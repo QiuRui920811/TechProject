@@ -267,6 +267,10 @@ public final class TechProjectPlugin extends JavaPlugin {
         if (this.titleService != null) {
             this.titleService.reload();
         }
+        // 補註冊 PlaceholderAPI（若熱載順序導致 onEnable 時尚未載入 PAPI）
+        if (this.getServer().getPluginManager().getPlugin("PlaceholderAPI") != null) {
+            new com.rui.techproject.service.TechPlaceholderExpansion(this).register();
+        }
     }
 
     @Override
