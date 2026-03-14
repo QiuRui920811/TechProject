@@ -214,6 +214,51 @@ public final class TechListener implements Listener {
         player.setFallDistance(0.0f);
     }
 
+    // ── 聊天稱號 hover 資訊 ──────────────────────────────────
+
+    @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
+    public void onChatTitleHover(final AsyncChatEvent event) {
+        final Player player = event.getPlayer();
+        final UUID uuid = player.getUniqueId();
+        final var titleService = this.plugin.getTitleService();
+        if (titleService == null) { return; }
+        final String titleText = titleService.getPlayerTitle(uuid);
+        if (titleText == null || titleText.isBlank()) { return; }
+
+        final var progressService = this.plugin.getPlayerProgressService();
+        final var registry = this.plugin.getTechRegistry();
+
+        // 將 legacy §色碼 字串轉成 Adventure Component
+        final net.kyori.adventure.text.Component titleComp =
+            net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer.legacySection().deserialize(titleText);
+
+        // 組裝 hover 面板
+        final net.kyori.adventure.text.Component hover = net.kyori.adventure.text.Component.text()
+            .append(net.kyori.adventure.text.Component.text("══ 科技稱號 ══", net.kyori.adventure.text.format.TextColor.color(0xFFD054)))
+            .append(net.kyori.adventure.text.Component.newline())
+            .append(net.kyori.adventure.text.Component.text("🏷 ", net.kyori.adventure.text.format.TextColor.color(0xA8B2C1)))
+            .append(titleComp)
+            .append(net.kyori.adventure.text.Component.newline())
+            .append(net.kyori.adventure.text.Component.text("📊 研究等級 Lv." + progressService.getTechLevel(uuid), net.kyori.adventure.text.format.TextColor.color(0x42A5F5)))
+            .append(net.kyori.adventure.text.Component.newline())
+            .append(net.kyori.adventure.text.Component.text("⚡ 可用研究點 " + progressService.getAvailableTechXp(uuid), net.kyori.adventure.text.format.TextColor.color(0xFFD740)))
+            .append(net.kyori.adventure.text.Component.newline())
+            .append(net.kyori.adventure.text.Component.text("🏆 成就 " + progressService.unlockedAchievements(uuid).size() + "/" + registry.allAchievements().size(), net.kyori.adventure.text.format.TextColor.color(0x66BB6A)))
+            .append(net.kyori.adventure.text.Component.newline())
+            .append(net.kyori.adventure.text.Component.text("🎖 稱號 " + titleService.getPlayerUnlockedTitleCount(uuid) + "/" + titleService.totalTitleCount(), net.kyori.adventure.text.format.TextColor.color(0xCE93D8)))
+            .build();
+
+        final net.kyori.adventure.text.Component titleWithHover =
+            titleComp.hoverEvent(net.kyori.adventure.text.event.HoverEvent.showText(hover))
+                     .append(net.kyori.adventure.text.Component.text(" "));
+
+        // 包裝現有的 renderer，在前面加上帶 hover 的稱號
+        final io.papermc.paper.chat.ChatRenderer original = event.renderer();
+        event.renderer((source, sourceDisplayName, message, viewer) ->
+            titleWithHover.append(original.render(source, sourceDisplayName, message, viewer))
+        );
+    }
+
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onBookSearchChat(final AsyncChatEvent event) {
         final String plainText = PlainTextComponentSerializer.plainText().serialize(event.message());

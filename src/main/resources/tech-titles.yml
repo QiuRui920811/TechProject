@@ -4,7 +4,7 @@
 #
 #  格式：
 #    成就ID:
-#      title: "顯示的稱號文字（支援 & 色碼與 MiniMessage）"
+#      title: "顯示的稱號文字（支援 &#RRGGBB hex 色碼與 & 色碼）"
 #
 #  佔位符：
 #    %techproject_title%        — 玩家目前套用的稱號（無稱號時回傳空字串）
@@ -21,165 +21,165 @@
 #    3. /tech title — 查看目前稱號
 #    4. /tech title clear — 取消稱號
 #
-#  TAB 插件整合範例：
-#    在 TAB/config.yml 的 tablist-name-formatting 或 scoreboard-teams 中使用：
-#      prefix: "%techproject_title% "
+#  聊天整合：
+#    TechProject 會自動在聊天訊息前顯示稱號並附帶 hover 資訊。
+#    請勿在 CMI GeneralFormat 中重複使用 %techproject_title%。
 #
 # ═══════════════════════════════════════════════════════════
 
 titles:
-  # ── 入門 ──
+  # ── 入門 ──  柔灰銀色調，象徵萌新起步
   first_machine:
-    title: "&7[&f機械新手&7]"
+    title: "&#7B8FA1[&#C8D4E0機械新手&#7B8FA1]"
   newcomer_craft:
-    title: "&7[&f合成學徒&7]"
+    title: "&#7B8FA1[&#C8D4E0合成學徒&#7B8FA1]"
   starter_power:
-    title: "&7[&f電力初心&7]"
+    title: "&#7B8FA1[&#C8D4E0電力初心&#7B8FA1]"
   first_research:
-    title: "&7[&f研究見習&7]"
+    title: "&#7B8FA1[&#C8D4E0研究見習&#7B8FA1]"
 
-  # ── 加工 ──
+  # ── 加工 ──  銅金色系漸進到赤焰
   first_crush:
-    title: "&7[&f碎礦工&7]"
+    title: "&#8B7355[&#C9A96E碎礦工&#8B7355]"
   first_compress:
-    title: "&7[&f壓縮工&7]"
+    title: "&#8B7355[&#C9A96E壓縮工&#8B7355]"
   first_smelt:
-    title: "&7[&f冶煉工&7]"
+    title: "&#8B7355[&#C9A96E冶煉工&#8B7355]"
   assembly_starter:
-    title: "&7[&f組裝技師&7]"
+    title: "&#8B7355[&#C9A96E組裝技師&#8B7355]"
   process_milestone_100:
-    title: "&6[&e百鍊匠&6]"
+    title: "&#D4A017[&#F5D060百鍊匠&#D4A017]"
   process_milestone_500:
-    title: "&6[&e流水線之星&6]"
+    title: "&#D4A017[&#F5D060流水線之星&#D4A017]"
   process_milestone_2000:
-    title: "&c[&6加工之王&c]"
+    title: "&#C0392B[&#E8734A加工之王&#C0392B]"
   recycler_expert:
-    title: "&a[&2回收大師&a]"
+    title: "&#2E7D32[&#66BB6A回收大師&#2E7D32]"
 
-  # ── 能源 ──
+  # ── 能源 ──  電光黃橙色系
   energy_beginner:
-    title: "&e[&f能源學徒&e]"
+    title: "&#C8960C[&#F5E060能源學徒&#C8960C]"
   energy_500:
-    title: "&e[&6小型電廠&e]"
+    title: "&#D4A017[&#FFD040小型電廠&#D4A017]"
   energy_2000:
-    title: "&6[&e中型電廠&6]"
+    title: "&#E8A020[&#FFD740中型電廠&#E8A020]"
   energy_10000:
-    title: "&c[&6大型電廠&c]"
+    title: "&#CC5500[&#FF8833大型電廠&#CC5500]"
   solar_pioneer:
-    title: "&e[&f☀ 太陽先驅&e]"
+    title: "&#D4A017[&#F5C71A☀ 太陽先驅&#D4A017]"
   generator_collector:
-    title: "&6[&e發電收藏家&6]"
+    title: "&#D4A017[&#FFD054發電收藏家&#D4A017]"
   power_grid_master:
-    title: "&4[&c⚡ 電網主宰&4]"
+    title: "&#B71C1C[&#EF5350⚡ 電網主宰&#B71C1C]"
 
-  # ── 農業 / 烹飪 ──
+  # ── 農業 / 烹飪 ──  翠綠與暖黃
   first_harvest:
-    title: "&a[&f農夫&a]"
+    title: "&#3D8B37[&#6FC66A農夫&#3D8B37]"
   crop_100:
-    title: "&a[&2百畝農場&a]"
+    title: "&#2E7D32[&#66BB6A百畝農場&#2E7D32]"
   crop_king:
-    title: "&2[&a農作之王&2]"
+    title: "&#1B5E20[&#4CAF50農作之王&#1B5E20]"
   cook_first_meal:
-    title: "&e[&f見習廚師&e]"
+    title: "&#C8960C[&#F5D060見習廚師&#C8960C]"
   cook_10_meals:
-    title: "&6[&e業餘廚師&6]"
+    title: "&#D4A017[&#FFD054業餘廚師&#D4A017]"
   cook_50_meals:
-    title: "&c[&6料理達人&c]"
+    title: "&#C0392B[&#E8734A料理達人&#C0392B]"
   bio_researcher:
-    title: "&a[&2生質研究員&a]"
+    title: "&#2E7D32[&#66BB6A生質研究員&#2E7D32]"
   orchard_keeper:
-    title: "&a[&f果園園丁&a]"
+    title: "&#3D8B37[&#81C784果園園丁&#3D8B37]"
 
-  # ── 物流 ──
+  # ── 物流 ──  青藍色系
   first_transfer:
-    title: "&b[&f搬運工&b]"
+    title: "&#2196A0[&#4FC3C8搬運工&#2196A0]"
   transfer_500:
-    title: "&b[&3物流新星&b]"
+    title: "&#00838F[&#26C6DA物流新星&#00838F]"
   network_architect:
-    title: "&3[&b物流架構師&3]"
+    title: "&#006064[&#00ACC1物流架構師&#006064]"
   upgrade_engineer:
-    title: "&b[&3升級工程師&b]"
+    title: "&#00838F[&#26C6DA升級工程師&#00838F]"
   storage_master:
-    title: "&3[&b倉儲大師&3]"
+    title: "&#006064[&#00ACC1倉儲大師&#006064]"
 
-  # ── 探索 ──
+  # ── 探索 ──  靛藍與星紫
   first_planet_visit:
-    title: "&9[&b✦ 星際旅人&9]"
+    title: "&#3F51B5[&#7986CB✦ 星際旅人&#3F51B5]"
   planet_explorer_3:
-    title: "&9[&b✦ 三星探索者&9]"
+    title: "&#3F51B5[&#7986CB✦ 三星探索者&#3F51B5]"
   planet_explorer_all:
-    title: "&5[&d✦ 全星系漫遊&5]"
+    title: "&#6A1B9A[&#AB47BC✦ 全星系漫遊&#6A1B9A]"
   gate_builder:
-    title: "&9[&b星門建造者&9]"
+    title: "&#3F51B5[&#7986CB星門建造者&#3F51B5]"
   discover_ruins:
-    title: "&5[&d遺跡發現者&5]"
+    title: "&#6A1B9A[&#AB47BC遺跡發現者&#6A1B9A]"
   planet_sample_collector:
-    title: "&9[&b星球採樣員&9]"
+    title: "&#3F51B5[&#7986CB星球採樣員&#3F51B5]"
 
-  # ── 收集 ──
+  # ── 收集 ──  由灰銀逐階到金紅
   tech_collector:
-    title: "&e[&f收藏家&e]"
+    title: "&#C8960C[&#F5D060收藏家&#C8960C]"
   collect_10:
-    title: "&7[&f初窺門徑&7]"
+    title: "&#7B8FA1[&#C8D4E0初窺門徑&#7B8FA1]"
   collect_25:
-    title: "&e[&f鑑賞家&e]"
+    title: "&#C8960C[&#F5D060鑑賞家&#C8960C]"
   item_conqueror:
-    title: "&6[&e征服者&6]"
+    title: "&#D4A017[&#FFD054征服者&#D4A017]"
   collect_100:
-    title: "&c[&6收集狂人&c]"
+    title: "&#C0392B[&#E8734A收集狂人&#C0392B]"
   collect_200:
-    title: "&4[&c科技博物館&4]"
+    title: "&#B71C1C[&#EF5350科技博物館&#B71C1C]"
   machine_collector_10:
-    title: "&b[&3機器建造師&b]"
+    title: "&#00838F[&#26C6DA機器建造師&#00838F]"
   machine_collector_20:
-    title: "&6[&e工業大亨&6]"
+    title: "&#D4A017[&#FFD054工業大亨&#D4A017]"
   all_machines_collector:
-    title: "&4[&c&l機器全通&4]"
+    title: "&#B71C1C[&#EF5350機器全通&#B71C1C]"
 
-  # ── 終局 ──
+  # ── 終局 ──  史詩紫紅與金
   quantum_engineer:
-    title: "&d[&5量子工程師&d]"
+    title: "&#8E24AA[&#CE93D8量子工程師&#8E24AA]"
   fusion_overlord:
-    title: "&c[&4聚變霸主&c]"
+    title: "&#B71C1C[&#EF5350聚變霸主&#B71C1C]"
   void_pioneer:
-    title: "&5[&d虛空先鋒&5]"
+    title: "&#6A1B9A[&#AB47BC虛空先鋒&#6A1B9A]"
   singularity_breaker:
-    title: "&5[&d✧ 奇點破界者&5]"
+    title: "&#7B1FA2[&#BA68C8✧ 奇點破界者&#7B1FA2]"
   stellar_founder:
-    title: "&6[&e✧ 星核開鑄者&6]"
+    title: "&#D4A017[&#FFD054✧ 星核開鑄者&#D4A017]"
   omega_theory:
-    title: "&d[&5✧ 終極理論家&d]"
+    title: "&#8E24AA[&#CE93D8✧ 終極理論家&#8E24AA]"
   apex_of_tech:
-    title: "&4[&c&l★ 科技巔峰&4]"
+    title: "&#AD1457[&#EC407A★ 科技巔峰&#AD1457]"
   plasma_forge_master:
-    title: "&c[&6等離子鍛造師&c]"
+    title: "&#C0392B[&#E8734A等離子鍛造師&#C0392B]"
   cosmic_assembler:
-    title: "&d[&5宇宙裝配員&d]"
+    title: "&#8E24AA[&#CE93D8宇宙裝配員&#8E24AA]"
   mega_builder:
-    title: "&6[&e巨構工程師&6]"
+    title: "&#D4A017[&#FFD054巨構工程師&#D4A017]"
 
-  # ── 通用 ──
+  # ── 通用 ──  科技藍
   automation_master:
-    title: "&b[&3自動化大師&b]"
+    title: "&#1565C0[&#42A5F5自動化大師&#1565C0]"
   full_factory:
-    title: "&6[&e滿載工廠&6]"
+    title: "&#D4A017[&#FFD054滿載工廠&#D4A017]"
   mega_factory:
-    title: "&4[&c&l超級工廠&4]"
+    title: "&#AD1457[&#EC407A超級工廠&#AD1457]"
   completionist:
-    title: "&4[&6&l✦ 全成就 ✦&4]"
+    title: "&#BF360C[&#FF8F00✦ 全成就 ✦&#BF360C]"
 
-  # ── 系統 ──
+  # ── 系統 ──  深綠色系
   field_operator:
-    title: "&a[&2野外作業員&a]"
+    title: "&#2E7D32[&#66BB6A野外作業員&#2E7D32]"
   ecosystem_engineer:
-    title: "&2[&a生態工程師&2]"
+    title: "&#1B5E20[&#4CAF50生態工程師&#1B5E20]"
   logistics_director:
-    title: "&3[&b物流總監&3]"
+    title: "&#006064[&#00ACC1物流總監&#006064]"
   cargo_architect:
-    title: "&3[&b&l貨運架構師&3]"
+    title: "&#004D40[&#009688貨運架構師&#004D40]"
 
   # ── 擴展 ──
   cryo_specialist:
-    title: "&b[&3低溫專家&b]"
+    title: "&#00838F[&#26C6DA低溫專家&#00838F]"
   refinery_master:
-    title: "&6[&e精煉大師&6]"
+    title: "&#D4A017[&#FFD054精煉大師&#D4A017]"

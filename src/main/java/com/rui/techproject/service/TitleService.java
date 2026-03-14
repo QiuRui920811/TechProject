@@ -17,9 +17,12 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public final class TitleService {
     private static final String FILE_NAME = "tech-titles.yml";
+    private static final Pattern HEX_PATTERN = Pattern.compile("&#([0-9a-fA-F]{6})");
     private final TechProjectPlugin plugin;
     private final PlayerProgressService progressService;
     private final Map<String, String> titleMap = new LinkedHashMap<>();
@@ -54,7 +57,7 @@ public final class TitleService {
         for (final String key : section.getKeys(false)) {
             final String title = section.getString(key + ".title", "");
             if (!title.isBlank()) {
-                this.titleMap.put(key, ChatColor.translateAlternateColorCodes('&', title));
+                this.titleMap.put(key, translateHexAndLegacy(title));
             }
         }
         this.plugin.getLogger().info("已載入 " + this.titleMap.size() + " 個稱號定義。");
@@ -134,5 +137,23 @@ public final class TitleService {
     public boolean clearTitle(final UUID uuid) {
         this.progressService.setSelectedTitle(uuid, "");
         return true;
+    }
+
+    /**
+     * 將 {@code &#RRGGBB} hex 色碼轉為 {@code §x§R§R§G§G§B§B} 格式，
+     * 同時也處理傳統 {@code &0-9a-fk-or} 色碼。
+     */
+    private static String translateHexAndLegacy(final String text) {
+        final Matcher matcher = HEX_PATTERN.matcher(text);
+        final StringBuilder sb = new StringBuilder();
+        while (matcher.find()) {
+            final StringBuilder hex = new StringBuilder("\u00A7x");
+            for (final char c : matcher.group(1).toCharArray()) {
+                hex.append('\u00A7').append(c);
+            }
+            matcher.appendReplacement(sb, hex.toString());
+        }
+        matcher.appendTail(sb);
+        return ChatColor.translateAlternateColorCodes('&', sb.toString());
     }
 }
