@@ -5,7 +5,7 @@
 # 🚀 入門指南
 
 - [新手入門](getting-started/README.md)
-- [第一步：建造研究台](getting-started/first-steps.md)
+- [第一步：搭建進階工作台](getting-started/first-steps.md)
 - [研究系統](getting-started/research-system.md)
 - [能源基礎](getting-started/energy-basics.md)
 
