@@ -1,6 +1,7 @@
 # 目錄
 
 [首頁](README.md)
+[📋 更新日記](changelog.md)
 
 # 🚀 入門指南
 
