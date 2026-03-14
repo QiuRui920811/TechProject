@@ -1292,6 +1292,17 @@ items:
     use-cases:
       - Tempest 高機動探索
       - 前線外勤垂直機動
+  tech_magnet:
+    display-name: 科技磁石
+    category: INTERMEDIATE
+    tier: TIER2
+    icon: IRON_INGOT
+    description: 放在背包中，自動吸取周圍 5 格內的掉落物品。蛹下右鍵可切換開關。
+    unlock: centrifuge
+    use-cases:
+      - 被動：自動吸取掉落物
+      - 蛹下右鍵切換開關
+      - 放在背包即生效
   radiation_filter:
     display-name: 輻射濾芯
     category: ADVANCED
@@ -2982,6 +2993,12 @@ recipes:
     output: vector_grapple
     energy: 18
     guide: 伺服模組束 + 絕緣線材 + 感測陣列 → 製造機 → 向量抓鉤
+  assembler_tech_magnet:
+    machine: assembler
+    inputs: [magnetic_ring, energy_cell, copper_wire]
+    output: tech_magnet
+    energy: 14
+    guide: 磁環 + 能量電池 + 銅線 → 製造機 → 科技磁石
   advanced_pulse_thruster:
     machine: advanced_assembler
     inputs: [pressure_membrane, plasma_cell, precision_nozzle]

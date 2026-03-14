@@ -61,6 +61,7 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.Item;
 import org.bukkit.entity.Mob;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.player.PlayerItemDamageEvent;
@@ -94,6 +95,9 @@ public final class TechListener implements Listener {
     private final Map<UUID, Map<String, Long>> artifactCooldowns = new ConcurrentHashMap<>();
     private final Map<UUID, Map<String, Long>> talismanCooldowns = new ConcurrentHashMap<>();
     private final Map<UUID, Long> lastEquipmentTick = new ConcurrentHashMap<>();
+    private final Set<UUID> magnetDisabled = ConcurrentHashMap.newKeySet();
+    private static final String TECH_MAGNET = "tech_magnet";
+    private static final double MAGNET_RANGE = 5.0;
 
     private static final Set<String> ARTIFACT_IDS = Set.of(
             "pulse_staff", "storm_staff", "gravity_staff", "warp_orb", "cryo_wand",
@@ -136,6 +140,7 @@ public final class TechListener implements Listener {
         this.artifactCooldowns.remove(playerId);
         this.talismanCooldowns.remove(playerId);
         this.lastEquipmentTick.remove(playerId);
+        this.magnetDisabled.remove(playerId);
         this.plugin.getMachineService().cleanupPlayer(playerId);
         this.plugin.getCookingService().cancelSession(playerId);
         this.plugin.getAchievementGuiService().clearState(playerId);
@@ -319,7 +324,7 @@ public final class TechListener implements Listener {
             event.setCancelled(true);
             return;
         }
-        if (this.tryPlantTechCrop(event) || this.tryUseHydroSpade(event) || this.tryUseMobilityTool(event)) {
+        if (this.tryPlantTechCrop(event) || this.tryUseHydroSpade(event) || this.tryToggleMagnet(event) || this.tryUseMobilityTool(event)) {
             return;
         }
         // 互動烹調：右鍵營火/煙燻/高爐並手持食物
@@ -2031,6 +2036,7 @@ public final class TechListener implements Listener {
         this.lastEquipmentTick.put(player.getUniqueId(), now);
         this.applyEquipmentPassiveEffects(player);
         this.handleTalismanPassiveChecks(player);
+        this.handleMagnetTick(player);
     }
 
     private boolean tryUseArtifact(final PlayerInteractEvent event) {
@@ -2445,5 +2451,59 @@ public final class TechListener implements Listener {
             }
         }
         player.sendActionBar(this.plugin.getItemFactory().success("農夫護符觸發—雙倍收穫！"));
+    }
+
+    // ─── 科技磁石 ───────────────────────────────────────
+
+    private boolean hasMagnetInInventory(final Player player) {
+        for (final ItemStack stack : player.getInventory().getContents()) {
+            if (stack == null || stack.getType() == Material.AIR) { continue; }
+            final String id = this.plugin.getItemFactory().getTechItemId(stack);
+            if (TECH_MAGNET.equalsIgnoreCase(id)) { return true; }
+        }
+        return false;
+    }
+
+    private void handleMagnetTick(final Player player) {
+        if (this.magnetDisabled.contains(player.getUniqueId())) { return; }
+        if (!this.hasMagnetInInventory(player)) { return; }
+        final Location loc = player.getLocation();
+        final Collection<Entity> nearby = loc.getWorld().getNearbyEntities(loc, MAGNET_RANGE, MAGNET_RANGE, MAGNET_RANGE,
+                entity -> entity instanceof Item item && item.getPickupDelay() <= 0 && !item.isDead());
+        if (nearby.isEmpty()) { return; }
+        for (final Entity entity : nearby) {
+            final Item item = (Item) entity;
+            final Vector dir = player.getLocation().add(0, 0.5, 0).toVector().subtract(item.getLocation().toVector());
+            final double dist = dir.length();
+            if (dist < 1.2) {
+                item.teleport(player.getLocation());
+            } else {
+                item.setVelocity(dir.normalize().multiply(0.6));
+            }
+        }
+        loc.getWorld().spawnParticle(Particle.ENCHANT, loc.add(0, 1, 0), 5, 1, 0.5, 1, 0.05);
+    }
+
+    private boolean tryToggleMagnet(final PlayerInteractEvent event) {
+        if (event.getItem() == null) { return false; }
+        if (!event.getPlayer().isSneaking()) { return false; }
+        if (event.getAction() != Action.RIGHT_CLICK_AIR && event.getAction() != Action.RIGHT_CLICK_BLOCK) { return false; }
+        final String techItemId = this.plugin.getItemFactory().getTechItemId(event.getItem());
+        if (!TECH_MAGNET.equalsIgnoreCase(techItemId)) { return false; }
+        final Player player = event.getPlayer();
+        event.setUseInteractedBlock(Result.DENY);
+        event.setUseItemInHand(Result.DENY);
+        event.setCancelled(true);
+        final UUID uuid = player.getUniqueId();
+        if (this.magnetDisabled.contains(uuid)) {
+            this.magnetDisabled.remove(uuid);
+            player.sendActionBar(this.plugin.getItemFactory().success("科技磁石已開啟 — 自動吸取周圍物品"));
+            player.playSound(player.getLocation(), Sound.BLOCK_BEACON_ACTIVATE, 0.6f, 1.4f);
+        } else {
+            this.magnetDisabled.add(uuid);
+            player.sendActionBar(this.plugin.getItemFactory().warning("科技磁石已關閉"));
+            player.playSound(player.getLocation(), Sound.BLOCK_BEACON_DEACTIVATE, 0.6f, 1.0f);
+        }
+        return true;
     }
 }
