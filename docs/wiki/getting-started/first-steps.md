@@ -24,7 +24,7 @@
 | | 第 1 格 | 第 2 格 | 第 3 格 |
 |:---:|:---:|:---:|:---:|
 | **第 1 排** | ![書](https://minecraft.wiki/images/Invicon_Book.png) 書 | ![講台](https://minecraft.wiki/images/Invicon_Lectern.png) 講台 | ![書](https://minecraft.wiki/images/Invicon_Book.png) 書 |
-| **第 2 排** | ![銅錠](https://minecraft.wiki/images/Invicon_Copper_Ingot.png) 銅錠 | ![紅石](https://minecraft.wiki/images/Invicon_Redstone_Dust.png) 紅石 | ![銅錠](https://minecraft.wiki/images/Invicon_Copper_Ingot.png) 銅錠 |
+| **第 2 排** | ![銅錠](https://minecraft.wiki/images/Invicon_Copper_Ingot.png) 銅錠 | ![紅石](https://minecraft.wiki/images/Invicon_Redstone.png) 紅石 | ![銅錠](https://minecraft.wiki/images/Invicon_Copper_Ingot.png) 銅錠 |
 | **第 3 排** | ![鐵錠](https://minecraft.wiki/images/Invicon_Iron_Ingot.png) 鐵錠 | ![鐵錠](https://minecraft.wiki/images/Invicon_Iron_Ingot.png) 鐵錠 | ![鐵錠](https://minecraft.wiki/images/Invicon_Iron_Ingot.png) 鐵錠 |
 
 **材料清單**：3 鐵錠 + 2 銅錠 + 2 書 + 1 講台 + 1 紅石
@@ -37,7 +37,7 @@
 
 在這裡你可以：
 - 瀏覽所有可解鎖的物品和機器
-- 花費研究 XP 解鎖新科技
+- 花費研究經驗 解鎖新科技
 - 查看每個物品的配方和用途
 
 ---
@@ -49,7 +49,7 @@
 | | 第 1 格 | 第 2 格 | 第 3 格 |
 |:---:|:---:|:---:|:---:|
 | **第 1 排** | ![玻璃](https://minecraft.wiki/images/Invicon_Glass.png) 玻璃 | ![玻璃](https://minecraft.wiki/images/Invicon_Glass.png) 玻璃 | ![玻璃](https://minecraft.wiki/images/Invicon_Glass.png) 玻璃 |
-| **第 2 排** | ![銅錠](https://minecraft.wiki/images/Invicon_Copper_Ingot.png) 銅錠 | ![紅石](https://minecraft.wiki/images/Invicon_Redstone_Dust.png) 紅石 | ![銅錠](https://minecraft.wiki/images/Invicon_Copper_Ingot.png) 銅錠 |
+| **第 2 排** | ![銅錠](https://minecraft.wiki/images/Invicon_Copper_Ingot.png) 銅錠 | ![紅石](https://minecraft.wiki/images/Invicon_Redstone.png) 紅石 | ![銅錠](https://minecraft.wiki/images/Invicon_Copper_Ingot.png) 銅錠 |
 | **第 3 排** | ![鐵錠](https://minecraft.wiki/images/Invicon_Iron_Ingot.png) 鐵錠 | ![鐵錠](https://minecraft.wiki/images/Invicon_Iron_Ingot.png) 鐵錠 | ![鐵錠](https://minecraft.wiki/images/Invicon_Iron_Ingot.png) 鐵錠 |
 
 **材料清單**：3 鐵錠 + 2 銅錠 + 3 玻璃 + 1 紅石
@@ -65,7 +65,7 @@
 | | 第 1 格 | 第 2 格 | 第 3 格 |
 |:---:|:---:|:---:|:---:|
 | **第 1 排** | ![圓石](https://minecraft.wiki/images/Invicon_Cobblestone.png) 圓石 | ![圓石](https://minecraft.wiki/images/Invicon_Cobblestone.png) 圓石 | ![圓石](https://minecraft.wiki/images/Invicon_Cobblestone.png) 圓石 |
-| **第 2 排** | ![鐵錠](https://minecraft.wiki/images/Invicon_Iron_Ingot.png) 鐵錠 | ![紅石](https://minecraft.wiki/images/Invicon_Redstone_Dust.png) 紅石 | ![鐵錠](https://minecraft.wiki/images/Invicon_Iron_Ingot.png) 鐵錠 |
+| **第 2 排** | ![鐵錠](https://minecraft.wiki/images/Invicon_Iron_Ingot.png) 鐵錠 | ![紅石](https://minecraft.wiki/images/Invicon_Redstone.png) 紅石 | ![鐵錠](https://minecraft.wiki/images/Invicon_Iron_Ingot.png) 鐵錠 |
 | **第 3 排** | ![鐵錠](https://minecraft.wiki/images/Invicon_Iron_Ingot.png) 鐵錠 | ![活塞](https://minecraft.wiki/images/Invicon_Piston.png) 活塞 | ![鐵錠](https://minecraft.wiki/images/Invicon_Iron_Ingot.png) 鐵錠 |
 
 **材料清單**：4 鐵錠 + 3 圓石 + 1 紅石 + 1 活塞
@@ -92,5 +92,5 @@
 
 ## 下一步
 
-- [研究系統](research-system.md) — 了解研究 XP 怎麼獲得、怎麼花
+- [研究系統](research-system.md) — 了解研究經驗 怎麼獲得、怎麼花
 - [能源基礎](energy-basics.md) — 更多發電方式與供電技巧

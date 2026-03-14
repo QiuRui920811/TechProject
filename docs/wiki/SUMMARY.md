@@ -12,10 +12,10 @@
 # ⚙️ 機器百科
 
 - [機器總覽](machines/README.md)
-- [TIER 1 — 基礎機器](machines/tier-1.md)
-- [TIER 2 — 中階機器](machines/tier-2.md)
-- [TIER 3 — 高階機器](machines/tier-3.md)
-- [TIER 4 — 終局機器](machines/tier-4.md)
+- [一階 — 基礎機器](machines/tier-1.md)
+- [二階 — 中階機器](machines/tier-2.md)
+- [三階 — 高階機器](machines/tier-3.md)
+- [四階 — 終局機器](machines/tier-4.md)
 - [巨構機器](machines/megastructures.md)
 
 # 🧱 物品百科
@@ -55,11 +55,11 @@
 # 🪐 星球系統
 
 - [星球系統總覽](planets/README.md)
-- [奧蕾莉亞 Aurelia](planets/aurelia.md)
-- [克里昂 Cryon](planets/cryon.md)
-- [倪克斯 Nyx](planets/nyx.md)
-- [赫利昂 Helion](planets/helion.md)
-- [坦佩斯特 Tempest](planets/tempest.md)
+- [奧蕾莉亞](planets/aurelia.md)
+- [克里昂](planets/cryon.md)
+- [倪克斯](planets/nyx.md)
+- [赫利昂](planets/helion.md)
+- [坦佩斯特](planets/tempest.md)
 - [星門與旅行](planets/stargate.md)
 - [行星防護套裝](planets/planet-suits.md)
 
