@@ -2293,6 +2293,239 @@ items:
     use-cases:
       - 被動：反擊退
       - 放在背包即生效
+
+  # ─── 魔法物品 ───────────────────────────────────────
+  magic_lump_1:
+    display-name: 魔法結晶 - I
+    category: BASIC
+    tier: TIER1
+    icon: GOLD_NUGGET
+    description: 從金粒中提煉的初級魔法結晶，是所有魔法合成的基礎材料。
+    unlock: assembler
+    use-cases:
+      - 魔法合成基礎材料
+      - 可升級為二級結晶
+  magic_lump_2:
+    display-name: 魔法結晶 - II
+    category: INTERMEDIATE
+    tier: TIER2
+    icon: GOLD_INGOT
+    description: 凝聚四個初級結晶的中級魔法結晶，用途更廣泛。
+    unlock: field_forge
+    use-cases:
+      - 魔法書皮、魔法玻璃材料
+      - 可升級為三級結晶
+  magic_lump_3:
+    display-name: 魔法結晶 - III
+    category: ADVANCED
+    tier: TIER3
+    icon: RAW_GOLD
+    description: 最高級的魔法結晶，蘊含強大的魔力。
+    unlock: laser_engraver
+    use-cases:
+      - 壞死顱骨材料
+      - 高階魔法物品材料
+  ender_lump_1:
+    display-name: 末影結晶 - I
+    category: BASIC
+    tier: TIER1
+    icon: ENDER_PEARL
+    description: 從末影珍珠中提取的初級末影結晶。
+    unlock: assembler
+    use-cases:
+      - 末影系物品基礎
+      - 可升級為二級
+  ender_lump_2:
+    display-name: 末影結晶 - II
+    category: INTERMEDIATE
+    tier: TIER2
+    icon: ENDER_EYE
+    description: 凝聚四個初級末影結晶的中級結晶。
+    unlock: field_forge
+    use-cases:
+      - 末影系進階材料
+      - 可升級為三級
+  ender_lump_3:
+    display-name: 末影結晶 - III
+    category: ADVANCED
+    tier: TIER3
+    icon: END_CRYSTAL
+    description: 最高級的末影結晶，散發維度裂隙的能量。
+    unlock: laser_engraver
+    use-cases:
+      - 來世精華材料
+      - 高階末影物品材料
+  magic_book_cover:
+    display-name: 魔法書皮
+    category: INTERMEDIATE
+    tier: TIER2
+    icon: ENCHANTED_BOOK
+    description: 以魔法結晶裝飾的書皮，用於製作魔法書籍與道具。
+    unlock: field_forge
+    use-cases:
+      - 魔法道具合成
+      - 護符合成材料
+  magic_glass:
+    display-name: 魔法玻璃
+    category: INTERMEDIATE
+    tier: TIER2
+    icon: GLASS
+    description: 注入魔力的透明玻璃，可以折射魔法能量。
+    unlock: field_forge
+    use-cases:
+      - 魔法道具合成
+      - 特殊裝備材料
+  lava_crystal:
+    display-name: 岩漿水晶
+    category: INTERMEDIATE
+    tier: TIER2
+    icon: MAGMA_CREAM
+    description: 烈焰與魔法結合的火屬性水晶。
+    unlock: field_forge
+    use-cases:
+      - 火屬性物品材料
+      - 防焰護符進階材料
+  common_talisman:
+    display-name: 基礎護符
+    category: INTERMEDIATE
+    tier: TIER2
+    icon: EMERALD
+    description: 尚未賦予特殊能力的護符基底，用於製作各種專精護符。
+    unlock: field_forge
+    use-cases:
+      - 所有護符的基底
+      - 配合不同材料製作不同護符
+  necrotic_skull:
+    display-name: 壞死顱骨
+    category: ADVANCED
+    tier: TIER3
+    icon: WITHER_SKELETON_SKULL
+    description: 以高級魔法結晶浸潤的凋零骷髏頭顱，散發不祥氣息。
+    unlock: laser_engraver
+    use-cases:
+      - 來世精華材料
+      - 高階魔法道具材料
+  essence_of_afterlife:
+    display-name: 來世精華
+    category: ADVANCED
+    tier: TIER3
+    icon: NETHER_STAR
+    description: 凝結生死之間能量的稀有精華，是高階魔法道具的核心材料。
+    unlock: quantum_processor
+    use-cases:
+      - 頂級魔法道具核心
+      - 高階護符材料
+  synthetic_shulker_shell:
+    display-name: 合成潛影殼
+    category: INTERMEDIATE
+    tier: TIER2
+    icon: SHULKER_SHELL
+    description: 以科技手段合成的潛影殼替代品，不用再跑去終界打潛影貝了。
+    unlock: field_forge
+    use-cases:
+      - 潛影盒替代材料
+      - 原版潛影殼的替代方案
+  ancient_rune_fire:
+    display-name: 古代符文 [火]
+    category: ADVANCED
+    tier: TIER3
+    icon: BLAZE_POWDER
+    description: 刻有火焰印記的古老符文石，蘊含灼烈能量。
+    unlock: laser_engraver
+    use-cases:
+      - 火屬性合成
+      - 岩漿水晶材料
+  ancient_rune_water:
+    display-name: 古代符文 [水]
+    category: ADVANCED
+    tier: TIER3
+    icon: HEART_OF_THE_SEA
+    description: 刻有水流印記的古老符文石，蘊含潮汐能量。
+    unlock: laser_engraver
+    use-cases:
+      - 水屬性合成
+      - 深海護符材料
+  ancient_rune_earth:
+    display-name: 古代符文 [地]
+    category: ADVANCED
+    tier: TIER3
+    icon: MOSS_BLOCK
+    description: 刻有大地印記的古老符文石，蘊含穩固能量。
+    unlock: laser_engraver
+    use-cases:
+      - 地屬性合成
+      - 防護類護符材料
+  ancient_rune_air:
+    display-name: 古代符文 [風]
+    category: ADVANCED
+    tier: TIER3
+    icon: FEATHER
+    description: 刻有氣流印記的古老符文石，蘊含飄逸能量。
+    unlock: laser_engraver
+    use-cases:
+      - 風屬性合成
+      - 天使護符材料
+  ancient_rune_ender:
+    display-name: 古代符文 [終]
+    category: ADVANCED
+    tier: TIER3
+    icon: CHORUS_FRUIT
+    description: 刻有終界印記的古老符文石，蘊含維度裂隙能量。
+    unlock: laser_engraver
+    use-cases:
+      - 終界屬性合成
+      - 末影結晶材料
+  ancient_rune_lightning:
+    display-name: 古代符文 [雷]
+    category: ADVANCED
+    tier: TIER3
+    icon: LIGHTNING_ROD
+    description: 刻有閃電印記的古老符文石，蘊含雷擊能量。
+    unlock: laser_engraver
+    use-cases:
+      - 雷屬性合成
+      - 電力增強材料
+  ancient_rune_rainbow:
+    display-name: 古代符文 [虹]
+    category: ADVANCED
+    tier: TIER3
+    icon: GLOW_INK_SAC
+    description: 刻有光譜印記的古老符文石，蘊含七彩能量。
+    unlock: laser_engraver
+    use-cases:
+      - 特殊裝飾合成
+      - 高階魔法道具材料
+  ancient_rune_soulbound:
+    display-name: 古代符文 [靈魂綁定]
+    category: ADVANCED
+    tier: TIER3
+    icon: SOUL_LANTERN
+    description: 刻有靈魂印記的古老符文石，可將物品綁定於靈魂，死亡時不掉落。
+    unlock: laser_engraver
+    use-cases:
+      - 靈魂綁定附魔
+      - 死亡不掉落效果
+  ancient_rune_villager:
+    display-name: 古代符文 [村民]
+    category: ADVANCED
+    tier: TIER3
+    icon: EMERALD_BLOCK
+    description: 刻有村民印記的古老符文石，影響交易與村民聲望。
+    unlock: laser_engraver
+    use-cases:
+      - 村民相關合成
+      - 交易增益材料
+  strange_nether_goo:
+    display-name: 異界凝膠
+    category: INTERMEDIATE
+    tier: TIER2
+    icon: SLIME_BALL
+    description: 與豬布林交易獲得的奇異黏液，散發不尋常的能量。
+    unlock: field_forge
+    use-cases:
+      - 古代符文 [村民] 材料
+      - 下界特殊合成
+
 machines:
   kiln:
     display-name: 工業窯爐
@@ -3235,6 +3468,141 @@ recipes:
     output: talisman_whirlwind
     energy: 20
     guide: 高級電路 + 高密碳塊 → 雷射鵰刻機 → 旋風護符
+
+  # ─── 魔法物品配方 ───────────────────────────────────
+  craft_magic_lump_1:
+    machine: assembler
+    inputs: [iron_dust, gold_nugget]
+    output: magic_lump_1
+    energy: 6
+    guide: 鐵粉 + 金粒 → 製造機 → 魔法結晶 I
+  craft_magic_lump_2:
+    machine: field_forge
+    inputs: [magic_lump_1, magic_lump_1, magic_lump_1, magic_lump_1]
+    output: magic_lump_2
+    energy: 12
+    guide: 4× 魔法結晶 I → 力場鍛造台 → 魔法結晶 II
+  craft_magic_lump_3:
+    machine: laser_engraver
+    inputs: [magic_lump_2, magic_lump_2, magic_lump_2, magic_lump_2]
+    output: magic_lump_3
+    energy: 20
+    guide: 4× 魔法結晶 II → 雷射雕刻機 → 魔法結晶 III
+  craft_ender_lump_1:
+    machine: assembler
+    inputs: [iron_dust, ender_pearl]
+    output: ender_lump_1
+    energy: 8
+    guide: 鐵粉 + 末影珍珠 → 製造機 → 末影結晶 I
+  craft_ender_lump_2:
+    machine: field_forge
+    inputs: [ender_lump_1, ender_lump_1, ender_lump_1, ender_lump_1]
+    output: ender_lump_2
+    energy: 14
+    guide: 4× 末影結晶 I → 力場鍛造台 → 末影結晶 II
+  craft_ender_lump_3:
+    machine: laser_engraver
+    inputs: [ender_lump_2, ender_lump_2, ender_lump_2, ender_lump_2]
+    output: ender_lump_3
+    energy: 22
+    guide: 4× 末影結晶 II → 雷射雕刻機 → 末影結晶 III
+  craft_magic_book_cover:
+    machine: field_forge
+    inputs: [magic_lump_2, magic_lump_2, book, magic_lump_2]
+    output: magic_book_cover
+    energy: 14
+    guide: 魔法結晶 II ×3 + 書 → 力場鍛造台 → 魔法書皮
+  craft_magic_glass:
+    machine: field_forge
+    inputs: [magic_lump_2, copper_dust, glass_pane]
+    output: magic_glass
+    energy: 14
+    guide: 魔法結晶 II + 銅粉 + 玻璃片 → 力場鍛造台 → 魔法玻璃
+  craft_lava_crystal:
+    machine: field_forge
+    inputs: [magic_lump_1, ancient_rune_fire, blaze_powder]
+    output: lava_crystal
+    energy: 16
+    guide: 魔法結晶 I + 古代符文 [火] + 烈焰粉 → 力場鍛造台 → 岩漿水晶
+  craft_common_talisman:
+    machine: field_forge
+    inputs: [magic_lump_2, magic_lump_2, gold_ingot, ender_lump_1]
+    output: common_talisman
+    energy: 16
+    guide: 魔法結晶 II ×2 + 金錠 + 末影結晶 I → 力場鍛造台 → 基礎護符
+  craft_necrotic_skull:
+    machine: laser_engraver
+    inputs: [magic_lump_3, wither_skeleton_skull]
+    output: necrotic_skull
+    energy: 24
+    guide: 魔法結晶 III + 凋零骷髏頭 → 雷射雕刻機 → 壞死顱骨
+  craft_essence_of_afterlife:
+    machine: quantum_processor
+    inputs: [necrotic_skull, ender_lump_3, nether_star]
+    output: essence_of_afterlife
+    energy: 32
+    guide: 壞死顱骨 + 末影結晶 III + 乙太之星 → 量子處理器 → 來世精華
+  craft_synthetic_shulker_shell:
+    machine: field_forge
+    inputs: [magic_lump_2, iron_ingot, ender_lump_1]
+    output: synthetic_shulker_shell
+    energy: 16
+    guide: 魔法結晶 II + 鐵錠 + 末影結晶 I → 力場鍛造台 → 合成潛影殼
+  craft_ancient_rune_fire:
+    machine: laser_engraver
+    inputs: [magic_lump_2, ender_lump_2, blaze_powder, lava_bucket]
+    output: ancient_rune_fire
+    energy: 22
+    guide: 魔法結晶 II + 末影結晶 II + 烈焰粉 + 熔岩桶 → 雷射雕刻機 → 古代符文 [火]
+  craft_ancient_rune_water:
+    machine: laser_engraver
+    inputs: [magic_lump_2, ender_lump_2, prismarine_shard, water_bucket]
+    output: ancient_rune_water
+    energy: 22
+    guide: 魔法結晶 II + 末影結晶 II + 海磷碎片 + 水桶 → 雷射雕刻機 → 古代符文 [水]
+  craft_ancient_rune_earth:
+    machine: laser_engraver
+    inputs: [magic_lump_2, ender_lump_2, obsidian, moss_block]
+    output: ancient_rune_earth
+    energy: 22
+    guide: 魔法結晶 II + 末影結晶 II + 黑曜石 + 苔蘚塊 → 雷射雕刻機 → 古代符文 [地]
+  craft_ancient_rune_air:
+    machine: laser_engraver
+    inputs: [magic_lump_2, ender_lump_2, feather, phantom_membrane]
+    output: ancient_rune_air
+    energy: 22
+    guide: 魔法結晶 II + 末影結晶 II + 羽毛 + 乾燥薄膜 → 雷射雕刻機 → 古代符文 [風]
+  craft_ancient_rune_ender:
+    machine: laser_engraver
+    inputs: [magic_lump_2, ender_lump_2, chorus_fruit, ender_eye]
+    output: ancient_rune_ender
+    energy: 24
+    guide: 魔法結晶 II + 末影結晶 II + 乳狀果 + 末影之眼 → 雷射雕刻機 → 古代符文 [終]
+  craft_ancient_rune_lightning:
+    machine: laser_engraver
+    inputs: [magic_lump_2, ender_lump_2, copper_ingot, lightning_rod]
+    output: ancient_rune_lightning
+    energy: 22
+    guide: 魔法結晶 II + 末影結晶 II + 銅錠 + 避雷針 → 雷射雕刻機 → 古代符文 [雷]
+  craft_ancient_rune_rainbow:
+    machine: laser_engraver
+    inputs: [magic_lump_2, ender_lump_2, glow_ink_sac, amethyst_shard]
+    output: ancient_rune_rainbow
+    energy: 24
+    guide: 魔法結晶 II + 末影結晶 II + 螢光墨囊 + 紫水晶碎片 → 雷射雕刻機 → 古代符文 [虹]
+  craft_ancient_rune_soulbound:
+    machine: laser_engraver
+    inputs: [magic_lump_3, ender_lump_3, soul_lantern, necrotic_skull]
+    output: ancient_rune_soulbound
+    energy: 28
+    guide: 魔法結晶 III + 末影結晶 III + 靈魂燈籠 + 壞死顱骨 → 雷射雕刻機 → 古代符文 [靈魂綁定]
+  craft_ancient_rune_villager:
+    machine: laser_engraver
+    inputs: [magic_lump_2, ender_lump_2, emerald, strange_nether_goo]
+    output: ancient_rune_villager
+    energy: 22
+    guide: 魔法結晶 II + 末影結晶 II + 綠寶石 + 異界凝膠 → 雷射雕刻機 → 古代符文 [村民]
+
   bio_lab_vegetable_curry:
     machine: bio_lab
     inputs: [onion, bell_pepper]

@@ -10,6 +10,7 @@
 |---|---|---|
 | [基礎材料](basic-materials.md) | 一階基礎加工產物 | ~30 |
 | [進階材料](advanced-materials.md) | 二～三階進階元件 | ~50 |
+| [魔法物品](magical-items.md) | 結晶、符文、護符材料 | ~25 |
 | [升級模組](upgrades.md) | 機器升級配件 | 4 |
 | [終局材料](endgame-materials.md) | 四階與巨構材料 | ~45 |
 | 食物 | 料理與飲品 | ~60 |
