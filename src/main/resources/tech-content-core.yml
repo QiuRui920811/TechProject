@@ -2283,10 +2283,10 @@ recipes:
     guide: "竹子 → 電鋸 → 纖維網"
   auto_farm_seed_cluster:
     machine: "auto_farm"
-    inputs: ["crop_seeds", "crop_seeds"]
+    inputs: ["crop_seeds", "bone_meal"]
     output: "seed_cluster"
     energy: 3
-    guide: "種子 → 自動農場 → 種子簇"
+    guide: "種子 + 骨粉 → 自動農場 → 種子簇"
   auto_farm_crop:
     machine: "auto_farm"
     inputs: ["crop_seeds"]

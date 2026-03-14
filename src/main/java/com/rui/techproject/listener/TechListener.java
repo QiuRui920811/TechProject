@@ -2119,7 +2119,7 @@ public final class TechListener implements Listener {
                 }
                 destination.setYaw(player.getLocation().getYaw());
                 destination.setPitch(player.getLocation().getPitch());
-                player.teleport(destination);
+                player.teleportAsync(destination);
                 player.getWorld().playSound(loc, Sound.ENTITY_ENDERMAN_TELEPORT, 0.8f, 1.2f);
                 player.getWorld().spawnParticle(Particle.PORTAL, loc, 30, 0.5, 1, 0.5, 0.1);
                 player.getWorld().spawnParticle(Particle.PORTAL, destination, 30, 0.5, 1, 0.5, 0.1);
@@ -2476,7 +2476,7 @@ public final class TechListener implements Listener {
             final Vector dir = player.getLocation().add(0, 0.5, 0).toVector().subtract(item.getLocation().toVector());
             final double dist = dir.length();
             if (dist < 1.2) {
-                item.teleport(player.getLocation());
+                item.teleportAsync(player.getLocation());
             } else {
                 item.setVelocity(dir.normalize().multiply(0.6));
             }
