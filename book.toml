@@ -1,0 +1,15 @@
+[book]
+title = "TechProject 科技百科"
+authors = ["RuCat"]
+description = "TechProject Minecraft 科技模組插件百科全書"
+language = "zh-TW"
+src = "docs/wiki"
+
+[build]
+build-dir = "book"
+
+[output.html]
+default-theme = "navy"
+preferred-dark-theme = "navy"
+git-repository-url = "https://github.com/QiuRui920811/TechProject"
+edit-url-template = "https://github.com/QiuRui920811/TechProject/edit/main/docs/wiki/{path}"
