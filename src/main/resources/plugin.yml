@@ -1,0 +1,17 @@
+name: TechProject
+main: com.rui.techproject.TechProjectPlugin
+version: 0.1.0
+api-version: '1.21'
+folia-supported: true
+author: _RuCat
+website: https://example.invalid
+softdepend: [Nexo, PlaceholderAPI]
+commands:
+  tech:
+    description: 開啟科技書或管理科技插件
+    usage: /tech [book|list|stats|achievements|give|reload|xp|research]
+    aliases: [techbook]
+permissions:
+  techproject.admin:
+    description: 管理科技插件
+    default: op

@@ -1,0 +1,26 @@
+{
+  "model": {
+    "type": "minecraft:range_dispatch",
+    "property": "minecraft:custom_model_data",
+    "entries": [
+      {
+        "threshold": 1310089,
+        "model": {
+          "type": "minecraft:model",
+          "model": "techproject:item/void_shard"
+        }
+      },
+      {
+        "threshold": 2031650,
+        "model": {
+          "type": "minecraft:model",
+          "model": "techproject:item/quantum_chip"
+        }
+      }
+    ],
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "minecraft:item/echo_shard"
+    }
+  }
+}

@@ -1,0 +1,33 @@
+{
+  "model": {
+    "type": "minecraft:range_dispatch",
+    "property": "minecraft:custom_model_data",
+    "entries": [
+      {
+        "threshold": 6438733,
+        "model": {
+          "type": "minecraft:model",
+          "model": "techproject:item/dark_matter_loom"
+        }
+      },
+      {
+        "threshold": 7895634,
+        "model": {
+          "type": "minecraft:model",
+          "model": "techproject:item/insulation_press"
+        }
+      },
+      {
+        "threshold": 7959964,
+        "model": {
+          "type": "minecraft:model",
+          "model": "techproject:item/advanced_assembler"
+        }
+      }
+    ],
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "minecraft:item/loom"
+    }
+  }
+}

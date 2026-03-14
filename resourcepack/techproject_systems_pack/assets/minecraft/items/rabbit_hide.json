@@ -1,0 +1,19 @@
+{
+  "model": {
+    "type": "minecraft:range_dispatch",
+    "property": "minecraft:custom_model_data",
+    "entries": [
+      {
+        "threshold": 4472090,
+        "model": {
+          "type": "minecraft:model",
+          "model": "techproject:item/rubber_sheet"
+        }
+      }
+    ],
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "minecraft:item/rabbit_hide"
+    }
+  }
+}

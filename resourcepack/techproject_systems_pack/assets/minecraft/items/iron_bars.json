@@ -1,0 +1,75 @@
+{
+  "model": {
+    "type": "minecraft:range_dispatch",
+    "property": "minecraft:custom_model_data",
+    "entries": [
+      {
+        "threshold": 2087677,
+        "model": {
+          "type": "minecraft:model",
+          "model": "techproject:item/fusion_mesh"
+        }
+      },
+      {
+        "threshold": 2764423,
+        "model": {
+          "type": "minecraft:model",
+          "model": "techproject:item/alloy_frame"
+        }
+      },
+      {
+        "threshold": 3038203,
+        "model": {
+          "type": "minecraft:model",
+          "model": "techproject:item/steel_wire"
+        }
+      },
+      {
+        "threshold": 3404031,
+        "model": {
+          "type": "minecraft:model",
+          "model": "techproject:item/quarry_frame"
+        }
+      },
+      {
+        "threshold": 3645052,
+        "model": {
+          "type": "minecraft:model",
+          "model": "techproject:item/bus_frame"
+        }
+      },
+      {
+        "threshold": 4399161,
+        "model": {
+          "type": "minecraft:model",
+          "model": "techproject:item/chrono_lattice"
+        }
+      },
+      {
+        "threshold": 4936958,
+        "model": {
+          "type": "minecraft:model",
+          "model": "techproject:item/reactor_lattice"
+        }
+      },
+      {
+        "threshold": 6939039,
+        "model": {
+          "type": "minecraft:model",
+          "model": "techproject:item/energy_cable"
+        }
+      },
+      {
+        "threshold": 7201187,
+        "model": {
+          "type": "minecraft:model",
+          "model": "techproject:item/industrial_bus"
+        }
+      }
+    ],
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "minecraft:item/iron_bars"
+    }
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "model": {
+    "type": "minecraft:range_dispatch",
+    "property": "minecraft:custom_model_data",
+    "entries": [
+      {
+        "threshold": 1368949,
+        "model": {
+          "type": "minecraft:model",
+          "model": "techproject:item/crushed_biomass"
+        }
+      },
+      {
+        "threshold": 4834752,
+        "model": {
+          "type": "minecraft:model",
+          "model": "techproject:item/circuit_board"
+        }
+      }
+    ],
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "minecraft:item/green_dye"
+    }
+  }
+}

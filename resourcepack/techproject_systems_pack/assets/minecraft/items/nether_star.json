@@ -1,0 +1,47 @@
+{
+  "model": {
+    "type": "minecraft:range_dispatch",
+    "property": "minecraft:custom_model_data",
+    "entries": [
+      {
+        "threshold": 1445459,
+        "model": {
+          "type": "minecraft:model",
+          "model": "techproject:item/achievement_badge"
+        }
+      },
+      {
+        "threshold": 1863079,
+        "model": {
+          "type": "minecraft:model",
+          "model": "techproject:item/omega_matrix"
+        }
+      },
+      {
+        "threshold": 2375091,
+        "model": {
+          "type": "minecraft:model",
+          "model": "techproject:item/singularity_core"
+        }
+      },
+      {
+        "threshold": 4473100,
+        "model": {
+          "type": "minecraft:model",
+          "model": "techproject:item/cosmic_matrix"
+        }
+      },
+      {
+        "threshold": 4649188,
+        "model": {
+          "type": "minecraft:model",
+          "model": "techproject:item/fusion_core"
+        }
+      }
+    ],
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "minecraft:item/nether_star"
+    }
+  }
+}

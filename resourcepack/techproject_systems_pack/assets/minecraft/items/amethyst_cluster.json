@@ -1,0 +1,33 @@
+{
+  "model": {
+    "type": "minecraft:range_dispatch",
+    "property": "minecraft:custom_model_data",
+    "entries": [
+      {
+        "threshold": 2281710,
+        "model": {
+          "type": "minecraft:model",
+          "model": "techproject:item/crystal_matrix"
+        }
+      },
+      {
+        "threshold": 2924303,
+        "model": {
+          "type": "minecraft:model",
+          "model": "techproject:item/harmonic_crystal"
+        }
+      },
+      {
+        "threshold": 4582667,
+        "model": {
+          "type": "minecraft:model",
+          "model": "techproject:item/grown_crystal"
+        }
+      }
+    ],
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "minecraft:item/amethyst_cluster"
+    }
+  }
+}

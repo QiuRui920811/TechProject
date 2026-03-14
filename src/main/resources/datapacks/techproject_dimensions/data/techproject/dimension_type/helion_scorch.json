@@ -1,0 +1,29 @@
+{
+  "coordinate_scale": 1.0,
+  "has_skylight": false,
+  "has_ceiling": false,
+  "ambient_light": 0.24,
+  "has_fixed_time": true,
+  "monster_spawn_block_light_limit": 15,
+  "monster_spawn_light_level": 15,
+  "logical_height": 256,
+  "min_y": 0,
+  "height": 256,
+  "infiniburn": "#minecraft:infiniburn_nether",
+  "attributes": {
+    "minecraft:visual/sky_color": "#E16A24",
+    "minecraft:visual/fog_color": "#6F1D11",
+    "minecraft:visual/water_fog_color": "#34110B",
+    "minecraft:visual/cloud_color": "#55FF9440",
+    "minecraft:visual/cloud_height": 128.0,
+    "minecraft:visual/fog_start_distance": -12.0,
+    "minecraft:visual/fog_end_distance": 92.0,
+    "minecraft:visual/sky_fog_end_distance": 70.0,
+    "minecraft:visual/cloud_fog_end_distance": 90.0,
+    "minecraft:visual/sky_light_color": "#FFB05A",
+    "minecraft:visual/sky_light_factor": 0.82,
+    "minecraft:visual/star_brightness": 0.0
+  },
+  "skybox": "none",
+  "cardinal_light": "nether"
+}

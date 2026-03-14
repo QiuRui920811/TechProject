@@ -1,0 +1,19 @@
+{
+  "model": {
+    "type": "minecraft:range_dispatch",
+    "property": "minecraft:custom_model_data",
+    "entries": [
+      {
+        "threshold": 4911179,
+        "model": {
+          "type": "minecraft:model",
+          "model": "techproject:item/agri_module"
+        }
+      }
+    ],
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "minecraft:item/moss_carpet"
+    }
+  }
+}

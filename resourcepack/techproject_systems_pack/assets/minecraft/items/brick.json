@@ -1,0 +1,26 @@
+{
+  "model": {
+    "type": "minecraft:range_dispatch",
+    "property": "minecraft:custom_model_data",
+    "entries": [
+      {
+        "threshold": 2479484,
+        "model": {
+          "type": "minecraft:model",
+          "model": "techproject:item/thermal_shell"
+        }
+      },
+      {
+        "threshold": 4314697,
+        "model": {
+          "type": "minecraft:model",
+          "model": "techproject:item/ceramic_plate"
+        }
+      }
+    ],
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "minecraft:item/brick"
+    }
+  }
+}

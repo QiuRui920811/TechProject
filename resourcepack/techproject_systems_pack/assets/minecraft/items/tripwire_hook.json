@@ -1,0 +1,26 @@
+{
+  "model": {
+    "type": "minecraft:range_dispatch",
+    "property": "minecraft:custom_model_data",
+    "entries": [
+      {
+        "threshold": 3328278,
+        "model": {
+          "type": "minecraft:model",
+          "model": "techproject:item/copper_wire"
+        }
+      },
+      {
+        "threshold": 4231419,
+        "model": {
+          "type": "minecraft:model",
+          "model": "techproject:item/insulated_wire"
+        }
+      }
+    ],
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "minecraft:item/tripwire_hook"
+    }
+  }
+}

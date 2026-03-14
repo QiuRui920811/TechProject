@@ -1,0 +1,33 @@
+{
+  "model": {
+    "type": "minecraft:range_dispatch",
+    "property": "minecraft:custom_model_data",
+    "entries": [
+      {
+        "threshold": 6231917,
+        "model": {
+          "type": "minecraft:model",
+          "model": "techproject:item/apex_forge"
+        }
+      },
+      {
+        "threshold": 6731574,
+        "model": {
+          "type": "minecraft:model",
+          "model": "techproject:item/research_desk"
+        }
+      },
+      {
+        "threshold": 7638250,
+        "model": {
+          "type": "minecraft:model",
+          "model": "techproject:item/celestial_assembler"
+        }
+      }
+    ],
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "minecraft:item/enchanting_table"
+    }
+  }
+}

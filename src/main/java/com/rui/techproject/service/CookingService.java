@@ -1,0 +1,628 @@
+package com.rui.techproject.service;
+
+import com.rui.techproject.TechProjectPlugin;
+import com.rui.techproject.util.ItemFactoryUtil;
+import com.rui.techproject.util.LocationKey;
+import com.rui.techproject.util.SafeScheduler;
+import io.papermc.paper.threadedregions.scheduler.ScheduledTask;
+import net.kyori.adventure.bossbar.BossBar;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.TextColor;
+import net.kyori.adventure.text.format.TextDecoration;
+import net.kyori.adventure.title.Title;
+import org.bukkit.Bukkit;
+import org.bukkit.Color;
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.Particle;
+import org.bukkit.Sound;
+import org.bukkit.World;
+import org.bukkit.block.Block;
+import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.entity.Display;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.ItemDisplay;
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.util.Transformation;
+import org.joml.AxisAngle4f;
+import org.joml.Vector3f;
+
+import java.io.File;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
+import java.time.Duration;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+
+/**
+ * 互動式烹飪系統。
+ * <p>
+ * 玩家對營火 / 煙燻爐 / 高爐 / 熔爐右鍵放食材，
+ * 食物會懸浮在方塊上方旋轉，透過 BossBar 與 Title 動畫顯示烹調進度，
+ * 完成後產物掉落並觸發特效。
+ */
+public final class CookingService {
+
+    // ── 色彩常量 ──
+    private static final TextColor HEAT_COLOR    = TextColor.color(0xFF6B35);
+    private static final TextColor COOK_COLOR    = TextColor.color(0xFFD166);
+    private static final TextColor DONE_COLOR    = TextColor.color(0x7CFC9A);
+    private static final TextColor PROGRESS_FILL = TextColor.color(0xFF9F43);
+    private static final TextColor PROGRESS_EMPTY = TextColor.color(0x3D3D3D);
+    private static final TextColor SUBTITLE_COLOR = TextColor.color(0xA8B2C1);
+
+    // ── 烹飪階段 ──
+    private static final String[] PHASE_LABELS = {
+            "🔥 加熱中…",
+            "🍳 烹調中…",
+            "♨ 翻炒中…",
+            "✦ 收汁中…",
+            "✨ 即將完成…"
+    };
+
+    private static final Sound[] PHASE_SOUNDS = {
+            Sound.BLOCK_FIRE_AMBIENT,
+            Sound.BLOCK_FURNACE_FIRE_CRACKLE,
+            Sound.ENTITY_GENERIC_BURN,
+            Sound.BLOCK_LAVA_POP,
+            Sound.BLOCK_AMETHYST_BLOCK_CHIME
+    };
+
+    private static final Set<Material> COOKING_STATIONS = Set.of(
+            Material.CAMPFIRE, Material.SOUL_CAMPFIRE,
+            Material.SMOKER, Material.BLAST_FURNACE, Material.FURNACE
+    );
+
+    // ── 記錄類 ──
+    private record CookingRecipe(String id, String inputId, Material inputMaterial,
+                                 String outputId, int cookTimeTicks,
+                                 String stationType, String displayName) {}
+
+    private static final class CookingSession {
+        final UUID playerId;
+        final LocationKey location;
+        final CookingRecipe recipe;
+        final long startTick;
+        final int totalTicks;
+        UUID displayEntityId;
+        BossBar bossBar;
+        int ticksElapsed;
+        int lastPhase = -1;
+        ScheduledTask tickTask;
+
+        CookingSession(UUID playerId, LocationKey location, CookingRecipe recipe,
+                       long startTick, int totalTicks) {
+            this.playerId = playerId;
+            this.location = location;
+            this.recipe = recipe;
+            this.startTick = startTick;
+            this.totalTicks = totalTicks;
+        }
+    }
+
+    // ── 欄位 ──
+    private final TechProjectPlugin plugin;
+    private final TechRegistry registry;
+    private final ItemFactoryUtil itemFactory;
+    private final SafeScheduler scheduler;
+    private final Map<LocationKey, CookingSession> activeSessions = new ConcurrentHashMap<>();
+    private final List<CookingRecipe> recipes = new ArrayList<>();
+
+    public CookingService(final TechProjectPlugin plugin,
+                          final TechRegistry registry,
+                          final ItemFactoryUtil itemFactory,
+                          final SafeScheduler scheduler) {
+        this.plugin = plugin;
+        this.registry = registry;
+        this.itemFactory = itemFactory;
+        this.scheduler = scheduler;
+        this.loadRecipes(plugin);
+    }
+
+    // ══════════════════════ 公開 API ══════════════════════
+
+    /**
+     * 判斷材質是否為烹飪站。
+     */
+    public boolean isCookingStation(final Material material) {
+        return material != null && COOKING_STATIONS.contains(material);
+    }
+
+    /**
+     * 判斷方塊是否為烹飪站。
+     */
+    public boolean isCookingStation(final Block block) {
+        return block != null && COOKING_STATIONS.contains(block.getType());
+    }
+
+    /**
+     * 嘗試在烹飪站上開始烹調（從玩家手持物品推斷）。
+     */
+    public boolean tryStartCooking(final Player player, final Block block) {
+        return this.tryStartCooking(player, block, player.getInventory().getItemInMainHand());
+    }
+
+    /**
+     * 嘗試在烹飪站上開始烹調。
+     * @return true 表示事件已處理（成功或拒絕），false 表示不是烹飪行為。
+     */
+    public boolean tryStartCooking(final Player player, final Block block, final ItemStack handItem) {
+        if (!this.isCookingStation(block)) {
+            return false;
+        }
+        if (handItem == null || handItem.getType().isAir()) {
+            // 空手右鍵：如果正在烹調，顯示進度
+            final LocationKey key = LocationKey.from(block.getLocation());
+            final CookingSession session = this.activeSessions.get(key);
+            if (session != null) {
+                final float progress = (float) session.ticksElapsed / session.totalTicks;
+                final int pct = (int) (progress * 100);
+                player.sendActionBar(Component.text("烹調進度：" + pct + "% — " + session.recipe.displayName, COOK_COLOR));
+                return true;
+            }
+            return false;
+        }
+
+        final LocationKey key = LocationKey.from(block.getLocation());
+        if (this.activeSessions.containsKey(key)) {
+            player.sendActionBar(Component.text("這個烹飪台正在使用中！", TextColor.color(0xFF7B7B)));
+            return true;
+        }
+
+        // 尋找匹配配方
+        final CookingRecipe recipe = this.findRecipe(handItem, block.getType());
+        if (recipe == null) {
+            return false; // 不是可烹調的食材，讓事件繼續
+        }
+
+        // 扣除食材
+        if (handItem.getAmount() > 1) {
+            handItem.setAmount(handItem.getAmount() - 1);
+        } else {
+            player.getInventory().setItemInMainHand(null);
+        }
+
+        // 啟動烹調
+        this.startSession(player, block, recipe);
+        return true;
+    }
+
+    /**
+     * 方塊被破壞時中斷烹調。
+     */
+    public void interruptCooking(final Block block) {
+        final LocationKey key = LocationKey.from(block.getLocation());
+        final CookingSession session = this.activeSessions.remove(key);
+        if (session == null) {
+            return;
+        }
+        this.cleanupSession(session, block.getLocation(), true);
+    }
+
+    /** 別名：方塊被破壞時中斷烹調。 */
+    public void interruptByBlockBreak(final Block block) {
+        this.interruptCooking(block);
+    }
+
+    /**
+     * 玩家斷線時清理。
+     */
+    public void cleanupPlayer(final UUID playerId) {
+        final var iterator = this.activeSessions.entrySet().iterator();
+        while (iterator.hasNext()) {
+            final var entry = iterator.next();
+            if (entry.getValue().playerId.equals(playerId)) {
+                final CookingSession session = entry.getValue();
+                iterator.remove();
+                final World world = Bukkit.getWorld(session.location.worldName());
+                if (world != null) {
+                    final Location loc = new Location(world, session.location.x(), session.location.y(), session.location.z());
+                    this.cleanupSession(session, loc, true);
+                }
+            }
+        }
+    }
+
+    /** 別名：清理玩家。 */
+    public void cancelSession(final UUID playerId) {
+        this.cleanupPlayer(playerId);
+    }
+
+    /**
+     * 伺服器關閉時清除所有烹調。
+     */
+    public void shutdown() {
+        for (final var entry : this.activeSessions.entrySet()) {
+            final CookingSession session = entry.getValue();
+            if (session.tickTask != null) {
+                session.tickTask.cancel();
+            }
+            this.removeDisplayEntity(session);
+            final Player player = Bukkit.getPlayer(session.playerId);
+            if (player != null && session.bossBar != null) {
+                player.hideBossBar(session.bossBar);
+            }
+        }
+        this.activeSessions.clear();
+    }
+
+    // ══════════════════════ 烹調邏輯 ══════════════════════
+
+    private void startSession(final Player player, final Block block, final CookingRecipe recipe) {
+        final LocationKey key = LocationKey.from(block.getLocation());
+        final int cookTicks = recipe.cookTimeTicks;
+        final CookingSession session = new CookingSession(
+                player.getUniqueId(), key, recipe,
+                block.getWorld().getFullTime(), cookTicks
+        );
+
+        // 建立懸浮食物展示
+        final Location displayLoc = block.getLocation().clone().add(0.5, 1.15, 0.5);
+        this.spawnFoodDisplay(session, displayLoc, recipe);
+
+        // 建立 BossBar
+        session.bossBar = BossBar.bossBar(
+                Component.text("🔥 " + recipe.displayName + " — 加熱中…", HEAT_COLOR),
+                0.0f,
+                BossBar.Color.RED,
+                BossBar.Overlay.PROGRESS
+        );
+        player.showBossBar(session.bossBar);
+
+        // 開場 Title
+        player.showTitle(Title.title(
+                Component.text("🔥", HEAT_COLOR),
+                Component.text("開始烹調 " + recipe.displayName, SUBTITLE_COLOR),
+                Title.Times.times(Duration.ofMillis(200), Duration.ofMillis(800), Duration.ofMillis(400))
+        ));
+
+        // 開場音效
+        player.playSound(block.getLocation(), Sound.BLOCK_FIRE_AMBIENT, 0.6f, 1.0f);
+        player.playSound(block.getLocation(), Sound.ITEM_ARMOR_EQUIP_IRON, 0.4f, 1.3f);
+
+        this.activeSessions.put(key, session);
+
+        // 啟動 tick 計時器（每 4 ticks 一次）
+        session.tickTask = this.scheduler.runRegionTimer(
+                block.getLocation(),
+                task -> this.tickSession(key, task),
+                4L, 4L
+        );
+    }
+
+    private void tickSession(final LocationKey key, final ScheduledTask task) {
+        final CookingSession session = this.activeSessions.get(key);
+        if (session == null) {
+            task.cancel();
+            return;
+        }
+
+        session.ticksElapsed += 4;
+        final float progress = Math.min(1.0f, (float) session.ticksElapsed / session.totalTicks);
+        final int phaseIndex = Math.min(PHASE_LABELS.length - 1,
+                (int) (progress * PHASE_LABELS.length));
+
+        // 更新 BossBar
+        final TextColor barColor = progress < 0.5f ? HEAT_COLOR : (progress < 0.9f ? COOK_COLOR : DONE_COLOR);
+        session.bossBar.name(Component.text(
+                this.buildProgressBar(progress) + " " + PHASE_LABELS[phaseIndex] + " " +
+                        session.recipe.displayName + " " + (int) (progress * 100) + "%",
+                barColor
+        ));
+        session.bossBar.progress(progress);
+        session.bossBar.color(progress < 0.5f ? BossBar.Color.RED : (progress < 0.9f ? BossBar.Color.YELLOW : BossBar.Color.GREEN));
+
+        // 粒子效果
+        final World world = Bukkit.getWorld(key.worldName());
+        if (world != null) {
+            final Location particleLoc = new Location(world, key.x() + 0.5, key.y() + 1.3, key.z() + 0.5);
+            if (progress < 0.3f) {
+                world.spawnParticle(Particle.SMOKE, particleLoc, 3, 0.15, 0.1, 0.15, 0.01);
+                world.spawnParticle(Particle.FLAME, particleLoc.clone().add(0, -0.3, 0), 2, 0.1, 0.05, 0.1, 0.005);
+            } else if (progress < 0.7f) {
+                world.spawnParticle(Particle.CAMPFIRE_COSY_SMOKE, particleLoc, 1, 0.08, 0.1, 0.08, 0.01);
+                world.spawnParticle(Particle.LAVA, particleLoc, 1, 0.1, 0.05, 0.1, 0.0);
+            } else {
+                world.spawnParticle(Particle.HAPPY_VILLAGER, particleLoc, 3, 0.2, 0.15, 0.2, 0.0);
+                world.spawnParticle(Particle.WAX_ON, particleLoc, 2, 0.15, 0.1, 0.15, 0.0);
+            }
+
+            // 旋轉食物展示
+            this.rotateFoodDisplay(session, world);
+        }
+
+        // 階段切換 Title 動畫
+        final Player player = Bukkit.getPlayer(session.playerId);
+        if (player != null && phaseIndex != session.lastPhase) {
+            session.lastPhase = phaseIndex;
+            if (phaseIndex > 0) {
+                player.showTitle(Title.title(
+                        Component.text(PHASE_LABELS[phaseIndex].substring(0, 2), barColor)
+                                .decoration(TextDecoration.BOLD, true),
+                        Component.text(PHASE_LABELS[phaseIndex].substring(2).trim(), SUBTITLE_COLOR),
+                        Title.Times.times(Duration.ofMillis(100), Duration.ofMillis(600), Duration.ofMillis(300))
+                ));
+                player.playSound(player.getLocation(), PHASE_SOUNDS[phaseIndex], 0.45f, 1.0f + phaseIndex * 0.1f);
+            }
+
+            // ActionBar 進度文字
+            player.sendActionBar(Component.text(
+                    this.buildProgressBar(progress) + " " + session.recipe.displayName + " " + (int) (progress * 100) + "%",
+                    barColor
+            ));
+        }
+
+        // 完成
+        if (session.ticksElapsed >= session.totalTicks) {
+            task.cancel();
+            this.completeCooking(key);
+        }
+    }
+
+    private void completeCooking(final LocationKey key) {
+        final CookingSession session = this.activeSessions.remove(key);
+        if (session == null) {
+            return;
+        }
+
+        final World world = Bukkit.getWorld(key.worldName());
+        final Location loc = world != null
+                ? new Location(world, key.x() + 0.5, key.y() + 1.2, key.z() + 0.5)
+                : null;
+
+        // 建立產物
+        final ItemStack output = this.buildOutputItem(session.recipe);
+
+        // 掉落物品
+        if (loc != null && world != null) {
+            world.dropItemNaturally(loc, output);
+
+            // 完成特效
+            world.spawnParticle(Particle.TOTEM_OF_UNDYING, loc, 25, 0.3, 0.4, 0.3, 0.08);
+            world.spawnParticle(Particle.HAPPY_VILLAGER, loc, 12, 0.25, 0.3, 0.25, 0.0);
+            world.playSound(loc, Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 0.8f, 1.3f);
+            world.playSound(loc, Sound.BLOCK_AMETHYST_BLOCK_CHIME, 0.6f, 1.5f);
+            world.playSound(loc, Sound.UI_TOAST_CHALLENGE_COMPLETE, 0.4f, 1.2f);
+        }
+
+        // 玩家通知
+        final Player player = Bukkit.getPlayer(session.playerId);
+        if (player != null) {
+            player.showTitle(Title.title(
+                    Component.text("✅", DONE_COLOR).decoration(TextDecoration.BOLD, true),
+                    Component.text(session.recipe.displayName + " 烹調完成！", DONE_COLOR),
+                    Title.Times.times(Duration.ofMillis(100), Duration.ofMillis(1200), Duration.ofMillis(500))
+            ));
+            player.sendActionBar(Component.text("🍽 " + session.recipe.displayName + " 已完成烹調", DONE_COLOR));
+            player.hideBossBar(session.bossBar);
+
+            // 成就追蹤
+            this.plugin.getPlayerProgressService().incrementStat(player.getUniqueId(), "meals_cooked", 1);
+            this.plugin.getAchievementService().evaluate(player.getUniqueId());
+        }
+
+        this.removeDisplayEntity(session);
+    }
+
+    // ══════════════════════ 食物展示實體 ══════════════════════
+
+    private void spawnFoodDisplay(final CookingSession session, final Location location, final CookingRecipe recipe) {
+        final World world = location.getWorld();
+        if (world == null) {
+            return;
+        }
+
+        world.spawn(location, ItemDisplay.class, display -> {
+            final ItemStack displayItem;
+            if (recipe.inputMaterial != null && recipe.inputMaterial != Material.AIR) {
+                displayItem = new ItemStack(recipe.inputMaterial);
+            } else {
+                displayItem = this.buildOutputItem(recipe);
+            }
+            display.setItemStack(displayItem);
+            display.setItemDisplayTransform(ItemDisplay.ItemDisplayTransform.GROUND);
+            display.setBillboard(Display.Billboard.CENTER);
+            display.setTransformation(new Transformation(
+                    new Vector3f(0, 0.1f, 0),
+                    new AxisAngle4f(0, 0, 1, 0),
+                    new Vector3f(0.65f, 0.65f, 0.65f),
+                    new AxisAngle4f(0, 0, 1, 0)
+            ));
+            display.setGlowing(true);
+            display.setGlowColorOverride(Color.fromRGB(0xFF6B35));
+            session.displayEntityId = display.getUniqueId();
+        });
+    }
+
+    private void rotateFoodDisplay(final CookingSession session, final World world) {
+        if (session.displayEntityId == null) {
+            return;
+        }
+        final Entity entity = Bukkit.getEntity(session.displayEntityId);
+        if (!(entity instanceof ItemDisplay display)) {
+            return;
+        }
+        final float angle = (session.ticksElapsed * 4.5f) % 360f;
+        final float bobY = (float) (Math.sin(session.ticksElapsed * 0.15) * 0.04);
+        display.setTransformation(new Transformation(
+                new Vector3f(0, 0.1f + bobY, 0),
+                new AxisAngle4f((float) Math.toRadians(angle), 0, 1, 0),
+                new Vector3f(0.65f, 0.65f, 0.65f),
+                new AxisAngle4f(0, 0, 1, 0)
+        ));
+
+        // 更新發光顏色
+        final float progress = (float) session.ticksElapsed / session.totalTicks;
+        if (progress > 0.8f) {
+            display.setGlowColorOverride(Color.fromRGB(0x7CFC9A));
+        } else if (progress > 0.5f) {
+            display.setGlowColorOverride(Color.fromRGB(0xFFD166));
+        }
+    }
+
+    private void removeDisplayEntity(final CookingSession session) {
+        if (session.displayEntityId == null) {
+            return;
+        }
+        final Entity entity = Bukkit.getEntity(session.displayEntityId);
+        if (entity != null) {
+            entity.remove();
+        }
+    }
+
+    // ══════════════════════ 清理 ══════════════════════
+
+    private void cleanupSession(final CookingSession session, final Location location, final boolean dropRaw) {
+        if (session.tickTask != null) {
+            session.tickTask.cancel();
+        }
+
+        final Player player = Bukkit.getPlayer(session.playerId);
+        if (player != null && session.bossBar != null) {
+            player.hideBossBar(session.bossBar);
+        }
+
+        this.removeDisplayEntity(session);
+
+        // 退還原始食材
+        if (dropRaw && location.getWorld() != null) {
+            final ItemStack rawItem;
+            if (session.recipe.inputMaterial != null && session.recipe.inputMaterial != Material.AIR) {
+                rawItem = new ItemStack(session.recipe.inputMaterial);
+            } else {
+                rawItem = this.buildOutputItem(session.recipe); // fallback
+            }
+            location.getWorld().dropItemNaturally(location.clone().add(0.5, 1.0, 0.5), rawItem);
+        }
+    }
+
+    // ══════════════════════ 進度條 ══════════════════════
+
+    private String buildProgressBar(final float progress) {
+        final int total = 20;
+        final int filled = (int) (progress * total);
+        final StringBuilder bar = new StringBuilder("┃");
+        for (int i = 0; i < total; i++) {
+            bar.append(i < filled ? "█" : "░");
+        }
+        bar.append("┃");
+        return bar.toString();
+    }
+
+    // ══════════════════════ 配方系統 ══════════════════════
+
+    private CookingRecipe findRecipe(final ItemStack handItem, final Material stationType) {
+        final String techId = this.itemFactory.getTechItemId(handItem);
+        final String stationName = stationType.name();
+
+        for (final CookingRecipe recipe : this.recipes) {
+            // 站台類型檢查
+            if (!recipe.stationType.equalsIgnoreCase("any")) {
+                boolean stationMatch = false;
+                for (final String allowed : recipe.stationType.split(",")) {
+                    if (allowed.trim().equalsIgnoreCase(stationName)) {
+                        stationMatch = true;
+                        break;
+                    }
+                }
+                if (!stationMatch) {
+                    continue;
+                }
+            }
+            // ID 匹配（科技物品或原版）
+            if (techId != null && recipe.inputId.equalsIgnoreCase(techId)) {
+                return recipe;
+            }
+            if (recipe.inputMaterial != null && handItem.getType() == recipe.inputMaterial && techId == null) {
+                return recipe;
+            }
+        }
+        return null;
+    }
+
+    private ItemStack buildOutputItem(final CookingRecipe recipe) {
+        final var itemDef = this.registry.getItem(recipe.outputId);
+        if (itemDef != null) {
+            return this.itemFactory.buildTechItem(itemDef);
+        }
+        // 嘗試原版物品
+        try {
+            final Material mat = Material.valueOf(recipe.outputId.toUpperCase(Locale.ROOT));
+            return new ItemStack(mat);
+        } catch (final IllegalArgumentException ignored) {
+            return new ItemStack(Material.COOKED_BEEF);
+        }
+    }
+
+    private void loadRecipes(final JavaPlugin plugin) {
+        this.recipes.clear();
+
+        // 嘗試外部檔案
+        final File file = new File(plugin.getDataFolder(), "tech-content-expansion.yml");
+        YamlConfiguration yaml = null;
+        if (file.isFile()) {
+            yaml = YamlConfiguration.loadConfiguration(file);
+        } else {
+            final var resource = plugin.getResource("tech-content-expansion.yml");
+            if (resource != null) {
+                yaml = YamlConfiguration.loadConfiguration(new InputStreamReader(resource, StandardCharsets.UTF_8));
+            }
+        }
+
+        if (yaml != null) {
+            final ConfigurationSection section = yaml.getConfigurationSection("cooking-recipes");
+            if (section != null) {
+                for (final String key : section.getKeys(false)) {
+                    final ConfigurationSection rs = section.getConfigurationSection(key);
+                    if (rs == null) continue;
+
+                    final String rawInput = rs.getString("input", "");
+                    final boolean isTechInput = "TECH_ITEM".equalsIgnoreCase(rs.getString("input-type", ""));
+                    final String inputId = isTechInput ? rawInput : "";
+                    Material inputMat = null;
+                    if (!isTechInput) {
+                        try {
+                            inputMat = Material.valueOf(rawInput.toUpperCase(Locale.ROOT));
+                        } catch (final IllegalArgumentException ignored) {}
+                    }
+
+                    final String rawOutput = rs.getString("output", "COOKED_BEEF");
+                    final int cookTime = rs.getInt("cook-time", 200);
+                    final String displayName = rs.getString("display-name", key);
+
+                    // 判斷站台類型
+                    final List<String> stations = rs.getStringList("stations");
+                    final String stationType = stations.isEmpty() ? "any" : String.join(",", stations);
+
+                    this.recipes.add(new CookingRecipe(
+                            key, inputId, inputMat, rawOutput,
+                            cookTime, stationType, displayName
+                    ));
+                }
+            }
+        }
+
+        // 預設原版食物配方（如果 YAML 沒有定義）
+        if (this.recipes.isEmpty()) {
+            this.addDefaultRecipes();
+        }
+
+        plugin.getLogger().info("烹飪系統：載入 " + this.recipes.size() + " 個烹飪配方。");
+    }
+
+    private void addDefaultRecipes() {
+        this.recipes.add(new CookingRecipe("cook_beef", "", Material.BEEF, "COOKED_BEEF", 160, "any", "烤牛排"));
+        this.recipes.add(new CookingRecipe("cook_porkchop", "", Material.PORKCHOP, "COOKED_PORKCHOP", 160, "any", "烤豬排"));
+        this.recipes.add(new CookingRecipe("cook_chicken", "", Material.CHICKEN, "COOKED_CHICKEN", 140, "any", "烤雞腿"));
+        this.recipes.add(new CookingRecipe("cook_mutton", "", Material.MUTTON, "COOKED_MUTTON", 150, "any", "烤羊排"));
+        this.recipes.add(new CookingRecipe("cook_rabbit", "", Material.RABBIT, "COOKED_RABBIT", 120, "any", "烤兔肉"));
+        this.recipes.add(new CookingRecipe("cook_cod", "", Material.COD, "COOKED_COD", 100, "any", "烤鱈魚"));
+        this.recipes.add(new CookingRecipe("cook_salmon", "", Material.SALMON, "COOKED_SALMON", 100, "any", "烤鮭魚"));
+        this.recipes.add(new CookingRecipe("cook_potato", "", Material.POTATO, "BAKED_POTATO", 120, "any", "烤馬鈴薯"));
+        this.recipes.add(new CookingRecipe("cook_kelp", "", Material.KELP, "DRIED_KELP", 80, "any", "烤乾海帶"));
+    }
+}

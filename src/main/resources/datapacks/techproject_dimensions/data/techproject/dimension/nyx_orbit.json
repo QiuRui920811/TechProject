@@ -1,0 +1,11 @@
+{
+  "type": "techproject:nyx_end_sky",
+  "generator": {
+    "type": "minecraft:noise",
+    "settings": "techproject:nyx_orbit_noise",
+    "biome_source": {
+      "type": "minecraft:fixed",
+      "biome": "techproject:nyx_abyss"
+    }
+  }
+}

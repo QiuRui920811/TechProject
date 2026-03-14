@@ -1,0 +1,11 @@
+{
+  "type": "techproject:tempest_overcast",
+  "generator": {
+    "type": "minecraft:noise",
+    "settings": "techproject:tempest_surface_noise",
+    "biome_source": {
+      "type": "minecraft:fixed",
+      "biome": "techproject:tempest_supercell"
+    }
+  }
+}

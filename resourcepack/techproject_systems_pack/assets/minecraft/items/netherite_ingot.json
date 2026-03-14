@@ -1,0 +1,26 @@
+{
+  "model": {
+    "type": "minecraft:range_dispatch",
+    "property": "minecraft:custom_model_data",
+    "entries": [
+      {
+        "threshold": 2957525,
+        "model": {
+          "type": "minecraft:model",
+          "model": "techproject:item/neutronium_ingot"
+        }
+      },
+      {
+        "threshold": 4259311,
+        "model": {
+          "type": "minecraft:model",
+          "model": "techproject:item/starsteel_ingot"
+        }
+      }
+    ],
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "minecraft:item/netherite_ingot"
+    }
+  }
+}

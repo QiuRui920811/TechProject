@@ -1,0 +1,603 @@
+# 可選外觀欄位（直接照下面格式填）：
+# item-model: namespace:path
+# nexo-id: your_nexo_item_id
+#
+# 物品範例：
+#   some_item:
+#     display-name: 某個物品
+#     category: ADVANCED
+#     icon: IRON_INGOT
+#     item-model: techproject:item/some_item
+#     nexo-id: some_item
+#
+# 機器範例：
+#   some_machine:
+#     display-name: 某台機器
+#     category: ADVANCED
+#     block: IRON_BLOCK
+#     item-model: techproject:item/some_machine
+#     nexo-id: some_machine
+#
+# items 與 machines 都可用，設定後會優先使用該外觀。
+items:
+  neutronium_ingot:
+    display-name: 中子合金錠
+    category: ADVANCED
+    tier: TIER4
+    icon: NETHERITE_INGOT
+    # item-model: techproject:item/neutronium_ingot
+    # nexo-id: neutronium_ingot
+    description: 超高密度中子合金，是終局製造的骨架材料。
+    unlock: fusion_reactor
+    use-cases:
+      - 終局結構骨架
+      - 重力子系列機器
+      - 奇點系列配方
+  neutronium_plate:
+    display-name: 中子合金板
+    category: ADVANCED
+    tier: TIER4
+    icon: HEAVY_WEIGHTED_PRESSURE_PLATE
+    description: 壓製後的中子金屬板，用於高壓設備。
+    unlock: singularity_press
+    use-cases:
+      - 巨型壓製設備
+      - 終局外殼
+  dark_matter_dust:
+    display-name: 暗物質粉
+    category: ADVANCED
+    tier: TIER4
+    icon: BLACK_DYE
+    description: 暗物質粉末，可用於奇點與反物質前置。
+    unlock: void_extractor
+    use-cases:
+      - 反物質前置
+      - 奇點前置
+  dark_matter_sheet:
+    display-name: 暗物質薄片
+    category: ADVANCED
+    tier: TIER4
+    icon: BLACK_STAINED_GLASS_PANE
+    description: 暗物質薄片，極度穩定又難以製造。
+    unlock: dark_matter_loom
+    use-cases:
+      - 終局裝甲
+      - 星際設備
+  graviton_lens:
+    display-name: 重力子透鏡
+    category: ADVANCED
+    tier: TIER4
+    icon: END_CRYSTAL
+    description: 可扭曲重力場的聚焦鏡片。
+    unlock: graviton_stabilizer
+    use-cases:
+      - 重力穩定器
+      - 軌道級設備
+  graviton_core:
+    display-name: 重力子核心
+    category: ADVANCED
+    tier: TIER4
+    icon: BEACON
+    description: 穩定重力場的終局核心。
+    unlock: graviton_stabilizer
+    use-cases:
+      - 終局能源核心
+      - 軌道工廠機台
+  singularity_mesh:
+    display-name: 奇點網格
+    category: ADVANCED
+    tier: TIER4
+    icon: COBWEB
+    description: 可承受奇點壓力的編織結構。
+    unlock: singularity_press
+    use-cases:
+      - 奇點核心
+      - 反物質容器
+  singularity_core:
+    display-name: 奇點核心
+    category: ADVANCED
+    tier: TIER4
+    icon: NETHER_STAR
+    description: 微型奇點核心，超終局機器關鍵前置。
+    unlock: singularity_press
+    use-cases:
+      - 時序引擎
+      - 星核熔鍛爐
+  antimatter_cluster:
+    display-name: 反物質團簇
+    category: ADVANCED
+    tier: TIER4
+    icon: FIRE_CHARGE
+    description: 高風險反物質團塊，需穩定場域保護。
+    unlock: antimatter_synthesizer
+    use-cases:
+      - 終局燃料
+      - 星核熔鍛爐
+  antimatter_cell:
+    display-name: 反物質電池
+    category: ADVANCED
+    tier: TIER4
+    icon: BLAZE_POWDER
+    description: 封裝後的反物質電池。
+    unlock: antimatter_synthesizer
+    use-cases:
+      - 時序引擎
+      - 虛空信標
+  stellar_alloy:
+    display-name: 星核合金
+    category: ADVANCED
+    tier: TIER4
+    icon: GOLD_INGOT
+    description: 星光與中子金屬融合後得到的超高階合金。
+    unlock: stellar_forge
+    use-cases:
+      - 星際外殼
+      - 終局骨架
+  stellar_glass:
+    display-name: 星輝玻璃
+    category: ADVANCED
+    tier: TIER4
+    icon: SEA_LANTERN
+    description: 可承受宇宙級熱量的透明材料。
+    unlock: stellar_forge
+    use-cases:
+      - 軌道視窗
+      - 終局透鏡
+  orbit_frame:
+    display-name: 軌道框架
+    category: ADVANCED
+    tier: TIER4
+    icon: END_STONE_BRICKS
+    description: 軌道工廠結構框架。
+    unlock: orbital_printer
+    use-cases:
+      - 軌道設備
+      - 終局工廠主體
+  orbit_processor:
+    display-name: 軌道處理器
+    category: ADVANCED
+    tier: TIER4
+    icon: COMPARATOR
+    description: 可在高真空環境下運作的終局處理器。
+    unlock: orbital_printer
+    use-cases:
+      - 時序線
+      - 虛空線
+  quantum_fabric:
+    display-name: 量子織布
+    category: ADVANCED
+    tier: TIER4
+    icon: WHITE_WOOL
+    description: 量子編織布料，可承載極端資訊密度。
+    unlock: dark_matter_loom
+    use-cases:
+      - 時序齒輪
+      - 高階外殼
+  chrono_thread:
+    display-name: 時序線束
+    category: ADVANCED
+    tier: TIER4
+    icon: STRING
+    description: 時序線束，可干涉局部時間流。
+    unlock: chrono_engine
+    use-cases:
+      - 時序核心
+      - 終局導線
+  chrono_core:
+    display-name: 時序核心
+    category: ADVANCED
+    tier: TIER4
+    icon: CLOCK
+    description: 時序引擎核心，掌控高速製程穩定性。
+    unlock: chrono_engine
+    use-cases:
+      - 時間艙
+      - 終局演算
+  void_shard:
+    display-name: 虛空碎片
+    category: ADVANCED
+    tier: TIER4
+    icon: ECHO_SHARD
+    description: 從虛空抽出的不穩定碎片。
+    unlock: void_extractor
+    use-cases:
+      - 虛空信標
+      - 暗物質線
+  void_crystal:
+    display-name: 虛空晶體
+    category: ADVANCED
+    tier: TIER4
+    icon: AMETHYST_SHARD
+    description: 經穩定化的虛空晶體。
+    unlock: void_beacon
+    use-cases:
+      - 終局聚焦件
+      - 時序線
+  void_beacon_core:
+    display-name: 虛空信標核心
+    category: ADVANCED
+    tier: TIER4
+    icon: BEACON
+    description: 虛空信標核心，長距離網路強化設備。
+    unlock: void_beacon
+    use-cases:
+      - 範圍延伸
+      - 終局網路骨幹
+  nanite_slurry:
+    display-name: 奈米漿液
+    category: ADVANCED
+    tier: TIER4
+    icon: SLIME_BALL
+    description: 奈米機械群的液態前驅物。
+    unlock: nanite_foundry
+    use-cases:
+      - 奈米簇團
+      - 自修復材料
+  nanite_cluster:
+    display-name: 奈米簇團
+    category: ADVANCED
+    tier: TIER4
+    icon: PRISMARINE_SHARD
+    description: 成形後的奈米機械叢集。
+    unlock: nanite_foundry
+    use-cases:
+      - 自修復機台
+      - 終局自動化
+  entropy_plate:
+    display-name: 熵穩板
+    category: ADVANCED
+    tier: TIER4
+    icon: LIGHT_WEIGHTED_PRESSURE_PLATE
+    description: 熵穩定結構板，用於防止極端製程崩潰。
+    unlock: entropy_chamber
+    use-cases:
+      - 終局安全殼
+      - 時序 / 反物質線
+  entropy_core:
+    display-name: 熵穩核心
+    category: ADVANCED
+    tier: TIER4
+    icon: TOTEM_OF_UNDYING
+    description: 熵平衡核心，終局機台穩定器。
+    unlock: entropy_chamber
+    use-cases:
+      - 星核熔鍛爐
+      - 時間艙
+  cosmic_matrix:
+    display-name: 宇宙矩陣
+    category: ADVANCED
+    tier: TIER4
+    icon: NETHER_STAR
+    description: 宇宙級結構矩陣，最終級配方核心。
+    unlock: celestial_assembler
+    use-cases:
+      - 終極核心
+      - 終局裝配
+  cosmic_panel:
+    display-name: 宇宙面板
+    category: ADVANCED
+    tier: TIER4
+    icon: PURPUR_BLOCK
+    description: 宇宙級複合面板。
+    unlock: celestial_assembler
+    use-cases:
+      - 星際設備外殼
+      - 終局骨架
+  omega_core:
+    display-name: 終極核心
+    category: ADVANCED
+    tier: TIER4
+    icon: DRAGON_EGG
+    description: 最高等級核心，代表整條科技線的終點。
+    unlock: omega_fabricator
+    use-cases:
+      - 最終成就展示
+      - 終局核心
+machines:
+  void_extractor:
+    display-name: 虛空抽取器
+    category: ADVANCED
+    tier: TIER4
+    block: CRYING_OBSIDIAN
+    # item-model: techproject:item/void_extractor
+    # nexo-id: void_extractor
+    inputs: [quantum_fluid, grown_crystal]
+    outputs: [void_shard, dark_matter_dust]
+    energy-per-tick: 30
+    effect: 虛空脈動抽取
+    unlock: matter_compiler
+  dark_matter_loom:
+    display-name: 暗物質織機
+    category: ADVANCED
+    tier: TIER4
+    block: LOOM
+    inputs: [dark_matter_dust, quantum_fabric]
+    outputs: [dark_matter_sheet]
+    energy-per-tick: 26
+    effect: 暗紋編織
+    unlock: void_extractor
+  graviton_stabilizer:
+    display-name: 重力穩定器
+    category: ADVANCED
+    tier: TIER4
+    block: BEACON
+    inputs: [magnetic_ring, grown_crystal]
+    outputs: [graviton_lens, graviton_core]
+    energy-per-tick: 24
+    effect: 重力場收束
+    unlock: field_forge
+  singularity_press:
+    display-name: 奇點壓縮台
+    category: ADVANCED
+    tier: TIER4
+    block: ANVIL
+    inputs: [dark_matter_sheet, neutronium_ingot]
+    outputs: [singularity_mesh, singularity_core]
+    energy-per-tick: 32
+    effect: 奇點級壓縮
+    unlock: graviton_stabilizer
+  antimatter_synthesizer:
+    display-name: 反物質合成器
+    category: ADVANCED
+    tier: TIER4
+    block: RESPAWN_ANCHOR
+    inputs: [dark_matter_dust, singularity_mesh]
+    outputs: [antimatter_cluster, antimatter_cell]
+    energy-per-tick: 34
+    effect: 反相粒子聚合
+    unlock: singularity_press
+  stellar_forge:
+    display-name: 星核熔鍛爐
+    category: ADVANCED
+    tier: TIER4
+    block: BLAST_FURNACE
+    inputs: [antimatter_cluster, neutronium_plate]
+    outputs: [stellar_alloy, stellar_glass]
+    energy-per-tick: 36
+    effect: 星核熔流
+    unlock: antimatter_synthesizer
+  orbital_printer:
+    display-name: 軌道列印機
+    category: ADVANCED
+    tier: TIER4
+    block: SMITHING_TABLE
+    inputs: [stellar_alloy, graviton_lens]
+    outputs: [orbit_frame, orbit_processor]
+    energy-per-tick: 28
+    effect: 真空列印
+    unlock: stellar_forge
+  chrono_engine:
+    display-name: 時序引擎
+    category: ADVANCED
+    tier: TIER4
+    block: CLOCK
+    inputs: [orbit_processor, void_crystal]
+    outputs: [chrono_thread, chrono_core]
+    energy-per-tick: 38
+    effect: 時流脈動
+    unlock: orbital_printer
+  void_beacon:
+    display-name: 虛空信標
+    category: ADVANCED
+    tier: TIER4
+    block: BEACON
+    inputs: [void_shard, graviton_core]
+    outputs: [void_crystal, void_beacon_core]
+    energy-per-tick: 22
+    effect: 虛空穩定場
+    unlock: void_extractor
+  nanite_foundry:
+    display-name: 奈米鑄造廠
+    category: ADVANCED
+    tier: TIER4
+    block: CAULDRON
+    inputs: [synthetic_fiber, quantum_fluid]
+    outputs: [nanite_slurry, nanite_cluster]
+    energy-per-tick: 24
+    effect: 奈米聚合霧化
+    unlock: chemical_reactor
+  entropy_chamber:
+    display-name: 熵穩定艙
+    category: ADVANCED
+    tier: TIER4
+    block: SCULK_SHRIEKER
+    inputs: [chrono_core, antimatter_cell]
+    outputs: [entropy_plate, entropy_core]
+    energy-per-tick: 40
+    effect: 熵場鎖定
+    unlock: chrono_engine
+  celestial_assembler:
+    display-name: 天穹裝配機
+    category: ADVANCED
+    tier: TIER4
+    block: ENCHANTING_TABLE
+    inputs: [stellar_glass, orbit_frame]
+    outputs: [cosmic_matrix, cosmic_panel]
+    energy-per-tick: 34
+    effect: 天穹構裝
+    unlock: orbital_printer
+  omega_fabricator:
+    display-name: 終極製核儀
+    category: ADVANCED
+    tier: TIER4
+    block: DRAGON_HEAD
+    inputs: [cosmic_matrix, entropy_core]
+    outputs: [omega_core]
+    energy-per-tick: 48
+    effect: 終局核心鍛成
+    unlock: celestial_assembler
+recipes:
+  stellar_neutronium_ingot:
+    machine: stellar_forge
+    inputs: [fusion_core, titanium_alloy]
+    output: neutronium_ingot
+    energy: 34
+    guide: 聚變核心 + 鈦合金 → 恆星鍛爐 → 中子錠
+  singularity_neutronium_plate:
+    machine: singularity_press
+    inputs: [neutronium_ingot, neutronium_ingot]
+    output: neutronium_plate
+    energy: 32
+    guide: 兩個中子錠 → 奇點壓機 → 中子板
+  void_dark_matter_dust:
+    machine: void_extractor
+    inputs: [quantum_fluid, grown_crystal]
+    output: dark_matter_dust
+    energy: 30
+    guide: 量子流體 + 培育晶體 → 虛空萃取器 → 暗物質粉
+  void_shard_recipe:
+    machine: void_extractor
+    inputs: [quantum_fluid, ion_dust]
+    output: void_shard
+    energy: 28
+    guide: 量子流體 + 離子粉 → 虛空萃取器 → 虛空碎片
+  loom_quantum_fabric:
+    machine: dark_matter_loom
+    inputs: [synthetic_fiber, nano_coating]
+    output: quantum_fabric
+    energy: 24
+    guide: 合成纖維 + 奈米塗層 → 暗物質織機 → 量子布料
+  loom_dark_matter_sheet:
+    machine: dark_matter_loom
+    inputs: [dark_matter_dust, quantum_fabric]
+    output: dark_matter_sheet
+    energy: 26
+    guide: 暗物質粉 + 量子布料 → 暗物質織機 → 暗物質片材
+  graviton_lens_recipe:
+    machine: graviton_stabilizer
+    inputs: [magnetic_ring, grown_crystal]
+    output: graviton_lens
+    energy: 24
+    guide: 磁環 + 培育晶體 → 重力子穩定器 → 重力子透鏡
+  graviton_core_recipe:
+    machine: graviton_stabilizer
+    inputs: [flux_link, field_plate]
+    output: graviton_core
+    energy: 26
+    guide: 通量連結 + 力場板 → 重力子穩定器 → 重力子核心
+  singularity_mesh_recipe:
+    machine: singularity_press
+    inputs: [dark_matter_sheet, neutronium_ingot]
+    output: singularity_mesh
+    energy: 32
+    guide: 暗物質片材 + 中子錠 → 奇點壓機 → 奇點網格
+  singularity_core_recipe:
+    machine: singularity_press
+    inputs: [singularity_mesh, graviton_core]
+    output: singularity_core
+    energy: 34
+    guide: 奇點網格 + 重力子核心 → 奇點壓機 → 奇點核心
+  antimatter_cluster_recipe:
+    machine: antimatter_synthesizer
+    inputs: [dark_matter_dust, singularity_mesh]
+    output: antimatter_cluster
+    energy: 34
+    guide: 暗物質粉 + 奇點網格 → 反物質合成器 → 反物質簇
+  antimatter_cell_recipe:
+    machine: antimatter_synthesizer
+    inputs: [antimatter_cluster, capacitor_bank]
+    output: antimatter_cell
+    energy: 36
+    guide: 反物質簇 + 電容組 → 反物質合成器 → 反物質電池
+  stellar_alloy_recipe:
+    machine: stellar_forge
+    inputs: [antimatter_cluster, neutronium_plate]
+    output: stellar_alloy
+    energy: 36
+    guide: 反物質簇 + 中子板 → 恆星鍛爐 → 恆星合金
+  stellar_glass_recipe:
+    machine: stellar_forge
+    inputs: [reinforced_glass, starlight_plate]
+    output: stellar_glass
+    energy: 28
+    guide: 強化玻璃 + 星光板 → 恆星鍛爐 → 恆星玻璃
+  orbit_frame_recipe:
+    machine: orbital_printer
+    inputs: [stellar_alloy, graviton_lens]
+    output: orbit_frame
+    energy: 28
+    guide: 恆星合金 + 重力子透鏡 → 軌道列印機 → 軌道框架
+  orbit_processor_recipe:
+    machine: orbital_printer
+    inputs: [advanced_circuit, graviton_core]
+    output: orbit_processor
+    energy: 30
+    guide: 進階電路 + 重力子核心 → 軌道列印機 → 軌道處理器
+  void_crystal_recipe:
+    machine: void_beacon
+    inputs: [void_shard, graviton_lens]
+    output: void_crystal
+    energy: 22
+    guide: 虛空碎片 + 重力子透鏡 → 虛空信標 → 虛空晶體
+  void_beacon_core_recipe:
+    machine: void_beacon
+    inputs: [void_crystal, energy_node]
+    output: void_beacon_core
+    energy: 24
+    guide: 虛空晶體 + 能源節點 → 虛空信標 → 虛空信標核心
+  nanite_slurry_recipe:
+    machine: nanite_foundry
+    inputs: [synthetic_fiber, polymer_resin]
+    output: nanite_slurry
+    energy: 22
+    guide: 合成纖維 + 聚合樹脂 → 奈米體鑄造廠 → 奈米漿液
+  nanite_cluster_recipe:
+    machine: nanite_foundry
+    inputs: [nanite_slurry, quantum_fluid]
+    output: nanite_cluster
+    energy: 24
+    guide: 奈米漿液 + 量子流體 → 奈米體鑄造廠 → 奈米簇
+  chrono_thread_recipe:
+    machine: chrono_engine
+    inputs: [orbit_processor, void_crystal]
+    output: chrono_thread
+    energy: 38
+    guide: 軌道處理器 + 虛空晶體 → 時序引擎 → 時序線
+  chrono_core_recipe:
+    machine: chrono_engine
+    inputs: [chrono_thread, graviton_core]
+    output: chrono_core
+    energy: 40
+    guide: 時序線 + 重力子核心 → 時序引擎 → 時序核心
+  entropy_plate_recipe:
+    machine: entropy_chamber
+    inputs: [chrono_core, antimatter_cell]
+    output: entropy_plate
+    energy: 40
+    guide: 時序核心 + 反物質電池 → 熵室 → 熵板
+  entropy_core_recipe:
+    machine: entropy_chamber
+    inputs: [entropy_plate, singularity_core]
+    output: entropy_core
+    energy: 42
+    guide: 熵板 + 奇點核心 → 熵室 → 熵核心
+  cosmic_matrix_recipe:
+    machine: celestial_assembler
+    inputs: [stellar_glass, orbit_frame]
+    output: cosmic_matrix
+    energy: 34
+    guide: 恆星玻璃 + 軌道框架 → 天穹裝配機 → 宇宙矩陣
+  cosmic_panel_recipe:
+    machine: celestial_assembler
+    inputs: [cosmic_matrix, neutronium_plate]
+    output: cosmic_panel
+    energy: 34
+    guide: 宇宙矩陣 + 中子板 → 天穹裝配機 → 宇宙面板
+  omega_core_recipe:
+    machine: omega_fabricator
+    inputs: [cosmic_matrix, entropy_core]
+    output: omega_core
+    energy: 48
+    guide: 宇宙矩陣 + 熵核心 → 歐米伽製造台 → 歐米伽核心
+  relay_node_chain:
+    machine: celestial_assembler
+    inputs: [void_beacon_core, logistics_node]
+    output: energy_node
+    energy: 18
+    guide: 虛空信標核心 + 物流節點 → 天穹裝配機 → 強化能源節點骨幹
+  long_range_tube_recipe:
+    machine: orbital_printer
+    inputs: [item_tube, void_crystal]
+    output: item_tube
+    energy: 16
+    guide: 物流導管 + 虛空晶體 → 軌道列印機 → 更穩定的遠距物流導管

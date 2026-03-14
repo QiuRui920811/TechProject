@@ -1,0 +1,26 @@
+{
+  "model": {
+    "type": "minecraft:range_dispatch",
+    "property": "minecraft:custom_model_data",
+    "entries": [
+      {
+        "threshold": 1356283,
+        "model": {
+          "type": "minecraft:model",
+          "model": "techproject:item/glass_panel"
+        }
+      },
+      {
+        "threshold": 7231973,
+        "model": {
+          "type": "minecraft:model",
+          "model": "techproject:item/item_tube"
+        }
+      }
+    ],
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "minecraft:item/glass_pane"
+    }
+  }
+}

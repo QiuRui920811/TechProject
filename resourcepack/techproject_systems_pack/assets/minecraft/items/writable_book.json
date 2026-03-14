@@ -1,0 +1,33 @@
+{
+  "model": {
+    "type": "minecraft:range_dispatch",
+    "property": "minecraft:custom_model_data",
+    "entries": [
+      {
+        "threshold": 830203,
+        "model": {
+          "type": "minecraft:model",
+          "model": "techproject:item/hud_writable_book"
+        }
+      },
+      {
+        "threshold": 2758164,
+        "model": {
+          "type": "minecraft:model",
+          "model": "techproject:item/archive_core"
+        }
+      },
+      {
+        "threshold": 3395053,
+        "model": {
+          "type": "minecraft:model",
+          "model": "techproject:item/data_core"
+        }
+      }
+    ],
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "minecraft:item/writable_book"
+    }
+  }
+}

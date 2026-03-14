@@ -1,0 +1,26 @@
+{
+  "model": {
+    "type": "minecraft:range_dispatch",
+    "property": "minecraft:custom_model_data",
+    "entries": [
+      {
+        "threshold": 3143364,
+        "model": {
+          "type": "minecraft:model",
+          "model": "techproject:item/entropy_core"
+        }
+      },
+      {
+        "threshold": 4794231,
+        "model": {
+          "type": "minecraft:model",
+          "model": "techproject:item/stability_core"
+        }
+      }
+    ],
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "minecraft:item/totem_of_undying"
+    }
+  }
+}

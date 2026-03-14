@@ -1,0 +1,185 @@
+# ═══════════════════════════════════════════════════════════
+#  科技稱號系統 — 成就解鎖後可套用的稱號
+# ═══════════════════════════════════════════════════════════
+#
+#  格式：
+#    成就ID:
+#      title: "顯示的稱號文字（支援 & 色碼與 MiniMessage）"
+#
+#  佔位符：
+#    %techproject_title%        — 玩家目前套用的稱號（無稱號時回傳空字串）
+#    %techproject_title_raw%    — 不含色碼的純文字稱號
+#    %techproject_title_id%     — 目前套用的成就 ID（無稱號時回傳 none）
+#    %techproject_title_count%  — 玩家已解鎖的稱號數量
+#    %techproject_title_total%  — 稱號總數
+#    %techproject_level%        — 研究等級
+#    %techproject_xp%           — 累計研究 XP
+#
+#  使用方式：
+#    1. 在成就 GUI 中點擊已解鎖的成就即可套用稱號
+#    2. 再次點擊已套用的稱號可取消
+#    3. /tech title — 查看目前稱號
+#    4. /tech title clear — 取消稱號
+#
+#  TAB 插件整合範例：
+#    在 TAB/config.yml 的 tablist-name-formatting 或 scoreboard-teams 中使用：
+#      prefix: "%techproject_title% "
+#
+# ═══════════════════════════════════════════════════════════
+
+titles:
+  # ── 入門 ──
+  first_machine:
+    title: "&7[&f機械新手&7]"
+  newcomer_craft:
+    title: "&7[&f合成學徒&7]"
+  starter_power:
+    title: "&7[&f電力初心&7]"
+  first_research:
+    title: "&7[&f研究見習&7]"
+
+  # ── 加工 ──
+  first_crush:
+    title: "&7[&f碎礦工&7]"
+  first_compress:
+    title: "&7[&f壓縮工&7]"
+  first_smelt:
+    title: "&7[&f冶煉工&7]"
+  assembly_starter:
+    title: "&7[&f組裝技師&7]"
+  process_milestone_100:
+    title: "&6[&e百鍊匠&6]"
+  process_milestone_500:
+    title: "&6[&e流水線之星&6]"
+  process_milestone_2000:
+    title: "&c[&6加工之王&c]"
+  recycler_expert:
+    title: "&a[&2回收大師&a]"
+
+  # ── 能源 ──
+  energy_beginner:
+    title: "&e[&f能源學徒&e]"
+  energy_500:
+    title: "&e[&6小型電廠&e]"
+  energy_2000:
+    title: "&6[&e中型電廠&6]"
+  energy_10000:
+    title: "&c[&6大型電廠&c]"
+  solar_pioneer:
+    title: "&e[&f☀ 太陽先驅&e]"
+  generator_collector:
+    title: "&6[&e發電收藏家&6]"
+  power_grid_master:
+    title: "&4[&c⚡ 電網主宰&4]"
+
+  # ── 農業 / 烹飪 ──
+  first_harvest:
+    title: "&a[&f農夫&a]"
+  crop_100:
+    title: "&a[&2百畝農場&a]"
+  crop_king:
+    title: "&2[&a農作之王&2]"
+  cook_first_meal:
+    title: "&e[&f見習廚師&e]"
+  cook_10_meals:
+    title: "&6[&e業餘廚師&6]"
+  cook_50_meals:
+    title: "&c[&6料理達人&c]"
+  bio_researcher:
+    title: "&a[&2生質研究員&a]"
+  orchard_keeper:
+    title: "&a[&f果園園丁&a]"
+
+  # ── 物流 ──
+  first_transfer:
+    title: "&b[&f搬運工&b]"
+  transfer_500:
+    title: "&b[&3物流新星&b]"
+  network_architect:
+    title: "&3[&b物流架構師&3]"
+  upgrade_engineer:
+    title: "&b[&3升級工程師&b]"
+  storage_master:
+    title: "&3[&b倉儲大師&3]"
+
+  # ── 探索 ──
+  first_planet_visit:
+    title: "&9[&b✦ 星際旅人&9]"
+  planet_explorer_3:
+    title: "&9[&b✦ 三星探索者&9]"
+  planet_explorer_all:
+    title: "&5[&d✦ 全星系漫遊&5]"
+  gate_builder:
+    title: "&9[&b星門建造者&9]"
+  discover_ruins:
+    title: "&5[&d遺跡發現者&5]"
+  planet_sample_collector:
+    title: "&9[&b星球採樣員&9]"
+
+  # ── 收集 ──
+  tech_collector:
+    title: "&e[&f收藏家&e]"
+  collect_10:
+    title: "&7[&f初窺門徑&7]"
+  collect_25:
+    title: "&e[&f鑑賞家&e]"
+  item_conqueror:
+    title: "&6[&e征服者&6]"
+  collect_100:
+    title: "&c[&6收集狂人&c]"
+  collect_200:
+    title: "&4[&c科技博物館&4]"
+  machine_collector_10:
+    title: "&b[&3機器建造師&b]"
+  machine_collector_20:
+    title: "&6[&e工業大亨&6]"
+  all_machines_collector:
+    title: "&4[&c&l機器全通&4]"
+
+  # ── 終局 ──
+  quantum_engineer:
+    title: "&d[&5量子工程師&d]"
+  fusion_overlord:
+    title: "&c[&4聚變霸主&c]"
+  void_pioneer:
+    title: "&5[&d虛空先鋒&5]"
+  singularity_breaker:
+    title: "&5[&d✧ 奇點破界者&5]"
+  stellar_founder:
+    title: "&6[&e✧ 星核開鑄者&6]"
+  omega_theory:
+    title: "&d[&5✧ 終極理論家&d]"
+  apex_of_tech:
+    title: "&4[&c&l★ 科技巔峰&4]"
+  plasma_forge_master:
+    title: "&c[&6等離子鍛造師&c]"
+  cosmic_assembler:
+    title: "&d[&5宇宙裝配員&d]"
+  mega_builder:
+    title: "&6[&e巨構工程師&6]"
+
+  # ── 通用 ──
+  automation_master:
+    title: "&b[&3自動化大師&b]"
+  full_factory:
+    title: "&6[&e滿載工廠&6]"
+  mega_factory:
+    title: "&4[&c&l超級工廠&4]"
+  completionist:
+    title: "&4[&6&l✦ 全成就 ✦&4]"
+
+  # ── 系統 ──
+  field_operator:
+    title: "&a[&2野外作業員&a]"
+  ecosystem_engineer:
+    title: "&2[&a生態工程師&2]"
+  logistics_director:
+    title: "&3[&b物流總監&3]"
+  cargo_architect:
+    title: "&3[&b&l貨運架構師&3]"
+
+  # ── 擴展 ──
+  cryo_specialist:
+    title: "&b[&3低溫專家&b]"
+  refinery_master:
+    title: "&6[&e精煉大師&6]"

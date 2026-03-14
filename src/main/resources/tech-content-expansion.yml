@@ -1,0 +1,3587 @@
+# 可選外觀欄位：
+# item-model: namespace:path
+# nexo-id: your_nexo_item_id
+# head-texture: minecraft_texture_hash_or_full_url
+# items 與 machines 都可用，設定後會優先使用該外觀。
+items:
+  ceramic_plate:
+    display-name: 陶瓷板
+    category: INTERMEDIATE
+    icon: BRICK
+    description: 耐熱陶瓷板，可作為冷熱製程保護層。
+    unlock: kiln
+    use-cases:
+      - 高溫保護層
+      - 低溫 / 電漿前置
+  thermal_ceramic:
+    display-name: 熱穩陶瓷
+    category: ADVANCED
+    tier: TIER2
+    icon: TERRACOTTA
+    description: 經過熱處理的陶瓷材料，可承受極端溫差。
+    unlock: kiln
+    use-cases:
+      - 等離子精煉爐內襯
+      - 終局熱區設備
+  insulated_wire:
+    display-name: 絕緣線材
+    category: INTERMEDIATE
+    icon: TRIPWIRE_HOOK
+    description: 包覆絕緣層的線材，適合穩定訊號與能源控制。
+    unlock: insulation_press
+    use-cases:
+      - 感測模組
+      - 自動化控制線
+  sensor_array:
+    display-name: 感測陣列
+    category: INTERMEDIATE
+    icon: OBSERVER
+    description: 多點感測陣列，可做為精密工業邏輯元件。
+    unlock: insulation_press
+    use-cases:
+      - 軌道觀測台
+      - 高級控制部件
+  servo_bundle:
+    display-name: 伺服模組束
+    category: INTERMEDIATE
+    icon: PISTON
+    description: 一組整合好的伺服執行模組。
+    unlock: insulation_press
+    use-cases:
+      - 自動化機械結構
+      - 中後期控制線
+  coolant_canister:
+    display-name: 冷卻罐
+    category: INTERMEDIATE
+    icon: WATER_BUCKET
+    description: 可重複導入冷卻流程的壓力冷卻罐。
+    unlock: cryo_distiller
+    use-cases:
+      - 低溫核心
+      - 低溫製程
+  cryo_gel:
+    display-name: 低溫凝膠
+    category: INTERMEDIATE
+    icon: PACKED_ICE
+    description: 低溫凝膠材料，用於冷卻與穩定相變化。
+    unlock: cryo_distiller
+    use-cases:
+      - 低溫處理
+      - 低溫設備
+  cryo_core:
+    display-name: 低溫核心
+    category: ADVANCED
+    icon: BLUE_ICE
+    description: 冷凍鏈核心，可保護高壓與高能製程。
+    unlock: cryo_distiller
+    use-cases:
+      - 穩定終局熱流程
+      - 低溫保護核心
+  bio_catalyst:
+    display-name: 生質觸媒
+    category: INTERMEDIATE
+    icon: FERMENTED_SPIDER_EYE
+    description: 生質觸媒，用於基因與合成食品工業。
+    unlock: gene_splicer
+    use-cases:
+      - 基因樣板
+      - 生質合成前置
+  gene_template:
+    display-name: 基因樣板
+    category: ADVANCED
+    icon: MAP
+    description: 已編碼的基因樣板，可導向更高階生物工藝。
+    unlock: gene_splicer
+    use-cases:
+      - 合成肉塊
+      - 生物科技支線
+  neural_resin:
+    display-name: 神經樹脂
+    category: ADVANCED
+    icon: HONEYCOMB
+    description: 神經樣本聚合樹脂，可用於高階感測與資料結構。
+    unlock: gene_splicer
+    use-cases:
+      - 資料核心前置
+      - 進階生質材料
+  splicer_blade:
+    display-name: 切片刀組
+    category: INTERMEDIATE
+    icon: IRON_SWORD
+    description: 基因切片刀組，用於精密生質處理設備。
+    unlock: gene_splicer
+    use-cases:
+      - 基因切片台升階材料
+      - 精密切割
+  synth_meat:
+    display-name: 合成肉塊
+    category: INTERMEDIATE
+    icon: COOKED_BEEF
+    description: 合成營養肉塊，適合大量後勤供應與生質鏈再利用。
+    unlock: biosynth_vat
+    use-cases:
+      - 伺服器工業糧食
+      - 生質循環鏈
+  soybean_seeds:
+    display-name: 大豆種子
+    category: INTERMEDIATE
+    icon: WHEAT_SEEDS
+    description: 可種植的大豆種子，適合手種與機械收割線。
+    unlock: initial
+    use-cases:
+      - 種植大豆田
+      - 食物與生質支線
+  soybean_pods:
+    display-name: 大豆莢
+    category: INTERMEDIATE
+    icon: COCOA_BEANS
+    description: 高蛋白作物，可供口糧、生質與合成肉工業使用。
+    unlock: soybean_seeds
+    use-cases:
+      - 科技口糧
+      - 合成肉後勤包
+  spiceberry_seeds:
+    display-name: 香辛莓種子
+    category: INTERMEDIATE
+    icon: BEETROOT_SEEDS
+    description: 培育後能做出高效率補給食材與生質香料。
+    unlock: initial
+    use-cases:
+      - 種植香辛莓
+      - 農業支線調味作物
+  spiceberry:
+    display-name: 香辛莓
+    category: INTERMEDIATE
+    icon: SWEET_BERRIES
+    description: 帶有微量刺激性的莓果，可加工成高機動性補給。
+    unlock: spiceberry_seeds
+    use-cases:
+      - 科技營養棒
+      - 生質刺激配方
+  tea_leaf_seeds:
+    display-name: 茶葉苗種
+    category: INTERMEDIATE
+    icon: MELON_SEEDS
+    description: 用於培育科技茶葉的苗種，適合接溫室與收割線。
+    unlock: initial
+    use-cases:
+      - 種植茶葉田
+      - 冷卻與探索補給
+  tea_leaf:
+    display-name: 科技茶葉
+    category: INTERMEDIATE
+    icon: DRIED_KELP
+    description: 可做成提神茶飲，也能加入冷卻與戶外補給鏈。
+    unlock: tea_leaf_seeds
+    use-cases:
+      - 提神茶飲
+      - 冷卻補給前置
+  tomato_seeds:
+    display-name: 番茄種子
+    category: INTERMEDIATE
+    icon: BEETROOT_SEEDS
+    description: 打草就可能找到的常見菜園種子，能長出多汁番茄。
+    unlock: initial
+    use-cases:
+      - 種植番茄田
+      - 沙拉與燉菜素材
+  tomato:
+    display-name: 熟番茄
+    category: INTERMEDIATE
+    icon: BEETROOT
+    head-texture: 99172226d276070dc21b75ba25cc2aa5649da5cac745ba977695b59aebd
+    description: 多汁的園圃作物，可直接食用，也適合做成沙拉與燉菜。
+    unlock: tomato_seeds
+    use-cases:
+      - 直接食用
+      - 菜園料理
+  cabbage_seeds:
+    display-name: 高麗菜種子
+    category: INTERMEDIATE
+    icon: WHEAT_SEEDS
+    description: 容易在野外草叢間混到的葉菜種子，能穩定量產葉菜。
+    unlock: initial
+    use-cases:
+      - 種植葉菜田
+      - 沙拉與捲菜料理
+  cabbage:
+    display-name: 高麗菜球
+    category: INTERMEDIATE
+    icon: DRIED_KELP
+    head-texture: fcd6d67320c9131be85a164cd7c5fcf288f28c2816547db30a3187416bdc45b
+    description: 基地菜園的常見主食材，可直接吃，也能做成熱食。
+    unlock: cabbage_seeds
+    use-cases:
+      - 直接食用
+      - 菜園料理
+  corn_seeds:
+    display-name: 玉米粒種
+    category: INTERMEDIATE
+    icon: PUMPKIN_SEEDS
+    description: 適合大面積種植的穀物種子，成熟後可做成麵包與派皮。
+    unlock: initial
+    use-cases:
+      - 種植玉米田
+      - 穀物料理
+  corn:
+    display-name: 甜玉米
+    category: INTERMEDIATE
+    icon: GOLD_NUGGET
+    head-texture: 9bd3802e5fac03afab742b0f3cca41bcd4723bee911d23be29cffd5b965f1
+    description: 甜脆耐放的田間穀物，可直接食用或加工成簡單主食。
+    unlock: corn_seeds
+    use-cases:
+      - 直接食用
+      - 麵包與派食材
+  onion_bulbs:
+    display-name: 洋蔥球根
+    category: INTERMEDIATE
+    icon: MELON_SEEDS
+    description: 地下鱗莖作物的育苗球根，適合拿來補齊簡易家常料理線。
+    unlock: initial
+    use-cases:
+      - 種植洋蔥田
+      - 燉菜與炒料
+  onion:
+    display-name: 洋蔥
+    category: INTERMEDIATE
+    icon: BROWN_MUSHROOM
+    head-texture: 6ce036e327cb9d4d8fef36897a89624b5d9b18f705384ce0d7ed1e1fc7f56
+    description: 常見辛香配料，可直接食用，也能為熱食提供香氣。
+    unlock: onion_bulbs
+    use-cases:
+      - 直接食用
+      - 燉菜底料
+  nutrition_bar:
+    display-name: 科技營養棒
+    category: INTERMEDIATE
+    icon: COOKIE
+    description: 快速恢復飽食並短暫提升移動效率的壓縮口糧。
+    unlock: initial
+    use-cases:
+      - 外勤補給
+      - 初中期工地口糧
+  protein_ration:
+    display-name: 蛋白口糧包
+    category: ADVANCED
+    icon: COOKED_BEEF
+    description: 高強度後勤口糧，適合長時間戶外作業與高壓探索。
+    unlock: initial
+    use-cases:
+      - 中後期探索補給
+      - 生質肉工業成品
+  radiant_tea:
+    display-name: 曙光茶飲
+    category: ADVANCED
+    icon: HONEY_BOTTLE
+    description: 以茶葉與水凝膠穩定出的機能飲，能提升夜視與工作效率。
+    unlock: initial
+    use-cases:
+      - 洞窟與戶外探索
+      - 夜間工地飲品
+  lumenfruit_sapling:
+    display-name: 流明果苗
+    category: INTERMEDIATE
+    icon: FLOWERING_AZALEA
+    description: Aurelia 果樹的幼苗樣本，可作為異星果園研究素材。
+    unlock: initial
+    use-cases:
+      - 異星果樹研究
+      - 果園培育前置
+  lumenfruit:
+    display-name: 流明果
+    category: INTERMEDIATE
+    icon: GLOW_BERRIES
+    head-texture: 8e8336169bb894cc136da40b5d6ad22cae3d8052aff067dc09eb8f066122a1d0
+    description: 帶有柔光的果實，可直接食用並短暫提供夜視，也能壓成果泥或調成探索飲品。
+    unlock: lumenfruit_sapling
+    use-cases:
+      - 水果加工
+      - 飲料與甜味補給
+  frost_apple_sapling:
+    display-name: 霜蘋幼株
+    category: INTERMEDIATE
+    icon: PEARLESCENT_FROGLIGHT
+    description: Cryon 冰園樣本，結出的果實適合做冷卻型飲品。
+    unlock: initial
+    use-cases:
+      - 冰原果樹研究
+      - 飲料支線前置
+  frost_apple:
+    display-name: 霜蘋果
+    category: INTERMEDIATE
+    icon: APPLE
+    head-texture: ea62b9de6a26b86869ca22ea40f1bde80a0430a54547becce8fda8707777258f
+    description: 冰冷脆甜的異星果實，可直接食用獲得短暫加速與抗性，也能做成高效補給。
+    unlock: frost_apple_sapling
+    use-cases:
+      - 冷卻果汁
+      - 高機動探索補給
+  shadow_berry_sapling:
+    display-name: 幽影莓苗
+    category: INTERMEDIATE
+    icon: CHORUS_FLOWER
+    description: Nyx 暗域果樹幼苗，能收集成串影莓供濃縮加工。
+    unlock: initial
+    use-cases:
+      - 暗域果樹研究
+      - 果泥濃縮原料
+  shadow_berry_cluster:
+    display-name: 幽影莓串
+    category: INTERMEDIATE
+    icon: SWEET_BERRIES
+    head-texture: 13c5378d4e0f1422bf26cb55a0afdd8eb89cb82d06205033fa52abbb0d10d0e6
+    description: 帶有虛空香氣的莓果串，可直接食用獲得夜視與跳躍，也能混成高階補給。
+    unlock: shadow_berry_sapling
+    use-cases:
+      - 果泥濃縮
+      - 後勤果糧鏈
+  sunflare_fig_sapling:
+    display-name: 曜焰無花果苗
+    category: INTERMEDIATE
+    icon: RED_MUSHROOM
+    description: Helion 高溫果樹的耐熱幼苗，可長出高糖高能果實。
+    unlock: initial
+    use-cases:
+      - 熱域果園研究
+      - 高能食物前置
+  sunflare_fig:
+    display-name: 曜焰無花果
+    category: INTERMEDIATE
+    icon: COOKIE
+    head-texture: 4f672a2980daca6eb879b9b1c64bbc9b1d91e44432745225b1473c2f4d5c4a1
+    description: 糖分濃縮的熱能果實，可直接食用獲得飽食與抗火，適合調成長效口糧。
+    unlock: sunflare_fig_sapling
+    use-cases:
+      - 能量口糧
+      - 果泥鏈增甜素材
+  stormplum_sapling:
+    display-name: 雷莓李苗
+    category: INTERMEDIATE
+    icon: COPPER_BULB
+    description: Tempest 帶電果樹幼苗，可產出微帶電的酸甜果實。
+    unlock: initial
+    use-cases:
+      - 風暴果園研究
+      - 電解飲品前置
+  stormplum:
+    display-name: 雷莓李
+    category: INTERMEDIATE
+    icon: HONEY_BOTTLE
+    head-texture: ae1e95266dcac153b1939bd94c3b981f5a2fe4f65cbd23e75cb6400fcc10bf24
+    description: 帶有刺激氣泡感的果實，可直接飲用獲得加速與急速挖掘，常被調成探索飲料。
+    unlock: stormplum_sapling
+    use-cases:
+      - 氣泡飲品
+      - 野外補給調配
+  cherry_sapling:
+    display-name: 櫻桃樹苗
+    category: INTERMEDIATE
+    icon: CHERRY_SAPLING
+    description: 常見家園果樹苗，適合直接栽進基地果園。
+    unlock: initial
+    use-cases:
+      - 家園果園
+      - 甜味水果供應
+  cherry:
+    display-name: 櫻桃
+    category: INTERMEDIATE
+    icon: SWEET_BERRIES
+    head-texture: c520766b87d2463c34173ffcd578b0e67d163d37a2d7c2e77915cd91144d40d1
+    description: 酸甜平衡的紅色果實，可直接食用，也適合做成果汁與塔派。
+    unlock: cherry_sapling
+    use-cases:
+      - 直接食用
+      - 果汁與派食材
+  lemon_sapling:
+    display-name: 檸果樹苗
+    category: INTERMEDIATE
+    icon: OAK_SAPLING
+    description: 清香型果樹苗，成熟後可穩定供應酸味水果。
+    unlock: initial
+    use-cases:
+      - 家園果園
+      - 果汁原料
+  lemon:
+    display-name: 黃檸果
+    category: INTERMEDIATE
+    icon: HONEY_BOTTLE
+    head-texture: 957fd56ca15978779324df519354b6639a8d9bc1192c7c3de925a329baef6c
+    description: 清爽酸香的柑橘果實，適合直接吃或榨成果飲。
+    unlock: lemon_sapling
+    use-cases:
+      - 直接食用
+      - 柑橘飲品
+  peach_sapling:
+    display-name: 蜜桃樹苗
+    category: INTERMEDIATE
+    icon: BIRCH_SAPLING
+    description: 溫帶果園常見樹苗，能結出高甜度的蜜桃。
+    unlock: initial
+    use-cases:
+      - 家園果園
+      - 甜味水果供應
+  peach:
+    display-name: 蜜桃
+    category: INTERMEDIATE
+    icon: APPLE
+    head-texture: d3ba41fe82757871e8cbec9ded9acbfd19930d93341cf8139d1dfbfaa3ec2a5
+    description: 柔甜多汁的果實，可直接食用，也很適合做派與果飲。
+    unlock: peach_sapling
+    use-cases:
+      - 直接食用
+      - 派與果飲
+  pear_sapling:
+    display-name: 梨樹苗
+    category: INTERMEDIATE
+    icon: SPRUCE_SAPLING
+    description: 易種植、產量穩定的果樹苗，適合作為基礎果園主力。
+    unlock: initial
+    use-cases:
+      - 家園果園
+      - 日常水果供應
+  pear:
+    display-name: 青梨
+    category: INTERMEDIATE
+    icon: APPLE
+    head-texture: 2de28df844961a8eca8efb79ebb4ae10b834c64a66815e8b645aeff75889664b
+    description: 清甜耐放的果實，可直接食用，也能拿來調成果飲。
+    unlock: pear_sapling
+    use-cases:
+      - 直接食用
+      - 果飲原料
+  orange_sapling:
+    display-name: 橙樹苗
+    category: INTERMEDIATE
+    icon: JUNGLE_SAPLING
+    description: 高糖柑橘型果樹，成熟後可穩定供應橙果。
+    unlock: initial
+    use-cases:
+      - 家園果園
+      - 柑橘補給
+  orange:
+    display-name: 香橙
+    category: INTERMEDIATE
+    icon: ORANGE_DYE
+    head-texture: 65b1db547d1b7956d4511accb1533e21756d7cbc38eb64355a2626412212
+    description: 爽口甜香的常見果實，可直接食用，也很適合榨汁。
+    unlock: orange_sapling
+    use-cases:
+      - 直接食用
+      - 果汁原料
+  fruit_puree:
+    display-name: 異星果泥
+    category: ADVANCED
+    icon: BEETROOT_SOUP
+    description: 把多種星球水果壓縮後得到的穩定果泥，可直接恢復狀態，也是後續飲食加工基底。
+    unlock: initial
+    use-cases:
+      - 口糧加工
+      - 果汁濃縮基底
+  nebula_juice:
+    display-name: 星霧果飲
+    category: ADVANCED
+    icon: POTION
+    description: 以霜蘋與流明果調成的探索飲品，可提供夜視、加速與緩降，適合長距離星球作業。
+    unlock: initial
+    use-cases:
+      - 探索飲料
+      - 長程外勤補給
+  orchard_ration:
+    display-name: 果園後勤口糧
+    category: ADVANCED
+    icon: GOLDEN_CARROT
+    description: 由果泥、豆類與高糖果實壓製的耐久口糧，可提供飽食、抗性與工作效率，適合長時間冒險。
+    unlock: initial
+    use-cases:
+      - 中後期探索補給
+      - 果樹農業後勤成品
+  lemon_juice:
+    display-name: 檸果汁
+    category: INTERMEDIATE
+    icon: POTION
+    description: 用黃檸果壓出的清爽飲品，適合短程探索與炎熱地區作業。
+    unlock: initial
+    use-cases:
+      - 簡易果汁
+      - 外出補水
+  orange_juice:
+    display-name: 香橙汁
+    category: INTERMEDIATE
+    icon: POTION
+    description: 甜味較高的日常果汁，適合當作基礎補給飲品。
+    unlock: initial
+    use-cases:
+      - 基地日常飲品
+      - 果園補給
+  peach_juice:
+    display-name: 蜜桃汁
+    category: INTERMEDIATE
+    icon: POTION
+    item-model: "nexo:peach_juice"
+    description: 帶有甜香的桃汁，適合搭配果園食物一起使用。
+    unlock: initial
+    use-cases:
+      - 甜味果汁
+      - 休閒補給
+  pear_juice:
+    display-name: 青梨汁
+    category: INTERMEDIATE
+    icon: POTION
+    description: 清甜型果汁，適合長時間日常活動中的緩和補給。
+    unlock: initial
+    use-cases:
+      - 輕量補給
+      - 家園飲品
+  cherry_juice:
+    display-name: 櫻桃汁
+    category: INTERMEDIATE
+    icon: POTION
+    description: 帶有濃厚果香的紅色果汁，可作為甜點與派類的搭配飲品。
+    unlock: initial
+    use-cases:
+      - 甜味果汁
+      - 果園飲品
+  sunrise_pie:
+    display-name: 晨光果派
+    category: ADVANCED
+    icon: PUMPKIN_PIE
+    description: 由香橙與蜜桃做成的簡單甜派，適合長距離出門前先補滿肚子。
+    unlock: initial
+    use-cases:
+      - 簡單甜派
+      - 探索前補給
+  berry_tart:
+    display-name: 漿果塔派
+    category: ADVANCED
+    icon: COOKIE
+    description: 以影莓與香辛莓做成的小型塔派，甜中帶刺激感。
+    unlock: initial
+    use-cases:
+      - 甜點補給
+      - 高機動零食
+  orchard_salad:
+    display-name: 果園沙拉
+    category: INTERMEDIATE
+    icon: BEETROOT_SOUP
+    description: 番茄與葉菜拌出的簡單沙拉，是最容易入門的基地料理之一。
+    unlock: initial
+    use-cases:
+      - 入門料理
+      - 基地日常食物
+  cornbread:
+    display-name: 玉米麵包
+    category: INTERMEDIATE
+    icon: BREAD
+    description: 用玉米和豆類做成的簡單主食，適合作為外出的便攜口糧。
+    unlock: initial
+    use-cases:
+      - 入門主食
+      - 便攜糧食
+  stuffed_cabbage:
+    display-name: 捲心菜捲
+    category: INTERMEDIATE
+    icon: RABBIT_STEW
+    description: 把高麗菜與洋蔥包成的熱食，能提供比沙拉更扎實的飽足感。
+    unlock: initial
+    use-cases:
+      - 家常熱食
+      - 中程補給
+  citrus_salad:
+    display-name: 柑橘沙拉
+    category: INTERMEDIATE
+    icon: SUSPICIOUS_STEW
+    description: 把香橙、黃檸果與葉菜拌在一起的清爽沙拉，適合日常基地生活。
+    unlock: initial
+    use-cases:
+      - 清爽入門料理
+      - 果園日常食物
+  tomato_stew:
+    display-name: 番茄燉鍋
+    category: INTERMEDIATE
+    icon: MUSHROOM_STEW
+    description: 用番茄與洋蔥熬出的熱食，適合在寒冷或長時間作業前先補一碗。
+    unlock: initial
+    use-cases:
+      - 家常熱食
+      - 中程補給
+  orchard_smoothie:
+    display-name: 果園奶昔
+    category: INTERMEDIATE
+    icon: POTION
+    description: 把多種家園水果打成果昔，偏向穩定恢復與輕量增益。
+    unlock: initial
+    use-cases:
+      - 果昔飲品
+      - 休閒補給
+  sparkling_lemonade:
+    display-name: 氣泡檸橙飲
+    category: INTERMEDIATE
+    icon: POTION
+    description: 檸果與香橙調成的帶氣果飲，適合長跑與外勤搬運。
+    unlock: initial
+    use-cases:
+      - 高機動飲品
+      - 果園汽水
+  peach_cobbler:
+    display-name: 蜜桃派盆
+    category: ADVANCED
+    icon: PUMPKIN_PIE
+    description: 用蜜桃與玉米烤成的大份量甜點，飽足感和恢復量都更高。
+    unlock: initial
+    use-cases:
+      - 厚實甜派
+      - 遠征補給
+  pear_crisp:
+    display-name: 青梨脆派
+    category: ADVANCED
+    icon: COOKIE
+    description: 將青梨烘成果香脆派，適合當作長距離探索用的甜點乾糧。
+    unlock: initial
+    use-cases:
+      - 甜點乾糧
+      - 遠程探索零食
+  aurelia_glaze:
+    display-name: 輻晶蜜凍
+    category: ADVANCED
+    icon: HONEY_BOTTLE
+    description: 以流明果與輻照碎片調成的果凍，能暫時緩和奧蕾莉亞的輻晶灼蝕。
+    unlock: irradiated_shard
+    use-cases:
+      - 奧蕾莉亞對策食物
+      - 輻射緩衝
+  cryon_hotpot:
+    display-name: 霜芯暖鍋
+    category: ADVANCED
+    icon: RABBIT_STEW
+    description: 以霜蘋果和低溫晶體做出的熱鍋，能在克里昂暫時壓住凍骨寒流。
+    unlock: cryonite_crystal
+    use-cases:
+      - 克里昂對策食物
+      - 抗寒補給
+  nyx_phase_gel:
+    display-name: 相位凝露
+    category: ADVANCED
+    icon: HONEY_BOTTLE
+    description: 影莓與虛玻碎片製成的凝露，能暫時穩定倪克斯的相位失壓。
+    unlock: voidglass_fragment
+    use-cases:
+      - 倪克斯對策食物
+      - 壓差緩衝
+  helion_sorbet:
+    display-name: 日冕雪酪
+    category: ADVANCED
+    icon: HONEY_BOTTLE
+    description: 以烈陽無花果與日灼碎片急冷成的雪酪，能暫時壓低赫利昂的灼熱負荷。
+    unlock: solarite_shard
+    use-cases:
+      - 赫利昂對策食物
+      - 散熱補給
+  tempest_fizz:
+    display-name: 雷雲汽泡飲
+    category: ADVANCED
+    icon: POTION
+    description: 風暴李與暴嵐玻片調出的汽泡飲，能暫時降低坦佩斯特的導電亂流壓力。
+    unlock: stormglass_shard
+    use-cases:
+      - 坦佩斯特對策飲品
+      - 風暴緩衝
+  grape_sapling:
+    display-name: 葡萄架苗
+    category: INTERMEDIATE
+    icon: OAK_SAPLING
+    description: 結出藍紫色串果的藤本植物苗，適合搭棚種植。
+    unlock: initial
+    use-cases:
+      - 家園果園
+      - 果汁與甜食原料
+  grape:
+    display-name: 葡萄串
+    category: INTERMEDIATE
+    icon: SWEET_BERRIES
+    description: 酸甜多汁的小粒水果，可直接食用或做成果汁與果醬。
+    unlock: grape_sapling
+    use-cases:
+      - 直接食用
+      - 果汁原料
+  banana_sapling:
+    display-name: 蕉苗
+    category: INTERMEDIATE
+    icon: BAMBOO
+    description: 熱帶蕉樹苗，成熟後產量穩定，適合加工成各式甜品。
+    unlock: initial
+    use-cases:
+      - 甜味水果供應
+      - 甜品加工
+  banana:
+    display-name: 香蕉
+    category: INTERMEDIATE
+    icon: GOLD_NUGGET
+    description: 軟滑香甜的熱帶果實，可直接食用，也適合做奶昔與甜點。
+    unlock: banana_sapling
+    use-cases:
+      - 直接食用
+      - 奶昔與甜品
+  mango_sapling:
+    display-name: 芒果樹苗
+    category: INTERMEDIATE
+    icon: JUNGLE_SAPLING
+    description: 適合溫暖環境的果樹苗，果實甜香濃厚。
+    unlock: initial
+    use-cases:
+      - 果園側支線
+      - 夏日飲品
+  mango:
+    display-name: 芒果
+    category: INTERMEDIATE
+    icon: ORANGE_DYE
+    description: 甜香誘人的大型熱帶果實，可直接食用或榨成飲品。
+    unlock: mango_sapling
+    use-cases:
+      - 直接食用
+      - 果汁與冰品
+  coconut_palm:
+    display-name: 椰子苗
+    category: INTERMEDIATE
+    icon: JUNGLE_SAPLING
+    description: 熱帶棕櫚苗，結出的椰子可做飲品與料理。
+    unlock: initial
+    use-cases:
+      - 果園擴展
+      - 飲品供應
+  coconut:
+    display-name: 椰子
+    category: INTERMEDIATE
+    icon: BROWN_MUSHROOM
+    description: 硬殼熱帶果實，內含大量椰汁，也可做成椰奶與椰油。
+    unlock: coconut_palm
+    use-cases:
+      - 飲品原料
+      - 料理添加
+  strawberry_bush:
+    display-name: 草莓苗
+    category: INTERMEDIATE
+    icon: FLOWERING_AZALEA
+    description: 低矮的小漿果植株，產量高且果實甜嫩。
+    unlock: initial
+    use-cases:
+      - 漿果農場
+      - 甜品原料
+  strawberry:
+    display-name: 草莓
+    category: INTERMEDIATE
+    icon: SWEET_BERRIES
+    description: 紅潤嬌小的漿果，味道鮮甜可口，適合做成果醬或甜品。
+    unlock: strawberry_bush
+    use-cases:
+      - 直接食用
+      - 甜品與果汁
+  blueberry_bush:
+    display-name: 藍莓苗
+    category: INTERMEDIATE
+    icon: FLOWERING_AZALEA
+    description: 耐陰的小型漿果叢，果實帶有獨特酸甜。
+    unlock: initial
+    use-cases:
+      - 漿果農場
+      - 飲品與甜食
+  blueberry:
+    display-name: 藍莓
+    category: INTERMEDIATE
+    icon: GLOW_BERRIES
+    description: 深藍色的小粒漿果，適合做成甜品或搭配其他水果調飲。
+    unlock: blueberry_bush
+    use-cases:
+      - 直接食用
+      - 綜合果汁
+  raspberry_bush:
+    display-name: 覆盆子苗
+    category: INTERMEDIATE
+    icon: SWEET_BERRIES
+    description: 帶有細刺的低矮灌木苗，果實酸甜帶香。
+    unlock: initial
+    use-cases:
+      - 漿果農場
+      - 果醬原料
+  raspberry:
+    display-name: 覆盆子
+    category: INTERMEDIATE
+    icon: SWEET_BERRIES
+    description: 酸中帶甜的紅色漿果，搭配甜品或果汁都非常適合。
+    unlock: raspberry_bush
+    use-cases:
+      - 直接食用
+      - 甜品與果汁
+  watermelon_slice:
+    display-name: 科技西瓜片
+    category: INTERMEDIATE
+    icon: MELON_SLICE
+    description: 改良品種的大片西瓜，含水量極高，清涼消暑。
+    unlock: initial
+    use-cases:
+      - 消暑水果
+      - 果汁原料
+  pineapple:
+    display-name: 鳳梨
+    category: INTERMEDIATE
+    icon: GOLD_NUGGET
+    description: 帶有鱗紋外殼的熱帶甜果，果肉酸甜多汁。
+    unlock: initial
+    use-cases:
+      - 直接食用
+      - 熱帶飲品
+  kiwi:
+    display-name: 奇異果
+    category: INTERMEDIATE
+    icon: GREEN_DYE
+    description: 毛茸茸的小型水果，內裡翠綠酸甜，富含維生素。
+    unlock: initial
+    use-cases:
+      - 直接食用
+      - 果汁原料
+  garlic:
+    display-name: 大蒜
+    category: INTERMEDIATE
+    icon: BEETROOT
+    description: 辛香濃烈的調味根莖，幾乎所有熱食都需要它。
+    unlock: initial
+    use-cases:
+      - 料理香料
+      - 燉菜調味
+  lettuce:
+    display-name: 生菜
+    category: INTERMEDIATE
+    icon: FERN
+    description: 清脆的葉菜，是沙拉與包捲類料理的基底。
+    unlock: initial
+    use-cases:
+      - 沙拉基底
+      - 包捲料理
+  bell_pepper:
+    display-name: 甜椒
+    category: INTERMEDIATE
+    icon: ORANGE_DYE
+    description: 色彩鮮豔的甜椒，可直接食用或拿來炒菜。
+    unlock: initial
+    use-cases:
+      - 直接食用
+      - 炒菜配料
+  spinach:
+    display-name: 菠菜
+    category: INTERMEDIATE
+    icon: FERN
+    description: 深綠色的營養葉菜，適合做成湯品或拌菜。
+    unlock: initial
+    use-cases:
+      - 湯品配料
+      - 營養補充
+  radish:
+    display-name: 蘿蔔
+    category: INTERMEDIATE
+    icon: BEETROOT
+    description: 爽脆微辛的根莖蔬菜，可直接食用也能做成醃菜。
+    unlock: initial
+    use-cases:
+      - 直接食用
+      - 醃漬原料
+  grape_juice:
+    display-name: 葡萄汁
+    category: INTERMEDIATE
+    icon: POTION
+    description: 濃郁香甜的紫色果汁，令人精神一振。
+    unlock: initial
+    use-cases:
+      - 日常果汁
+      - 基地飲品
+  mango_smoothie:
+    display-name: 芒果奶昔
+    category: INTERMEDIATE
+    icon: POTION
+    description: 芒果打成的濃稠冰飲，香甜消暑。
+    unlock: initial
+    use-cases:
+      - 消暑飲品
+      - 甜味奶昔
+  coconut_water:
+    display-name: 椰子水
+    category: INTERMEDIATE
+    icon: POTION
+    description: 直接從椰子殼倒出的天然飲品，清涼補水。
+    unlock: initial
+    use-cases:
+      - 天然飲品
+      - 探索補水
+  berry_blend:
+    display-name: 綜合莓果汁
+    category: INTERMEDIATE
+    icon: POTION
+    description: 草莓、藍莓與覆盆子混打而成的莓果飲，酸甜清新。
+    unlock: initial
+    use-cases:
+      - 綜合莓飲
+      - 日常飲品
+  tropical_punch:
+    display-name: 熱帶水果賓治
+    category: ADVANCED
+    icon: POTION
+    description: 鳳梨、芒果與香橙混合的大杯水果飲，適合工地慶功用。
+    unlock: initial
+    use-cases:
+      - 慶功飲品
+      - 高飽足飲料
+  green_tea:
+    display-name: 綠茶
+    category: INTERMEDIATE
+    icon: POTION
+    description: 清香淡雅的基本茶飲，能舒緩疲勞並提升專注力。
+    unlock: initial
+    use-cases:
+      - 日常茶飲
+      - 恢復精力
+  iced_tea:
+    display-name: 冰紅茶
+    category: INTERMEDIATE
+    icon: POTION
+    description: 冰鎮後的清爽紅茶，適合炎熱環境下飲用。
+    unlock: initial
+    use-cases:
+      - 消暑飲品
+      - 外勤補給
+  hot_cocoa:
+    display-name: 熱可可
+    category: INTERMEDIATE
+    icon: POTION
+    description: 濃郁溫暖的可可飲品，適合在寒冷星球或冬日基地飲用。
+    unlock: initial
+    use-cases:
+      - 寒地暖身飲品
+      - 休閒飲料
+  apple_cider:
+    display-name: 蘋果醋飲
+    category: INTERMEDIATE
+    icon: POTION
+    description: 以蘋果發酵而成的酸甜飲品，帶有淡淡果香。
+    unlock: initial
+    use-cases:
+      - 養生飲品
+      - 果園附加產品
+  ginger_ale:
+    display-name: 薑汁汽水
+    category: INTERMEDIATE
+    icon: POTION
+    description: 帶有辛辣氣泡的薑味飲品，能提振精神。
+    unlock: initial
+    use-cases:
+      - 提神飲品
+      - 基地零食飲料
+  milk_tea:
+    display-name: 奶茶
+    category: INTERMEDIATE
+    icon: POTION
+    description: 加了鮮奶的溫潤茶飲，是基地休息時的好選擇。
+    unlock: initial
+    use-cases:
+      - 休閒飲品
+      - 基地下午茶
+  matcha_latte:
+    display-name: 抹茶拿鐵
+    category: ADVANCED
+    icon: POTION
+    description: 濃厚抹茶與鮮奶拉出的綿密飲品，能提供持久的專注效果。
+    unlock: initial
+    use-cases:
+      - 專注飲品
+      - 長時間工作飲料
+  espresso:
+    display-name: 濃縮咖啡
+    category: INTERMEDIATE
+    icon: POTION
+    description: 高壓萃取的濃縮黑咖啡，一杯就能迅速提神。
+    unlock: initial
+    use-cases:
+      - 極速提神
+      - 工地咖啡
+  vanilla_milkshake:
+    display-name: 香草奶昔
+    category: INTERMEDIATE
+    icon: POTION
+    description: 經典香草口味的奶昔，甜蜜順口。
+    unlock: initial
+    use-cases:
+      - 甜味飲品
+      - 基地甜點飲料
+  strawberry_milkshake:
+    display-name: 草莓奶昔
+    category: INTERMEDIATE
+    icon: POTION
+    description: 草莓與鮮奶混打的粉紅色奶昔，酸甜順口。
+    unlock: initial
+    use-cases:
+      - 漿果飲品
+      - 基地甜點飲料
+  fried_rice:
+    display-name: 炒飯
+    category: INTERMEDIATE
+    icon: COOKED_CHICKEN
+    description: 用米飯與蔬菜快炒的主食，快速飽肚。
+    unlock: initial
+    use-cases:
+      - 基地快餐
+      - 工地主食
+  noodle_soup:
+    display-name: 湯麵
+    category: INTERMEDIATE
+    icon: MUSHROOM_STEW
+    description: 熱騰騰的麵條配上清湯與蔬菜，暖身又飽肚。
+    unlock: initial
+    use-cases:
+      - 暖身主食
+      - 經濟餐點
+  grilled_vegetables:
+    display-name: 烤時蔬
+    category: INTERMEDIATE
+    icon: COOKED_CHICKEN
+    description: 各式蔬菜在高溫下燒烤至金黃，香氣四溢。
+    unlock: initial
+    use-cases:
+      - 健康配菜
+      - 燒烤拼盤
+  mushroom_risotto:
+    display-name: 蘑菇燉飯
+    category: ADVANCED
+    icon: MUSHROOM_STEW
+    description: 蘑菇與穀物慢燉而成的濃郁飯食，口感綿密。
+    unlock: initial
+    use-cases:
+      - 高級餐點
+      - 探險主食
+  vegetable_curry:
+    display-name: 蔬菜咖哩
+    category: ADVANCED
+    icon: RABBIT_STEW
+    description: 多種蔬菜與辛香料燉煮的濃厚咖哩，配飯或麵皆宜。
+    unlock: initial
+    use-cases:
+      - 辛香熱食
+      - 遠征主食
+  sushi_roll:
+    display-name: 壽司捲
+    category: INTERMEDIATE
+    icon: COOKED_COD
+    description: 米飯包裹鮮魚與蔬菜的小份精緻食物，適合當零食或配菜。
+    unlock: initial
+    use-cases:
+      - 精緻小食
+      - 基地零食
+  ramen:
+    display-name: 拉麵
+    category: ADVANCED
+    icon: RABBIT_STEW
+    description: 濃郁豚骨湯底搭配彈牙麵條與配料，令人大快朵頤。
+    unlock: initial
+    use-cases:
+      - 高飽足主食
+      - 基地夜宵
+  potato_soup:
+    display-name: 馬鈴薯湯
+    category: INTERMEDIATE
+    icon: MUSHROOM_STEW
+    description: 奶油馬鈴薯湯，口感濃厚綿密，適合寒冷環境飲用。
+    unlock: initial
+    use-cases:
+      - 暖胃湯品
+      - 日常湯食
+  garlic_bread:
+    display-name: 蒜香麵包
+    category: INTERMEDIATE
+    icon: BREAD
+    description: 抹上蒜泥奶油烤成的香脆麵包，簡單卻令人停不下來。
+    unlock: initial
+    use-cases:
+      - 輕食配菜
+      - 快速補給
+  cheese_pizza:
+    display-name: 起司披薩
+    category: ADVANCED
+    icon: PUMPKIN_PIE
+    description: 鋪滿拉絲起司的圓形大餅，是基地聚餐首選。
+    unlock: initial
+    use-cases:
+      - 聚餐主食
+      - 高飽足餐點
+  dumpling:
+    display-name: 蒸餃
+    category: INTERMEDIATE
+    icon: COOKED_CHICKEN
+    description: 薄皮包裹肉餡蒸製而成的小巧食物，一口一個剛剛好。
+    unlock: initial
+    use-cases:
+      - 中式小食
+      - 快速補給
+  fish_stew:
+    display-name: 鮮魚湯
+    category: INTERMEDIATE
+    icon: MUSHROOM_STEW
+    description: 用鮮魚與蔬菜熬煮的清爽湯品，營養豐富。
+    unlock: initial
+    use-cases:
+      - 海鮮料理
+      - 營養湯品
+  roasted_corn:
+    display-name: 烤玉米
+    category: INTERMEDIATE
+    icon: GOLD_NUGGET
+    description: 新鮮玉米塗上醬料直接碳烤，香甜焦脆。
+    unlock: initial
+    use-cases:
+      - 烤物小食
+      - 農產加工
+  veggie_wrap:
+    display-name: 蔬菜捲餅
+    category: INTERMEDIATE
+    icon: BREAD
+    description: 用薄餅包裹各式蔬菜的輕食，適合當作外勤午餐。
+    unlock: initial
+    use-cases:
+      - 輕食午餐
+      - 外勤攜帶
+  breakfast_burrito:
+    display-name: 早安捲餅
+    category: INTERMEDIATE
+    icon: BREAD
+    description: 蛋液、肉末與蔬菜包在大張薄餅裡，是開工前的飽肚好選擇。
+    unlock: initial
+    use-cases:
+      - 早餐主食
+      - 飽肚快餐
+  chocolate_cake:
+    display-name: 巧克力蛋糕
+    category: ADVANCED
+    icon: CAKE
+    description: 濃郁巧克力淋面蛋糕，是基地慶祝活動的人氣甜品。
+    unlock: initial
+    use-cases:
+      - 慶典甜品
+      - 高飽足甜食
+  vanilla_ice_cream:
+    display-name: 香草冰淇淋
+    category: INTERMEDIATE
+    icon: SNOWBALL
+    description: 經典香草口味的冰涼甜品，解饞消暑。
+    unlock: initial
+    use-cases:
+      - 消暑甜品
+      - 基地零食
+  donut:
+    display-name: 甜甜圈
+    category: INTERMEDIATE
+    icon: COOKIE
+    description: 油炸後裹上糖霜的環形麵包，鬆軟甜蜜。
+    unlock: initial
+    use-cases:
+      - 休閒零食
+      - 甜味補給
+  muffin:
+    display-name: 鬆糕
+    category: INTERMEDIATE
+    icon: COOKIE
+    description: 柔軟的小蛋糕，適合搭配咖啡或茶當作點心。
+    unlock: initial
+    use-cases:
+      - 下午茶點心
+      - 小型甜食
+  brownie:
+    display-name: 布朗尼
+    category: INTERMEDIATE
+    icon: COOKIE
+    description: 濕潤濃厚的巧克力方塊蛋糕，甜而不膩。
+    unlock: initial
+    use-cases:
+      - 甜味加持
+      - 慰勞甜品
+  cheesecake:
+    display-name: 起司蛋糕
+    category: ADVANCED
+    icon: CAKE
+    description: 細膩綿滑的起司蛋糕，是基地下午茶的奢華選項。
+    unlock: initial
+    use-cases:
+      - 高級甜品
+      - 慶典甜食
+  fruit_parfait:
+    display-name: 水果帕菲
+    category: INTERMEDIATE
+    icon: HONEY_BOTTLE
+    description: 層層堆疊鮮果與奶油的玻璃杯甜品，色彩繽紛。
+    unlock: initial
+    use-cases:
+      - 精緻甜品
+      - 休閒零食
+  pancakes:
+    display-name: 鬆餅
+    category: INTERMEDIATE
+    icon: COOKIE
+    description: 厚實柔軟的圓形煎餅，淋上糖漿後格外美味。
+    unlock: initial
+    use-cases:
+      - 早餐甜食
+      - 日常零食
+  cinnamon_roll:
+    display-name: 肉桂捲
+    category: INTERMEDIATE
+    icon: COOKIE
+    description: 帶有肉桂香的螺旋卷麵包，外酥內軟。
+    unlock: initial
+    use-cases:
+      - 麵包甜食
+      - 下午茶搭配
+  honey_toast:
+    display-name: 蜂蜜吐司
+    category: INTERMEDIATE
+    icon: BREAD
+    description: 厚切吐司塗上蜂蜜後烤至金黃，簡單卻令人滿足。
+    unlock: initial
+    use-cases:
+      - 簡易甜食
+      - 早餐補給
+  field_sickle:
+    display-name: 收田鐮刀
+    category: INTERMEDIATE
+    icon: IRON_HOE
+    description: 一次收成 3x3 成熟作物並自動重植的農務工具。
+    unlock: crop_harvester
+    use-cases:
+      - 手動收成加速
+      - 科技農業前期工具
+  hydro_spade:
+    display-name: 水培鏟
+    category: INTERMEDIATE
+    icon: DIAMOND_HOE
+    description: 右鍵可催生周圍作物，是溫室與田區的輔助工具。
+    unlock: greenhouse
+    use-cases:
+      - 手動催熟工具
+      - 溫室維護
+  vector_grapple:
+    display-name: 向量抓鉤
+    category: INTERMEDIATE
+    icon: TRIPWIRE_HOOK
+    description: 右鍵發射抓鉤箭，箭矢命中地形後自動牽引玩家過去，適合遺跡垂直探索、物流塔檢修與地形切線移動。每次使用消耗電量，對準儲能機器 Shift + 右鍵可充電。
+    unlock: sensor_array
+    use-cases:
+      - 箭矢式抓鉤工具
+      - 遊踡高低差位移
+      - 基地立體維修工具
+  pulse_thruster:
+    display-name: 脈衝推進器
+    category: ADVANCED
+    tier: TIER4
+    icon: BLAZE_ROD
+    description: 短時間輸出高推力的手持推進器，可作為橫向空橋、低重力地形與真空作業的機動補助。每次使用消耗電量，對準儲能機器 Shift + 右鍵可充電。
+    unlock: pressure_chestplate
+    use-cases:
+      - Nyx 空域位移
+      - 戶外跨谷衝刺
+  storm_jetpack:
+    display-name: 風暴噴射背包
+    category: ADVANCED
+    tier: TIER4
+    icon: ELYTRA
+    description: 以前線核心與風暴偏轉層整合而成的背負式飛行包，穿上後可用雙跳進行高功率空中噴射。每次噴射消耗電量，對準儲能機器 Shift + 右鍵可充電。
+    unlock: frontier_chestplate
+    use-cases:
+      - Tempest 高機動探索
+      - 前線外勤垂直機動
+  radiation_filter:
+    display-name: 輻射濾芯
+    category: ADVANCED
+    icon: TURTLE_HELMET
+    description: 抗輻射裝備使用的核心濾芯，能隔絕星球環境污染。
+    unlock: purifier
+    use-cases:
+      - 抗輻射裝備前置
+      - 星球探索防護
+  anti_radiation_helmet:
+    display-name: 抗輻射頭盔
+    category: ADVANCED
+    tier: TIER4
+    icon: CHAINMAIL_HELMET
+    description: Aurelia 星球探索用頭盔，需與整套裝備一起使用。
+    unlock: radiation_filter
+    use-cases:
+      - 星球探索
+      - 完整防護套裝
+  anti_radiation_chestplate:
+    display-name: 抗輻射胸甲
+    category: ADVANCED
+    tier: TIER4
+    icon: CHAINMAIL_CHESTPLATE
+    description: 隔絕強輻射與毒性微粒的核心護甲部件。
+    unlock: radiation_filter
+    use-cases:
+      - 星球探索
+      - 完整防護套裝
+  anti_radiation_leggings:
+    display-name: 抗輻射護腿
+    category: ADVANCED
+    tier: TIER4
+    icon: CHAINMAIL_LEGGINGS
+    description: 長時間星球步行時的重要抗污染下身護具。
+    unlock: radiation_filter
+    use-cases:
+      - 星球探索
+      - 完整防護套裝
+  anti_radiation_boots:
+    display-name: 抗輻射靴
+    category: ADVANCED
+    tier: TIER4
+    icon: CHAINMAIL_BOOTS
+    description: 保護雙腳不受 Aurelia 星塵與污染地表侵蝕。
+    unlock: radiation_filter
+    use-cases:
+      - 星球探索
+      - 完整防護套裝
+  irradiated_shard:
+    display-name: 輻照碎晶
+    category: ADVANCED
+    tier: TIER4
+    icon: AMETHYST_SHARD
+    description: 來自 Aurelia 地表的基礎地質樣本，是整條星球研究線的第一層素材。
+    unlock: anti_radiation_helmet
+    use-cases:
+      - 基礎地表樣本
+      - 後續星球科技素材
+  void_bloom:
+    display-name: 虛域花簇
+    category: ADVANCED
+    tier: TIER4
+    icon: CHORUS_FLOWER
+    description: 生長在虛域污染區的異常花簇，能作為外星生質素材。
+    unlock: anti_radiation_chestplate
+    use-cases:
+      - 星球生質材料
+      - 新探索鏈素材
+  void_bloom_seeds:
+    display-name: 虛域花簇種子
+    category: ADVANCED
+    tier: TIER4
+    icon: NETHER_WART
+    description: 從 Aurelia 污染地表回收的特殊植種，可帶回基地培育。
+    unlock: void_bloom
+    use-cases:
+      - 種植 Aurelia 特殊植物
+      - 星球農業支線
+  planetary_relic:
+    display-name: 星核遺物
+    category: ADVANCED
+    tier: TIER4
+    icon: HEART_OF_THE_SEA
+    description: 從 Aurelia 遺跡核心回收的遺物，是高一階的遺跡層研究資料。
+    unlock: anti_radiation_boots
+    use-cases:
+      - 遺跡層研究資料
+      - 後續高階解析核心
+  cryonite_crystal:
+    display-name: 霜核晶簇
+    category: ADVANCED
+    tier: TIER4
+    icon: PRISMARINE_CRYSTALS
+    description: 從 Cryon 冰層取得的基礎寒域樣本，用於低溫研究線。
+    unlock: anti_radiation_helmet
+    use-cases:
+      - Cryon 基礎樣本
+      - 低溫防護模組
+  frostbloom:
+    display-name: 霜綻花
+    category: ADVANCED
+    tier: TIER4
+    icon: SPORE_BLOSSOM
+    description: 能在極寒環境中保有活性的異星植株樣本。
+    unlock: anti_radiation_chestplate
+    use-cases:
+      - Cryon 生質素材
+      - 星球研究鏈
+  frostbloom_seeds:
+    display-name: 霜綻花種子
+    category: ADVANCED
+    tier: TIER4
+    icon: WHEAT_SEEDS
+    description: 適合在農地培育的 Cryon 寒性植株種子。
+    unlock: frostbloom
+    use-cases:
+      - 種植 Cryon 特殊植物
+      - 低溫農業線
+  cryon_relic:
+    display-name: 霜境遺物
+    category: ADVANCED
+    tier: TIER4
+    icon: LODESTONE
+    description: Cryon 遺跡中回收的古導航核心，屬於遺跡層資料物件。
+    unlock: anti_radiation_boots
+    use-cases:
+      - Cryon 遺跡層資料
+      - 異星研究樣本
+  voidglass_fragment:
+    display-name: 虛璃碎片
+    category: ADVANCED
+    tier: TIER4
+    icon: GLASS_PANE
+    description: 取自 Nyx 真空殘骸的基礎壓差樣本，是深空研究的地表層材料。
+    unlock: cryon_relic
+    use-cases:
+      - Nyx 基礎樣本
+      - 壓差防護材料
+  echo_spore:
+    display-name: 回響孢子
+    category: ADVANCED
+    tier: TIER4
+    icon: CHORUS_FLOWER
+    description: 漂浮在 Nyx 虛空中的異常孢子樣本。
+    unlock: cryon_relic
+    use-cases:
+      - Nyx 生質素材
+      - 異星樣本分析
+  echo_spore_seeds:
+    display-name: 回響孢子囊
+    category: ADVANCED
+    tier: TIER4
+    icon: BEETROOT_SEEDS
+    description: 經穩定封存後可帶回種植的 Nyx 孢子囊。
+    unlock: echo_spore
+    use-cases:
+      - 種植 Nyx 特殊植物
+      - 深空生質研究
+  nyx_relic:
+    display-name: 倪克斯遺核
+    category: ADVANCED
+    tier: TIER4
+    icon: ENDER_EYE
+    description: 來自 Nyx 遺址的壓差穩定核心，是深空遺跡層研究的關鍵物件。
+    unlock: cryon_relic
+    use-cases:
+      - Nyx 遺跡層資料
+      - 深空研究前置
+  aurelia_parasite_gland:
+    display-name: 輻塵腺體
+    category: ADVANCED
+    tier: TIER4
+    icon: FERMENTED_SPIDER_EYE
+    description: 從 Aurelia 特殊怪回收的戰鬥樣本，夾帶高濃度污染與適應訊號。
+    unlock: planetary_relic
+    use-cases:
+      - 戰鬥樣本層
+      - 輻射網層前置
+  cryon_ice_heart:
+    display-name: 冰脈核心
+    category: ADVANCED
+    tier: TIER4
+    icon: PACKED_ICE
+    description: 由 Cryon 特殊怪體內取出的低溫穩定核心，是寒域戰鬥樣本。
+    unlock: cryon_relic
+    use-cases:
+      - 戰鬥樣本層
+      - 低溫內襯前置
+  nyx_phase_tissue:
+    display-name: 相位膜組織
+    category: ADVANCED
+    tier: TIER4
+    icon: PHANTOM_MEMBRANE
+    description: 來自 Nyx 特殊怪的相位化組織，可用於壓差膜層穩定。
+    unlock: nyx_relic
+    use-cases:
+      - 戰鬥樣本層
+      - 壓差膜層前置
+  exo_frame:
+    display-name: 外骨骼框架
+    category: ADVANCED
+    tier: TIER4
+    icon: IRON_BARS
+    description: 模組化環境防護裝的共同骨架，用於所有行星裝備。
+    unlock: survey_beacon
+    use-cases:
+      - 行星防護裝通用骨架
+      - 模組化裝備核心
+  seal_fabric:
+    display-name: 氣密織層
+    category: ADVANCED
+    tier: TIER4
+    icon: WHITE_WOOL
+    description: 隔絕粉塵、低溫與壓差的多層氣密織物。
+    unlock: survey_beacon
+    use-cases:
+      - 行星防護裝通用織層
+      - 防護裝密封組件
+  radiation_mesh:
+    display-name: 輻射網層
+    category: ADVANCED
+    tier: TIER4
+    icon: TURTLE_SCUTE
+    description: 專門阻隔高輻射微粒與污染粒子的防護網層。
+    unlock: xeno_refinery
+    use-cases:
+      - Aurelia 專用模組
+      - 抗輻射裝備模組
+  thermal_lining:
+    display-name: 低溫內襯
+    category: ADVANCED
+    tier: TIER4
+    icon: RABBIT_HIDE
+    description: 可維持體溫的極寒作業內襯，適合 Cryon 探索。
+    unlock: xeno_refinery
+    use-cases:
+      - Cryon 專用模組
+      - 抗寒裝備模組
+  pressure_membrane:
+    display-name: 壓差膜層
+    category: ADVANCED
+    tier: TIER4
+    icon: PHANTOM_MEMBRANE
+    description: 能穩定外殼內外壓差的柔性膜層，適合 Nyx 真空作業。
+    unlock: xeno_refinery
+    use-cases:
+      - Nyx 專用模組
+      - 抗壓裝備模組
+  thermal_helmet:
+    display-name: 抗寒頭盔
+    category: ADVANCED
+    tier: TIER4
+    icon: DIAMOND_HELMET
+    description: Cryon 星球探索用頭盔，對極寒與冰霜風暴有抗性。
+    unlock: thermal_lining
+    use-cases:
+      - Cryon 探索
+      - 完整抗寒套裝
+  thermal_chestplate:
+    display-name: 抗寒胸甲
+    category: ADVANCED
+    tier: TIER4
+    icon: DIAMOND_CHESTPLATE
+    description: 內建保溫層與穩定器的胸甲，是 Cryon 套裝主體。
+    unlock: thermal_lining
+    use-cases:
+      - Cryon 探索
+      - 完整抗寒套裝
+  thermal_leggings:
+    display-name: 抗寒護腿
+    category: ADVANCED
+    tier: TIER4
+    icon: DIAMOND_LEGGINGS
+    description: 降低低溫環境對行動效率的影響。
+    unlock: thermal_lining
+    use-cases:
+      - Cryon 探索
+      - 完整抗寒套裝
+  thermal_boots:
+    display-name: 抗寒靴
+    category: ADVANCED
+    tier: TIER4
+    icon: DIAMOND_BOOTS
+    description: 適合踩踏冰面與極低溫地形的封閉式靴具。
+    unlock: thermal_lining
+    use-cases:
+      - Cryon 探索
+      - 完整抗寒套裝
+  pressure_helmet:
+    display-name: 抗壓頭盔
+    category: ADVANCED
+    tier: TIER4
+    icon: NETHERITE_HELMET
+    description: Nyx 真空探索用頭盔，可穩定內外壓差與視野。
+    unlock: pressure_membrane
+    use-cases:
+      - Nyx 探索
+      - 完整抗壓套裝
+  pressure_chestplate:
+    display-name: 抗壓胸甲
+    category: ADVANCED
+    tier: TIER4
+    icon: NETHERITE_CHESTPLATE
+    description: 抗壓作業核心胸甲，負責維持內部作業環境。
+    unlock: pressure_membrane
+    use-cases:
+      - Nyx 探索
+      - 完整抗壓套裝
+  pressure_leggings:
+    display-name: 抗壓護腿
+    category: ADVANCED
+    tier: TIER4
+    icon: NETHERITE_LEGGINGS
+    description: 減少真空與壓差環境對移動造成的負擔。
+    unlock: pressure_membrane
+    use-cases:
+      - Nyx 探索
+      - 完整抗壓套裝
+  pressure_boots:
+    display-name: 抗壓靴
+    category: ADVANCED
+    tier: TIER4
+    icon: NETHERITE_BOOTS
+    description: 適合 Nyx 低重力地形的密封靴具。
+    unlock: pressure_membrane
+    use-cases:
+      - Nyx 探索
+      - 完整抗壓套裝
+  survey_chip:
+    display-name: 星圖測繪晶片
+    category: ADVANCED
+    tier: TIER4
+    icon: COMPASS
+    description: 行星研究鏈的第一個核心資料晶片。
+    unlock: observatory
+    use-cases:
+      - 行星測繪信標前置
+      - 星球研究鍊
+  survey_data:
+    display-name: 行星測繪資料
+    category: ADVANCED
+    tier: TIER4
+    icon: MAP
+    description: 經由 Survey Beacon 整理的地表層資料，用於啟動低階遺跡與研究分支。
+    unlock: survey_beacon
+    use-cases:
+      - 遺物解析儀前置
+      - 星球研究資料
+  ancient_signal:
+    display-name: 古訊號片段
+    category: ADVANCED
+    tier: TIER4
+    icon: RECOVERY_COMPASS
+    description: 從遺跡層資料解譯出的高階訊號，是後段星球與前線裝的真正門票。
+    unlock: relic_analyzer
+    use-cases:
+      - 異星精煉槽前置
+      - 高階異星研究
+  xeno_alloy:
+    display-name: 異星合金
+    category: ADVANCED
+    tier: TIER4
+    icon: NETHERITE_INGOT
+    description: 由地表樣本、戰鬥樣本與遺跡資料共同精煉出的高韌性異星合金。
+    unlock: xeno_refinery
+    use-cases:
+      - 模組化裝備骨架
+      - 行星鍛造台前置
+  solarite_shard:
+    display-name: 日耀碎晶
+    category: ADVANCED
+    tier: TIER4
+    icon: BLAZE_POWDER
+    description: 由 Helion 高熱岩層回收的基礎熱障樣本，用於前線熱防護研究。
+    unlock: pressure_helmet
+    use-cases:
+      - Helion 星球素材
+      - 高階熱障模組
+  emberbloom:
+    display-name: 焰綻簇
+    category: ADVANCED
+    tier: TIER4
+    icon: SHROOMLIGHT
+    description: 來自 Helion 的耐高熱生質簇，可支援前線防護層。
+    unlock: pressure_chestplate
+    use-cases:
+      - Helion 生質樣本
+      - 前線套裝封裝材料
+  emberroot:
+    display-name: 焰根束
+    category: ADVANCED
+    tier: TIER4
+    icon: CRIMSON_ROOTS
+    description: 能承受 Helion 高熱地表的根系材料，可製作前線裝備補強層。
+    unlock: emberbloom
+    use-cases:
+      - Helion 植物素材
+      - 防熱裝備纖維
+  emberroot_seeds:
+    display-name: 焰根種子
+    category: ADVANCED
+    tier: TIER4
+    icon: MELON_SEEDS
+    description: 從 Helion 地表取得的耐熱植種，可帶回基地培育。
+    unlock: emberroot
+    use-cases:
+      - 種植 Helion 特殊植物
+      - 高熱農業支線
+  helion_relic:
+    display-name: 赫利昂炎核遺物
+    category: ADVANCED
+    tier: TIER4
+    icon: BEACON
+    description: 從 Helion 焦灼遺跡解出的高熱穩定核心，是高階遺跡層資料。
+    unlock: pressure_boots
+    use-cases:
+      - Helion 遺跡研究
+      - 前線核心碎片來源
+  helion_cinder_core:
+    display-name: 灰燼燃核
+    category: ADVANCED
+    tier: TIER4
+    icon: FIRE_CHARGE
+    description: 由 Helion 特殊怪遺留的高熱戰鬥樣本，可支撐日灼屏蔽層。
+    unlock: helion_relic
+    use-cases:
+      - 戰鬥樣本層
+      - 日灼屏蔽層前置
+  stormglass_shard:
+    display-name: 風暴玻片
+    category: ADVANCED
+    tier: TIER4
+    icon: PRISMARINE_SHARD
+    description: Tempest 帶電地層冷凝出的基礎導電樣本，是電暴研究的地表層素材。
+    unlock: helion_relic
+    use-cases:
+      - Tempest 星球素材
+      - 電磁緩衝模組
+  ion_fern:
+    display-name: 離子蕨束
+    category: ADVANCED
+    tier: TIER4
+    icon: FERN
+    description: 在 Tempest 高壓氣旋中存活的導電植株樣本。
+    unlock: helion_relic
+    use-cases:
+      - Tempest 生質樣本
+      - 前線防護纖維
+  ion_fern_seeds:
+    display-name: 離子蕨芽孢
+    category: ADVANCED
+    tier: TIER4
+    icon: PUMPKIN_SEEDS
+    description: 來自 Tempest 的導電蕨類芽孢，可培育成獨有作物。
+    unlock: ion_fern
+    use-cases:
+      - 種植 Tempest 特殊植物
+      - 帶電纖維量產
+  tempest_relic:
+    display-name: 坦佩斯特雷核遺物
+    category: ADVANCED
+    tier: TIER4
+    icon: LIGHTNING_ROD
+    description: 由 Tempest 遺跡核心取回的帶電穩壓裝置，屬於高階遺跡層物件。
+    unlock: helion_relic
+    use-cases:
+      - Tempest 遺跡研究
+      - 前線核心碎片來源
+  tempest_capacitor:
+    display-name: 風暴電容核
+    category: ADVANCED
+    tier: TIER4
+    icon: LIGHT_BLUE_DYE
+    description: 從 Tempest 特殊怪殘骸中取得的高壓電容樣本，可製作風暴偏轉層。
+    unlock: tempest_relic
+    use-cases:
+      - 戰鬥樣本層
+      - 風暴偏轉層前置
+  frontier_core_fragment:
+    display-name: 前線核心碎片
+    category: ADVANCED
+    tier: TIER4
+    icon: ECHO_SHARD
+    description: 由 Helion / Tempest 高階遺跡釋出的碎片，是前線裝研究的遺跡層頂點材料。
+    unlock: ancient_signal
+    use-cases:
+      - 前線防護核心前置
+      - 高階遺跡戰利品
+  flare_shielding:
+    display-name: 日灼屏蔽層
+    category: ADVANCED
+    tier: TIER4
+    icon: MAGMA_CREAM
+    description: 專門對抗高溫、火焰與熱浪衝擊的前線模組。
+    unlock: helion_relic
+    use-cases:
+      - Helion 高階防護模組
+      - 前線防護裝熱障層
+  storm_baffle:
+    display-name: 風暴偏轉層
+    category: ADVANCED
+    tier: TIER4
+    icon: LIGHT_BLUE_DYE
+    description: 用於抵銷帶電風暴與高壓亂流的前線偏轉模組。
+    unlock: tempest_relic
+    use-cases:
+      - Tempest 高階防護模組
+      - 前線防護裝電磁層
+  frontier_core:
+    display-name: 前線防護核心
+    category: ADVANCED
+    tier: TIER4
+    icon: NETHER_STAR
+    description: 整合多顆星球遺跡成果後得到的全域防護核心。
+    unlock: planetary_forge
+    use-cases:
+      - 前線防護裝組裝
+      - 深層星球探索
+  frontier_helmet:
+    display-name: 前線探勘頭盔
+    category: ADVANCED
+    tier: TIER4
+    icon: NETHERITE_HELMET
+    description: 可同時對抗輻射、極寒、真空、熱浪與電暴的全域頭盔。
+    unlock: frontier_core
+    use-cases:
+      - 高階全域防護
+      - Helion / Tempest 探索
+  frontier_chestplate:
+    display-name: 前線探勘胸甲
+    category: ADVANCED
+    tier: TIER4
+    icon: NETHERITE_CHESTPLATE
+    description: 內建多層防護模組的全域胸甲，是前線套裝主體。
+    unlock: frontier_core
+    use-cases:
+      - 高階全域防護
+      - Helion / Tempest 探索
+  frontier_leggings:
+    display-name: 前線探勘護腿
+    category: ADVANCED
+    tier: TIER4
+    icon: NETHERITE_LEGGINGS
+    description: 維持極端行動穩定性的全域下身防護組件。
+    unlock: frontier_core
+    use-cases:
+      - 高階全域防護
+      - 深層行星移動
+  frontier_boots:
+    display-name: 前線探勘靴
+    category: ADVANCED
+    tier: TIER4
+    icon: NETHERITE_BOOTS
+    description: 適應低重力、極寒冰面與高熱地表的全域探索靴。
+    unlock: frontier_core
+    use-cases:
+      - 高階全域防護
+      - 多星球通用外勤
+  plasma_dust:
+    display-name: 等離子粉
+    category: ADVANCED
+    tier: TIER4
+    icon: GLOWSTONE_DUST
+    description: 高能等離子粉塵，是聚變後工藝的重要基底。
+    unlock: plasma_refiner
+    use-cases:
+      - 等離子錠
+      - 高能製程
+  plasma_ingot:
+    display-name: 等離子錠
+    category: ADVANCED
+    tier: TIER4
+    icon: GOLD_INGOT
+    description: 經穩定後的等離子錠，可用於高熱高壓設備骨架。
+    unlock: plasma_refiner
+    use-cases:
+      - 反應爐格架
+      - 熱區設備框架
+  reactor_lattice:
+    display-name: 反應爐格架
+    category: ADVANCED
+    tier: TIER4
+    icon: IRON_BARS
+    description: 反應爐用支撐格架，適合時間與能量設備。
+    unlock: plasma_refiner
+    use-cases:
+      - 時序格架前置
+      - 反應爐結構
+  photon_shard:
+    display-name: 光子碎晶
+    category: ADVANCED
+    icon: PRISMARINE_CRYSTALS
+    description: 光子碎晶，常用於高精密光學與星圖製作。
+    unlock: photon_weaver
+    use-cases:
+      - 光子板
+      - 觀測透鏡
+  photon_plate:
+    display-name: 光子板
+    category: ADVANCED
+    icon: LIGHT_WEIGHTED_PRESSURE_PLATE
+    description: 將光子束固定為結構板後得到的材料。
+    unlock: photon_weaver
+    use-cases:
+      - 極光板前置
+      - 光學裝甲層
+  observatory_lens:
+    display-name: 觀測透鏡
+    category: ADVANCED
+    icon: SPYGLASS
+    description: 天文觀測級透鏡，可用於高階資料擷取。
+    unlock: photon_weaver
+    use-cases:
+      - 星圖
+      - 遺產掃描儀前置
+  star_chart:
+    display-name: 星圖
+    category: ADVANCED
+    icon: MAP
+    description: 記錄軌道與星流資料的高精度星圖。
+    unlock: observatory
+    use-cases:
+      - 真空模組
+      - 遺產資料
+  gravitic_bearing:
+    display-name: 重力軸承
+    category: ADVANCED
+    icon: LODESTONE
+    description: 穩定重力軸承，適用於重力與軌道機械。
+    unlock: observatory
+    use-cases:
+      - 封存板
+      - 重力設備
+  vacuum_module:
+    display-name: 真空模組
+    category: ADVANCED
+    icon: GLASS_BOTTLE
+    description: 真空環境維持模組，可協助後續宇宙級加工。
+    unlock: observatory
+    use-cases:
+      - 真空玻璃
+      - 軌道裝配
+  data_core:
+    display-name: 資料核心
+    category: ADVANCED
+    icon: WRITABLE_BOOK
+    description: 壓縮高密度工業資料的運算核心。
+    unlock: observatory
+    use-cases:
+      - 封存板
+      - 封存核心
+  archive_plate:
+    display-name: 封存板
+    category: ADVANCED
+    icon: BOOKSHELF
+    description: 用於封存高價值科技資料的強化板件。
+    unlock: data_archive
+    use-cases:
+      - 封存核心
+      - 終極檔案庫
+  pulse_staff:
+    display-name: 脈衝法杖
+    category: ADVANCED
+    tier: TIER3
+    icon: STICK
+    description: 右鍵釋放脈衝波，擊退 8 格內所有生物。消耗 5 EU。
+    unlock: field_forge
+    use-cases:
+      - 右鍵：脈衝擊退
+      - 需充電使用
+  storm_staff:
+    display-name: 風暴法杖
+    category: ADVANCED
+    tier: TIER3
+    icon: BLAZE_ROD
+    description: 右鍵召喚落雷打擊準心目標。消耗 8 EU。
+    unlock: field_forge
+    use-cases:
+      - 右鍵：雷擊目標
+      - 需充電使用
+  gravity_staff:
+    display-name: 重力法杖
+    category: ADVANCED
+    tier: TIER3
+    icon: END_ROD
+    description: 右鍵令 8 格內所有生物浮空 4 秒。消耗 6 EU。
+    unlock: field_forge
+    use-cases:
+      - 右鍵：浮空控場
+      - 需充電使用
+  warp_orb:
+    display-name: 曲速球
+    category: ADVANCED
+    tier: TIER3
+    icon: ENDER_PEARL
+    description: 右鍵瞬移至準心方向 8 格前方。消耗 10 EU。
+    unlock: field_forge
+    use-cases:
+      - 右鍵：短距傳送
+      - 需充電使用
+  cryo_wand:
+    display-name: 冰晶權杖
+    category: ADVANCED
+    tier: TIER3
+    icon: PRISMARINE_SHARD
+    description: 右鍵冰封 8 格內所有生物，附加緩速 5 秒。消耗 6 EU。
+    unlock: field_forge
+    use-cases:
+      - 右鍵：冰封控場
+      - 需充電使用
+  plasma_lance:
+    display-name: 電漿長矛
+    category: ADVANCED
+    tier: TIER4
+    icon: TRIDENT
+    description: 右鍵發射電漿直線光束，對路徑生物造成 6 顆心傷害。消耗 8 EU。
+    unlock: matter_compiler
+    use-cases:
+      - 右鍵：直線光束攻擊
+      - 需充電使用
+  void_mirror:
+    display-name: 虛空之鏡
+    category: ADVANCED
+    tier: TIER4
+    icon: SHIELD
+    description: 右鍵啟動抗性 III 護盾 5 秒，期間反彈投射物。消耗 10 EU。
+    unlock: matter_compiler
+    use-cases:
+      - 右鍵：護盾 + 反射
+      - 需充電使用
+  time_dilator:
+    display-name: 時間膨脹器
+    category: ADVANCED
+    tier: TIER4
+    icon: CLOCK
+    description: 右鍵令 8 格內所有生物減速 6 秒。消耗 8 EU。
+    unlock: matter_compiler
+    use-cases:
+      - 右鍵：範圍減速
+      - 需充電使用
+  heal_beacon:
+    display-name: 修復信標
+    category: ADVANCED
+    tier: TIER4
+    icon: NETHER_STAR
+    description: 右鍵立即回復 6 顆心並附加再生 10 秒。消耗 12 EU。
+    unlock: matter_compiler
+    use-cases:
+      - 右鍵：自我治癒
+      - 需充電使用
+  entropy_scepter:
+    display-name: 熵變權杖
+    category: ADVANCED
+    tier: TIER4
+    icon: WITHER_SKELETON_SKULL
+    description: 右鍵令 6 格內所有生物凋零 4 秒並受 4 顆心傷害。消耗 10 EU。
+    unlock: matter_compiler
+    use-cases:
+      - 右鍵：凋零範圍攻擊
+      - 需充電使用
+  titan_helmet:
+    display-name: 泰坦頭盔
+    category: INTERMEDIATE
+    tier: TIER2
+    icon: IRON_HELMET
+    description: 科技合金鍛造的頭盔。穿戴時自動獲得防火抗性。
+    unlock: assembler
+    use-cases:
+      - 穿戴：防火抗性
+      - 泰坦套裝件
+  titan_chestplate:
+    display-name: 泰坦胸甲
+    category: INTERMEDIATE
+    tier: TIER2
+    icon: IRON_CHESTPLATE
+    description: 科技合金鍛造的胸甲。穿戴時承受傷害降低 10%。
+    unlock: assembler
+    use-cases:
+      - 穿戴：10% 減傷
+      - 泰坦套裝件
+  titan_leggings:
+    display-name: 泰坦護腿
+    category: INTERMEDIATE
+    tier: TIER2
+    icon: IRON_LEGGINGS
+    description: 科技合金鍛造的護腿。穿戴時獲得速度 I。
+    unlock: assembler
+    use-cases:
+      - 穿戴：速度 I
+      - 泰坦套裝件
+  titan_boots:
+    display-name: 泰坦靴子
+    category: INTERMEDIATE
+    tier: TIER2
+    icon: IRON_BOOTS
+    description: 科技合金鍛造的靴子。穿戴時摔落傷害降低 50%。
+    unlock: assembler
+    use-cases:
+      - 穿戴：-50% 摔落傷害
+      - 泰坦套裝件
+  quantum_helmet:
+    display-name: 量子頭盔
+    category: ADVANCED
+    tier: TIER3
+    icon: DIAMOND_HELMET
+    description: 量子材質頭盔。穿戴時自動獲得夜視及水下呼吸。
+    unlock: quantum_processor
+    use-cases:
+      - 穿戴：夜視 + 水下呼吸
+      - 量子套裝件
+  quantum_chestplate:
+    display-name: 量子胸甲
+    category: ADVANCED
+    tier: TIER3
+    icon: DIAMOND_CHESTPLATE
+    description: 量子材質胸甲。穿戴時承受傷害降低 15%，受擊時反傷攻擊者。
+    unlock: quantum_processor
+    use-cases:
+      - 穿戴：15% 減傷 + 荊棘反傷
+      - 量子套裝件
+  quantum_leggings:
+    display-name: 量子護腿
+    category: ADVANCED
+    tier: TIER3
+    icon: DIAMOND_LEGGINGS
+    description: 量子材質護腿。穿戴時獲得速度 II。
+    unlock: quantum_processor
+    use-cases:
+      - 穿戴：速度 II
+      - 量子套裝件
+  quantum_boots:
+    display-name: 量子靴子
+    category: ADVANCED
+    tier: TIER3
+    icon: DIAMOND_BOOTS
+    description: 量子材質靴子。穿戴時完全免疫摔落傷害，水下高速移動。
+    unlock: quantum_processor
+    use-cases:
+      - 穿戴：免摔落 + 海豚親和
+      - 量子套裝件
+  void_crown:
+    display-name: 虛空之冠
+    category: ADVANCED
+    tier: TIER4
+    icon: NETHERITE_HELMET
+    description: 虛空材質王冠。穿戴時減傷 20% 並自動緩降。
+    unlock: matter_compiler
+    use-cases:
+      - 穿戴：20% 減傷 + 緩降
+      - 虛空套裝件
+  void_cuirass:
+    display-name: 虛空鎧甲
+    category: ADVANCED
+    tier: TIER4
+    icon: NETHERITE_CHESTPLATE
+    description: 虛空材質鎧甲。穿戴時自動再生，減傷 20%。
+    unlock: matter_compiler
+    use-cases:
+      - 穿戴：再生 + 20% 減傷
+      - 虛空套裝件
+  void_greaves:
+    display-name: 虛空護脛
+    category: ADVANCED
+    tier: TIER4
+    icon: NETHERITE_LEGGINGS
+    description: 虛空材質護脛。穿戴時獲得速度 III。
+    unlock: matter_compiler
+    use-cases:
+      - 穿戴：速度 III
+      - 虛空套裝件
+  void_sabatons:
+    display-name: 虛空戰靴
+    category: ADVANCED
+    tier: TIER4
+    icon: NETHERITE_BOOTS
+    description: 虛空材質戰靴。穿戴時完全免疫摔落及火焰傷害。
+    unlock: matter_compiler
+    use-cases:
+      - 穿戴：免摔落 + 免火傷
+      - 虛空套裝件
+  talisman_fire:
+    display-name: 防焰護符
+    category: INTERMEDIATE
+    tier: TIER2
+    icon: MAGMA_CREAM
+    description: 放在背包中，著火時自動獲得 30 秒防火效果。冷卻 60 秒。
+    unlock: field_forge
+    use-cases:
+      - 被動：著火時防火
+      - 放在背包即生效
+  talisman_water:
+    display-name: 深海護符
+    category: INTERMEDIATE
+    tier: TIER2
+    icon: HEART_OF_THE_SEA
+    description: 放在背包中，溺水時自動獲得 60 秒水下呼吸。冷卻 90 秒。
+    unlock: field_forge
+    use-cases:
+      - 被動：溺水時水下呼吸
+      - 放在背包即生效
+  talisman_angel:
+    display-name: 天使護符
+    category: INTERMEDIATE
+    tier: TIER2
+    icon: FEATHER
+    description: 放在背包中，摔落時自動抵消傷害。冷卻 45 秒。
+    unlock: field_forge
+    use-cases:
+      - 被動：防摔落傷害
+      - 放在背包即生效
+  talisman_warrior:
+    display-name: 戰士護符
+    category: INTERMEDIATE
+    tier: TIER2
+    icon: GOLDEN_SWORD
+    description: 放在背包中，攻擊時自動獲得力量 I 持續 8 秒。冷卻 30 秒。
+    unlock: field_forge
+    use-cases:
+      - 被動：攻擊時增傷
+      - 放在背包即生效
+  talisman_knight:
+    display-name: 騎士護符
+    category: ADVANCED
+    tier: TIER3
+    icon: GOLDEN_CHESTPLATE
+    description: 放在背包中，血量低於 50% 被擊時自動獲得抗性 II 持續 5 秒。冷卻 60 秒。
+    unlock: laser_engraver
+    use-cases:
+      - 被動：低血量減傷護盾
+      - 放在背包即生效
+  talisman_traveler:
+    display-name: 旅者護符
+    category: INTERMEDIATE
+    tier: TIER2
+    icon: GOLDEN_BOOTS
+    description: 放在背包中，疾跑時自動獲得速度 II 持續 15 秒。冷卻 45 秒。
+    unlock: field_forge
+    use-cases:
+      - 被動：疾跑加速
+      - 放在背包即生效
+  talisman_hunter:
+    display-name: 獵人護符
+    category: ADVANCED
+    tier: TIER3
+    icon: BOW
+    description: 放在背包中，擊殺生物時 25% 機率雙倍掉落。
+    unlock: laser_engraver
+    use-cases:
+      - 被動：雙倍戰利品
+      - 放在背包即生效
+  talisman_miner:
+    display-name: 礦工護符
+    category: ADVANCED
+    tier: TIER3
+    icon: GOLDEN_PICKAXE
+    description: 放在背包中，挖礦時自動燒煉礦石掉落。
+    unlock: laser_engraver
+    use-cases:
+      - 被動：自動燒煉礦石
+      - 放在背包即生效
+  talisman_farmer:
+    display-name: 農夫護符
+    category: INTERMEDIATE
+    tier: TIER2
+    icon: GOLDEN_HOE
+    description: 放在背包中，收割作物時 25% 機率雙倍收穫。
+    unlock: field_forge
+    use-cases:
+      - 被動：雙倍作物
+      - 放在背包即生效
+  talisman_anvil:
+    display-name: 鐵砧護符
+    category: ADVANCED
+    tier: TIER3
+    icon: ANVIL
+    description: 放在背包中，工具即將損壞時自動保護（殘餘 1 耐久）。冷卻 120 秒。
+    unlock: laser_engraver
+    use-cases:
+      - 被動：防工具損壞
+      - 放在背包即生效
+  talisman_heal:
+    display-name: 再生護符
+    category: ADVANCED
+    tier: TIER3
+    icon: GOLDEN_APPLE
+    description: 放在背包中，血量低於 30% 時自動獲得再生 II 持續 5 秒。冷卻 90 秒。
+    unlock: laser_engraver
+    use-cases:
+      - 被動：低血量再生
+      - 放在背包即生效
+  talisman_whirlwind:
+    display-name: 旋風護符
+    category: ADVANCED
+    tier: TIER3
+    icon: PHANTOM_MEMBRANE
+    description: 放在背包中，被近戰攻擊時自動擊退周圍生物。冷卻 20 秒。
+    unlock: laser_engraver
+    use-cases:
+      - 被動：反擊退
+      - 放在背包即生效
+machines:
+  kiln:
+    display-name: 工業窯爐
+    category: INTERMEDIATE
+    block: BRICKS
+    inputs: [clay_ball, ceramic_plate, heat_coil]
+    outputs: [ceramic_plate, thermal_ceramic]
+    energy-per-tick: 12
+    effect: 陶材燒結
+    unlock: furnace
+  insulation_press:
+    display-name: 絕緣壓製台
+    category: INTERMEDIATE
+    block: LOOM
+    inputs: [copper_wire, plastic, logic_gate, servo_motor]
+    outputs: [insulated_wire, sensor_array, servo_bundle]
+    energy-per-tick: 11
+    effect: 線材包覆壓製
+    unlock: wire_mill
+  cryo_distiller:
+    display-name: 低溫蒸餾器
+    category: ADVANCED
+    block: POWDER_SNOW_CAULDRON
+    inputs: [coolant_mix, refined_oil, hydro_gel, coolant_cell, grown_crystal]
+    outputs: [coolant_canister, cryo_gel, cryo_core]
+    energy-per-tick: 18
+    effect: 低溫相變蒸餾
+    unlock: purifier
+  gene_splicer:
+    display-name: 基因切片台
+    category: ADVANCED
+    block: BREWING_STAND
+    inputs: [bio_resin, fertilizer_mix, crops, etched_circuit, synthetic_fiber, steel_plate, precision_nozzle]
+    outputs: [bio_catalyst, gene_template, neural_resin, splicer_blade]
+    energy-per-tick: 20
+    effect: 基因樣板切片
+    unlock: bio_lab
+  biosynth_vat:
+    display-name: 生質合成槽
+    category: ADVANCED
+    block: CAULDRON
+    inputs: [gene_template, bio_catalyst, soybean_pods]
+    outputs: [synth_meat, protein_ration]
+    energy-per-tick: 16
+    effect: 生質批次培養
+    unlock: gene_splicer
+  plasma_refiner:
+    display-name: 等離子精煉爐
+    category: ADVANCED
+    tier: TIER4
+    block: BLAST_FURNACE
+    inputs: [ion_dust, refined_oil, titanium_alloy, alloy_frame]
+    outputs: [plasma_dust, plasma_ingot, reactor_lattice]
+    energy-per-tick: 28
+    effect: 等離子穩定化
+    unlock: fusion_reactor
+  photon_weaver:
+    display-name: 光子織構機
+    category: ADVANCED
+    block: SEA_LANTERN
+    inputs: [laser_lens, starlight_plate, reinforced_glass, optic_lens]
+    outputs: [photon_shard, photon_plate, observatory_lens]
+    energy-per-tick: 24
+    effect: 光束編織成形
+    unlock: laser_engraver
+  observatory:
+    display-name: 軌道觀測台
+    category: ADVANCED
+    block: LECTERN
+    inputs: [observatory_lens, data_matrix, magnetic_ring, graviton_lens, vacuum_tube, control_unit]
+    outputs: [star_chart, gravitic_bearing, vacuum_module, data_core]
+    energy-per-tick: 22
+    effect: 軌道資料測繪
+    unlock: quantum_processor
+  data_archive:
+    display-name: 資料封存庫
+    category: ADVANCED
+    block: CHISELED_BOOKSHELF
+    inputs: [data_core, gravitic_bearing]
+    outputs: [archive_plate]
+    energy-per-tick: 20
+    effect: 壓縮封存資料
+    unlock: observatory
+  survey_beacon:
+    display-name: 行星測繪信標
+    category: ADVANCED
+    tier: TIER4
+    block: BEACON
+    inputs: [survey_chip, star_chart, data_core]
+    outputs: [survey_data]
+    energy-per-tick: 24
+    effect: 將觀測資料轉成可用的星球測繪樣本
+    unlock: observatory&item:anti_radiation_helmet&stat:planetary_samples_collected>=6
+  relic_analyzer:
+    display-name: 遺物解析儀
+    category: ADVANCED
+    tier: TIER4
+    block: CALIBRATED_SCULK_SENSOR
+    inputs: [survey_data, planetary_relic, cryon_relic, nyx_relic]
+    outputs: [ancient_signal]
+    energy-per-tick: 26
+    effect: 解析異星遺物並抽出古訊號片段
+    unlock: machine:survey_beacon&(item:planetary_relic|item:cryon_relic|item:nyx_relic)&stat:planet_ruins_activated>=1
+  xeno_refinery:
+    display-name: 異星精煉槽
+    category: ADVANCED
+    tier: TIER4
+    block: SMITHING_TABLE
+    inputs: [ancient_signal, irradiated_shard, cryonite_crystal, voidglass_fragment, aurelia_parasite_gland, cryon_ice_heart, nyx_phase_tissue]
+    outputs: [xeno_alloy, radiation_mesh, thermal_lining, pressure_membrane, flare_shielding, storm_baffle]
+    energy-per-tick: 28
+    effect: 將地表樣本、戰鬥樣本與遺跡資料精煉成防護模組與異星合金
+    unlock: machine:relic_analyzer&item:cryonite_crystal&item:voidglass_fragment&stat:planet_elites_defeated>=2
+  planetary_forge:
+    display-name: 行星鍛造台
+    category: ADVANCED
+    tier: TIER4
+    block: NETHERITE_BLOCK
+    inputs: [xeno_alloy, seal_fabric, exo_frame, radiation_mesh, thermal_lining, pressure_membrane]
+    outputs: [anti_radiation_chestplate, thermal_chestplate, pressure_chestplate, frontier_chestplate]
+    energy-per-tick: 30
+    effect: 生產模組化行星防護裝與高階探索骨架
+    unlock: machine:xeno_refinery&item:xeno_alloy&stat:planet_ruins_activated>=3
+  planetary_gate:
+    display-name: 行星星門
+    category: ADVANCED
+    tier: TIER4
+    block: CONDUIT
+    inputs: [survey_data, gravitic_bearing, quantum_frame, xeno_alloy]
+    outputs: [survey_data]
+    energy-per-tick: 12
+    effect: 平時維持 12 EU 吸能，啟動躍遷時額外消耗 1200 EU 將玩家投送至目標星球
+    unlock: machine:planetary_forge&item:ancient_signal&stat:planet_elites_defeated>=3
+  planetary_harvester:
+    display-name: 行星採集機
+    category: ADVANCED
+    tier: TIER4
+    block: OBSERVER
+    inputs: [harvest_unit, sensor_array, servo_bundle, xeno_alloy]
+    outputs: [irradiated_shard, cryonite_crystal, voidglass_fragment, solarite_shard, stormglass_shard]
+    energy-per-tick: 20
+    effect: 自動回收行星地表樣本與異星生質
+    unlock: machine:survey_beacon&item:irradiated_shard&stat:planetary_samples_collected>=18
+recipes:
+  kiln_ceramic_plate:
+    machine: kiln
+    inputs: [clay_ball]
+    output: ceramic_plate
+    energy: 12
+    guide: 黏土球 → 窯爐 → 陶瓷板
+  kiln_thermal_ceramic:
+    machine: kiln
+    inputs: [ceramic_plate, heat_coil]
+    output: thermal_ceramic
+    energy: 14
+    guide: 陶瓷板 + 熱線圈 → 窯爐 → 隔熱陶瓷
+  insulation_wire_recipe:
+    machine: insulation_press
+    inputs: [copper_wire, plastic]
+    output: insulated_wire
+    energy: 11
+    guide: 銅線 + 塑膠 → 絕緣壓床 → 絕緣導線
+  insulation_sensor_array:
+    machine: insulation_press
+    inputs: [insulated_wire, logic_gate]
+    output: sensor_array
+    energy: 13
+    guide: 絕緣導線 + 邏輯閘 → 絕緣壓床 → 感測陣列
+  insulation_servo_bundle:
+    machine: insulation_press
+    inputs: [servo_motor, insulated_wire]
+    output: servo_bundle
+    energy: 13
+    guide: 伺服馬達 + 絕緣導線 → 絕緣壓床 → 伺服束線
+  cryo_canister_recipe:
+    machine: cryo_distiller
+    inputs: [coolant_mix, refined_oil]
+    output: coolant_canister
+    energy: 17
+    guide: 冷卻混合液 + 精煉油 → 低溫蒸餾器 → 冷卻罐
+  cryo_gel_recipe:
+    machine: cryo_distiller
+    inputs: [hydro_gel, coolant_cell]
+    output: cryo_gel
+    energy: 16
+    guide: 水凝膠 + 冷卻電池 → 低溫蒸餾器 → 低溫凝膠
+  cryo_core_recipe:
+    machine: cryo_distiller
+    inputs: [coolant_canister, grown_crystal]
+    output: cryo_core
+    energy: 20
+    guide: 冷卻罐 + 培育晶體 → 低溫蒸餾器 → 低溫核心
+  gene_bio_catalyst_recipe:
+    machine: gene_splicer
+    inputs: [bio_resin, fertilizer_mix]
+    output: bio_catalyst
+    energy: 18
+    guide: 生質樹脂 + 肥料混合物 → 基因剪接台 → 生質催化劑
+  gene_template_recipe:
+    machine: gene_splicer
+    inputs: [crops, etched_circuit]
+    output: gene_template
+    energy: 20
+    guide: 作物 + 蝕刻電路 → 基因剪接台 → 基因模板
+  gene_neural_resin_recipe:
+    machine: gene_splicer
+    inputs: [bio_resin, synthetic_fiber]
+    output: neural_resin
+    energy: 19
+    guide: 生質樹脂 + 合成纖維 → 基因剪接台 → 神經樹脂
+  gene_splicer_blade_recipe:
+    machine: gene_splicer
+    inputs: [steel_plate, precision_nozzle]
+    output: splicer_blade
+    energy: 17
+    guide: 鋼板 + 精密噴嘴 → 基因剪接台 → 剪接刀片
+  biosynth_meat_recipe:
+    machine: biosynth_vat
+    inputs: [gene_template, bio_catalyst]
+    output: synth_meat
+    energy: 16
+    guide: 基因模板 + 生質催化劑 → 生物合成槽 → 合成肉
+  auto_farm_soybean_seed:
+    machine: auto_farm
+    inputs: [crop_seeds, fertilizer_mix]
+    output: soybean_seeds
+    energy: 4
+    guide: 作物種子 + 肥料混合物 → 自動農場 → 黃豆種子
+  greenhouse_spiceberry_seed:
+    machine: greenhouse
+    inputs: [seed_cluster, fertilizer_mix]
+    output: spiceberry_seeds
+    energy: 8
+    guide: 種子簇 + 肥料混合物 → 溫室培育艙 → 香莓種子
+  greenhouse_tea_leaf_seed:
+    machine: greenhouse
+    inputs: [seed_cluster, hydro_gel]
+    output: tea_leaf_seeds
+    energy: 8
+    guide: 種子簇 + 水凝膠 → 溫室培育艙 → 茶葉種子
+  bio_lab_nutrition_bar:
+    machine: bio_lab
+    inputs: [soybean_pods, spiceberry]
+    output: nutrition_bar
+    energy: 12
+    guide: 黃豆莢 + 香莓 → 生質實驗室 → 營養棒
+  biosynth_protein_ration:
+    machine: biosynth_vat
+    inputs: [synth_meat, soybean_pods]
+    output: protein_ration
+    energy: 18
+    guide: 合成肉 + 黃豆莢 → 生物合成槽 → 蛋白口糧
+  coolant_radiant_tea:
+    machine: coolant_mixer
+    inputs: [tea_leaf, hydro_gel]
+    output: radiant_tea
+    energy: 10
+    guide: 茶葉 + 水凝膠 → 冷卻混合器 → 輝光茶飲
+  bio_lab_fruit_puree:
+    machine: bio_lab
+    inputs: [lumenfruit, shadow_berry_cluster]
+    output: fruit_puree
+    energy: 14
+    guide: 微光果 + 影莓串 → 生質實驗室 → 果泥
+  coolant_nebula_juice:
+    machine: coolant_mixer
+    inputs: [frost_apple, lumenfruit]
+    output: nebula_juice
+    energy: 12
+    guide: 霜蘋果 + 微光果 → 冷卻混合器 → 星雲果汁
+  biosynth_orchard_ration:
+    machine: biosynth_vat
+    inputs: [fruit_puree, soybean_pods]
+    output: orchard_ration
+    energy: 18
+    guide: 果泥 + 黃豆莢 → 生物合成槽 → 果園口糧
+  bio_lab_stormplum_gel:
+    machine: bio_lab
+    inputs: [stormplum, hydro_gel]
+    output: radiant_tea
+    energy: 11
+    guide: 風暴李 + 水凝膠 → 生質實驗室 → 輝光茶變種
+  biosynth_fig_bar:
+    machine: biosynth_vat
+    inputs: [sunflare_fig, fruit_puree]
+    output: nutrition_bar
+    energy: 16
+    guide: 烈陽無花果 + 果泥 → 生物合成槽 → 營養棒
+  auto_farm_tomato_seed:
+    machine: auto_farm
+    inputs: [crop_seeds, bio_catalyst]
+    output: tomato_seeds
+    energy: 4
+    guide: 作物種子 + 生質催化劑 → 自動農場 → 番茄種子
+  auto_farm_cabbage_seed:
+    machine: auto_farm
+    inputs: [crop_seeds, hydro_gel]
+    output: cabbage_seeds
+    energy: 4
+    guide: 作物種子 + 水凝膠 → 自動農場 → 高麗菜種子
+  greenhouse_corn_seed:
+    machine: greenhouse
+    inputs: [seed_cluster, bio_catalyst]
+    output: corn_seeds
+    energy: 8
+    guide: 種子簇 + 生質催化劑 → 溫室培育艙 → 玉米粒種
+  greenhouse_onion_bulbs:
+    machine: greenhouse
+    inputs: [seed_cluster, gene_template]
+    output: onion_bulbs
+    energy: 8
+    guide: 種子簇 + 基因模板 → 溫室培育艙 → 洋蔥球根
+  coolant_lemon_juice:
+    machine: coolant_mixer
+    inputs: [lemon, hydro_gel]
+    output: lemon_juice
+    energy: 10
+    guide: 黃檸果 + 水凝膠 → 冷卻混合器 → 檸果汁
+  coolant_orange_juice:
+    machine: coolant_mixer
+    inputs: [orange, hydro_gel]
+    output: orange_juice
+    energy: 10
+    guide: 香橙 + 水凝膠 → 冷卻混合器 → 香橙汁
+  coolant_peach_juice:
+    machine: coolant_mixer
+    inputs: [peach, hydro_gel]
+    output: peach_juice
+    energy: 10
+    guide: 蜜桃 + 水凝膠 → 冷卻混合器 → 蜜桃汁
+  coolant_pear_juice:
+    machine: coolant_mixer
+    inputs: [pear, hydro_gel]
+    output: pear_juice
+    energy: 10
+    guide: 青梨 + 水凝膠 → 冷卻混合器 → 青梨汁
+  coolant_cherry_juice:
+    machine: coolant_mixer
+    inputs: [cherry, hydro_gel]
+    output: cherry_juice
+    energy: 10
+    guide: 櫻桃 + 水凝膠 → 冷卻混合器 → 櫻桃汁
+  bio_lab_orchard_salad:
+    machine: bio_lab
+    inputs: [tomato, cabbage]
+    output: orchard_salad
+    energy: 11
+    guide: 番茄 + 高麗菜球 → 生質實驗室 → 果園沙拉
+  bio_lab_cornbread:
+    machine: bio_lab
+    inputs: [corn, soybean_pods]
+    output: cornbread
+    energy: 12
+    guide: 甜玉米 + 黃豆莢 → 生質實驗室 → 玉米麵包
+  bio_lab_stuffed_cabbage:
+    machine: bio_lab
+    inputs: [cabbage, onion]
+    output: stuffed_cabbage
+    energy: 12
+    guide: 高麗菜球 + 洋蔥 → 生質實驗室 → 捲心菜捲
+  biosynth_sunrise_pie:
+    machine: biosynth_vat
+    inputs: [orange, peach]
+    output: sunrise_pie
+    energy: 16
+    guide: 香橙 + 蜜桃 → 生物合成槽 → 晨光果派
+  biosynth_berry_tart:
+    machine: biosynth_vat
+    inputs: [shadow_berry_cluster, spiceberry]
+    output: berry_tart
+    energy: 16
+    guide: 影莓串 + 香莓 → 生物合成槽 → 漿果塔派
+  bio_lab_citrus_salad:
+    machine: bio_lab
+    inputs: [orange, lemon]
+    output: citrus_salad
+    energy: 11
+    guide: 香橙 + 黃檸果 → 生質實驗室 → 柑橘沙拉
+  bio_lab_tomato_stew:
+    machine: bio_lab
+    inputs: [tomato, onion]
+    output: tomato_stew
+    energy: 11
+    guide: 番茄 + 洋蔥 → 生質實驗室 → 番茄燉鍋
+  coolant_orchard_smoothie:
+    machine: coolant_mixer
+    inputs: [peach, pear]
+    output: orchard_smoothie
+    energy: 11
+    guide: 蜜桃 + 青梨 → 冷卻混合器 → 果園奶昔
+  coolant_sparkling_lemonade:
+    machine: coolant_mixer
+    inputs: [lemon, orange]
+    output: sparkling_lemonade
+    energy: 11
+    guide: 黃檸果 + 香橙 → 冷卻混合器 → 氣泡檸橙飲
+  biosynth_peach_cobbler:
+    machine: biosynth_vat
+    inputs: [peach, corn]
+    output: peach_cobbler
+    energy: 16
+    guide: 蜜桃 + 甜玉米 → 生物合成槽 → 蜜桃派盆
+  biosynth_pear_crisp:
+    machine: biosynth_vat
+    inputs: [pear, cornbread]
+    output: pear_crisp
+    energy: 16
+    guide: 青梨 + 玉米麵包 → 生物合成槽 → 青梨脆派
+  bio_lab_aurelia_glaze:
+    machine: bio_lab
+    inputs: [lumenfruit, irradiated_shard]
+    output: aurelia_glaze
+    energy: 18
+    guide: 流明果 + 輻照碎片 → 生質實驗室 → 輻晶蜜凍
+  biosynth_cryon_hotpot:
+    machine: biosynth_vat
+    inputs: [frost_apple, cryonite_crystal]
+    output: cryon_hotpot
+    energy: 18
+    guide: 霜蘋果 + 低溫晶體 → 生物合成槽 → 霜芯暖鍋
+  coolant_nyx_phase_gel:
+    machine: coolant_mixer
+    inputs: [shadow_berry_cluster, voidglass_fragment]
+    output: nyx_phase_gel
+    energy: 18
+    guide: 影莓串 + 虛玻碎片 → 冷卻混合器 → 相位凝露
+  cryo_helion_sorbet:
+    machine: cryo_distiller
+    inputs: [sunflare_fig, solarite_shard]
+    output: helion_sorbet
+    energy: 18
+    guide: 烈陽無花果 + 日灼碎片 → 低溫蒸餾器 → 日冕雪酪
+  coolant_tempest_fizz:
+    machine: coolant_mixer
+    inputs: [stormplum, stormglass_shard]
+    output: tempest_fizz
+    energy: 18
+    guide: 風暴李 + 暴嵐玻片 → 冷卻混合器 → 雷雲汽泡飲
+  assembler_field_sickle:
+    machine: assembler
+    inputs: [harvest_unit, steel_plate]
+    output: field_sickle
+    energy: 14
+    guide: 收割單元 + 鋼板 → 製造機 → 田野鐮刀
+  assembler_hydro_spade:
+    machine: assembler
+    inputs: [agri_module, servo_motor]
+    output: hydro_spade
+    energy: 14
+    guide: 農業模組 + 伺服馬達 → 製造機 → 水培鏟
+  assembler_vector_grapple:
+    machine: assembler
+    inputs: [servo_bundle, insulated_wire, sensor_array]
+    output: vector_grapple
+    energy: 18
+    guide: 伺服模組束 + 絕緣線材 + 感測陣列 → 製造機 → 向量抓鉤
+  advanced_pulse_thruster:
+    machine: advanced_assembler
+    inputs: [pressure_membrane, plasma_cell, precision_nozzle]
+    output: pulse_thruster
+    energy: 24
+    guide: 壓差膜層 + 電漿容器 + 精密噴嘴 → 進階製造機 → 脈衝推進器
+  purifier_radiation_filter:
+    machine: purifier
+    inputs: [rust_filter, nano_coating]
+    output: radiation_filter
+    energy: 14
+    guide: 鏽蝕濾芯 + 奈米塗層 → 淨化器 → 輻射濾網
+  observatory_survey_chip:
+    machine: observatory
+    inputs: [star_chart, data_core]
+    output: survey_chip
+    energy: 24
+    guide: 星圖 + 數據核心 → 天文觀測台 → 測繪晶片
+  survey_beacon_data:
+    machine: survey_beacon
+    inputs: [survey_chip, star_chart]
+    output: survey_data
+    energy: 24
+    guide: 測繪晶片 + 星圖 → 測繪信標 → 測繪資料
+  relic_analyzer_aurelia:
+    machine: relic_analyzer
+    inputs: [survey_data, planetary_relic]
+    output: ancient_signal
+    energy: 26
+    guide: 測繪資料 + 行星遺物 → 遺物解析儀 → 古代訊號
+  relic_analyzer_cryon:
+    machine: relic_analyzer
+    inputs: [survey_data, cryon_relic]
+    output: ancient_signal
+    energy: 26
+    guide: 測繪資料 + 克里昂遺物 → 遺物解析儀 → 古代訊號
+  relic_analyzer_nyx:
+    machine: relic_analyzer
+    inputs: [survey_data, nyx_relic]
+    output: ancient_signal
+    energy: 26
+    guide: 測繪資料 + 倪克斯遺核 → 遺物解析儀 → 古代訊號
+  relic_analyzer_helion:
+    machine: relic_analyzer
+    inputs: [ancient_signal, helion_relic]
+    output: frontier_core_fragment
+    energy: 30
+    guide: 古代訊號 + 赫利昂炎核遺物 → 遺物解析儀 → 前線核心碎片
+  relic_analyzer_tempest:
+    machine: relic_analyzer
+    inputs: [ancient_signal, tempest_relic]
+    output: frontier_core_fragment
+    energy: 30
+    guide: 古代訊號 + 坦佩斯特雷核遺物 → 遺物解析儀 → 前線核心碎片
+  xeno_alloy_recipe:
+    machine: xeno_refinery
+    inputs: [ancient_signal, irradiated_shard]
+    output: xeno_alloy
+    energy: 28
+    guide: 古代訊號 + 輻照碎晶 → 異星精煉台 → 異星合金
+  xeno_radiation_mesh:
+    machine: xeno_refinery
+    inputs: [xeno_alloy, irradiated_shard, aurelia_parasite_gland]
+    output: radiation_mesh
+    energy: 29
+    guide: 異星合金 + 輻照碎晶 + 奧蕾莉亞寄生腺體 → 異星精煉台 → 輻射網層
+  xeno_thermal_lining:
+    machine: xeno_refinery
+    inputs: [xeno_alloy, cryonite_crystal, cryon_ice_heart]
+    output: thermal_lining
+    energy: 29
+    guide: 異星合金 + 冰晶礦核 + 克里昂冰脈核心 → 異星精煉台 → 低溫內襯
+  xeno_pressure_membrane:
+    machine: xeno_refinery
+    inputs: [xeno_alloy, voidglass_fragment, nyx_phase_tissue]
+    output: pressure_membrane
+    energy: 29
+    guide: 異星合金 + 虛璃碎片 + 倪克斯相位膜組織 → 異星精煉台 → 壓差膜層
+  xeno_flare_shielding:
+    machine: xeno_refinery
+    inputs: [xeno_alloy, solarite_shard, helion_cinder_core]
+    output: flare_shielding
+    energy: 31
+    guide: 異星合金 + 日灼碎片 + 赫利昂灰燼燃核 → 異星精煉台 → 耀焰屏護層
+  xeno_storm_baffle:
+    machine: xeno_refinery
+    inputs: [xeno_alloy, stormglass_shard, tempest_capacitor]
+    output: storm_baffle
+    energy: 31
+    guide: 異星合金 + 風暴玻璃碎片 + 坦佩斯特電容核 → 異星精煉台 → 風暴導流層
+  planetary_exo_frame:
+    machine: planetary_forge
+    inputs: [xeno_alloy, composite_panel]
+    output: exo_frame
+    energy: 30
+    guide: 異星合金 + 複合面板 → 行星鍛造台 → 外骨骼框架
+  planetary_seal_fabric:
+    machine: planetary_forge
+    inputs: [synthetic_fiber, void_bloom]
+    output: seal_fabric
+    energy: 28
+    guide: 合成纖維 + 虛空花簇 → 行星鍛造台 → 密封織層
+  advanced_anti_radiation_helmet:
+    machine: planetary_forge
+    inputs: [exo_frame, seal_fabric, radiation_mesh, glass_panel]
+    output: anti_radiation_helmet
+    energy: 32
+    guide: 外骨骼框架 + 密封織層 + 輻射網層 + 玻璃板 → 行星鍛造台 → 抗輻射頭盔
+  advanced_anti_radiation_chestplate:
+    machine: planetary_forge
+    inputs: [exo_frame, seal_fabric, radiation_mesh, carbon_mesh]
+    output: anti_radiation_chestplate
+    energy: 34
+    guide: 外骨骼框架 + 密封織層 + 輻射網層 + 碳纖網 → 行星鍛造台 → 抗輻射胸甲
+  advanced_anti_radiation_leggings:
+    machine: planetary_forge
+    inputs: [exo_frame, seal_fabric, radiation_mesh, insulated_wire]
+    output: anti_radiation_leggings
+    energy: 33
+    guide: 外骨骼框架 + 密封織層 + 輻射網層 + 絕緣導線 → 行星鍛造台 → 抗輻射護腿
+  advanced_anti_radiation_boots:
+    machine: planetary_forge
+    inputs: [exo_frame, seal_fabric, radiation_mesh, rubber_sheet]
+    output: anti_radiation_boots
+    energy: 31
+    guide: 外骨骼框架 + 密封織層 + 輻射網層 + 橡膠片 → 行星鍛造台 → 抗輻射靴
+  planetary_thermal_helmet:
+    machine: planetary_forge
+    inputs: [exo_frame, seal_fabric, thermal_lining, glass_panel]
+    output: thermal_helmet
+    energy: 32
+    guide: 外骨骼框架 + 密封織層 + 低溫內襯 + 玻璃板 → 行星鍛造台 → 低溫頭盔
+  planetary_thermal_chestplate:
+    machine: planetary_forge
+    inputs: [exo_frame, seal_fabric, thermal_lining, carbon_mesh]
+    output: thermal_chestplate
+    energy: 34
+    guide: 外骨骼框架 + 密封織層 + 低溫內襯 + 碳纖網 → 行星鍛造台 → 低溫胸甲
+  planetary_thermal_leggings:
+    machine: planetary_forge
+    inputs: [exo_frame, seal_fabric, thermal_lining, insulated_wire]
+    output: thermal_leggings
+    energy: 33
+    guide: 外骨骼框架 + 密封織層 + 低溫內襯 + 絕緣導線 → 行星鍛造台 → 低溫護腿
+  planetary_thermal_boots:
+    machine: planetary_forge
+    inputs: [exo_frame, seal_fabric, thermal_lining, rubber_sheet]
+    output: thermal_boots
+    energy: 31
+    guide: 外骨骼框架 + 密封織層 + 低溫內襯 + 橡膠片 → 行星鍛造台 → 低溫靴
+  planetary_pressure_helmet:
+    machine: planetary_forge
+    inputs: [exo_frame, seal_fabric, pressure_membrane, glass_panel]
+    output: pressure_helmet
+    energy: 32
+    guide: 外骨骼框架 + 密封織層 + 壓差膜層 + 玻璃板 → 行星鍛造台 → 真空頭盔
+  planetary_pressure_chestplate:
+    machine: planetary_forge
+    inputs: [exo_frame, seal_fabric, pressure_membrane, carbon_mesh]
+    output: pressure_chestplate
+    energy: 34
+    guide: 外骨骼框架 + 密封織層 + 壓差膜層 + 碳纖網 → 行星鍛造台 → 真空胸甲
+  planetary_pressure_leggings:
+    machine: planetary_forge
+    inputs: [exo_frame, seal_fabric, pressure_membrane, insulated_wire]
+    output: pressure_leggings
+    energy: 33
+    guide: 外骨骼框架 + 密封織層 + 壓差膜層 + 絕緣導線 → 行星鍛造台 → 真空護腿
+  planetary_pressure_boots:
+    machine: planetary_forge
+    inputs: [exo_frame, seal_fabric, pressure_membrane, rubber_sheet]
+    output: pressure_boots
+    energy: 31
+    guide: 外骨骼框架 + 密封織層 + 壓差膜層 + 橡膠片 → 行星鍛造台 → 真空靴
+  frontier_core_recipe:
+    machine: planetary_forge
+    inputs: [frontier_core_fragment, xeno_alloy, helion_cinder_core, tempest_capacitor]
+    output: frontier_core
+    energy: 34
+    guide: 前線核心碎片 + 異星合金 + 赫利昂灰燼燃核 + 坦佩斯特電容核 → 行星鍛造台 → 前線核心
+  frontier_helmet_recipe:
+    machine: planetary_forge
+    inputs: [frontier_core, flare_shielding, storm_baffle, glass_panel]
+    output: frontier_helmet
+    energy: 36
+    guide: 前線核心 + 耀焰屏護層 + 風暴導流層 + 玻璃板 → 行星鍛造台 → 前線頭盔
+  frontier_chestplate_recipe:
+    machine: planetary_forge
+    inputs: [frontier_core, flare_shielding, storm_baffle, carbon_mesh]
+    output: frontier_chestplate
+    energy: 38
+    guide: 前線核心 + 耀焰屏護層 + 風暴導流層 + 碳纖網 → 行星鍛造台 → 前線胸甲
+  frontier_leggings_recipe:
+    machine: planetary_forge
+    inputs: [frontier_core, flare_shielding, storm_baffle, insulated_wire]
+    output: frontier_leggings
+    energy: 37
+    guide: 前線核心 + 耀焰屏護層 + 風暴導流層 + 絕緣導線 → 行星鍛造台 → 前線護腿
+  frontier_boots_recipe:
+    machine: planetary_forge
+    inputs: [frontier_core, flare_shielding, storm_baffle, rubber_sheet]
+    output: frontier_boots
+    energy: 35
+    guide: 前線核心 + 耀焰屏護層 + 風暴導流層 + 橡膠片 → 行星鍛造台 → 前線靴
+  planetary_gate_recipe:
+    machine: advanced_assembler
+    inputs: [gravitic_bearing, quantum_frame, xeno_alloy]
+    output: planetary_gate
+    energy: 34
+    guide: 重力軸承 + 量子框架 + 異星合金 → 進階製造機 → 行星星門
+  storm_jetpack_recipe:
+    machine: planetary_forge
+    inputs: [frontier_core, storm_baffle, drone_frame, precision_nozzle]
+    output: storm_jetpack
+    energy: 40
+    guide: 前線核心 + 風暴偏轉層 + 無人機框架 + 精密噴嘴 → 行星鍛造台 → 風暴噴射背包
+  plasma_dust_recipe:
+    machine: plasma_refiner
+    inputs: [ion_dust, refined_oil]
+    output: plasma_dust
+    energy: 26
+    guide: 離子粉 + 精煉油 → 電漿精煉器 → 電漿粉
+  plasma_ingot_recipe:
+    machine: plasma_refiner
+    inputs: [titanium_alloy, plasma_dust]
+    output: plasma_ingot
+    energy: 28
+    guide: 鈦合金 + 電漿粉 → 電漿精煉器 → 電漿錠
+  reactor_lattice_recipe:
+    machine: plasma_refiner
+    inputs: [plasma_ingot, alloy_frame]
+    output: reactor_lattice
+    energy: 29
+    guide: 電漿錠 + 合金框架 → 電漿精煉器 → 反應格架
+  photon_shard_recipe:
+    machine: photon_weaver
+    inputs: [laser_lens, starlight_plate]
+    output: photon_shard
+    energy: 23
+    guide: 雷射鏡 + 星光板 → 光子編織機 → 光子碎片
+  photon_plate_recipe:
+    machine: photon_weaver
+    inputs: [photon_shard, reinforced_glass]
+    output: photon_plate
+    energy: 25
+    guide: 光子碎片 + 強化玻璃 → 光子編織機 → 光子板
+  observatory_lens_recipe:
+    machine: photon_weaver
+    inputs: [photon_shard, optic_lens]
+    output: observatory_lens
+    energy: 24
+    guide: 光子碎片 + 光學鏡片 → 光子編織機 → 觀測透鏡
+  observatory_star_chart_recipe:
+    machine: observatory
+    inputs: [observatory_lens, data_matrix]
+    output: star_chart
+    energy: 22
+    guide: 觀測透鏡 + 數據矩陣 → 天文觀測台 → 星圖
+  observatory_bearing_recipe:
+    machine: observatory
+    inputs: [magnetic_ring, graviton_lens]
+    output: gravitic_bearing
+    energy: 24
+    guide: 磁環 + 重力子透鏡 → 天文觀測台 → 重力軸承
+  observatory_vacuum_module_recipe:
+    machine: observatory
+    inputs: [star_chart, vacuum_tube]
+    output: vacuum_module
+    energy: 22
+    guide: 星圖 + 真空管 → 天文觀測台 → 真空模組
+  observatory_data_core_recipe:
+    machine: observatory
+    inputs: [star_chart, control_unit]
+    output: data_core
+    energy: 23
+    guide: 星圖 + 控制單元 → 天文觀測台 → 數據核心
+  archive_plate_recipe:
+    machine: data_archive
+    inputs: [data_core, gravitic_bearing]
+    output: archive_plate
+    energy: 20
+    guide: 數據核心 + 重力軸承 → 資料檔案庫 → 檔案板
+  craft_pulse_staff:
+    machine: field_forge
+    inputs: [advanced_circuit, dense_carbon_block]
+    output: pulse_staff
+    energy: 20
+    guide: 高級電路 + 高密碳塊 → 場域鍛爐 → 脈衝法杖
+  craft_storm_staff:
+    machine: field_forge
+    inputs: [advanced_circuit, heat_coil]
+    output: storm_staff
+    energy: 22
+    guide: 高級電路 + 加熱線圈 → 場域鍛爐 → 風暴法杖
+  craft_gravity_staff:
+    machine: field_forge
+    inputs: [graviton_lens, advanced_circuit]
+    output: gravity_staff
+    energy: 22
+    guide: 重力子透鏡 + 高級電路 → 場域鍛爐 → 重力法杖
+  craft_warp_orb:
+    machine: field_forge
+    inputs: [quantum_chip, graviton_lens]
+    output: warp_orb
+    energy: 24
+    guide: 量子晶片 + 重力子透鏡 → 場域鍛爐 → 曲速球
+  craft_cryo_wand:
+    machine: field_forge
+    inputs: [coolant_cell, advanced_circuit]
+    output: cryo_wand
+    energy: 20
+    guide: 冷卻核心 + 高級電路 → 場域鍛爐 → 冰晶權杖
+  craft_plasma_lance:
+    machine: matter_compiler
+    inputs: [plasma_cell, titanium_alloy]
+    output: plasma_lance
+    energy: 30
+    guide: 電漿核心 + 鈦合金 → 物質編譯器 → 電漿長矛
+  craft_void_mirror:
+    machine: matter_compiler
+    inputs: [photon_plate, graviton_lens]
+    output: void_mirror
+    energy: 32
+    guide: 光子板 + 重力子透鏡 → 物質編譯器 → 虛空之鏡
+  craft_time_dilator:
+    machine: matter_compiler
+    inputs: [quantum_chip, control_unit]
+    output: time_dilator
+    energy: 30
+    guide: 量子晶片 + 控制單元 → 物質編譯器 → 時間膨脹器
+  craft_heal_beacon:
+    machine: matter_compiler
+    inputs: [data_core, fusion_core]
+    output: heal_beacon
+    energy: 34
+    guide: 數據核心 + 融合核心 → 物質編譯器 → 修復信標
+  craft_entropy_scepter:
+    machine: matter_compiler
+    inputs: [void_beacon_core, plasma_cell]
+    output: entropy_scepter
+    energy: 36
+    guide: 虛空信標核心 + 電漿核心 → 物質編譯器 → 熵變權杖
+  craft_titan_helmet:
+    machine: assembler
+    inputs: [composite_panel, circuit_board]
+    output: titan_helmet
+    energy: 14
+    guide: 複合面板 + 電路板 → 製造機 → 泰坦頭盔
+  craft_titan_chestplate:
+    machine: assembler
+    inputs: [composite_panel, carbon_mesh]
+    output: titan_chestplate
+    energy: 16
+    guide: 複合面板 + 碳纖網 → 製造機 → 泰坦胸甲
+  craft_titan_leggings:
+    machine: assembler
+    inputs: [composite_panel, copper_wire]
+    output: titan_leggings
+    energy: 14
+    guide: 複合面板 + 銅線 → 製造機 → 泰坦護腿
+  craft_titan_boots:
+    machine: assembler
+    inputs: [composite_panel, rubber_sheet]
+    output: titan_boots
+    energy: 12
+    guide: 複合面板 + 橡膠片 → 製造機 → 泰坦靴子
+  craft_quantum_helmet:
+    machine: quantum_processor
+    inputs: [quantum_chip, titanium_alloy]
+    output: quantum_helmet
+    energy: 24
+    guide: 量子晶片 + 鈦合金 → 量子處理器 → 量子頭盔
+  craft_quantum_chestplate:
+    machine: quantum_processor
+    inputs: [quantum_chip, photon_plate]
+    output: quantum_chestplate
+    energy: 26
+    guide: 量子晶片 + 光子板 → 量子處理器 → 量子胸甲
+  craft_quantum_leggings:
+    machine: quantum_processor
+    inputs: [quantum_chip, carbon_mesh]
+    output: quantum_leggings
+    energy: 24
+    guide: 量子晶片 + 碳纖網 → 量子處理器 → 量子護腿
+  craft_quantum_boots:
+    machine: quantum_processor
+    inputs: [quantum_chip, graviton_lens]
+    output: quantum_boots
+    energy: 24
+    guide: 量子晶片 + 重力子透鏡 → 量子處理器 → 量子靴子
+  craft_void_crown:
+    machine: matter_compiler
+    inputs: [void_beacon_core, photon_plate]
+    output: void_crown
+    energy: 34
+    guide: 虛空信標核心 + 光子板 → 物質編譯器 → 虛空之冠
+  craft_void_cuirass:
+    machine: matter_compiler
+    inputs: [void_beacon_core, titanium_alloy]
+    output: void_cuirass
+    energy: 36
+    guide: 虛空信標核心 + 鈦合金 → 物質編譯器 → 虛空鎧甲
+  craft_void_greaves:
+    machine: matter_compiler
+    inputs: [void_beacon_core, carbon_mesh]
+    output: void_greaves
+    energy: 34
+    guide: 虛空信標核心 + 碳纖網 → 物質編譯器 → 虛空護脛
+  craft_void_sabatons:
+    machine: matter_compiler
+    inputs: [void_beacon_core, graviton_lens]
+    output: void_sabatons
+    energy: 34
+    guide: 虛空信標核心 + 重力子透鏡 → 物質編譯器 → 虛空戰靴
+  craft_talisman_fire:
+    machine: field_forge
+    inputs: [circuit_board, heat_coil]
+    output: talisman_fire
+    energy: 14
+    guide: 電路板 + 加熱線圈 → 場域鍛爐 → 防焰護符
+  craft_talisman_water:
+    machine: field_forge
+    inputs: [circuit_board, hydro_gel]
+    output: talisman_water
+    energy: 14
+    guide: 電路板 + 水凝膠 → 場域鍛爐 → 深海護符
+  craft_talisman_angel:
+    machine: field_forge
+    inputs: [circuit_board, rubber_sheet]
+    output: talisman_angel
+    energy: 12
+    guide: 電路板 + 橡膠片 → 場域鍛爐 → 天使護符
+  craft_talisman_warrior:
+    machine: field_forge
+    inputs: [circuit_board, dense_carbon_block]
+    output: talisman_warrior
+    energy: 14
+    guide: 電路板 + 高密碳塊 → 場域鍛爐 → 戰士護符
+  craft_talisman_knight:
+    machine: laser_engraver
+    inputs: [advanced_circuit, composite_panel]
+    output: talisman_knight
+    energy: 20
+    guide: 高級電路 + 複合面板 → 雷射鵰刻機 → 騎士護符
+  craft_talisman_traveler:
+    machine: field_forge
+    inputs: [circuit_board, copper_wire]
+    output: talisman_traveler
+    energy: 12
+    guide: 電路板 + 銅線 → 場域鍛爐 → 旅者護符
+  craft_talisman_hunter:
+    machine: laser_engraver
+    inputs: [advanced_circuit, optic_lens]
+    output: talisman_hunter
+    energy: 20
+    guide: 高級電路 + 光學鏡片 → 雷射鵰刻機 → 獵人護符
+  craft_talisman_miner:
+    machine: laser_engraver
+    inputs: [advanced_circuit, heat_coil]
+    output: talisman_miner
+    energy: 20
+    guide: 高級電路 + 加熱線圈 → 雷射鵰刻機 → 礦工護符
+  craft_talisman_farmer:
+    machine: field_forge
+    inputs: [circuit_board, bio_catalyst]
+    output: talisman_farmer
+    energy: 14
+    guide: 電路板 + 生質催化劑 → 場域鍛爐 → 農夫護符
+  craft_talisman_anvil:
+    machine: laser_engraver
+    inputs: [advanced_circuit, titanium_alloy]
+    output: talisman_anvil
+    energy: 22
+    guide: 高級電路 + 鈦合金 → 雷射鵰刻機 → 鐵砧護符
+  craft_talisman_heal:
+    machine: laser_engraver
+    inputs: [advanced_circuit, data_matrix]
+    output: talisman_heal
+    energy: 20
+    guide: 高級電路 + 數據矩陣 → 雷射鵰刻機 → 再生護符
+  craft_talisman_whirlwind:
+    machine: laser_engraver
+    inputs: [advanced_circuit, dense_carbon_block]
+    output: talisman_whirlwind
+    energy: 20
+    guide: 高級電路 + 高密碳塊 → 雷射鵰刻機 → 旋風護符
+  bio_lab_vegetable_curry:
+    machine: bio_lab
+    inputs: [onion, bell_pepper]
+    output: vegetable_curry
+    energy: 18
+    guide: 洋蔥 + 甜椒 → 生物實驗室 → 蔬菜咖哩
+  bio_lab_ramen:
+    machine: bio_lab
+    inputs: [soybean_pods, corn]
+    output: ramen
+    energy: 18
+    guide: 大豆莢 + 玉米 → 生物實驗室 → 拉麵
+  bio_lab_sushi_roll:
+    machine: bio_lab
+    inputs: [corn, tomato]
+    output: sushi_roll
+    energy: 16
+    guide: 甜玉米 + 番茄 → 生物實驗室 → 壽司捲
+  bio_lab_cheese_pizza:
+    machine: bio_lab
+    inputs: [tomato, garlic]
+    output: cheese_pizza
+    energy: 18
+    guide: 番茄 + 大蒜 → 生物實驗室 → 起司披薩
+  bio_lab_veggie_wrap:
+    machine: bio_lab
+    inputs: [lettuce, tomato]
+    output: veggie_wrap
+    energy: 14
+    guide: 生菜 + 番茄 → 生物實驗室 → 蔬菜捲餅
+  bio_lab_breakfast_burrito:
+    machine: bio_lab
+    inputs: [bell_pepper, corn]
+    output: breakfast_burrito
+    energy: 16
+    guide: 甜椒 + 甜玉米 → 生物實驗室 → 早安捲餅
+  bio_lab_fruit_parfait:
+    machine: bio_lab
+    inputs: [strawberry, blueberry]
+    output: fruit_parfait
+    energy: 12
+    guide: 草莓 + 藍莓 → 生物實驗室 → 水果帕菲
+  biosynth_cheesecake:
+    machine: biosynth_vat
+    inputs: [fruit_puree, bio_catalyst]
+    output: cheesecake
+    energy: 16
+    guide: 異星果泥 + 生質催化劑 → 生合成槽 → 起司蛋糕
+  biosynth_chocolate_cake:
+    machine: biosynth_vat
+    inputs: [fruit_puree, spiceberry]
+    output: chocolate_cake
+    energy: 16
+    guide: 異星果泥 + 香辛莓 → 生合成槽 → 巧克力蛋糕
+  cryo_vanilla_ice_cream:
+    machine: cryo_distiller
+    inputs: [coconut, fruit_puree]
+    output: vanilla_ice_cream
+    energy: 18
+    guide: 椰子 + 異星果泥 → 冷凍蒸餾機 → 香草冰淇淋
+  coolant_grape_juice:
+    machine: coolant_mixer
+    inputs: [grape, hydro_gel]
+    output: grape_juice
+    energy: 14
+    guide: 葡萄 + 水凝膠 → 冷卻混合器 → 葡萄汁
+  coolant_mango_smoothie:
+    machine: coolant_mixer
+    inputs: [mango, coconut]
+    output: mango_smoothie
+    energy: 14
+    guide: 芒果 + 椰子 → 冷卻混合器 → 芒果奶昔
+  coolant_coconut_water:
+    machine: coolant_mixer
+    inputs: [coconut, hydro_gel]
+    output: coconut_water
+    energy: 12
+    guide: 椰子 + 水凝膠 → 冷卻混合器 → 椰子水
+  coolant_berry_blend:
+    machine: coolant_mixer
+    inputs: [strawberry, blueberry]
+    output: berry_blend
+    energy: 14
+    guide: 草莓 + 藍莓 → 冷卻混合器 → 綜合莓果汁
+  coolant_tropical_punch:
+    machine: coolant_mixer
+    inputs: [pineapple, mango]
+    output: tropical_punch
+    energy: 14
+    guide: 鳳梨 + 芒果 → 冷卻混合器 → 熱帶水果賓治
+  coolant_iced_tea:
+    machine: coolant_mixer
+    inputs: [tea_leaf, coolant_mix]
+    output: iced_tea
+    energy: 12
+    guide: 科技茶葉 + 冷卻混合液 → 冷卻混合器 → 冰紅茶
+  coolant_apple_cider:
+    machine: coolant_mixer
+    inputs: [pear, coolant_mix]
+    output: apple_cider
+    energy: 12
+    guide: 青梨 + 冷卻混合液 → 冷卻混合器 → 蘋果醋飲
+  coolant_ginger_ale:
+    machine: coolant_mixer
+    inputs: [watermelon_slice, hydro_gel]
+    output: ginger_ale
+    energy: 12
+    guide: 科技西瓜片 + 水凝膠 → 冷卻混合器 → 薑汁汽水
+  coolant_vanilla_milkshake:
+    machine: coolant_mixer
+    inputs: [banana, coconut]
+    output: vanilla_milkshake
+    energy: 14
+    guide: 香蕉 + 椰子 → 冷卻混合器 → 香草奶昔
+  coolant_strawberry_milkshake:
+    machine: coolant_mixer
+    inputs: [strawberry, coconut]
+    output: strawberry_milkshake
+    energy: 14
+    guide: 草莓 + 椰子 → 冷卻混合器 → 草莓奶昔
+achievements:
+  network_architect:
+    display-name: 物流架構師
+    description: 累計完成 2000 次物流搬運。
+    reward-xp: 320
+    reward-tokens: 18
+    hint: 打造大型物流骨幹
+  upgrade_engineer:
+    display-name: 升級工程師
+    description: 首次取得距離升級模組。
+    reward-xp: 220
+    reward-tokens: 12
+    hint: 善用升級模組強化骨幹
+  fusion_overlord:
+    display-name: 聚變霸主
+    description: 製作出聚變核心。
+    reward-xp: 360
+    reward-tokens: 24
+    hint: 完成聚變工業基礎
+  void_pioneer:
+    display-name: 虛空先鋒
+    description: 首次抽出虛空碎片。
+    reward-xp: 420
+    reward-tokens: 28
+    hint: 開始踏入虛空科技線
+  cryo_specialist:
+    display-name: 低溫專家
+    description: 首次使用低溫蒸餾器。
+    reward-xp: 180
+    reward-tokens: 12
+    hint: 建造低溫蒸餾器
+  refinery_master:
+    display-name: 精煉大師
+    description: 使用精煉系機器共加工 500 個物品。
+    reward-xp: 240
+    reward-tokens: 16
+    hint: 精煉系持續量產
+
+cooking-recipes:
+  cooked_beef:
+    input: BEEF
+    output: COOKED_BEEF
+    cook-time: 100
+    display-name: 烤牛排
+    stations: [CAMPFIRE, SMOKER, BLAST_FURNACE]
+  cooked_porkchop:
+    input: PORKCHOP
+    output: COOKED_PORKCHOP
+    cook-time: 100
+    display-name: 烤豬排
+    stations: [CAMPFIRE, SMOKER, BLAST_FURNACE]
+  cooked_chicken:
+    input: CHICKEN
+    output: COOKED_CHICKEN
+    cook-time: 80
+    display-name: 烤雞肉
+    stations: [CAMPFIRE, SMOKER]
+  cooked_mutton:
+    input: MUTTON
+    output: COOKED_MUTTON
+    cook-time: 100
+    display-name: 烤羊排
+    stations: [CAMPFIRE, SMOKER]
+  cooked_rabbit:
+    input: RABBIT
+    output: COOKED_RABBIT
+    cook-time: 80
+    display-name: 烤兔肉
+    stations: [CAMPFIRE, SMOKER]
+  cooked_cod:
+    input: COD
+    output: COOKED_COD
+    cook-time: 60
+    display-name: 烤鱈魚
+    stations: [CAMPFIRE, SMOKER]
+  cooked_salmon:
+    input: SALMON
+    output: COOKED_SALMON
+    cook-time: 60
+    display-name: 烤鮭魚
+    stations: [CAMPFIRE, SMOKER]
+  baked_potato:
+    input: POTATO
+    output: BAKED_POTATO
+    cook-time: 80
+    display-name: 烤馬鈴薯
+    stations: [CAMPFIRE, SMOKER, BLAST_FURNACE]
+  dried_kelp:
+    input: KELP
+    output: DRIED_KELP
+    cook-time: 40
+    display-name: 乾海帶
+    stations: [CAMPFIRE, SMOKER]
+  synth_steak:
+    input: synth_meat
+    output: COOKED_BEEF
+    input-type: TECH_ITEM
+    cook-time: 120
+    display-name: 合成肉排
+    stations: [CAMPFIRE, SMOKER, BLAST_FURNACE]
+  roasted_corn_recipe:
+    input: corn
+    output: roasted_corn
+    input-type: TECH_ITEM
+    cook-time: 80
+    display-name: 烤玉米
+    stations: [CAMPFIRE, SMOKER]
+  garlic_bread_recipe:
+    input: garlic
+    output: garlic_bread
+    input-type: TECH_ITEM
+    cook-time: 60
+    display-name: 蒜香麵包
+    stations: [CAMPFIRE, SMOKER]
+  grilled_vegetables_recipe:
+    input: bell_pepper
+    output: grilled_vegetables
+    input-type: TECH_ITEM
+    cook-time: 100
+    display-name: 烤時蔬
+    stations: [CAMPFIRE, SMOKER, BLAST_FURNACE]
+  pancakes_recipe:
+    input: WHEAT
+    output: pancakes
+    cook-time: 80
+    display-name: 鬆餅
+    stations: [CAMPFIRE, SMOKER]
+  honey_toast_recipe:
+    input: BREAD
+    output: honey_toast
+    cook-time: 60
+    display-name: 蜂蜜吐司
+    stations: [CAMPFIRE, SMOKER]
+  green_tea_recipe:
+    input: tea_leaf
+    output: green_tea
+    input-type: TECH_ITEM
+    cook-time: 80
+    display-name: 綠茶
+    stations: [CAMPFIRE, SMOKER]
+  espresso_recipe:
+    input: tea_leaf
+    output: espresso
+    input-type: TECH_ITEM
+    cook-time: 100
+    display-name: 濃縮咖啡
+    stations: [CAMPFIRE, SMOKER, BLAST_FURNACE]
+  hot_cocoa_recipe:
+    input: COCOA_BEANS
+    output: hot_cocoa
+    cook-time: 80
+    display-name: 熱可可
+    stations: [CAMPFIRE, SMOKER]
+  matcha_latte_recipe:
+    input: tea_leaf
+    output: matcha_latte
+    input-type: TECH_ITEM
+    cook-time: 100
+    display-name: 抹茶拿鐵
+    stations: [CAMPFIRE, SMOKER]
+  milk_tea_recipe:
+    input: tea_leaf
+    output: milk_tea
+    input-type: TECH_ITEM
+    cook-time: 80
+    display-name: 奶茶
+    stations: [CAMPFIRE, SMOKER]
+  fried_rice_recipe:
+    input: corn
+    output: fried_rice
+    input-type: TECH_ITEM
+    cook-time: 100
+    display-name: 炒飯
+    stations: [CAMPFIRE, SMOKER]
+  noodle_soup_recipe:
+    input: WHEAT
+    output: noodle_soup
+    cook-time: 100
+    display-name: 湯麵
+    stations: [CAMPFIRE, SMOKER]
+  mushroom_risotto_recipe:
+    input: RED_MUSHROOM
+    output: mushroom_risotto
+    cook-time: 120
+    display-name: 蘑菇燉飯
+    stations: [CAMPFIRE, SMOKER]
+  potato_soup_recipe:
+    input: POTATO
+    output: potato_soup
+    cook-time: 100
+    display-name: 馬鈴薯湯
+    stations: [CAMPFIRE, SMOKER]
+  dumpling_recipe:
+    input: cabbage
+    output: dumpling
+    input-type: TECH_ITEM
+    cook-time: 100
+    display-name: 蒸餃
+    stations: [CAMPFIRE, SMOKER]
+  fish_stew_recipe:
+    input: COD
+    output: fish_stew
+    cook-time: 100
+    display-name: 鮮魚湯
+    stations: [CAMPFIRE, SMOKER]
+  donut_recipe:
+    input: WHEAT
+    output: donut
+    cook-time: 80
+    display-name: 甜甜圈
+    stations: [CAMPFIRE, SMOKER]
+  brownie_recipe:
+    input: COCOA_BEANS
+    output: brownie
+    cook-time: 100
+    display-name: 布朗尼
+    stations: [CAMPFIRE, SMOKER]
+  cinnamon_roll_recipe:
+    input: WHEAT
+    output: cinnamon_roll
+    cook-time: 80
+    display-name: 肉桂捲
+    stations: [CAMPFIRE, SMOKER]
+  muffin_recipe:
+    input: blueberry
+    output: muffin
+    input-type: TECH_ITEM
+    cook-time: 80
+    display-name: 鬆糕
+    stations: [CAMPFIRE, SMOKER]

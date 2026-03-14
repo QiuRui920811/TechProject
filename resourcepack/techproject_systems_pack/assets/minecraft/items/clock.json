@@ -1,0 +1,33 @@
+{
+  "model": {
+    "type": "minecraft:range_dispatch",
+    "property": "minecraft:custom_model_data",
+    "entries": [
+      {
+        "threshold": 2578077,
+        "model": {
+          "type": "minecraft:model",
+          "model": "techproject:item/bronze_gear"
+        }
+      },
+      {
+        "threshold": 4005035,
+        "model": {
+          "type": "minecraft:model",
+          "model": "techproject:item/chrono_core"
+        }
+      },
+      {
+        "threshold": 6807674,
+        "model": {
+          "type": "minecraft:model",
+          "model": "techproject:item/chrono_engine"
+        }
+      }
+    ],
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "minecraft:item/clock"
+    }
+  }
+}

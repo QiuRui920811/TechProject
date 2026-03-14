@@ -1,0 +1,19 @@
+{
+  "model": {
+    "type": "minecraft:range_dispatch",
+    "property": "minecraft:custom_model_data",
+    "entries": [
+      {
+        "threshold": 6055038,
+        "model": {
+          "type": "minecraft:model",
+          "model": "techproject:item/polymer_press"
+        }
+      }
+    ],
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "minecraft:item/honey_block"
+    }
+  }
+}

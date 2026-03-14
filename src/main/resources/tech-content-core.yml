@@ -1,0 +1,3231 @@
+# 核心科技內容（原本寫在程式內的預設資料，現在全部外放到 YML）
+# 可選外觀欄位：
+# item-model: namespace:path（填 -1 或留空 = 不套用）
+# nexo-id: your_nexo_item_id
+#
+# 建議直接填在每個物品 / 機器下面：
+#   item-model: techproject:item/your_model
+#   nexo-id: your_nexo_item_id
+#
+# 注意：
+# - items: 改科技物品顯示與材質
+# - items.icon: 純材料 / 功能型物品優先用不可放置的原版物品，避免再用方塊當底材
+# - gui-buttons: 科技書 / 研究台 / 機器 GUI 的功能按鈕外觀
+# - gui-icons: 分類卡 / 階級卡 / 研究篩選等動態圖示外觀（主要改 item-model）
+# - gui-panes: GUI 玻璃片 / 邊框外觀，item-model 預設 -1 = 不套用
+# - machines: 改機器物品顯示與材質
+# - recipes: 改配方線
+# - achievements: 改成就
+gui-buttons:
+  hub-starter-guide:
+    icon: KNOWLEDGE_BOOK
+    item-model: "nexo:newbie_start_icon_custom"
+    display-name: "新手起步"
+    lore:
+      - "先看第一條生存科技流程"
+  hub-guide-list:
+    icon: WRITABLE_BOOK
+    item-model: "nexo:book_image_71c8269ed2e50370"
+    display-name: "科技指南"
+    lore:
+      - "教學 / 配線 / 物流 / 升級"
+  hub-book-claim:
+    icon: ENCHANTED_BOOK
+    item-model: "nexo:book_image_71c8269ed2e50370"
+    display-name: "補發科技書"
+    lore:
+      - "遺失時點這裡補一本文字書"
+  hub-refresh:
+    icon: BOOK
+    display-name: "重新整理分類"
+    lore:
+      - "更新分類解鎖狀態"
+      - "也能當成回首頁"
+  tier-back-hub:
+    icon: ARROW
+    item-model: "nexo:back_icon_custom"
+    display-name: "返回分類大廳"
+    lore:
+      - "回到功能分類首頁"
+  tier-refresh:
+    icon: BOOK
+    display-name: "重新整理階級"
+    lore:
+      - "重新整理該分類的階級狀態"
+  main-page-prev:
+    icon: ARROW
+    item-model: "nexo:previous_page_icon_custom"
+    display-name: "上一頁"
+    lore:
+      - "頁數 {page}/{max-page}"
+  main-starter-guide:
+    icon: KNOWLEDGE_BOOK
+    item-model: "nexo:newbie_start_icon_custom"
+    display-name: "新手起步"
+    lore:
+      - "先看第一條生存科技流程"
+      - "包含合成、擺放、接電順序"
+  main-guide-list:
+    icon: WRITABLE_BOOK
+    item-model: "nexo:book_image_71c8269ed2e50370"
+    display-name: "科技指南"
+    lore:
+      - "教學 / 配線 / 物流 / 升級"
+  main-back-hub:
+    icon: BOOK
+    item-model: "nexo:back_icon_custom"
+    display-name: "返回分類首頁"
+    lore:
+      - "分類：{category}"
+      - "篩選：{tier}"
+  main-page-next:
+    icon: SPECTRAL_ARROW
+    item-model: "nexo:next_page_icon_custom"
+    display-name: "下一頁"
+    lore:
+      - "頁數 {page}/{max-page}"
+  research-overview:
+    icon: EXPERIENCE_BOTTLE
+    display-name: "研究點數"
+    lore:
+      - "等級：Lv.{level}"
+      - "目前可用：{available}"
+      - "累計取得：{total}"
+      - "本級進度：{progress} / {next}"
+      - "來源：成就、機器運轉、發電與採集里程碑"
+      - "物品 第一階～第四階：{item-costs}"
+      - "機器 第一階～第四階：{machine-costs}"
+      - "互動 第一階～第四階：{interaction-costs}"
+      - "點擊打開研究台"
+  research-mode-ready:
+    icon: LIME_DYE
+    display-name: "◆ 只看可研究"
+    lore:
+      - "目前只顯示前置已完成的內容"
+      - "點擊切換模式"
+  research-mode-all:
+    icon: GRAY_DYE
+    display-name: "• 顯示全部候選"
+    lore:
+      - "目前也顯示尚未完成前置的內容"
+      - "點擊切換模式"
+  research-page-prev:
+    icon: ARROW
+    item-model: "nexo:previous_page_icon_custom"
+    display-name: "上一頁"
+    lore:
+      - "頁數 {page}/{max-page}"
+  research-prev-category:
+    icon: WRITABLE_BOOK
+    display-name: "上一個分類"
+    lore:
+      - "目前：{category}"
+  research-back-book:
+    icon: BOOK
+    item-model: "nexo:back_icon_custom"
+    display-name: "返回科技書"
+    lore:
+      - "回到科技分類首頁"
+  research-refresh:
+    icon: RECOVERY_COMPASS
+    display-name: "重新整理研究台"
+    lore:
+      - "重新排序目前候選"
+      - "也會刷新 XP / 狀態"
+  research-next-category:
+    icon: WRITABLE_BOOK
+    display-name: "下一個分類"
+    lore:
+      - "目前：{category}"
+  research-page-next:
+    icon: SPECTRAL_ARROW
+    item-model: "nexo:next_page_icon_custom"
+    display-name: "下一頁"
+    lore:
+      - "頁數 {page}/{max-page}"
+  guide-list-page-prev:
+    icon: ARROW
+    item-model: "nexo:previous_page_icon_custom"
+    display-name: "上一頁"
+    lore:
+      - "頁數 {page}/{max-page}"
+  guide-list-back-hub:
+    icon: BOOK
+    item-model: "nexo:back_icon_custom"
+    display-name: "返回分類大廳"
+    lore:
+      - "回到類型首頁"
+  guide-list-page-next:
+    icon: SPECTRAL_ARROW
+    item-model: "nexo:next_page_icon_custom"
+    display-name: "下一頁"
+    lore:
+      - "頁數 {page}/{max-page}"
+  guide-detail-back:
+    icon: ARROW
+    item-model: "nexo:back_icon_custom"
+    display-name: "返回指南"
+    lore:
+      - "頁數：{page}"
+  detail-view-recipe:
+    icon: KNOWLEDGE_BOOK
+    display-name: "查看配方圖"
+    lore:
+      - "共有 {count} 種取得方式"
+      - "點擊後直接顯示九宮格 / 製程格"
+  machine-detail-view-recipe:
+    icon: KNOWLEDGE_BOOK
+    display-name: "查看製作配方"
+    lore:
+      - "共有 {count} 種配方圖"
+      - "{hint}"
+  detail-back-tier:
+    icon: ARROW
+    display-name: "返回階級內容"
+    lore:
+      - "{category}"
+      - "{tier}"
+  detail-tech-tree:
+    icon: MANGROVE_PROPAGULE
+    display-name: "科技樹前置線"
+    lore:
+      - "{line1}"
+      - "{line2}"
+      - "{line3}"
+      - "{line4}"
+      - "{line5}"
+      - "{line6}"
+  machine-detail-interaction:
+    icon: AMETHYST_SHARD
+    display-name: "互動儀式"
+    lore:
+      - "{name}"
+      - "{type}"
+      - "點擊查看法陣 / 多方塊結構"
+  recipe-view-prev:
+    icon: LIME_DYE
+    item-model: "nexo:previous_page_icon_custom"
+    display-name: "◀ 上一種配方"
+    lore:
+      - "目前第 {page} / {max-page} 種"
+      - "{hint}"
+  recipe-view-back-detail:
+    icon: ARROW
+    item-model: "nexo:back_icon_custom"
+    display-name: "返回詳情"
+    lore:
+      - "{name}"
+  recipe-view-next:
+    icon: MAGENTA_DYE
+    item-model: "nexo:next_page_icon_custom"
+    display-name: "下一種配方 ▶"
+    lore:
+      - "目前第 {page} / {max-page} 種"
+      - "{hint}"
+  tree-back-detail:
+    icon: ARROW
+    item-model: "nexo:back_icon_custom"
+    display-name: "返回詳情"
+    lore:
+      - "{name}"
+  interaction-tech-tree:
+    icon: MANGROVE_PROPAGULE
+    display-name: "查看前置科技樹"
+    lore:
+      - "{line1}"
+      - "{line2}"
+      - "{line3}"
+      - "{line4}"
+      - "{line5}"
+      - "{line6}"
+  interaction-back-content:
+    icon: ARROW
+    item-model: "nexo:back_icon_custom"
+    display-name: "返回內容頁"
+    lore:
+      - "{category}"
+      - "{tier}"
+  machine-recipes-prev:
+    icon: LIME_DYE
+    item-model: "nexo:previous_page_icon_custom"
+    display-name: "◀ 上一頁"
+    lore:
+      - "第 {page} / {max-page} 頁"
+      - "{hint}"
+  machine-recipes-back-machine:
+    icon: ARROW
+    item-model: "nexo:back_icon_custom"
+    display-name: "返回機器"
+    lore:
+      - "{name}"
+  machine-recipes-next:
+    icon: MAGENTA_DYE
+    item-model: "nexo:next_page_icon_custom"
+    display-name: "下一頁 ▶"
+    lore:
+      - "第 {page} / {max-page} 頁"
+      - "{hint}"
+  machine-recipes-back-list:
+    icon: ARROW
+    item-model: "nexo:back_icon_custom"
+    display-name: "返回配方列表"
+    lore:
+      - "回到第 {page} 頁"
+  machine-dir-input:
+    icon: HOPPER
+    display-name: "收電方向"
+    lore:
+      - "目前：{current}"
+      - "點一下切換方向"
+      - "順序：ALL → 北 → 東 → 南 → 西 → 上 → 下"
+  machine-dir-output:
+    icon: DROPPER
+    display-name: "送電方向"
+    lore:
+      - "目前：{current}"
+      - "點一下切換方向"
+      - "順序：ALL → 北 → 東 → 南 → 西 → 上 → 下"
+  energy-node-usage:
+    icon: FIREWORK_STAR
+    display-name: "節點用法"
+    lore:
+      - "至少成對放置最容易看懂"
+      - "A 節點收電，B 節點送電"
+      - "中間再接主幹或耗能機器"
+  machine-open-recipes:
+    icon: WRITABLE_BOOK
+    display-name: "查看配方"
+    lore:
+      - "點擊查看此機器配方列表"
+gui-icons:
+  category-card-machines:
+    icon: PISTON
+    item-model: "-1"
+  category-card-energy:
+    icon: LIGHTNING_ROD
+    item-model: "-1"
+  category-card-materials:
+    icon: IRON_INGOT
+    item-model: "-1"
+  category-card-tools:
+    icon: CROSSBOW
+    item-model: "-1"
+  category-card-transport:
+    icon: CHEST_MINECART
+    item-model: "-1"
+  category-card-automation:
+    icon: OBSERVER
+    item-model: "-1"
+  category-card-defense:
+    icon: SHIELD
+    item-model: "-1"
+  category-card-special:
+    icon: ENCHANTED_BOOK
+    item-model: "-1"
+  tier-card-tier1:
+    icon: WOODEN_PICKAXE
+    item-model: "nexo:first_rank_icon"
+  tier-card-tier2:
+    icon: COPPER_INGOT
+    item-model: "nexo:second_rank_icon"
+  tier-card-tier3:
+    icon: REPEATER
+    item-model: "nexo:third_rank_icon"
+  tier-card-tier4:
+    icon: NETHER_STAR
+    item-model: "nexo:fourth_rank_icon"
+  main-overview:
+    icon: KNOWLEDGE_BOOK
+    item-model: "nexo:overview_icon"
+  main-tier-all:
+    icon: NETHER_STAR
+    item-model: "nexo:all_ranks_icon"
+  main-tier-tier1:
+    icon: WOODEN_PICKAXE
+    item-model: "nexo:first_rank_icon"
+  main-tier-tier2:
+    icon: COPPER_INGOT
+    item-model: "nexo:second_rank_icon"
+  main-tier-tier3:
+    icon: REPEATER
+    item-model: "nexo:third_rank_icon"
+  main-tier-tier4:
+    icon: NETHER_STAR
+    item-model: "nexo:fourth_rank_icon"
+  research-tier-all:
+    icon: NETHER_STAR
+    item-model: "nexo:all_ranks_icon"
+  research-tier-tier1:
+    icon: WOODEN_PICKAXE
+    item-model: "nexo:first_rank_icon"
+  research-tier-tier2:
+    icon: COPPER_INGOT
+    item-model: "nexo:second_rank_icon"
+  research-tier-tier3:
+    icon: REPEATER
+    item-model: "nexo:third_rank_icon"
+  research-tier-tier4:
+    icon: NETHER_STAR
+    item-model: "nexo:fourth_rank_icon"
+  research-category-all:
+    icon: KNOWLEDGE_BOOK
+    item-model: "-1"
+  research-category-machines:
+    icon: PISTON
+    item-model: "-1"
+  research-category-energy:
+    icon: LIGHTNING_ROD
+    item-model: "-1"
+  research-category-materials:
+    icon: IRON_INGOT
+    item-model: "-1"
+  research-category-tools:
+    icon: CROSSBOW
+    item-model: "-1"
+  research-category-transport:
+    icon: CHEST_MINECART
+    item-model: "-1"
+  research-category-automation:
+    icon: OBSERVER
+    item-model: "-1"
+  research-category-defense:
+    icon: SHIELD
+    item-model: "-1"
+  research-category-special:
+    icon: ENCHANTED_BOOK
+    item-model: "-1"
+gui-panes:
+  gray_stained_glass_pane:
+    icon: GRAY_STAINED_GLASS_PANE
+    item-model: "minecraft:black_stained_glass_pane"
+    # nexo-id: your_gray_gui_pane
+  black_stained_glass_pane:
+    icon: BLACK_STAINED_GLASS_PANE
+    item-model: "minecraft:black_stained_glass_pane"
+    # nexo-id: your_black_gui_pane
+  light_blue_stained_glass_pane:
+    icon: LIGHT_BLUE_STAINED_GLASS_PANE
+    item-model: "minecraft:black_stained_glass_pane"
+    # nexo-id: your_light_blue_gui_pane
+  purple_stained_glass_pane:
+    icon: PURPLE_STAINED_GLASS_PANE
+    item-model: "minecraft:black_stained_glass_pane"
+    # nexo-id: your_purple_gui_pane
+  lime_stained_glass_pane:
+    icon: LIME_STAINED_GLASS_PANE
+    item-model: "minecraft:black_stained_glass_pane"
+    # nexo-id: your_lime_gui_pane
+  blue_stained_glass_pane:
+    icon: BLUE_STAINED_GLASS_PANE
+    item-model: "minecraft:black_stained_glass_pane"
+    # nexo-id: your_blue_gui_pane
+  cyan_stained_glass_pane:
+    icon: CYAN_STAINED_GLASS_PANE
+    item-model: "minecraft:black_stained_glass_pane"
+    # nexo-id: your_cyan_gui_pane
+  orange_stained_glass_pane:
+    icon: ORANGE_STAINED_GLASS_PANE
+    item-model: "minecraft:black_stained_glass_pane"
+    # nexo-id: your_orange_gui_pane
+  red_stained_glass_pane:
+    icon: RED_STAINED_GLASS_PANE
+    item-model: "minecraft:black_stained_glass_pane"
+    # nexo-id: your_red_gui_pane
+  yellow_stained_glass_pane:
+    icon: YELLOW_STAINED_GLASS_PANE
+    item-model: "minecraft:black_stained_glass_pane"
+    # nexo-id: your_yellow_gui_pane
+  green_stained_glass_pane:
+    icon: GREEN_STAINED_GLASS_PANE
+    item-model: "minecraft:black_stained_glass_pane"
+    # nexo-id: your_green_gui_pane
+  white_stained_glass_pane:
+    icon: WHITE_STAINED_GLASS_PANE
+    item-model: "minecraft:black_stained_glass_pane"
+    # nexo-id: your_white_gui_pane
+  brown_stained_glass_pane:
+    icon: BROWN_STAINED_GLASS_PANE
+    item-model: "minecraft:black_stained_glass_pane"
+    # nexo-id: your_brown_gui_pane
+  planetary-gate-earth:
+    icon: PAPER
+    item-model: "nexo:techproject_gate_hover"
+    nexo-id: techproject_gate_hover
+  planetary-gate-aurelia:
+    icon: PAPER
+    item-model: "nexo:techproject_gate_hover"
+    nexo-id: techproject_gate_hover
+  planetary-gate-helion:
+    icon: PAPER
+    item-model: "nexo:techproject_gate_hover"
+    nexo-id: techproject_gate_hover
+  planetary-gate-nyx:
+    icon: PAPER
+    item-model: "nexo:techproject_gate_hover"
+    nexo-id: techproject_gate_hover
+  planetary-gate-cryon:
+    icon: PAPER
+    item-model: "nexo:techproject_gate_hover"
+    nexo-id: techproject_gate_hover
+  planetary-gate-tempest:
+    icon: PAPER
+    item-model: "nexo:techproject_gate_hover"
+    nexo-id: techproject_gate_hover
+items:
+  iron_dust:
+    display-name: "鐵粉"
+    category: BASIC
+    icon: GUNPOWDER
+    item-model: "nexo:iron_powder_material"
+    nexo-id: iron_powder_material
+    description: "冶煉成鐵錠或製作線路板。"
+    unlock: "crusher"
+    use-cases:
+      - "熔爐 → 鐵錠"
+      - "電路板材料"
+  copper_ingot:
+    display-name: "銅錠"
+    category: BASIC
+    icon: COPPER_INGOT
+    # item-model: techproject:item/copper_ingot
+    # nexo-id: copper_ingot
+    description: "科技系統使用的銅錠，需透過科技熔爐把銅粉加工而成，與原版銅錠分流。"
+    unlock: "furnace"
+    use-cases:
+      - "銅粉 → 科技熔爐 → 科技銅錠"
+      - "電路製作"
+      - "機器外殼"
+  coal_dust:
+    display-name: "煤粉"
+    category: BASIC
+    icon: BLACK_DYE
+    item-model: "nexo:coal_powder_material"
+    nexo-id: coal_powder_material
+    description: "燃料與發電基礎。"
+    unlock: "crusher"
+    use-cases:
+      - "發電"
+      - "高溫製程"
+  silicon:
+    display-name: "矽晶"
+    category: BASIC
+    icon: QUARTZ
+    item-model: "nexo:silicone_material"
+    description: "晶片與高級電路核心材料。"
+    unlock: "crusher"
+    use-cases:
+      - "晶片"
+      - "高級電路"
+  plastic:
+    display-name: "塑膠"
+    category: BASIC
+    icon: SLIME_BALL
+    item-model: "nexo:plastic_material"
+    description: "高階裝備與機器零件材料。"
+    unlock: "recycler"
+    use-cases:
+      - "機器零件"
+      - "高級材料"
+  steel_plate:
+    display-name: "鋼板"
+    category: INTERMEDIATE
+    icon: IRON_INGOT
+    # item-model: techproject:item/steel_plate
+    # nexo-id: steel_plate
+    description: "機器主體與重型製程材料。"
+    unlock: "compressor"
+    use-cases:
+      - "機器主體"
+      - "裝甲結構"
+  circuit_board:
+    display-name: "電路板"
+    category: INTERMEDIATE
+    icon: GREEN_DYE
+    item-model: "nexo:circuit_board"
+    nexo-id: circuit_board
+    description: "核心電子部件。"
+    unlock: "assembler"
+    use-cases:
+      - "機械零件"
+      - "高級電路"
+  glass_panel:
+    display-name: "玻璃面板"
+    category: INTERMEDIATE
+    icon: GLASS_BOTTLE
+    item-model: "nexo:glass_panel"
+    nexo-id: glass_panel
+    description: "機器視窗與高級材料。"
+    unlock: "furnace"
+    use-cases:
+      - "透明面板"
+      - "機器外觀"
+  energy_cell:
+    display-name: "能源電池"
+    category: INTERMEDIATE
+    icon: HEART_OF_THE_SEA
+    # item-model: techproject:item/energy_cell
+    # nexo-id: energy_cell
+    description: "儲存能源的單元。"
+    unlock: "assembler"
+    use-cases:
+      - "儲能"
+      - "發電系統"
+  quantum_chip:
+    display-name: "量子晶片"
+    category: ADVANCED
+    icon: ECHO_SHARD
+    # item-model: techproject:item/quantum_chip
+    # nexo-id: quantum_chip
+    description: "高階機器核心。"
+    unlock: "quantum_processor"
+    use-cases:
+      - "終局核心"
+      - "量子設備"
+  nano_coating:
+    display-name: "奈米塗層"
+    category: ADVANCED
+    icon: PHANTOM_MEMBRANE
+    # item-model: techproject:item/nano_coating
+    # nexo-id: nano_coating
+    description: "高階機器薄膜材料。"
+    unlock: "advanced_assembler"
+    use-cases:
+      - "保護層"
+      - "高階機器"
+  advanced_circuit:
+    display-name: "高級電路"
+    category: ADVANCED
+    tier: TIER2
+    icon: REDSTONE
+    item-model: "nexo:advanced_circuit"
+    nexo-id: advanced_circuit
+    description: "高級科技製作電路。"
+    unlock: "assembler"
+    use-cases:
+      - "量子處理器"
+      - "高級科技配方"
+  tech_book:
+    display-name: "科技書"
+    category: SPECIAL
+    icon: ENCHANTED_BOOK
+    # item-model: techproject:item/tech_book
+    # nexo-id: tech_book
+    # 實際發給玩家時顯示：
+    # name: 科技書
+    # lore:
+    #   - 解鎖配方與科技樹。
+    #   - 右鍵：開啟科技書（等同 /tech book）
+    #   - 左鍵：無特殊功能
+    #   - 補發：/tech book get
+    description: "解鎖配方與科技樹。"
+    unlock: "initial"
+    use-cases:
+      - "科技樹"
+      - "教學提示"
+  energy_token:
+    display-name: "能源代幣"
+    category: SPECIAL
+    icon: EMERALD
+    # item-model: techproject:item/energy_token
+    # nexo-id: energy_token
+    description: "能源貨幣。"
+    unlock: "solar_generator"
+    use-cases:
+      - "特殊交易"
+      - "獎勵貨幣"
+  achievement_badge:
+    display-name: "成就徽章"
+    category: SPECIAL
+    icon: NETHER_STAR
+    # item-model: techproject:item/achievement_badge
+    # nexo-id: achievement_badge
+    description: "成就獎勵與展示徽章。"
+    unlock: "first_machine"
+    use-cases:
+      - "成就獎勵"
+      - "裝飾"
+  wood_dust:
+    display-name: "木屑"
+    category: BASIC
+    icon: BROWN_DYE
+    item-model: "nexo:sawdust"
+    nexo-id: sawdust
+    description: "木屑材料，可作燃料或塑膠前置。"
+    unlock: "electric_saw"
+    use-cases:
+      - "塑膠前置"
+      - "燃料"
+  iron_plate:
+    display-name: "鐵板"
+    category: INTERMEDIATE
+    icon: IRON_INGOT
+    item-model: "nexo:iron_plate"
+    nexo-id: iron_plate
+    description: "機器基礎零件。"
+    unlock: "compressor"
+    use-cases:
+      - "壓縮機"
+      - "製造機"
+  compressed_iron_bundle:
+    display-name: "壓實鐵胚"
+    category: INTERMEDIATE
+    icon: IRON_BLOCK
+    description: "把鐵板再壓一次得到的厚重壓坯。"
+    unlock: "compressor"
+    use-cases:
+      - "機械零件前置"
+      - "高壓骨架"
+  recycled_material:
+    display-name: "回收材料"
+    category: BASIC
+    icon: FLINT
+    item-model: "nexo:recycled_materials"
+    nexo-id: recycled_materials
+    description: "回收產出基礎材料。"
+    unlock: "recycler"
+    use-cases:
+      - "再製材料"
+      - "次級配方"
+  crop_seeds:
+    display-name: "作物種子"
+    category: BASIC
+    icon: WHEAT_SEEDS
+    item-model: "nexo:crop_seeds"
+    nexo-id: crop_seeds
+    description: "自動農場種植種子。"
+    unlock: "initial"
+    use-cases:
+      - "自動農場"
+      - "作物培育"
+  crops:
+    display-name: "作物"
+    category: BASIC
+    icon: WHEAT
+    # item-model: techproject:item/crops
+    # nexo-id: crops
+    description: "自動農場收成物。"
+    unlock: "auto_farm"
+    use-cases:
+      - "食物供應"
+      - "生質材料"
+  copper_dust:
+    display-name: "銅粉"
+    category: BASIC
+    icon: ORANGE_DYE
+    item-model: "nexo:copper_powder_material"
+    nexo-id: copper_powder_material
+    description: "粉碎銅礦後產出的金屬粉，屬於中前期標準加工線。"
+    unlock: "crusher"
+    use-cases:
+      - "銅礦 → 粉碎機 → 銅粉"
+      - "銅粉 → 熔爐 → 銅錠"
+      - "電子材料"
+  machine_component:
+    display-name: "機械零件"
+    category: INTERMEDIATE
+    icon: IRON_NUGGET
+    item-model: "nexo:machine_parts"
+    nexo-id: machine_parts
+    description: "通用機器部件。"
+    unlock: "assembler"
+    use-cases:
+      - "多數機器共通材料"
+  precision_frame:
+    display-name: "精密框架"
+    category: INTERMEDIATE
+    icon: HEAVY_WEIGHTED_PRESSURE_PLATE
+    description: "壓實鐵胚與高密碳材做出的機械骨架。"
+    unlock: "assembler"
+    use-cases:
+      - "高階外殼"
+      - "進階裝配"
+  carbon_mesh:
+    display-name: "碳纖網"
+    category: BASIC
+    icon: COAL
+    item-model: "nexo:carbon_steel"
+    # nexo-id: carbon_mesh
+    description: "壓縮碳網，耐熱結構材料。"
+    unlock: "crusher"
+    use-cases:
+      - "科技書詳細頁"
+      - "可用於後續科技線"
+      - "支援配方與解鎖鏈"
+  dense_carbon_block:
+    display-name: "高密碳塊"
+    category: INTERMEDIATE
+    icon: COAL_BLOCK
+    description: "把碳纖網再次壓實後得到的重質碳材。"
+    unlock: "compressor"
+    use-cases:
+      - "精密框架"
+      - "高壓結構"
+  lithium_cell:
+    display-name: "鋰電池"
+    category: INTERMEDIATE
+    icon: LIGHT_BLUE_DYE
+    # item-model: techproject:item/lithium_cell
+    # nexo-id: lithium_cell
+    description: "高密度儲能小型電池。"
+    unlock: "battery_bank"
+    use-cases:
+      - "科技書詳細頁"
+      - "可用於後續科技線"
+      - "支援配方與解鎖鏈"
+  reactor_core:
+    display-name: "反應爐核心"
+    category: ADVANCED
+    icon: BLAZE_ROD
+    # item-model: techproject:item/reactor_core
+    # nexo-id: reactor_core
+    description: "高階能源核心。"
+    unlock: "advanced_assembler"
+    use-cases:
+      - "科技書詳細頁"
+      - "可用於後續科技線"
+      - "支援配方與解鎖鏈"
+  reinforced_glass:
+    display-name: "強化玻璃"
+    category: INTERMEDIATE
+    icon: GLASS_BOTTLE
+    # item-model: techproject:item/reinforced_glass
+    # nexo-id: reinforced_glass
+    description: "耐壓透明結構。"
+    unlock: "furnace"
+    use-cases:
+      - "科技書詳細頁"
+      - "可用於後續科技線"
+      - "支援配方與解鎖鏈"
+  titanium_alloy:
+    display-name: "鈦合金"
+    category: ADVANCED
+    tier: TIER2
+    icon: NETHERITE_SCRAP
+    # item-model: techproject:item/titanium_alloy
+    # nexo-id: titanium_alloy
+    description: "高強度輕量合金。"
+    unlock: "smeltery"
+    use-cases:
+      - "科技書詳細頁"
+      - "可用於後續科技線"
+      - "支援配方與解鎖鏈"
+  coolant_cell:
+    display-name: "冷卻電池"
+    category: INTERMEDIATE
+    icon: SNOWBALL
+    # item-model: techproject:item/coolant_cell
+    # nexo-id: coolant_cell
+    description: "散熱模組材料。"
+    unlock: "purifier"
+    use-cases:
+      - "科技書詳細頁"
+      - "可用於後續科技線"
+      - "支援配方與解鎖鏈"
+  bronze_gear:
+    display-name: "青銅齒輪"
+    category: INTERMEDIATE
+    icon: CLOCK
+    # item-model: techproject:item/bronze_gear
+    # nexo-id: bronze_gear
+    description: "傳動齒輪材料。"
+    unlock: "assembler"
+    use-cases:
+      - "科技書詳細頁"
+      - "可用於後續科技線"
+      - "支援配方與解鎖鏈"
+  micro_processor:
+    display-name: "微型處理器"
+    category: ADVANCED
+    icon: REDSTONE
+    # item-model: techproject:item/micro_processor
+    # nexo-id: micro_processor
+    description: "精密處理單元。"
+    unlock: "advanced_assembler"
+    use-cases:
+      - "科技書詳細頁"
+      - "可用於後續科技線"
+      - "支援配方與解鎖鏈"
+  data_matrix:
+    display-name: "數據矩陣"
+    category: ADVANCED
+    icon: BOOK
+    # item-model: techproject:item/data_matrix
+    # nexo-id: data_matrix
+    description: "數據矩陣核心。"
+    unlock: "quantum_processor"
+    use-cases:
+      - "科技書詳細頁"
+      - "可用於後續科技線"
+      - "支援配方與解鎖鏈"
+  fiber_mesh:
+    display-name: "纖維網"
+    category: BASIC
+    icon: STRING
+    item-model: "nexo:fiber_mesh_material"
+    nexo-id: fiber_mesh_material
+    description: "纖維複合網。"
+    unlock: "electric_saw"
+    use-cases:
+      - "科技書詳細頁"
+      - "可用於後續科技線"
+      - "支援配方與解鎖鏈"
+  pressure_tube:
+    display-name: "壓力導管"
+    category: INTERMEDIATE
+    icon: COPPER_INGOT
+    # item-model: techproject:item/pressure_tube
+    # nexo-id: pressure_tube
+    description: "流體與氣壓輸送。"
+    unlock: "compressor"
+    use-cases:
+      - "科技書詳細頁"
+      - "可用於後續科技線"
+      - "支援配方與解鎖鏈"
+  alloy_frame:
+    display-name: "合金框架"
+    category: INTERMEDIATE
+    icon: LEAD
+    # item-model: techproject:item/alloy_frame
+    # nexo-id: alloy_frame
+    description: "合金機架。"
+    unlock: "smeltery"
+    use-cases:
+      - "科技書詳細頁"
+      - "可用於後續科技線"
+      - "支援配方與解鎖鏈"
+  rust_filter:
+    display-name: "鏽蝕濾芯"
+    category: BASIC
+    icon: PAPER
+    # item-model: techproject:item/rust_filter
+    # nexo-id: rust_filter
+    description: "淨化與回收濾材。"
+    unlock: "recycler"
+    use-cases:
+      - "科技書詳細頁"
+      - "可用於後續科技線"
+      - "支援配方與解鎖鏈"
+  optic_lens:
+    display-name: "光學鏡片"
+    category: INTERMEDIATE
+    icon: SPYGLASS
+    # item-model: techproject:item/optic_lens
+    # nexo-id: optic_lens
+    description: "感測與掃描鏡片。"
+    unlock: "furnace"
+    use-cases:
+      - "科技書詳細頁"
+      - "可用於後續科技線"
+      - "支援配方與解鎖鏈"
+  plasma_cell:
+    display-name: "電漿電池"
+    category: ADVANCED
+    icon: MAGMA_CREAM
+    # item-model: techproject:item/plasma_cell
+    # nexo-id: plasma_cell
+    description: "高溫等離子容器。"
+    unlock: "advanced_assembler"
+    use-cases:
+      - "科技書詳細頁"
+      - "可用於後續科技線"
+      - "支援配方與解鎖鏈"
+  crystal_matrix:
+    display-name: "晶體矩陣"
+    category: ADVANCED
+    icon: AMETHYST_SHARD
+    # item-model: techproject:item/crystal_matrix
+    # nexo-id: crystal_matrix
+    description: "晶體陣列核心。"
+    unlock: "quantum_processor"
+    use-cases:
+      - "科技書詳細頁"
+      - "可用於後續科技線"
+      - "支援配方與解鎖鏈"
+  logic_gate:
+    display-name: "邏輯閘"
+    category: INTERMEDIATE
+    icon: REDSTONE
+    # item-model: techproject:item/logic_gate
+    # nexo-id: logic_gate
+    description: "邏輯控制模組。"
+    unlock: "assembler"
+    use-cases:
+      - "科技書詳細頁"
+      - "可用於後續科技線"
+      - "支援配方與解鎖鏈"
+  servo_motor:
+    display-name: "伺服馬達"
+    category: INTERMEDIATE
+    icon: REDSTONE
+    # item-model: techproject:item/servo_motor
+    # nexo-id: servo_motor
+    description: "自動化執行元件。"
+    unlock: "assembler"
+    use-cases:
+      - "科技書詳細頁"
+      - "可用於後續科技線"
+      - "支援配方與解鎖鏈"
+  heat_coil:
+    display-name: "熱線圈"
+    category: INTERMEDIATE
+    icon: BLAZE_POWDER
+    # item-model: techproject:item/heat_coil
+    # nexo-id: heat_coil
+    description: "高溫線圈。"
+    unlock: "furnace"
+    use-cases:
+      - "科技書詳細頁"
+      - "可用於後續科技線"
+      - "支援配方與解鎖鏈"
+  drone_core:
+    display-name: "無人機核心"
+    category: ADVANCED
+    icon: ENDER_EYE
+    # item-model: techproject:item/drone_core
+    # nexo-id: drone_core
+    description: "自動化核心模組。"
+    unlock: "advanced_assembler"
+    use-cases:
+      - "科技書詳細頁"
+      - "可用於後續科技線"
+      - "支援配方與解鎖鏈"
+  android_core:
+    display-name: "安卓核心"
+    category: ADVANCED
+    icon: ENDER_EYE
+    description: "可部署 自動機 的控制核心。"
+    unlock: "advanced_assembler"
+    use-cases:
+      - "自動機 工作站核心零件"
+      - "進階自動化裝配"
+      - "支援配方與解鎖鏈"
+  android_memory_matrix:
+    display-name: "安卓記憶矩陣"
+    category: ADVANCED
+    icon: WRITABLE_BOOK
+    description: "承載 自動機 程序與任務配置。"
+    unlock: "android_bay"
+    use-cases:
+      - "自動機 工作站"
+      - "自動機 程序存放"
+      - "支援配方與解鎖鏈"
+  android_harvest_script:
+    display-name: "安卓農務程序"
+    category: INTERMEDIATE
+    icon: GLOW_BERRIES
+    description: "讓 自動機 自動巡收成熟作物。"
+    unlock: "android_station"
+    use-cases:
+      - "自動機 工作站程序槽"
+      - "農田自動巡收"
+      - "支援配方與解鎖鏈"
+  android_logging_script:
+    display-name: "安卓伐木程序"
+    category: INTERMEDIATE
+    icon: IRON_AXE
+    description: "讓 自動機 自動辨識自然樹木並砍伐。"
+    unlock: "android_station"
+    use-cases:
+      - "自動機 工作站程序槽"
+      - "林場自動砍伐"
+      - "支援配方與解鎖鏈"
+  android_salvage_script:
+    display-name: "安卓回收程序"
+    category: INTERMEDIATE
+    icon: HOPPER
+    description: "讓 自動機 回收附近安全可拾取掉落物。"
+    unlock: "android_station"
+    use-cases:
+      - "自動機 工作站程序槽"
+      - "戰利品回收"
+      - "支援配方與解鎖鏈"
+  android_planet_script:
+    display-name: "安卓行星採樣程序"
+    category: ADVANCED
+    icon: END_ROD
+    description: "讓 自動機 在星球環境中執行採樣。"
+    unlock: "android_station"
+    use-cases:
+      - "自動機 工作站程序槽"
+      - "星球資源採樣"
+      - "支援配方與解鎖鏈"
+  android_overclock_card:
+    display-name: "安卓超頻卡"
+    category: ADVANCED
+    icon: SUGAR
+    description: "提高程序執行頻率，但消耗更多 EU 與燃料。"
+    unlock: "android_station"
+    use-cases:
+      - "自動機 左右側程序卡槽"
+      - "高頻巡邏工作站"
+      - "支援配方與解鎖鏈"
+  android_efficiency_card:
+    display-name: "安卓節能卡"
+    category: ADVANCED
+    icon: HONEYCOMB
+    description: "降低 自動機 任務的能源與燃料成本。"
+    unlock: "android_station"
+    use-cases:
+      - "自動機 左右側程序卡槽"
+      - "長時間值守前哨"
+      - "支援配方與解鎖鏈"
+  android_expansion_card:
+    display-name: "安卓擴域卡"
+    category: ADVANCED
+    icon: ENDER_EYE
+    description: "擴大 自動機 的巡邏半徑與垂直掃描範圍。"
+    unlock: "android_station"
+    use-cases:
+      - "自動機 左右側程序卡槽"
+      - "大型農場 / 林場 / 星球前哨"
+      - "支援配方與解鎖鏈"
+  hydro_gel:
+    display-name: "水凝膠"
+    category: BASIC
+    icon: GHAST_TEAR
+    item-model: "nexo:hydrogel_material"
+    nexo-id: hydrogel_material
+    description: "農業與冷卻膠體。"
+    unlock: "auto_farm"
+    use-cases:
+      - "科技書詳細頁"
+      - "可用於後續科技線"
+      - "支援配方與解鎖鏈"
+  agri_module:
+    display-name: "農業模組"
+    category: INTERMEDIATE
+    icon: GLOW_BERRIES
+    # item-model: techproject:item/agri_module
+    # nexo-id: agri_module
+    description: "農業模組。"
+    unlock: "auto_farm"
+    use-cases:
+      - "科技書詳細頁"
+      - "可用於後續科技線"
+      - "支援配方與解鎖鏈"
+  fertilizer_mix:
+    display-name: "肥料混合物"
+    category: BASIC
+    icon: BONE_MEAL
+    item-model: "nexo:fertilizer_mix"
+    nexo-id: fertilizer_mix
+    description: "加速作物生長混合物。"
+    unlock: "auto_farm"
+    use-cases:
+      - "科技書詳細頁"
+      - "可用於後續科技線"
+      - "支援配方與解鎖鏈"
+  bio_fiber:
+    display-name: "生質纖維"
+    category: BASIC
+    icon: LEATHER
+    item-model: "nexo:biomass_fiber"
+    nexo-id: biomass_fiber
+    description: "生質纖維。"
+    unlock: "auto_farm"
+    use-cases:
+      - "科技書詳細頁"
+      - "可用於後續科技線"
+      - "支援配方與解鎖鏈"
+  quantum_fluid:
+    display-name: "量子流體"
+    category: ADVANCED
+    icon: EXPERIENCE_BOTTLE
+    # item-model: techproject:item/quantum_fluid
+    # nexo-id: quantum_fluid
+    description: "量子流體。"
+    unlock: "quantum_processor"
+    use-cases:
+      - "科技書詳細頁"
+      - "可用於後續科技線"
+      - "支援配方與解鎖鏈"
+  starlight_plate:
+    display-name: "星光板"
+    category: ADVANCED
+    tier: TIER2
+    icon: PRISMARINE_SHARD
+    # item-model: techproject:item/starlight_plate
+    # nexo-id: starlight_plate
+    description: "光能面板。"
+    unlock: "solar_array"
+    use-cases:
+      - "科技書詳細頁"
+      - "可用於後續科技線"
+      - "支援配方與解鎖鏈"
+  emitter_node:
+    display-name: "發射節點"
+    category: INTERMEDIATE
+    icon: FIREWORK_STAR
+    # item-model: techproject:item/emitter_node
+    # nexo-id: emitter_node
+    description: "能量發射節點。"
+    unlock: "battery_bank"
+    use-cases:
+      - "科技書詳細頁"
+      - "可用於後續科技線"
+      - "支援配方與解鎖鏈"
+  capacitor_bank:
+    display-name: "電容組"
+    category: ADVANCED
+    tier: TIER2
+    icon: REDSTONE
+    # item-model: techproject:item/capacitor_bank
+    # nexo-id: capacitor_bank
+    description: "大容量電容模組。"
+    unlock: "battery_bank"
+    use-cases:
+      - "科技書詳細頁"
+      - "可用於後續科技線"
+      - "支援配方與解鎖鏈"
+  fusion_mesh:
+    display-name: "聚變網"
+    category: ADVANCED
+    tier: TIER4
+    icon: LEAD
+    # item-model: techproject:item/fusion_mesh
+    # nexo-id: fusion_mesh
+    description: "聚變級耐熱網。"
+    unlock: "fusion_reactor"
+    use-cases:
+      - "科技書詳細頁"
+      - "可用於後續科技線"
+      - "支援配方與解鎖鏈"
+  vacuum_tube:
+    display-name: "真空管"
+    category: INTERMEDIATE
+    icon: GLASS_BOTTLE
+    # item-model: techproject:item/vacuum_tube
+    # nexo-id: vacuum_tube
+    description: "真空電子元件。"
+    unlock: "furnace"
+    use-cases:
+      - "科技書詳細頁"
+      - "可用於後續科技線"
+      - "支援配方與解鎖鏈"
+  signal_relay:
+    display-name: "訊號中繼器"
+    category: INTERMEDIATE
+    icon: REDSTONE
+    # item-model: techproject:item/signal_relay
+    # nexo-id: signal_relay
+    description: "訊號中繼節點。"
+    unlock: "assembler"
+    use-cases:
+      - "科技書詳細頁"
+      - "可用於後續科技線"
+      - "支援配方與解鎖鏈"
+  composite_panel:
+    display-name: "複合面板"
+    category: INTERMEDIATE
+    icon: BRICK
+    # item-model: techproject:item/composite_panel
+    # nexo-id: composite_panel
+    description: "複合外裝板。"
+    unlock: "compressor"
+    use-cases:
+      - "科技書詳細頁"
+      - "可用於後續科技線"
+      - "支援配方與解鎖鏈"
+  flux_link:
+    display-name: "通量連結"
+    category: ADVANCED
+    icon: ENDER_PEARL
+    # item-model: techproject:item/flux_link
+    # nexo-id: flux_link
+    description: "高頻能源連接器。"
+    unlock: "quantum_processor"
+    use-cases:
+      - "科技書詳細頁"
+      - "可用於後續科技線"
+      - "支援配方與解鎖鏈"
+  ore_slurry:
+    display-name: "礦漿"
+    category: BASIC
+    icon: CLAY_BALL
+    item-model: "nexo:mineral_slurry"
+    nexo-id: mineral_slurry
+    description: "洗礦後形成的礦漿。"
+    unlock: "ore_washer"
+    use-cases:
+      - "科技書詳細頁"
+      - "可用於後續科技線"
+      - "支援配方與解鎖鏈"
+  purified_shard:
+    display-name: "淨化碎晶"
+    category: INTERMEDIATE
+    icon: PRISMARINE_CRYSTALS
+    # item-model: techproject:item/purified_shard
+    # nexo-id: purified_shard
+    description: "淨化礦物結晶。"
+    unlock: "purifier"
+    use-cases:
+      - "科技書詳細頁"
+      - "可用於後續科技線"
+      - "支援配方與解鎖鏈"
+  purifier_membrane:
+    display-name: "淨化膜片"
+    category: INTERMEDIATE
+    icon: PAPER
+    description: "高壓淨化後得到的精密過濾膜。"
+    unlock: "purifier"
+    use-cases:
+      - "冷卻與過濾前置"
+      - "物流濾網核心"
+  bio_resin:
+    display-name: "生質樹脂"
+    category: BASIC
+    icon: HONEYCOMB
+    item-model: "nexo:biomass_resin"
+    nexo-id: biomass_resin
+    description: "生質樹脂。"
+    unlock: "bio_lab"
+    use-cases:
+      - "科技書詳細頁"
+      - "可用於後續科技線"
+      - "支援配方與解鎖鏈"
+  phase_plate:
+    display-name: "相位板"
+    category: ADVANCED
+    icon: CHORUS_FRUIT
+    # item-model: techproject:item/phase_plate
+    # nexo-id: phase_plate
+    description: "相位強化材料。"
+    unlock: "quantum_processor"
+    use-cases:
+      - "科技書詳細頁"
+      - "可用於後續科技線"
+      - "支援配方與解鎖鏈"
+  grid_module:
+    display-name: "網格模組"
+    category: INTERMEDIATE
+    icon: REDSTONE
+    # item-model: techproject:item/grid_module
+    # nexo-id: grid_module
+    description: "電網模組。"
+    unlock: "solar_array"
+    use-cases:
+      - "科技書詳細頁"
+      - "可用於後續科技線"
+      - "支援配方與解鎖鏈"
+  field_emitter:
+    display-name: "力場發射器"
+    category: ADVANCED
+    icon: ECHO_SHARD
+    # item-model: techproject:item/field_emitter
+    # nexo-id: field_emitter
+    description: "力場發生器。"
+    unlock: "field_forge"
+    use-cases:
+      - "科技書詳細頁"
+      - "可用於後續科技線"
+      - "支援配方與解鎖鏈"
+  machine_casing:
+    display-name: "機械外殼"
+    category: INTERMEDIATE
+    icon: SHIELD
+    # item-model: techproject:item/machine_casing
+    # nexo-id: machine_casing
+    description: "標準機器外殼。"
+    unlock: "assembler"
+    use-cases:
+      - "科技書詳細頁"
+      - "可用於後續科技線"
+      - "支援配方與解鎖鏈"
+  ion_dust:
+    display-name: "離子粉"
+    category: ADVANCED
+    icon: GLOWSTONE_DUST
+    # item-model: techproject:item/ion_dust
+    # nexo-id: ion_dust
+    description: "高能離子粉末。"
+    unlock: "centrifuge"
+    use-cases:
+      - "科技書詳細頁"
+      - "可用於後續科技線"
+      - "支援配方與解鎖鏈"
+  magnetic_ring:
+    display-name: "磁環"
+    category: INTERMEDIATE
+    icon: NAUTILUS_SHELL
+    # item-model: techproject:item/magnetic_ring
+    # nexo-id: magnetic_ring
+    description: "磁場控制零件。"
+    unlock: "centrifuge"
+    use-cases:
+      - "科技書詳細頁"
+      - "可用於後續科技線"
+      - "支援配方與解鎖鏈"
+  centrifuge_rotor:
+    display-name: "離心轉子"
+    category: ADVANCED
+    icon: LIGHT_WEIGHTED_PRESSURE_PLATE
+    description: "能承受高速旋轉的離心總成。"
+    unlock: "centrifuge"
+    use-cases:
+      - "磁環前置"
+      - "物流總線骨架"
+  stability_core:
+    display-name: "穩定核心"
+    category: ADVANCED
+    tier: TIER4
+    icon: TOTEM_OF_UNDYING
+    # item-model: techproject:item/stability_core
+    # nexo-id: stability_core
+    description: "高階穩定核心。"
+    unlock: "fusion_reactor"
+    use-cases:
+      - "科技書詳細頁"
+      - "可用於後續科技線"
+      - "支援配方與解鎖鏈"
+  thermal_shell:
+    display-name: "隔熱外殼"
+    category: INTERMEDIATE
+    icon: BRICK
+    # item-model: techproject:item/thermal_shell
+    # nexo-id: thermal_shell
+    description: "耐熱保護殼。"
+    unlock: "smeltery"
+    use-cases:
+      - "科技書詳細頁"
+      - "可用於後續科技線"
+      - "支援配方與解鎖鏈"
+  crushed_biomass:
+    display-name: "生質粉碎物"
+    category: BASIC
+    icon: GREEN_DYE
+    item-model: "nexo:biomass_scrap"
+    nexo-id: biomass_scrap
+    description: "生質粉碎物。"
+    unlock: "bio_lab"
+    use-cases:
+      - "科技書詳細頁"
+      - "可用於後續科技線"
+      - "支援配方與解鎖鏈"
+  seed_cluster:
+    display-name: "種子簇"
+    category: BASIC
+    icon: MELON_SEEDS
+    item-model: "nexo:seed_family"
+    nexo-id: seed_family
+    description: "高密度種子簇。"
+    unlock: "auto_farm"
+    use-cases:
+      - "科技書詳細頁"
+      - "可用於後續科技線"
+      - "支援配方與解鎖鏈"
+  harvest_unit:
+    display-name: "收割單元"
+    category: INTERMEDIATE
+    icon: SHEARS
+    # item-model: techproject:item/harvest_unit
+    # nexo-id: harvest_unit
+    description: "收割模組。"
+    unlock: "auto_farm"
+    use-cases:
+      - "科技書詳細頁"
+      - "可用於後續科技線"
+      - "支援配方與解鎖鏈"
+  growth_lamp:
+    display-name: "生長燈"
+    category: INTERMEDIATE
+    icon: GLOW_INK_SAC
+    # item-model: techproject:item/growth_lamp
+    # nexo-id: growth_lamp
+    description: "生長照明模組。"
+    unlock: "greenhouse"
+    use-cases:
+      - "科技書詳細頁"
+      - "可用於後續科技線"
+      - "支援配方與解鎖鏈"
+  quantum_frame:
+    display-name: "量子框架"
+    category: ADVANCED
+    icon: ECHO_SHARD
+    # item-model: techproject:item/quantum_frame
+    # nexo-id: quantum_frame
+    description: "量子框架結構。"
+    unlock: "quantum_processor"
+    use-cases:
+      - "科技書詳細頁"
+      - "可用於後續科技線"
+      - "支援配方與解鎖鏈"
+  rubber_sheet:
+    display-name: "橡膠片"
+    category: BASIC
+    icon: RABBIT_HIDE
+    # item-model: techproject:item/rubber_sheet
+    # nexo-id: rubber_sheet
+    description: "聚合壓製用基底。"
+    unlock: "polymer_press"
+    use-cases:
+      - "科技書詳細頁"
+      - "可用於後續科技線"
+      - "支援配方與解鎖鏈"
+  copper_wire:
+    display-name: "銅線"
+    category: INTERMEDIATE
+    icon: LEAD
+    # item-model: techproject:item/copper_wire
+    # nexo-id: copper_wire
+    description: "電力與訊號傳輸線材。"
+    unlock: "wire_mill"
+    use-cases:
+      - "科技書詳細頁"
+      - "可用於後續科技線"
+      - "支援配方與解鎖鏈"
+  steel_wire:
+    display-name: "鋼線"
+    category: INTERMEDIATE
+    icon: LEAD
+    # item-model: techproject:item/steel_wire
+    # nexo-id: steel_wire
+    description: "耐熱高張力線材。"
+    unlock: "wire_mill"
+    use-cases:
+      - "科技書詳細頁"
+      - "可用於後續科技線"
+      - "支援配方與解鎖鏈"
+  wiring_bundle:
+    display-name: "工業線束"
+    category: INTERMEDIATE
+    icon: STRING
+    description: "把銅線與鋼線綁成可上機的工業線束。"
+    unlock: "wire_mill"
+    use-cases:
+      - "進階電路"
+      - "物流骨幹前置"
+  polymer_resin:
+    display-name: "聚合樹脂"
+    category: INTERMEDIATE
+    icon: HONEY_BOTTLE
+    # item-model: techproject:item/polymer_resin
+    # nexo-id: polymer_resin
+    description: "化工聚合原液。"
+    unlock: "chemical_reactor"
+    use-cases:
+      - "科技書詳細頁"
+      - "可用於後續科技線"
+      - "支援配方與解鎖鏈"
+  treated_plastic:
+    display-name: "處理塑膠"
+    category: INTERMEDIATE
+    icon: SLIME_BALL
+    # item-model: techproject:item/treated_plastic
+    # nexo-id: treated_plastic
+    description: "強化塑膠結構件。"
+    unlock: "polymer_press"
+    use-cases:
+      - "科技書詳細頁"
+      - "可用於後續科技線"
+      - "支援配方與解鎖鏈"
+  synthetic_fiber:
+    display-name: "合成纖維"
+    category: INTERMEDIATE
+    icon: WHITE_WOOL
+    # item-model: techproject:item/synthetic_fiber
+    # nexo-id: synthetic_fiber
+    description: "合成纖維材料。"
+    unlock: "chemical_reactor"
+    use-cases:
+      - "科技書詳細頁"
+      - "可用於後續科技線"
+      - "支援配方與解鎖鏈"
+  coolant_mix:
+    display-name: "冷卻混合液"
+    category: INTERMEDIATE
+    icon: POTION
+    # item-model: techproject:item/coolant_mix
+    # nexo-id: coolant_mix
+    description: "進階冷卻液。"
+    unlock: "coolant_mixer"
+    use-cases:
+      - "科技書詳細頁"
+      - "可用於後續科技線"
+      - "支援配方與解鎖鏈"
+  refined_oil:
+    display-name: "精煉油"
+    category: BASIC
+    icon: INK_SAC
+    item-model: "nexo:refined_oil"
+    description: "精煉油料。"
+    unlock: "refinery"
+    use-cases:
+      - "科技書詳細頁"
+      - "可用於後續科技線"
+      - "支援配方與解鎖鏈"
+  laser_lens:
+    display-name: "雷射鏡"
+    category: INTERMEDIATE
+    icon: END_CRYSTAL
+    # item-model: techproject:item/laser_lens
+    # nexo-id: laser_lens
+    description: "雷射聚焦透鏡。"
+    unlock: "laser_engraver"
+    use-cases:
+      - "科技書詳細頁"
+      - "可用於後續科技線"
+      - "支援配方與解鎖鏈"
+  etched_circuit:
+    display-name: "蝕刻電路"
+    category: ADVANCED
+    icon: REDSTONE
+    # item-model: techproject:item/etched_circuit
+    # nexo-id: etched_circuit
+    description: "蝕刻後高密度電路。"
+    unlock: "laser_engraver"
+    use-cases:
+      - "科技書詳細頁"
+      - "可用於後續科技線"
+      - "支援配方與解鎖鏈"
+  drone_shell:
+    display-name: "無人機外殼"
+    category: INTERMEDIATE
+    icon: TURTLE_SCUTE
+    # item-model: techproject:item/drone_shell
+    # nexo-id: drone_shell
+    description: "無人機外殼。"
+    unlock: "drone_bay"
+    use-cases:
+      - "科技書詳細頁"
+      - "可用於後續科技線"
+      - "支援配方與解鎖鏈"
+  drone_frame:
+    display-name: "無人機框架"
+    category: ADVANCED
+    icon: PHANTOM_MEMBRANE
+    # item-model: techproject:item/drone_frame
+    # nexo-id: drone_frame
+    description: "飛行載具骨架。"
+    unlock: "drone_bay"
+    use-cases:
+      - "科技書詳細頁"
+      - "可用於後續科技線"
+      - "支援配方與解鎖鏈"
+  android_shell:
+    display-name: "安卓外殼"
+    category: INTERMEDIATE
+    icon: TURTLE_SCUTE
+    description: "自動機 工作站外裝外殼。"
+    unlock: "android_bay"
+    use-cases:
+      - "自動機 組裝件"
+      - "進階自動化裝配"
+      - "支援配方與解鎖鏈"
+  android_frame:
+    display-name: "安卓框架"
+    category: ADVANCED
+    icon: PHANTOM_MEMBRANE
+    description: "自動機 骨架與伺服結構。"
+    unlock: "android_bay"
+    use-cases:
+      - "自動機 工作站"
+      - "高階自動化骨架"
+      - "支援配方與解鎖鏈"
+  fusion_core:
+    display-name: "聚變核心"
+    category: ADVANCED
+    tier: TIER4
+    icon: NETHER_STAR
+    # item-model: techproject:item/fusion_core
+    # nexo-id: fusion_core
+    description: "聚變能源核心。"
+    unlock: "fusion_reactor"
+    use-cases:
+      - "科技書詳細頁"
+      - "可用於後續科技線"
+      - "支援配方與解鎖鏈"
+  crystal_seed:
+    display-name: "晶種"
+    category: INTERMEDIATE
+    icon: AMETHYST_SHARD
+    # item-model: techproject:item/crystal_seed
+    # nexo-id: crystal_seed
+    description: "晶體培育種子。"
+    unlock: "crystal_growth_chamber"
+    use-cases:
+      - "科技書詳細頁"
+      - "可用於後續科技線"
+      - "支援配方與解鎖鏈"
+  grown_crystal:
+    display-name: "培育晶體"
+    category: ADVANCED
+    icon: DIAMOND
+    # item-model: techproject:item/grown_crystal
+    # nexo-id: grown_crystal
+    description: "培育完成的高純度晶體。"
+    unlock: "crystal_growth_chamber"
+    use-cases:
+      - "科技書詳細頁"
+      - "可用於後續科技線"
+      - "支援配方與解鎖鏈"
+  field_plate:
+    display-name: "力場板"
+    category: ADVANCED
+    icon: GOLD_NUGGET
+    # item-model: techproject:item/field_plate
+    # nexo-id: field_plate
+    description: "力場結構板。"
+    unlock: "field_forge"
+    use-cases:
+      - "科技書詳細頁"
+      - "可用於後續科技線"
+      - "支援配方與解鎖鏈"
+  matter_blob:
+    display-name: "物質團"
+    category: ADVANCED
+    icon: SLIME_BALL
+    # item-model: techproject:item/matter_blob
+    # nexo-id: matter_blob
+    description: "物質編譯中間體。"
+    unlock: "matter_compiler"
+    use-cases:
+      - "科技書詳細頁"
+      - "可用於後續科技線"
+      - "支援配方與解鎖鏈"
+  singularity_fragment:
+    display-name: "奇點碎片"
+    category: ADVANCED
+    icon: DRAGON_BREATH
+    # item-model: techproject:item/singularity_fragment
+    # nexo-id: singularity_fragment
+    description: "奇點碎片。"
+    unlock: "matter_compiler"
+    use-cases:
+      - "科技書詳細頁"
+      - "可用於後續科技線"
+      - "支援配方與解鎖鏈"
+  control_unit:
+    display-name: "控制單元"
+    category: ADVANCED
+    icon: RECOVERY_COMPASS
+    # item-model: techproject:item/control_unit
+    # nexo-id: control_unit
+    description: "高階控制單元。"
+    unlock: "laser_engraver"
+    use-cases:
+      - "科技書詳細頁"
+      - "可用於後續科技線"
+      - "支援配方與解鎖鏈"
+  precision_nozzle:
+    display-name: "精密噴嘴"
+    category: INTERMEDIATE
+    icon: FIRE_CHARGE
+    # item-model: techproject:item/precision_nozzle
+    # nexo-id: precision_nozzle
+    description: "精密噴嘴組件。"
+    unlock: "chemical_reactor"
+    use-cases:
+      - "科技書詳細頁"
+      - "可用於後續科技線"
+      - "支援配方與解鎖鏈"
+  speed_upgrade:
+    display-name: "速度升級"
+    category: ADVANCED
+    icon: SUGAR
+    # item-model: techproject:item/speed_upgrade
+    # nexo-id: speed_upgrade
+    description: "提升機器每刻的加工次數。"
+    unlock: "advanced_assembler"
+    use-cases:
+      - "科技書詳細頁"
+      - "可用於後續科技線"
+      - "支援配方與解鎖鏈"
+  efficiency_upgrade:
+    display-name: "效率升級"
+    category: ADVANCED
+    icon: HONEYCOMB
+    # item-model: techproject:item/efficiency_upgrade
+    # nexo-id: efficiency_upgrade
+    description: "降低每次加工所需能源。"
+    unlock: "advanced_assembler"
+    use-cases:
+      - "科技書詳細頁"
+      - "可用於後續科技線"
+      - "支援配方與解鎖鏈"
+  stack_upgrade:
+    display-name: "堆疊升級"
+    category: ADVANCED
+    icon: SHULKER_SHELL
+    # item-model: techproject:item/stack_upgrade
+    # nexo-id: stack_upgrade
+    description: "增加機器單次產出量。"
+    unlock: "advanced_assembler"
+    use-cases:
+      - "科技書詳細頁"
+      - "可用於後續科技線"
+      - "支援配方與解鎖鏈"
+  range_upgrade:
+    display-name: "範圍升級"
+    category: ADVANCED
+    icon: ENDER_EYE
+    # item-model: techproject:item/range_upgrade
+    # nexo-id: range_upgrade
+    description: "提升能源與物流網路搜尋距離。"
+    unlock: "quantum_processor"
+    use-cases:
+      - "科技書詳細頁"
+      - "可用於後續科技線"
+      - "支援配方與解鎖鏈"
+machines:
+  research_desk:
+    display-name: 研究台
+    category: BASIC
+    block: ENCHANTING_TABLE
+    # item-model: techproject:item/research_desk
+    # nexo-id: research_desk
+    inputs: [tech_book, copper_ingot]
+    outputs: []
+    energy-per-tick: 0
+    effect: 奧術研究光環
+    unlock: initial
+  crusher:
+    display-name: "粉碎機"
+    category: BASIC
+    block: BLAST_FURNACE
+    inputs: ["iron_ore", "copper_ore"]
+    outputs: ["iron_dust", "copper_dust"]
+    energy-per-tick: 5
+    effect: "旋轉渦輪"
+    unlock: "initial"
+    structure-preview:
+      title: "手動粉碎架"
+      rows:
+        - "   G   "
+        - "   C   "
+      map:
+        G: "minecraft:iron_bars"
+        C: "machine:crusher"
+  furnace:
+    display-name: "熔爐"
+    category: BASIC
+    block: FURNACE
+    inputs: ["iron_dust", "copper_dust"]
+    outputs: ["iron_ingot", "copper_ingot"]
+    energy-per-tick: 10
+    effect: "火焰動畫"
+    unlock: "crusher"
+  auto_farm:
+    display-name: "自動農場"
+    category: BASIC
+    block: MOSS_BLOCK
+    inputs: ["crop_seeds"]
+    outputs: ["crops"]
+    energy-per-tick: 3
+    effect: "作物生長動畫"
+    unlock: "initial"
+  electric_saw:
+    display-name: "電鋸"
+    category: BASIC
+    block: STONECUTTER
+    inputs: ["oak_planks"]
+    outputs: ["wood_dust"]
+    energy-per-tick: 4
+    effect: "鋸片旋轉"
+    unlock: "initial"
+  recycler:
+    display-name: "回收機"
+    category: BASIC
+    block: SMOKER
+    inputs: ["wood_dust", "paper", "coal_dust"]
+    outputs: ["recycled_material", "plastic", "rust_filter"]
+    energy-per-tick: 3
+    effect: "回收動畫"
+    unlock: "initial"
+  solar_generator:
+    display-name: "太陽能發電機"
+    category: BASIC
+    block: DAYLIGHT_DETECTOR
+    inputs: ["sunlight"]
+    outputs: ["energy_cell"]
+    energy-per-tick: 0
+    effect: "太陽光束"
+    unlock: "initial"
+  coal_generator:
+    display-name: "煤炭發電機"
+    category: BASIC
+    block: CAMPFIRE
+    inputs: ["coal"]
+    outputs: ["energy_cell"]
+    energy-per-tick: 5
+    effect: "火焰 + 蒸氣"
+    unlock: "initial"
+  compressor:
+    display-name: "壓縮機"
+    category: INTERMEDIATE
+    block: PISTON
+    inputs: ["iron_ingot", "iron_plate"]
+    outputs: ["iron_plate", "steel_plate", "compressed_iron_bundle", "dense_carbon_block"]
+    energy-per-tick: 8
+    effect: "金屬壓縮動畫"
+    unlock: "furnace"
+    structure-preview:
+      title: "壓床"
+      rows:
+        - "   P   "
+        - "   C   "
+      map:
+        P: "minecraft:heavy_weighted_pressure_plate"
+        C: "machine:compressor"
+  assembler:
+    display-name: "製造機"
+    category: INTERMEDIATE
+    block: CRAFTER
+    inputs: ["circuit_board", "steel_plate"]
+    outputs: ["machine_component"]
+    energy-per-tick: 15
+    effect: "光束組裝"
+    unlock: "steel_plate"
+  quantum_processor:
+    display-name: "量子處理器"
+    category: ADVANCED
+    block: RESPAWN_ANCHOR
+    inputs: ["advanced_circuit", "nano_coating"]
+    outputs: ["quantum_chip"]
+    energy-per-tick: 20
+    effect: "閃爍光束 / 能量流"
+    unlock: "advanced_assembler"
+  smeltery:
+    display-name: "合金熔煉爐"
+    category: INTERMEDIATE
+    block: MAGMA_BLOCK
+    inputs: ["iron_dust", "coal_dust"]
+    outputs: ["titanium_alloy"]
+    energy-per-tick: 12
+    effect: "熔岩流動"
+    unlock: "furnace"
+  advanced_assembler:
+    display-name: "進階製造機"
+    category: ADVANCED
+    block: LOOM
+    inputs: ["machine_component", "advanced_circuit"]
+    outputs: ["nano_coating"]
+    energy-per-tick: 24
+    effect: "脈衝光場"
+    unlock: "assembler"
+  solar_array:
+    display-name: "太陽能陣列"
+    category: INTERMEDIATE
+    block: BLUE_STAINED_GLASS
+    inputs: ["starlight_plate"]
+    outputs: ["energy_cell"]
+    energy-per-tick: 0
+    effect: "多段光能動畫"
+    unlock: "battery_bank"
+  battery_bank:
+    display-name: "電池庫"
+    category: INTERMEDIATE
+    block: REDSTONE_LAMP
+    inputs: ["energy_cell", "lithium_cell"]
+    outputs: ["capacitor_bank"]
+    energy-per-tick: 2
+    effect: "儲能脈衝"
+    unlock: "assembler"
+  purifier:
+    display-name: "淨化器"
+    category: INTERMEDIATE
+    block: CAULDRON
+    inputs: ["ore_slurry"]
+    outputs: ["purified_shard", "coolant_cell", "purifier_membrane"]
+    energy-per-tick: 9
+    effect: "淨化泡沫"
+    unlock: "ore_washer"
+    structure-preview:
+      title: "脈衝淨化槽"
+      rows:
+        - "   B   "
+        - "   P   "
+      map:
+        B: "minecraft:stone_button"
+        P: "machine:purifier"
+  centrifuge:
+    display-name: "離心機"
+    category: ADVANCED
+    block: HOPPER
+    inputs: ["purified_shard"]
+    outputs: ["ion_dust", "magnetic_ring", "centrifuge_rotor"]
+    energy-per-tick: 18
+    effect: "高速旋轉"
+    unlock: "purifier"
+    structure-preview:
+      title: "離心轉盤"
+      rows:
+        - "   P   "
+        - "   C   "
+      map:
+        P: "minecraft:light_weighted_pressure_plate"
+        C: "machine:centrifuge"
+  ore_washer:
+    display-name: "洗礦機"
+    category: INTERMEDIATE
+    block: BARREL
+    inputs: ["iron_dust"]
+    outputs: ["ore_slurry"]
+    energy-per-tick: 7
+    effect: "水流翻騰"
+    unlock: "crusher"
+    structure-preview:
+      title: "洗礦槽"
+      rows:
+        - "   L   "
+        - "   C   "
+      map:
+        L: "minecraft:lever"
+        C: "machine:ore_washer"
+  bio_lab:
+    display-name: "生質實驗室"
+    category: INTERMEDIATE
+    block: BREWING_STAND
+    inputs: ["crops", "wood_dust"]
+    outputs: ["bio_resin", "bio_fiber"]
+    energy-per-tick: 11
+    effect: "綠色培養動畫"
+    unlock: "auto_farm"
+    structure-preview:
+      title: 生質實驗室
+      rows:
+        - " H "
+        - " B "
+      map:
+        H: "minecraft:tripwire_hook"
+        B: "machine:bio_lab"
+  greenhouse:
+    display-name: "溫室培育艙"
+    category: INTERMEDIATE
+    block: MANGROVE_LEAVES
+    inputs: ["seed_cluster", "fertilizer_mix"]
+    outputs: ["growth_lamp", "hydro_gel"]
+    energy-per-tick: 8
+    effect: "綠光培育"
+    unlock: "auto_farm"
+  polymer_press:
+    display-name: "聚合壓床"
+    category: INTERMEDIATE
+    block: HONEY_BLOCK
+    inputs: ["rubber_sheet", "polymer_resin"]
+    outputs: ["treated_plastic"]
+    energy-per-tick: 10
+    effect: "黏性壓製"
+    unlock: "bio_lab"
+  wire_mill:
+    display-name: "拉線機"
+    category: INTERMEDIATE
+    block: ANVIL
+    inputs: ["copper_ingot", "steel_plate"]
+    outputs: ["copper_wire", "steel_wire", "wiring_bundle"]
+    energy-per-tick: 9
+    effect: "高速牽引"
+    unlock: "compressor"
+    structure-preview:
+      title: "拉線架"
+      rows:
+        - "   G   "
+        - "   W   "
+      map:
+        G: "minecraft:iron_bars"
+        W: "machine:wire_mill"
+  chemical_reactor:
+    display-name: "化學反應器"
+    category: ADVANCED
+    block: BEACON
+    inputs: ["bio_resin", "coal_dust"]
+    outputs: ["polymer_resin", "synthetic_fiber", "precision_nozzle"]
+    energy-per-tick: 16
+    effect: "化學煙霧"
+    unlock: "bio_lab"
+    structure-preview:
+      title: 化學反應器
+      rows:
+        - " R "
+        - " C "
+      map:
+        R: "minecraft:comparator"
+        C: "machine:chemical_reactor"
+  coolant_mixer:
+    display-name: "冷卻混合器"
+    category: INTERMEDIATE
+    block: CAULDRON
+    inputs: ["coolant_cell", "hydro_gel"]
+    outputs: ["coolant_mix"]
+    energy-per-tick: 7
+    effect: "低溫氣霧"
+    unlock: "purifier"
+  refinery:
+    display-name: "精煉塔"
+    category: INTERMEDIATE
+    block: SMOKER
+    inputs: ["bio_resin", "ore_slurry"]
+    outputs: ["refined_oil"]
+    energy-per-tick: 10
+    effect: "蒸餾氣柱"
+    unlock: "bio_lab&ore_washer"
+  laser_engraver:
+    display-name: "雷射雕刻機"
+    category: ADVANCED
+    block: END_ROD
+    inputs: ["silicon", "optic_lens"]
+    outputs: ["laser_lens", "etched_circuit", "control_unit"]
+    energy-per-tick: 18
+    effect: "雷射掃描"
+    unlock: "advanced_assembler"
+  drone_bay:
+    display-name: "無人機艙"
+    category: ADVANCED
+    block: SHULKER_BOX
+    inputs: ["drone_core", "machine_casing"]
+    outputs: ["drone_shell", "drone_frame"]
+    energy-per-tick: 18
+    effect: "飛行裝配"
+    unlock: "advanced_assembler"
+  android_bay:
+    display-name: "安卓艙"
+    category: ADVANCED
+    block: CHISELED_BOOKSHELF
+    inputs: ["android_core", "machine_casing"]
+    outputs: ["android_shell", "android_frame", "android_memory_matrix"]
+    energy-per-tick: 20
+    effect: "程序裝配"
+    unlock: "advanced_assembler"
+  android_station:
+    display-name: "安卓工作站"
+    category: ADVANCED
+    block: CHISELED_TUFF
+    head-texture: 3503cb7ed845e7a507f569afc647c47ac483771465c9a679a54594c76afba
+    inputs: ["android_frame", "android_memory_matrix"]
+    outputs: ["android_item_interface", "android_fuel_interface"]
+    energy-per-tick: 12
+    effect: "部署與巡檢"
+    unlock: "android_bay"
+    structure-preview:
+      title: "自動機哨站"
+      rows:
+        - " I C F "
+        - "   A   "
+      map:
+        I: "machine:android_item_interface"
+        C: "minecraft:chest"
+        F: "machine:android_fuel_interface"
+        A: "machine:android_station"
+  android_item_interface:
+    display-name: "安卓物品介面"
+    category: ADVANCED
+    block: BARREL
+    inputs: ["signal_relay", "chest"]
+    outputs: []
+    energy-per-tick: 4
+    effect: "物資回收"
+    unlock: "android_station"
+  android_fuel_interface:
+    display-name: "安卓燃料介面"
+    category: ADVANCED
+    block: BLAST_FURNACE
+    inputs: ["emitter_node", "pressure_tube"]
+    outputs: []
+    energy-per-tick: 4
+    effect: "燃料補給"
+    unlock: "android_station"
+  fusion_reactor:
+    display-name: "聚變反應爐"
+    category: ADVANCED
+    tier: TIER4
+    block: CRYING_OBSIDIAN
+    inputs: ["fusion_mesh", "stability_core"]
+    outputs: ["fusion_core"]
+    energy-per-tick: 28
+    effect: "聚變環流"
+    unlock: "field_forge&crystal_growth_chamber"
+  crystal_growth_chamber:
+    display-name: "晶體培育艙"
+    category: ADVANCED
+    block: AMETHYST_BLOCK
+    inputs: ["crystal_seed", "coolant_mix"]
+    outputs: ["grown_crystal"]
+    energy-per-tick: 19
+    effect: "晶簇成長"
+    unlock: "coolant_mixer"
+  field_forge:
+    display-name: "力場鍛造台"
+    category: ADVANCED
+    block: LODESTONE
+    inputs: ["field_emitter", "phase_plate"]
+    outputs: ["field_plate"]
+    energy-per-tick: 22
+    effect: "藍色場域波動"
+    unlock: "quantum_processor"
+  matter_compiler:
+    display-name: "物質編譯器"
+    category: ADVANCED
+    block: SCULK_CATALYST
+    inputs: ["quantum_fluid", "grown_crystal"]
+    outputs: ["matter_blob", "singularity_fragment"]
+    energy-per-tick: 26
+    effect: "物質編譯脈衝"
+    unlock: "crystal_growth_chamber&quantum_processor"
+  energy_node:
+    display-name: "能源節點"
+    category: INTERMEDIATE
+    block: LIGHTNING_ROD
+    inputs: ["energy_cell"]
+    outputs: ["energy_cell"]
+    energy-per-tick: 0
+    effect: "遠距能量橋接"
+    unlock: "battery_bank"
+  energy_cable:
+    display-name: "導能線纜"
+    category: INTERMEDIATE
+    block: IRON_BARS
+    inputs: ["flux_link"]
+    outputs: ["flux_link"]
+    energy-per-tick: 0
+    effect: "能量穿透傳輸"
+    unlock: "battery_bank"
+  logistics_node:
+    display-name: "物流節點"
+    category: INTERMEDIATE
+    block: TARGET
+    inputs: ["machine_component"]
+    outputs: ["machine_component"]
+    energy-per-tick: 0
+    effect: "遠距物流橋接"
+    unlock: "assembler"
+  item_tube:
+    display-name: "物流導管"
+    category: INTERMEDIATE
+    block: GLASS_PANE
+    inputs: ["pressure_tube"]
+    outputs: ["pressure_tube"]
+    energy-per-tick: 0
+    effect: "物品穿透傳輸"
+    unlock: "wire_mill"
+recipes:
+  crusher_iron_ore:
+    machine: "crusher"
+    inputs: ["iron_ore"]
+    output: "iron_dust"
+    energy: 5
+    guide: "鐵礦石 → 粉碎機 → 鐵粉"
+  crusher_copper_ore:
+    machine: "crusher"
+    inputs: ["copper_ore"]
+    output: "copper_dust"
+    energy: 5
+    guide: "銅礦石 → 粉碎機 → 銅粉"
+  crusher_quartz:
+    machine: "crusher"
+    inputs: ["quartz"]
+    output: "silicon"
+    energy: 6
+    guide: "石英 → 粉碎機 → 矽晶"
+  crusher_coal:
+    machine: "crusher"
+    inputs: ["coal"]
+    output: "coal_dust"
+    energy: 5
+    guide: "煤炭 → 粉碎機 → 煤粉"
+  compressor_iron_plate:
+    machine: "compressor"
+    inputs: ["iron_ingot"]
+    output: "iron_plate"
+    energy: 7
+    guide: "鐵錠 → 壓縮機 → 鐵板"
+  furnace_iron_dust:
+    machine: "furnace"
+    inputs: ["iron_dust"]
+    output: "iron_ingot"
+    energy: 10
+    guide: "鐵粉 → 熔爐 → 鐵錠"
+  furnace_copper_dust:
+    machine: "furnace"
+    inputs: ["copper_dust"]
+    output: "copper_ingot"
+    energy: 10
+    guide: "銅粉 → 熔爐 → 銅錠"
+  furnace_glass:
+    machine: "furnace"
+    inputs: ["glass"]
+    output: "glass_panel"
+    energy: 8
+    guide: "玻璃 → 熔爐 → 玻璃板"
+  furnace_reinforced_glass:
+    machine: "furnace"
+    inputs: ["glass_panel", "carbon_mesh"]
+    output: "reinforced_glass"
+    energy: 12
+    guide: "玻璃板 + 碳纖網 → 熔爐 → 強化玻璃"
+  furnace_heat_coil:
+    machine: "furnace"
+    inputs: ["copper_wire", "blaze_powder"]
+    output: "heat_coil"
+    energy: 10
+    guide: "銅線 + 烈焰粉 → 熔爐 → 熱線圈"
+  furnace_vacuum_tube:
+    machine: "furnace"
+    inputs: ["glass_panel", "copper_wire"]
+    output: "vacuum_tube"
+    energy: 8
+    guide: "玻璃板 + 銅線 → 熔爐 → 真空管"
+  furnace_optic_lens:
+    machine: "furnace"
+    inputs: ["glass_panel", "silicon"]
+    output: "optic_lens"
+    energy: 12
+    guide: "玻璃板 + 矽晶 → 熔爐 → 光學鏡片"
+  saw_wood:
+    machine: "electric_saw"
+    inputs: ["oak_planks"]
+    output: "wood_dust"
+    energy: 4
+    guide: "木板 → 電鋸 → 木屑"
+  saw_fiber:
+    machine: "electric_saw"
+    inputs: ["bamboo"]
+    output: "fiber_mesh"
+    energy: 4
+    guide: "竹子 → 電鋸 → 纖維網"
+  auto_farm_seed_cluster:
+    machine: "auto_farm"
+    inputs: ["crop_seeds", "crop_seeds"]
+    output: "seed_cluster"
+    energy: 3
+    guide: "種子 → 自動農場 → 種子簇"
+  auto_farm_crop:
+    machine: "auto_farm"
+    inputs: ["crop_seeds"]
+    output: "crops"
+    energy: 3
+    guide: "種子 → 自動農場 → 作物"
+  auto_farm_fertilizer:
+    machine: "auto_farm"
+    inputs: ["crops", "bone_meal"]
+    output: "fertilizer_mix"
+    energy: 3
+    guide: "作物 + 骨粉 → 自動農場 → 肥料混合物"
+  auto_farm_agri:
+    machine: "auto_farm"
+    inputs: ["crops", "hydro_gel"]
+    output: "agri_module"
+    energy: 4
+    guide: "作物 + 水凝膠 → 自動農場 → 農業模組"
+  assembler_harvest_unit:
+    machine: "assembler"
+    inputs: ["servo_motor", "iron_plate"]
+    output: "harvest_unit"
+    energy: 10
+    guide: "伺服馬達 + 鐵板 → 製造機 → 收割單元"
+  recycler_material:
+    machine: "recycler"
+    inputs: ["wood_dust"]
+    output: "recycled_material"
+    energy: 3
+    guide: "木屑 → 回收機 → 回收材料"
+  recycler_plastic:
+    machine: "recycler"
+    inputs: ["wood_dust", "recycled_material"]
+    output: "plastic"
+    energy: 6
+    guide: "木屑 + 回收材料 → 回收機 → 塑膠"
+  recycler_filter:
+    machine: "recycler"
+    inputs: ["paper", "coal_dust"]
+    output: "rust_filter"
+    energy: 5
+    guide: "紙張 + 煤粉 → 回收機 → 鏽蝕濾芯"
+  compressor_steel:
+    machine: "compressor"
+    inputs: ["iron_plate"]
+    output: "steel_plate"
+    energy: 8
+    guide: "鐵板 → 壓縮機 → 鋼板"
+  compressor_compressed_iron:
+    machine: "compressor"
+    inputs: ["iron_plate", "iron_plate"]
+    output: "compressed_iron_bundle"
+    energy: 12
+    guide: "鐵板 + 鐵板 → 壓縮機 → 壓實鐵胚"
+  compressor_mesh:
+    machine: "compressor"
+    inputs: ["coal_dust"]
+    output: "carbon_mesh"
+    energy: 7
+    guide: "煤粉 → 壓縮機 → 碳纖網"
+  compressor_dense_carbon:
+    machine: "compressor"
+    inputs: ["carbon_mesh", "carbon_mesh"]
+    output: "dense_carbon_block"
+    energy: 11
+    guide: "碳纖網 + 碳纖網 → 壓縮機 → 高密碳塊"
+  compressor_pressure_tube:
+    machine: "compressor"
+    inputs: ["copper_ingot", "glass_panel"]
+    output: "pressure_tube"
+    energy: 9
+    guide: "銅錠 + 玻璃板 → 壓縮機 → 壓力導管"
+  compressor_composite:
+    machine: "compressor"
+    inputs: ["steel_plate", "plastic"]
+    output: "composite_panel"
+    energy: 9
+    guide: "鋼板 + 塑膠 → 壓縮機 → 複合面板"
+  assembler_component:
+    machine: "assembler"
+    inputs: ["compressed_iron_bundle", "circuit_board"]
+    output: "machine_component"
+    energy: 17
+    guide: "壓實鐵胚 + 電路板 → 製造機 → 機械零件"
+  assembler_precision_frame:
+    machine: "assembler"
+    inputs: ["machine_component", "dense_carbon_block"]
+    output: "precision_frame"
+    energy: 18
+    guide: "機械零件 + 高密碳塊 → 製造機 → 精密框架"
+  assembler_circuit:
+    machine: "assembler"
+    inputs: ["copper_ingot", "silicon"]
+    output: "circuit_board"
+    energy: 13
+    guide: "銅錠 + 矽晶 → 製造機 → 電路板"
+  assembler_advanced_circuit:
+    machine: "assembler"
+    inputs: ["circuit_board", "logic_gate", "wiring_bundle"]
+    output: "advanced_circuit"
+    energy: 18
+    guide: "電路板 + 邏輯閘 + 工業線束 → 製造機 → 進階電路"
+  assembler_energy_cell:
+    machine: "assembler"
+    inputs: ["copper_ingot", "redstone"]
+    output: "energy_cell"
+    energy: 14
+    guide: "銅錠 + 紅石 → 製造機 → 能源電池"
+  assembler_logic_gate:
+    machine: "assembler"
+    inputs: ["copper_wire", "silicon"]
+    output: "logic_gate"
+    energy: 14
+    guide: "銅線 + 矽晶 → 製造機 → 邏輯閘"
+  assembler_servo:
+    machine: "assembler"
+    inputs: ["steel_wire", "machine_component"]
+    output: "servo_motor"
+    energy: 15
+    guide: "鋼線 + 機械零件 → 製造機 → 伺服馬達"
+  assembler_machine_casing:
+    machine: "assembler"
+    inputs: ["precision_frame", "glass_panel"]
+    output: "machine_casing"
+    energy: 18
+    guide: "精密框架 + 玻璃板 → 製造機 → 機械外殼"
+  assembler_signal_relay:
+    machine: "assembler"
+    inputs: ["logic_gate", "copper_wire"]
+    output: "signal_relay"
+    energy: 13
+    guide: "邏輯閘 + 銅線 → 製造機 → 訊號中繼器"
+  assembler_bronze_gear:
+    machine: "assembler"
+    inputs: ["copper_ingot", "iron_plate"]
+    output: "bronze_gear"
+    energy: 13
+    guide: "銅錠 + 鐵板 → 製造機 → 青銅齒輪"
+  smeltery_alloy:
+    machine: "smeltery"
+    inputs: ["iron_dust", "coal_dust"]
+    output: "titanium_alloy"
+    energy: 12
+    guide: "鐵粉 + 煤粉 → 合金熔煉爐 → 鈦合金"
+  smeltery_frame:
+    machine: "smeltery"
+    inputs: ["titanium_alloy", "steel_wire"]
+    output: "alloy_frame"
+    energy: 14
+    guide: "鈦合金 + 鋼線 → 合金熔煉爐 → 合金框架"
+  smeltery_shell:
+    machine: "smeltery"
+    inputs: ["heat_coil", "steel_plate"]
+    output: "thermal_shell"
+    energy: 14
+    guide: "熱線圈 + 鋼板 → 合金熔煉爐 → 隔熱外殼"
+  advanced_nano:
+    machine: "advanced_assembler"
+    inputs: ["precision_frame", "advanced_circuit"]
+    output: "nano_coating"
+    energy: 26
+    guide: "精密框架 + 進階電路 → 進階製造機 → 奈米塗層"
+  advanced_micro:
+    machine: "advanced_assembler"
+    inputs: ["advanced_circuit", "dense_carbon_block", "wiring_bundle"]
+    output: "micro_processor"
+    energy: 24
+    guide: "進階電路 + 高密碳塊 + 工業線束 → 進階製造機 → 微型處理器"
+  advanced_reactor_core:
+    machine: "advanced_assembler"
+    inputs: ["control_unit", "heat_coil"]
+    output: "reactor_core"
+    energy: 24
+    guide: "控制單元 + 熱線圈 → 進階製造機 → 反應爐核心"
+  advanced_drone_core:
+    machine: "advanced_assembler"
+    inputs: ["control_unit", "emitter_node"]
+    output: "drone_core"
+    energy: 22
+    guide: "控制單元 + 發射節點 → 進階製造機 → 無人機核心"
+  advanced_android_core:
+    machine: "advanced_assembler"
+    inputs: ["control_unit", "servo_motor"]
+    output: "android_core"
+    energy: 22
+    guide: "控制單元 + 伺服馬達 → 進階製造機 → 安卓核心"
+  solar_plate:
+    machine: "solar_array"
+    inputs: ["glass_panel", "energy_cell"]
+    output: "starlight_plate"
+    energy: 6
+    guide: "玻璃板 + 能源電池 → 太陽能陣列 → 星光板"
+  solar_grid:
+    machine: "solar_array"
+    inputs: ["starlight_plate", "copper_wire"]
+    output: "grid_module"
+    energy: 7
+    guide: "星光板 + 銅線 → 太陽能陣列 → 網格模組"
+  battery_lithium:
+    machine: "battery_bank"
+    inputs: ["energy_cell", "copper_ingot"]
+    output: "lithium_cell"
+    energy: 9
+    guide: "能源電池 + 銅錠 → 電池庫 → 鋰電池"
+  battery_emitter:
+    machine: "battery_bank"
+    inputs: ["energy_cell", "logic_gate"]
+    output: "emitter_node"
+    energy: 8
+    guide: "能源電池 + 邏輯閘 → 電池庫 → 發射節點"
+  battery_capacitor:
+    machine: "battery_bank"
+    inputs: ["lithium_cell", "emitter_node"]
+    output: "capacitor_bank"
+    energy: 11
+    guide: "鋰電池 + 發射節點 → 電池庫 → 電容組"
+  washer_slurry:
+    machine: "ore_washer"
+    inputs: ["iron_dust"]
+    output: "ore_slurry"
+    energy: 7
+    guide: "鐵粉 → 洗礦機 → 礦漿"
+  washer_biomass:
+    machine: "ore_washer"
+    inputs: ["crops"]
+    output: "crushed_biomass"
+    energy: 6
+    guide: "作物 → 洗礦機 → 粉碎生質"
+  purifier_shard:
+    machine: "purifier"
+    inputs: ["ore_slurry"]
+    output: "purified_shard"
+    energy: 9
+    guide: "礦漿 → 淨化器 → 淨化碎晶"
+  purifier_coolant:
+    machine: "purifier"
+    inputs: ["snowball", "glass_panel", "purifier_membrane"]
+    output: "coolant_cell"
+    energy: 10
+    guide: "雪球 + 玻璃板 + 淨化膜片 → 淨化器 → 冷卻電池"
+  purifier_membrane_recipe:
+    machine: "purifier"
+    inputs: ["rust_filter", "fiber_mesh"]
+    output: "purifier_membrane"
+    energy: 10
+    guide: "鏽蝕濾芯 + 纖維網 → 淨化器 → 淨化膜片"
+  centrifuge_ion:
+    machine: "centrifuge"
+    inputs: ["purified_shard"]
+    output: "ion_dust"
+    energy: 18
+    guide: "淨化碎晶 → 離心機 → 離子粉"
+  centrifuge_rotor_recipe:
+    machine: "centrifuge"
+    inputs: ["ion_dust", "alloy_frame"]
+    output: "centrifuge_rotor"
+    energy: 20
+    guide: "離子粉 + 合金框架 → 離心機 → 離心轉子"
+  centrifuge_ring:
+    machine: "centrifuge"
+    inputs: ["ion_dust", "steel_wire", "centrifuge_rotor"]
+    output: "magnetic_ring"
+    energy: 20
+    guide: "離子粉 + 鋼線 + 離心轉子 → 離心機 → 磁環"
+  bio_resin_recipe:
+    machine: "bio_lab"
+    inputs: ["crops", "wood_dust"]
+    output: "bio_resin"
+    energy: 11
+    guide: "作物 + 木屑 → 生質實驗室 → 生質樹脂"
+  bio_fiber_recipe:
+    machine: "bio_lab"
+    inputs: ["crushed_biomass", "fiber_mesh"]
+    output: "bio_fiber"
+    energy: 10
+    guide: "粉碎生質 + 纖維網 → 生質實驗室 → 生質纖維"
+  greenhouse_growth_lamp:
+    machine: "greenhouse"
+    inputs: ["glass_panel", "agri_module"]
+    output: "growth_lamp"
+    energy: 8
+    guide: "玻璃板 + 農業模組 → 溫室培育艙 → 生長燈"
+  greenhouse_hydro:
+    machine: "greenhouse"
+    inputs: ["bio_resin", "crops"]
+    output: "hydro_gel"
+    energy: 8
+    guide: "生質樹脂 + 作物 → 溫室培育艙 → 水凝膠"
+  polymer_rubber:
+    machine: "polymer_press"
+    inputs: ["bio_resin"]
+    output: "rubber_sheet"
+    energy: 9
+    guide: "生質樹脂 → 聚合壓床 → 橡膠片"
+  polymer_treated:
+    machine: "polymer_press"
+    inputs: ["plastic", "polymer_resin"]
+    output: "treated_plastic"
+    energy: 10
+    guide: "塑膠 + 聚合樹脂 → 聚合壓床 → 處理塑膠"
+  wire_mill_copper:
+    machine: "wire_mill"
+    inputs: ["copper_ingot"]
+    output: "copper_wire"
+    energy: 9
+    guide: "銅錠 → 拉線機 → 銅線"
+  wire_mill_steel:
+    machine: "wire_mill"
+    inputs: ["steel_plate"]
+    output: "steel_wire"
+    energy: 11
+    guide: "鋼板 → 拉線機 → 鋼線"
+  wire_mill_bundle:
+    machine: "wire_mill"
+    inputs: ["copper_wire", "steel_wire"]
+    output: "wiring_bundle"
+    energy: 12
+    guide: "銅線 + 鋼線 → 拉線機 → 工業線束"
+  chemical_polymer:
+    machine: "chemical_reactor"
+    inputs: ["bio_resin", "coal_dust"]
+    output: "polymer_resin"
+    energy: 16
+    guide: "生質樹脂 + 煤粉 → 化學反應器 → 聚合樹脂"
+  chemical_synthetic:
+    machine: "chemical_reactor"
+    inputs: ["polymer_resin", "bio_fiber"]
+    output: "synthetic_fiber"
+    energy: 16
+    guide: "聚合樹脂 + 生質纖維 → 化學反應器 → 合成纖維"
+  chemical_nozzle:
+    machine: "chemical_reactor"
+    inputs: ["pressure_tube", "steel_wire"]
+    output: "precision_nozzle"
+    energy: 15
+    guide: "壓力導管 + 鋼線 → 化學反應器 → 精密噴嘴"
+  coolant_mix_recipe:
+    machine: "coolant_mixer"
+    inputs: ["coolant_cell", "hydro_gel"]
+    output: "coolant_mix"
+    energy: 7
+    guide: "冷卻電池 + 水凝膠 → 冷卻混合器 → 冷卻混合液"
+  refinery_oil:
+    machine: "refinery"
+    inputs: ["bio_resin", "ore_slurry"]
+    output: "refined_oil"
+    energy: 10
+    guide: "生質樹脂 + 礦漿 → 精煉塔 → 精煉油"
+  laser_lens_recipe:
+    machine: "laser_engraver"
+    inputs: ["optic_lens", "reinforced_glass"]
+    output: "laser_lens"
+    energy: 17
+    guide: "光學鏡片 + 強化玻璃 → 雷射雕刻機 → 雷射鏡"
+  laser_etched:
+    machine: "laser_engraver"
+    inputs: ["laser_lens", "advanced_circuit"]
+    output: "etched_circuit"
+    energy: 18
+    guide: "雷射鏡 + 進階電路 → 雷射雕刻機 → 蝕刻電路"
+  laser_control:
+    machine: "laser_engraver"
+    inputs: ["etched_circuit", "logic_gate"]
+    output: "control_unit"
+    energy: 18
+    guide: "蝕刻電路 + 邏輯閘 → 雷射雕刻機 → 控制單元"
+  drone_shell_recipe:
+    machine: "drone_bay"
+    inputs: ["treated_plastic", "machine_casing"]
+    output: "drone_shell"
+    energy: 18
+    guide: "處理塑膠 + 機械外殼 → 無人機艙 → 無人機外殼"
+  drone_frame_recipe:
+    machine: "drone_bay"
+    inputs: ["drone_shell", "synthetic_fiber"]
+    output: "drone_frame"
+    energy: 19
+    guide: "無人機外殼 + 合成纖維 → 無人機艙 → 無人機框架"
+  android_shell_recipe:
+    machine: "android_bay"
+    inputs: ["treated_plastic", "machine_casing"]
+    output: "android_shell"
+    energy: 18
+    guide: "處理塑膠 + 機械外殼 → 安卓艙 → 安卓外殼"
+  android_frame_recipe:
+    machine: "android_bay"
+    inputs: ["android_shell", "synthetic_fiber"]
+    output: "android_frame"
+    energy: 19
+    guide: "安卓外殼 + 合成纖維 → 安卓艙 → 安卓框架"
+  android_memory_matrix_recipe:
+    machine: "android_bay"
+    inputs: ["android_core", "data_matrix"]
+    output: "android_memory_matrix"
+    energy: 20
+    guide: "安卓核心 + 數據矩陣 → 安卓艙 → 安卓記憶矩陣"
+  assembler_android_harvest_script:
+    machine: "assembler"
+    inputs: ["agri_module", "logic_gate"]
+    output: "android_harvest_script"
+    energy: 14
+    guide: "農業模組 + 邏輯閘 → 製造機 → 安卓農務程序"
+  assembler_android_logging_script:
+    machine: "assembler"
+    inputs: ["harvest_unit", "servo_motor"]
+    output: "android_logging_script"
+    energy: 15
+    guide: "收割單元 + 伺服馬達 → 製造機 → 安卓伐木程序"
+  assembler_android_salvage_script:
+    machine: "assembler"
+    inputs: ["signal_relay", "emitter_node"]
+    output: "android_salvage_script"
+    energy: 15
+    guide: "訊號中繼器 + 發射節點 → 製造機 → 安卓回收程序"
+  advanced_android_overclock_card:
+    machine: "advanced_assembler"
+    inputs: ["speed_upgrade", "android_memory_matrix"]
+    output: "android_overclock_card"
+    energy: 20
+    guide: "速度升級 + 安卓記憶矩陣 → 進階製造機 → 安卓超頻卡"
+  advanced_android_efficiency_card:
+    machine: "advanced_assembler"
+    inputs: ["efficiency_upgrade", "android_memory_matrix"]
+    output: "android_efficiency_card"
+    energy: 20
+    guide: "效率升級 + 安卓記憶矩陣 → 進階製造機 → 安卓節能卡"
+  quantum_android_expansion_card:
+    machine: "quantum_processor"
+    inputs: ["range_upgrade", "android_memory_matrix"]
+    output: "android_expansion_card"
+    energy: 22
+    guide: "範圍升級 + 安卓記憶矩陣 → 量子處理器 → 安卓擴域卡"
+  quantum_android_planet_script:
+    machine: "quantum_processor"
+    inputs: ["quantum_frame", "field_emitter"]
+    output: "android_planet_script"
+    energy: 23
+    guide: "量子框架 + 力場發射器 → 量子處理器 → 安卓行星採樣程序"
+  advanced_android_station:
+    machine: "advanced_assembler"
+    inputs: ["android_frame", "android_memory_matrix"]
+    output: "android_station"
+    energy: 24
+    guide: "安卓框架 + 安卓記憶矩陣 → 進階製造機 → 安卓工作站"
+  advanced_plasma_cell:
+    machine: "advanced_assembler"
+    inputs: ["heat_coil", "ion_dust"]
+    output: "plasma_cell"
+    energy: 22
+    guide: "熱線圈 + 離子粉 → 進階製造機 → 電漿電池"
+  assembler_android_item_interface:
+    machine: "assembler"
+    inputs: ["signal_relay", "chest"]
+    output: "android_item_interface"
+    energy: 16
+    guide: "訊號中繼器 + 箱子 → 製造機 → 安卓物品介面"
+  assembler_android_fuel_interface:
+    machine: "assembler"
+    inputs: ["emitter_node", "pressure_tube"]
+    output: "android_fuel_interface"
+    energy: 16
+    guide: "發射節點 + 壓力導管 → 製造機 → 安卓燃料介面"
+  quantum_chip_recipe:
+    machine: "quantum_processor"
+    inputs: ["advanced_circuit", "nano_coating"]
+    output: "quantum_chip"
+    energy: 20
+    guide: "進階電路 + 奈米塗層 → 量子處理器 → 量子晶片"
+  quantum_fluid_recipe:
+    machine: "quantum_processor"
+    inputs: ["ion_dust", "flux_link"]
+    output: "quantum_fluid"
+    energy: 20
+    guide: "離子粉 + 通量連結 → 量子處理器 → 量子流體"
+  quantum_frame_recipe:
+    machine: "quantum_processor"
+    inputs: ["flux_link", "reinforced_glass"]
+    output: "quantum_frame"
+    energy: 22
+    guide: "通量連結 + 強化玻璃 → 量子處理器 → 量子框架"
+  quantum_data_matrix:
+    machine: "quantum_processor"
+    inputs: ["control_unit", "quantum_chip"]
+    output: "data_matrix"
+    energy: 21
+    guide: "控制單元 + 量子晶片 → 量子處理器 → 數據矩陣"
+  quantum_crystal_matrix:
+    machine: "quantum_processor"
+    inputs: ["grown_crystal", "data_matrix"]
+    output: "crystal_matrix"
+    energy: 21
+    guide: "培育晶體 + 數據矩陣 → 量子處理器 → 晶體矩陣"
+  quantum_flux_link:
+    machine: "quantum_processor"
+    inputs: ["magnetic_ring", "energy_cell"]
+    output: "flux_link"
+    energy: 20
+    guide: "磁環 + 能源電池 → 量子處理器 → 通量連結"
+  quantum_phase_plate:
+    machine: "quantum_processor"
+    inputs: ["quantum_frame", "grown_crystal"]
+    output: "phase_plate"
+    energy: 22
+    guide: "量子框架 + 培育晶體 → 量子處理器 → 相位板"
+  quantum_field_emitter:
+    machine: "quantum_processor"
+    inputs: ["flux_link", "control_unit"]
+    output: "field_emitter"
+    energy: 23
+    guide: "通量連結 + 控制單元 → 量子處理器 → 力場發射器"
+  crystal_seed_recipe:
+    machine: "crystal_growth_chamber"
+    inputs: ["amethyst_shard", "coolant_mix"]
+    output: "crystal_seed"
+    energy: 18
+    guide: "紫水晶碎片 + 冷卻混合液 → 晶體培育艙 → 晶種"
+  grown_crystal_recipe:
+    machine: "crystal_growth_chamber"
+    inputs: ["crystal_seed", "quantum_fluid"]
+    output: "grown_crystal"
+    energy: 19
+    guide: "晶種 + 量子流體 → 晶體培育艙 → 培育晶體"
+  field_plate_recipe:
+    machine: "field_forge"
+    inputs: ["field_emitter", "phase_plate"]
+    output: "field_plate"
+    energy: 22
+    guide: "力場發射器 + 相位板 → 力場鍛造台 → 力場板"
+  fusion_mesh_recipe:
+    machine: "fusion_reactor"
+    inputs: ["thermal_shell", "field_plate"]
+    output: "fusion_mesh"
+    energy: 25
+    guide: "隔熱外殼 + 力場板 → 聚變反應爐 → 聚變網"
+  stability_core_recipe:
+    machine: "fusion_reactor"
+    inputs: ["magnetic_ring", "reactor_core"]
+    output: "stability_core"
+    energy: 26
+    guide: "磁環 + 反應爐核心 → 聚變反應爐 → 穩定核心"
+  fusion_core_recipe:
+    machine: "fusion_reactor"
+    inputs: ["fusion_mesh", "stability_core"]
+    output: "fusion_core"
+    energy: 28
+    guide: "聚變網 + 穩定核心 → 聚變反應爐 → 聚變核心"
+  matter_blob_recipe:
+    machine: "matter_compiler"
+    inputs: ["quantum_fluid", "grown_crystal"]
+    output: "matter_blob"
+    energy: 26
+    guide: "量子流體 + 培育晶體 → 物質編譯器 → 物質團"
+  singularity_fragment_recipe:
+    machine: "matter_compiler"
+    inputs: ["matter_blob", "fusion_core"]
+    output: "singularity_fragment"
+    energy: 27
+    guide: "物質團 + 聚變核心 → 物質編譯器 → 奇點碎片"
+  advanced_speed_upgrade:
+    machine: "advanced_assembler"
+    inputs: ["servo_motor", "micro_processor"]
+    output: "speed_upgrade"
+    energy: 18
+    guide: "伺服馬達 + 微型處理器 → 進階製造機 → 速度升級"
+  advanced_efficiency_upgrade:
+    machine: "advanced_assembler"
+    inputs: ["nano_coating", "capacitor_bank"]
+    output: "efficiency_upgrade"
+    energy: 18
+    guide: "奈米塗層 + 電容組 → 進階製造機 → 效率升級"
+  advanced_stack_upgrade:
+    machine: "advanced_assembler"
+    inputs: ["machine_casing", "composite_panel"]
+    output: "stack_upgrade"
+    energy: 18
+    guide: "機械外殼 + 複合面板 → 進階製造機 → 堆疊升級"
+  quantum_range_upgrade:
+    machine: "quantum_processor"
+    inputs: ["flux_link", "sensor_array"]
+    output: "range_upgrade"
+    energy: 20
+    guide: "通量連結 + 感測陣列 → 量子處理器 → 範圍升級"
+  assembler_energy_node:
+    machine: "assembler"
+    inputs: ["emitter_node", "machine_casing"]
+    output: "energy_node"
+    energy: 14
+    guide: "發射節點 + 機械外殼 → 製造機 → 能源節點"
+  assembler_energy_cable:
+    machine: "assembler"
+    inputs: ["copper_wire", "iron_plate"]
+    output: "energy_cable"
+    energy: 10
+    guide: "銅線 + 鐵板 → 製造機 → 導能線纜"
+  assembler_logistics_node:
+    machine: "assembler"
+    inputs: ["signal_relay", "machine_component"]
+    output: "logistics_node"
+    energy: 14
+    guide: "訊號中繼器 + 機械零件 → 製造機 → 物流節點"
+  wire_item_tube:
+    machine: "wire_mill"
+    inputs: ["pressure_tube", "steel_wire"]
+    output: "item_tube"
+    energy: 11
+    guide: "壓力導管 + 鋼線 → 拉線機 → 物流導管"
+achievements:
+  # ═══ 入門（BEGINNER） ═══
+  first_machine:
+    display-name: "第一台機器"
+    description: "放置第一台機器。"
+    reward-xp: 50
+    reward-tokens: 0
+    hint: "放置任一自訂機器"
+  newcomer_craft:
+    display-name: "合成學徒"
+    description: "首次在研究台合成科技物品。"
+    reward-xp: 30
+    reward-tokens: 2
+    hint: "使用研究台解鎖物品"
+  starter_power:
+    display-name: "初始電力"
+    description: "首次放置發電機。"
+    reward-xp: 40
+    reward-tokens: 3
+    hint: "建造一台發電機"
+  first_research:
+    display-name: "首次研究"
+    description: "首次花費研究點數解鎖項目。"
+    reward-xp: 30
+    reward-tokens: 2
+    hint: "使用研究 XP 解鎖"
+
+  # ═══ 加工（PROCESSING） ═══
+  first_crush:
+    display-name: "碎礦入門"
+    description: "首次使用碎礦機。"
+    reward-xp: 60
+    reward-tokens: 4
+    hint: "放入礦石啟動碎礦機"
+  first_compress:
+    display-name: "壓縮初試"
+    description: "首次使用壓縮器。"
+    reward-xp: 60
+    reward-tokens: 4
+    hint: "使用壓縮器製作壓縮物"
+  first_smelt:
+    display-name: "冶煉先行"
+    description: "首次使用精煉爐。"
+    reward-xp: 60
+    reward-tokens: 4
+    hint: "啟動精煉爐進行冶煉"
+  assembly_starter:
+    display-name: "組裝新手"
+    description: "首次使用裝配台合成物品。"
+    reward-xp: 80
+    reward-tokens: 6
+    hint: "使用增強裝配台"
+  process_milestone_100:
+    display-name: "加工百次"
+    description: "累計加工 100 個物品。"
+    reward-xp: 100
+    reward-tokens: 8
+    hint: "機器持續運作"
+  process_milestone_500:
+    display-name: "流水線工人"
+    description: "累計加工 500 個物品。"
+    reward-xp: 180
+    reward-tokens: 14
+    hint: "大規模量產"
+  process_milestone_2000:
+    display-name: "加工之王"
+    description: "累計加工 2000 個物品。"
+    reward-xp: 300
+    reward-tokens: 22
+    hint: "超級效率工廠"
+  recycler_expert:
+    display-name: "回收專家"
+    description: "回收 1000 個物品。"
+    reward-xp: 180
+    reward-tokens: 15
+    hint: "持續使用回收機"
+
+  # ═══ 能源（ENERGY） ═══
+  energy_beginner:
+    display-name: "能源新手"
+    description: "累計發電 100 單位能源。"
+    reward-xp: 100
+    reward-tokens: 10
+    hint: "使用發電機"
+  energy_500:
+    display-name: "小型電廠"
+    description: "累計發電 500 單位能源。"
+    reward-xp: 140
+    reward-tokens: 10
+    hint: "持續運行發電機"
+  energy_2000:
+    display-name: "中型電廠"
+    description: "累計發電 2000 單位能源。"
+    reward-xp: 200
+    reward-tokens: 16
+    hint: "大量發電設備"
+  energy_10000:
+    display-name: "大型電廠"
+    description: "累計發電 10000 單位能源。"
+    reward-xp: 350
+    reward-tokens: 24
+    hint: "能源帝國"
+  solar_pioneer:
+    display-name: "太陽能先驅"
+    description: "建造太陽能板。"
+    reward-xp: 80
+    reward-tokens: 6
+    hint: "放置太陽能發電機"
+  generator_collector:
+    display-name: "發電機收藏家"
+    description: "建造 3 種不同類型的發電機。"
+    reward-xp: 160
+    reward-tokens: 12
+    hint: "嘗試不同發電方式"
+  power_grid_master:
+    display-name: "電網主宰"
+    description: "累計發電 50000 單位能源。"
+    reward-xp: 500
+    reward-tokens: 32
+    hint: "工業級電網"
+
+  # ═══ 農業 / 烹飪（AGRICULTURE） ═══
+  first_harvest:
+    display-name: "初次收穫"
+    description: "手動或自動收穫第一批作物。"
+    reward-xp: 40
+    reward-tokens: 3
+    hint: "收割農作物"
+  crop_100:
+    display-name: "百株農場"
+    description: "收割 100 批作物。"
+    reward-xp: 100
+    reward-tokens: 8
+    hint: "擴大農場規模"
+  crop_king:
+    display-name: "農作之王"
+    description: "收割 1000 作物。"
+    reward-xp: 180
+    reward-tokens: 12
+    hint: "自動農場量產"
+  cook_first_meal:
+    display-name: "首道料理"
+    description: "使用互動烹調製作第一道菜。"
+    reward-xp: 50
+    reward-tokens: 4
+    hint: "右鍵營火放上食材"
+  cook_10_meals:
+    display-name: "業餘廚師"
+    description: "互動烹調 10 道菜。"
+    reward-xp: 100
+    reward-tokens: 8
+    hint: "多多烹調"
+  cook_50_meals:
+    display-name: "料理達人"
+    description: "互動烹調 50 道菜。"
+    reward-xp: 200
+    reward-tokens: 16
+    hint: "超級廚師"
+  bio_researcher:
+    display-name: "生質研究員"
+    description: "首次使用基因切片台處理生物材料。"
+    reward-xp: 120
+    reward-tokens: 10
+    hint: "進入生物科技支線"
+  orchard_keeper:
+    display-name: "果園園丁"
+    description: "種植或收穫 5 種不同作物。"
+    reward-xp: 80
+    reward-tokens: 6
+    hint: "多種類作物種植"
+
+  # ═══ 物流（LOGISTICS） ═══
+  first_transfer:
+    display-name: "首次搬運"
+    description: "完成第一次自動物流搬運。"
+    reward-xp: 60
+    reward-tokens: 4
+    hint: "建造物流管線"
+  transfer_500:
+    display-name: "物流新星"
+    description: "完成 500 次物流搬運。"
+    reward-xp: 140
+    reward-tokens: 10
+    hint: "擴建物流網路"
+  storage_master:
+    display-name: "倉儲大師"
+    description: "建立 5 個以上的數位儲存設備。"
+    reward-xp: 180
+    reward-tokens: 14
+    hint: "打造倉儲體系"
+
+  # ═══ 探索（EXPLORATION） ═══
+  first_planet_visit:
+    display-name: "星際旅人"
+    description: "首次前往其他星球。"
+    reward-xp: 200
+    reward-tokens: 16
+    hint: "使用星際門傳送"
+  planet_explorer_3:
+    display-name: "三星探索者"
+    description: "造訪 3 個不同星球。"
+    reward-xp: 300
+    reward-tokens: 22
+    hint: "探索更多星球"
+  planet_explorer_all:
+    display-name: "全星系漫遊"
+    description: "造訪所有可用星球。"
+    reward-xp: 500
+    reward-tokens: 32
+    hint: "探索每一個星球"
+  gate_builder:
+    display-name: "星門建造者"
+    description: "建造第一座星際門。"
+    reward-xp: 180
+    reward-tokens: 14
+    hint: "製作星際門方塊"
+  discover_ruins:
+    display-name: "遺跡發現者"
+    description: "在星球上發現並啟動遺跡。"
+    reward-xp: 240
+    reward-tokens: 18
+    hint: "探索星球表面尋找遺跡"
+  planet_sample_collector:
+    display-name: "星球採樣員"
+    description: "從不同星球收集 20 份樣本。"
+    reward-xp: 260
+    reward-tokens: 20
+    hint: "使用採集工具蒐集樣本"
+
+  # ═══ 收集（COLLECTION） ═══
+  tech_collector:
+    display-name: "科技收藏家"
+    description: "收集全部基礎材料。"
+    reward-xp: 120
+    reward-tokens: 8
+    hint: "解鎖基礎分類物品"
+  collect_10:
+    display-name: "初窺門徑"
+    description: "解鎖 10 種不同物品。"
+    reward-xp: 60
+    reward-tokens: 4
+    hint: "持續研究與合成"
+  collect_25:
+    display-name: "物品鑑賞家"
+    description: "解鎖 25 種不同物品。"
+    reward-xp: 120
+    reward-tokens: 10
+    hint: "探索更多科技線"
+  item_conqueror:
+    display-name: "物品征服者"
+    description: "解鎖 50 種不同物品。"
+    reward-xp: 300
+    reward-tokens: 25
+    hint: "完整推進科技線"
+  collect_100:
+    display-name: "收集狂人"
+    description: "解鎖 100 種不同物品。"
+    reward-xp: 400
+    reward-tokens: 28
+    hint: "擴展所有分支"
+  collect_200:
+    display-name: "科技博物館"
+    description: "解鎖 200 種不同物品。"
+    reward-xp: 600
+    reward-tokens: 40
+    hint: "幾乎通關全部物品線"
+  machine_collector_10:
+    display-name: "機器建造師"
+    description: "建造 10 種不同機器。"
+    reward-xp: 160
+    reward-tokens: 12
+    hint: "多嘗試不同機器"
+  machine_collector_20:
+    display-name: "工業大亨"
+    description: "建造 20 種不同機器。"
+    reward-xp: 280
+    reward-tokens: 20
+    hint: "建立完整的工業鏈"
+  all_machines_collector:
+    display-name: "機器全通"
+    description: "建造所有種類的機器。"
+    reward-xp: 500
+    reward-tokens: 36
+    hint: "解鎖並建造每一台機器"
+
+  # ═══ 終局（ENDGAME） ═══
+  quantum_engineer:
+    display-name: "量子工程師"
+    description: "製作量子晶片。"
+    reward-xp: 250
+    reward-tokens: 20
+    hint: "推進到量子階段"
+  plasma_forge_master:
+    display-name: "等離子鍛造師"
+    description: "首次使用等離子精煉爐。"
+    reward-xp: 300
+    reward-tokens: 22
+    hint: "建造等離子精煉爐"
+  cosmic_assembler:
+    display-name: "宇宙裝配員"
+    description: "首次使用天穹裝配台。"
+    reward-xp: 360
+    reward-tokens: 26
+    hint: "建造天穹裝配台"
+  mega_builder:
+    display-name: "巨構工程師"
+    description: "建造第一座巨構建築。"
+    reward-xp: 450
+    reward-tokens: 30
+    hint: "進入巨構時代"
+
+  # ═══ 通用 ═══
+  automation_master:
+    display-name: "自動化大師"
+    description: "同時維持 10 台機器運作。"
+    reward-xp: 150
+    reward-tokens: 12
+    hint: "擴建工廠"
+  full_factory:
+    display-name: "滿載工廠"
+    description: "機器數量達 20。"
+    reward-xp: 220
+    reward-tokens: 18
+    hint: "大型工廠"
+  mega_factory:
+    display-name: "超級工廠"
+    description: "同時維持 50 台機器運作。"
+    reward-xp: 400
+    reward-tokens: 28
+    hint: "超大型工廠規模"
+  completionist:
+    display-name: "全成就達成者"
+    description: "完成所有成就。"
+    reward-xp: 500
+    reward-tokens: 32
+    hint: "最終完成度獎勵"

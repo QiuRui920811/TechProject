@@ -1,0 +1,26 @@
+{
+  "model": {
+    "type": "minecraft:range_dispatch",
+    "property": "minecraft:custom_model_data",
+    "entries": [
+      {
+        "threshold": 4755417,
+        "model": {
+          "type": "minecraft:model",
+          "model": "techproject:item/grid_module"
+        }
+      },
+      {
+        "threshold": 6152710,
+        "model": {
+          "type": "minecraft:model",
+          "model": "techproject:item/solar_generator"
+        }
+      }
+    ],
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "minecraft:item/daylight_detector"
+    }
+  }
+}

@@ -1,0 +1,33 @@
+{
+  "model": {
+    "type": "minecraft:range_dispatch",
+    "property": "minecraft:custom_model_data",
+    "entries": [
+      {
+        "threshold": 1476520,
+        "model": {
+          "type": "minecraft:model",
+          "model": "techproject:item/treated_plastic"
+        }
+      },
+      {
+        "threshold": 1711560,
+        "model": {
+          "type": "minecraft:model",
+          "model": "techproject:item/nanite_slurry"
+        }
+      },
+      {
+        "threshold": 4972219,
+        "model": {
+          "type": "minecraft:model",
+          "model": "techproject:item/plastic"
+        }
+      }
+    ],
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "minecraft:item/slime_ball"
+    }
+  }
+}

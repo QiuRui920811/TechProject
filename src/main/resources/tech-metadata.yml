@@ -1,0 +1,2323 @@
+# TechProject canonical metadata overlay
+# 這份檔案不取代 content 定義，而是提供第一階段重構所需的顯式 schema。
+# 可覆蓋欄位：guide-category / system-group / item-class / machine-archetype / visual-tier / acquisition-mode / family / role / tier / display-name
+
+items:
+  tech_book:
+    guide-category: SPECIAL
+    system-group: SPECIAL
+    item-class: SPECIAL
+    visual-tier: ADVANCED
+    acquisition-mode: RESEARCH_REWARD
+    family: research
+    role: guide-book
+  energy_token:
+    guide-category: SPECIAL
+    system-group: SPECIAL
+    item-class: SPECIAL
+    visual-tier: ADVANCED
+    acquisition-mode: RESEARCH_REWARD
+    family: rewards
+    role: reward-currency
+  achievement_badge:
+    guide-category: SPECIAL
+    system-group: SPECIAL
+    item-class: SPECIAL
+    visual-tier: ADVANCED
+    acquisition-mode: RESEARCH_REWARD
+    family: rewards
+    role: achievement-reward
+
+  iron_dust:
+    guide-category: MATERIALS
+    system-group: PROCESSING
+    item-class: TECH_MATERIAL
+    visual-tier: TECH
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: ore_processing
+    role: dust-material
+  copper_dust:
+    guide-category: MATERIALS
+    system-group: PROCESSING
+    item-class: TECH_MATERIAL
+    visual-tier: TECH
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: ore_processing
+    role: dust-material
+  coal_dust:
+    guide-category: MATERIALS
+    system-group: PROCESSING
+    item-class: TECH_MATERIAL
+    visual-tier: TECH
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: ore_processing
+    role: dust-material
+  silicon:
+    guide-category: MATERIALS
+    system-group: PROCESSING
+    item-class: TECH_MATERIAL
+    visual-tier: TECH
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: electronics
+    role: precision-material
+  steel_plate:
+    guide-category: MATERIALS
+    system-group: PROCESSING
+    item-class: TECH_MATERIAL
+    visual-tier: TECH
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: metal_components
+    role: structural-plate
+  iron_plate:
+    guide-category: MATERIALS
+    system-group: PROCESSING
+    item-class: TECH_MATERIAL
+    visual-tier: TECH
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: metal_components
+    role: structural-plate
+  machine_component:
+    guide-category: MATERIALS
+    system-group: PROCESSING
+    item-class: CORE_COMPONENT
+    visual-tier: TECH
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: machine_parts
+    role: assembly-component
+  circuit_board:
+    guide-category: MATERIALS
+    system-group: PROCESSING
+    item-class: CORE_COMPONENT
+    visual-tier: TECH
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: electronics
+    role: circuit-component
+  advanced_circuit:
+    guide-category: MATERIALS
+    system-group: QUANTUM_PRECISION
+    item-class: CORE_COMPONENT
+    visual-tier: ADVANCED
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: electronics
+    role: advanced-circuit
+  quantum_chip:
+    guide-category: MATERIALS
+    system-group: QUANTUM_PRECISION
+    item-class: CORE_COMPONENT
+    visual-tier: ADVANCED
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: electronics
+    role: quantum-component
+  nano_coating:
+    guide-category: MATERIALS
+    system-group: QUANTUM_PRECISION
+    item-class: CORE_COMPONENT
+    visual-tier: ADVANCED
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: advanced_components
+    role: protective-coating
+  energy_cell:
+    guide-category: ENERGY
+    system-group: ENERGY
+    item-class: CORE_COMPONENT
+    visual-tier: TECH
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: energy_storage
+    role: energy-unit
+  lithium_cell:
+    guide-category: ENERGY
+    system-group: ENERGY
+    item-class: CORE_COMPONENT
+    visual-tier: TECH
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: energy_storage
+    role: energy-unit
+  capacitor_bank:
+    guide-category: ENERGY
+    system-group: ENERGY
+    item-class: CORE_COMPONENT
+    visual-tier: ADVANCED
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: energy_storage
+    role: storage-core
+  starlight_plate:
+    guide-category: ENERGY
+    system-group: ENERGY
+    item-class: CORE_COMPONENT
+    visual-tier: ADVANCED
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: solar_power
+    role: solar-component
+  fusion_core:
+    guide-category: ENERGY
+    system-group: ENDGAME
+    item-class: ENDGAME_COMPONENT
+    visual-tier: ENDGAME
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: fusion_power
+    role: endgame-core
+  field_plate:
+    guide-category: MATERIALS
+    system-group: QUANTUM_PRECISION
+    item-class: CORE_COMPONENT
+    visual-tier: ADVANCED
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: field_tech
+    role: field-component
+  matter_blob:
+    guide-category: MATERIALS
+    system-group: QUANTUM_PRECISION
+    item-class: CORE_COMPONENT
+    visual-tier: ADVANCED
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: matter_fabrication
+    role: exotic-material
+  singularity_fragment:
+    guide-category: MATERIALS
+    system-group: ENDGAME
+    item-class: ENDGAME_COMPONENT
+    visual-tier: ENDGAME
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: singularity
+    role: endgame-fragment
+
+  ceramic_plate:
+    guide-category: MATERIALS
+    system-group: PROCESSING
+    item-class: TECH_MATERIAL
+    visual-tier: TECH
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: thermal_processing
+    role: heat-shield
+  thermal_ceramic:
+    guide-category: MATERIALS
+    system-group: PROCESSING
+    item-class: CORE_COMPONENT
+    visual-tier: ADVANCED
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: thermal_processing
+    role: advanced-heat-shield
+  insulated_wire:
+    guide-category: MATERIALS
+    system-group: ENERGY
+    item-class: TECH_MATERIAL
+    visual-tier: TECH
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: wiring
+    role: insulated-wire
+  sensor_array:
+    guide-category: AUTOMATION
+    system-group: QUANTUM_PRECISION
+    item-class: CORE_COMPONENT
+    visual-tier: TECH
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: sensors
+    role: sensing-component
+  servo_bundle:
+    guide-category: AUTOMATION
+    system-group: PROCESSING
+    item-class: CORE_COMPONENT
+    visual-tier: TECH
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: automation_parts
+    role: actuator-bundle
+  cryo_core:
+    guide-category: ENERGY
+    system-group: PROCESSING
+    item-class: CORE_COMPONENT
+    visual-tier: ADVANCED
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: cryo_chain
+    role: cooling-core
+  gene_template:
+    guide-category: AUTOMATION
+    system-group: AGRI_BIO
+    item-class: CORE_COMPONENT
+    visual-tier: ADVANCED
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: gene_chain
+    role: bio-template
+  plasma_ingot:
+    guide-category: MATERIALS
+    system-group: ENDGAME
+    item-class: ENDGAME_COMPONENT
+    visual-tier: ENDGAME
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: plasma_chain
+    role: high-energy-metal
+  reactor_lattice:
+    guide-category: ENERGY
+    system-group: ENDGAME
+    item-class: ENDGAME_COMPONENT
+    visual-tier: ENDGAME
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: reactor_structures
+    role: reactor-structure
+  observatory_lens:
+    guide-category: AUTOMATION
+    system-group: QUANTUM_PRECISION
+    item-class: CORE_COMPONENT
+    visual-tier: ADVANCED
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: observatory
+    role: optics-component
+  data_core:
+    guide-category: AUTOMATION
+    system-group: QUANTUM_PRECISION
+    item-class: CORE_COMPONENT
+    visual-tier: ADVANCED
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: archive_chain
+    role: data-component
+
+  coolant_canister:
+    guide-category: ENERGY
+    system-group: PROCESSING
+    item-class: CORE_COMPONENT
+    visual-tier: ADVANCED
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: cryo_chain
+    role: cooling-container
+  cryo_gel:
+    guide-category: ENERGY
+    system-group: PROCESSING
+    item-class: TECH_MATERIAL
+    visual-tier: ADVANCED
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: cryo_chain
+    role: cooling-medium
+  bio_catalyst:
+    guide-category: AUTOMATION
+    system-group: AGRI_BIO
+    item-class: CORE_COMPONENT
+    visual-tier: ADVANCED
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: gene_chain
+    role: bio-catalyst
+  neural_resin:
+    guide-category: AUTOMATION
+    system-group: AGRI_BIO
+    item-class: CORE_COMPONENT
+    visual-tier: ADVANCED
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: gene_chain
+    role: neural-material
+  splicer_blade:
+    guide-category: TOOLS
+    system-group: AGRI_BIO
+    item-class: CORE_COMPONENT
+    visual-tier: TECH
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: industrial_tools
+    role: precision-tool
+  synth_meat:
+    guide-category: AUTOMATION
+    system-group: AGRI_BIO
+    item-class: TECH_MATERIAL
+    visual-tier: TECH
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: biosynth
+    role: food-output
+  soybean_seeds:
+    guide-category: AGRICULTURE
+    system-group: AGRI_BIO
+    item-class: TECH_MATERIAL
+    visual-tier: TECH
+    acquisition-mode: FIELD_COLLECTION
+    family: crop_chain
+    role: crop-seed
+  soybean_pods:
+    guide-category: AGRICULTURE
+    system-group: AGRI_BIO
+    item-class: TECH_MATERIAL
+    visual-tier: TECH
+    acquisition-mode: FIELD_COLLECTION
+    family: crop_chain
+    role: crop-output
+  spiceberry_seeds:
+    guide-category: AGRICULTURE
+    system-group: AGRI_BIO
+    item-class: TECH_MATERIAL
+    visual-tier: TECH
+    acquisition-mode: FIELD_COLLECTION
+    family: crop_chain
+    role: crop-seed
+  spiceberry:
+    guide-category: AGRICULTURE
+    system-group: AGRI_BIO
+    item-class: TECH_MATERIAL
+    visual-tier: TECH
+    acquisition-mode: FIELD_COLLECTION
+    family: crop_chain
+    role: crop-output
+  tea_leaf_seeds:
+    guide-category: AGRICULTURE
+    system-group: AGRI_BIO
+    item-class: TECH_MATERIAL
+    visual-tier: TECH
+    acquisition-mode: FIELD_COLLECTION
+    family: crop_chain
+    role: crop-seed
+  tea_leaf:
+    guide-category: AGRICULTURE
+    system-group: AGRI_BIO
+    item-class: TECH_MATERIAL
+    visual-tier: TECH
+    acquisition-mode: FIELD_COLLECTION
+    family: crop_chain
+    role: crop-output
+  tomato_seeds:
+    guide-category: AGRICULTURE
+    system-group: AGRI_BIO
+    item-class: TECH_MATERIAL
+    visual-tier: TECH
+    acquisition-mode: FIELD_COLLECTION
+    family: crop_chain
+    role: crop-seed
+  tomato:
+    guide-category: AGRICULTURE
+    system-group: AGRI_BIO
+    item-class: TECH_MATERIAL
+    visual-tier: TECH
+    acquisition-mode: FIELD_COLLECTION
+    family: crop_chain
+    role: crop-output
+  cabbage_seeds:
+    guide-category: AGRICULTURE
+    system-group: AGRI_BIO
+    item-class: TECH_MATERIAL
+    visual-tier: TECH
+    acquisition-mode: FIELD_COLLECTION
+    family: crop_chain
+    role: crop-seed
+  cabbage:
+    guide-category: AGRICULTURE
+    system-group: AGRI_BIO
+    item-class: TECH_MATERIAL
+    visual-tier: TECH
+    acquisition-mode: FIELD_COLLECTION
+    family: crop_chain
+    role: crop-output
+  corn_seeds:
+    guide-category: AGRICULTURE
+    system-group: AGRI_BIO
+    item-class: TECH_MATERIAL
+    visual-tier: TECH
+    acquisition-mode: FIELD_COLLECTION
+    family: crop_chain
+    role: crop-seed
+  corn:
+    guide-category: AGRICULTURE
+    system-group: AGRI_BIO
+    item-class: TECH_MATERIAL
+    visual-tier: TECH
+    acquisition-mode: FIELD_COLLECTION
+    family: crop_chain
+    role: crop-output
+  onion_bulbs:
+    guide-category: AGRICULTURE
+    system-group: AGRI_BIO
+    item-class: TECH_MATERIAL
+    visual-tier: TECH
+    acquisition-mode: FIELD_COLLECTION
+    family: crop_chain
+    role: crop-seed
+  onion:
+    guide-category: AGRICULTURE
+    system-group: AGRI_BIO
+    item-class: TECH_MATERIAL
+    visual-tier: TECH
+    acquisition-mode: FIELD_COLLECTION
+    family: crop_chain
+    role: crop-output
+  nutrition_bar:
+    guide-category: FOOD
+    system-group: AGRI_BIO
+    item-class: CORE_COMPONENT
+    visual-tier: TECH
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: field_rations
+    role: ration-food
+  protein_ration:
+    guide-category: FOOD
+    system-group: AGRI_BIO
+    item-class: CORE_COMPONENT
+    visual-tier: ADVANCED
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: field_rations
+    role: ration-food
+  radiant_tea:
+    guide-category: FOOD
+    system-group: AGRI_BIO
+    item-class: CORE_COMPONENT
+    visual-tier: ADVANCED
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: orchard_drinks
+    role: tonic-drink
+  lumenfruit_sapling:
+    guide-category: AGRICULTURE
+    system-group: AGRI_BIO
+    item-class: TECH_MATERIAL
+    visual-tier: TECH
+    acquisition-mode: FIELD_COLLECTION
+    family: orchard_chain
+    role: orchard-sapling
+  lumenfruit:
+    guide-category: AGRICULTURE
+    system-group: AGRI_BIO
+    item-class: TECH_MATERIAL
+    visual-tier: TECH
+    acquisition-mode: FIELD_COLLECTION
+    family: orchard_chain
+    role: orchard-fruit
+  frost_apple_sapling:
+    guide-category: AGRICULTURE
+    system-group: AGRI_BIO
+    item-class: TECH_MATERIAL
+    visual-tier: TECH
+    acquisition-mode: FIELD_COLLECTION
+    family: orchard_chain
+    role: orchard-sapling
+  frost_apple:
+    guide-category: AGRICULTURE
+    system-group: AGRI_BIO
+    item-class: TECH_MATERIAL
+    visual-tier: TECH
+    acquisition-mode: FIELD_COLLECTION
+    family: orchard_chain
+    role: orchard-fruit
+  shadow_berry_sapling:
+    guide-category: AGRICULTURE
+    system-group: AGRI_BIO
+    item-class: TECH_MATERIAL
+    visual-tier: TECH
+    acquisition-mode: FIELD_COLLECTION
+    family: orchard_chain
+    role: orchard-sapling
+  shadow_berry_cluster:
+    guide-category: AGRICULTURE
+    system-group: AGRI_BIO
+    item-class: TECH_MATERIAL
+    visual-tier: TECH
+    acquisition-mode: FIELD_COLLECTION
+    family: orchard_chain
+    role: orchard-fruit
+  sunflare_fig_sapling:
+    guide-category: AGRICULTURE
+    system-group: AGRI_BIO
+    item-class: TECH_MATERIAL
+    visual-tier: TECH
+    acquisition-mode: FIELD_COLLECTION
+    family: orchard_chain
+    role: orchard-sapling
+  sunflare_fig:
+    guide-category: AGRICULTURE
+    system-group: AGRI_BIO
+    item-class: TECH_MATERIAL
+    visual-tier: TECH
+    acquisition-mode: FIELD_COLLECTION
+    family: orchard_chain
+    role: orchard-fruit
+  stormplum_sapling:
+    guide-category: AGRICULTURE
+    system-group: AGRI_BIO
+    item-class: TECH_MATERIAL
+    visual-tier: TECH
+    acquisition-mode: FIELD_COLLECTION
+    family: orchard_chain
+    role: orchard-sapling
+  stormplum:
+    guide-category: AGRICULTURE
+    system-group: AGRI_BIO
+    item-class: TECH_MATERIAL
+    visual-tier: TECH
+    acquisition-mode: FIELD_COLLECTION
+    family: orchard_chain
+    role: orchard-fruit
+  cherry_sapling:
+    guide-category: AGRICULTURE
+    system-group: AGRI_BIO
+    item-class: TECH_MATERIAL
+    visual-tier: TECH
+    acquisition-mode: FIELD_COLLECTION
+    family: orchard_chain
+    role: orchard-sapling
+  cherry:
+    guide-category: AGRICULTURE
+    system-group: AGRI_BIO
+    item-class: TECH_MATERIAL
+    visual-tier: TECH
+    acquisition-mode: FIELD_COLLECTION
+    family: orchard_chain
+    role: orchard-fruit
+  lemon_sapling:
+    guide-category: AGRICULTURE
+    system-group: AGRI_BIO
+    item-class: TECH_MATERIAL
+    visual-tier: TECH
+    acquisition-mode: FIELD_COLLECTION
+    family: orchard_chain
+    role: orchard-sapling
+  lemon:
+    guide-category: AGRICULTURE
+    system-group: AGRI_BIO
+    item-class: TECH_MATERIAL
+    visual-tier: TECH
+    acquisition-mode: FIELD_COLLECTION
+    family: orchard_chain
+    role: orchard-fruit
+  peach_sapling:
+    guide-category: AGRICULTURE
+    system-group: AGRI_BIO
+    item-class: TECH_MATERIAL
+    visual-tier: TECH
+    acquisition-mode: FIELD_COLLECTION
+    family: orchard_chain
+    role: orchard-sapling
+  peach:
+    guide-category: AGRICULTURE
+    system-group: AGRI_BIO
+    item-class: TECH_MATERIAL
+    visual-tier: TECH
+    acquisition-mode: FIELD_COLLECTION
+    family: orchard_chain
+    role: orchard-fruit
+  pear_sapling:
+    guide-category: AGRICULTURE
+    system-group: AGRI_BIO
+    item-class: TECH_MATERIAL
+    visual-tier: TECH
+    acquisition-mode: FIELD_COLLECTION
+    family: orchard_chain
+    role: orchard-sapling
+  pear:
+    guide-category: AGRICULTURE
+    system-group: AGRI_BIO
+    item-class: TECH_MATERIAL
+    visual-tier: TECH
+    acquisition-mode: FIELD_COLLECTION
+    family: orchard_chain
+    role: orchard-fruit
+  orange_sapling:
+    guide-category: AGRICULTURE
+    system-group: AGRI_BIO
+    item-class: TECH_MATERIAL
+    visual-tier: TECH
+    acquisition-mode: FIELD_COLLECTION
+    family: orchard_chain
+    role: orchard-sapling
+  orange:
+    guide-category: AGRICULTURE
+    system-group: AGRI_BIO
+    item-class: TECH_MATERIAL
+    visual-tier: TECH
+    acquisition-mode: FIELD_COLLECTION
+    family: orchard_chain
+    role: orchard-fruit
+  fruit_puree:
+    guide-category: FOOD
+    system-group: AGRI_BIO
+    item-class: CORE_COMPONENT
+    visual-tier: ADVANCED
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: orchard_meals
+    role: puree-food
+  nebula_juice:
+    guide-category: FOOD
+    system-group: AGRI_BIO
+    item-class: CORE_COMPONENT
+    visual-tier: ADVANCED
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: orchard_drinks
+    role: explorer-drink
+  orchard_ration:
+    guide-category: FOOD
+    system-group: AGRI_BIO
+    item-class: CORE_COMPONENT
+    visual-tier: ADVANCED
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: field_rations
+    role: ration-food
+  lemon_juice:
+    guide-category: FOOD
+    system-group: AGRI_BIO
+    item-class: CORE_COMPONENT
+    visual-tier: TECH
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: orchard_drinks
+    role: juice-drink
+  orange_juice:
+    guide-category: FOOD
+    system-group: AGRI_BIO
+    item-class: CORE_COMPONENT
+    visual-tier: TECH
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: orchard_drinks
+    role: juice-drink
+  peach_juice:
+    guide-category: FOOD
+    system-group: AGRI_BIO
+    item-class: CORE_COMPONENT
+    visual-tier: TECH
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: orchard_drinks
+    role: juice-drink
+  pear_juice:
+    guide-category: FOOD
+    system-group: AGRI_BIO
+    item-class: CORE_COMPONENT
+    visual-tier: TECH
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: orchard_drinks
+    role: juice-drink
+  cherry_juice:
+    guide-category: FOOD
+    system-group: AGRI_BIO
+    item-class: CORE_COMPONENT
+    visual-tier: TECH
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: orchard_drinks
+    role: juice-drink
+  sunrise_pie:
+    guide-category: FOOD
+    system-group: AGRI_BIO
+    item-class: CORE_COMPONENT
+    visual-tier: ADVANCED
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: orchard_pastry
+    role: pie-food
+  berry_tart:
+    guide-category: FOOD
+    system-group: AGRI_BIO
+    item-class: CORE_COMPONENT
+    visual-tier: ADVANCED
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: orchard_pastry
+    role: tart-food
+  orchard_salad:
+    guide-category: FOOD
+    system-group: AGRI_BIO
+    item-class: CORE_COMPONENT
+    visual-tier: TECH
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: orchard_meals
+    role: salad-food
+  cornbread:
+    guide-category: FOOD
+    system-group: AGRI_BIO
+    item-class: CORE_COMPONENT
+    visual-tier: TECH
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: orchard_meals
+    role: bread-food
+  stuffed_cabbage:
+    guide-category: FOOD
+    system-group: AGRI_BIO
+    item-class: CORE_COMPONENT
+    visual-tier: TECH
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: orchard_meals
+    role: hotmeal-food
+  citrus_salad:
+    guide-category: FOOD
+    system-group: AGRI_BIO
+    item-class: CORE_COMPONENT
+    visual-tier: TECH
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: orchard_meals
+    role: salad-food
+  tomato_stew:
+    guide-category: FOOD
+    system-group: AGRI_BIO
+    item-class: CORE_COMPONENT
+    visual-tier: TECH
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: orchard_meals
+    role: hotmeal-food
+  orchard_smoothie:
+    guide-category: FOOD
+    system-group: AGRI_BIO
+    item-class: CORE_COMPONENT
+    visual-tier: TECH
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: orchard_drinks
+    role: smoothie-drink
+  sparkling_lemonade:
+    guide-category: FOOD
+    system-group: AGRI_BIO
+    item-class: CORE_COMPONENT
+    visual-tier: TECH
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: orchard_drinks
+    role: soda-drink
+  peach_cobbler:
+    guide-category: FOOD
+    system-group: AGRI_BIO
+    item-class: CORE_COMPONENT
+    visual-tier: ADVANCED
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: orchard_pastry
+    role: pie-food
+  pear_crisp:
+    guide-category: FOOD
+    system-group: AGRI_BIO
+    item-class: CORE_COMPONENT
+    visual-tier: ADVANCED
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: orchard_pastry
+    role: crisp-food
+  aurelia_glaze:
+    guide-category: FOOD
+    system-group: AGRI_BIO
+    item-class: CORE_COMPONENT
+    visual-tier: ADVANCED
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: planet_cuisine
+    role: radiation-ward-food
+  cryon_hotpot:
+    guide-category: FOOD
+    system-group: AGRI_BIO
+    item-class: CORE_COMPONENT
+    visual-tier: ADVANCED
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: planet_cuisine
+    role: cryo-ward-food
+  nyx_phase_gel:
+    guide-category: FOOD
+    system-group: AGRI_BIO
+    item-class: CORE_COMPONENT
+    visual-tier: ADVANCED
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: planet_cuisine
+    role: vacuum-ward-food
+  helion_sorbet:
+    guide-category: FOOD
+    system-group: AGRI_BIO
+    item-class: CORE_COMPONENT
+    visual-tier: ADVANCED
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: planet_cuisine
+    role: solar-ward-food
+  tempest_fizz:
+    guide-category: FOOD
+    system-group: AGRI_BIO
+    item-class: CORE_COMPONENT
+    visual-tier: ADVANCED
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: planet_cuisine
+    role: storm-ward-food
+  field_sickle:
+    guide-category: TOOLS
+    system-group: AGRI_BIO
+    item-class: CORE_COMPONENT
+    visual-tier: TECH
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: agri_tools
+    role: harvest-tool
+  hydro_spade:
+    guide-category: TOOLS
+    system-group: AGRI_BIO
+    item-class: CORE_COMPONENT
+    visual-tier: TECH
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: agri_tools
+    role: growth-tool
+  vector_grapple:
+    guide-category: TOOLS
+    system-group: FIELD_AUTOMATION
+    item-class: SPECIAL
+    visual-tier: TECH
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: expedition_tools
+    role: grapple-tool
+  pulse_thruster:
+    guide-category: TOOLS
+    system-group: FIELD_AUTOMATION
+    item-class: SPECIAL
+    visual-tier: ADVANCED
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: expedition_tools
+    role: dash-tool
+  storm_jetpack:
+    guide-category: TOOLS
+    system-group: ENDGAME
+    item-class: SPECIAL
+    visual-tier: ENDGAME
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: expedition_tools
+    role: jetpack-tool
+  radiation_filter:
+    guide-category: SPECIAL
+    system-group: ENDGAME
+    item-class: CORE_COMPONENT
+    visual-tier: ADVANCED
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: planet_surface
+    role: safety-filter
+  anti_radiation_helmet:
+    guide-category: SPECIAL
+    system-group: ENDGAME
+    item-class: ENDGAME_COMPONENT
+    visual-tier: ENDGAME
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: planet_surface
+    role: protective-gear
+  anti_radiation_chestplate:
+    guide-category: SPECIAL
+    system-group: ENDGAME
+    item-class: ENDGAME_COMPONENT
+    visual-tier: ENDGAME
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: planet_surface
+    role: protective-gear
+  anti_radiation_leggings:
+    guide-category: SPECIAL
+    system-group: ENDGAME
+    item-class: ENDGAME_COMPONENT
+    visual-tier: ENDGAME
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: planet_surface
+    role: protective-gear
+  anti_radiation_boots:
+    guide-category: SPECIAL
+    system-group: ENDGAME
+    item-class: ENDGAME_COMPONENT
+    visual-tier: ENDGAME
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: planet_surface
+    role: protective-gear
+  irradiated_shard:
+    guide-category: SPECIAL
+    system-group: ENDGAME
+    item-class: ENDGAME_COMPONENT
+    visual-tier: ENDGAME
+    acquisition-mode: FIELD_COLLECTION
+    family: planet_surface
+    role: planetary-sample
+  void_bloom:
+    guide-category: SPECIAL
+    system-group: ENDGAME
+    item-class: ENDGAME_COMPONENT
+    visual-tier: ENDGAME
+    acquisition-mode: FIELD_COLLECTION
+    family: planet_surface
+    role: planetary-bio-sample
+  planetary_relic:
+    guide-category: SPECIAL
+    system-group: ENDGAME
+    item-class: ENDGAME_COMPONENT
+    visual-tier: ENDGAME
+    acquisition-mode: FIELD_COLLECTION
+    family: planet_surface
+    role: planetary-relic
+  cryonite_crystal:
+    guide-category: SPECIAL
+    system-group: ENDGAME
+    item-class: ENDGAME_COMPONENT
+    visual-tier: ENDGAME
+    acquisition-mode: FIELD_COLLECTION
+    family: planet_surface
+    role: cryo-sample
+  frostbloom:
+    guide-category: SPECIAL
+    system-group: ENDGAME
+    item-class: ENDGAME_COMPONENT
+    visual-tier: ENDGAME
+    acquisition-mode: FIELD_COLLECTION
+    family: planet_surface
+    role: cryo-bio-sample
+  cryon_relic:
+    guide-category: SPECIAL
+    system-group: ENDGAME
+    item-class: ENDGAME_COMPONENT
+    visual-tier: ENDGAME
+    acquisition-mode: FIELD_COLLECTION
+    family: planet_surface
+    role: cryo-relic
+  voidglass_fragment:
+    guide-category: SPECIAL
+    system-group: ENDGAME
+    item-class: ENDGAME_COMPONENT
+    visual-tier: ENDGAME
+    acquisition-mode: FIELD_COLLECTION
+    family: planet_surface
+    role: vacuum-sample
+  echo_spore:
+    guide-category: SPECIAL
+    system-group: ENDGAME
+    item-class: ENDGAME_COMPONENT
+    visual-tier: ENDGAME
+    acquisition-mode: FIELD_COLLECTION
+    family: planet_surface
+    role: vacuum-bio-sample
+  nyx_relic:
+    guide-category: SPECIAL
+    system-group: ENDGAME
+    item-class: ENDGAME_COMPONENT
+    visual-tier: ENDGAME
+    acquisition-mode: FIELD_COLLECTION
+    family: planet_surface
+    role: vacuum-relic
+  exo_frame:
+    guide-category: SPECIAL
+    system-group: ENDGAME
+    item-class: ENDGAME_COMPONENT
+    visual-tier: ENDGAME
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: modular_suits
+    role: suit-frame
+  seal_fabric:
+    guide-category: SPECIAL
+    system-group: ENDGAME
+    item-class: ENDGAME_COMPONENT
+    visual-tier: ENDGAME
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: modular_suits
+    role: suit-seal
+  radiation_mesh:
+    guide-category: SPECIAL
+    system-group: ENDGAME
+    item-class: ENDGAME_COMPONENT
+    visual-tier: ENDGAME
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: modular_suits
+    role: radiation-module
+  thermal_lining:
+    guide-category: SPECIAL
+    system-group: ENDGAME
+    item-class: ENDGAME_COMPONENT
+    visual-tier: ENDGAME
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: modular_suits
+    role: thermal-module
+  pressure_membrane:
+    guide-category: SPECIAL
+    system-group: ENDGAME
+    item-class: ENDGAME_COMPONENT
+    visual-tier: ENDGAME
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: modular_suits
+    role: pressure-module
+  thermal_helmet:
+    guide-category: SPECIAL
+    system-group: ENDGAME
+    item-class: ENDGAME_COMPONENT
+    visual-tier: ENDGAME
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: cryon_suit
+    role: protective-gear
+  thermal_chestplate:
+    guide-category: SPECIAL
+    system-group: ENDGAME
+    item-class: ENDGAME_COMPONENT
+    visual-tier: ENDGAME
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: cryon_suit
+    role: protective-gear
+  thermal_leggings:
+    guide-category: SPECIAL
+    system-group: ENDGAME
+    item-class: ENDGAME_COMPONENT
+    visual-tier: ENDGAME
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: cryon_suit
+    role: protective-gear
+  thermal_boots:
+    guide-category: SPECIAL
+    system-group: ENDGAME
+    item-class: ENDGAME_COMPONENT
+    visual-tier: ENDGAME
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: cryon_suit
+    role: protective-gear
+  pressure_helmet:
+    guide-category: SPECIAL
+    system-group: ENDGAME
+    item-class: ENDGAME_COMPONENT
+    visual-tier: ENDGAME
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: nyx_suit
+    role: protective-gear
+  pressure_chestplate:
+    guide-category: SPECIAL
+    system-group: ENDGAME
+    item-class: ENDGAME_COMPONENT
+    visual-tier: ENDGAME
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: nyx_suit
+    role: protective-gear
+  pressure_leggings:
+    guide-category: SPECIAL
+    system-group: ENDGAME
+    item-class: ENDGAME_COMPONENT
+    visual-tier: ENDGAME
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: nyx_suit
+    role: protective-gear
+  pressure_boots:
+    guide-category: SPECIAL
+    system-group: ENDGAME
+    item-class: ENDGAME_COMPONENT
+    visual-tier: ENDGAME
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: nyx_suit
+    role: protective-gear
+  survey_chip:
+    guide-category: SPECIAL
+    system-group: ENDGAME
+    item-class: ENDGAME_COMPONENT
+    visual-tier: ENDGAME
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: planet_research
+    role: survey-component
+  survey_data:
+    guide-category: SPECIAL
+    system-group: ENDGAME
+    item-class: ENDGAME_COMPONENT
+    visual-tier: ENDGAME
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: planet_research
+    role: survey-data
+  ancient_signal:
+    guide-category: SPECIAL
+    system-group: ENDGAME
+    item-class: ENDGAME_COMPONENT
+    visual-tier: ENDGAME
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: planet_research
+    role: relic-signal
+  xeno_alloy:
+    guide-category: SPECIAL
+    system-group: ENDGAME
+    item-class: ENDGAME_COMPONENT
+    visual-tier: ENDGAME
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: planet_research
+    role: xeno-alloy
+  solarite_shard:
+    guide-category: SPECIAL
+    system-group: ENDGAME
+    item-class: ENDGAME_COMPONENT
+    visual-tier: ENDGAME
+    acquisition-mode: FIELD_COLLECTION
+    family: planet_surface
+    role: solar-sample
+  emberbloom:
+    guide-category: SPECIAL
+    system-group: ENDGAME
+    item-class: ENDGAME_COMPONENT
+    visual-tier: ENDGAME
+    acquisition-mode: FIELD_COLLECTION
+    family: planet_surface
+    role: heat-bio-sample
+  helion_relic:
+    guide-category: SPECIAL
+    system-group: ENDGAME
+    item-class: ENDGAME_COMPONENT
+    visual-tier: ENDGAME
+    acquisition-mode: FIELD_COLLECTION
+    family: planet_surface
+    role: solar-relic
+  stormglass_shard:
+    guide-category: SPECIAL
+    system-group: ENDGAME
+    item-class: ENDGAME_COMPONENT
+    visual-tier: ENDGAME
+    acquisition-mode: FIELD_COLLECTION
+    family: planet_surface
+    role: storm-sample
+  ion_fern:
+    guide-category: SPECIAL
+    system-group: ENDGAME
+    item-class: ENDGAME_COMPONENT
+    visual-tier: ENDGAME
+    acquisition-mode: FIELD_COLLECTION
+    family: planet_surface
+    role: storm-bio-sample
+  tempest_relic:
+    guide-category: SPECIAL
+    system-group: ENDGAME
+    item-class: ENDGAME_COMPONENT
+    visual-tier: ENDGAME
+    acquisition-mode: FIELD_COLLECTION
+    family: planet_surface
+    role: storm-relic
+  frontier_core_fragment:
+    guide-category: SPECIAL
+    system-group: ENDGAME
+    item-class: ENDGAME_COMPONENT
+    visual-tier: ENDGAME
+    acquisition-mode: FIELD_COLLECTION
+    family: frontier_suit
+    role: frontier-fragment
+  flare_shielding:
+    guide-category: SPECIAL
+    system-group: ENDGAME
+    item-class: ENDGAME_COMPONENT
+    visual-tier: ENDGAME
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: frontier_suit
+    role: flare-module
+  storm_baffle:
+    guide-category: SPECIAL
+    system-group: ENDGAME
+    item-class: ENDGAME_COMPONENT
+    visual-tier: ENDGAME
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: frontier_suit
+    role: storm-module
+  frontier_core:
+    guide-category: SPECIAL
+    system-group: ENDGAME
+    item-class: ENDGAME_COMPONENT
+    visual-tier: ENDGAME
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: frontier_suit
+    role: frontier-core
+  frontier_helmet:
+    guide-category: SPECIAL
+    system-group: ENDGAME
+    item-class: ENDGAME_COMPONENT
+    visual-tier: ENDGAME
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: frontier_suit
+    role: protective-gear
+  frontier_chestplate:
+    guide-category: SPECIAL
+    system-group: ENDGAME
+    item-class: ENDGAME_COMPONENT
+    visual-tier: ENDGAME
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: frontier_suit
+    role: protective-gear
+  frontier_leggings:
+    guide-category: SPECIAL
+    system-group: ENDGAME
+    item-class: ENDGAME_COMPONENT
+    visual-tier: ENDGAME
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: frontier_suit
+    role: protective-gear
+  frontier_boots:
+    guide-category: SPECIAL
+    system-group: ENDGAME
+    item-class: ENDGAME_COMPONENT
+    visual-tier: ENDGAME
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: frontier_suit
+    role: protective-gear
+  plasma_dust:
+    guide-category: MATERIALS
+    system-group: ENDGAME
+    item-class: ENDGAME_COMPONENT
+    visual-tier: ENDGAME
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: plasma_chain
+    role: high-energy-powder
+  photon_shard:
+    guide-category: MATERIALS
+    system-group: QUANTUM_PRECISION
+    item-class: CORE_COMPONENT
+    visual-tier: ADVANCED
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: observatory
+    role: optical-crystal
+  photon_plate:
+    guide-category: MATERIALS
+    system-group: QUANTUM_PRECISION
+    item-class: CORE_COMPONENT
+    visual-tier: ADVANCED
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: observatory
+    role: optical-plate
+  star_chart:
+    guide-category: AUTOMATION
+    system-group: QUANTUM_PRECISION
+    item-class: CORE_COMPONENT
+    visual-tier: ADVANCED
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: observatory
+    role: scan-data
+  gravitic_bearing:
+    guide-category: AUTOMATION
+    system-group: QUANTUM_PRECISION
+    item-class: CORE_COMPONENT
+    visual-tier: ADVANCED
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: observatory
+    role: gravity-component
+  vacuum_module:
+    guide-category: AUTOMATION
+    system-group: QUANTUM_PRECISION
+    item-class: CORE_COMPONENT
+    visual-tier: ADVANCED
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: observatory
+    role: vacuum-module
+  logging_blade:
+    guide-category: TOOLS
+    system-group: FIELD_AUTOMATION
+    item-class: CORE_COMPONENT
+    visual-tier: TECH
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: industrial_tools
+    role: forestry-tool
+  net_launcher:
+    guide-category: TOOLS
+    system-group: FIELD_AUTOMATION
+    item-class: CORE_COMPONENT
+    visual-tier: ADVANCED
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: capture_tools
+    role: capture-tool
+  archive_plate:
+    guide-category: AUTOMATION
+    system-group: QUANTUM_PRECISION
+    item-class: CORE_COMPONENT
+    visual-tier: ADVANCED
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: archive_chain
+    role: archive-medium
+  neutronium_ingot:
+    guide-category: MATERIALS
+    system-group: ENDGAME
+    item-class: ENDGAME_COMPONENT
+    visual-tier: ENDGAME
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: neutronium
+    role: endgame-metal
+  neutronium_plate:
+    guide-category: MATERIALS
+    system-group: ENDGAME
+    item-class: ENDGAME_COMPONENT
+    visual-tier: ENDGAME
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: neutronium
+    role: compressed-plate
+  dark_matter_dust:
+    guide-category: MATERIALS
+    system-group: ENDGAME
+    item-class: ENDGAME_COMPONENT
+    visual-tier: ENDGAME
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: dark_matter
+    role: exotic-powder
+  dark_matter_sheet:
+    guide-category: MATERIALS
+    system-group: ENDGAME
+    item-class: ENDGAME_COMPONENT
+    visual-tier: ENDGAME
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: dark_matter
+    role: exotic-sheet
+  graviton_lens:
+    guide-category: ENERGY
+    system-group: ENDGAME
+    item-class: ENDGAME_COMPONENT
+    visual-tier: ENDGAME
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: graviton
+    role: gravity-optics
+  graviton_core:
+    guide-category: ENERGY
+    system-group: ENDGAME
+    item-class: ENDGAME_COMPONENT
+    visual-tier: ENDGAME
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: graviton
+    role: gravity-core
+  singularity_mesh:
+    guide-category: MATERIALS
+    system-group: ENDGAME
+    item-class: ENDGAME_COMPONENT
+    visual-tier: ENDGAME
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: singularity
+    role: singularity-medium
+  singularity_core:
+    guide-category: MATERIALS
+    system-group: ENDGAME
+    item-class: ENDGAME_COMPONENT
+    visual-tier: ENDGAME
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: singularity
+    role: singularity-core
+  antimatter_cluster:
+    guide-category: ENERGY
+    system-group: ENDGAME
+    item-class: ENDGAME_COMPONENT
+    visual-tier: ENDGAME
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: antimatter
+    role: antimatter-fuel
+  antimatter_cell:
+    guide-category: ENERGY
+    system-group: ENDGAME
+    item-class: ENDGAME_COMPONENT
+    visual-tier: ENDGAME
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: antimatter
+    role: antimatter-battery
+  stellar_alloy:
+    guide-category: MATERIALS
+    system-group: ENDGAME
+    item-class: ENDGAME_COMPONENT
+    visual-tier: ENDGAME
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: stellar
+    role: stellar-metal
+  stellar_glass:
+    guide-category: MATERIALS
+    system-group: ENDGAME
+    item-class: ENDGAME_COMPONENT
+    visual-tier: ENDGAME
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: stellar
+    role: stellar-glass
+  orbit_frame:
+    guide-category: MATERIALS
+    system-group: ENDGAME
+    item-class: ENDGAME_COMPONENT
+    visual-tier: ENDGAME
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: orbital
+    role: orbital-frame
+  orbit_processor:
+    guide-category: AUTOMATION
+    system-group: ENDGAME
+    item-class: ENDGAME_COMPONENT
+    visual-tier: ENDGAME
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: orbital
+    role: orbital-processor
+  quantum_fabric:
+    guide-category: MATERIALS
+    system-group: ENDGAME
+    item-class: ENDGAME_COMPONENT
+    visual-tier: ENDGAME
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: chrono
+    role: dense-fabric
+  chrono_thread:
+    guide-category: ENERGY
+    system-group: ENDGAME
+    item-class: ENDGAME_COMPONENT
+    visual-tier: ENDGAME
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: chrono
+    role: temporal-conduit
+  chrono_core:
+    guide-category: ENERGY
+    system-group: ENDGAME
+    item-class: ENDGAME_COMPONENT
+    visual-tier: ENDGAME
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: chrono
+    role: temporal-core
+  void_shard:
+    guide-category: MATERIALS
+    system-group: ENDGAME
+    item-class: ENDGAME_COMPONENT
+    visual-tier: ENDGAME
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: void
+    role: void-fragment
+  void_crystal:
+    guide-category: MATERIALS
+    system-group: ENDGAME
+    item-class: ENDGAME_COMPONENT
+    visual-tier: ENDGAME
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: void
+    role: void-crystal
+  void_beacon_core:
+    guide-category: ENERGY
+    system-group: ENDGAME
+    item-class: ENDGAME_COMPONENT
+    visual-tier: ENDGAME
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: void
+    role: void-network-core
+  nanite_slurry:
+    guide-category: AUTOMATION
+    system-group: ENDGAME
+    item-class: ENDGAME_COMPONENT
+    visual-tier: ENDGAME
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: nanite
+    role: nanite-medium
+  nanite_cluster:
+    guide-category: AUTOMATION
+    system-group: ENDGAME
+    item-class: ENDGAME_COMPONENT
+    visual-tier: ENDGAME
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: nanite
+    role: nanite-cluster
+  entropy_plate:
+    guide-category: MATERIALS
+    system-group: ENDGAME
+    item-class: ENDGAME_COMPONENT
+    visual-tier: ENDGAME
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: entropy
+    role: stability-plate
+  entropy_core:
+    guide-category: ENERGY
+    system-group: ENDGAME
+    item-class: ENDGAME_COMPONENT
+    visual-tier: ENDGAME
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: entropy
+    role: stability-core
+  cosmic_matrix:
+    guide-category: SPECIAL
+    system-group: ENDGAME
+    item-class: ENDGAME_COMPONENT
+    visual-tier: ENDGAME
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: omega
+    role: cosmic-matrix
+  cosmic_panel:
+    guide-category: MATERIALS
+    system-group: ENDGAME
+    item-class: ENDGAME_COMPONENT
+    visual-tier: ENDGAME
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: omega
+    role: cosmic-panel
+  omega_core:
+    guide-category: SPECIAL
+    system-group: ENDGAME
+    item-class: ENDGAME_COMPONENT
+    visual-tier: ENDGAME
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: omega
+    role: final-core
+
+  starsteel_ingot:
+    guide-category: MATERIALS
+    system-group: MEGASTRUCTURE
+    item-class: ENDGAME_COMPONENT
+    visual-tier: ENDGAME
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: megastructure_materials
+    role: endgame-metal
+  starsteel_frame:
+    guide-category: MATERIALS
+    system-group: MEGASTRUCTURE
+    item-class: ENDGAME_COMPONENT
+    visual-tier: ENDGAME
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: megastructure_materials
+    role: structural-frame
+  vacuum_glass:
+    guide-category: MATERIALS
+    system-group: MEGASTRUCTURE
+    item-class: ENDGAME_COMPONENT
+    visual-tier: ENDGAME
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: megastructure_materials
+    role: pressure-resistant-glass
+  warp_cell:
+    guide-category: ENERGY
+    system-group: MEGASTRUCTURE
+    item-class: ENDGAME_COMPONENT
+    visual-tier: ENDGAME
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: warp_chain
+    role: warp-power
+  warp_coil:
+    guide-category: ENERGY
+    system-group: MEGASTRUCTURE
+    item-class: ENDGAME_COMPONENT
+    visual-tier: ENDGAME
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: warp_chain
+    role: warp-driver
+  harmonic_crystal:
+    guide-category: MATERIALS
+    system-group: MEGASTRUCTURE
+    item-class: ENDGAME_COMPONENT
+    visual-tier: ENDGAME
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: continuum_chain
+    role: harmonic-crystal
+  celestial_lens:
+    guide-category: AUTOMATION
+    system-group: MEGASTRUCTURE
+    item-class: ENDGAME_COMPONENT
+    visual-tier: ENDGAME
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: warp_chain
+    role: endgame-optics
+  nebula_fiber:
+    guide-category: MATERIALS
+    system-group: MEGASTRUCTURE
+    item-class: ENDGAME_COMPONENT
+    visual-tier: ENDGAME
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: warp_chain
+    role: endgame-fiber
+  astral_circuit:
+    guide-category: AUTOMATION
+    system-group: MEGASTRUCTURE
+    item-class: ENDGAME_COMPONENT
+    visual-tier: ENDGAME
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: megastructure_control
+    role: endgame-circuit
+  event_horizon_plate:
+    guide-category: MATERIALS
+    system-group: MEGASTRUCTURE
+    item-class: ENDGAME_COMPONENT
+    visual-tier: ENDGAME
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: singularity
+    role: event-horizon-plate
+  singularity_casing:
+    guide-category: MATERIALS
+    system-group: MEGASTRUCTURE
+    item-class: ENDGAME_COMPONENT
+    visual-tier: ENDGAME
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: singularity
+    role: protective-casing
+  chrono_lattice:
+    guide-category: MATERIALS
+    system-group: MEGASTRUCTURE
+    item-class: ENDGAME_COMPONENT
+    visual-tier: ENDGAME
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: continuum_chain
+    role: temporal-lattice
+  continuum_shell:
+    guide-category: MATERIALS
+    system-group: MEGASTRUCTURE
+    item-class: ENDGAME_COMPONENT
+    visual-tier: ENDGAME
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: continuum_chain
+    role: temporal-shell
+  aurora_plate:
+    guide-category: MATERIALS
+    system-group: MEGASTRUCTURE
+    item-class: ENDGAME_COMPONENT
+    visual-tier: ENDGAME
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: continuum_chain
+    role: aurora-plate
+  relic_data:
+    guide-category: AUTOMATION
+    system-group: MEGASTRUCTURE
+    item-class: ENDGAME_COMPONENT
+    visual-tier: ENDGAME
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: archive_chain
+    role: relic-data
+  archive_core:
+    guide-category: AUTOMATION
+    system-group: MEGASTRUCTURE
+    item-class: ENDGAME_COMPONENT
+    visual-tier: ENDGAME
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: archive_chain
+    role: archive-core
+  dimension_anchor:
+    guide-category: TRANSPORT
+    system-group: MEGASTRUCTURE
+    item-class: ENDGAME_COMPONENT
+    visual-tier: ENDGAME
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: anchor_network
+    role: dimension-anchor
+  cluster_manifold:
+    guide-category: TRANSPORT
+    system-group: MEGASTRUCTURE
+    item-class: ENDGAME_COMPONENT
+    visual-tier: ENDGAME
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: anchor_network
+    role: network-manifold
+  omega_matrix:
+    guide-category: SPECIAL
+    system-group: MEGASTRUCTURE
+    item-class: ENDGAME_COMPONENT
+    visual-tier: ENDGAME
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: omega
+    role: civilization-matrix
+  apex_core:
+    guide-category: SPECIAL
+    system-group: MEGASTRUCTURE
+    item-class: ENDGAME_COMPONENT
+    visual-tier: ENDGAME
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: omega
+    role: apex-core
+  omega_archive:
+    guide-category: SPECIAL
+    system-group: MEGASTRUCTURE
+    item-class: ENDGAME_COMPONENT
+    visual-tier: ENDGAME
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: omega
+    role: final-showcase
+
+machines:
+  research_desk:
+    guide-category: SPECIAL
+    system-group: BOOTSTRAP
+    machine-archetype: RESEARCH
+    visual-tier: TECH
+    acquisition-mode: ADVANCED_WORKBENCH
+    family: research
+    role: research-gateway
+  crusher:
+    guide-category: MACHINES
+    system-group: BOOTSTRAP
+    machine-archetype: PROCESSOR
+    visual-tier: TECH
+    acquisition-mode: ADVANCED_WORKBENCH
+    family: ore_processing
+    role: size-reduction
+  furnace:
+    guide-category: MACHINES
+    system-group: BOOTSTRAP
+    machine-archetype: PROCESSOR
+    visual-tier: TECH
+    acquisition-mode: ADVANCED_WORKBENCH
+    family: ore_processing
+    role: smelting
+  electric_saw:
+    guide-category: MACHINES
+    system-group: BOOTSTRAP
+    machine-archetype: PROCESSOR
+    visual-tier: TECH
+    acquisition-mode: ADVANCED_WORKBENCH
+    family: wood_processing
+    role: wood-cutting
+  recycler:
+    guide-category: MACHINES
+    system-group: BOOTSTRAP
+    machine-archetype: PROCESSOR
+    visual-tier: TECH
+    acquisition-mode: ADVANCED_WORKBENCH
+    family: recycling
+    role: material-recovery
+
+  solar_generator:
+    guide-category: ENERGY
+    system-group: ENERGY
+    machine-archetype: GENERATOR
+    visual-tier: TECH
+    acquisition-mode: ADVANCED_WORKBENCH
+    family: solar_power
+    role: passive-generation
+  coal_generator:
+    guide-category: ENERGY
+    system-group: ENERGY
+    machine-archetype: GENERATOR
+    visual-tier: TECH
+    acquisition-mode: ADVANCED_WORKBENCH
+    family: combustion_power
+    role: fuel-generation
+  solar_array:
+    guide-category: ENERGY
+    system-group: ENERGY
+    machine-archetype: GENERATOR
+    visual-tier: ADVANCED
+    acquisition-mode: ADVANCED_WORKBENCH
+    family: solar_power
+    role: scaled-generation
+  battery_bank:
+    guide-category: ENERGY
+    system-group: ENERGY
+    machine-archetype: STORAGE
+    visual-tier: TECH
+    acquisition-mode: ADVANCED_WORKBENCH
+    family: energy_storage
+    role: energy-buffer
+  energy_node:
+    guide-category: ENERGY
+    system-group: ENERGY
+    machine-archetype: RELAY
+    visual-tier: TECH
+    acquisition-mode: ADVANCED_WORKBENCH
+    family: energy_network
+    role: energy-relay
+  energy_cable:
+    guide-category: ENERGY
+    system-group: ENERGY
+    machine-archetype: RELAY
+    visual-tier: TECH
+    acquisition-mode: ADVANCED_WORKBENCH
+    family: energy_network
+    role: energy-link
+  storm_turbine:
+    guide-category: ENERGY
+    system-group: ENERGY
+    machine-archetype: GENERATOR
+    visual-tier: ADVANCED
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: weather_power
+    role: storm-generation
+  fusion_reactor:
+    guide-category: ENERGY
+    system-group: ENDGAME
+    machine-archetype: GENERATOR
+    visual-tier: ENDGAME
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: fusion_power
+    role: endgame-generation
+
+  compressor:
+    guide-category: MACHINES
+    system-group: PROCESSING
+    machine-archetype: PROCESSOR
+    visual-tier: TECH
+    acquisition-mode: ADVANCED_WORKBENCH
+    family: metal_processing
+    role: compression
+  assembler:
+    guide-category: MACHINES
+    system-group: PROCESSING
+    machine-archetype: PROCESSOR
+    visual-tier: TECH
+    acquisition-mode: ADVANCED_WORKBENCH
+    family: assembly
+    role: mid-assembly
+  smeltery:
+    guide-category: MACHINES
+    system-group: PROCESSING
+    machine-archetype: PROCESSOR
+    visual-tier: TECH
+    acquisition-mode: ADVANCED_WORKBENCH
+    family: alloy_processing
+    role: alloy-smelting
+  advanced_assembler:
+    guide-category: MACHINES
+    system-group: QUANTUM_PRECISION
+    machine-archetype: PROCESSOR
+    visual-tier: ADVANCED
+    acquisition-mode: ADVANCED_WORKBENCH
+    family: assembly
+    role: advanced-assembly
+  ore_washer:
+    guide-category: MACHINES
+    system-group: PROCESSING
+    machine-archetype: PROCESSOR
+    visual-tier: TECH
+    acquisition-mode: ADVANCED_WORKBENCH
+    family: ore_processing
+    role: ore-washing
+  purifier:
+    guide-category: MACHINES
+    system-group: PROCESSING
+    machine-archetype: PROCESSOR
+    visual-tier: TECH
+    acquisition-mode: ADVANCED_WORKBENCH
+    family: ore_processing
+    role: purification
+  centrifuge:
+    guide-category: MACHINES
+    system-group: PROCESSING
+    machine-archetype: PROCESSOR
+    visual-tier: ADVANCED
+    acquisition-mode: ADVANCED_WORKBENCH
+    family: ore_processing
+    role: separation
+  wire_mill:
+    guide-category: MACHINES
+    system-group: PROCESSING
+    machine-archetype: PROCESSOR
+    visual-tier: TECH
+    acquisition-mode: ADVANCED_WORKBENCH
+    family: wiring
+    role: wire-drawing
+  polymer_press:
+    guide-category: MACHINES
+    system-group: PROCESSING
+    machine-archetype: PROCESSOR
+    visual-tier: TECH
+    acquisition-mode: ADVANCED_WORKBENCH
+    family: polymer_chain
+    role: pressure-forming
+  chemical_reactor:
+    guide-category: MACHINES
+    system-group: PROCESSING
+    machine-archetype: PROCESSOR
+    visual-tier: ADVANCED
+    acquisition-mode: ADVANCED_WORKBENCH
+    family: chemistry
+    role: chemical-synthesis
+  coolant_mixer:
+    guide-category: MACHINES
+    system-group: PROCESSING
+    machine-archetype: PROCESSOR
+    visual-tier: TECH
+    acquisition-mode: ADVANCED_WORKBENCH
+    family: cryo_chain
+    role: coolant-mixing
+  refinery:
+    guide-category: MACHINES
+    system-group: PROCESSING
+    machine-archetype: PROCESSOR
+    visual-tier: TECH
+    acquisition-mode: ADVANCED_WORKBENCH
+    family: fluid_processing
+    role: refining
+  laser_engraver:
+    guide-category: MACHINES
+    system-group: QUANTUM_PRECISION
+    machine-archetype: PROCESSOR
+    visual-tier: ADVANCED
+    acquisition-mode: ADVANCED_WORKBENCH
+    family: precision_fabrication
+    role: laser-engraving
+  quantum_processor:
+    guide-category: MACHINES
+    system-group: QUANTUM_PRECISION
+    machine-archetype: PROCESSOR
+    visual-tier: ADVANCED
+    acquisition-mode: ADVANCED_WORKBENCH
+    family: quantum_chain
+    role: quantum-processing
+  crystal_growth_chamber:
+    guide-category: MACHINES
+    system-group: QUANTUM_PRECISION
+    machine-archetype: PROCESSOR
+    visual-tier: ADVANCED
+    acquisition-mode: ADVANCED_WORKBENCH
+    family: crystal_chain
+    role: crystal-growth
+  field_forge:
+    guide-category: MACHINES
+    system-group: QUANTUM_PRECISION
+    machine-archetype: PROCESSOR
+    visual-tier: ADVANCED
+    acquisition-mode: ADVANCED_WORKBENCH
+    family: field_tech
+    role: field-forging
+  matter_compiler:
+    guide-category: MACHINES
+    system-group: QUANTUM_PRECISION
+    machine-archetype: PROCESSOR
+    visual-tier: ADVANCED
+    acquisition-mode: ADVANCED_WORKBENCH
+    family: matter_fabrication
+    role: matter-compilation
+  drone_bay:
+    guide-category: AUTOMATION
+    system-group: QUANTUM_PRECISION
+    machine-archetype: PROCESSOR
+    visual-tier: ADVANCED
+    acquisition-mode: ADVANCED_WORKBENCH
+    family: drone_chain
+    role: drone-assembly
+
+  auto_farm:
+    guide-category: AUTOMATION
+    system-group: AGRI_BIO
+    machine-archetype: FIELD
+    visual-tier: TECH
+    acquisition-mode: ADVANCED_WORKBENCH
+    family: agri_automation
+    role: crop-production
+  greenhouse:
+    guide-category: AUTOMATION
+    system-group: AGRI_BIO
+    machine-archetype: FIELD
+    visual-tier: TECH
+    acquisition-mode: ADVANCED_WORKBENCH
+    family: agri_automation
+    role: controlled-growth
+  bio_lab:
+    guide-category: AUTOMATION
+    system-group: AGRI_BIO
+    machine-archetype: PROCESSOR
+    visual-tier: TECH
+    acquisition-mode: ADVANCED_WORKBENCH
+    family: bio_chain
+    role: biomass-processing
+
+  crop_harvester:
+    guide-category: AUTOMATION
+    system-group: FIELD_AUTOMATION
+    machine-archetype: FIELD
+    visual-tier: TECH
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: agri_automation
+    role: field-harvest
+  tree_feller:
+    guide-category: AUTOMATION
+    system-group: FIELD_AUTOMATION
+    machine-archetype: FIELD
+    visual-tier: TECH
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: field_extraction
+    role: tree-harvest
+  fishing_dock:
+    guide-category: AUTOMATION
+    system-group: FIELD_AUTOMATION
+    machine-archetype: FIELD
+    visual-tier: TECH
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: field_extraction
+    role: fishing-harvest
+  mob_collector:
+    guide-category: AUTOMATION
+    system-group: FIELD_AUTOMATION
+    machine-archetype: FIELD
+    visual-tier: ADVANCED
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: field_extraction
+    role: mob-harvest
+  vacuum_inlet:
+    guide-category: AUTOMATION
+    system-group: FIELD_AUTOMATION
+    machine-archetype: FIELD
+    visual-tier: TECH
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: field_extraction
+    role: item-collection
+
+  logistics_node:
+    guide-category: TRANSPORT
+    system-group: LOGISTICS
+    machine-archetype: RELAY
+    visual-tier: TECH
+    acquisition-mode: ADVANCED_WORKBENCH
+    family: logistics
+    role: transfer-node
+  item_tube:
+    guide-category: TRANSPORT
+    system-group: LOGISTICS
+    machine-archetype: RELAY
+    visual-tier: TECH
+    acquisition-mode: ADVANCED_WORKBENCH
+    family: logistics
+    role: tube-transport
+  storage_hub:
+    guide-category: TRANSPORT
+    system-group: LOGISTICS
+    machine-archetype: STORAGE
+    visual-tier: TECH
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: logistics
+    role: central-buffer
+  filter_router:
+    guide-category: TRANSPORT
+    system-group: LOGISTICS
+    machine-archetype: RELAY
+    visual-tier: ADVANCED
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: logistics
+    role: filtered-routing
+  splitter_node:
+    guide-category: TRANSPORT
+    system-group: LOGISTICS
+    machine-archetype: RELAY
+    visual-tier: ADVANCED
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: logistics
+    role: balanced-split
+  industrial_bus:
+    guide-category: TRANSPORT
+    system-group: LOGISTICS
+    machine-archetype: RELAY
+    visual-tier: ADVANCED
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: logistics
+    role: backbone-routing
+
+  kiln:
+    guide-category: MACHINES
+    system-group: PROCESSING
+    machine-archetype: PROCESSOR
+    visual-tier: TECH
+    acquisition-mode: ADVANCED_WORKBENCH
+    family: thermal_processing
+    role: ceramic-firing
+  insulation_press:
+    guide-category: AUTOMATION
+    system-group: PROCESSING
+    machine-archetype: PROCESSOR
+    visual-tier: TECH
+    acquisition-mode: ADVANCED_WORKBENCH
+    family: wiring
+    role: insulation-forming
+  cryo_distiller:
+    guide-category: ENERGY
+    system-group: PROCESSING
+    machine-archetype: PROCESSOR
+    visual-tier: ADVANCED
+    acquisition-mode: ADVANCED_WORKBENCH
+    family: cryo_chain
+    role: cryo-distillation
+  gene_splicer:
+    guide-category: AUTOMATION
+    system-group: AGRI_BIO
+    machine-archetype: PROCESSOR
+    visual-tier: ADVANCED
+    acquisition-mode: ADVANCED_WORKBENCH
+    family: gene_chain
+    role: gene-processing
+  biosynth_vat:
+    guide-category: AUTOMATION
+    system-group: AGRI_BIO
+    machine-archetype: PROCESSOR
+    visual-tier: ADVANCED
+    acquisition-mode: ADVANCED_WORKBENCH
+    family: biosynth
+    role: biomass-synthesis
+  plasma_refiner:
+    guide-category: ENERGY
+    system-group: ENDGAME
+    machine-archetype: PROCESSOR
+    visual-tier: ENDGAME
+    acquisition-mode: ADVANCED_WORKBENCH
+    family: plasma_chain
+    role: plasma-refining
+  photon_weaver:
+    guide-category: MACHINES
+    system-group: QUANTUM_PRECISION
+    machine-archetype: PROCESSOR
+    visual-tier: ADVANCED
+    acquisition-mode: ADVANCED_WORKBENCH
+    family: observatory
+    role: photon-weaving
+  observatory:
+    guide-category: AUTOMATION
+    system-group: QUANTUM_PRECISION
+    machine-archetype: RESEARCH
+    visual-tier: ADVANCED
+    acquisition-mode: ADVANCED_WORKBENCH
+    family: observatory
+    role: orbital-scanning
+  data_archive:
+    guide-category: AUTOMATION
+    system-group: QUANTUM_PRECISION
+    machine-archetype: STORAGE
+    visual-tier: ADVANCED
+    acquisition-mode: ADVANCED_WORKBENCH
+    family: archive_chain
+    role: archive-storage
+  survey_beacon:
+    guide-category: SPECIAL
+    system-group: ENDGAME
+    machine-archetype: RESEARCH
+    visual-tier: ENDGAME
+    acquisition-mode: ADVANCED_WORKBENCH
+    family: planet_research
+    role: planet-survey
+  relic_analyzer:
+    guide-category: SPECIAL
+    system-group: ENDGAME
+    machine-archetype: RESEARCH
+    visual-tier: ENDGAME
+    acquisition-mode: ADVANCED_WORKBENCH
+    family: planet_research
+    role: relic-analysis
+  xeno_refinery:
+    guide-category: SPECIAL
+    system-group: ENDGAME
+    machine-archetype: PROCESSOR
+    visual-tier: ENDGAME
+    acquisition-mode: ADVANCED_WORKBENCH
+    family: planet_research
+    role: xeno-refining
+  planetary_forge:
+    guide-category: SPECIAL
+    system-group: ENDGAME
+    machine-archetype: PROCESSOR
+    visual-tier: ENDGAME
+    acquisition-mode: ADVANCED_WORKBENCH
+    family: modular_suits
+    role: planetary-forging
+  planetary_gate:
+    guide-category: SPECIAL
+    system-group: ENDGAME
+    machine-archetype: FIELD
+    visual-tier: ENDGAME
+    acquisition-mode: ADVANCED_WORKBENCH
+    family: planet_research
+    role: planetary-gateway
+  planetary_harvester:
+    guide-category: SPECIAL
+    system-group: ENDGAME
+    machine-archetype: FIELD
+    visual-tier: ENDGAME
+    acquisition-mode: ADVANCED_WORKBENCH
+    family: planet_research
+    role: planetary-harvesting
+
+  void_extractor:
+    guide-category: MACHINES
+    system-group: ENDGAME
+    machine-archetype: PROCESSOR
+    visual-tier: ENDGAME
+    acquisition-mode: ADVANCED_WORKBENCH
+    family: void
+    role: void-extraction
+  dark_matter_loom:
+    guide-category: MACHINES
+    system-group: ENDGAME
+    machine-archetype: PROCESSOR
+    visual-tier: ENDGAME
+    acquisition-mode: ADVANCED_WORKBENCH
+    family: dark_matter
+    role: exotic-weaving
+  graviton_stabilizer:
+    guide-category: ENERGY
+    system-group: ENDGAME
+    machine-archetype: PROCESSOR
+    visual-tier: ENDGAME
+    acquisition-mode: ADVANCED_WORKBENCH
+    family: graviton
+    role: gravity-stabilization
+  singularity_press:
+    guide-category: MACHINES
+    system-group: ENDGAME
+    machine-archetype: PROCESSOR
+    visual-tier: ENDGAME
+    acquisition-mode: ADVANCED_WORKBENCH
+    family: singularity
+    role: singularity-compression
+  antimatter_synthesizer:
+    guide-category: ENERGY
+    system-group: ENDGAME
+    machine-archetype: PROCESSOR
+    visual-tier: ENDGAME
+    acquisition-mode: ADVANCED_WORKBENCH
+    family: antimatter
+    role: antimatter-synthesis
+  stellar_forge:
+    guide-category: MACHINES
+    system-group: ENDGAME
+    machine-archetype: PROCESSOR
+    visual-tier: ENDGAME
+    acquisition-mode: ADVANCED_WORKBENCH
+    family: stellar
+    role: stellar-forging
+  orbital_printer:
+    guide-category: MACHINES
+    system-group: ENDGAME
+    machine-archetype: PROCESSOR
+    visual-tier: ENDGAME
+    acquisition-mode: ADVANCED_WORKBENCH
+    family: orbital
+    role: orbital-printing
+  chrono_engine:
+    guide-category: ENERGY
+    system-group: ENDGAME
+    machine-archetype: GENERATOR
+    visual-tier: ENDGAME
+    acquisition-mode: ADVANCED_WORKBENCH
+    family: chrono
+    role: temporal-engine
+  void_beacon:
+    guide-category: ENERGY
+    system-group: ENDGAME
+    machine-archetype: RELAY
+    visual-tier: ENDGAME
+    acquisition-mode: ADVANCED_WORKBENCH
+    family: void
+    role: void-network-relay
+  nanite_foundry:
+    guide-category: AUTOMATION
+    system-group: ENDGAME
+    machine-archetype: PROCESSOR
+    visual-tier: ENDGAME
+    acquisition-mode: ADVANCED_WORKBENCH
+    family: nanite
+    role: nanite-fabrication
+  entropy_chamber:
+    guide-category: MACHINES
+    system-group: ENDGAME
+    machine-archetype: PROCESSOR
+    visual-tier: ENDGAME
+    acquisition-mode: ADVANCED_WORKBENCH
+    family: entropy
+    role: entropy-stabilization
+  celestial_assembler:
+    guide-category: MACHINES
+    system-group: ENDGAME
+    machine-archetype: PROCESSOR
+    visual-tier: ENDGAME
+    acquisition-mode: ADVANCED_WORKBENCH
+    family: omega
+    role: cosmic-assembly
+  omega_fabricator:
+    guide-category: SPECIAL
+    system-group: ENDGAME
+    machine-archetype: PROCESSOR
+    visual-tier: ENDGAME
+    acquisition-mode: ADVANCED_WORKBENCH
+    family: omega
+    role: final-fabrication
+
+  starsteel_foundry:
+    guide-category: MACHINES
+    system-group: MEGASTRUCTURE
+    machine-archetype: PROCESSOR
+    visual-tier: ENDGAME
+    acquisition-mode: ADVANCED_WORKBENCH
+    family: megastructure_fabrication
+    role: endgame-smelting
+  vacuum_chamber:
+    guide-category: MACHINES
+    system-group: MEGASTRUCTURE
+    machine-archetype: PROCESSOR
+    visual-tier: ENDGAME
+    acquisition-mode: ADVANCED_WORKBENCH
+    family: megastructure_fabrication
+    role: vacuum-processing
+  warp_assembler:
+    guide-category: MACHINES
+    system-group: MEGASTRUCTURE
+    machine-archetype: PROCESSOR
+    visual-tier: ENDGAME
+    acquisition-mode: ADVANCED_WORKBENCH
+    family: warp_chain
+    role: warp-assembly
+  event_horizon_smith:
+    guide-category: MACHINES
+    system-group: MEGASTRUCTURE
+    machine-archetype: PROCESSOR
+    visual-tier: ENDGAME
+    acquisition-mode: ADVANCED_WORKBENCH
+    family: singularity
+    role: singularity-forging
+  continuum_lathe:
+    guide-category: MACHINES
+    system-group: MEGASTRUCTURE
+    machine-archetype: PROCESSOR
+    visual-tier: ENDGAME
+    acquisition-mode: ADVANCED_WORKBENCH
+    family: continuum_chain
+    role: temporal-machining
+  relic_scanner:
+    guide-category: AUTOMATION
+    system-group: MEGASTRUCTURE
+    machine-archetype: PROCESSOR
+    visual-tier: ENDGAME
+    acquisition-mode: ADVANCED_WORKBENCH
+    family: archive_chain
+    role: relic-analysis
+  anchor_forge:
+    guide-category: MACHINES
+    system-group: MEGASTRUCTURE
+    machine-archetype: PROCESSOR
+    visual-tier: ENDGAME
+    acquisition-mode: ADVANCED_WORKBENCH
+    family: anchor_network
+    role: anchor-fabrication
+  apex_forge:
+    guide-category: SPECIAL
+    system-group: MEGASTRUCTURE
+    machine-archetype: PROCESSOR
+    visual-tier: ENDGAME
+    acquisition-mode: ADVANCED_WORKBENCH
+    family: omega
+    role: civilization-forge

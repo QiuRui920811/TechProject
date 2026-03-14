@@ -1,0 +1,26 @@
+{
+  "model": {
+    "type": "minecraft:range_dispatch",
+    "property": "minecraft:custom_model_data",
+    "entries": [
+      {
+        "threshold": 1469510,
+        "model": {
+          "type": "minecraft:model",
+          "model": "techproject:item/star_chart"
+        }
+      },
+      {
+        "threshold": 2649371,
+        "model": {
+          "type": "minecraft:model",
+          "model": "techproject:item/gene_template"
+        }
+      }
+    ],
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "minecraft:item/map"
+    }
+  }
+}

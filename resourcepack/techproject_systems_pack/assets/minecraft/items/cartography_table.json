@@ -1,0 +1,19 @@
+{
+  "model": {
+    "type": "minecraft:range_dispatch",
+    "property": "minecraft:custom_model_data",
+    "entries": [
+      {
+        "threshold": 7691596,
+        "model": {
+          "type": "minecraft:model",
+          "model": "techproject:item/relic_scanner"
+        }
+      }
+    ],
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "minecraft:item/cartography_table"
+    }
+  }
+}

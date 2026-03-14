@@ -1,0 +1,33 @@
+{
+  "model": {
+    "type": "minecraft:range_dispatch",
+    "property": "minecraft:custom_model_data",
+    "entries": [
+      {
+        "threshold": 1704081,
+        "model": {
+          "type": "minecraft:model",
+          "model": "techproject:item/laser_lens"
+        }
+      },
+      {
+        "threshold": 3832830,
+        "model": {
+          "type": "minecraft:model",
+          "model": "techproject:item/graviton_lens"
+        }
+      },
+      {
+        "threshold": 4997676,
+        "model": {
+          "type": "minecraft:model",
+          "model": "techproject:item/celestial_lens"
+        }
+      }
+    ],
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "minecraft:item/end_crystal"
+    }
+  }
+}

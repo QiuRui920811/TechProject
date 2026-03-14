@@ -1,0 +1,448 @@
+# 可選外觀欄位：
+# item-model: namespace:path
+# nexo-id: your_nexo_item_id
+# items 與 machines 都可用，設定後會優先使用該外觀。
+items:
+  starsteel_ingot:
+    display-name: 星鋼錠
+    category: ADVANCED
+    tier: TIER4
+    icon: NETHERITE_INGOT
+    description: 星鋼錠，是軌道與超終局結構的高強度金屬。
+    unlock: starsteel_foundry
+    use-cases:
+      - 星鋼框架
+      - 終局外殼
+  starsteel_frame:
+    display-name: 星鋼框架
+    category: ADVANCED
+    tier: TIER4
+    icon: POLISHED_BLACKSTONE_BRICKS
+    description: 用星鋼打造的結構框架，可承受宇宙級壓力。
+    unlock: starsteel_foundry
+    use-cases:
+      - 曲率結構機體
+      - 巔峰鍛成儀前置
+  vacuum_glass:
+    display-name: 真空玻璃
+    category: ADVANCED
+    tier: TIER4
+    icon: TINTED_GLASS
+    description: 適合真空與虛空環境的耐壓透明材。
+    unlock: vacuum_chamber
+    use-cases:
+      - 諧振晶體
+      - 連續體外殼
+  harmonic_crystal:
+    display-name: 諧振晶體
+    category: ADVANCED
+    tier: TIER4
+    icon: AMETHYST_CLUSTER
+    description: 在真空環境中調諧完成的高穩定晶體。
+    unlock: vacuum_chamber
+    use-cases:
+      - 極光板
+      - 時序共振材料
+  celestial_lens:
+    display-name: 天穹透鏡
+    category: ADVANCED
+    tier: TIER4
+    icon: END_CRYSTAL
+    description: 可觀測宇宙級結構的終局透鏡。
+    unlock: vacuum_chamber
+    use-cases:
+      - 星界電路
+      - 遺產掃描儀
+  nebula_fiber:
+    display-name: 星雲纖維
+    category: ADVANCED
+    tier: TIER4
+    icon: STRING
+    description: 由暗物質與量子纖維交織而成的星雲纖維。
+    unlock: vacuum_chamber
+    use-cases:
+      - 曲率線路
+      - 終局複合材料
+  warp_cell:
+    display-name: 曲率電池
+    category: ADVANCED
+    tier: TIER4
+    icon: ENDER_PEARL
+    description: 可扭曲空間流的儲能單元。
+    unlock: warp_assembler
+    use-cases:
+      - 曲率線圈
+      - 維度錨
+  warp_coil:
+    display-name: 曲率線圈
+    category: ADVANCED
+    tier: TIER4
+    icon: LIGHTNING_ROD
+    description: 曲率線圈，是跨區結構機台的重要驅動件。
+    unlock: warp_assembler
+    use-cases:
+      - 叢集匯流核心
+      - 高級位移設備
+  astral_circuit:
+    display-name: 星界電路
+    category: ADVANCED
+    tier: TIER4
+    icon: COMPARATOR
+    description: 結合軌道計算與宇宙光學的高級電路。
+    unlock: warp_assembler
+    use-cases:
+      - 巔峰鍛成儀控制層
+      - 終局處理模組
+  event_horizon_plate:
+    display-name: 事件視界板
+    category: ADVANCED
+    tier: TIER4
+    icon: NETHERITE_SCRAP
+    description: 經奇點與熵場鍛壓後得到的極限結構板。
+    unlock: event_horizon_smith
+    use-cases:
+      - 奇點外殼
+      - 終局外殼
+  singularity_casing:
+    display-name: 奇點外殼
+    category: ADVANCED
+    tier: TIER4
+    icon: NETHERITE_BLOCK
+    description: 封裝奇點製程的穩定保護殼。
+    unlock: event_horizon_smith
+    use-cases:
+      - 維度錨
+      - 巔峰機械結構
+  chrono_lattice:
+    display-name: 時序格架
+    category: ADVANCED
+    tier: TIER4
+    icon: IRON_BARS
+    description: 時序支撐格，能讓時間工業設備穩定運作。
+    unlock: continuum_lathe
+    use-cases:
+      - 連續體外殼
+      - 高速時流工業
+  continuum_shell:
+    display-name: 連續體外殼
+    category: ADVANCED
+    tier: TIER4
+    icon: SHULKER_SHELL
+    description: 時空連續殼體，可保護最終級演算核心。
+    unlock: continuum_lathe
+    use-cases:
+      - 巔峰核心
+      - 終極檔案庫
+  aurora_plate:
+    display-name: 極光板
+    category: ADVANCED
+    tier: TIER4
+    icon: PRISMARINE_BRICKS
+    description: 帶有極光共振紋理的終局板材。
+    unlock: continuum_lathe
+    use-cases:
+      - 高級護殼
+      - 宇宙結構件
+  relic_data:
+    display-name: 遺產資料
+    category: ADVANCED
+    tier: TIER4
+    icon: KNOWLEDGE_BOOK
+    description: 從深層科技遺跡解析出來的遺產資料。
+    unlock: relic_scanner
+    use-cases:
+      - 封存核心
+      - 終極檔案庫
+  archive_core:
+    display-name: 封存核心
+    category: ADVANCED
+    tier: TIER4
+    icon: WRITABLE_BOOK
+    description: 匯集多條終局資料支線的封存核心。
+    unlock: relic_scanner
+    use-cases:
+      - 終極矩陣
+      - 終極檔案庫
+  dimension_anchor:
+    display-name: 維度錨
+    category: ADVANCED
+    tier: TIER4
+    icon: RESPAWN_ANCHOR
+    description: 用來鎖定空間定位的大型錨定裝置。
+    unlock: anchor_forge
+    use-cases:
+      - 叢集匯流核心
+      - 超大型跨區網路
+  cluster_manifold:
+    display-name: 叢集匯流核心
+    category: ADVANCED
+    tier: TIER4
+    icon: HOPPER
+    description: 可整合多座終局工廠區的流量分配核心。
+    unlock: anchor_forge
+    use-cases:
+      - 巨型基地骨幹
+      - 巔峰鍛成儀前置
+  omega_matrix:
+    display-name: 終極矩陣
+    category: ADVANCED
+    tier: TIER4
+    icon: NETHER_STAR
+    description: 將宇宙級裝配與資料封存融合後得到的矩陣。
+    unlock: apex_forge
+    use-cases:
+      - 巔峰核心
+      - 終極檔案庫
+  apex_core:
+    display-name: 巔峰核心
+    category: ADVANCED
+    tier: TIER4
+    icon: DRAGON_BREATH
+    description: 終局中的終局核心，用於壓縮所有高階支線成果。
+    unlock: apex_forge
+    use-cases:
+      - 終極檔案庫
+      - 完成度展示
+  omega_archive:
+    display-name: 終極檔案庫
+    category: ADVANCED
+    tier: TIER4
+    icon: CHISELED_BOOKSHELF
+    description: 封存整條科技文明成果的最終資料庫。
+    unlock: apex_forge
+    use-cases:
+      - 最終展示物
+      - 伺服器終局目標
+machines:
+  starsteel_foundry:
+    display-name: 星鋼鑄造廠
+    category: ADVANCED
+    tier: TIER4
+    block: SMITHING_TABLE
+    inputs: [stellar_alloy, neutronium_ingot, orbit_frame]
+    outputs: [starsteel_ingot, starsteel_frame]
+    energy-per-tick: 38
+    effect: 星鋼熔鑄
+    unlock: stellar_forge
+  vacuum_chamber:
+    display-name: 真空工藝艙
+    category: ADVANCED
+    tier: TIER4
+    block: BLACK_STAINED_GLASS
+    inputs: [stellar_glass, void_crystal, graviton_lens, quantum_fabric, dark_matter_sheet]
+    outputs: [vacuum_glass, harmonic_crystal, celestial_lens, nebula_fiber]
+    energy-per-tick: 34
+    effect: 真空穩定製程
+    unlock: void_beacon
+  warp_assembler:
+    display-name: 曲率裝配機
+    category: ADVANCED
+    tier: TIER4
+    block: ENDER_CHEST
+    inputs: [antimatter_cell, chrono_thread, magnetic_ring, orbit_processor, celestial_lens]
+    outputs: [warp_cell, warp_coil, astral_circuit]
+    energy-per-tick: 42
+    effect: 曲率場裝配
+    unlock: chrono_engine
+  event_horizon_smith:
+    display-name: 事件視界鍛台
+    category: ADVANCED
+    tier: TIER4
+    block: NETHERITE_BLOCK
+    inputs: [singularity_core, entropy_plate, dark_matter_sheet, neutronium_plate]
+    outputs: [event_horizon_plate, singularity_casing]
+    energy-per-tick: 44
+    effect: 視界鍛壓
+    unlock: singularity_press
+  continuum_lathe:
+    display-name: 連續體車床
+    category: ADVANCED
+    tier: TIER4
+    block: STONECUTTER
+    inputs: [chrono_core, reactor_lattice, vacuum_glass, harmonic_crystal, photon_plate]
+    outputs: [chrono_lattice, continuum_shell, aurora_plate]
+    energy-per-tick: 40
+    effect: 時空精密切削
+    unlock: entropy_chamber
+  relic_scanner:
+    display-name: 遺產掃描儀
+    category: ADVANCED
+    tier: TIER4
+    block: CARTOGRAPHY_TABLE
+    inputs: [star_chart, void_beacon_core, data_core, archive_plate]
+    outputs: [relic_data, archive_core]
+    energy-per-tick: 30
+    effect: 遺跡資料解析
+    unlock: data_archive
+  anchor_forge:
+    display-name: 錨定鍛造台
+    category: ADVANCED
+    tier: TIER4
+    block: RESPAWN_ANCHOR
+    inputs: [singularity_casing, void_beacon_core, warp_coil, graviton_core]
+    outputs: [dimension_anchor, cluster_manifold]
+    energy-per-tick: 46
+    effect: 空間錨定鍛造
+    unlock: void_beacon
+  apex_forge:
+    display-name: 巔峰鍛成儀
+    category: ADVANCED
+    tier: TIER4
+    block: ENCHANTING_TABLE
+    inputs: [cosmic_matrix, archive_core, continuum_shell, relic_data]
+    outputs: [omega_matrix, apex_core, omega_archive]
+    energy-per-tick: 52
+    effect: 巔峰核心壓縮
+    unlock: omega_fabricator
+recipes:
+  starsteel_ingot_recipe:
+    machine: starsteel_foundry
+    inputs: [stellar_alloy, neutronium_ingot]
+    output: starsteel_ingot
+    energy: 38
+    guide: 恆星合金 + 中子錠 → 星鋼鑄造廠 → 星鋼錠
+  starsteel_frame_recipe:
+    machine: starsteel_foundry
+    inputs: [starsteel_ingot, orbit_frame]
+    output: starsteel_frame
+    energy: 40
+    guide: 星鋼錠 + 軌道框架 → 星鋼鑄造廠 → 星鋼框架
+  vacuum_glass_recipe:
+    machine: vacuum_chamber
+    inputs: [stellar_glass, void_crystal]
+    output: vacuum_glass
+    energy: 34
+    guide: 恆星玻璃 + 虛空晶體 → 真空艙 → 真空玻璃
+  harmonic_crystal_recipe:
+    machine: vacuum_chamber
+    inputs: [vacuum_glass, void_crystal]
+    output: harmonic_crystal
+    energy: 35
+    guide: 真空玻璃 + 虛空晶體 → 真空艙 → 諧振晶體
+  celestial_lens_recipe:
+    machine: vacuum_chamber
+    inputs: [graviton_lens, vacuum_glass]
+    output: celestial_lens
+    energy: 36
+    guide: 重力子透鏡 + 真空玻璃 → 真空艙 → 天穹透鏡
+  nebula_fiber_recipe:
+    machine: vacuum_chamber
+    inputs: [quantum_fabric, dark_matter_sheet]
+    output: nebula_fiber
+    energy: 37
+    guide: 量子布料 + 暗物質片材 → 真空艙 → 星雲纖維
+  warp_cell_recipe:
+    machine: warp_assembler
+    inputs: [antimatter_cell, chrono_thread]
+    output: warp_cell
+    energy: 42
+    guide: 反物質電池 + 時序線 → 曲躍裝配機 → 曲躍電池
+  warp_coil_recipe:
+    machine: warp_assembler
+    inputs: [warp_cell, magnetic_ring]
+    output: warp_coil
+    energy: 43
+    guide: 曲躍電池 + 磁環 → 曲躍裝配機 → 曲躍線圈
+  astral_circuit_recipe:
+    machine: warp_assembler
+    inputs: [orbit_processor, celestial_lens]
+    output: astral_circuit
+    energy: 41
+    guide: 軌道處理器 + 天穹透鏡 → 曲躍裝配機 → 星界電路
+  event_horizon_plate_recipe:
+    machine: event_horizon_smith
+    inputs: [singularity_core, entropy_plate]
+    output: event_horizon_plate
+    energy: 44
+    guide: 奇點核心 + 熵板 → 事件視界鍛台 → 事件視界板
+  singularity_casing_recipe:
+    machine: event_horizon_smith
+    inputs: [dark_matter_sheet, neutronium_plate]
+    output: singularity_casing
+    energy: 45
+    guide: 暗物質片材 + 中子板 → 事件視界鍛台 → 奇點外殼
+  chrono_lattice_recipe:
+    machine: continuum_lathe
+    inputs: [chrono_core, reactor_lattice]
+    output: chrono_lattice
+    energy: 40
+    guide: 時序核心 + 反應格架 → 連續體車床 → 時序晶格
+  continuum_shell_recipe:
+    machine: continuum_lathe
+    inputs: [chrono_lattice, vacuum_glass]
+    output: continuum_shell
+    energy: 41
+    guide: 時序晶格 + 真空玻璃 → 連續體車床 → 連續體外殼
+  aurora_plate_recipe:
+    machine: continuum_lathe
+    inputs: [harmonic_crystal, photon_plate]
+    output: aurora_plate
+    energy: 39
+    guide: 諧振晶體 + 光子板 → 連續體車床 → 極光板
+  relic_data_recipe:
+    machine: relic_scanner
+    inputs: [star_chart, void_beacon_core]
+    output: relic_data
+    energy: 30
+    guide: 星圖 + 虛空信標核心 → 遺物掃描儀 → 遺物資料
+  archive_core_recipe:
+    machine: relic_scanner
+    inputs: [data_core, archive_plate]
+    output: archive_core
+    energy: 32
+    guide: 數據核心 + 檔案板 → 遺物掃描儀 → 檔案核心
+  dimension_anchor_recipe:
+    machine: anchor_forge
+    inputs: [singularity_casing, void_beacon_core]
+    output: dimension_anchor
+    energy: 46
+    guide: 奇點外殼 + 虛空信標核心 → 錨定鍛台 → 維度錨
+  cluster_manifold_recipe:
+    machine: anchor_forge
+    inputs: [dimension_anchor, graviton_core]
+    output: cluster_manifold
+    energy: 47
+    guide: 維度錨 + 重力子核心 → 錨定鍛台 → 叢集歧管
+  omega_matrix_recipe:
+    machine: apex_forge
+    inputs: [cosmic_matrix, archive_core]
+    output: omega_matrix
+    energy: 50
+    guide: 宇宙矩陣 + 檔案核心 → 巔峰鍛台 → 歐米伽矩陣
+  apex_core_recipe:
+    machine: apex_forge
+    inputs: [omega_matrix, continuum_shell]
+    output: apex_core
+    energy: 52
+    guide: 歐米伽矩陣 + 連續體外殼 → 巔峰鍛台 → 巔峰核心
+  omega_archive_recipe:
+    machine: apex_forge
+    inputs: [apex_core, relic_data]
+    output: omega_archive
+    energy: 54
+    guide: 巔峰核心 + 遺物資料 → 巔峰鍛台 → 歐米伽檔案
+achievements:
+  singularity_breaker:
+    display-name: 奇點破界者
+    description: 首次製作出奇點核心。
+    reward-xp: 460
+    reward-tokens: 30
+    hint: 打開奇點壓縮線
+  stellar_founder:
+    display-name: 星核開鑄者
+    description: 首次冶成恆星合金。
+    reward-xp: 500
+    reward-tokens: 32
+    hint: 進入星核鍛造時代
+  omega_theory:
+    display-name: 終極理論家
+    description: 取得宇宙矩陣，跨入最終理論裝配。
+    reward-xp: 560
+    reward-tokens: 36
+    hint: 天穹裝配完成後再往前推
+  apex_of_tech:
+    display-name: 科技巔峰
+    description: 成功製作歐米伽核心。
+    reward-xp: 720
+    reward-tokens: 48
+    hint: 整條終局科技線的成熟證明

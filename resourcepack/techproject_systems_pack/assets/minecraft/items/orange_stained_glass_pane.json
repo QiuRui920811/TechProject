@@ -1,0 +1,26 @@
+{
+  "model": {
+    "type": "minecraft:range_dispatch",
+    "property": "minecraft:custom_model_data",
+    "entries": [
+      {
+        "threshold": 830006,
+        "model": {
+          "type": "minecraft:model",
+          "model": "techproject:item/hud_orange_panel"
+        }
+      },
+      {
+        "threshold": 830106,
+        "model": {
+          "type": "minecraft:model",
+          "model": "techproject:item/hud_orange_info"
+        }
+      }
+    ],
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "minecraft:item/orange_stained_glass_pane"
+    }
+  }
+}

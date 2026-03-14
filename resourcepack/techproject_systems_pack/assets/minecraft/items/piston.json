@@ -1,0 +1,40 @@
+{
+  "model": {
+    "type": "minecraft:range_dispatch",
+    "property": "minecraft:custom_model_data",
+    "entries": [
+      {
+        "threshold": 4669500,
+        "model": {
+          "type": "minecraft:model",
+          "model": "techproject:item/servo_bundle"
+        }
+      },
+      {
+        "threshold": 4728596,
+        "model": {
+          "type": "minecraft:model",
+          "model": "techproject:item/machine_component"
+        }
+      },
+      {
+        "threshold": 6063301,
+        "model": {
+          "type": "minecraft:model",
+          "model": "techproject:item/compressor"
+        }
+      },
+      {
+        "threshold": 6324994,
+        "model": {
+          "type": "minecraft:model",
+          "model": "techproject:item/quarry_drill"
+        }
+      }
+    ],
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "minecraft:item/piston"
+    }
+  }
+}

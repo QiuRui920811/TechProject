@@ -1,0 +1,26 @@
+{
+  "model": {
+    "type": "minecraft:range_dispatch",
+    "property": "minecraft:custom_model_data",
+    "entries": [
+      {
+        "threshold": 2389735,
+        "model": {
+          "type": "minecraft:model",
+          "model": "techproject:item/filter_mesh_core"
+        }
+      },
+      {
+        "threshold": 3989674,
+        "model": {
+          "type": "minecraft:model",
+          "model": "techproject:item/singularity_mesh"
+        }
+      }
+    ],
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "minecraft:item/cobweb"
+    }
+  }
+}

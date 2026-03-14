@@ -1,0 +1,54 @@
+{
+  "model": {
+    "type": "minecraft:range_dispatch",
+    "property": "minecraft:custom_model_data",
+    "entries": [
+      {
+        "threshold": 1060951,
+        "model": {
+          "type": "minecraft:model",
+          "model": "techproject:item/void_beacon_core"
+        }
+      },
+      {
+        "threshold": 2990194,
+        "model": {
+          "type": "minecraft:model",
+          "model": "techproject:item/graviton_core"
+        }
+      },
+      {
+        "threshold": 4669137,
+        "model": {
+          "type": "minecraft:model",
+          "model": "techproject:item/field_emitter"
+        }
+      },
+      {
+        "threshold": 6245659,
+        "model": {
+          "type": "minecraft:model",
+          "model": "techproject:item/chemical_reactor"
+        }
+      },
+      {
+        "threshold": 6641574,
+        "model": {
+          "type": "minecraft:model",
+          "model": "techproject:item/graviton_stabilizer"
+        }
+      },
+      {
+        "threshold": 6893957,
+        "model": {
+          "type": "minecraft:model",
+          "model": "techproject:item/void_beacon"
+        }
+      }
+    ],
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "minecraft:item/beacon"
+    }
+  }
+}

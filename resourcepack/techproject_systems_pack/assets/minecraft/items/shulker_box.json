@@ -1,0 +1,19 @@
+{
+  "model": {
+    "type": "minecraft:range_dispatch",
+    "property": "minecraft:custom_model_data",
+    "entries": [
+      {
+        "threshold": 6012468,
+        "model": {
+          "type": "minecraft:model",
+          "model": "techproject:item/drone_bay"
+        }
+      }
+    ],
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "minecraft:item/shulker_box"
+    }
+  }
+}

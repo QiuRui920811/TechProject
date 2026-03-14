@@ -1,0 +1,19 @@
+{
+  "model": {
+    "type": "minecraft:range_dispatch",
+    "property": "minecraft:custom_model_data",
+    "entries": [
+      {
+        "threshold": 7585603,
+        "model": {
+          "type": "minecraft:model",
+          "model": "techproject:item/crop_harvester"
+        }
+      }
+    ],
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "minecraft:item/hay_block"
+    }
+  }
+}

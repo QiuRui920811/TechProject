@@ -1,0 +1,33 @@
+{
+  "model": {
+    "type": "minecraft:range_dispatch",
+    "property": "minecraft:custom_model_data",
+    "entries": [
+      {
+        "threshold": 2456517,
+        "model": {
+          "type": "minecraft:model",
+          "model": "techproject:item/storage_crate"
+        }
+      },
+      {
+        "threshold": 4806399,
+        "model": {
+          "type": "minecraft:model",
+          "model": "techproject:item/stack_upgrade"
+        }
+      },
+      {
+        "threshold": 6175937,
+        "model": {
+          "type": "minecraft:model",
+          "model": "techproject:item/storage_hub"
+        }
+      }
+    ],
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "minecraft:item/chest"
+    }
+  }
+}

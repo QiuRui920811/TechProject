@@ -1,0 +1,33 @@
+{
+  "model": {
+    "type": "minecraft:range_dispatch",
+    "property": "minecraft:custom_model_data",
+    "entries": [
+      {
+        "threshold": 1558394,
+        "model": {
+          "type": "minecraft:model",
+          "model": "techproject:item/etched_circuit"
+        }
+      },
+      {
+        "threshold": 2018346,
+        "model": {
+          "type": "minecraft:model",
+          "model": "techproject:item/advanced_circuit"
+        }
+      },
+      {
+        "threshold": 3267528,
+        "model": {
+          "type": "minecraft:model",
+          "model": "techproject:item/routing_chip"
+        }
+      }
+    ],
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "minecraft:item/repeater"
+    }
+  }
+}

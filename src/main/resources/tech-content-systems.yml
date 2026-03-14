@@ -1,0 +1,679 @@
+# 可選外觀欄位（直接照下面格式填）：
+# item-model: namespace:path
+#   例：item-model: techproject:item/my_custom_part
+# nexo-id: your_nexo_item_id
+#   例：nexo-id: custom_machine_part
+#
+# 建議直接填在每個物品 / 機器下面：
+#   item-model: techproject:item/your_model
+#   nexo-id: your_nexo_item_id
+# items 與 machines 都可用，設定後會優先使用該外觀。
+items:
+  drill_head:
+    display-name: 鑽頭組
+    category: INTERMEDIATE
+    system-group: FIELD_AUTOMATION
+    item-class: CORE_COMPONENT
+    visual-tier: TECH
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: quarry_drill
+    role: drill-component
+    icon: NETHERITE_PICKAXE
+    item-model: "-1"
+    description: 強化鑽頭組，用於真正的採礦設備。
+    unlock: machine:compressor&item:steel_plate
+    use-cases:
+      - 採礦鑽機前置
+      - 採礦工業骨架
+  quarry_frame:
+    display-name: 採礦機架
+    category: INTERMEDIATE
+    system-group: FIELD_AUTOMATION
+    item-class: CORE_COMPONENT
+    visual-tier: TECH
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: quarry_drill
+    role: frame-component
+    icon: IRON_BARS
+    item-model: "-1"
+    description: 採石平台機架，支撐自動化鑽探設備。
+    unlock: machine:assembler&item:machine_component
+    use-cases:
+      - 採礦鑽機前置
+      - 重型結構機架
+  harvest_matrix:
+    display-name: 收割矩陣
+    category: INTERMEDIATE
+    icon: SHEARS
+    item-model: "-1"
+    description: 收割邏輯矩陣，能辨識成熟作物並自動重植。
+    unlock: machine:auto_farm&item:crops
+    use-cases:
+      - 作物收割機前置
+      - 農業自動化
+  vacuum_core:
+    display-name: 真空核心
+    category: INTERMEDIATE
+    icon: ENDER_EYE
+    item-model: "-1"
+    description: 真空吸納核心，可將地面掉落物吸入機器。
+    unlock: machine:assembler&item:signal_relay
+    use-cases:
+      - 真空吸入口前置
+      - 物流回收站
+  storm_rotor:
+    display-name: 風暴轉子
+    category: ADVANCED
+    tier: TIER2
+    icon: WIND_CHARGE
+    item-model: "-1"
+    description: 風暴轉子，在惡劣天氣下可大幅提升發電效率。
+    unlock: machine:wire_mill&item:steel_wire
+    use-cases:
+      - 風暴渦輪機前置
+      - 天候發電支線
+  weather_sensor:
+    display-name: 天候感測器
+    category: ADVANCED
+    tier: TIER2
+    icon: LIGHTNING_ROD
+    item-model: "-1"
+    description: 可監測風暴與降雨變化的感測器。
+    unlock: machine:insulation_press&item:sensor_array
+    use-cases:
+      - 風暴渦輪機控制件
+      - 環境感測網路
+  field_processor:
+    display-name: 戶外處理器
+    category: ADVANCED
+    icon: COMPARATOR
+    item-model: "-1"
+    description: 戶外設備控制處理器，適合農場與礦區機台。
+    unlock: machine:advanced_assembler&item:control_unit
+    use-cases:
+      - 高級戶外設備
+      - 專用機台控制
+  logging_blade:
+    display-name: 伐木刀組
+    category: INTERMEDIATE
+    icon: IRON_AXE
+    item-model: "-1"
+    description: 自動伐木刀組，可辨識樹幹結構並整株砍伐。
+    unlock: machine:electric_saw&item:steel_plate
+    use-cases:
+      - 伐木機前置
+      - 林業自動化
+  arbor_frame:
+    display-name: 林業機架
+    category: INTERMEDIATE
+    icon: OAK_FENCE
+    item-model: "-1"
+    description: 林業機械骨架，適合部署戶外伐木設備。
+    unlock: machine:assembler&item:machine_component
+    use-cases:
+      - 伐木機前置
+      - 戶外設備骨架
+  net_launcher:
+    display-name: 捕網發射器
+    category: ADVANCED
+    icon: CROSSBOW
+    item-model: "-1"
+    description: 捕獲網模組，安裝到生物收集器後可自動捕捉範圍內的生物；本身不可手持使用，是生物收集器的核心組件。
+    unlock: machine:advanced_assembler&item:field_processor
+    use-cases:
+      - 生物收集器核心組件
+      - 不可單獨手持使用
+  bait_module:
+    display-name: 誘餌模組
+    category: INTERMEDIATE
+    icon: FISHING_ROD
+    item-model: "-1"
+    description: 漁獲誘引模組，能持續維持釣點效率。
+    unlock: machine:auto_farm&item:bio_resin
+    use-cases:
+      - 自動釣台前置
+      - 水域設備模組
+  dock_frame:
+    display-name: 碼頭骨架
+    category: INTERMEDIATE
+    icon: OAK_SLAB
+    item-model: "-1"
+    description: 水上平台骨架，可承載釣魚與吸納機構。
+    unlock: machine:assembler&item:pressure_tube
+    use-cases:
+      - 自動釣台前置
+      - 水域工業結構
+  storage_crate:
+    display-name: 儲物箱
+    category: INTERMEDIATE
+    icon: CHEST
+    item-model: "-1"
+    description: 模組化儲存箱，是匯流站與總線系統的基礎單元。
+    unlock: machine:assembler&item:machine_casing
+    use-cases:
+      - 倉儲匯流站前置
+      - 工業總線倉儲
+  routing_chip:
+    display-name: 路由晶片
+    category: ADVANCED
+    icon: REPEATER
+    item-model: "-1"
+    description: 物流路由晶片，可讓工業線做更細緻的匯流與分流。
+    unlock: machine:laser_engraver&item:etched_circuit
+    use-cases:
+      - 過濾路由器前置
+      - 分流器 / 總線控制
+  filter_mesh_core:
+    display-name: 過濾網核心
+    category: ADVANCED
+    icon: COBWEB
+    item-model: "-1"
+    description: 高選擇性過濾核心，能固定篩出指定物料。
+    unlock: machine:advanced_assembler&item:routing_chip
+    use-cases:
+      - 過濾路由器前置
+      - 工業過濾層
+  bus_frame:
+    display-name: 總線機架
+    category: ADVANCED
+    tier: TIER2
+    icon: IRON_BARS
+    item-model: "-1"
+    description: 工業總線框架，用於高吞吐量物流主幹。
+    unlock: machine:wire_mill&item:steel_wire
+    use-cases:
+      - 工業總線前置
+      - 長距物流骨幹
+  splitter_core:
+    display-name: 分流核心
+    category: ADVANCED
+    icon: OBSERVER
+    item-model: "-1"
+    description: 分流核心，適合將單一輸出拆往多個分支產線。
+    unlock: machine:assembler&item:routing_chip
+    use-cases:
+      - 分流節點前置
+      - 流量分支
+machines:
+  quarry_drill:
+    display-name: 採礦鑽機
+    category: ADVANCED
+    system-group: FIELD_AUTOMATION
+    machine-archetype: FIELD
+    visual-tier: ADVANCED
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: quarry_drill
+    role: ore-extraction
+    block: BLAST_FURNACE
+    item-model: "-1"
+    # nexo-id: quarry_drill
+    inputs: []
+    outputs: []
+    energy-per-tick: 24
+    effect: 區塊級向下抽取礦脈
+    unlock: machine:assembler&item:drill_head&item:quarry_frame
+    structure-preview:
+      title: 採礦鑽架
+      rows:
+        - " D C D "
+        - " I B I "
+      map:
+        D: machine:quarry_drill
+        C: minecraft:chest
+        I: minecraft:iron_block
+        B: minecraft:blast_furnace
+  quarry_drill_mk2:
+    display-name: 採礦鑽機二型
+    category: ADVANCED
+    system-group: FIELD_AUTOMATION
+    machine-archetype: FIELD
+    visual-tier: ADVANCED
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: quarry_drill
+    role: ore-extraction
+    block: BLAST_FURNACE
+    item-model: "-1"
+    inputs: []
+    outputs: []
+    energy-per-tick: 48
+    effect: 區塊級高速抽取礦脈
+    unlock: machine:quarry_drill&item:capacitor_bank&item:control_unit
+    structure-preview:
+      title: 採礦鑽架 Mk2
+      rows:
+        - " D C D "
+        - " I B I "
+      map:
+        D: machine:quarry_drill_mk2
+        C: minecraft:chest
+        I: minecraft:iron_block
+        B: minecraft:blast_furnace
+  quarry_drill_mk3:
+    display-name: 採礦鑽機三型
+    category: ADVANCED
+    tier: TIER4
+    system-group: FIELD_AUTOMATION
+    machine-archetype: FIELD
+    visual-tier: ENDGAME
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: quarry_drill
+    role: ore-extraction
+    block: BLAST_FURNACE
+    item-model: "-1"
+    inputs: []
+    outputs: []
+    energy-per-tick: 96
+    effect: 區塊級終局抽礦平台
+    unlock: machine:quarry_drill_mk2&item:fusion_core&item:quantum_frame
+    structure-preview:
+      title: 採礦鑽架 Mk3
+      rows:
+        - " D C D "
+        - " I B I "
+      map:
+        D: machine:quarry_drill_mk3
+        C: minecraft:chest
+        I: minecraft:iron_block
+        B: minecraft:blast_furnace
+  crop_harvester:
+    display-name: 作物收割機
+    category: INTERMEDIATE
+    block: HAY_BLOCK
+    item-model: "-1"
+    inputs: [harvest_matrix, agri_module]
+    outputs: [crops, crop_seeds, bio_fiber]
+    energy-per-tick: 8
+    effect: 收割附近成熟作物並自動重植
+    unlock: machine:auto_farm&item:harvest_matrix
+    structure-preview:
+      title: 收割架
+      rows:
+        - "   H   "
+        - "   C   "
+      map:
+        H: minecraft:hay_block
+        C: machine:crop_harvester
+  vacuum_inlet:
+    display-name: 真空吸入口
+    category: INTERMEDIATE
+    block: HOPPER
+    item-model: "-1"
+    inputs: [vacuum_core, pressure_tube]
+    outputs: [junk, crops, iron_dust, copper_dust, plastic, circuit_board]
+    energy-per-tick: 3
+    effect: 將周圍掉落物直接吸入產線
+    unlock: machine:assembler&item:vacuum_core
+  storm_turbine:
+    display-name: 風暴渦輪機
+    category: ADVANCED
+    block: LIGHTNING_ROD
+    item-model: "-1"
+    inputs: [storm_rotor, weather_sensor]
+    outputs: [energy_cell]
+    energy-per-tick: 0
+    effect: 暴雨與雷暴時會大幅增加發電量
+    unlock: machine:wire_mill&item:storm_rotor&item:weather_sensor
+  tree_feller:
+    display-name: 伐木機
+    category: INTERMEDIATE
+    block: STRIPPED_OAK_LOG
+    item-model: "-1"
+    inputs: [logging_blade, arbor_frame]
+    outputs: [oak_log, birch_log, spruce_log, jungle_log, acacia_log, dark_oak_log, cherry_log, mangrove_log, oak_sapling]
+    energy-per-tick: 12
+    effect: 搜尋附近樹幹並整株砍伐
+    unlock: machine:electric_saw&item:logging_blade&item:arbor_frame
+    structure-preview:
+      title: 伐木架
+      rows:
+        - "   F   "
+        - "   C   "
+      map:
+        F: minecraft:oak_fence
+        C: machine:tree_feller
+  mob_collector:
+    display-name: 生物收集器
+    category: ADVANCED
+    block: SPAWNER
+    item-model: "-1"
+    inputs: [net_launcher, field_processor]
+    outputs: [leather, beef, white_wool, mutton, porkchop, chicken, feather, rotten_flesh, bone, gunpowder, string, spider_eye, slime_ball]
+    energy-per-tick: 14
+    effect: 收集附近生物並轉化為掉落物
+    unlock: machine:advanced_assembler&item:net_launcher&item:field_processor
+    structure-preview:
+      title: 獵捕架
+      rows:
+        - "   I   "
+        - "   C   "
+      map:
+        I: minecraft:iron_bars
+        C: machine:mob_collector
+  fishing_dock:
+    display-name: 自動釣台
+    category: INTERMEDIATE
+    block: BARREL
+    item-model: "-1"
+    inputs: [bait_module, dock_frame]
+    outputs: [cod, salmon, tropical_fish, pufferfish, nautilus_shell, string]
+    energy-per-tick: 7
+    effect: 依附近水域持續取得漁獲
+    unlock: machine:auto_farm&item:bait_module&item:dock_frame
+    structure-preview:
+      title: 釣台
+      rows:
+        - "   F   "
+        - "   C   "
+      map:
+        F: minecraft:fishing_rod
+        C: machine:fishing_dock
+  storage_hub:
+    display-name: 倉儲匯流站
+    category: INTERMEDIATE
+    block: CHEST
+    item-model: "-1"
+    inputs: [storage_crate, machine_casing, wiring_bundle]
+    outputs: [machine_component, steel_plate, circuit_board, crops, plastic]
+    energy-per-tick: 0
+    effect: 接收任意物流並作為中型緩衝倉
+    unlock: machine:assembler&item:storage_crate
+  filter_router:
+    display-name: 過濾路由器
+    category: ADVANCED
+    block: TARGET
+    item-model: "-1"
+    inputs: [filter_mesh_core, routing_chip, purifier_membrane]
+    outputs: [machine_component, steel_plate, circuit_board, crops, plastic]
+    energy-per-tick: 0
+    effect: 用第 1 格樣本物品做精準過濾匯流
+    unlock: machine:advanced_assembler&item:filter_mesh_core&item:routing_chip
+  splitter_node:
+    display-name: 分流節點
+    category: ADVANCED
+    block: DROPPER
+    item-model: "-1"
+    inputs: [splitter_core, routing_chip, servo_motor]
+    outputs: [machine_component, steel_plate, circuit_board, crops, plastic]
+    energy-per-tick: 0
+    effect: 將同一輸出平均拆往多條產線
+    unlock: machine:assembler&item:splitter_core&item:routing_chip
+  industrial_bus:
+    display-name: 工業總線
+    category: ADVANCED
+    block: IRON_BARS
+    item-model: "-1"
+    inputs: [bus_frame, routing_chip, storage_crate, centrifuge_rotor]
+    outputs: [machine_component, steel_plate, circuit_board, crops, plastic]
+    energy-per-tick: 0
+    effect: 高吞吐量遠距物流骨幹與中繼站
+    unlock: machine:wire_mill&item:bus_frame&item:routing_chip&item:storage_crate
+  cargo_input_node:
+    display-name: 貨物抽取節點
+    category: ADVANCED
+    block: HOPPER
+    item-model: "-1"
+    inputs: [routing_chip, servo_motor, storage_crate]
+    outputs: [machine_component, steel_plate, circuit_board, crops, plastic]
+    energy-per-tick: 2
+    effect: 從相鄰原版容器（箱子/桶/漏斗）抽取物品送入產線
+    unlock: machine:assembler&item:routing_chip&item:servo_motor
+  cargo_manager:
+    display-name: 貨物管理站
+    category: ADVANCED
+    block: LODESTONE
+    item-model: "-1"
+    inputs: [bus_frame, routing_chip, control_unit, signal_relay]
+    outputs: [machine_component, steel_plate, circuit_board, crops, plastic]
+    energy-per-tick: 5
+    effect: 無線掃描範圍內同主人機器並抽取輸出物品
+    unlock: machine:advanced_assembler&item:bus_frame&item:control_unit&item:signal_relay
+  trash_node:
+    display-name: 銷毀節點
+    category: INTERMEDIATE
+    block: MAGMA_BLOCK
+    item-model: "-1"
+    inputs: [machine_casing, lava_bucket]
+    outputs: []
+    energy-per-tick: 0
+    effect: 永久銷毀所有匯入的物品
+    unlock: machine:assembler&item:machine_casing
+  cargo_motor:
+    display-name: 貨物驅動器
+    category: ADVANCED
+    block: PISTON
+    item-model: "-1"
+    inputs: [bus_frame, servo_motor, routing_chip]
+    outputs: [machine_component, steel_plate, circuit_board, crops, plastic]
+    energy-per-tick: 1
+    effect: 高速物流中繼站，每次傳輸最多 8 件物品
+    unlock: machine:assembler&item:bus_frame&item:servo_motor&item:routing_chip
+recipes:
+  drill_head_recipe:
+    machine: assembler
+    inputs: [steel_plate, titanium_alloy]
+    output: drill_head
+    energy: 18
+    guide: 鋼板 + 鈦合金 → 製造機 → 鑽頭組
+  quarry_frame_recipe:
+    machine: assembler
+    inputs: [machine_component, alloy_frame]
+    output: quarry_frame
+    energy: 16
+    guide: 機械零件 + 合金框架 → 製造機 → 採礦機架
+  harvest_matrix_recipe:
+    machine: assembler
+    inputs: [agri_module, signal_relay]
+    output: harvest_matrix
+    energy: 15
+    guide: 農業模組 + 訊號中繼器 → 製造機 → 收割矩陣
+  vacuum_core_recipe:
+    machine: assembler
+    inputs: [signal_relay, pressure_tube]
+    output: vacuum_core
+    energy: 15
+    guide: 訊號中繼器 + 壓力導管 → 製造機 → 真空核心
+  storm_rotor_recipe:
+    machine: wire_mill
+    inputs: [steel_wire, magnetic_ring]
+    output: storm_rotor
+    energy: 16
+    guide: 鋼線 + 磁環 → 拉線機 → 風暴轉子
+  weather_sensor_recipe:
+    machine: insulation_press
+    inputs: [sensor_array, insulated_wire]
+    output: weather_sensor
+    energy: 15
+    guide: 感測陣列 + 絕緣導線 → 絕緣壓床 → 天候感測器
+  field_processor_recipe:
+    machine: advanced_assembler
+    inputs: [control_unit, logic_gate]
+    output: field_processor
+    energy: 22
+    guide: 控制單元 + 邏輯閘 → 進階製造機 → 戶外處理器
+  quarry_drill_recipe:
+    machine: advanced_assembler
+    inputs: [drill_head, quarry_frame]
+    output: quarry_drill
+    energy: 24
+    guide: 鑽頭組 + 採礦機架 → 進階製造機 → 採礦鑽機
+  quarry_drill_mk2_recipe:
+    machine: advanced_assembler
+    inputs: [quarry_drill, capacitor_bank, control_unit]
+    output: quarry_drill_mk2
+    energy: 38
+    guide: 採礦鑽機 + 電容組 + 控制單元 → 進階製造機 → 採礦鑽機二型
+  quarry_drill_mk3_recipe:
+    machine: quantum_processor
+    inputs: [quarry_drill_mk2, fusion_core, quantum_frame]
+    output: quarry_drill_mk3
+    energy: 56
+    guide: 採礦鑽機二型 + 聚變核心 + 量子框架 → 量子處理器 → 採礦鑽機三型
+  crop_harvester_recipe:
+    machine: assembler
+    inputs: [harvest_matrix, agri_module]
+    output: crop_harvester
+    energy: 18
+    guide: 收割矩陣 + 農業模組 → 製造機 → 作物收割機
+  vacuum_inlet_recipe:
+    machine: assembler
+    inputs: [vacuum_core, machine_casing]
+    output: vacuum_inlet
+    energy: 17
+    guide: 真空核心 + 機械外殼 → 製造機 → 真空吸入口
+  storm_turbine_recipe:
+    machine: advanced_assembler
+    inputs: [storm_rotor, weather_sensor]
+    output: storm_turbine
+    energy: 26
+    guide: 風暴轉子 + 天候感測器 → 進階製造機 → 風暴渦輪機
+  logging_blade_recipe:
+    machine: assembler
+    inputs: [steel_plate, servo_motor]
+    output: logging_blade
+    energy: 16
+    guide: 鋼板 + 伺服馬達 → 製造機 → 伐木刀組
+  arbor_frame_recipe:
+    machine: assembler
+    inputs: [machine_component, treated_plastic]
+    output: arbor_frame
+    energy: 15
+    guide: 機械零件 + 處理塑膠 → 製造機 → 林業機架
+  tree_feller_recipe:
+    machine: assembler
+    inputs: [logging_blade, arbor_frame]
+    output: tree_feller
+    energy: 18
+    guide: 伐木刀組 + 林業機架 → 製造機 → 伐木機
+  bait_module_recipe:
+    machine: bio_lab
+    inputs: [bio_resin, crops]
+    output: bait_module
+    energy: 12
+    guide: 生質樹脂 + 作物 → 生質實驗室 → 誘餌模組
+  dock_frame_recipe:
+    machine: assembler
+    inputs: [pressure_tube, composite_panel]
+    output: dock_frame
+    energy: 15
+    guide: 壓力導管 + 複合面板 → 製造機 → 碼頭骨架
+  fishing_dock_recipe:
+    machine: assembler
+    inputs: [bait_module, dock_frame]
+    output: fishing_dock
+    energy: 18
+    guide: 誘餌模組 + 碼頭骨架 → 製造機 → 自動釣台
+  net_launcher_recipe:
+    machine: advanced_assembler
+    inputs: [field_processor, servo_motor]
+    output: net_launcher
+    energy: 22
+    guide: 戶外處理器 + 伺服馬達 → 進階製造機 → 捕網發射器
+  mob_collector_recipe:
+    machine: advanced_assembler
+    inputs: [net_launcher, field_processor]
+    output: mob_collector
+    energy: 24
+    guide: 捕網發射器 + 戶外處理器 → 進階製造機 → 生物收集器
+  storage_crate_recipe:
+    machine: assembler
+    inputs: [machine_casing, treated_plastic, wiring_bundle]
+    output: storage_crate
+    energy: 15
+    guide: 機械外殼 + 處理塑膠 + 工業線束 → 製造機 → 儲物箱
+  storage_hub_recipe:
+    machine: assembler
+    inputs: [storage_crate, machine_casing, wiring_bundle]
+    output: storage_hub
+    energy: 17
+    guide: 儲物箱 + 機械外殼 + 工業線束 → 製造機 → 倉儲匯流站
+  routing_chip_recipe:
+    machine: laser_engraver
+    inputs: [etched_circuit, logic_gate, wiring_bundle]
+    output: routing_chip
+    energy: 20
+    guide: 蝕刻電路 + 邏輯閘 + 工業線束 → 雷射雕刻機 → 路由晶片
+  filter_mesh_core_recipe:
+    machine: advanced_assembler
+    inputs: [routing_chip, nano_coating, purifier_membrane]
+    output: filter_mesh_core
+    energy: 24
+    guide: 路由晶片 + 奈米塗層 + 淨化膜片 → 進階製造機 → 過濾網核心
+  filter_router_recipe:
+    machine: advanced_assembler
+    inputs: [filter_mesh_core, routing_chip, purifier_membrane]
+    output: filter_router
+    energy: 25
+    guide: 過濾網核心 + 路由晶片 + 淨化膜片 → 進階製造機 → 過濾路由器
+  splitter_core_recipe:
+    machine: assembler
+    inputs: [routing_chip, signal_relay, servo_motor]
+    output: splitter_core
+    energy: 18
+    guide: 路由晶片 + 訊號中繼器 + 伺服馬達 → 製造機 → 分流核心
+  splitter_node_recipe:
+    machine: assembler
+    inputs: [splitter_core, routing_chip, servo_motor]
+    output: splitter_node
+    energy: 20
+    guide: 分流核心 + 路由晶片 + 伺服馬達 → 製造機 → 分流節點
+  bus_frame_recipe:
+    machine: wire_mill
+    inputs: [steel_wire, copper_wire, centrifuge_rotor]
+    output: bus_frame
+    energy: 20
+    guide: 鋼線 + 銅線 + 離心轉子 → 拉線機 → 總線機架
+  industrial_bus_recipe:
+    machine: advanced_assembler
+    inputs: [bus_frame, storage_crate, routing_chip, centrifuge_rotor]
+    output: industrial_bus
+    energy: 26
+    guide: 總線機架 + 儲物箱 + 路由晶片 + 離心轉子 → 進階製造機 → 工業總線
+  cargo_input_node_recipe:
+    machine: assembler
+    inputs: [routing_chip, servo_motor, storage_crate]
+    output: cargo_input_node
+    energy: 20
+    guide: 路由晶片 + 伺服馬達 + 儲物箱 → 製造機 → 貨物抽取節點
+  cargo_manager_recipe:
+    machine: advanced_assembler
+    inputs: [bus_frame, routing_chip, control_unit, signal_relay]
+    output: cargo_manager
+    energy: 28
+    guide: 總線機架 + 路由晶片 + 控制單元 + 訊號中繼器 → 進階製造機 → 貨物管理站
+  trash_node_recipe:
+    machine: assembler
+    inputs: [machine_casing, lava_bucket]
+    output: trash_node
+    energy: 12
+    guide: 機械外殼 + 岩漿桶 → 製造機 → 銷毀節點
+  cargo_motor_recipe:
+    machine: assembler
+    inputs: [bus_frame, servo_motor, routing_chip]
+    output: cargo_motor
+    energy: 22
+    guide: 總線機架 + 伺服馬達 + 路由晶片 → 製造機 → 貨物驅動器
+achievements:
+  field_operator:
+    display-name: 野外作業員
+    description: 建成第一台戶外專用設備。
+    reward-xp: 180
+    reward-tokens: 10
+    hint: 放置作物收割機、真空入口或採礦鑽機
+  ecosystem_engineer:
+    display-name: 生態工程師
+    description: 擁有伐木、釣魚與生物收集設備。
+    reward-xp: 260
+    reward-tokens: 16
+    hint: 建成伐木機、自動釣台、生物收集器
+  logistics_director:
+    display-name: 物流總監
+    description: 完成倉儲、過濾、分流與工業總線骨幹。
+    reward-xp: 320
+    reward-tokens: 20
+    hint: 建立真正的工業物流網路
+  cargo_architect:
+    display-name: 貨運架構師
+    description: 擁有貨物抽取節點、貨物管理站、貨物驅動器與銷毀節點。
+    reward-xp: 400
+    reward-tokens: 25
+    hint: 建立完整的進階貨物物流系統

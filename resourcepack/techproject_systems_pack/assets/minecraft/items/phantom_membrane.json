@@ -1,0 +1,26 @@
+{
+  "model": {
+    "type": "minecraft:range_dispatch",
+    "property": "minecraft:custom_model_data",
+    "entries": [
+      {
+        "threshold": 1957375,
+        "model": {
+          "type": "minecraft:model",
+          "model": "techproject:item/drone_frame"
+        }
+      },
+      {
+        "threshold": 2342689,
+        "model": {
+          "type": "minecraft:model",
+          "model": "techproject:item/nano_coating"
+        }
+      }
+    ],
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "minecraft:item/phantom_membrane"
+    }
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "model": {
+    "type": "minecraft:range_dispatch",
+    "property": "minecraft:custom_model_data",
+    "entries": [
+      {
+        "threshold": 830202,
+        "model": {
+          "type": "minecraft:model",
+          "model": "techproject:item/hud_enchanted_book"
+        }
+      },
+      {
+        "threshold": 2456080,
+        "model": {
+          "type": "minecraft:model",
+          "model": "techproject:item/tech_book"
+        }
+      }
+    ],
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "minecraft:item/enchanted_book"
+    }
+  }
+}

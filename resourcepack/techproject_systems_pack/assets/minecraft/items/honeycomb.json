@@ -1,0 +1,33 @@
+{
+  "model": {
+    "type": "minecraft:range_dispatch",
+    "property": "minecraft:custom_model_data",
+    "entries": [
+      {
+        "threshold": 1112700,
+        "model": {
+          "type": "minecraft:model",
+          "model": "techproject:item/neural_resin"
+        }
+      },
+      {
+        "threshold": 2287042,
+        "model": {
+          "type": "minecraft:model",
+          "model": "techproject:item/efficiency_upgrade"
+        }
+      },
+      {
+        "threshold": 2527572,
+        "model": {
+          "type": "minecraft:model",
+          "model": "techproject:item/bio_resin"
+        }
+      }
+    ],
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "minecraft:item/honeycomb"
+    }
+  }
+}

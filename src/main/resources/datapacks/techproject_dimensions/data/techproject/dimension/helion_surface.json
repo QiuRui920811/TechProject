@@ -1,0 +1,11 @@
+{
+  "type": "techproject:helion_scorch",
+  "generator": {
+    "type": "minecraft:noise",
+    "settings": "techproject:helion_surface_noise",
+    "biome_source": {
+      "type": "minecraft:fixed",
+      "biome": "techproject:helion_cinderfields"
+    }
+  }
+}

@@ -1,0 +1,2449 @@
+package com.rui.techproject.listener;
+
+import com.rui.techproject.TechProjectPlugin;
+import com.rui.techproject.model.PlacedMachine;
+import io.papermc.paper.event.player.AsyncChatEvent;
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
+import org.bukkit.FluidCollisionMode;
+import org.bukkit.GameMode;
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.Particle;
+import org.bukkit.Sound;
+import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
+import org.bukkit.block.data.Ageable;
+import org.bukkit.block.data.BlockData;
+import org.bukkit.entity.AbstractArrow;
+import org.bukkit.entity.Arrow;
+import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
+import org.bukkit.event.Listener;
+import org.bukkit.event.Event.Result;
+import org.bukkit.event.block.Action;
+import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockDispenseEvent;
+import org.bukkit.event.block.BlockPhysicsEvent;
+import org.bukkit.event.block.BlockPistonExtendEvent;
+import org.bukkit.event.block.BlockPistonRetractEvent;
+import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.block.BlockRedstoneEvent;
+import org.bukkit.event.block.LeavesDecayEvent;
+import org.bukkit.event.entity.CreatureSpawnEvent;
+import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.entity.EntityDeathEvent;
+import org.bukkit.event.entity.ProjectileHitEvent;
+import org.bukkit.event.hanging.HangingPlaceEvent;
+import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryMoveItemEvent;
+import org.bukkit.event.inventory.FurnaceSmeltEvent;
+import org.bukkit.event.inventory.InventoryCloseEvent;
+import org.bukkit.event.inventory.InventoryDragEvent;
+import org.bukkit.event.inventory.InventoryType;
+import org.bukkit.event.inventory.PrepareItemCraftEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerBucketEmptyEvent;
+import org.bukkit.event.player.PlayerItemConsumeEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerMoveEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.player.PlayerToggleFlightEvent;
+import org.bukkit.event.world.ChunkLoadEvent;
+import org.bukkit.event.world.ChunkUnloadEvent;
+import org.bukkit.block.Container;
+import org.bukkit.inventory.EquipmentSlot;
+import org.bukkit.inventory.CraftingInventory;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
+import org.bukkit.attribute.Attribute;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.Mob;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.player.PlayerItemDamageEvent;
+import org.bukkit.event.player.PlayerToggleSneakEvent;
+import org.bukkit.util.RayTraceResult;
+import org.bukkit.util.Vector;
+
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ThreadLocalRandom;
+
+public final class TechListener implements Listener {
+    private static final String VECTOR_GRAPPLE = "vector_grapple";
+    private static final String PULSE_THRUSTER = "pulse_thruster";
+    private static final String STORM_JETPACK = "storm_jetpack";
+    private static final long GRAPPLE_ENERGY_COST = 5L;
+    private static final long THRUSTER_ENERGY_COST = 8L;
+    private static final long JETPACK_ENERGY_COST = 6L;
+
+    private final TechProjectPlugin plugin;
+    private final Map<UUID, Long> grappleCooldowns = new ConcurrentHashMap<>();
+    private final Map<UUID, Long> thrusterCooldowns = new ConcurrentHashMap<>();
+    private final Map<UUID, Long> jetpackCooldowns = new ConcurrentHashMap<>();
+    private final Map<UUID, Long> mobilityGracePeriods = new ConcurrentHashMap<>();
+    private final Set<UUID> managedJetpackFlight = ConcurrentHashMap.newKeySet();
+    private final Map<UUID, UUID> grappleArrowOwners = new ConcurrentHashMap<>();
+    private final Map<UUID, Map<String, Long>> artifactCooldowns = new ConcurrentHashMap<>();
+    private final Map<UUID, Map<String, Long>> talismanCooldowns = new ConcurrentHashMap<>();
+    private final Map<UUID, Long> lastEquipmentTick = new ConcurrentHashMap<>();
+
+    private static final Set<String> ARTIFACT_IDS = Set.of(
+            "pulse_staff", "storm_staff", "gravity_staff", "warp_orb", "cryo_wand",
+            "plasma_lance", "void_mirror", "time_dilator", "heal_beacon", "entropy_scepter"
+    );
+
+    private static final Set<String> TALISMAN_IDS = Set.of(
+            "talisman_fire", "talisman_water", "talisman_angel", "talisman_warrior",
+            "talisman_knight", "talisman_traveler", "talisman_hunter", "talisman_miner",
+            "talisman_farmer", "talisman_anvil", "talisman_heal", "talisman_whirlwind"
+    );
+
+    public TechListener(final TechProjectPlugin plugin) {
+        this.plugin = plugin;
+    }
+
+    @EventHandler
+    public void onJoin(final PlayerJoinEvent event) {
+        final Player player = event.getPlayer();
+        this.plugin.getPlanetService().recoverTravelState(player);
+        this.plugin.getPlayerProgressService().ensureLoaded(player.getUniqueId());
+        this.plugin.getPlayerProgressService().grantStartingProgress(player);
+        if (this.plugin.getConfig().getBoolean("starting-techbook", true) && !this.hasTechBook(player)) {
+            player.getInventory().addItem(this.plugin.getItemFactory().buildTechBook());
+        }
+        this.giveStarterKitIfNeeded(player);
+        this.refreshJetpackFlightState(player);
+        // 自動刷新背包中版本過舊的科技物品（延遲 1 tick 確保載入完成）
+        this.plugin.getSafeScheduler().runEntityDelayed(player, () -> this.refreshPlayerInventory(player), 5L);
+    }
+
+    @EventHandler
+    public void onQuit(final PlayerQuitEvent event) {
+        final UUID playerId = event.getPlayer().getUniqueId();
+        this.grappleCooldowns.remove(playerId);
+        this.thrusterCooldowns.remove(playerId);
+        this.jetpackCooldowns.remove(playerId);
+        this.mobilityGracePeriods.remove(playerId);
+        this.managedJetpackFlight.remove(playerId);
+        this.artifactCooldowns.remove(playerId);
+        this.talismanCooldowns.remove(playerId);
+        this.lastEquipmentTick.remove(playerId);
+        this.plugin.getMachineService().cleanupPlayer(playerId);
+        this.plugin.getCookingService().cancelSession(playerId);
+        this.plugin.getAchievementGuiService().clearState(playerId);
+        this.plugin.getPlayerProgressService().save(event.getPlayer().getUniqueId());
+    }
+
+    @EventHandler(ignoreCancelled = true)
+    public void onMove(final PlayerMoveEvent event) {
+        this.refreshJetpackFlightState(event.getPlayer());
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    public void onToggleFlight(final PlayerToggleFlightEvent event) {
+        final Player player = event.getPlayer();
+        if (!this.hasJetpackEquipped(player) || !this.isManagedSurvivalFlight(player)) {
+            return;
+        }
+        event.setCancelled(true);
+        player.setFlying(false);
+
+        if (!this.isCooldownReady(this.jetpackCooldowns, player.getUniqueId())) {
+            player.sendActionBar(this.plugin.getItemFactory().warning("風暴噴射背包冷卻中。"));
+            this.refreshJetpackFlightState(player);
+            return;
+        }
+
+        final ItemStack chestplate = player.getInventory().getChestplate();
+        final long jetEnergy = this.plugin.getItemFactory().getItemStoredEnergy(chestplate);
+        if (jetEnergy < JETPACK_ENERGY_COST) {
+            player.sendActionBar(this.plugin.getItemFactory().warning("風暴噴射背包電量不足，請對準儲能機器 Shift + 右鍵充電。"));
+            this.refreshJetpackFlightState(player);
+            return;
+        }
+
+        final Vector direction = player.getLocation().getDirection().normalize();
+        final double forward = player.isSneaking() ? 0.42 : 1.05;
+        final double upward = player.isSneaking() ? 1.1 : 0.78;
+        final Vector burst = direction.multiply(forward);
+        burst.setY(Math.max(upward, (direction.getY() * 0.35) + upward));
+
+        player.setVelocity(player.getVelocity().multiply(0.15).add(burst));
+        player.setFallDistance(0.0f);
+        player.addPotionEffect(new PotionEffect(PotionEffectType.SLOW_FALLING, 36, 0, false, true, true));
+        this.markGracefulLanding(player, 3200L);
+        this.startCooldown(this.jetpackCooldowns, player.getUniqueId(), 950L);
+
+        final Location exhaust = player.getLocation().add(0.0, 0.6, 0.0);
+        exhaust.getWorld().spawnParticle(Particle.SOUL_FIRE_FLAME, exhaust, 18, 0.3, 0.35, 0.3, 0.01);
+        exhaust.getWorld().spawnParticle(Particle.CLOUD, exhaust, 12, 0.22, 0.25, 0.22, 0.02);
+        exhaust.getWorld().playSound(exhaust, Sound.ITEM_FIRECHARGE_USE, 0.75f, 1.2f);
+        exhaust.getWorld().playSound(exhaust, Sound.ENTITY_BREEZE_SHOOT, 0.65f, 1.45f);
+        this.plugin.getItemFactory().drainItemEnergy(chestplate, JETPACK_ENERGY_COST);
+        final long jetRemaining = this.plugin.getItemFactory().getItemStoredEnergy(chestplate);
+        final long jetMax = this.plugin.getItemFactory().maxItemEnergy(STORM_JETPACK);
+        player.sendActionBar(this.plugin.getItemFactory().success("風暴噴射背包已點火。 ⚡ " + jetRemaining + "/" + jetMax));
+
+        this.plugin.getSafeScheduler().runEntityDelayed(player, () -> this.refreshJetpackFlightState(player), 2L);
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    public void onMobilityFallDamage(final EntityDamageEvent event) {
+        if (!(event.getEntity() instanceof Player player) || event.getCause() != EntityDamageEvent.DamageCause.FALL) {
+            return;
+        }
+        final long safeUntil = this.mobilityGracePeriods.getOrDefault(player.getUniqueId(), 0L);
+        if (safeUntil < System.currentTimeMillis()) {
+            this.mobilityGracePeriods.remove(player.getUniqueId());
+            return;
+        }
+        event.setCancelled(true);
+        player.setFallDistance(0.0f);
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    public void onBookSearchChat(final AsyncChatEvent event) {
+        final String plainText = PlainTextComponentSerializer.plainText().serialize(event.message());
+        // 物品搜尋：以 ? 開頭的訊息 → 打開鐵砧搜尋 GUI（或帶關鍵字直接開圖鑑結果）
+        if (this.plugin.getItemSearchService().isSearchQuery(plainText)) {
+            event.setCancelled(true);
+            final String query = this.plugin.getItemSearchService().extractQuery(plainText);
+            final Player player = event.getPlayer();
+            this.plugin.getSafeScheduler().runEntity(player, () ->
+                this.plugin.getItemSearchService().openSearch(player, query)
+            );
+            return;
+        }
+        if (!this.plugin.getTechBookService().isAwaitingSearchInput(event.getPlayer().getUniqueId())) {
+            return;
+        }
+        event.setCancelled(true);
+        this.plugin.getTechBookService().consumeSearchInput(event.getPlayer(), plainText);
+    }
+
+    @EventHandler
+    public void onChunkLoad(final ChunkLoadEvent event) {
+        this.plugin.getPlanetService().handleChunkLoad(event.getChunk());
+    }
+
+    @EventHandler
+    public void onChunkUnload(final ChunkUnloadEvent event) {
+        this.plugin.getPlanetService().handleChunkUnload(event.getChunk());
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onPlanetMobSpawn(final CreatureSpawnEvent event) {
+        if (event.getSpawnReason() != CreatureSpawnEvent.SpawnReason.NATURAL
+                && event.getSpawnReason() != CreatureSpawnEvent.SpawnReason.REINFORCEMENTS) {
+            return;
+        }
+        if (!(event.getEntity() instanceof LivingEntity living)) {
+            return;
+        }
+        this.plugin.getPlanetService().tryEmpowerPlanetMob(living);
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR)
+    public void onPlanetMobDeath(final EntityDeathEvent event) {
+        this.plugin.getPlanetService().handlePlanetEliteDeath(event.getEntity(), event.getEntity().getKiller(), event.getDrops());
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST)
+    public void onInteract(final PlayerInteractEvent event) {
+        if (event.getAction() != Action.RIGHT_CLICK_AIR && event.getAction() != Action.RIGHT_CLICK_BLOCK) {
+            return;
+        }
+        if (event.getHand() == EquipmentSlot.OFF_HAND) {
+            return;
+        }
+        ItemStack stack = event.getItem();
+        if (stack == null && event.getHand() != null) {
+            stack = event.getPlayer().getInventory().getItem(event.getHand());
+        }
+        if (this.plugin.getItemFactory().hasFullUnlockBookTag(stack)) {
+            event.setUseInteractedBlock(Result.DENY);
+            event.setUseItemInHand(Result.DENY);
+            event.setCancelled(true);
+
+            final Player player = event.getPlayer();
+            final int unlocked = this.plugin.getPlayerProgressService().unlockAllResearch(
+                    player.getUniqueId(),
+                    this.plugin.getTechAddonService().allInteractions().stream().map(definition -> definition.id()).toList()
+            );
+            if (unlocked <= 0) {
+                player.sendMessage(this.plugin.getItemFactory().warning("你目前已經是全解鎖狀態。"));
+                return;
+            }
+
+            if (stack.getAmount() <= 1) {
+                player.getInventory().setItemInMainHand(null);
+            } else {
+                stack.setAmount(stack.getAmount() - 1);
+                player.getInventory().setItemInMainHand(stack);
+            }
+            if (!this.hasTechBook(player)) {
+                player.getInventory().addItem(this.plugin.getItemFactory().buildTechBook());
+            }
+            this.plugin.getPlayerProgressService().save(player.getUniqueId());
+            player.sendMessage(this.plugin.getItemFactory().success("已使用全解鎖書，全部科技研究已解鎖。"));
+            this.plugin.getSafeScheduler().runEntityDelayed(player, () -> this.plugin.getTechBookService().openDefaultBook(player), 1L);
+            return;
+        }
+        if (this.plugin.getItemFactory().hasTechBookTag(stack)) {
+            event.setUseInteractedBlock(Result.DENY);
+            event.setUseItemInHand(Result.DENY);
+            event.setCancelled(true);
+            this.plugin.getSafeScheduler().runEntityDelayed(event.getPlayer(), () -> this.plugin.getTechBookService().openDefaultBook(event.getPlayer()), 1L);
+            return;
+        }
+        if (this.tryUseCustomFood(event)) {
+            return;
+        }
+        if (this.tryUseArtifact(event)) {
+            return;
+        }
+        if (event.useInteractedBlock() == Result.DENY || event.useItemInHand() == Result.DENY) {
+            return;
+        }
+        if (event.getClickedBlock() != null && this.plugin.getPlanetService().handlePlanetInteract(event.getPlayer(), event.getClickedBlock(), stack)) {
+            event.setUseInteractedBlock(Result.DENY);
+            event.setUseItemInHand(Result.DENY);
+            event.setCancelled(true);
+            return;
+        }
+        if (this.tryPlantTechCrop(event) || this.tryUseHydroSpade(event) || this.tryUseMobilityTool(event)) {
+            return;
+        }
+        // 互動烹調：右鍵營火/煙燻/高爐並手持食物
+        if (event.getClickedBlock() != null && event.getHand() == EquipmentSlot.HAND
+                && this.plugin.getCookingService().isCookingStation(event.getClickedBlock().getType())) {
+            if (this.plugin.getCookingService().tryStartCooking(event.getPlayer(), event.getClickedBlock())) {
+                event.setUseInteractedBlock(Result.DENY);
+                event.setUseItemInHand(Result.DENY);
+                event.setCancelled(true);
+                return;
+            }
+        }
+        if (event.getHand() == EquipmentSlot.HAND && this.tryShowAdvancedWorkbenchHint(event.getPlayer(), event.getClickedBlock())) {
+            return;
+        }
+        final Block machineBlock = event.getClickedBlock() == null ? null : this.plugin.getMachineService().resolveManagedMachineBlock(event.getClickedBlock());
+        if (machineBlock != null) {
+            event.setUseInteractedBlock(Result.DENY);
+            event.setUseItemInHand(Result.DENY);
+            event.setCancelled(true);
+            if (!this.plugin.getMachineService().canModifyMachine(event.getPlayer(), machineBlock, false)) {
+                return;
+            }
+            this.plugin.getMachineService().handleManagedMachineInteract(event.getPlayer(), machineBlock, event.getClickedBlock());
+            return;
+        }
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    public void onBlockRedstone(final BlockRedstoneEvent event) {
+        if (this.isProtectedTechBlock(event.getBlock())) {
+            event.setNewCurrent(0);
+        }
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    public void onPistonExtend(final BlockPistonExtendEvent event) {
+        if (this.isProtectedTechBlock(event.getBlock())) {
+            event.setCancelled(true);
+            return;
+        }
+        for (final Block pushed : event.getBlocks()) {
+            if (this.isProtectedTechBlock(pushed)) {
+                event.setCancelled(true);
+                return;
+            }
+        }
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    public void onPistonRetract(final BlockPistonRetractEvent event) {
+        if (this.isProtectedTechBlock(event.getBlock())) {
+            event.setCancelled(true);
+            return;
+        }
+        for (final Block pulled : event.getBlocks()) {
+            if (this.isProtectedTechBlock(pulled)) {
+                event.setCancelled(true);
+                return;
+            }
+        }
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    public void onBlockPhysics(final BlockPhysicsEvent event) {
+        if (this.plugin.getMachineService().isManagedMachine(event.getBlock())
+                || this.plugin.getPlacedTechBlockService().isTrackedBlock(event.getBlock())) {
+            event.setCancelled(true);
+        }
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    public void onLeavesDecay(final LeavesDecayEvent event) {
+        if (this.isProtectedTechBlock(event.getBlock())) {
+            event.setCancelled(true);
+        }
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    public void onInventoryMoveItem(final InventoryMoveItemEvent event) {
+        if (event.getSource().getHolder() instanceof Container container
+                && this.isProtectedTechBlock(container.getBlock())) {
+            event.setCancelled(true);
+            return;
+        }
+        if (event.getDestination().getHolder() instanceof Container container
+                && this.isProtectedTechBlock(container.getBlock())) {
+            event.setCancelled(true);
+        }
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    public void onBlockDispense(final BlockDispenseEvent event) {
+        if (this.isProtectedTechBlock(event.getBlock())) {
+            event.setCancelled(true);
+        }
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    public void onInventoryClick(final InventoryClickEvent event) {
+        if (this.handleProtectedWorkbenchResultClick(event)) {
+            return;
+        }
+        if (this.handleAdvancedWorkbenchClick(event)) {
+            return;
+        }
+        // 鐵砧搜尋 GUI
+        if (event.getWhoClicked() instanceof Player player
+                && this.plugin.getItemSearchService().isAnvilSearchOpen(player.getUniqueId())) {
+            event.setCancelled(true);
+            this.plugin.getItemSearchService().handleAnvilClick(player, event.getRawSlot());
+            return;
+        }
+        final boolean bookViewOpen = this.plugin.getTechBookService().isBookInventory(event.getView().getTopInventory());
+        final String title = PlainTextComponentSerializer.plainText().serialize(event.getView().title());
+        if (!bookViewOpen && !this.plugin.getTechBookService().isBookView(title)) {
+            if (this.plugin.getAchievementGuiService().isAchievementGui(title)) {
+                event.setCancelled(true);
+                if (event.getWhoClicked() instanceof Player player) {
+                    this.plugin.getAchievementGuiService().handleClick(player, event.getRawSlot());
+                }
+                return;
+            }
+            if (this.plugin.getMachineService().isMachineView(title)) {
+                this.plugin.getMachineService().handleMachineInventoryClick(event);
+                return;
+            }
+            if (this.plugin.getPlanetService().isPlanetaryGateView(title)) {
+                event.setCancelled(true);
+                if (event.getWhoClicked() instanceof Player player) {
+                    this.plugin.getPlanetService().handlePlanetaryGateMenuClick(player, event.getRawSlot());
+                }
+            }
+            return;
+        }
+        event.setCancelled(true);
+        final ItemStack current = event.getCurrentItem();
+        if (!(event.getWhoClicked() instanceof Player player)) {
+            return;
+        }
+        if (event.isRightClick() && this.plugin.getTechBookService().tryGrantPreviewItem(player, current)) {
+            return;
+        }
+        final String action = this.plugin.getItemFactory().getGuiAction(current);
+        this.plugin.getTechBookService().handleAction(player, action);
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    public void onInventoryDrag(final InventoryDragEvent event) {
+        final String title = PlainTextComponentSerializer.plainText().serialize(event.getView().title());
+        final boolean bookViewOpen = this.plugin.getTechBookService().isBookInventory(event.getView().getTopInventory());
+        if (this.plugin.getPlanetService().isPlanetaryGateView(title)) {
+            event.setCancelled(true);
+            return;
+        }
+        if (this.plugin.getAchievementGuiService().isAchievementGui(title)) {
+            event.setCancelled(true);
+            return;
+        }
+        if (bookViewOpen || this.plugin.getTechBookService().isBookView(title)) {
+            for (final int rawSlot : event.getRawSlots()) {
+                if (rawSlot < event.getView().getTopInventory().getSize()) {
+                    event.setCancelled(true);
+                    return;
+                }
+            }
+        }
+        if (!this.plugin.getMachineService().isMachineView(title)) {
+            return;
+        }
+        this.plugin.getMachineService().handleMachineInventoryDrag(event);
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST)
+    public void onPrepareItemCraft(final PrepareItemCraftEvent event) {
+        if (!(event.getInventory() instanceof CraftingInventory craftingInventory)) {
+            return;
+        }
+        final var match = craftingInventory.getMatrix().length >= 9
+                ? this.plugin.getBlueprintService().matchCraftingMatrix(craftingInventory.getMatrix())
+                : null;
+        if (match == null) {
+            if (this.containsTaggedTechMaterial(craftingInventory.getMatrix())) {
+                craftingInventory.setResult(this.plugin.getBlueprintService().isAdvancedWorkbench(craftingInventory.getLocation())
+                        ? this.invalidTechProcessingResult()
+                        : this.isolatedTechMaterialResult());
+            }
+            return;
+        }
+        if (!this.plugin.getBlueprintService().isAdvancedWorkbench(craftingInventory.getLocation())) {
+            craftingInventory.setResult(this.invalidAdvancedWorkbenchResult(match.machine().displayName()));
+            return;
+        }
+        final Player viewer = event.getViewers().stream()
+                .filter(Player.class::isInstance)
+                .map(Player.class::cast)
+                .findFirst()
+                .orElse(null);
+        if (viewer != null
+                && !viewer.hasPermission("techproject.admin")
+                && !this.plugin.getPlayerProgressService().hasMachineUnlocked(viewer.getUniqueId(), match.machine().id())) {
+            craftingInventory.setResult(this.lockedMachineResult(match.machine().displayName()));
+            return;
+        }
+        craftingInventory.setResult(this.plugin.getItemFactory().buildMachineItem(match.machine()));
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    public void onFurnaceSmelt(final FurnaceSmeltEvent event) {
+        if (!this.isTaggedTechMaterial(event.getSource())) {
+            return;
+        }
+        event.setCancelled(true);
+        event.setResult(new ItemStack(Material.AIR));
+    }
+
+    @EventHandler
+    public void onInventoryClose(final InventoryCloseEvent event) {
+        if (event.getPlayer() instanceof Player player) {
+            this.plugin.getTechBookService().clearBookView(player.getUniqueId());
+            this.plugin.getAchievementGuiService().clearState(player.getUniqueId());
+            this.plugin.getItemSearchService().clearState(player.getUniqueId());
+        }
+        final String title = PlainTextComponentSerializer.plainText().serialize(event.getView().title());
+        if (this.plugin.getPlanetService().isPlanetaryGateView(title) && event.getPlayer() instanceof Player player) {
+            this.plugin.getPlanetService().closePlanetaryGateMenu(player);
+        }
+        if (!this.plugin.getMachineService().isMachineView(title)) {
+            return;
+        }
+        if (event.getPlayer() instanceof Player player) {
+            this.plugin.getMachineService().closeMachineView(player, event.getInventory());
+        }
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    public void onBlockPlace(final BlockPlaceEvent event) {
+        final String techItemId = this.plugin.getItemFactory().getTechItemId(event.getItemInHand());
+        final String machineId = this.plugin.getItemFactory().getMachineId(event.getItemInHand());
+        if (this.plugin.getPlanetService().isPlanetWorld(event.getBlockPlaced().getWorld())
+                && !"planetary_gate".equalsIgnoreCase(machineId)) {
+            event.setCancelled(true);
+            event.getPlayer().sendActionBar(this.plugin.getItemFactory().warning("星球地表禁止建造，這裡只能探勘、採集與戰鬥。"));
+            event.getPlayer().playSound(event.getBlockPlaced().getLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 0.35f, 0.7f);
+            return;
+        }
+        if (machineId != null) {
+            if (!this.plugin.getMachineService().validatePlacement(event.getPlayer(), event.getBlockPlaced(), machineId)) {
+                event.setCancelled(true);
+                return;
+            }
+            this.plugin.getMachineService().registerPlacedMachine(event.getPlayer(), event.getBlockPlaced(), machineId, event.getItemInHand());
+            return;
+        }
+        if (this.plugin.getPlacedTechBlockService().shouldTrackPlacement(techItemId)) {
+            this.plugin.getPlacedTechBlockService().registerPlacedBlock(event.getBlockPlaced(), techItemId);
+            return;
+        }
+        if (techItemId != null) {
+            event.setCancelled(true);
+            event.getPlayer().sendActionBar(this.plugin.getItemFactory().warning("此科技物品不可放置。"));
+        }
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    public void onBucketEmpty(final PlayerBucketEmptyEvent event) {
+        if (!this.plugin.getPlanetService().isPlanetWorld(event.getBlock().getWorld())) {
+            return;
+        }
+        event.setCancelled(true);
+        event.getPlayer().sendActionBar(this.plugin.getItemFactory().warning("星球地表禁止放置液體。"));
+        event.getPlayer().playSound(event.getBlock().getLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 0.35f, 0.7f);
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    public void onHangingPlace(final HangingPlaceEvent event) {
+        if (!this.plugin.getPlanetService().isPlanetWorld(event.getBlock().getWorld())) {
+            return;
+        }
+        event.setCancelled(true);
+        if (event.getPlayer() != null) {
+            event.getPlayer().sendActionBar(this.plugin.getItemFactory().warning("星球地表禁止放置展示物與裝飾物。"));
+            event.getPlayer().playSound(event.getBlock().getLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 0.35f, 0.7f);
+        }
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    public void onBlockBreak(final BlockBreakEvent event) {
+        // 互動烹調：破壞烹調中的方塊會中斷烹調
+        this.plugin.getCookingService().interruptByBlockBreak(event.getBlock());
+        final Block managedMachine = this.plugin.getMachineService().resolveManagedMachineBlock(event.getBlock());
+        final PlacedMachine placedMachine = this.plugin.getMachineService().placedMachineAt(managedMachine);
+        final boolean allowPlanetaryGateBreak = this.plugin.getPlanetService().isPlanetWorld(event.getBlock().getWorld())
+                && placedMachine != null
+                && "planetary_gate".equalsIgnoreCase(placedMachine.machineId());
+        if (!allowPlanetaryGateBreak && this.plugin.getPlanetService().handlePlanetBreak(event)) {
+            return;
+        }
+        this.handleWildGrassForaging(event);
+        this.handleTalismanMiner(event);
+        this.handleTalismanFarmer(event);
+        if (this.handleFieldSickle(event) || this.handleCustomCropBreak(event)) {
+            return;
+        }
+        final Block protectedMachine = managedMachine;
+        if (protectedMachine != null
+                && !this.plugin.getMachineService().canModifyMachine(event.getPlayer(), protectedMachine, true)) {
+            event.setCancelled(true);
+            return;
+        }
+        final ItemStack machineDrop = this.plugin.getMachineService().buildPlacedMachineItem(event.getBlock());
+        if (machineDrop != null) {
+            event.setDropItems(false);
+            event.getBlock().getWorld().dropItemNaturally(event.getBlock().getLocation().add(0.5, 0.5, 0.5), machineDrop);
+        }
+        final ItemStack techBlockDrop = this.plugin.getPlacedTechBlockService().buildDrop(event.getBlock());
+        if (techBlockDrop != null) {
+            event.setDropItems(false);
+            event.getBlock().getWorld().dropItemNaturally(event.getBlock().getLocation().add(0.5, 0.5, 0.5), techBlockDrop);
+            this.plugin.getPlacedTechBlockService().unregister(event.getBlock());
+        }
+        this.plugin.getMachineService().unregisterMachine(event.getBlock());
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    public void onConsume(final PlayerItemConsumeEvent event) {
+        final String techItemId = this.plugin.getItemFactory().getTechItemId(event.getItem());
+        if (techItemId == null) {
+            return;
+        }
+        final Player player = event.getPlayer();
+        if (!this.applyCustomFoodEffects(player, techItemId)) {
+            return;
+        }
+        player.sendActionBar(this.plugin.getItemFactory().success("食物 / 飲品效果已生效。"));
+    }
+
+    private boolean tryUseCustomFood(final PlayerInteractEvent event) {
+        if (event.getItem() == null || (event.getAction() != Action.RIGHT_CLICK_AIR && event.getAction() != Action.RIGHT_CLICK_BLOCK)) {
+            return false;
+        }
+        final String techItemId = this.plugin.getItemFactory().getTechItemId(event.getItem());
+        if (techItemId == null) {
+            return false;
+        }
+        final int hunger = this.manualFoodHunger(techItemId);
+        if (hunger <= 0) {
+            return false;
+        }
+        final Player player = event.getPlayer();
+        event.setUseInteractedBlock(Result.DENY);
+        event.setUseItemInHand(Result.DENY);
+        event.setCancelled(true);
+
+        if (player.getGameMode() != GameMode.CREATIVE) {
+            final ItemStack hand = player.getInventory().getItemInMainHand();
+            if (hand == null || hand.getAmount() <= 0) {
+                return true;
+            }
+            if (hand.getAmount() <= 1) {
+                player.getInventory().setItemInMainHand(null);
+            } else {
+                hand.setAmount(hand.getAmount() - 1);
+                player.getInventory().setItemInMainHand(hand);
+            }
+        }
+
+        this.restoreFood(player, hunger, this.manualFoodSaturation(techItemId));
+        this.applyCustomFoodEffects(player, techItemId);
+        player.setCooldown(event.getItem().getType(), 12);
+        this.playCustomFoodConsumeSound(player, techItemId);
+        player.getWorld().spawnParticle(Particle.HAPPY_VILLAGER, player.getLocation().add(0.0, 1.0, 0.0), 6, 0.25, 0.2, 0.25, 0.01);
+        player.sendActionBar(this.plugin.getItemFactory().success("已食用「" + this.plugin.getItemFactory().displayNameForId(techItemId) + "」。"));
+        return true;
+    }
+
+    private void playCustomFoodConsumeSound(final Player player, final String techItemId) {
+        if (player == null || techItemId == null || techItemId.isBlank()) {
+            return;
+        }
+        if (this.isDrinkLikeFood(techItemId)) {
+            player.getWorld().playSound(player.getLocation(), Sound.ENTITY_GENERIC_DRINK, 0.85f, 1.08f);
+            player.getWorld().playSound(player.getLocation(), Sound.ITEM_BOTTLE_EMPTY, 0.55f, 1.18f);
+            player.getWorld().playSound(player.getLocation(), Sound.ENTITY_PLAYER_BURP, 0.35f, 1.28f);
+            return;
+        }
+        player.getWorld().playSound(player.getLocation(), Sound.ENTITY_GENERIC_EAT, 0.85f, 1.02f);
+        player.getWorld().playSound(player.getLocation(), Sound.ENTITY_GENERIC_EAT, 0.7f, 1.18f);
+        player.getWorld().playSound(player.getLocation(), Sound.ENTITY_PLAYER_BURP, 0.45f, 1.2f);
+    }
+
+    private boolean isDrinkLikeFood(final String techItemId) {
+        final String normalized = techItemId.toLowerCase();
+        return normalized.contains("juice")
+                || normalized.contains("tea")
+                || normalized.contains("smoothie")
+                || normalized.contains("lemonade")
+                || normalized.contains("fizz")
+                || normalized.contains("glaze")
+                || normalized.contains("sorbet")
+                || normalized.contains("gel")
+                || normalized.contains("milkshake")
+                || normalized.contains("cocoa")
+                || normalized.contains("cider")
+                || normalized.contains("ale")
+                || normalized.contains("latte")
+                || normalized.contains("espresso")
+                || normalized.contains("punch")
+                || normalized.contains("blend")
+                || normalized.equals("coconut_water");
+    }
+
+    private boolean hasTechBook(final Player player) {
+        for (final ItemStack item : player.getInventory().getContents()) {
+            if (item == null || item.getType() == Material.AIR) {
+                continue;
+            }
+            if (this.plugin.getItemFactory().hasTechBookTag(item)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean tryPlantTechCrop(final PlayerInteractEvent event) {
+        if (event.getAction() != Action.RIGHT_CLICK_BLOCK || event.getClickedBlock() == null || event.getItem() == null) {
+            return false;
+        }
+        if (!this.plugin.getTechCropService().tryPlant(event.getPlayer(), event.getClickedBlock(), event.getBlockFace(), event.getItem())) {
+            return false;
+        }
+        event.setUseInteractedBlock(Result.DENY);
+        event.setUseItemInHand(Result.DENY);
+        event.setCancelled(true);
+        return true;
+    }
+
+    private void handleWildGrassForaging(final BlockBreakEvent event) {
+        if (event.isCancelled() || event.getPlayer().getGameMode() == GameMode.CREATIVE) {
+            return;
+        }
+        if (this.plugin.getPlanetService().isPlanetWorld(event.getBlock().getWorld())) {
+            return;
+        }
+        final Material material = event.getBlock().getType();
+        if (material != Material.SHORT_GRASS && material != Material.TALL_GRASS && material != Material.FERN && material != Material.LARGE_FERN) {
+            return;
+        }
+        final String dropId = this.rollWildForageDrop();
+        if (dropId == null) {
+            return;
+        }
+        final ItemStack drop = this.buildTechDrop(dropId, 1);
+        if (drop == null || drop.getType() == Material.AIR) {
+            return;
+        }
+        final Location location = event.getBlock().getLocation().add(0.5, 0.45, 0.5);
+        event.getBlock().getWorld().dropItemNaturally(location, drop);
+        event.getBlock().getWorld().spawnParticle(Particle.HAPPY_VILLAGER, location, 6, 0.18, 0.12, 0.18, 0.01);
+        event.getPlayer().sendActionBar(this.plugin.getItemFactory().success("野外採集到「" + this.plugin.getItemFactory().displayNameForId(dropId) + "」。"));
+    }
+
+    private String rollWildForageDrop() {
+        final double roll = ThreadLocalRandom.current().nextDouble();
+        if (roll < 0.030D) {
+            return "soybean_seeds";
+        }
+        if (roll < 0.055D) {
+            return "spiceberry_seeds";
+        }
+        if (roll < 0.080D) {
+            return "tea_leaf_seeds";
+        }
+        if (roll < 0.102D) {
+            return "tomato_seeds";
+        }
+        if (roll < 0.124D) {
+            return "cabbage_seeds";
+        }
+        if (roll < 0.146D) {
+            return "corn_seeds";
+        }
+        if (roll < 0.168D) {
+            return "onion_bulbs";
+        }
+        if (roll < 0.178D) {
+            return "lumenfruit_sapling";
+        }
+        if (roll < 0.188D) {
+            return "frost_apple_sapling";
+        }
+        if (roll < 0.198D) {
+            return "shadow_berry_sapling";
+        }
+        if (roll < 0.208D) {
+            return "sunflare_fig_sapling";
+        }
+        if (roll < 0.218D) {
+            return "stormplum_sapling";
+        }
+        if (roll < 0.226D) {
+            return "cherry_sapling";
+        }
+        if (roll < 0.234D) {
+            return "lemon_sapling";
+        }
+        if (roll < 0.242D) {
+            return "peach_sapling";
+        }
+        if (roll < 0.250D) {
+            return "pear_sapling";
+        }
+        if (roll < 0.258D) {
+            return "orange_sapling";
+        }
+        return null;
+    }
+
+    private ItemStack buildTechDrop(final String id, final int amount) {
+        if (this.plugin.getTechRegistry().getItem(id) == null) {
+            return null;
+        }
+        final ItemStack stack = this.plugin.getItemFactory().buildTechItem(this.plugin.getTechRegistry().getItem(id));
+        stack.setAmount(Math.min(amount, stack.getMaxStackSize()));
+        return stack;
+    }
+
+    private int manualFoodHunger(final String techItemId) {
+        return switch (techItemId.toLowerCase()) {
+            case "sunrise_pie", "stuffed_cabbage", "orchard_ration", "cryon_hotpot",
+                "ramen", "cheese_pizza", "chocolate_cake", "cheesecake", "vegetable_curry" -> 8;
+            case "peach_cobbler", "aurelia_glaze", "nyx_phase_gel", "helion_sorbet",
+                "mushroom_risotto", "breakfast_burrito", "tropical_punch" -> 7;
+            case "orchard_salad", "cornbread", "fruit_puree", "nutrition_bar", "protein_ration",
+                "citrus_salad", "tomato_stew", "pear_crisp", "tempest_fizz",
+                "fried_rice", "noodle_soup", "grilled_vegetables", "dumpling",
+                "fish_stew", "veggie_wrap", "potato_soup", "fruit_parfait" -> 6;
+            case "lumenfruit", "frost_apple", "sunflare_fig", "soybean_pods", "emberroot",
+                "tomato", "cabbage", "corn", "lemon", "peach", "pear", "orange", "orchard_smoothie",
+                "mango", "banana", "pineapple", "coconut", "garlic_bread", "roasted_corn",
+                "sushi_roll", "pancakes", "vanilla_ice_cream" -> 5;
+            case "shadow_berry_cluster", "stormplum", "spiceberry", "frostbloom", "ion_fern",
+                    "onion", "cherry", "lemon_juice", "orange_juice", "peach_juice", "pear_juice",
+                "cherry_juice", "radiant_tea", "nebula_juice", "berry_tart", "sparkling_lemonade",
+                "grape", "strawberry", "blueberry", "raspberry", "watermelon_slice", "kiwi",
+                "garlic", "lettuce", "bell_pepper", "spinach", "radish",
+                "grape_juice", "mango_smoothie", "coconut_water", "berry_blend",
+                "green_tea", "iced_tea", "hot_cocoa", "apple_cider", "ginger_ale",
+                "milk_tea", "matcha_latte", "espresso", "vanilla_milkshake", "strawberry_milkshake",
+                "donut", "muffin", "brownie", "cinnamon_roll", "honey_toast" -> 4;
+            default -> 0;
+        };
+    }
+
+    private float manualFoodSaturation(final String techItemId) {
+        return switch (techItemId.toLowerCase()) {
+            case "sunrise_pie", "stuffed_cabbage", "orchard_ration", "cryon_hotpot",
+                "ramen", "cheese_pizza", "chocolate_cake", "cheesecake", "vegetable_curry" -> 9.0f;
+            case "peach_cobbler", "aurelia_glaze", "nyx_phase_gel", "helion_sorbet",
+                "mushroom_risotto", "breakfast_burrito", "tropical_punch" -> 8.0f;
+            case "orchard_salad", "cornbread", "fruit_puree", "nutrition_bar", "protein_ration",
+                "citrus_salad", "tomato_stew", "pear_crisp", "tempest_fizz",
+                "fried_rice", "noodle_soup", "grilled_vegetables", "dumpling",
+                "fish_stew", "veggie_wrap", "potato_soup", "fruit_parfait" -> 7.0f;
+            case "sunflare_fig", "emberroot", "peach", "orange",
+                "mango", "banana", "pineapple", "coconut", "garlic_bread",
+                "sushi_roll", "roasted_corn", "pancakes", "vanilla_ice_cream" -> 6.0f;
+            case "lumenfruit", "frost_apple", "soybean_pods", "tomato", "cabbage", "corn", "lemon", "pear", "orchard_smoothie",
+                "grape", "strawberry", "blueberry", "raspberry", "watermelon_slice", "kiwi" -> 5.0f;
+            case "shadow_berry_cluster", "stormplum", "spiceberry", "frostbloom", "ion_fern", "onion",
+                    "cherry", "lemon_juice", "orange_juice", "peach_juice", "pear_juice", "cherry_juice",
+                "radiant_tea", "nebula_juice", "berry_tart", "sparkling_lemonade",
+                "garlic", "lettuce", "bell_pepper", "spinach", "radish",
+                "grape_juice", "mango_smoothie", "coconut_water", "berry_blend",
+                "green_tea", "iced_tea", "hot_cocoa", "apple_cider", "ginger_ale",
+                "milk_tea", "matcha_latte", "espresso", "vanilla_milkshake", "strawberry_milkshake",
+                "donut", "muffin", "brownie", "cinnamon_roll", "honey_toast" -> 4.5f;
+            default -> 0.0f;
+        };
+    }
+
+    private void restoreFood(final Player player, final int hunger, final float saturation) {
+        if (player == null || hunger <= 0) {
+            return;
+        }
+        player.setFoodLevel(Math.min(20, player.getFoodLevel() + hunger));
+        player.setSaturation(Math.min(player.getFoodLevel(), player.getSaturation() + Math.max(0.0f, saturation)));
+    }
+
+    private boolean applyCustomFoodEffects(final Player player, final String techItemId) {
+        if (player == null || techItemId == null || techItemId.isBlank()) {
+            return false;
+        }
+        switch (techItemId.toLowerCase()) {
+            case "nutrition_bar" -> {
+                player.addPotionEffect(new PotionEffect(PotionEffectType.SATURATION, 20 * 8, 0, false, true, true));
+                player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 20 * 20, 0, false, true, true));
+            }
+            case "protein_ration" -> {
+                player.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, 20 * 10, 0, false, true, true));
+                player.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE, 20 * 30, 0, false, true, true));
+            }
+            case "radiant_tea" -> {
+                player.addPotionEffect(new PotionEffect(PotionEffectType.NIGHT_VISION, 20 * 90, 0, false, true, true));
+                player.addPotionEffect(new PotionEffect(PotionEffectType.HASTE, 20 * 45, 0, false, true, true));
+            }
+            case "lumenfruit" -> {
+                player.addPotionEffect(new PotionEffect(PotionEffectType.SATURATION, 20 * 5, 0, false, true, true));
+                player.addPotionEffect(new PotionEffect(PotionEffectType.NIGHT_VISION, 20 * 40, 0, false, true, true));
+            }
+            case "frost_apple" -> {
+                player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 20 * 35, 0, false, true, true));
+                player.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE, 20 * 16, 0, false, true, true));
+            }
+            case "shadow_berry_cluster" -> {
+                player.addPotionEffect(new PotionEffect(PotionEffectType.NIGHT_VISION, 20 * 55, 0, false, true, true));
+                player.addPotionEffect(new PotionEffect(PotionEffectType.JUMP_BOOST, 20 * 22, 0, false, true, true));
+            }
+            case "sunflare_fig" -> {
+                player.addPotionEffect(new PotionEffect(PotionEffectType.SATURATION, 20 * 6, 0, false, true, true));
+                player.addPotionEffect(new PotionEffect(PotionEffectType.FIRE_RESISTANCE, 20 * 30, 0, false, true, true));
+            }
+            case "stormplum" -> {
+                player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 20 * 28, 1, false, true, true));
+                player.addPotionEffect(new PotionEffect(PotionEffectType.HASTE, 20 * 18, 0, false, true, true));
+            }
+            case "spiceberry" -> {
+                player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 20 * 18, 0, false, true, true));
+            }
+            case "soybean_pods" -> {
+                player.addPotionEffect(new PotionEffect(PotionEffectType.SATURATION, 20 * 4, 0, false, true, true));
+            }
+            case "tomato" -> {
+                player.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, 20 * 8, 0, false, true, true));
+            }
+            case "cabbage" -> {
+                player.addPotionEffect(new PotionEffect(PotionEffectType.SATURATION, 20 * 5, 0, false, true, true));
+            }
+            case "corn" -> {
+                player.addPotionEffect(new PotionEffect(PotionEffectType.SATURATION, 20 * 5, 0, false, true, true));
+                player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 20 * 12, 0, false, true, true));
+            }
+            case "onion" -> {
+                player.addPotionEffect(new PotionEffect(PotionEffectType.HASTE, 20 * 12, 0, false, true, true));
+            }
+            case "frostbloom" -> {
+                player.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE, 20 * 15, 0, false, true, true));
+            }
+            case "emberroot" -> {
+                player.addPotionEffect(new PotionEffect(PotionEffectType.FIRE_RESISTANCE, 20 * 20, 0, false, true, true));
+            }
+            case "ion_fern" -> {
+                player.addPotionEffect(new PotionEffect(PotionEffectType.HASTE, 20 * 20, 0, false, true, true));
+                player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 20 * 12, 0, false, true, true));
+            }
+            case "cherry" -> {
+                player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 20 * 18, 0, false, true, true));
+                player.addPotionEffect(new PotionEffect(PotionEffectType.JUMP_BOOST, 20 * 10, 0, false, true, true));
+            }
+            case "lemon" -> {
+                player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 20 * 20, 0, false, true, true));
+            }
+            case "peach" -> {
+                player.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, 20 * 10, 0, false, true, true));
+            }
+            case "pear" -> {
+                player.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE, 20 * 18, 0, false, true, true));
+            }
+            case "orange" -> {
+                player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 20 * 20, 1, false, true, true));
+            }
+            case "fruit_puree" -> {
+                player.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, 20 * 8, 0, false, true, true));
+                player.addPotionEffect(new PotionEffect(PotionEffectType.SATURATION, 20 * 7, 0, false, true, true));
+            }
+            case "lemon_juice" -> {
+                player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 20 * 35, 0, false, true, true));
+                player.addPotionEffect(new PotionEffect(PotionEffectType.HASTE, 20 * 20, 0, false, true, true));
+            }
+            case "orange_juice" -> {
+                player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 20 * 28, 1, false, true, true));
+            }
+            case "peach_juice" -> {
+                player.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, 20 * 14, 0, false, true, true));
+            }
+            case "pear_juice" -> {
+                player.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE, 20 * 24, 0, false, true, true));
+            }
+            case "cherry_juice" -> {
+                player.addPotionEffect(new PotionEffect(PotionEffectType.NIGHT_VISION, 20 * 40, 0, false, true, true));
+                player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 20 * 18, 0, false, true, true));
+            }
+            case "nebula_juice" -> {
+                player.addPotionEffect(new PotionEffect(PotionEffectType.NIGHT_VISION, 20 * 70, 0, false, true, true));
+                player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 20 * 40, 0, false, true, true));
+                player.addPotionEffect(new PotionEffect(PotionEffectType.SLOW_FALLING, 20 * 18, 0, false, true, true));
+            }
+            case "sunrise_pie" -> {
+                player.addPotionEffect(new PotionEffect(PotionEffectType.SATURATION, 20 * 10, 0, false, true, true));
+                player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 20 * 28, 0, false, true, true));
+            }
+            case "berry_tart" -> {
+                player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 20 * 24, 0, false, true, true));
+                player.addPotionEffect(new PotionEffect(PotionEffectType.JUMP_BOOST, 20 * 18, 0, false, true, true));
+            }
+            case "citrus_salad" -> {
+                player.addPotionEffect(new PotionEffect(PotionEffectType.SATURATION, 20 * 6, 0, false, true, true));
+                player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 20 * 16, 0, false, true, true));
+            }
+            case "tomato_stew" -> {
+                player.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, 20 * 14, 0, false, true, true));
+                player.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE, 20 * 14, 0, false, true, true));
+            }
+            case "orchard_smoothie" -> {
+                player.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, 20 * 10, 0, false, true, true));
+                player.addPotionEffect(new PotionEffect(PotionEffectType.NIGHT_VISION, 20 * 28, 0, false, true, true));
+            }
+            case "sparkling_lemonade" -> {
+                player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 20 * 30, 1, false, true, true));
+            }
+            case "peach_cobbler" -> {
+                player.addPotionEffect(new PotionEffect(PotionEffectType.SATURATION, 20 * 10, 0, false, true, true));
+                player.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, 20 * 12, 0, false, true, true));
+            }
+            case "pear_crisp" -> {
+                player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 20 * 18, 0, false, true, true));
+                player.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE, 20 * 18, 0, false, true, true));
+            }
+            case "aurelia_glaze" -> {
+                player.addPotionEffect(new PotionEffect(PotionEffectType.ABSORPTION, 20 * 45, 0, false, true, true));
+                player.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE, 20 * 24, 0, false, true, true));
+                this.plugin.getPlanetService().applyPlanetCuisineBuff(player, techItemId);
+            }
+            case "cryon_hotpot" -> {
+                player.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE, 20 * 30, 0, false, true, true));
+                player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 20 * 24, 0, false, true, true));
+                this.plugin.getPlanetService().applyPlanetCuisineBuff(player, techItemId);
+            }
+            case "nyx_phase_gel" -> {
+                player.addPotionEffect(new PotionEffect(PotionEffectType.SLOW_FALLING, 20 * 36, 0, false, true, true));
+                player.addPotionEffect(new PotionEffect(PotionEffectType.NIGHT_VISION, 20 * 36, 0, false, true, true));
+                this.plugin.getPlanetService().applyPlanetCuisineBuff(player, techItemId);
+            }
+            case "helion_sorbet" -> {
+                player.addPotionEffect(new PotionEffect(PotionEffectType.FIRE_RESISTANCE, 20 * 45, 0, false, true, true));
+                player.addPotionEffect(new PotionEffect(PotionEffectType.SATURATION, 20 * 12, 0, false, true, true));
+                this.plugin.getPlanetService().applyPlanetCuisineBuff(player, techItemId);
+            }
+            case "tempest_fizz" -> {
+                player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 20 * 30, 0, false, true, true));
+                player.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE, 20 * 24, 0, false, true, true));
+                this.plugin.getPlanetService().applyPlanetCuisineBuff(player, techItemId);
+            }
+            case "orchard_salad" -> {
+                player.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, 20 * 10, 0, false, true, true));
+            }
+            case "cornbread" -> {
+                player.addPotionEffect(new PotionEffect(PotionEffectType.SATURATION, 20 * 8, 0, false, true, true));
+            }
+            case "grape" -> {
+                player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 20 * 14, 0, false, true, true));
+            }
+            case "banana" -> {
+                player.addPotionEffect(new PotionEffect(PotionEffectType.SATURATION, 20 * 6, 0, false, true, true));
+                player.addPotionEffect(new PotionEffect(PotionEffectType.JUMP_BOOST, 20 * 12, 0, false, true, true));
+            }
+            case "mango" -> {
+                player.addPotionEffect(new PotionEffect(PotionEffectType.SATURATION, 20 * 6, 0, false, true, true));
+                player.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, 20 * 8, 0, false, true, true));
+            }
+            case "coconut" -> {
+                player.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE, 20 * 16, 0, false, true, true));
+            }
+            case "strawberry" -> {
+                player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 20 * 16, 0, false, true, true));
+                player.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, 20 * 6, 0, false, true, true));
+            }
+            case "blueberry" -> {
+                player.addPotionEffect(new PotionEffect(PotionEffectType.NIGHT_VISION, 20 * 30, 0, false, true, true));
+            }
+            case "raspberry" -> {
+                player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 20 * 18, 0, false, true, true));
+            }
+            case "watermelon_slice" -> {
+                player.addPotionEffect(new PotionEffect(PotionEffectType.SATURATION, 20 * 5, 0, false, true, true));
+                player.addPotionEffect(new PotionEffect(PotionEffectType.FIRE_RESISTANCE, 20 * 12, 0, false, true, true));
+            }
+            case "pineapple" -> {
+                player.addPotionEffect(new PotionEffect(PotionEffectType.HASTE, 20 * 18, 0, false, true, true));
+                player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 20 * 10, 0, false, true, true));
+            }
+            case "kiwi" -> {
+                player.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, 20 * 10, 0, false, true, true));
+                player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 20 * 10, 0, false, true, true));
+            }
+            case "garlic" -> {
+                player.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE, 20 * 12, 0, false, true, true));
+            }
+            case "lettuce" -> {
+                player.addPotionEffect(new PotionEffect(PotionEffectType.SATURATION, 20 * 4, 0, false, true, true));
+            }
+            case "bell_pepper" -> {
+                player.addPotionEffect(new PotionEffect(PotionEffectType.HASTE, 20 * 14, 0, false, true, true));
+            }
+            case "spinach" -> {
+                player.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE, 20 * 10, 0, false, true, true));
+                player.addPotionEffect(new PotionEffect(PotionEffectType.SATURATION, 20 * 4, 0, false, true, true));
+            }
+            case "radish" -> {
+                player.addPotionEffect(new PotionEffect(PotionEffectType.HASTE, 20 * 10, 0, false, true, true));
+            }
+            case "grape_juice" -> {
+                player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 20 * 22, 0, false, true, true));
+                player.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, 20 * 8, 0, false, true, true));
+            }
+            case "mango_smoothie" -> {
+                player.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, 20 * 12, 0, false, true, true));
+                player.addPotionEffect(new PotionEffect(PotionEffectType.SATURATION, 20 * 6, 0, false, true, true));
+            }
+            case "coconut_water" -> {
+                player.addPotionEffect(new PotionEffect(PotionEffectType.FIRE_RESISTANCE, 20 * 25, 0, false, true, true));
+                player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 20 * 14, 0, false, true, true));
+            }
+            case "berry_blend" -> {
+                player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 20 * 20, 0, false, true, true));
+                player.addPotionEffect(new PotionEffect(PotionEffectType.NIGHT_VISION, 20 * 24, 0, false, true, true));
+            }
+            case "tropical_punch" -> {
+                player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 20 * 30, 0, false, true, true));
+                player.addPotionEffect(new PotionEffect(PotionEffectType.SATURATION, 20 * 10, 0, false, true, true));
+                player.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, 20 * 10, 0, false, true, true));
+            }
+            case "green_tea" -> {
+                player.addPotionEffect(new PotionEffect(PotionEffectType.HASTE, 20 * 30, 0, false, true, true));
+                player.addPotionEffect(new PotionEffect(PotionEffectType.NIGHT_VISION, 20 * 20, 0, false, true, true));
+            }
+            case "iced_tea" -> {
+                player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 20 * 24, 0, false, true, true));
+                player.addPotionEffect(new PotionEffect(PotionEffectType.FIRE_RESISTANCE, 20 * 18, 0, false, true, true));
+            }
+            case "hot_cocoa" -> {
+                player.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE, 20 * 24, 0, false, true, true));
+                player.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, 20 * 10, 0, false, true, true));
+            }
+            case "apple_cider" -> {
+                player.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, 20 * 12, 0, false, true, true));
+                player.addPotionEffect(new PotionEffect(PotionEffectType.SATURATION, 20 * 5, 0, false, true, true));
+            }
+            case "ginger_ale" -> {
+                player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 20 * 22, 0, false, true, true));
+                player.addPotionEffect(new PotionEffect(PotionEffectType.HASTE, 20 * 14, 0, false, true, true));
+            }
+            case "milk_tea" -> {
+                player.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, 20 * 10, 0, false, true, true));
+                player.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE, 20 * 14, 0, false, true, true));
+            }
+            case "matcha_latte" -> {
+                player.addPotionEffect(new PotionEffect(PotionEffectType.HASTE, 20 * 40, 0, false, true, true));
+                player.addPotionEffect(new PotionEffect(PotionEffectType.NIGHT_VISION, 20 * 35, 0, false, true, true));
+                player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 20 * 20, 0, false, true, true));
+            }
+            case "espresso" -> {
+                player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 20 * 40, 1, false, true, true));
+                player.addPotionEffect(new PotionEffect(PotionEffectType.HASTE, 20 * 30, 0, false, true, true));
+            }
+            case "vanilla_milkshake" -> {
+                player.addPotionEffect(new PotionEffect(PotionEffectType.SATURATION, 20 * 8, 0, false, true, true));
+                player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 20 * 14, 0, false, true, true));
+            }
+            case "strawberry_milkshake" -> {
+                player.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, 20 * 10, 0, false, true, true));
+                player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 20 * 16, 0, false, true, true));
+            }
+            case "fried_rice" -> {
+                player.addPotionEffect(new PotionEffect(PotionEffectType.SATURATION, 20 * 8, 0, false, true, true));
+                player.addPotionEffect(new PotionEffect(PotionEffectType.HASTE, 20 * 14, 0, false, true, true));
+            }
+            case "noodle_soup" -> {
+                player.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, 20 * 12, 0, false, true, true));
+                player.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE, 20 * 12, 0, false, true, true));
+            }
+            case "grilled_vegetables" -> {
+                player.addPotionEffect(new PotionEffect(PotionEffectType.SATURATION, 20 * 6, 0, false, true, true));
+                player.addPotionEffect(new PotionEffect(PotionEffectType.HASTE, 20 * 16, 0, false, true, true));
+            }
+            case "mushroom_risotto" -> {
+                player.addPotionEffect(new PotionEffect(PotionEffectType.SATURATION, 20 * 10, 0, false, true, true));
+                player.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE, 20 * 20, 0, false, true, true));
+            }
+            case "vegetable_curry" -> {
+                player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 20 * 24, 0, false, true, true));
+                player.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE, 20 * 18, 0, false, true, true));
+                player.addPotionEffect(new PotionEffect(PotionEffectType.SATURATION, 20 * 8, 0, false, true, true));
+            }
+            case "sushi_roll" -> {
+                player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 20 * 14, 0, false, true, true));
+                player.addPotionEffect(new PotionEffect(PotionEffectType.SATURATION, 20 * 5, 0, false, true, true));
+            }
+            case "ramen" -> {
+                player.addPotionEffect(new PotionEffect(PotionEffectType.SATURATION, 20 * 12, 0, false, true, true));
+                player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 20 * 20, 0, false, true, true));
+                player.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, 20 * 10, 0, false, true, true));
+            }
+            case "potato_soup" -> {
+                player.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE, 20 * 16, 0, false, true, true));
+                player.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, 20 * 8, 0, false, true, true));
+            }
+            case "garlic_bread" -> {
+                player.addPotionEffect(new PotionEffect(PotionEffectType.SATURATION, 20 * 6, 0, false, true, true));
+            }
+            case "cheese_pizza" -> {
+                player.addPotionEffect(new PotionEffect(PotionEffectType.SATURATION, 20 * 12, 0, false, true, true));
+                player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 20 * 18, 0, false, true, true));
+                player.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, 20 * 8, 0, false, true, true));
+            }
+            case "dumpling" -> {
+                player.addPotionEffect(new PotionEffect(PotionEffectType.SATURATION, 20 * 7, 0, false, true, true));
+                player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 20 * 12, 0, false, true, true));
+            }
+            case "fish_stew" -> {
+                player.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, 20 * 12, 0, false, true, true));
+                player.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE, 20 * 10, 0, false, true, true));
+            }
+            case "roasted_corn" -> {
+                player.addPotionEffect(new PotionEffect(PotionEffectType.SATURATION, 20 * 6, 0, false, true, true));
+                player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 20 * 14, 0, false, true, true));
+            }
+            case "veggie_wrap" -> {
+                player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 20 * 18, 0, false, true, true));
+                player.addPotionEffect(new PotionEffect(PotionEffectType.SATURATION, 20 * 6, 0, false, true, true));
+            }
+            case "breakfast_burrito" -> {
+                player.addPotionEffect(new PotionEffect(PotionEffectType.SATURATION, 20 * 10, 0, false, true, true));
+                player.addPotionEffect(new PotionEffect(PotionEffectType.HASTE, 20 * 20, 0, false, true, true));
+                player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 20 * 14, 0, false, true, true));
+            }
+            case "chocolate_cake" -> {
+                player.addPotionEffect(new PotionEffect(PotionEffectType.SATURATION, 20 * 12, 0, false, true, true));
+                player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 20 * 24, 0, false, true, true));
+            }
+            case "vanilla_ice_cream" -> {
+                player.addPotionEffect(new PotionEffect(PotionEffectType.FIRE_RESISTANCE, 20 * 20, 0, false, true, true));
+                player.addPotionEffect(new PotionEffect(PotionEffectType.SATURATION, 20 * 6, 0, false, true, true));
+            }
+            case "donut" -> {
+                player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 20 * 18, 0, false, true, true));
+            }
+            case "muffin" -> {
+                player.addPotionEffect(new PotionEffect(PotionEffectType.SATURATION, 20 * 5, 0, false, true, true));
+            }
+            case "brownie" -> {
+                player.addPotionEffect(new PotionEffect(PotionEffectType.SATURATION, 20 * 6, 0, false, true, true));
+                player.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE, 20 * 10, 0, false, true, true));
+            }
+            case "cheesecake" -> {
+                player.addPotionEffect(new PotionEffect(PotionEffectType.SATURATION, 20 * 12, 0, false, true, true));
+                player.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, 20 * 12, 0, false, true, true));
+            }
+            case "fruit_parfait" -> {
+                player.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, 20 * 10, 0, false, true, true));
+                player.addPotionEffect(new PotionEffect(PotionEffectType.SATURATION, 20 * 8, 0, false, true, true));
+                player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 20 * 12, 0, false, true, true));
+            }
+            case "pancakes" -> {
+                player.addPotionEffect(new PotionEffect(PotionEffectType.SATURATION, 20 * 7, 0, false, true, true));
+                player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 20 * 10, 0, false, true, true));
+            }
+            case "cinnamon_roll" -> {
+                player.addPotionEffect(new PotionEffect(PotionEffectType.SATURATION, 20 * 5, 0, false, true, true));
+                player.addPotionEffect(new PotionEffect(PotionEffectType.HASTE, 20 * 14, 0, false, true, true));
+            }
+            case "honey_toast" -> {
+                player.addPotionEffect(new PotionEffect(PotionEffectType.SATURATION, 20 * 5, 0, false, true, true));
+                player.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, 20 * 8, 0, false, true, true));
+            }
+            case "stuffed_cabbage" -> {
+                player.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, 20 * 12, 0, false, true, true));
+                player.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE, 20 * 18, 0, false, true, true));
+            }
+            case "orchard_ration" -> {
+                player.addPotionEffect(new PotionEffect(PotionEffectType.SATURATION, 20 * 10, 0, false, true, true));
+                player.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE, 20 * 40, 0, false, true, true));
+                player.addPotionEffect(new PotionEffect(PotionEffectType.HASTE, 20 * 25, 0, false, true, true));
+            }
+            default -> {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private boolean tryUseHydroSpade(final PlayerInteractEvent event) {
+        if (event.getAction() != Action.RIGHT_CLICK_BLOCK || event.getClickedBlock() == null || event.getItem() == null) {
+            return false;
+        }
+        final String techItemId = this.plugin.getItemFactory().getTechItemId(event.getItem());
+        if (!"hydro_spade".equalsIgnoreCase(techItemId)) {
+            return false;
+        }
+        final Block center = event.getClickedBlock().getBlockData() instanceof Ageable
+                ? event.getClickedBlock()
+                : event.getClickedBlock().getRelative(BlockFace.UP);
+        int grown = 0;
+        for (int dx = -1; dx <= 1; dx++) {
+            for (int dz = -1; dz <= 1; dz++) {
+                final Block crop = center.getWorld().getBlockAt(center.getX() + dx, center.getY(), center.getZ() + dz);
+                if (this.plugin.getTechCropService().grow(crop, 2)) {
+                    grown++;
+                    continue;
+                }
+                final BlockData data = crop.getBlockData();
+                if (data instanceof Ageable ageable && crop.getRelative(BlockFace.DOWN).getType() == Material.FARMLAND && ageable.getAge() < ageable.getMaximumAge()) {
+                    ageable.setAge(Math.min(ageable.getMaximumAge(), ageable.getAge() + 2));
+                    crop.setBlockData(ageable, true);
+                    grown++;
+                }
+            }
+        }
+        if (grown <= 0) {
+            return false;
+        }
+        event.getPlayer().setCooldown(event.getItem().getType(), 10);
+        center.getWorld().spawnParticle(Particle.SPORE_BLOSSOM_AIR, center.getLocation().add(0.5, 0.8, 0.5), 18, 1.0, 0.35, 1.0, 0.02);
+        center.getWorld().playSound(center.getLocation(), Sound.ITEM_BONE_MEAL_USE, 0.6f, 1.25f);
+        event.setUseInteractedBlock(Result.DENY);
+        event.setUseItemInHand(Result.DENY);
+        event.setCancelled(true);
+        return true;
+    }
+
+    private boolean tryUseMobilityTool(final PlayerInteractEvent event) {
+        return this.tryChargeToolAtMachine(event) || this.tryUseVectorGrapple(event) || this.tryUsePulseThruster(event);
+    }
+
+    private boolean tryChargeToolAtMachine(final PlayerInteractEvent event) {
+        if (event.getAction() != Action.RIGHT_CLICK_BLOCK || !event.getPlayer().isSneaking()) {
+            return false;
+        }
+        ItemStack target = event.getItem();
+        String targetId = target == null ? null : this.plugin.getItemFactory().getTechItemId(target);
+        long maxEnergy = this.plugin.getItemFactory().maxItemEnergy(targetId);
+        if (maxEnergy <= 0L) {
+            target = event.getPlayer().getInventory().getChestplate();
+            targetId = target == null ? null : this.plugin.getItemFactory().getTechItemId(target);
+            maxEnergy = this.plugin.getItemFactory().maxItemEnergy(targetId);
+        }
+        if (maxEnergy <= 0L || target == null) {
+            return false;
+        }
+        final Block clicked = event.getClickedBlock();
+        if (clicked == null) {
+            return false;
+        }
+        final Block machineBlock = this.plugin.getMachineService().resolveManagedMachineBlock(clicked);
+        if (machineBlock == null) {
+            return false;
+        }
+        final var machine = this.plugin.getMachineService().placedMachineAt(machineBlock);
+        if (machine == null || machine.storedEnergy() <= 0L) {
+            return false;
+        }
+        event.setUseInteractedBlock(Result.DENY);
+        event.setUseItemInHand(Result.DENY);
+        event.setCancelled(true);
+        final long currentEnergy = this.plugin.getItemFactory().getItemStoredEnergy(target);
+        if (currentEnergy >= maxEnergy) {
+            event.getPlayer().sendActionBar(this.plugin.getItemFactory().secondary("⚡ " + currentEnergy + "/" + maxEnergy + " EU — 已滿電"));
+            return true;
+        }
+        final long need = maxEnergy - currentEnergy;
+        final long transfer = Math.min(need, machine.storedEnergy());
+        machine.consumeEnergy(transfer);
+        this.plugin.getItemFactory().setItemStoredEnergy(target, currentEnergy + transfer);
+        final long after = currentEnergy + transfer;
+        event.getPlayer().sendActionBar(this.plugin.getItemFactory().success("充電完成 ⚡ " + after + "/" + maxEnergy + " EU"));
+        event.getPlayer().getWorld().playSound(event.getPlayer().getLocation(), Sound.BLOCK_RESPAWN_ANCHOR_CHARGE, 0.6f, 1.3f);
+        return true;
+    }
+
+    private boolean tryUseVectorGrapple(final PlayerInteractEvent event) {
+        if ((event.getAction() != Action.RIGHT_CLICK_AIR && event.getAction() != Action.RIGHT_CLICK_BLOCK) || event.getItem() == null) {
+            return false;
+        }
+        if (!VECTOR_GRAPPLE.equalsIgnoreCase(this.plugin.getItemFactory().getTechItemId(event.getItem()))) {
+            return false;
+        }
+        final Player player = event.getPlayer();
+        event.setUseInteractedBlock(Result.DENY);
+        event.setUseItemInHand(Result.DENY);
+        event.setCancelled(true);
+
+        if (!this.isCooldownReady(this.grappleCooldowns, player.getUniqueId())) {
+            player.sendActionBar(this.plugin.getItemFactory().warning("向量抓鉤冷卻中。"));
+            return true;
+        }
+
+        final ItemStack held = event.getItem();
+        final long energy = this.plugin.getItemFactory().getItemStoredEnergy(held);
+        if (energy < GRAPPLE_ENERGY_COST) {
+            player.sendActionBar(this.plugin.getItemFactory().warning("向量抓鉤電量不足，請對準儲能機器 Shift + 右鍵充電。"));
+            return true;
+        }
+
+        final Arrow arrow = player.launchProjectile(Arrow.class);
+        arrow.setVelocity(player.getLocation().getDirection().multiply(3.5));
+        arrow.setPickupStatus(AbstractArrow.PickupStatus.DISALLOWED);
+        arrow.setGravity(true);
+        this.grappleArrowOwners.put(arrow.getUniqueId(), player.getUniqueId());
+        this.startCooldown(this.grappleCooldowns, player.getUniqueId(), 1200L);
+
+        player.getWorld().playSound(player.getLocation(), Sound.ITEM_CROSSBOW_SHOOT, 0.75f, 1.45f);
+        player.sendActionBar(this.plugin.getItemFactory().success("向量抓鉤已發射…"));
+
+        this.plugin.getSafeScheduler().runEntityDelayed(arrow, () -> {
+            if (this.grappleArrowOwners.remove(arrow.getUniqueId()) != null) {
+                arrow.remove();
+            }
+        }, 160L);
+        return true;
+    }
+
+    @EventHandler
+    public void onProjectileHit(final ProjectileHitEvent event) {
+        if (!(event.getEntity() instanceof Arrow arrow)) {
+            return;
+        }
+        final UUID ownerId = this.grappleArrowOwners.remove(arrow.getUniqueId());
+        if (ownerId == null) {
+            return;
+        }
+        final Player player = this.plugin.getServer().getPlayer(ownerId);
+        if (player == null || !player.isOnline()) {
+            arrow.remove();
+            return;
+        }
+        final Location anchor = arrow.getLocation();
+        final Vector delta = anchor.toVector().subtract(player.getLocation().toVector());
+        final double distance = delta.length();
+        arrow.remove();
+        if (distance < 1.35) {
+            return;
+        }
+
+        final ItemStack held = player.getInventory().getItemInMainHand();
+        if (VECTOR_GRAPPLE.equalsIgnoreCase(this.plugin.getItemFactory().getTechItemId(held))) {
+            this.plugin.getItemFactory().drainItemEnergy(held, GRAPPLE_ENERGY_COST);
+            final long remaining = this.plugin.getItemFactory().getItemStoredEnergy(held);
+            final long max = this.plugin.getItemFactory().maxItemEnergy(VECTOR_GRAPPLE);
+            player.sendActionBar(this.plugin.getItemFactory().success("向量抓鉤鎖定！ ⚡ " + remaining + "/" + max));
+        }
+
+        final Vector launch = delta.normalize().multiply(Math.min(2.15, 0.60 + (distance * 0.072)));
+        launch.setY(Math.max(0.55, Math.min(1.45, launch.getY() + 0.38)));
+        if (this.isStandingOnSolidGround(player)) {
+            launch.setY(Math.max(0.92, launch.getY()));
+        }
+
+        player.setVelocity(player.getVelocity().multiply(0.12).add(launch));
+        player.setFallDistance(0.0f);
+        player.addPotionEffect(new PotionEffect(PotionEffectType.SLOW_FALLING, 38, 0, false, true, true));
+        this.markGracefulLanding(player, 3200L);
+
+        this.spawnParticleLine(player.getEyeLocation(), anchor, Particle.ELECTRIC_SPARK, 14);
+        player.getWorld().playSound(anchor, Sound.BLOCK_CHAIN_PLACE, 0.55f, 1.7f);
+    }
+
+    private boolean tryUsePulseThruster(final PlayerInteractEvent event) {
+        if ((event.getAction() != Action.RIGHT_CLICK_AIR && event.getAction() != Action.RIGHT_CLICK_BLOCK) || event.getItem() == null) {
+            return false;
+        }
+        if (!PULSE_THRUSTER.equalsIgnoreCase(this.plugin.getItemFactory().getTechItemId(event.getItem()))) {
+            return false;
+        }
+        final Player player = event.getPlayer();
+        if (event.getAction() == Action.RIGHT_CLICK_BLOCK && !player.isSneaking()) {
+            return false;
+        }
+        event.setUseInteractedBlock(Result.DENY);
+        event.setUseItemInHand(Result.DENY);
+        event.setCancelled(true);
+
+        if (!this.isCooldownReady(this.thrusterCooldowns, player.getUniqueId())) {
+            player.sendActionBar(this.plugin.getItemFactory().warning("脈衝推進器冷卻中。"));
+            return true;
+        }
+
+        final ItemStack thrusterItem = event.getItem();
+        final long thrusterEnergy = this.plugin.getItemFactory().getItemStoredEnergy(thrusterItem);
+        if (thrusterEnergy < THRUSTER_ENERGY_COST) {
+            player.sendActionBar(this.plugin.getItemFactory().warning("脈衝推進器電量不足，請對準儲能機器 Shift + 右鍵充電。"));
+            return true;
+        }
+
+        final Vector direction = player.getLocation().getDirection().normalize();
+        final double forward = player.isSneaking() ? 0.55 : 1.28;
+        final double upward = player.isSneaking() ? 1.02 : 0.42;
+        final Vector thrust = direction.multiply(forward);
+        thrust.setY(Math.max(upward, (direction.getY() * 0.4) + upward));
+        if (this.isStandingOnSolidGround(player)) {
+            thrust.setY(thrust.getY() + 0.1);
+        }
+
+        player.setVelocity(player.getVelocity().multiply(0.18).add(thrust));
+        player.setFallDistance(0.0f);
+        player.addPotionEffect(new PotionEffect(PotionEffectType.SLOW_FALLING, 24, 0, false, true, true));
+        player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 24, 0, false, true, true));
+        this.markGracefulLanding(player, 2200L);
+        this.startCooldown(this.thrusterCooldowns, player.getUniqueId(), 850L);
+
+        final Location exhaust = player.getLocation().add(0.0, 0.8, 0.0);
+        exhaust.getWorld().spawnParticle(Particle.FLAME, exhaust, 12, 0.22, 0.25, 0.22, 0.01);
+        exhaust.getWorld().spawnParticle(Particle.CLOUD, exhaust, 10, 0.18, 0.22, 0.18, 0.02);
+        exhaust.getWorld().playSound(exhaust, Sound.ENTITY_BLAZE_SHOOT, 0.6f, 1.35f);
+        exhaust.getWorld().playSound(exhaust, Sound.ITEM_FIRECHARGE_USE, 0.55f, 1.55f);
+        this.plugin.getItemFactory().drainItemEnergy(thrusterItem, THRUSTER_ENERGY_COST);
+        final long thrusterRemaining = this.plugin.getItemFactory().getItemStoredEnergy(thrusterItem);
+        final long thrusterMax = this.plugin.getItemFactory().maxItemEnergy(PULSE_THRUSTER);
+        player.sendActionBar(this.plugin.getItemFactory().success("脈衝推進器已輸出推力。 ⚡ " + thrusterRemaining + "/" + thrusterMax));
+        return true;
+    }
+
+    private boolean handleCustomCropBreak(final BlockBreakEvent event) {
+        final Block block = event.getBlock();
+        if (!this.plugin.getTechCropService().isTrackedCrop(block)) {
+            return false;
+        }
+        event.setCancelled(true);
+        event.setDropItems(false);
+        final boolean replant = this.plugin.getTechCropService().isMature(block) && !event.getPlayer().isSneaking();
+        final List<ItemStack> drops = this.plugin.getTechCropService().harvest(block, replant);
+        int harvested = 0;
+        for (final ItemStack drop : drops) {
+            if (drop == null || drop.getType() == Material.AIR) {
+                continue;
+            }
+            harvested += drop.getAmount();
+            block.getWorld().dropItemNaturally(block.getLocation().add(0.5, 0.4, 0.5), drop);
+        }
+        if (harvested > 0) {
+            this.plugin.getPlayerProgressService().incrementStat(event.getPlayer().getUniqueId(), "farm_harvested", harvested);
+            block.getWorld().spawnParticle(Particle.HAPPY_VILLAGER, block.getLocation().add(0.5, 0.75, 0.5), 10, 0.25, 0.15, 0.25, 0.01);
+            block.getWorld().playSound(block.getLocation(), Sound.ITEM_BONE_MEAL_USE, 0.45f, 1.2f);
+        }
+        return true;
+    }
+
+    private boolean handleFieldSickle(final BlockBreakEvent event) {
+        final ItemStack tool = event.getPlayer().getInventory().getItemInMainHand();
+        if (!"field_sickle".equalsIgnoreCase(this.plugin.getItemFactory().getTechItemId(tool))) {
+            return false;
+        }
+        final Block origin = event.getBlock();
+        if (!this.isHarvestableCrop(origin)) {
+            return false;
+        }
+        event.setCancelled(true);
+        event.setDropItems(false);
+        int harvested = 0;
+        for (int dx = -1; dx <= 1; dx++) {
+            for (int dz = -1; dz <= 1; dz++) {
+                final Block crop = origin.getWorld().getBlockAt(origin.getX() + dx, origin.getY(), origin.getZ() + dz);
+                if (this.plugin.getTechCropService().isTrackedCrop(crop)) {
+                    if (!this.plugin.getTechCropService().isMature(crop)) {
+                        continue;
+                    }
+                    for (final ItemStack drop : this.plugin.getTechCropService().harvest(crop, true)) {
+                        if (drop == null || drop.getType() == Material.AIR) {
+                            continue;
+                        }
+                        harvested += drop.getAmount();
+                        crop.getWorld().dropItemNaturally(crop.getLocation().add(0.5, 0.4, 0.5), drop);
+                    }
+                    crop.getWorld().spawnParticle(Particle.HAPPY_VILLAGER, crop.getLocation().add(0.5, 0.75, 0.5), 6, 0.18, 0.12, 0.18, 0.01);
+                    continue;
+                }
+                final BlockData data = crop.getBlockData();
+                if (!(data instanceof Ageable ageable) || ageable.getAge() < ageable.getMaximumAge() || crop.getRelative(BlockFace.DOWN).getType() != Material.FARMLAND) {
+                    continue;
+                }
+                for (final ItemStack drop : crop.getDrops(tool, event.getPlayer())) {
+                    harvested += drop.getAmount();
+                    crop.getWorld().dropItemNaturally(crop.getLocation().add(0.5, 0.4, 0.5), drop);
+                }
+                ageable.setAge(0);
+                crop.setBlockData(ageable, true);
+                crop.getWorld().spawnParticle(Particle.HAPPY_VILLAGER, crop.getLocation().add(0.5, 0.75, 0.5), 6, 0.18, 0.12, 0.18, 0.01);
+            }
+        }
+        if (harvested > 0) {
+            this.plugin.getPlayerProgressService().incrementStat(event.getPlayer().getUniqueId(), "farm_harvested", harvested);
+            origin.getWorld().playSound(origin.getLocation(), Sound.ITEM_BONE_MEAL_USE, 0.55f, 1.35f);
+        }
+        return true;
+    }
+
+    private boolean isHarvestableCrop(final Block block) {
+        if (block == null) {
+            return false;
+        }
+        if (this.plugin.getTechCropService().isTrackedCrop(block)) {
+            return this.plugin.getTechCropService().isMature(block);
+        }
+        final BlockData data = block.getBlockData();
+        return data instanceof Ageable ageable
+                && ageable.getAge() >= ageable.getMaximumAge()
+                && block.getRelative(BlockFace.DOWN).getType() == Material.FARMLAND;
+    }
+
+    private void refreshJetpackFlightState(final Player player) {
+        if (!this.isManagedSurvivalFlight(player)) {
+            this.managedJetpackFlight.remove(player.getUniqueId());
+            return;
+        }
+
+        final UUID playerId = player.getUniqueId();
+        if (!this.hasJetpackEquipped(player)) {
+            if (this.managedJetpackFlight.remove(playerId) && player.getAllowFlight()) {
+                player.setAllowFlight(false);
+            }
+            return;
+        }
+
+        final boolean ready = this.isCooldownReady(this.jetpackCooldowns, playerId);
+        if (ready) {
+            if (!player.getAllowFlight()) {
+                player.setAllowFlight(true);
+            }
+            this.managedJetpackFlight.add(playerId);
+            return;
+        }
+
+        if (this.managedJetpackFlight.contains(playerId) && player.getAllowFlight()) {
+            player.setAllowFlight(false);
+        }
+    }
+
+    private boolean hasJetpackEquipped(final Player player) {
+        return STORM_JETPACK.equalsIgnoreCase(this.plugin.getItemFactory().getTechItemId(player.getInventory().getChestplate()));
+    }
+
+    private boolean isManagedSurvivalFlight(final Player player) {
+        return player.getGameMode() == GameMode.SURVIVAL || player.getGameMode() == GameMode.ADVENTURE;
+    }
+
+    private boolean isCooldownReady(final Map<UUID, Long> cooldowns, final UUID playerId) {
+        return cooldowns.getOrDefault(playerId, 0L) <= System.currentTimeMillis();
+    }
+
+    private void startCooldown(final Map<UUID, Long> cooldowns, final UUID playerId, final long durationMillis) {
+        cooldowns.put(playerId, System.currentTimeMillis() + durationMillis);
+    }
+
+    private void markGracefulLanding(final Player player, final long durationMillis) {
+        this.mobilityGracePeriods.put(player.getUniqueId(), System.currentTimeMillis() + durationMillis);
+    }
+
+    private boolean isStandingOnSolidGround(final Player player) {
+        return player.getLocation().clone().subtract(0.0, 0.18, 0.0).getBlock().getType().isSolid();
+    }
+
+    private void spawnParticleLine(final Location start, final Location end, final Particle particle, final int points) {
+        if (start.getWorld() == null || end.getWorld() == null || start.getWorld() != end.getWorld()) {
+            return;
+        }
+        final Vector line = end.toVector().subtract(start.toVector());
+        final int steps = Math.max(2, points);
+        for (int index = 0; index <= steps; index++) {
+            final double ratio = (double) index / (double) steps;
+            final Location point = start.clone().add(line.clone().multiply(ratio));
+            start.getWorld().spawnParticle(particle, point, 1, 0.02, 0.02, 0.02, 0.0);
+        }
+    }
+
+    private void giveStarterKitIfNeeded(final Player player) {
+        final var progress = this.plugin.getPlayerProgressService();
+        if (progress.getStat(player.getUniqueId(), "starter_kit_claimed") > 0L) {
+            return;
+        }
+        final var machineItems = this.plugin.getConfig().getStringList("starting-kit.machine-items");
+        final var itemItems = this.plugin.getConfig().getStringList("starting-kit.item-items");
+        if (machineItems.isEmpty() && itemItems.isEmpty()) {
+            return;
+        }
+        for (final String id : machineItems) {
+            final var machine = this.plugin.getTechRegistry().getMachine(id);
+            if (machine != null) {
+                player.getInventory().addItem(this.plugin.getItemFactory().buildMachineItem(machine));
+            }
+        }
+        for (final String id : itemItems) {
+            final var item = this.plugin.getTechRegistry().getItem(id);
+            if (item != null) {
+                player.getInventory().addItem(this.plugin.getItemFactory().buildTechItem(item));
+            }
+        }
+        progress.incrementStat(player.getUniqueId(), "starter_kit_claimed", 1L);
+        player.sendMessage(this.plugin.getItemFactory().success("你收到新手科技包：先放太陽能發電機，再放粉碎機。"));
+    }
+
+    private boolean handleAdvancedWorkbenchClick(final InventoryClickEvent event) {
+        if (!(event.getWhoClicked() instanceof Player player)) {
+            return false;
+        }
+        if (!(event.getView().getTopInventory() instanceof CraftingInventory craftingInventory)
+                || event.getView().getTopInventory().getType() != InventoryType.WORKBENCH
+                || event.getSlotType() != InventoryType.SlotType.RESULT) {
+            return false;
+        }
+        final var match = this.plugin.getBlueprintService().matchCraftingMatrix(craftingInventory.getMatrix());
+        if (match == null) {
+            return false;
+        }
+        if (!this.plugin.getBlueprintService().isAdvancedWorkbench(craftingInventory.getLocation())) {
+            event.setCancelled(true);
+            player.sendActionBar(this.plugin.getItemFactory().danger("這是科技配方，請到鐵方塊底座的進階工作台製作。"));
+            player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 0.7f, 0.6f);
+            return true;
+        }
+        final ItemStack result = this.plugin.getItemFactory().buildMachineItem(match.machine());
+        event.setCancelled(true);
+        if (event.isShiftClick()) {
+            if (!this.canStoreCraftResult(player, result)) {
+                player.sendMessage(this.plugin.getItemFactory().warning("背包滿了，無法從進階工作台取出成品。"));
+                return true;
+            }
+            player.getInventory().addItem(result);
+        } else {
+            final ItemStack cursor = player.getItemOnCursor();
+            if (cursor != null && cursor.getType() != Material.AIR) {
+                if (!cursor.isSimilar(result) || cursor.getAmount() >= cursor.getMaxStackSize()) {
+                    player.sendMessage(this.plugin.getItemFactory().warning("請先清空滑鼠上的物品，再從進階工作台取出成品。"));
+                    return true;
+                }
+                cursor.setAmount(cursor.getAmount() + 1);
+                player.setItemOnCursor(cursor);
+            } else {
+                player.setItemOnCursor(result);
+            }
+        }
+        final ItemStack[] matrix = craftingInventory.getMatrix();
+        for (int index = 0; index < matrix.length; index++) {
+            final ItemStack ingredient = matrix[index];
+            if (ingredient == null || ingredient.getType() == Material.AIR) {
+                continue;
+            }
+            if (ingredient.getAmount() <= 1) {
+                matrix[index] = null;
+            } else {
+                ingredient.setAmount(ingredient.getAmount() - 1);
+                matrix[index] = ingredient;
+            }
+        }
+        craftingInventory.setMatrix(matrix);
+        final var nextMatch = this.plugin.getBlueprintService().matchCraftingMatrix(craftingInventory.getMatrix());
+        craftingInventory.setResult(nextMatch != null && this.plugin.getBlueprintService().isAdvancedWorkbench(craftingInventory.getLocation())
+                ? this.plugin.getItemFactory().buildMachineItem(nextMatch.machine())
+                : null);
+        return true;
+    }
+
+    private boolean canStoreCraftResult(final Player player, final ItemStack result) {
+        if (player.getInventory().firstEmpty() != -1) {
+            return true;
+        }
+        for (final ItemStack content : player.getInventory().getStorageContents()) {
+            if (content == null || content.getType() == Material.AIR) {
+                return true;
+            }
+            if (content.isSimilar(result) && content.getAmount() < content.getMaxStackSize()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean tryShowAdvancedWorkbenchHint(final Player player, final Block clickedBlock) {
+        if (clickedBlock == null || clickedBlock.getType() != Material.CRAFTING_TABLE) {
+            return false;
+        }
+        if (!this.plugin.getBlueprintService().isAdvancedWorkbench(clickedBlock.getLocation())) {
+            return false;
+        }
+        player.sendActionBar(this.plugin.getItemFactory().success("進階工作台：下方鐵方塊已就緒，可製作科技藍圖。"));
+        this.playAdvancedWorkbenchEffect(clickedBlock.getLocation().add(0.5, 0.85, 0.5));
+        return false;
+    }
+
+    private void playAdvancedWorkbenchEffect(final Location location) {
+        location.getWorld().spawnParticle(Particle.END_ROD, location, 8, 0.25, 0.2, 0.25, 0.01);
+        location.getWorld().spawnParticle(Particle.WAX_ON, location, 12, 0.3, 0.15, 0.3, 0.0);
+        location.getWorld().playSound(location, Sound.BLOCK_ENCHANTMENT_TABLE_USE, 0.7f, 1.25f);
+        location.getWorld().playSound(location, Sound.BLOCK_AMETHYST_BLOCK_CHIME, 0.45f, 1.5f);
+    }
+
+    private boolean handleProtectedWorkbenchResultClick(final InventoryClickEvent event) {
+        if (!(event.getView().getTopInventory() instanceof CraftingInventory)
+                || event.getSlotType() != InventoryType.SlotType.RESULT) {
+            return false;
+        }
+        final ItemStack current = event.getCurrentItem();
+        if (!this.isProtectedWorkbenchResult(current)) {
+            return false;
+        }
+        event.setCancelled(true);
+        return true;
+    }
+
+    private boolean isProtectedWorkbenchResult(final ItemStack stack) {
+        if (stack == null || stack.getType() == Material.AIR) {
+            return false;
+        }
+        if (this.plugin.getItemFactory().isGuiPlaceholder(stack)) {
+            return true;
+        }
+        if (stack.getType() != Material.BARRIER || !stack.hasItemMeta()) {
+            return false;
+        }
+        final ItemMeta meta = stack.getItemMeta();
+        final String title = meta.displayName() == null
+                ? ""
+                : PlainTextComponentSerializer.plainText().serialize(meta.displayName());
+        return title.contains("缺少進階工作台結構")
+                || title.contains("尚未解鎖此機器")
+                || title.contains("科技材料不可用於原版配方")
+                || title.contains("此配方不屬於進階工作台");
+    }
+
+    private ItemStack invalidAdvancedWorkbenchResult(final String resultName) {
+        final ItemStack stack = this.plugin.getItemFactory().tagGuiPlaceholder(new ItemStack(Material.BARRIER));
+        final ItemMeta meta = stack.getItemMeta();
+        meta.displayName(this.plugin.getItemFactory().danger("缺少進階工作台結構"));
+        meta.lore(List.of(
+                this.plugin.getItemFactory().muted("這份配方屬於科技合成"),
+                this.plugin.getItemFactory().muted("請先在工作台下方放一個鐵方塊"),
+                this.plugin.getItemFactory().muted("完成後才能製作：" + resultName)
+        ));
+        stack.setItemMeta(meta);
+        return stack;
+    }
+
+    private ItemStack lockedMachineResult(final String resultName) {
+        final ItemStack stack = this.plugin.getItemFactory().tagGuiPlaceholder(new ItemStack(Material.BARRIER));
+        final ItemMeta meta = stack.getItemMeta();
+        meta.displayName(this.plugin.getItemFactory().danger("尚未解鎖此機器"));
+        meta.lore(List.of(
+                this.plugin.getItemFactory().muted("這份藍圖已存在，但研究進度尚未到達"),
+                this.plugin.getItemFactory().muted("請先解鎖後再製作：" + resultName)
+        ));
+        stack.setItemMeta(meta);
+        return stack;
+    }
+
+    private ItemStack isolatedTechMaterialResult() {
+        final ItemStack stack = this.plugin.getItemFactory().tagGuiPlaceholder(new ItemStack(Material.BARRIER));
+        final ItemMeta meta = stack.getItemMeta();
+        meta.displayName(this.plugin.getItemFactory().danger("科技材料不可用於原版配方"));
+        meta.lore(List.of(
+                this.plugin.getItemFactory().muted("帶有科技標記的物品已與原版合成鏈分離"),
+                this.plugin.getItemFactory().muted("請改用科技機器或對應科技藍圖處理")
+        ));
+        stack.setItemMeta(meta);
+        return stack;
+    }
+
+    private ItemStack invalidTechProcessingResult() {
+        final ItemStack stack = this.plugin.getItemFactory().tagGuiPlaceholder(new ItemStack(Material.BARRIER));
+        final ItemMeta meta = stack.getItemMeta();
+        meta.displayName(this.plugin.getItemFactory().danger("此配方不屬於進階工作台"));
+        meta.lore(List.of(
+                this.plugin.getItemFactory().muted("這些科技材料不是九宮格工作台配方"),
+                this.plugin.getItemFactory().muted("請改到對應的科技機器製作，例如製造機或進階製造機"),
+                this.plugin.getItemFactory().muted("可從科技書查看每個材料的製作站")
+        ));
+        stack.setItemMeta(meta);
+        return stack;
+    }
+
+    private boolean containsTaggedTechMaterial(final ItemStack[] matrix) {
+        if (matrix == null) {
+            return false;
+        }
+        for (final ItemStack stack : matrix) {
+            if (this.isTaggedTechMaterial(stack)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean isTaggedTechMaterial(final ItemStack stack) {
+        return this.plugin.getItemFactory().getTechItemId(stack) != null
+                || this.plugin.getItemFactory().getMachineId(stack) != null;
+    }
+
+    /**
+     * 掃描玩家背包，自動刷新版本過舊的科技物品的 displayName + lore。
+     */
+    private void refreshPlayerInventory(final Player player) {
+        if (!player.isOnline()) {
+            return;
+        }
+        int refreshed = 0;
+        for (final ItemStack stack : player.getInventory().getContents()) {
+            if (stack == null || stack.getType() == Material.AIR) {
+                continue;
+            }
+            if (this.plugin.getItemFactory().refreshTechItemIfNeeded(stack)) {
+                refreshed++;
+            }
+        }
+        if (refreshed > 0 && this.plugin.getConfig().getBoolean("item-refresh-notify", false)) {
+            player.sendActionBar(this.plugin.getItemFactory().muted("已自動更新 " + refreshed + " 個科技物品的外觀。"));
+        }
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    public void onEntityDamage(final EntityDamageEvent event) {
+        if (!(event.getEntity() instanceof Player player)) {
+            return;
+        }
+        this.applyEquipmentDamageReduction(player, event);
+        this.handleTalismanOnDamage(player, event);
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    public void onEntityDamageByEntity(final EntityDamageByEntityEvent event) {
+        if (event.getDamager() instanceof Player attacker) {
+            this.handleTalismanOnAttack(attacker, event);
+        }
+        if (event.getEntity() instanceof Player victim && event.getDamager() instanceof LivingEntity) {
+            this.handleTalismanWhirlwind(victim);
+            this.handleEquipmentThorns(victim, event);
+        }
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onMobDeathForHunter(final EntityDeathEvent event) {
+        if (event.getEntity().getKiller() == null) {
+            return;
+        }
+        final Player killer = event.getEntity().getKiller();
+        if (!this.hasTalismanInInventory(killer, "talisman_hunter")) {
+            return;
+        }
+        if (ThreadLocalRandom.current().nextDouble() >= 0.25) {
+            return;
+        }
+        final List<ItemStack> drops = event.getDrops();
+        final List<ItemStack> bonus = new java.util.ArrayList<>();
+        for (final ItemStack drop : drops) {
+            if (drop != null && drop.getType() != Material.AIR) {
+                bonus.add(drop.clone());
+            }
+        }
+        drops.addAll(bonus);
+        killer.sendActionBar(this.plugin.getItemFactory().success("獵人護符觸發—雙倍戰利品！"));
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    public void onItemDamageForAnvil(final PlayerItemDamageEvent event) {
+        final Player player = event.getPlayer();
+        final ItemStack item = event.getItem();
+        if (item.getType().getMaxDurability() <= 0) {
+            return;
+        }
+        if (!(item.getItemMeta() instanceof org.bukkit.inventory.meta.Damageable damageable)) {
+            return;
+        }
+        final int remaining = item.getType().getMaxDurability() - damageable.getDamage();
+        if (remaining > 2) {
+            return;
+        }
+        if (!this.hasTalismanInInventory(player, "talisman_anvil")) {
+            return;
+        }
+        if (!this.isTalismanCooldownReady(player, "talisman_anvil")) {
+            return;
+        }
+        event.setCancelled(true);
+        this.startTalismanCooldown(player, "talisman_anvil", 120_000L);
+        player.sendActionBar(this.plugin.getItemFactory().success("鐵砧護符觸發—工具已被保護！"));
+        player.getWorld().playSound(player.getLocation(), Sound.BLOCK_ANVIL_USE, 0.6f, 1.2f);
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    public void onPlayerToggleSneakForTraveler(final PlayerToggleSneakEvent event) {
+        if (!event.isSneaking()) {
+            return;
+        }
+        final Player player = event.getPlayer();
+        if (!player.isSprinting()) {
+            return;
+        }
+        this.handleTalismanTraveler(player);
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR)
+    public void onPlayerMoveForEquipment(final PlayerMoveEvent event) {
+        if (event.getFrom().getBlockX() == event.getTo().getBlockX()
+                && event.getFrom().getBlockY() == event.getTo().getBlockY()
+                && event.getFrom().getBlockZ() == event.getTo().getBlockZ()) {
+            return;
+        }
+        final Player player = event.getPlayer();
+        final long now = System.currentTimeMillis();
+        if (now - this.lastEquipmentTick.getOrDefault(player.getUniqueId(), 0L) < 3000L) {
+            return;
+        }
+        this.lastEquipmentTick.put(player.getUniqueId(), now);
+        this.applyEquipmentPassiveEffects(player);
+        this.handleTalismanPassiveChecks(player);
+    }
+
+    private boolean tryUseArtifact(final PlayerInteractEvent event) {
+        if (event.getItem() == null || (event.getAction() != Action.RIGHT_CLICK_AIR && event.getAction() != Action.RIGHT_CLICK_BLOCK)) {
+            return false;
+        }
+        final String techItemId = this.plugin.getItemFactory().getTechItemId(event.getItem());
+        if (techItemId == null || !ARTIFACT_IDS.contains(techItemId.toLowerCase())) {
+            return false;
+        }
+        final Player player = event.getPlayer();
+        event.setUseInteractedBlock(Result.DENY);
+        event.setUseItemInHand(Result.DENY);
+        event.setCancelled(true);
+
+        final String id = techItemId.toLowerCase();
+        if (!this.isArtifactCooldownReady(player, id)) {
+            player.sendActionBar(this.plugin.getItemFactory().warning("法器冷卻中。"));
+            return true;
+        }
+
+        final long energyCost = this.artifactEnergyCost(id);
+        final ItemStack held = event.getItem();
+        final long energy = this.plugin.getItemFactory().getItemStoredEnergy(held);
+        if (energy < energyCost) {
+            player.sendActionBar(this.plugin.getItemFactory().warning("法器電量不足，請對準儲能機器 Shift + 右鍵充電。"));
+            return true;
+        }
+
+        this.executeArtifactAbility(player, held, id);
+        this.plugin.getItemFactory().drainItemEnergy(held, energyCost);
+        this.startArtifactCooldown(player, id, this.artifactCooldownMs(id));
+
+        final long remaining = this.plugin.getItemFactory().getItemStoredEnergy(held);
+        final long max = this.plugin.getItemFactory().maxItemEnergy(id);
+        player.sendActionBar(this.plugin.getItemFactory().success(
+                this.plugin.getItemFactory().displayNameForId(id) + " 已發動！ ⚡ " + remaining + "/" + max));
+        return true;
+    }
+
+    private void executeArtifactAbility(final Player player, final ItemStack held, final String id) {
+        final Location loc = player.getLocation();
+        switch (id) {
+            case "pulse_staff" -> {
+                for (final Entity entity : player.getNearbyEntities(8, 4, 8)) {
+                    if (entity instanceof LivingEntity living && !(entity instanceof Player)) {
+                        final Vector push = entity.getLocation().toVector().subtract(loc.toVector()).normalize().multiply(2.2);
+                        push.setY(0.5);
+                        living.setVelocity(push);
+                    }
+                }
+                loc.getWorld().playSound(loc, Sound.ENTITY_WARDEN_SONIC_BOOM, 0.7f, 1.4f);
+                loc.getWorld().spawnParticle(Particle.SONIC_BOOM, loc.add(0, 1, 0), 1);
+            }
+            case "storm_staff" -> {
+                final RayTraceResult ray = player.rayTraceBlocks(48, FluidCollisionMode.NEVER);
+                final Location target = ray != null && ray.getHitBlock() != null
+                        ? ray.getHitBlock().getLocation()
+                        : player.getLocation().add(player.getLocation().getDirection().multiply(20));
+                target.getWorld().strikeLightning(target);
+            }
+            case "gravity_staff" -> {
+                for (final Entity entity : player.getNearbyEntities(8, 4, 8)) {
+                    if (entity instanceof LivingEntity living && !(entity instanceof Player)) {
+                        living.addPotionEffect(new PotionEffect(PotionEffectType.LEVITATION, 20 * 4, 1, false, true, true));
+                    }
+                }
+                loc.getWorld().playSound(loc, Sound.ENTITY_SHULKER_SHOOT, 0.8f, 0.7f);
+                loc.getWorld().spawnParticle(Particle.END_ROD, loc.add(0, 1, 0), 30, 3, 2, 3, 0.02);
+            }
+            case "warp_orb" -> {
+                final Vector direction = player.getLocation().getDirection().normalize();
+                Location destination = player.getLocation().clone();
+                for (int i = 1; i <= 8; i++) {
+                    final Location check = player.getLocation().clone().add(direction.clone().multiply(i));
+                    if (check.getBlock().getType().isSolid()) {
+                        break;
+                    }
+                    destination = check;
+                }
+                destination.setYaw(player.getLocation().getYaw());
+                destination.setPitch(player.getLocation().getPitch());
+                player.teleport(destination);
+                player.getWorld().playSound(loc, Sound.ENTITY_ENDERMAN_TELEPORT, 0.8f, 1.2f);
+                player.getWorld().spawnParticle(Particle.PORTAL, loc, 30, 0.5, 1, 0.5, 0.1);
+                player.getWorld().spawnParticle(Particle.PORTAL, destination, 30, 0.5, 1, 0.5, 0.1);
+            }
+            case "cryo_wand" -> {
+                for (final Entity entity : player.getNearbyEntities(8, 4, 8)) {
+                    if (entity instanceof LivingEntity living && !(entity instanceof Player)) {
+                        living.addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS, 20 * 5, 2, false, true, true));
+                        living.addPotionEffect(new PotionEffect(PotionEffectType.SLOW_FALLING, 20 * 5, 0, false, true, true));
+                        living.setFreezeTicks(20 * 5);
+                    }
+                }
+                loc.getWorld().playSound(loc, Sound.BLOCK_GLASS_BREAK, 0.8f, 1.5f);
+                loc.getWorld().spawnParticle(Particle.SNOWFLAKE, loc.add(0, 1, 0), 40, 4, 2, 4, 0.02);
+            }
+            case "plasma_lance" -> {
+                final Vector dir = player.getEyeLocation().getDirection().normalize();
+                final Location start = player.getEyeLocation();
+                for (int i = 1; i <= 16; i++) {
+                    final Location point = start.clone().add(dir.clone().multiply(i));
+                    point.getWorld().spawnParticle(Particle.FLAME, point, 3, 0.05, 0.05, 0.05, 0.01);
+                    for (final Entity entity : point.getWorld().getNearbyEntities(point, 0.8, 0.8, 0.8)) {
+                        if (entity instanceof LivingEntity living && entity != player) {
+                            living.damage(12.0, player);
+                        }
+                    }
+                    if (point.getBlock().getType().isSolid()) {
+                        break;
+                    }
+                }
+                loc.getWorld().playSound(loc, Sound.ENTITY_BLAZE_SHOOT, 0.9f, 1.6f);
+            }
+            case "void_mirror" -> {
+                player.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE, 20 * 5, 2, false, true, true));
+                player.addPotionEffect(new PotionEffect(PotionEffectType.ABSORPTION, 20 * 5, 1, false, true, true));
+                loc.getWorld().playSound(loc, Sound.ITEM_SHIELD_BLOCK, 0.8f, 1.3f);
+                loc.getWorld().spawnParticle(Particle.END_ROD, loc.add(0, 1, 0), 20, 1, 1, 1, 0.02);
+            }
+            case "time_dilator" -> {
+                for (final Entity entity : player.getNearbyEntities(8, 4, 8)) {
+                    if (entity instanceof LivingEntity living && !(entity instanceof Player)) {
+                        living.addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS, 20 * 6, 3, false, true, true));
+                        living.addPotionEffect(new PotionEffect(PotionEffectType.MINING_FATIGUE, 20 * 6, 1, false, true, true));
+                    }
+                }
+                loc.getWorld().playSound(loc, Sound.BLOCK_BELL_USE, 0.7f, 0.5f);
+                loc.getWorld().spawnParticle(Particle.ENCHANT, loc.add(0, 1, 0), 40, 4, 2, 4, 0.1);
+            }
+            case "heal_beacon" -> {
+                final double maxHealth = player.getAttribute(Attribute.MAX_HEALTH).getValue();
+                player.setHealth(Math.min(maxHealth, player.getHealth() + 12.0));
+                player.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, 20 * 10, 1, false, true, true));
+                loc.getWorld().playSound(loc, Sound.BLOCK_BEACON_ACTIVATE, 0.8f, 1.4f);
+                loc.getWorld().spawnParticle(Particle.HEART, loc.add(0, 1.5, 0), 12, 0.5, 0.3, 0.5, 0.01);
+            }
+            case "entropy_scepter" -> {
+                for (final Entity entity : player.getNearbyEntities(6, 3, 6)) {
+                    if (entity instanceof LivingEntity living && !(entity instanceof Player)) {
+                        living.addPotionEffect(new PotionEffect(PotionEffectType.WITHER, 20 * 4, 1, false, true, true));
+                        living.damage(8.0, player);
+                    }
+                }
+                loc.getWorld().playSound(loc, Sound.ENTITY_WITHER_AMBIENT, 0.7f, 1.3f);
+                loc.getWorld().spawnParticle(Particle.SMOKE, loc.add(0, 1, 0), 30, 3, 1.5, 3, 0.03);
+            }
+        }
+    }
+
+    private long artifactEnergyCost(final String id) {
+        return switch (id) {
+            case "pulse_staff" -> 5L;
+            case "storm_staff" -> 8L;
+            case "gravity_staff" -> 6L;
+            case "warp_orb" -> 10L;
+            case "cryo_wand" -> 6L;
+            case "plasma_lance" -> 8L;
+            case "void_mirror" -> 10L;
+            case "time_dilator" -> 8L;
+            case "heal_beacon" -> 12L;
+            case "entropy_scepter" -> 10L;
+            default -> 0L;
+        };
+    }
+
+    private long artifactCooldownMs(final String id) {
+        return switch (id) {
+            case "pulse_staff" -> 3000L;
+            case "storm_staff" -> 5000L;
+            case "gravity_staff" -> 4000L;
+            case "warp_orb" -> 2000L;
+            case "cryo_wand" -> 4000L;
+            case "plasma_lance" -> 3000L;
+            case "void_mirror" -> 8000L;
+            case "time_dilator" -> 6000L;
+            case "heal_beacon" -> 10000L;
+            case "entropy_scepter" -> 5000L;
+            default -> 3000L;
+        };
+    }
+
+    private boolean isArtifactCooldownReady(final Player player, final String id) {
+        final Map<String, Long> map = this.artifactCooldowns.get(player.getUniqueId());
+        if (map == null) { return true; }
+        return map.getOrDefault(id, 0L) <= System.currentTimeMillis();
+    }
+
+    private void startArtifactCooldown(final Player player, final String id, final long ms) {
+        this.artifactCooldowns.computeIfAbsent(player.getUniqueId(), k -> new ConcurrentHashMap<>()).put(id, System.currentTimeMillis() + ms);
+    }
+
+    private void applyEquipmentDamageReduction(final Player player, final EntityDamageEvent event) {
+        double reduction = 0.0;
+        for (final ItemStack armor : player.getInventory().getArmorContents()) {
+            if (armor == null || armor.getType() == Material.AIR) { continue; }
+            final String id = this.plugin.getItemFactory().getTechItemId(armor);
+            if (id == null) { continue; }
+            reduction += switch (id.toLowerCase()) {
+                case "titan_chestplate" -> 0.10;
+                case "quantum_chestplate" -> 0.15;
+                case "void_crown" -> 0.20;
+                case "void_cuirass" -> 0.20;
+                default -> 0.0;
+            };
+        }
+        if (reduction > 0.0) {
+            event.setDamage(event.getDamage() * (1.0 - Math.min(0.50, reduction)));
+        }
+        if (event.getCause() == EntityDamageEvent.DamageCause.FALL) {
+            for (final ItemStack armor : player.getInventory().getArmorContents()) {
+                if (armor == null) { continue; }
+                final String id = this.plugin.getItemFactory().getTechItemId(armor);
+                if (id == null) { continue; }
+                switch (id.toLowerCase()) {
+                    case "titan_boots" -> event.setDamage(event.getDamage() * 0.5);
+                    case "quantum_boots", "void_sabatons" -> event.setDamage(0.0);
+                }
+            }
+        }
+        if (event.getCause() == EntityDamageEvent.DamageCause.FIRE
+                || event.getCause() == EntityDamageEvent.DamageCause.FIRE_TICK
+                || event.getCause() == EntityDamageEvent.DamageCause.LAVA) {
+            for (final ItemStack armor : player.getInventory().getArmorContents()) {
+                if (armor == null) { continue; }
+                final String id = this.plugin.getItemFactory().getTechItemId(armor);
+                if ("void_sabatons".equalsIgnoreCase(id)) {
+                    event.setDamage(0.0);
+                    break;
+                }
+            }
+        }
+    }
+
+    private void applyEquipmentPassiveEffects(final Player player) {
+        for (final ItemStack armor : player.getInventory().getArmorContents()) {
+            if (armor == null || armor.getType() == Material.AIR) { continue; }
+            final String id = this.plugin.getItemFactory().getTechItemId(armor);
+            if (id == null) { continue; }
+            switch (id.toLowerCase()) {
+                case "titan_helmet" -> player.addPotionEffect(new PotionEffect(PotionEffectType.FIRE_RESISTANCE, 20 * 5, 0, false, false, true));
+                case "titan_leggings" -> player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 20 * 5, 0, false, false, true));
+                case "quantum_helmet" -> {
+                    player.addPotionEffect(new PotionEffect(PotionEffectType.NIGHT_VISION, 20 * 15, 0, false, false, true));
+                    player.addPotionEffect(new PotionEffect(PotionEffectType.WATER_BREATHING, 20 * 5, 0, false, false, true));
+                }
+                case "quantum_leggings" -> player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 20 * 5, 1, false, false, true));
+                case "quantum_boots" -> player.addPotionEffect(new PotionEffect(PotionEffectType.DOLPHINS_GRACE, 20 * 5, 0, false, false, true));
+                case "void_crown" -> player.addPotionEffect(new PotionEffect(PotionEffectType.SLOW_FALLING, 20 * 5, 0, false, false, true));
+                case "void_cuirass" -> player.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, 20 * 5, 0, false, false, true));
+                case "void_greaves" -> player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 20 * 5, 2, false, false, true));
+            }
+        }
+    }
+
+    private void handleEquipmentThorns(final Player victim, final EntityDamageByEntityEvent event) {
+        final ItemStack chestplate = victim.getInventory().getChestplate();
+        if (chestplate == null) { return; }
+        final String id = this.plugin.getItemFactory().getTechItemId(chestplate);
+        if (!"quantum_chestplate".equalsIgnoreCase(id)) { return; }
+        if (event.getDamager() instanceof LivingEntity attacker) {
+            attacker.damage(event.getDamage() * 0.25, victim);
+            victim.getWorld().playSound(victim.getLocation(), Sound.ENCHANT_THORNS_HIT, 0.6f, 1.2f);
+        }
+    }
+
+    private void handleTalismanOnDamage(final Player player, final EntityDamageEvent event) {
+        if (event.getCause() == EntityDamageEvent.DamageCause.FIRE || event.getCause() == EntityDamageEvent.DamageCause.FIRE_TICK) {
+            if (this.hasTalismanInInventory(player, "talisman_fire") && this.isTalismanCooldownReady(player, "talisman_fire")) {
+                player.addPotionEffect(new PotionEffect(PotionEffectType.FIRE_RESISTANCE, 20 * 30, 0, false, true, true));
+                this.startTalismanCooldown(player, "talisman_fire", 60_000L);
+                player.sendActionBar(this.plugin.getItemFactory().success("防焰護符觸發—防火效果已啟動！"));
+                player.getWorld().playSound(player.getLocation(), Sound.ITEM_FIRECHARGE_USE, 0.5f, 1.3f);
+            }
+        }
+        if (event.getCause() == EntityDamageEvent.DamageCause.DROWNING) {
+            if (this.hasTalismanInInventory(player, "talisman_water") && this.isTalismanCooldownReady(player, "talisman_water")) {
+                player.addPotionEffect(new PotionEffect(PotionEffectType.WATER_BREATHING, 20 * 60, 0, false, true, true));
+                this.startTalismanCooldown(player, "talisman_water", 90_000L);
+                player.sendActionBar(this.plugin.getItemFactory().success("深海護符觸發—水下呼吸已啟動！"));
+                player.getWorld().playSound(player.getLocation(), Sound.ENTITY_DOLPHIN_SPLASH, 0.5f, 1.3f);
+            }
+        }
+        if (event.getCause() == EntityDamageEvent.DamageCause.FALL) {
+            if (this.hasTalismanInInventory(player, "talisman_angel") && this.isTalismanCooldownReady(player, "talisman_angel")) {
+                event.setDamage(0.0);
+                this.startTalismanCooldown(player, "talisman_angel", 45_000L);
+                player.sendActionBar(this.plugin.getItemFactory().success("天使護符觸發—摔落傷害已抵消！"));
+                player.getWorld().playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 0.5f, 1.5f);
+                player.getWorld().spawnParticle(Particle.CLOUD, player.getLocation(), 10, 0.3, 0.2, 0.3, 0.02);
+            }
+        }
+        final double maxHealth = player.getAttribute(Attribute.MAX_HEALTH).getValue();
+        if (player.getHealth() <= maxHealth * 0.5 && event.getCause() == EntityDamageEvent.DamageCause.ENTITY_ATTACK) {
+            if (this.hasTalismanInInventory(player, "talisman_knight") && this.isTalismanCooldownReady(player, "talisman_knight")) {
+                player.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE, 20 * 5, 1, false, true, true));
+                this.startTalismanCooldown(player, "talisman_knight", 60_000L);
+                player.sendActionBar(this.plugin.getItemFactory().success("騎士護符觸發—抗性護盾已啟動！"));
+                player.getWorld().playSound(player.getLocation(), Sound.ITEM_SHIELD_BLOCK, 0.6f, 1.2f);
+            }
+        }
+    }
+
+    private void handleTalismanOnAttack(final Player attacker, final EntityDamageByEntityEvent event) {
+        if (this.hasTalismanInInventory(attacker, "talisman_warrior") && this.isTalismanCooldownReady(attacker, "talisman_warrior")) {
+            attacker.addPotionEffect(new PotionEffect(PotionEffectType.STRENGTH, 20 * 8, 0, false, true, true));
+            this.startTalismanCooldown(attacker, "talisman_warrior", 30_000L);
+            attacker.sendActionBar(this.plugin.getItemFactory().success("戰士護符觸發—力量提升！"));
+        }
+    }
+
+    private void handleTalismanWhirlwind(final Player victim) {
+        if (!this.hasTalismanInInventory(victim, "talisman_whirlwind") || !this.isTalismanCooldownReady(victim, "talisman_whirlwind")) {
+            return;
+        }
+        this.startTalismanCooldown(victim, "talisman_whirlwind", 20_000L);
+        final Location loc = victim.getLocation();
+        for (final Entity entity : victim.getNearbyEntities(3, 2, 3)) {
+            if (entity instanceof LivingEntity living && !(entity instanceof Player)) {
+                final Vector push = entity.getLocation().toVector().subtract(loc.toVector()).normalize().multiply(1.5);
+                push.setY(0.4);
+                living.setVelocity(push);
+            }
+        }
+        victim.sendActionBar(this.plugin.getItemFactory().success("旋風護符觸發—周圍生物已被擊退！"));
+        loc.getWorld().playSound(loc, Sound.ENTITY_PLAYER_ATTACK_SWEEP, 0.7f, 1.3f);
+        loc.getWorld().spawnParticle(Particle.SWEEP_ATTACK, loc.add(0, 1, 0), 6, 1, 0.5, 1, 0.01);
+    }
+
+    private void handleTalismanTraveler(final Player player) {
+        if (!this.hasTalismanInInventory(player, "talisman_traveler") || !this.isTalismanCooldownReady(player, "talisman_traveler")) {
+            return;
+        }
+        player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 20 * 15, 1, false, true, true));
+        this.startTalismanCooldown(player, "talisman_traveler", 45_000L);
+        player.sendActionBar(this.plugin.getItemFactory().success("旅者護符觸發—速度提升！"));
+    }
+
+    private void handleTalismanPassiveChecks(final Player player) {
+        final double maxHealth = player.getAttribute(Attribute.MAX_HEALTH).getValue();
+        if (player.getHealth() <= maxHealth * 0.3) {
+            if (this.hasTalismanInInventory(player, "talisman_heal") && this.isTalismanCooldownReady(player, "talisman_heal")) {
+                player.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, 20 * 5, 1, false, true, true));
+                this.startTalismanCooldown(player, "talisman_heal", 90_000L);
+                player.sendActionBar(this.plugin.getItemFactory().success("再生護符觸發—緊急再生已啟動！"));
+                player.getWorld().playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 0.5f, 1.4f);
+            }
+        }
+        if (player.isSprinting()) {
+            this.handleTalismanTraveler(player);
+        }
+    }
+
+    private boolean hasTalismanInInventory(final Player player, final String talismanId) {
+        for (final ItemStack stack : player.getInventory().getContents()) {
+            if (stack == null || stack.getType() == Material.AIR) { continue; }
+            final String id = this.plugin.getItemFactory().getTechItemId(stack);
+            if (talismanId.equalsIgnoreCase(id)) { return true; }
+        }
+        return false;
+    }
+
+    private boolean isTalismanCooldownReady(final Player player, final String talismanId) {
+        final Map<String, Long> map = this.talismanCooldowns.get(player.getUniqueId());
+        if (map == null) { return true; }
+        return map.getOrDefault(talismanId, 0L) <= System.currentTimeMillis();
+    }
+
+    private void startTalismanCooldown(final Player player, final String talismanId, final long ms) {
+        this.talismanCooldowns.computeIfAbsent(player.getUniqueId(), k -> new ConcurrentHashMap<>()).put(talismanId, System.currentTimeMillis() + ms);
+    }
+
+    private void handleTalismanMiner(final BlockBreakEvent event) {
+        final Player player = event.getPlayer();
+        if (player.getGameMode() == GameMode.CREATIVE) { return; }
+        if (!this.hasTalismanInInventory(player, "talisman_miner")) { return; }
+        final Material type = event.getBlock().getType();
+        final Material smelted = switch (type) {
+            case IRON_ORE, DEEPSLATE_IRON_ORE -> Material.IRON_INGOT;
+            case GOLD_ORE, DEEPSLATE_GOLD_ORE -> Material.GOLD_INGOT;
+            case COPPER_ORE, DEEPSLATE_COPPER_ORE -> Material.COPPER_INGOT;
+            case RAW_IRON_BLOCK -> Material.IRON_BLOCK;
+            case RAW_GOLD_BLOCK -> Material.GOLD_BLOCK;
+            case RAW_COPPER_BLOCK -> Material.COPPER_BLOCK;
+            default -> null;
+        };
+        if (smelted == null) { return; }
+        event.setDropItems(false);
+        final int fortune = Math.max(1, 1 + ThreadLocalRandom.current().nextInt(
+                Math.min(4, 1 + event.getPlayer().getInventory().getItemInMainHand().getEnchantmentLevel(org.bukkit.enchantments.Enchantment.FORTUNE))));
+        event.getBlock().getWorld().dropItemNaturally(event.getBlock().getLocation().add(0.5, 0.5, 0.5), new ItemStack(smelted, fortune));
+        event.getPlayer().sendActionBar(this.plugin.getItemFactory().success("礦工護符觸發—礦石已自動燒煉！"));
+    }
+
+    private boolean isProtectedTechBlock(final Block block) {
+        return this.plugin.getMachineService().resolveManagedMachineBlock(block) != null
+                || this.plugin.getPlacedTechBlockService().isTrackedBlock(block);
+    }
+
+    private void handleTalismanFarmer(final BlockBreakEvent event) {
+        final Player player = event.getPlayer();
+        if (player.getGameMode() == GameMode.CREATIVE) { return; }
+        if (!this.hasTalismanInInventory(player, "talisman_farmer")) { return; }
+        final BlockData data = event.getBlock().getBlockData();
+        if (!(data instanceof Ageable ageable) || ageable.getAge() < ageable.getMaximumAge()) { return; }
+        if (event.getBlock().getRelative(BlockFace.DOWN).getType() != Material.FARMLAND) { return; }
+        if (ThreadLocalRandom.current().nextDouble() >= 0.25) { return; }
+        for (final ItemStack drop : event.getBlock().getDrops(player.getInventory().getItemInMainHand())) {
+            if (drop != null && drop.getType() != Material.AIR) {
+                event.getBlock().getWorld().dropItemNaturally(event.getBlock().getLocation().add(0.5, 0.5, 0.5), drop.clone());
+            }
+        }
+        player.sendActionBar(this.plugin.getItemFactory().success("農夫護符觸發—雙倍收穫！"));
+    }
+}

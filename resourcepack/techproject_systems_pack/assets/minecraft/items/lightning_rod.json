@@ -1,0 +1,54 @@
+{
+  "model": {
+    "type": "minecraft:range_dispatch",
+    "property": "minecraft:custom_model_data",
+    "entries": [
+      {
+        "threshold": 830208,
+        "model": {
+          "type": "minecraft:model",
+          "model": "techproject:item/hud_lightning_rod"
+        }
+      },
+      {
+        "threshold": 1358947,
+        "model": {
+          "type": "minecraft:model",
+          "model": "techproject:item/warp_coil"
+        }
+      },
+      {
+        "threshold": 1691594,
+        "model": {
+          "type": "minecraft:model",
+          "model": "techproject:item/emitter_node"
+        }
+      },
+      {
+        "threshold": 3295766,
+        "model": {
+          "type": "minecraft:model",
+          "model": "techproject:item/weather_sensor"
+        }
+      },
+      {
+        "threshold": 6484466,
+        "model": {
+          "type": "minecraft:model",
+          "model": "techproject:item/energy_node"
+        }
+      },
+      {
+        "threshold": 7064381,
+        "model": {
+          "type": "minecraft:model",
+          "model": "techproject:item/storm_turbine"
+        }
+      }
+    ],
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "minecraft:item/lightning_rod"
+    }
+  }
+}

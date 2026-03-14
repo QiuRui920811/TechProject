@@ -1,0 +1,11 @@
+{
+  "type": "techproject:aurelia_twilight",
+  "generator": {
+    "type": "minecraft:noise",
+    "settings": "techproject:aurelia_surface_noise",
+    "biome_source": {
+      "type": "minecraft:fixed",
+      "biome": "techproject:aurelia_luminous_wastes"
+    }
+  }
+}

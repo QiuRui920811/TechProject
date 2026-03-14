@@ -1,0 +1,19 @@
+{
+  "model": {
+    "type": "minecraft:range_dispatch",
+    "property": "minecraft:custom_model_data",
+    "entries": [
+      {
+        "threshold": 3590425,
+        "model": {
+          "type": "minecraft:model",
+          "model": "techproject:item/cosmic_panel"
+        }
+      }
+    ],
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "minecraft:item/purpur_block"
+    }
+  }
+}

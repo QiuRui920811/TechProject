@@ -1,0 +1,26 @@
+{
+  "model": {
+    "type": "minecraft:range_dispatch",
+    "property": "minecraft:custom_model_data",
+    "entries": [
+      {
+        "threshold": 4317158,
+        "model": {
+          "type": "minecraft:model",
+          "model": "techproject:item/quantum_frame"
+        }
+      },
+      {
+        "threshold": 7645752,
+        "model": {
+          "type": "minecraft:model",
+          "model": "techproject:item/laser_engraver"
+        }
+      }
+    ],
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "minecraft:item/end_rod"
+    }
+  }
+}

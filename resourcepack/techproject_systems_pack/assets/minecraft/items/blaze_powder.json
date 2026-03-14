@@ -1,0 +1,26 @@
+{
+  "model": {
+    "type": "minecraft:range_dispatch",
+    "property": "minecraft:custom_model_data",
+    "entries": [
+      {
+        "threshold": 2597024,
+        "model": {
+          "type": "minecraft:model",
+          "model": "techproject:item/antimatter_cell"
+        }
+      },
+      {
+        "threshold": 3372924,
+        "model": {
+          "type": "minecraft:model",
+          "model": "techproject:item/heat_coil"
+        }
+      }
+    ],
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "minecraft:item/blaze_powder"
+    }
+  }
+}

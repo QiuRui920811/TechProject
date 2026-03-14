@@ -1,0 +1,20 @@
+# Build output
+target/
+
+# IDE
+.idea/
+*.iml
+.vscode/
+.project
+.classpath
+.settings/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Python venv
+.venv/
+
+# Maven wrapper
+.mvn/wrapper/maven-wrapper.jar

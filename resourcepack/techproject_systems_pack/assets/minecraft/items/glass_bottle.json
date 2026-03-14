@@ -1,0 +1,26 @@
+{
+  "model": {
+    "type": "minecraft:range_dispatch",
+    "property": "minecraft:custom_model_data",
+    "entries": [
+      {
+        "threshold": 2400956,
+        "model": {
+          "type": "minecraft:model",
+          "model": "techproject:item/vacuum_module"
+        }
+      },
+      {
+        "threshold": 2977111,
+        "model": {
+          "type": "minecraft:model",
+          "model": "techproject:item/vacuum_tube"
+        }
+      }
+    ],
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "minecraft:item/glass_bottle"
+    }
+  }
+}

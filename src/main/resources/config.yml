@@ -1,0 +1,98 @@
+machine-tick-interval: 20
+starting-techbook: true
+
+# 物品資料版本 — 每次修改物品/機器的 lore、名稱、描述時，手動遞增此值。
+# 持有舊版本物品的玩家在登入時會自動更新外觀（不影響 ID、儲能等狀態）。
+item-data-version: 1
+item-refresh-notify: false
+
+# 儲存後端設定
+storage:
+  # 可選：yaml（預設） / mysql / redis
+  backend: yaml
+
+  mysql:
+    host: localhost
+    port: 3306
+    database: techproject
+    username: root
+    password: ""
+    pool-size: 10
+    table-prefix: "tp_"
+
+  redis:
+    host: localhost
+    port: 6379
+    password: ""
+    database: 0
+    pool-size: 8
+    key-prefix: "tp:"
+
+research:
+  xp:
+    starting: 18
+    level-curve:
+      base: 55
+      linear: 28
+      quadratic: 6
+  costs:
+    items:
+      tiers:
+        TIER1: 14
+        TIER2: 32
+        TIER3: 72
+        TIER4: 132
+      use-case-bonus: 3
+      use-case-max: 10
+    machines:
+      tiers:
+        TIER1: 30
+        TIER2: 64
+        TIER3: 128
+        TIER4: 208
+      energy-divisor: 1
+      energy-max: 24
+    interactions:
+      tiers:
+        TIER1: 20
+        TIER2: 44
+        TIER3: 92
+        TIER4: 152
+      step-bonus: 4
+      effect-bonus: 3
+      extra-max: 24
+starting-unlocks:
+  items:
+    - tech_book
+    - crop_seeds
+  machines:
+    - crusher
+    - auto_farm
+    - electric_saw
+    - recycler
+    - solar_generator
+    - coal_generator
+starting-kit:
+  machine-items: []
+  item-items: []
+machine-safety:
+  restrict-machine-access: true
+  allowed-worlds: []
+  vacuum-min-item-age: 40
+  quarry-skip-exposed-ores: true
+  crop-harvester-require-farmland: true
+  tree-feller-require-natural-tree: true
+  mob-collector-ignore-named: true
+  mob-collector-ignore-tamed: true
+  mob-collector-ignore-leashed: true
+  mob-collector-ignore-babies: true
+  mob-blacklist:
+    - VILLAGER
+    - ALLAY
+    - IRON_GOLEM
+    - SNOW_GOLEM
+    - WOLF
+    - CAT
+    - HORSE
+    - DONKEY
+    - MULE

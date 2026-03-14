@@ -1,0 +1,26 @@
+{
+  "model": {
+    "type": "minecraft:range_dispatch",
+    "property": "minecraft:custom_model_data",
+    "entries": [
+      {
+        "threshold": 4917113,
+        "model": {
+          "type": "minecraft:model",
+          "model": "techproject:item/singularity_casing"
+        }
+      },
+      {
+        "threshold": 6697692,
+        "model": {
+          "type": "minecraft:model",
+          "model": "techproject:item/event_horizon_smith"
+        }
+      }
+    ],
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "minecraft:item/netherite_block"
+    }
+  }
+}

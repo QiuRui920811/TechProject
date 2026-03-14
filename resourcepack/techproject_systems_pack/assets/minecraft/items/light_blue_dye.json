@@ -1,0 +1,19 @@
+{
+  "model": {
+    "type": "minecraft:range_dispatch",
+    "property": "minecraft:custom_model_data",
+    "entries": [
+      {
+        "threshold": 4781497,
+        "model": {
+          "type": "minecraft:model",
+          "model": "techproject:item/lithium_cell"
+        }
+      }
+    ],
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "minecraft:item/light_blue_dye"
+    }
+  }
+}

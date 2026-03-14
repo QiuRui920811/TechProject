@@ -1,0 +1,26 @@
+{
+  "model": {
+    "type": "minecraft:range_dispatch",
+    "property": "minecraft:custom_model_data",
+    "entries": [
+      {
+        "threshold": 1356734,
+        "model": {
+          "type": "minecraft:model",
+          "model": "techproject:item/apex_core"
+        }
+      },
+      {
+        "threshold": 2108994,
+        "model": {
+          "type": "minecraft:model",
+          "model": "techproject:item/singularity_fragment"
+        }
+      }
+    ],
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "minecraft:item/dragon_breath"
+    }
+  }
+}

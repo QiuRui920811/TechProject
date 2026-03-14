@@ -1,0 +1,19 @@
+{
+  "model": {
+    "type": "minecraft:range_dispatch",
+    "property": "minecraft:custom_model_data",
+    "entries": [
+      {
+        "threshold": 4482818,
+        "model": {
+          "type": "minecraft:model",
+          "model": "techproject:item/antimatter_cluster"
+        }
+      }
+    ],
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "minecraft:item/fire_charge"
+    }
+  }
+}

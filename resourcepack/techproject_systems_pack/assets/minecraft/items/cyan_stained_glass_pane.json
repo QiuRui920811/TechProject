@@ -1,0 +1,26 @@
+{
+  "model": {
+    "type": "minecraft:range_dispatch",
+    "property": "minecraft:custom_model_data",
+    "entries": [
+      {
+        "threshold": 830008,
+        "model": {
+          "type": "minecraft:model",
+          "model": "techproject:item/hud_cyan_panel"
+        }
+      },
+      {
+        "threshold": 830108,
+        "model": {
+          "type": "minecraft:model",
+          "model": "techproject:item/hud_cyan_info"
+        }
+      }
+    ],
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "minecraft:item/cyan_stained_glass_pane"
+    }
+  }
+}

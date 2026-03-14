@@ -1,0 +1,19 @@
+{
+  "model": {
+    "type": "minecraft:range_dispatch",
+    "property": "minecraft:custom_model_data",
+    "entries": [
+      {
+        "threshold": 4821583,
+        "model": {
+          "type": "minecraft:model",
+          "model": "techproject:item/logic_gate"
+        }
+      }
+    ],
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "minecraft:item/redstone_torch"
+    }
+  }
+}

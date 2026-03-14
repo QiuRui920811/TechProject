@@ -1,0 +1,26 @@
+{
+  "model": {
+    "type": "minecraft:range_dispatch",
+    "property": "minecraft:custom_model_data",
+    "entries": [
+      {
+        "threshold": 830010,
+        "model": {
+          "type": "minecraft:model",
+          "model": "techproject:item/hud_lime_panel"
+        }
+      },
+      {
+        "threshold": 830110,
+        "model": {
+          "type": "minecraft:model",
+          "model": "techproject:item/hud_lime_info"
+        }
+      }
+    ],
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "minecraft:item/lime_stained_glass_pane"
+    }
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "model": {
+    "type": "minecraft:range_dispatch",
+    "property": "minecraft:custom_model_data",
+    "entries": [
+      {
+        "threshold": 830209,
+        "model": {
+          "type": "minecraft:model",
+          "model": "techproject:item/hud_crafting_table"
+        }
+      }
+    ],
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "minecraft:item/crafting_table"
+    }
+  }
+}

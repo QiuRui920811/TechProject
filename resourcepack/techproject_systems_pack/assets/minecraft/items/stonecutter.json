@@ -1,0 +1,26 @@
+{
+  "model": {
+    "type": "minecraft:range_dispatch",
+    "property": "minecraft:custom_model_data",
+    "entries": [
+      {
+        "threshold": 6200894,
+        "model": {
+          "type": "minecraft:model",
+          "model": "techproject:item/electric_saw"
+        }
+      },
+      {
+        "threshold": 6324110,
+        "model": {
+          "type": "minecraft:model",
+          "model": "techproject:item/continuum_lathe"
+        }
+      }
+    ],
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "minecraft:item/stonecutter"
+    }
+  }
+}

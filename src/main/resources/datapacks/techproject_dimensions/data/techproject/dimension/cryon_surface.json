@@ -1,0 +1,11 @@
+{
+  "type": "techproject:cryon_glacier",
+  "generator": {
+    "type": "minecraft:noise",
+    "settings": "techproject:cryon_surface_noise",
+    "biome_source": {
+      "type": "minecraft:fixed",
+      "biome": "techproject:cryon_shiverfields"
+    }
+  }
+}

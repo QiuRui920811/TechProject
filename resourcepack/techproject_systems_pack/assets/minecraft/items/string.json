@@ -1,0 +1,33 @@
+{
+  "model": {
+    "type": "minecraft:range_dispatch",
+    "property": "minecraft:custom_model_data",
+    "entries": [
+      {
+        "threshold": 2785204,
+        "model": {
+          "type": "minecraft:model",
+          "model": "techproject:item/chrono_thread"
+        }
+      },
+      {
+        "threshold": 3478496,
+        "model": {
+          "type": "minecraft:model",
+          "model": "techproject:item/fiber_mesh"
+        }
+      },
+      {
+        "threshold": 4961739,
+        "model": {
+          "type": "minecraft:model",
+          "model": "techproject:item/nebula_fiber"
+        }
+      }
+    ],
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "minecraft:item/string"
+    }
+  }
+}

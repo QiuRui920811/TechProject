@@ -1,0 +1,26 @@
+{
+  "model": {
+    "type": "minecraft:range_dispatch",
+    "property": "minecraft:custom_model_data",
+    "entries": [
+      {
+        "threshold": 1880714,
+        "model": {
+          "type": "minecraft:model",
+          "model": "techproject:item/plasma_dust"
+        }
+      },
+      {
+        "threshold": 3532154,
+        "model": {
+          "type": "minecraft:model",
+          "model": "techproject:item/ion_dust"
+        }
+      }
+    ],
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "minecraft:item/glowstone_dust"
+    }
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "model": {
+    "type": "minecraft:range_dispatch",
+    "property": "minecraft:custom_model_data",
+    "entries": [
+      {
+        "threshold": 3666148,
+        "model": {
+          "type": "minecraft:model",
+          "model": "techproject:item/harvest_matrix"
+        }
+      },
+      {
+        "threshold": 4610224,
+        "model": {
+          "type": "minecraft:model",
+          "model": "techproject:item/harvest_unit"
+        }
+      }
+    ],
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "minecraft:item/shears"
+    }
+  }
+}

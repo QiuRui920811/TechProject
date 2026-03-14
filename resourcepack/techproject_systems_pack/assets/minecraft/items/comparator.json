@@ -1,0 +1,47 @@
+{
+  "model": {
+    "type": "minecraft:range_dispatch",
+    "property": "minecraft:custom_model_data",
+    "entries": [
+      {
+        "threshold": 1075559,
+        "model": {
+          "type": "minecraft:model",
+          "model": "techproject:item/astral_circuit"
+        }
+      },
+      {
+        "threshold": 1443999,
+        "model": {
+          "type": "minecraft:model",
+          "model": "techproject:item/micro_processor"
+        }
+      },
+      {
+        "threshold": 2343718,
+        "model": {
+          "type": "minecraft:model",
+          "model": "techproject:item/control_unit"
+        }
+      },
+      {
+        "threshold": 2805239,
+        "model": {
+          "type": "minecraft:model",
+          "model": "techproject:item/orbit_processor"
+        }
+      },
+      {
+        "threshold": 4380954,
+        "model": {
+          "type": "minecraft:model",
+          "model": "techproject:item/field_processor"
+        }
+      }
+    ],
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "minecraft:item/comparator"
+    }
+  }
+}

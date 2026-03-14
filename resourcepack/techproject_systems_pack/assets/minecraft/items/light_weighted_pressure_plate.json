@@ -1,0 +1,33 @@
+{
+  "model": {
+    "type": "minecraft:range_dispatch",
+    "property": "minecraft:custom_model_data",
+    "entries": [
+      {
+        "threshold": 2264393,
+        "model": {
+          "type": "minecraft:model",
+          "model": "techproject:item/photon_plate"
+        }
+      },
+      {
+        "threshold": 2701792,
+        "model": {
+          "type": "minecraft:model",
+          "model": "techproject:item/field_plate"
+        }
+      },
+      {
+        "threshold": 3733684,
+        "model": {
+          "type": "minecraft:model",
+          "model": "techproject:item/entropy_plate"
+        }
+      }
+    ],
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "minecraft:item/light_weighted_pressure_plate"
+    }
+  }
+}

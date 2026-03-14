@@ -1,0 +1,19 @@
+{
+  "model": {
+    "type": "minecraft:range_dispatch",
+    "property": "minecraft:custom_model_data",
+    "entries": [
+      {
+        "threshold": 3887216,
+        "model": {
+          "type": "minecraft:model",
+          "model": "techproject:item/continuum_shell"
+        }
+      }
+    ],
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "minecraft:item/shulker_shell"
+    }
+  }
+}

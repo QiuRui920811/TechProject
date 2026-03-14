@@ -1,0 +1,26 @@
+{
+  "model": {
+    "type": "minecraft:range_dispatch",
+    "property": "minecraft:custom_model_data",
+    "entries": [
+      {
+        "threshold": 4681845,
+        "model": {
+          "type": "minecraft:model",
+          "model": "techproject:item/recycled_material"
+        }
+      },
+      {
+        "threshold": 6635593,
+        "model": {
+          "type": "minecraft:model",
+          "model": "techproject:item/auto_farm"
+        }
+      }
+    ],
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "minecraft:item/moss_block"
+    }
+  }
+}

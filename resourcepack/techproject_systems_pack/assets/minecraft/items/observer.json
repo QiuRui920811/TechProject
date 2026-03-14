@@ -1,0 +1,40 @@
+{
+  "model": {
+    "type": "minecraft:range_dispatch",
+    "property": "minecraft:custom_model_data",
+    "entries": [
+      {
+        "threshold": 1301663,
+        "model": {
+          "type": "minecraft:model",
+          "model": "techproject:item/sensor_array"
+        }
+      },
+      {
+        "threshold": 2370397,
+        "model": {
+          "type": "minecraft:model",
+          "model": "techproject:item/servo_motor"
+        }
+      },
+      {
+        "threshold": 3429963,
+        "model": {
+          "type": "minecraft:model",
+          "model": "techproject:item/splitter_core"
+        }
+      },
+      {
+        "threshold": 6334289,
+        "model": {
+          "type": "minecraft:model",
+          "model": "techproject:item/quarry_drill_mk3"
+        }
+      }
+    ],
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "minecraft:item/observer"
+    }
+  }
+}

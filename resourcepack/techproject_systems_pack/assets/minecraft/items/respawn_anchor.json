@@ -1,0 +1,40 @@
+{
+  "model": {
+    "type": "minecraft:range_dispatch",
+    "property": "minecraft:custom_model_data",
+    "entries": [
+      {
+        "threshold": 2970372,
+        "model": {
+          "type": "minecraft:model",
+          "model": "techproject:item/dimension_anchor"
+        }
+      },
+      {
+        "threshold": 6552473,
+        "model": {
+          "type": "minecraft:model",
+          "model": "techproject:item/antimatter_synthesizer"
+        }
+      },
+      {
+        "threshold": 6655314,
+        "model": {
+          "type": "minecraft:model",
+          "model": "techproject:item/quantum_processor"
+        }
+      },
+      {
+        "threshold": 7194495,
+        "model": {
+          "type": "minecraft:model",
+          "model": "techproject:item/anchor_forge"
+        }
+      }
+    ],
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "minecraft:item/respawn_anchor"
+    }
+  }
+}

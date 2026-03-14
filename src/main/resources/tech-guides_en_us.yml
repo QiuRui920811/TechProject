@@ -1,0 +1,194 @@
+guides:
+  starter_path:
+    title: "Starter Path: Your First Tech Line"
+    topic: Start
+    preview: Craft the first machines by hand, then learn power, placement, and routing.
+    lines:
+      - Start with either Solar Generator or Coal Generator. Both are meant to be hand-crafted starter machines.
+      - Place the generator directly beside a Crusher, then feed ores into the top input row.
+      - Add Electric Saw and Recycler early so wood and recycled materials stop bottlenecking the factory.
+      - Auto Farm is the farming entry point, then you branch into Greenhouse, Bio Lab, and Crop Harvester.
+      - When power production and consumption split into different areas, add Battery Bank, Energy Node, and Energy Cable.
+      - For logistics over distance, use Logistics Node and Item Tube instead of only relying on adjacent faces.
+      - Fishing Dock needs water, Tree Feller only targets natural trees, and Mob Collector ignores named or tamed mobs.
+      - Quarry Drill is safest above real mining zones and skips exposed ores by default.
+  chapter_01:
+    title: "Chapter 1: Industrial Start"
+    topic: Getting Started
+    preview: Move from manual crafting into your first stable machine line.
+    lines:
+      - Treat the Crusher, Furnace, and Solar Generator as one starter production loop.
+      - Do not rush every machine at once; stabilize crushing, smelting, and power first.
+      - The TechBook should tell you what bottleneck to solve next.
+      - Once steel plate production is stable, your midgame foundation is already forming.
+      - Machine GUIs matter because upgrades, routing, and recipe details live there.
+  chapter_02:
+    title: "Chapter 2: Power Backbone"
+    topic: Energy
+    preview: Understand generators, batteries, nodes, and cables as separate roles.
+    lines:
+      - Solar and coal power together make a reliable early hybrid grid.
+      - A Battery Bank belongs between generation and heavy consumers, not in a random corner.
+      - Use Energy Node for long-distance bridging and Energy Cable for continuous corridors.
+      - If a machine is dry on power, check range and routing before blaming the machine.
+      - Range Upgrade is especially valuable on network backbone machines.
+  chapter_03:
+    title: "Chapter 3: Logistics and Direction"
+    topic: Logistics
+    preview: Learn why items do not move by magic and how to route them correctly.
+    lines:
+      - Logistics sends materials only toward machines that can actually use them.
+      - The source machine follows its output side, and the destination follows its input side.
+      - Logistics Node and Item Tube extend transport beyond direct adjacency.
+      - Build main lines and branches instead of letting every route overlap.
+      - When transport stalls, inspect full outputs before rebuilding the whole system.
+  chapter_04:
+    title: "Chapter 4: Upgrade Modules"
+    topic: Upgrades
+    preview: The role of speed, efficiency, stack, and range modules.
+    lines:
+      - Speed Upgrade increases processing cadence but also stresses supply lines.
+      - Efficiency Upgrade lowers energy pressure and shines on advanced machines.
+      - Stack Upgrade is strongest when input supply is already stable.
+      - Range Upgrade expands how far energy and logistics can search.
+      - With only three upgrade slots, build around the real bottleneck.
+  chapter_05:
+    title: "Chapter 5: Agriculture and Biomass"
+    topic: Farming
+    preview: Turn crop production into chemical and industrial feedstock.
+    lines:
+      - AutoFarm crops are not only food; they are industrial resources.
+      - Greenhouse converts plant throughput into hydro gel and growth support materials.
+      - Bio Lab turns crops and wood dust into bio resin for later chains.
+      - Early automation of farm lines reduces pressure on polymer and coolant production.
+      - A separate logistics backbone for farming prevents cross-line starvation.
+  chapter_06:
+    title: "Chapter 6: Recycling and Polymers"
+    topic: Recycling
+    preview: Recycler is a resource recovery engine, not just a trash can.
+    lines:
+      - Recycled material is part of real production chains, especially plastics.
+      - Wood dust and recycled outputs keep reappearing in later recipes.
+      - If the recycle line dies, several higher-tech chains quietly collapse.
+      - Recycling deserves stable power because it feeds too many downstream steps.
+      - Large factories should view recovery as material return flow, not waste disposal.
+  chapter_07:
+    title: "Chapter 7: Wires and Grid Design"
+    topic: Grid
+    preview: Distinguish crafted wire parts from actual network blocks.
+    lines:
+      - Copper wire and steel wire are components, while Energy Cable is infrastructure.
+      - Keep item and energy backbones conceptually separate for easier debugging.
+      - If the grid stretches too far, add nodes and range support before adding more demand.
+      - Leave space around major junctions because late-game rewiring is expensive.
+      - Factory reliability often depends more on topology than raw machine count.
+  chapter_08:
+    title: "Chapter 8: Precision Manufacturing"
+    topic: Precision
+    preview: Laser-grade components become the bridge into quantum technology.
+    lines:
+      - Laser Engraver produces etched circuits and control-grade parts.
+      - Without stable optical and advanced circuit flow, quantum progress stalls.
+      - Precision chains usually fail from dirty supply, not from missing recipes.
+      - Keep laser production away from bulk assembly when possible.
+      - Efficiency modules are especially strong in this zone.
+  chapter_09:
+    title: "Chapter 9: Quantum Industry"
+    topic: Quantum
+    preview: Build from quantum chips toward field systems and late-game components.
+    lines:
+      - Quantum Processor is a progression wall, not just a faster crafter.
+      - Flux links, phase plates, and field emitters support multiple endgame branches.
+      - If quantum lines repeatedly starve, the logistics backbone is usually the problem.
+      - Splitting quantum infrastructure into its own district makes scaling easier.
+      - Battery support and network nodes should be ready before expansion.
+  chapter_10:
+    title: "Chapter 10: Endgame Matter Chain"
+    topic: Endgame
+    preview: Progress from void extraction into omega-grade fabrication.
+    lines:
+      - Void Extractor opens the route into dark matter and void-based components.
+      - Graviton Stabilizer and Singularity Press form the structural core of endgame industry.
+      - Antimatter, stellar, chrono, entropy, and celestial tiers stack on top of each other.
+      - Omega Core is the symbolic end result of a mature industrial empire.
+      - These machines reward strong efficiency and long-range network planning.
+  chapter_11:
+    title: "Chapter 11: Long-Range Network Layout"
+    topic: Networks
+    preview: Scale from one workshop into a distributed industrial campus.
+    lines:
+      - Main trunks and side branches should be intentional rather than accidental.
+      - Long-distance energy should pivot around Energy Nodes with cables filling gaps.
+      - Long-distance items should pivot around Logistics Nodes with tubes extending lines.
+      - Critical junctions should use direction limits to stop circular flow.
+      - If routes cannot find a target, network depth is often too shallow.
+  chapter_12:
+    title: "Chapter 12: Recipe Troubleshooting"
+    topic: Troubleshooting
+    preview: What to inspect when a machine has items and power but still does nothing.
+    lines:
+      - Confirm the actual item IDs match the recipe requirements.
+      - Check whether output storage has free or stackable space.
+      - Verify sufficient energy and valid input routing.
+      - On remote networks, confirm that nodes can search far enough to reach supply.
+      - High speed with weak supply can look like a frozen machine from the outside.
+  chapter_13:
+    title: "Chapter 13: Upgrade Planning Examples"
+    topic: Upgrades
+    preview: Practical upgrade combinations for different roles.
+    lines:
+      - Generators usually benefit more from range and efficiency than speed.
+      - Bulk processors often gain the most from speed plus stack.
+      - Heavy endgame machines almost always justify efficiency modules.
+      - Backbone relay machines often value range more than production volume.
+      - If uncertain, identify the actual bottleneck before filling every slot.
+  chapter_14:
+    title: "Chapter 14: District-Based Factory Design"
+    topic: Factory
+    preview: Split the factory into stable districts instead of one giant blob.
+    lines:
+      - Power, smelting, farming, chemistry, quantum, and endgame work best as separate districts.
+      - Connect districts with network backbones instead of stacking everything face-to-face.
+      - Centralizing intermediate parts is easier to maintain than duplicating them everywhere.
+      - If outputs keep clogging, expand transport before adding even more production.
+      - Good district design makes later rewiring dramatically less painful.
+  chapter_15:
+    title: "Chapter 15: Suggested Endgame Order"
+    topic: Endgame
+    preview: A smoother route through the final technology tiers.
+    lines:
+      - Stabilize quantum industry and the transport backbone first.
+      - Then build void and graviton prerequisites for dark matter throughput.
+      - After that, push into singularity and antimatter as your terminal material core.
+      - With stellar and orbital parts online, move into chrono, entropy, and celestial systems.
+      - Omega Core should be the result of a completed industrial structure, not a rushed shortcut.
+  chapter_16:
+    title: "Chapter 16: Cryo and Plasma Frontier"
+    topic: Expansion
+    preview: How the cryogenic and plasma lines extend your late industrial backbone.
+    lines:
+      - Cryo Distiller supports extreme thermal stability for demanding endgame systems.
+      - Plasma Refiner turns fusion progress into denser industrial-grade materials.
+      - Reactor Lattice becomes a recurring frame component for time and megastructure tiers.
+      - Both lines deserve stable backbone power rather than improvised side branches.
+      - If hot and cold chains share space, direction control matters even more.
+  chapter_17:
+    title: "Chapter 17: Observatory and Archive Industry"
+    topic: Expansion
+    preview: Convert optics and data into a true late-game information chain.
+    lines:
+      - Photon Weaver prepares the optical tier needed for large observation systems.
+      - Observatory blends optics, gravity parts, and data structures into new intermediates.
+      - Data Core and Archive Plate later feed directly into deeper archive technology.
+      - This branch is not cosmetic; it supports Apex and archive-grade recipes.
+      - Control units and data matrices are frequent supply bottlenecks here.
+  chapter_18:
+    title: "Chapter 18: Megastructure Endgame"
+    topic: Megastructure
+    preview: Progress from starsteel industry into warp, continuum, and apex fabrication.
+    lines:
+      - Starsteel Foundry and Vacuum Chamber form the twin entry points to megastructure play.
+      - Warp Assembler brings space-warp hardware into the factory core.
+      - Event Horizon Smith and Anchor Forge handle singularity shells and spatial anchoring.
+      - Continuum Lathe consumes a lot of upstream structure parts and needs strong logistics.
+      - Apex Forge and Omega Archive should feel like the final expression of a mature base.

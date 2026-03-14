@@ -1,0 +1,26 @@
+{
+  "model": {
+    "type": "minecraft:range_dispatch",
+    "property": "minecraft:custom_model_data",
+    "entries": [
+      {
+        "threshold": 2489818,
+        "model": {
+          "type": "minecraft:model",
+          "model": "techproject:item/void_crystal"
+        }
+      },
+      {
+        "threshold": 2969405,
+        "model": {
+          "type": "minecraft:model",
+          "model": "techproject:item/crystal_seed"
+        }
+      }
+    ],
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "minecraft:item/amethyst_shard"
+    }
+  }
+}

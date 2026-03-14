@@ -1,0 +1,26 @@
+{
+  "model": {
+    "type": "minecraft:range_dispatch",
+    "property": "minecraft:custom_model_data",
+    "entries": [
+      {
+        "threshold": 1021457,
+        "model": {
+          "type": "minecraft:model",
+          "model": "techproject:item/purified_shard"
+        }
+      },
+      {
+        "threshold": 3344094,
+        "model": {
+          "type": "minecraft:model",
+          "model": "techproject:item/photon_shard"
+        }
+      }
+    ],
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "minecraft:item/prismarine_crystals"
+    }
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "model": {
+    "type": "minecraft:range_dispatch",
+    "property": "minecraft:custom_model_data",
+    "entries": [
+      {
+        "threshold": 6967699,
+        "model": {
+          "type": "minecraft:model",
+          "model": "techproject:item/battery_bank"
+        }
+      }
+    ],
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "minecraft:item/redstone_lamp"
+    }
+  }
+}

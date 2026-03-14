@@ -1,0 +1,19 @@
+{
+  "model": {
+    "type": "minecraft:range_dispatch",
+    "property": "minecraft:custom_model_data",
+    "entries": [
+      {
+        "threshold": 1502935,
+        "model": {
+          "type": "minecraft:model",
+          "model": "techproject:item/nanite_cluster"
+        }
+      }
+    ],
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "minecraft:item/prismarine_shard"
+    }
+  }
+}

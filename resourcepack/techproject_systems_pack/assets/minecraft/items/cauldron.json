@@ -1,0 +1,40 @@
+{
+  "model": {
+    "type": "minecraft:range_dispatch",
+    "property": "minecraft:custom_model_data",
+    "entries": [
+      {
+        "threshold": 6103681,
+        "model": {
+          "type": "minecraft:model",
+          "model": "techproject:item/purifier"
+        }
+      },
+      {
+        "threshold": 6175013,
+        "model": {
+          "type": "minecraft:model",
+          "model": "techproject:item/biosynth_vat"
+        }
+      },
+      {
+        "threshold": 6455408,
+        "model": {
+          "type": "minecraft:model",
+          "model": "techproject:item/coolant_mixer"
+        }
+      },
+      {
+        "threshold": 6868018,
+        "model": {
+          "type": "minecraft:model",
+          "model": "techproject:item/nanite_foundry"
+        }
+      }
+    ],
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "minecraft:item/cauldron"
+    }
+  }
+}

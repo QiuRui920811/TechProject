@@ -1,0 +1,26 @@
+{
+  "model": {
+    "type": "minecraft:range_dispatch",
+    "property": "minecraft:custom_model_data",
+    "entries": [
+      {
+        "threshold": 1754362,
+        "model": {
+          "type": "minecraft:model",
+          "model": "techproject:item/coolant_mix"
+        }
+      },
+      {
+        "threshold": 4394332,
+        "model": {
+          "type": "minecraft:model",
+          "model": "techproject:item/cryo_core"
+        }
+      }
+    ],
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "minecraft:item/blue_ice"
+    }
+  }
+}

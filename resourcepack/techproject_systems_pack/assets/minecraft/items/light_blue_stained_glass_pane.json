@@ -1,0 +1,26 @@
+{
+  "model": {
+    "type": "minecraft:range_dispatch",
+    "property": "minecraft:custom_model_data",
+    "entries": [
+      {
+        "threshold": 830003,
+        "model": {
+          "type": "minecraft:model",
+          "model": "techproject:item/hud_light_blue_panel"
+        }
+      },
+      {
+        "threshold": 830103,
+        "model": {
+          "type": "minecraft:model",
+          "model": "techproject:item/hud_light_blue_info"
+        }
+      }
+    ],
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "minecraft:item/light_blue_stained_glass_pane"
+    }
+  }
+}
