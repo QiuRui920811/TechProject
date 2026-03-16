@@ -24,6 +24,7 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
+import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
@@ -1805,6 +1806,7 @@ public final class TechBookService {
         final List<String> localizedLines = lines.stream().map(this.itemFactory::localizeInlineTerms).toList();
         meta.displayName(this.itemFactory.warning(this.itemFactory.localizeInlineTerms(title)));
         meta.lore(this.itemFactory.mutedLore(localizedLines));
+        meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES, ItemFlag.HIDE_ADDITIONAL_TOOLTIP);
         this.itemFactory.applyGuiHudModel(meta, stack.getType(), true);
         stack.setItemMeta(meta);
         return stack;

@@ -18,6 +18,7 @@
 - [三階 — 高階機器](machines/tier-3.md)
 - [四階 — 終局機器](machines/tier-4.md)
 - [巨構機器](machines/megastructures.md)
+- [⚡ 純電力版機器](machines/electric-machines.md)
 
 # 🧱 物品百科
 

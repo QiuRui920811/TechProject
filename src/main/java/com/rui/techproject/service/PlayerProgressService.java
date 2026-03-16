@@ -238,6 +238,14 @@ public final class PlayerProgressService {
         this.storageBackend.savePlayerProgress(uuid, data);
     }
 
+    /**
+     * 儲存並從快取中移除離線玩家的進度資料，避免記憶體洩漏。
+     */
+    public void saveAndEvict(final UUID uuid) {
+        this.save(uuid);
+        this.cache.remove(uuid);
+    }
+
     public void saveAll() {
         for (final UUID uuid : this.cache.keySet()) {
             this.save(uuid);

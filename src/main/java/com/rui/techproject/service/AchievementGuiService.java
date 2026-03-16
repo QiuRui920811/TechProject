@@ -7,6 +7,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.kyori.adventure.title.Title;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -212,15 +213,16 @@ public final class AchievementGuiService {
                         player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 0.5f, 0.8f);
                     } else {
                         final String titleDisplay = this.titleService.getTitleDisplay(achievement.id());
+                        final Component titleComp = LegacyComponentSerializer.legacySection().deserialize(titleDisplay);
                         this.titleService.setTitle(player.getUniqueId(), achievement.id());
                         player.sendMessage(Component.empty());
                         player.sendMessage(Component.text("  ★ 稱號已裝備！", NamedTextColor.GOLD).decoration(TextDecoration.BOLD, true));
-                        player.sendMessage(Component.text("    " + titleDisplay, TextColor.color(0xFFD700)));
+                        player.sendMessage(Component.text("    ").append(titleComp));
                         player.sendMessage(Component.text("    你的稱號將顯示在名稱前方", TextColor.color(0x888888)));
                         player.sendMessage(Component.empty());
-                        player.sendActionBar(Component.text("★ 稱號裝備：" + titleDisplay, NamedTextColor.GOLD));
+                        player.sendActionBar(Component.text("★ 稱號裝備：", NamedTextColor.GOLD).append(titleComp));
                         player.showTitle(Title.title(
-                                Component.text(titleDisplay, TextColor.color(0xFFD700)),
+                                titleComp,
                                 Component.text("稱號已裝備！", TextColor.color(0xAAAAAA)),
                                 Title.Times.times(
                                         java.time.Duration.ofMillis(200),
@@ -356,7 +358,7 @@ public final class AchievementGuiService {
         // 獎勵
         lore.add(Component.text("  ┌─ 獎勵 ─────────────────┐", TextColor.color(0x888888)).decoration(TextDecoration.ITALIC, false));
         if (achievement.rewardXp() > 0) {
-            lore.add(Component.text("  │ ⭐ 研究 XP +" + achievement.rewardXp(), XP_COLOR).decoration(TextDecoration.ITALIC, false));
+            lore.add(Component.text("  │ ⭐ 研究經驗 +" + achievement.rewardXp(), XP_COLOR).decoration(TextDecoration.ITALIC, false));
         }
         if (achievement.rewardTokens() > 0) {
             lore.add(Component.text("  │ 🪙 能源代幣 ×" + achievement.rewardTokens(), TOKEN_COLOR).decoration(TextDecoration.ITALIC, false));
@@ -365,7 +367,8 @@ public final class AchievementGuiService {
 
         if (this.titleService != null && this.titleService.hasTitle(achievement.id())) {
             lore.add(Component.empty());
-            lore.add(Component.text("  🏷 稱號: " + this.titleService.getTitleDisplay(achievement.id()), TITLE_EQUIPPED).decoration(TextDecoration.ITALIC, false));
+            final Component titleComp = LegacyComponentSerializer.legacySection().deserialize(this.titleService.getTitleDisplay(achievement.id()));
+            lore.add(Component.text("  🏷 稱號: ", TITLE_EQUIPPED).decoration(TextDecoration.ITALIC, false).append(titleComp));
             if (unlocked) {
                 if (isEquipped) {
                     lore.add(Component.text("  ✦ 點擊取消裝備", TextColor.color(0xFF6666)).decoration(TextDecoration.ITALIC, false));
@@ -435,8 +438,8 @@ public final class AchievementGuiService {
         meta.displayName(Component.text("📖 研究等級", XP_COLOR).decoration(TextDecoration.ITALIC, false));
         meta.lore(List.of(
                 Component.empty(),
-                Component.text("  等級: Lv." + level, XP_COLOR).decoration(TextDecoration.ITALIC, false),
-                Component.text("  累計 XP: " + xp, TextColor.color(0xDDDDDD)).decoration(TextDecoration.ITALIC, false)
+                Component.text("  等級：Lv." + level, XP_COLOR).decoration(TextDecoration.ITALIC, false),
+                Component.text("  累計經驗：" + xp, TextColor.color(0xDDDDDD)).decoration(TextDecoration.ITALIC, false)
         ));
         meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES, ItemFlag.HIDE_ADDITIONAL_TOOLTIP);
         stack.setItemMeta(meta);

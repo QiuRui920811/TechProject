@@ -126,7 +126,7 @@ public final class TechCommand implements CommandExecutor, TabCompleter {
                 return true;
             }
             if (!args[1].equalsIgnoreCase("add")) {
-                sender.sendMessage(Component.text("用法：/tech xp add <amount> [player]", NamedTextColor.RED));
+                sender.sendMessage(Component.text("用法：/tech xp add <數量> [玩家]", NamedTextColor.RED));
                 return true;
             }
             if (!sender.hasPermission("techproject.admin")) {
@@ -134,7 +134,7 @@ public final class TechCommand implements CommandExecutor, TabCompleter {
                 return true;
             }
             if (args.length < 3) {
-                sender.sendMessage(Component.text("用法：/tech xp add <amount> [player]", NamedTextColor.RED));
+                sender.sendMessage(Component.text("用法：/tech xp add <數量> [玩家]", NamedTextColor.RED));
                 return true;
             }
             final long amount;
@@ -290,7 +290,7 @@ public final class TechCommand implements CommandExecutor, TabCompleter {
                 return true;
             }
             if (args.length < 2) {
-                sender.sendMessage(Component.text("用法：/tech give <id> [player]", NamedTextColor.RED));
+                sender.sendMessage(Component.text("用法：/tech give <物品代碼> [玩家]", NamedTextColor.RED));
                 return true;
             }
 

@@ -327,7 +327,7 @@ public final class ItemFactoryUtil {
         if (maxEnergy > 0L) {
             lore.add(this.colored("├─────────────────────────┤", MUTED));
             lore.add(this.itemEnergyBarLine(maxEnergy, maxEnergy));
-            lore.add(this.colored("  ▸ Shift+右鍵 對準儲能機器充電", TextColor.color(0x8AACCC)));
+            lore.add(this.colored("  ▸ 蹲下+右鍵 對準儲能機器充電", TextColor.color(0x8AACCC)));
         }
         lore.add(this.colored("└─────────────────────────┘", MUTED));
         meta.lore(lore);
@@ -800,28 +800,28 @@ public final class ItemFactoryUtil {
 
     public List<String> machineIoSummaryLines(final MachineDefinition definition) {
         if (definition == null) {
-            return List.of("I/O：未知");
+            return List.of("傳輸：未知");
         }
         final String normalizedId = definition.id().toLowerCase(Locale.ROOT);
         return switch (normalizedId) {
-            case "research_desk" -> List.of("I/O：無物品加工，右鍵直接開研究台");
-            case "solar_generator", "solar_array", "storm_turbine" -> List.of("I/O：不處理物品，只負責發電");
-            case "coal_generator" -> List.of("燃料輸入：煤 / 煤粉", "I/O：只負責供電，不產物品");
-            case "battery_bank" -> List.of("I/O：不改變物品，只做儲能與轉運");
-            case "energy_node", "energy_cable" -> List.of("I/O：只轉送電力，不處理物品");
-            case "logistics_node", "item_tube" -> List.of("I/O：只搬運物品，不改變物品種類");
-            case "storage_hub" -> List.of("I/O：大型物流緩衝，不改變物品種類");
-            case "filter_router" -> List.of("模板輸入：第 1 格放樣本", "I/O：只分流符合樣本的物品");
-            case "splitter_node" -> List.of("I/O：把單一路徑平均拆往多條輸出");
-            case "industrial_bus" -> List.of("I/O：高吞吐物流主幹，不改變物品種類");
-            case "crop_harvester" -> List.of("I/O：自動收成熟作物並重植，無需手動放入材料");
-            case "vacuum_inlet" -> List.of("I/O：自動吸入附近掉落物，無需手動放入材料");
-            case "tree_feller" -> List.of("I/O：自動砍自然樹並回收原木 / 樹苗");
-            case "mob_collector" -> List.of("I/O：自動收白名單生物掉落，無需手動放入材料");
-            case "fishing_dock" -> List.of("I/O：依水域條件隨機取得漁獲");
-            case "quarry_drill", "quarry_drill_mk2", "quarry_drill_mk3" -> List.of("燃料輸入：上方箱子的木炭 / 岩漿桶", "I/O：採出的礦物與副產物都回到上方箱子");
-            case "planetary_gate" -> List.of("I/O：不處理物品，消耗電力啟動星球傳送");
-            case "planetary_harvester" -> List.of("I/O：自動回收星球節點樣本，無需手動放入材料");
+            case "research_desk" -> List.of("傳輸：無物品加工，右鍵直接開研究台");
+            case "solar_generator", "solar_array", "storm_turbine" -> List.of("傳輸：不處理物品，只負責發電");
+            case "coal_generator" -> List.of("燃料輸入：煤 / 煤粉", "傳輸：只負責供電，不產物品");
+            case "battery_bank" -> List.of("傳輸：不改變物品，只做儲能與轉運");
+            case "energy_node", "energy_cable" -> List.of("傳輸：只轉送電力，不處理物品");
+            case "logistics_node", "item_tube" -> List.of("傳輸：只搬運物品，不改變物品種類");
+            case "storage_hub" -> List.of("傳輸：大型物流緩衝，不改變物品種類");
+            case "filter_router" -> List.of("模板輸入：第 1 格放樣本", "傳輸：只分流符合樣本的物品");
+            case "splitter_node" -> List.of("傳輸：把單一路徑平均拆往多條輸出");
+            case "industrial_bus" -> List.of("傳輸：高吞吐物流主幹，不改變物品種類");
+            case "crop_harvester" -> List.of("傳輸：自動收成熟作物並重植，無需手動放入材料");
+            case "vacuum_inlet" -> List.of("傳輸：自動吸入附近掉落物，無需手動放入材料");
+            case "tree_feller" -> List.of("傳輸：自動砍自然樹並回收原木 / 樹苗");
+            case "mob_collector" -> List.of("傳輸：自動收白名單生物掉落，無需手動放入材料");
+            case "fishing_dock" -> List.of("傳輸：依水域條件隨機取得漁獲");
+            case "quarry_drill", "quarry_drill_mk2", "quarry_drill_mk3" -> List.of("燃料輸入：上方箱子的木炭 / 岩漿桶", "傳輸：採出的礦物與副產物都回到上方箱子");
+            case "planetary_gate" -> List.of("傳輸：不處理物品，消耗電力啟動星球傳送");
+            case "planetary_harvester" -> List.of("傳輸：自動回收星球節點樣本，無需手動放入材料");
             default -> {
                 final boolean hasRecipes = !this.registry.getRecipesForMachine(definition.id()).isEmpty();
                 if (hasRecipes) {
@@ -850,25 +850,28 @@ public final class ItemFactoryUtil {
             case "battery_bank" -> List.of("傳輸：每側最多充 / 放 4 EU / 刻");
             case "energy_node", "energy_cable" -> List.of("限制：需檢查輸入 / 輸出方向與網路深度");
             case "logistics_node", "item_tube" -> List.of("限制：來源看輸出方向，目標看輸入方向");
-            case "storage_hub" -> List.of("吞吐：每 tick 最多內搬 9 件，外送 2 件", "升級：range 會增加物流網深度");
-            case "filter_router" -> List.of("規則：第 1 格模板會保留 1 件不被搬走", "吞吐：每 tick 內搬 4 件，外送 2 件");
-            case "splitter_node" -> List.of("規則：輸出目標會輪轉，平均分流", "吞吐：每 tick 內搬 / 外送各 3 件");
-            case "industrial_bus" -> List.of("吞吐：每 tick 內搬 / 外送各 6 件", "升級：range 會額外擴大物流深度");
-            case "greenhouse" -> List.of("副功能：每 6 刻會對周圍 2 格內作物做一次催熟脈衝", "升級：speed / efficiency / stack 影響配方，range 不影響催熟半徑");
-            case "crop_harvester" -> List.of("範圍：半徑 2 + range_upgrade", "耗能：每次收割 8 EU，需成熟作物");
-            case "vacuum_inlet" -> List.of("範圍：半徑 2.5 + range_upgrade", "限制：掉落物需達最小存在時間且可被撿取");
-            case "tree_feller" -> List.of("範圍：半徑 2 + range_upgrade（上限額外 +2）", "限制：只會處理自然樹；單次耗能隨樹幹數增加");
-            case "mob_collector" -> List.of("範圍：半徑 4 + range_upgrade", "限制：不處理命名、馴服、拴繩、幼體與黑名單目標");
+            case "storage_hub" -> List.of("吞吐：每刻最多內搬 9 件，外送 2 件", "升級：範圍模組會增加物流網深度");
+            case "filter_router" -> List.of("規則：第 1 格模板會保留 1 件不被搬走", "吞吐：每刻內搬 4 件，外送 2 件");
+            case "splitter_node" -> List.of("規則：輸出目標會輪轉，平均分流", "吞吐：每刻內搬 / 外送各 3 件");
+            case "industrial_bus" -> List.of("吞吐：每刻內搬 / 外送各 6 件", "升級：範圍模組會額外擴大物流深度");
+            case "greenhouse" -> List.of("副功能：每 6 刻會對周圍 2 格內作物做一次催熟脈衝", "升級：速度 / 效率 / 產量 影響配方，範圍不影響催熟半徑");
+            case "crop_harvester" -> List.of("範圍：半徑 2 + 範圍模組", "耗能：每次收割 8 EU，需成熟作物");
+            case "vacuum_inlet" -> List.of("範圍：半徑 2.5 + 範圍模組", "限制：掉落物需達最小存在時間且可被撿取");
+            case "tree_feller" -> List.of("範圍：半徑 2 + 範圍模組（上限額外 +2）", "限制：只會處理自然樹；單次耗能隨樹幹數增加");
+            case "mob_collector" -> List.of("範圍：半徑 4 + 範圍模組", "限制：不處理命名、馴服、拴繩、幼體與黑名單目標");
             case "fishing_dock" -> List.of("條件：周圍至少 3 格相鄰水面", "耗能：每次釣取 7 EU");
             case "quarry_drill" -> List.of("結構：中心高爐 + 上方箱子 + 兩側鐵塊與雙鑽機", "限制：需燃料，會掃描所在區塊往下所有礦物");
             case "quarry_drill_mk2" -> List.of("結構：與 Mk1 相同", "效率：每輪 2 次作業，單次耗能更高");
             case "quarry_drill_mk3" -> List.of("結構：與 Mk1 相同", "效率：同樣掃整個所在區塊，但每輪 4 次作業、單次產量更高");
             case "planetary_gate" -> List.of("操作：右鍵打開 54 格航線面板，點選星球或地球直接傳送", "限制：啟動時需站在門上，且目標世界必須就緒");
-            case "planetary_harvester" -> List.of("世界限制：只能在星球世界運作", "範圍：半徑 3 + range_upgrade，垂直 -1 ~ +3");
+            case "planetary_harvester" -> List.of("世界限制：只能在星球世界運作", "範圍：半徑 3 + 範圍模組，垂直 -1 ~ +3");
+            case "electric_crusher", "electric_compressor", "electric_ore_washer", "electric_wire_mill",
+                 "electric_purifier", "electric_centrifuge", "electric_bio_lab", "electric_chemical_reactor" ->
+                    List.of("純電力版：全自動加工，不需手動右鍵觸發", "升級：速度提高處理次數、效率降低配方耗能、產量提高單次產量");
             default -> {
                 final boolean hasRecipes = !this.registry.getRecipesForMachine(definition.id()).isEmpty();
                 if (hasRecipes) {
-                    yield List.of("升級：speed 提高處理次數、efficiency 降低配方耗能、stack 提高單次產量");
+                    yield List.of("升級：速度提高處理次數、效率降低配方耗能、產量提高單次產量");
                 }
                 yield List.of();
             }
@@ -883,20 +886,20 @@ public final class ItemFactoryUtil {
             case "research_desk" -> List.of("這台不加工，右鍵直接開研究台。", "建議放在主基地中央或科技書旁。");
             case "solar_generator", "solar_array" -> List.of("盡量露天，正上方不要被遮住。", "初期最常直接貼著粉碎機或電池庫。");
             case "coal_generator" -> List.of("貼著耗能機器放，並持續補煤。", "最適合補夜間缺口或當備援電源。");
-            case "crusher" -> List.of("核心上方先加鐵柵欄，接好電後右鍵鐵柵欄才會開始粉碎。", "Shift + 右鍵核心可開介面，這台現在不是全自動連續加工。");
+            case "crusher" -> List.of("核心上方先加鐵柵欄，接好電後右鍵鐵柵欄才會開始粉碎。", "蹲下 + 右鍵核心可開介面，這台現在不是全自動連續加工。");
             case "electric_saw", "recycler" -> List.of("旁邊先接任一發電機。", "輸出欄滿了就會停機，物流最好往外拉。");
             case "auto_farm" -> List.of("先接發電，再放入對應原料做農務配方。", "後續可往溫室、生物實驗室、作物收割機延伸。");
             case "battery_bank" -> List.of("放在發電區與耗能區之間當緩衝。", "這台不做配方，只做儲放電。");
             case "greenhouse" -> List.of("最好貼著農田區或自動農場。", "周圍 2 格內有作物時，催熟效果才會發揮。");
             case "energy_node", "energy_cable" -> List.of("用來把發電區跨區接到耗能區。", "若傳不到電，先檢查方向與中繼距離。");
             case "logistics_node", "item_tube" -> List.of("接在產線中段當幹線延伸。", "來源看輸出方向，目標看輸入方向。");
-            case "crop_harvester" -> List.of("請與作物同高度，周圍最好是農地。", "會自動重植，半徑受 range 升級影響。");
+            case "crop_harvester" -> List.of("請與作物同高度，周圍最好是農地。", "會自動重植，半徑受範圍升級影響。");
             case "vacuum_inlet" -> List.of("放在掉落物集中區中央最有效。", "只會吸可撿取、存在時間足夠的掉落物。");
             case "storm_turbine" -> List.of("建議放高處方便接電與觀察。", "暴雨天供電最強，後方最好接電池庫。");
             case "tree_feller" -> List.of("貼著樹列底部放置，系統只會處理自然樹。", "建議和真空吸入口同區，避免原木滿地。");
             case "mob_collector" -> List.of("放在刷怪塔或畜牧區外圍。", "不會收命名、生物被馴服、拴繩或幼年個體。");
             case "fishing_dock" -> List.of("至少要有 3 格相鄰水面。", "最適合放在岸邊或人工魚池邊。");
-            case "quarry_drill" -> List.of("中心改放原版高爐，上方放箱子，同一軸兩側放鐵方塊，鐵方塊上方各放一台採礦鑽機。", "燃料直接放上方箱子，右鍵中央高爐啟動；Shift + 右鍵中央高爐才會開介面。");
+            case "quarry_drill" -> List.of("中心改放原版高爐，上方放箱子，同一軸兩側放鐵方塊，鐵方塊上方各放一台採礦鑽機。", "燃料直接放上方箱子，右鍵中央高爐啟動；蹲下 + 右鍵中央高爐才會開介面。");
             case "quarry_drill_mk2" -> List.of("結構與 Mk1 相同，但每輪會抽更多礦。", "建議先有穩定供電與燃料箱。");
             case "quarry_drill_mk3" -> List.of("結構與 Mk1 相同，但抽礦效率最高、耗電也最大。", "同樣掃描所在區塊，只是每輪次數與產量更高。");
             case "storage_hub" -> List.of("適合放在多條產線交會點。", "先當大緩衝，再往過濾器 / 總線分流。");
@@ -905,6 +908,14 @@ public final class ItemFactoryUtil {
             case "industrial_bus" -> List.of("放在主幹道中央，前後各接數條支線。", "吞吐量高，適合跨區物流骨幹。");
             case "planetary_gate" -> List.of("右鍵打開星門航線選單，中央可直接選五顆星球與地球。", "平時維持 12 EU/刻吸能，每次傳送額外消耗 1200 EU；真正啟動前仍要站在門上。");
             case "planetary_harvester" -> List.of("只能放在星球上。", "會掃附近固定生成且會逐點恢復的異星資源節點。");
+            case "electric_crusher" -> List.of("純電力版粉碎機，放下即自動加工，不需手動右鍵。", "耗能約手動版 2×，建議接穩定供電。");
+            case "electric_compressor" -> List.of("純電力版壓縮機，全自動持續壓製。", "接好物流與電源即可無人運作。");
+            case "electric_ore_washer" -> List.of("純電力版洗礦機，自動洗礦無需拉桿。", "耗能約手動版 2×。");
+            case "electric_wire_mill" -> List.of("純電力版拉線機，自動拉線無需手動觸發。", "耗能約手動版 2×。");
+            case "electric_purifier" -> List.of("純電力版淨化器，自動淨化無需按鈕。", "耗能約手動版 2.4×。");
+            case "electric_centrifuge" -> List.of("純電力版離心機，自動離心無需手動觸發。", "耗能約手動版 2×，建議配效率升級。");
+            case "electric_bio_lab" -> List.of("純電力版生質實驗室，自動培養無需手動觸發。", "耗能約手動版 2×。");
+            case "electric_chemical_reactor" -> List.of("純電力版化學反應器，全自動反應。", "耗能約手動版 2×，高端產線必備。");
             default -> List.of();
         };
     }
@@ -1172,6 +1183,13 @@ public final class ItemFactoryUtil {
             case "quarry_mined" -> "採礦數";
             case "vacuum_collected" -> "吸入物品";
             case "storm_energy" -> "風暴發電";
+            case "planet_elites_defeated" -> "擊敗星球精英";
+            case "planets_visited" -> "探訪星球";
+            case "planet_harvested" -> "星球採集";
+            case "trees_felled" -> "伐木數";
+            case "mobs_collected" -> "收集生物";
+            case "fish_caught" -> "釣魚數";
+            case "crops_auto_harvested" -> "自動收割";
             default -> this.humanize(statKey);
         };
     }
@@ -2172,7 +2190,7 @@ public final class ItemFactoryUtil {
             lore.add(this.colored("├─────────────────────────┤", MUTED));
             final long currentEnergy = energy != null ? Math.min(energy, maxEnergy) : maxEnergy;
             lore.add(this.itemEnergyBarLine(currentEnergy, maxEnergy));
-            lore.add(this.colored("  ▸ Shift+右鍵 對準儲能機器充電", TextColor.color(0x8AACCC)));
+            lore.add(this.colored("  ▸ 蹲下+右鍵 對準儲能機器充電", TextColor.color(0x8AACCC)));
         }
         lore.add(this.colored("└─────────────────────────┘", MUTED));
         meta.lore(lore);

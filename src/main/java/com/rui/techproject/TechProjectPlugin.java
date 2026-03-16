@@ -410,13 +410,13 @@ public final class TechProjectPlugin extends JavaPlugin {
                 TechTier.TIER3,
                 "machine:laser_engraver&item:advanced_circuit",
                 java.util.List.of(
-                        "擴展接口：供外部 addon 掛入自訂法陣儀式",
-                        "使用 TechAddonService.registerAddon() 可擴展行為",
-                        "參見 TechInteractionType.RITUAL_CIRCLE 文件"
+                        "擴展接口：供外部擴展模組掛入自訂法陣儀式",
+                        "可透過擴展模組定義祭壇 / 法陣 / 多方塊互動",
+                        "由擴展模組自行監聽並實現具體邏輯"
                 ),
                 java.util.List.of(
-                        "Addon 可透過此接口定義祭壇/法陣/多方塊互動",
-                        "由 addon 自行監聽並實現具體邏輯"
+                        "擴展模組可透過此接口定義祭壇 / 法陣 / 多方塊互動",
+                        "由擴展模組自行監聽並實現具體邏輯"
                 )
         ));
                 this.techAddonService.registerInteraction(new TechInteractionDefinition(
@@ -427,13 +427,13 @@ public final class TechProjectPlugin extends JavaPlugin {
                     TechTier.TIER4,
                     "machine:storm_turbine&item:fusion_core",
                     java.util.List.of(
-                        "擴展接口：供外部 addon 掛入多方塊能源結構",
-                        "使用 TechAddonService.registerAddon() 可擴展行為",
-                        "參見 TechInteractionType.MULTIBLOCK 文件"
+                        "擴展接口：供外部擴展模組掛入多方塊能源結構",
+                        "可透過擴展模組定義爆發式發電結構",
+                        "由擴展模組自行監聽並實現具體邏輯"
                     ),
                     java.util.List.of(
-                        "Addon 可透過此接口定義爆發式發電結構",
-                        "由 addon 自行監聽並實現具體邏輯"
+                        "擴展模組可透過此接口定義爆發式發電結構",
+                        "由擴展模組自行監聽並實現具體邏輯"
                     )
                 ));
                 this.techAddonService.registerInteraction(new TechInteractionDefinition(
@@ -444,13 +444,13 @@ public final class TechProjectPlugin extends JavaPlugin {
                     TechTier.TIER3,
                     "machine:industrial_bus&item:quantum_chip",
                     java.util.List.of(
-                        "擴展接口：供外部 addon 掛入跨區域物流連結",
-                        "使用 TechAddonService.registerAddon() 可擴展行為",
-                        "參見 TechInteractionType.MACHINE_LINK 文件"
+                        "擴展接口：供外部擴展模組掛入跨區域物流連結",
+                        "可透過擴展模組定義遠端物流 / 傳送陣",
+                        "由擴展模組自行監聽並實現具體邏輯"
                     ),
                     java.util.List.of(
-                        "Addon 可透過此接口定義遠端物流 / 傳送陣",
-                        "由 addon 自行監聯並實現具體邏輯"
+                        "擴展模組可透過此接口定義遠端物流 / 傳送陣",
+                        "由擴展模組自行監聯並實現具體邏輯"
                     )
                 ));
     }

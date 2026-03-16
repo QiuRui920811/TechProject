@@ -292,6 +292,23 @@ public final class PlanetService {
         this.scheduler.runGlobalTimer(task -> this.tickFruitNodeRegrowths(), FRUIT_REGROWTH_TICK_INTERVAL, FRUIT_REGROWTH_TICK_INTERVAL);
     }
 
+    /**
+     * 清理離線玩家的所有星球相關暑存資料，避免記憶體洩漏。
+     */
+    public void cleanupPlayer(final java.util.UUID playerId) {
+        this.playerActivatedRuins.remove(playerId);
+        this.personalHarvestCooldowns.remove(playerId);
+        this.pendingHarvests.remove(playerId);
+        this.boundaryWarningCooldowns.remove(playerId);
+        this.cuisineWardExpiries.remove(playerId);
+        this.travelingPlayers.remove(playerId);
+        this.openPlanetaryGateMenus.remove(playerId);
+        if (this.travelVessels.containsKey(playerId)) {
+            this.cleanupTravelVessel(playerId);
+        }
+        this.travelPlayerStates.remove(playerId);
+    }
+
     public void shutdown() {
         this.pendingHarvests.clear();
         for (final java.util.UUID playerId : new ArrayList<>(this.travelVessels.keySet())) {

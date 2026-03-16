@@ -28,158 +28,158 @@
 # ═══════════════════════════════════════════════════════════
 
 titles:
-  # ── 入門 ──  柔灰銀色調，象徵萌新起步
+  # ── 入門 ──  冰藍白色
   first_machine:
-    title: "&#7B8FA1[&#C8D4E0機械新手&#7B8FA1]"
+    title: "&#9AA5B4〔&#D6E4F0機械新手&#9AA5B4〕"
   newcomer_craft:
-    title: "&#7B8FA1[&#C8D4E0合成學徒&#7B8FA1]"
+    title: "&#9AA5B4〔&#D6E4F0合成學徒&#9AA5B4〕"
   starter_power:
-    title: "&#7B8FA1[&#C8D4E0電力初心&#7B8FA1]"
+    title: "&#9AA5B4〔&#D6E4F0電力初心&#9AA5B4〕"
   first_research:
-    title: "&#7B8FA1[&#C8D4E0研究見習&#7B8FA1]"
+    title: "&#9AA5B4〔&#D6E4F0研究見習&#9AA5B4〕"
 
-  # ── 加工 ──  銅金色系漸進到赤焰
+  # ── 加工 ──  淡金色
   first_crush:
-    title: "&#8B7355[&#C9A96E碎礦工&#8B7355]"
+    title: "&#9AA5B4〔&#F2D89A碎礦工&#9AA5B4〕"
   first_compress:
-    title: "&#8B7355[&#C9A96E壓縮工&#8B7355]"
+    title: "&#9AA5B4〔&#F2D89A壓縮工&#9AA5B4〕"
   first_smelt:
-    title: "&#8B7355[&#C9A96E冶煉工&#8B7355]"
+    title: "&#9AA5B4〔&#F2D89A冶煉工&#9AA5B4〕"
   assembly_starter:
-    title: "&#8B7355[&#C9A96E組裝技師&#8B7355]"
+    title: "&#9AA5B4〔&#F2D89A組裝技師&#9AA5B4〕"
   process_milestone_100:
-    title: "&#D4A017[&#F5D060百鍊匠&#D4A017]"
+    title: "&#9AA5B4〔&#F5E0A0百鍊匠&#9AA5B4〕"
   process_milestone_500:
-    title: "&#D4A017[&#F5D060流水線之星&#D4A017]"
+    title: "&#9AA5B4〔&#F5E0A0流水線之星&#9AA5B4〕"
   process_milestone_2000:
-    title: "&#C0392B[&#E8734A加工之王&#C0392B]"
+    title: "&#9AA5B4〔&#FFB89A加工之王&#9AA5B4〕"
   recycler_expert:
-    title: "&#2E7D32[&#66BB6A回收大師&#2E7D32]"
+    title: "&#9AA5B4〔&#A8E0A8回收大師&#9AA5B4〕"
 
-  # ── 能源 ──  電光黃橙色系
+  # ── 能源 ──  淡琥珀色
   energy_beginner:
-    title: "&#C8960C[&#F5E060能源學徒&#C8960C]"
+    title: "&#9AA5B4〔&#FFE29D能源學徒&#9AA5B4〕"
   energy_500:
-    title: "&#D4A017[&#FFD040小型電廠&#D4A017]"
+    title: "&#9AA5B4〔&#FFE29D小型電廠&#9AA5B4〕"
   energy_2000:
-    title: "&#E8A020[&#FFD740中型電廠&#E8A020]"
+    title: "&#9AA5B4〔&#FFEBB0中型電廠&#9AA5B4〕"
   energy_10000:
-    title: "&#CC5500[&#FF8833大型電廠&#CC5500]"
+    title: "&#9AA5B4〔&#FFD4A0大型電廠&#9AA5B4〕"
   solar_pioneer:
-    title: "&#D4A017[&#F5C71A☀ 太陽先驅&#D4A017]"
+    title: "&#9AA5B4〔&#FFE29D☀ 太陽先驅&#9AA5B4〕"
   generator_collector:
-    title: "&#D4A017[&#FFD054發電收藏家&#D4A017]"
+    title: "&#9AA5B4〔&#FFEBB0發電收藏家&#9AA5B4〕"
   power_grid_master:
-    title: "&#B71C1C[&#EF5350⚡ 電網主宰&#B71C1C]"
+    title: "&#9AA5B4〔&#FFB89A⚡ 電網主宰&#9AA5B4〕"
 
-  # ── 農業 / 烹飪 ──  翠綠與暖黃
+  # ── 農業 / 烹飪 ──  淡翠綠與暖桃
   first_harvest:
-    title: "&#3D8B37[&#6FC66A農夫&#3D8B37]"
+    title: "&#9AA5B4〔&#A8E0A8農夫&#9AA5B4〕"
   crop_100:
-    title: "&#2E7D32[&#66BB6A百畝農場&#2E7D32]"
+    title: "&#9AA5B4〔&#A8E0A8百畝農場&#9AA5B4〕"
   crop_king:
-    title: "&#1B5E20[&#4CAF50農作之王&#1B5E20]"
+    title: "&#9AA5B4〔&#B8EEB8農作之王&#9AA5B4〕"
   cook_first_meal:
-    title: "&#C8960C[&#F5D060見習廚師&#C8960C]"
+    title: "&#9AA5B4〔&#FFD4A0見習廚師&#9AA5B4〕"
   cook_10_meals:
-    title: "&#D4A017[&#FFD054業餘廚師&#D4A017]"
+    title: "&#9AA5B4〔&#FFD4A0業餘廚師&#9AA5B4〕"
   cook_50_meals:
-    title: "&#C0392B[&#E8734A料理達人&#C0392B]"
+    title: "&#9AA5B4〔&#FFB89A料理達人&#9AA5B4〕"
   bio_researcher:
-    title: "&#2E7D32[&#66BB6A生質研究員&#2E7D32]"
+    title: "&#9AA5B4〔&#A8E0A8生質研究員&#9AA5B4〕"
   orchard_keeper:
-    title: "&#3D8B37[&#81C784果園園丁&#3D8B37]"
+    title: "&#9AA5B4〔&#B8EEB8果園園丁&#9AA5B4〕"
 
-  # ── 物流 ──  青藍色系
+  # ── 物流 ──  淡青藍
   first_transfer:
-    title: "&#2196A0[&#4FC3C8搬運工&#2196A0]"
+    title: "&#9AA5B4〔&#8CE0F2搬運工&#9AA5B4〕"
   transfer_500:
-    title: "&#00838F[&#26C6DA物流新星&#00838F]"
+    title: "&#9AA5B4〔&#8CE0F2物流新星&#9AA5B4〕"
   network_architect:
-    title: "&#006064[&#00ACC1物流架構師&#006064]"
+    title: "&#9AA5B4〔&#A0F0FF物流架構師&#9AA5B4〕"
   upgrade_engineer:
-    title: "&#00838F[&#26C6DA升級工程師&#00838F]"
+    title: "&#9AA5B4〔&#8CE0F2升級工程師&#9AA5B4〕"
   storage_master:
-    title: "&#006064[&#00ACC1倉儲大師&#006064]"
+    title: "&#9AA5B4〔&#A0F0FF倉儲大師&#9AA5B4〕"
 
-  # ── 探索 ──  靛藍與星紫
+  # ── 探索 ──  淡薰衣草紫
   first_planet_visit:
-    title: "&#3F51B5[&#7986CB✦ 星際旅人&#3F51B5]"
+    title: "&#9AA5B4〔&#C4AEF0✦ 星際旅人&#9AA5B4〕"
   planet_explorer_3:
-    title: "&#3F51B5[&#7986CB✦ 三星探索者&#3F51B5]"
+    title: "&#9AA5B4〔&#C4AEF0✦ 三星探索者&#9AA5B4〕"
   planet_explorer_all:
-    title: "&#6A1B9A[&#AB47BC✦ 全星系漫遊&#6A1B9A]"
+    title: "&#9AA5B4〔&#D8C0F8✦ 全星系漫遊&#9AA5B4〕"
   gate_builder:
-    title: "&#3F51B5[&#7986CB星門建造者&#3F51B5]"
+    title: "&#9AA5B4〔&#C4AEF0星門建造者&#9AA5B4〕"
   discover_ruins:
-    title: "&#6A1B9A[&#AB47BC遺跡發現者&#6A1B9A]"
+    title: "&#9AA5B4〔&#D8C0F8遺跡發現者&#9AA5B4〕"
   planet_sample_collector:
-    title: "&#3F51B5[&#7986CB星球採樣員&#3F51B5]"
+    title: "&#9AA5B4〔&#C4AEF0星球採樣員&#9AA5B4〕"
 
-  # ── 收集 ──  由灰銀逐階到金紅
+  # ── 收集 ──  淡金階層
   tech_collector:
-    title: "&#C8960C[&#F5D060收藏家&#C8960C]"
+    title: "&#9AA5B4〔&#F2D89A收藏家&#9AA5B4〕"
   collect_10:
-    title: "&#7B8FA1[&#C8D4E0初窺門徑&#7B8FA1]"
+    title: "&#9AA5B4〔&#D6E4F0初窺門徑&#9AA5B4〕"
   collect_25:
-    title: "&#C8960C[&#F5D060鑑賞家&#C8960C]"
+    title: "&#9AA5B4〔&#F2D89A鑑賞家&#9AA5B4〕"
   item_conqueror:
-    title: "&#D4A017[&#FFD054征服者&#D4A017]"
+    title: "&#9AA5B4〔&#F5E0A0征服者&#9AA5B4〕"
   collect_100:
-    title: "&#C0392B[&#E8734A收集狂人&#C0392B]"
+    title: "&#9AA5B4〔&#FFB89A收集狂人&#9AA5B4〕"
   collect_200:
-    title: "&#B71C1C[&#EF5350科技博物館&#B71C1C]"
+    title: "&#9AA5B4〔&#FFAAB0科技博物館&#9AA5B4〕"
   machine_collector_10:
-    title: "&#00838F[&#26C6DA機器建造師&#00838F]"
+    title: "&#9AA5B4〔&#8CE0F2機器建造師&#9AA5B4〕"
   machine_collector_20:
-    title: "&#D4A017[&#FFD054工業大亨&#D4A017]"
+    title: "&#9AA5B4〔&#F5E0A0工業大亨&#9AA5B4〕"
   all_machines_collector:
-    title: "&#B71C1C[&#EF5350機器全通&#B71C1C]"
+    title: "&#9AA5B4〔&#FFAAB0機器全通&#9AA5B4〕"
 
-  # ── 終局 ──  史詩紫紅與金
+  # ── 終局 ──  淡玫瑰粉紫
   quantum_engineer:
-    title: "&#8E24AA[&#CE93D8量子工程師&#8E24AA]"
+    title: "&#9AA5B4〔&#E0B8F0量子工程師&#9AA5B4〕"
   fusion_overlord:
-    title: "&#B71C1C[&#EF5350聚變霸主&#B71C1C]"
+    title: "&#9AA5B4〔&#FFAAB0聚變霸主&#9AA5B4〕"
   void_pioneer:
-    title: "&#6A1B9A[&#AB47BC虛空先鋒&#6A1B9A]"
+    title: "&#9AA5B4〔&#D8C0F8虛空先鋒&#9AA5B4〕"
   singularity_breaker:
-    title: "&#7B1FA2[&#BA68C8✧ 奇點破界者&#7B1FA2]"
+    title: "&#9AA5B4〔&#E0B8F0✧ 奇點破界者&#9AA5B4〕"
   stellar_founder:
-    title: "&#D4A017[&#FFD054✧ 星核開鑄者&#D4A017]"
+    title: "&#9AA5B4〔&#F5E0A0✧ 星核開鑄者&#9AA5B4〕"
   omega_theory:
-    title: "&#8E24AA[&#CE93D8✧ 終極理論家&#8E24AA]"
+    title: "&#9AA5B4〔&#E0B8F0✧ 終極理論家&#9AA5B4〕"
   apex_of_tech:
-    title: "&#AD1457[&#EC407A★ 科技巔峰&#AD1457]"
+    title: "&#9AA5B4〔&#F8A8C8★ 科技巔峰&#9AA5B4〕"
   plasma_forge_master:
-    title: "&#C0392B[&#E8734A等離子鍛造師&#C0392B]"
+    title: "&#9AA5B4〔&#FFB89A等離子鍛造師&#9AA5B4〕"
   cosmic_assembler:
-    title: "&#8E24AA[&#CE93D8宇宙裝配員&#8E24AA]"
+    title: "&#9AA5B4〔&#E0B8F0宇宙裝配員&#9AA5B4〕"
   mega_builder:
-    title: "&#D4A017[&#FFD054巨構工程師&#D4A017]"
+    title: "&#9AA5B4〔&#F5E0A0巨構工程師&#9AA5B4〕"
 
-  # ── 通用 ──  科技藍
+  # ── 通用 ──  淡天藍
   automation_master:
-    title: "&#1565C0[&#42A5F5自動化大師&#1565C0]"
+    title: "&#9AA5B4〔&#8EC8F5自動化大師&#9AA5B4〕"
   full_factory:
-    title: "&#D4A017[&#FFD054滿載工廠&#D4A017]"
+    title: "&#9AA5B4〔&#F5E0A0滿載工廠&#9AA5B4〕"
   mega_factory:
-    title: "&#AD1457[&#EC407A超級工廠&#AD1457]"
+    title: "&#9AA5B4〔&#F8A8C8超級工廠&#9AA5B4〕"
   completionist:
-    title: "&#BF360C[&#FF8F00✦ 全成就 ✦&#BF360C]"
+    title: "&#9AA5B4〔&#FFD0A0✦ 全成就 ✦&#9AA5B4〕"
 
-  # ── 系統 ──  深綠色系
+  # ── 系統 ──  淡青綠
   field_operator:
-    title: "&#2E7D32[&#66BB6A野外作業員&#2E7D32]"
+    title: "&#9AA5B4〔&#8ED8C8野外作業員&#9AA5B4〕"
   ecosystem_engineer:
-    title: "&#1B5E20[&#4CAF50生態工程師&#1B5E20]"
+    title: "&#9AA5B4〔&#8ED8C8生態工程師&#9AA5B4〕"
   logistics_director:
-    title: "&#006064[&#00ACC1物流總監&#006064]"
+    title: "&#9AA5B4〔&#A0F0FF物流總監&#9AA5B4〕"
   cargo_architect:
-    title: "&#004D40[&#009688貨運架構師&#004D40]"
+    title: "&#9AA5B4〔&#8ED8C8貨運架構師&#9AA5B4〕"
 
   # ── 擴展 ──
   cryo_specialist:
-    title: "&#00838F[&#26C6DA低溫專家&#00838F]"
+    title: "&#9AA5B4〔&#8CE0F2低溫專家&#9AA5B4〕"
   refinery_master:
-    title: "&#D4A017[&#FFD054精煉大師&#D4A017]"
+    title: "&#9AA5B4〔&#F5E0A0精煉大師&#9AA5B4〕"

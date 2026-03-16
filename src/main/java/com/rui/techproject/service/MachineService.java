@@ -433,7 +433,7 @@ public final class MachineService {
                 return true;
             }
             if (!this.isCrusherControlBlock(interactedBlock, block)) {
-                player.sendMessage(this.itemFactory.secondary("請右鍵上方鐵柵欄啟動粉碎；Shift + 右鍵核心可打開介面。"));
+                player.sendMessage(this.itemFactory.secondary("請右鍵上方鐵柵欄啟動粉碎；蹲下 + 右鍵核心可打開介面。"));
                 return true;
             }
             return this.tryStartManualCrusher(player, machine, block);
@@ -444,7 +444,7 @@ public final class MachineService {
                 return true;
             }
             if (!this.isCompressorControlBlock(interactedBlock, block)) {
-                player.sendMessage(this.itemFactory.secondary("請右鍵上方重型壓力板啟動壓縮；Shift + 右鍵核心可打開介面。"));
+                player.sendMessage(this.itemFactory.secondary("請右鍵上方重型壓力板啟動壓縮；蹲下 + 右鍵核心可打開介面。"));
                 return true;
             }
             return this.tryStartManualCompressor(player, machine, block);
@@ -455,7 +455,7 @@ public final class MachineService {
                 return true;
             }
             if (!this.isOreWasherControlBlock(interactedBlock, block)) {
-                player.sendMessage(this.itemFactory.secondary("請右鍵上方拉桿啟動洗礦；Shift + 右鍵核心可打開介面。"));
+                player.sendMessage(this.itemFactory.secondary("請右鍵上方拉桿啟動洗礦；蹲下 + 右鍵核心可打開介面。"));
                 return true;
             }
             return this.tryStartManualOreWasher(player, machine, block);
@@ -466,7 +466,7 @@ public final class MachineService {
                 return true;
             }
             if (!this.isWireMillControlBlock(interactedBlock, block)) {
-                player.sendMessage(this.itemFactory.secondary("請右鍵上方鐵柵欄啟動拉線；Shift + 右鍵核心可打開介面。"));
+                player.sendMessage(this.itemFactory.secondary("請右鍵上方鐵柵欄啟動拉線；蹲下 + 右鍵核心可打開介面。"));
                 return true;
             }
             return this.tryStartManualWireMill(player, machine, block);
@@ -477,7 +477,7 @@ public final class MachineService {
                 return true;
             }
             if (!this.isPurifierControlBlock(interactedBlock, block)) {
-                player.sendMessage(this.itemFactory.secondary("請右鍵上方石按鈕啟動淨化；Shift + 右鍵核心可打開介面。"));
+                player.sendMessage(this.itemFactory.secondary("請右鍵上方石按鈕啟動淨化；蹲下 + 右鍵核心可打開介面。"));
                 return true;
             }
             return this.tryStartManualPurifier(player, machine, block);
@@ -488,7 +488,7 @@ public final class MachineService {
                 return true;
             }
             if (!this.isCentrifugeControlBlock(interactedBlock, block)) {
-                player.sendMessage(this.itemFactory.secondary("請右鍵上方輕型壓力板啟動離心；Shift + 右鍵核心可打開介面。"));
+                player.sendMessage(this.itemFactory.secondary("請右鍵上方輕型壓力板啟動離心；蹲下 + 右鍵核心可打開介面。"));
                 return true;
             }
             return this.tryStartManualCentrifuge(player, machine, block);
@@ -499,7 +499,7 @@ public final class MachineService {
                 return true;
             }
             if (!this.isBioLabControlBlock(interactedBlock, block)) {
-                player.sendMessage(this.itemFactory.secondary("請右鍵上方絆線鉤啟動培養；Shift + 右鍵核心可打開介面。"));
+                player.sendMessage(this.itemFactory.secondary("請右鍵上方絆線鉤啟動培養；蹲下 + 右鍵核心可打開介面。"));
                 return true;
             }
             return this.tryStartManualBioLab(player, machine, block);
@@ -510,7 +510,7 @@ public final class MachineService {
                 return true;
             }
             if (!this.isChemReactorControlBlock(interactedBlock, block)) {
-                player.sendMessage(this.itemFactory.secondary("請右鍵上方比較器啟動反應；Shift + 右鍵核心可打開介面。"));
+                player.sendMessage(this.itemFactory.secondary("請右鍵上方比較器啟動反應；蹲下 + 右鍵核心可打開介面。"));
                 return true;
             }
             return this.tryStartManualChemReactor(player, machine, block);
@@ -560,39 +560,42 @@ public final class MachineService {
         }
         if (this.isQuarryLike(machineId)) {
             player.sendMessage(this.itemFactory.warning("採礦鑽機新結構：中心放原版高爐、上方放箱子、同一軸兩側放鐵方塊，鐵方塊上方各放一台採礦鑽機。"));
-            player.sendMessage(this.itemFactory.secondary("燃料直接放上方箱子，右鍵中央高爐啟動；Shift + 右鍵中央高爐才會打開設定介面。"));
+            player.sendMessage(this.itemFactory.secondary("燃料直接放上方箱子，右鍵中央高爐啟動；蹲下 + 右鍵中央高爐才會打開設定介面。"));
         }
         if (this.isManualCrusher(machineId)) {
             player.sendMessage(this.itemFactory.warning("粉碎機現在採手動結構：核心放粉碎機本體，上方加鐵柵欄作為投料口。"));
-            player.sendMessage(this.itemFactory.secondary("右鍵鐵柵欄才會啟動粉碎；Shift + 右鍵核心可以打開設定介面。"));
+            player.sendMessage(this.itemFactory.secondary("右鍵鐵柵欄才會啟動粉碎；蹲下 + 右鍵核心可以打開設定介面。"));
         }
         if (this.isManualCompressor(machineId)) {
             player.sendMessage(this.itemFactory.warning("壓縮機現在採手動結構：核心放壓縮機本體，上方放重型壓力板作為壓床。"));
-            player.sendMessage(this.itemFactory.secondary("右鍵壓力板才會啟動壓縮；Shift + 右鍵核心可以打開設定介面。"));
+            player.sendMessage(this.itemFactory.secondary("右鍵壓力板才會啟動壓縮；蹲下 + 右鍵核心可以打開設定介面。"));
         }
         if (this.isManualOreWasher(machineId)) {
             player.sendMessage(this.itemFactory.warning("洗礦機現在採手動結構：核心放洗礦機本體，上方裝拉桿作為攪拌控制。"));
-            player.sendMessage(this.itemFactory.secondary("右鍵拉桿才會啟動洗礦；Shift + 右鍵核心可以打開設定介面。"));
+            player.sendMessage(this.itemFactory.secondary("右鍵拉桿才會啟動洗礦；蹲下 + 右鍵核心可以打開設定介面。"));
         }
         if (this.isManualWireMill(machineId)) {
             player.sendMessage(this.itemFactory.warning("拉線機現在採手動結構：核心放拉線機本體，上方加鐵柵欄作為牽引把手。"));
-            player.sendMessage(this.itemFactory.secondary("右鍵鐵柵欄才會啟動拉線；Shift + 右鍵核心可以打開設定介面。"));
+            player.sendMessage(this.itemFactory.secondary("右鍵鐵柵欄才會啟動拉線；蹲下 + 右鍵核心可以打開設定介面。"));
         }
         if (this.isManualPurifier(machineId)) {
             player.sendMessage(this.itemFactory.warning("淨化器現在採手動結構：核心放淨化器本體，上方裝石按鈕作為脈衝淨化控制。"));
-            player.sendMessage(this.itemFactory.secondary("右鍵石按鈕才會啟動淨化；Shift + 右鍵核心可以打開設定介面。"));
+            player.sendMessage(this.itemFactory.secondary("右鍵石按鈕才會啟動淨化；蹲下 + 右鍵核心可以打開設定介面。"));
         }
         if (this.isManualCentrifuge(machineId)) {
             player.sendMessage(this.itemFactory.warning("離心機現在採手動結構：核心放離心機本體，上方放輕型壓力板作為旋轉啟動盤。"));
-            player.sendMessage(this.itemFactory.secondary("右鍵壓力板才會啟動離心；Shift + 右鍵核心可以打開設定介面。"));
+            player.sendMessage(this.itemFactory.secondary("右鍵壓力板才會啟動離心；蹲下 + 右鍵核心可以打開設定介面。"));
         }
         if (this.isManualBioLab(machineId)) {
             player.sendMessage(this.itemFactory.warning("生質實驗室現在採手動結構：核心放釀造台，上方裝絆線鉤作為反應啟動器。"));
-            player.sendMessage(this.itemFactory.secondary("右鍵絆線鉤才會啟動培養；Shift + 右鍵核心可以打開介面。"));
+            player.sendMessage(this.itemFactory.secondary("右鍵絆線鉤才會啟動培養；蹲下 + 右鍵核心可以打開介面。"));
         }
         if (this.isManualChemReactor(machineId)) {
             player.sendMessage(this.itemFactory.warning("化學反應器現在採手動結構：核心放信標，上方裝比較器作為反應觸發器。"));
-            player.sendMessage(this.itemFactory.secondary("右鍵比較器才會啟動反應；Shift + 右鍵核心可以打開介面。"));
+            player.sendMessage(this.itemFactory.secondary("右鍵比較器才會啟動反應；蹲下 + 右鍵核心可以打開介面。"));
+        }
+        if (this.isElectricAutoMachine(machineId)) {
+            player.sendMessage(this.itemFactory.success("純電力版機器已放置，接上電源後會全自動加工。右鍵即可打開介面。"));
         }
         return true;
     }
@@ -1639,6 +1642,9 @@ public final class MachineService {
             case "assembler", "advanced_assembler", "laser_engraver", "quantum_processor", "field_forge", "matter_compiler" -> this.tickProcessor(machine, definition, location, Particle.ELECTRIC_SPARK, definition.id() + "_cycles");
             case "smeltery", "fusion_reactor" -> this.tickProcessor(machine, definition, location, Particle.LAVA, definition.id() + "_cycles");
             case "coolant_mixer", "refinery", "crystal_growth_chamber", "drone_bay", "android_bay", "polymer_press" -> this.tickProcessor(machine, definition, location, Particle.WITCH, definition.id() + "_cycles");
+            case "electric_crusher", "electric_compressor", "electric_ore_washer", "electric_wire_mill",
+                 "electric_purifier", "electric_centrifuge", "electric_bio_lab", "electric_chemical_reactor" ->
+                    this.tickProcessor(machine, definition, location, Particle.ELECTRIC_SPARK, definition.id() + "_cycles");
             default -> this.tickConsumer(machine, location, definition.energyPerTick());
         }
         this.transferOutputs(machine, location);
@@ -3574,7 +3580,7 @@ public final class MachineService {
             }
         }
         if (missing.isEmpty()) {
-            return this.info(Material.LIME_DYE, "結構狀態", List.of("完整", "右鍵中央高爐可切換啟動 / 停止", "Shift + 右鍵中央高爐可打開設定介面"));
+            return this.info(Material.LIME_DYE, "結構狀態", List.of("完整", "右鍵中央高爐可切換啟動 / 停止", "蹲下 + 右鍵中央高爐可打開設定介面"));
         }
         final List<String> lines = new ArrayList<>();
         lines.add("缺少：");
@@ -5218,6 +5224,14 @@ public final class MachineService {
         return this.normalizeId(machineId).equals("chemical_reactor");
     }
 
+    private boolean isElectricAutoMachine(final String machineId) {
+        return switch (this.normalizeId(machineId)) {
+            case "electric_crusher", "electric_compressor", "electric_ore_washer", "electric_wire_mill",
+                 "electric_purifier", "electric_centrifuge", "electric_bio_lab", "electric_chemical_reactor" -> true;
+            default -> false;
+        };
+    }
+
     private Block crusherCoreCandidate(final Block anchor) {
         if (anchor == null) {
             return null;
@@ -6775,7 +6789,7 @@ public final class MachineService {
         inventory.setItem(25, this.info(layout != null ? Material.IRON_BARS : Material.BARRIER, "手動結構", List.of(
             layout != null ? "上方鐵柵欄：已就位" : "缺少上方鐵柵欄",
             "右鍵鐵柵欄：啟動粉碎",
-            "Shift + 右鍵核心：開設定"
+            "蹲下 + 右鍵核心：開設定"
         )));
         inventory.setItem(26, this.info(machine.hasManualOperation() ? Material.CLOCK : Material.IRON_PICKAXE, "運轉節奏", operationLines));
     }
@@ -6968,7 +6982,7 @@ public final class MachineService {
         inventory.setItem(22, this.structureStatus(core));
         inventory.setItem(23, this.info(supportsReady ? Material.IRON_BLOCK : Material.BARRIER, "雙側鐵方塊", List.of(supportsReady ? "已就位" : "需放在高爐同一軸兩側")));
         inventory.setItem(24, this.info(layout != null ? Material.BLAST_FURNACE : Material.BARRIER, "雙採礦機", List.of(layout != null ? "已就位" : "鐵方塊上方各放一台採礦鑽機")));
-        inventory.setItem(25, this.info(machine.enabled() ? Material.LIME_DYE : Material.GRAY_DYE, "啟動狀態", List.of(machine.enabled() ? "運轉中" : "待機", "右鍵中央高爐：啟動 / 停止", "Shift + 右鍵中央高爐：開設定")));
+        inventory.setItem(25, this.info(machine.enabled() ? Material.LIME_DYE : Material.GRAY_DYE, "啟動狀態", List.of(machine.enabled() ? "運轉中" : "待機", "右鍵中央高爐：啟動 / 停止", "蹲下 + 右鍵中央高爐：開設定")));
         inventory.setItem(26, this.info(Material.LAVA_BUCKET, "燃料與輸出", List.of("可用：木炭 / 岩漿桶", "木炭 1 秒、岩漿桶 8 秒", "岩漿桶消耗後會留下空桶", "燃料請放上方箱子第 1 排", "採出的礦會放進箱子第 2 排之後")));
     }
 

@@ -144,7 +144,8 @@ public final class TechListener implements Listener {
         this.plugin.getMachineService().cleanupPlayer(playerId);
         this.plugin.getCookingService().cancelSession(playerId);
         this.plugin.getAchievementGuiService().clearState(playerId);
-        this.plugin.getPlayerProgressService().save(event.getPlayer().getUniqueId());
+        this.plugin.getPlanetService().cleanupPlayer(playerId);
+        this.plugin.getPlayerProgressService().saveAndEvict(playerId);
     }
 
     @EventHandler(ignoreCancelled = true)
@@ -170,7 +171,7 @@ public final class TechListener implements Listener {
         final ItemStack chestplate = player.getInventory().getChestplate();
         final long jetEnergy = this.plugin.getItemFactory().getItemStoredEnergy(chestplate);
         if (jetEnergy < JETPACK_ENERGY_COST) {
-            player.sendActionBar(this.plugin.getItemFactory().warning("風暴噴射背包電量不足，請對準儲能機器 Shift + 右鍵充電。"));
+            player.sendActionBar(this.plugin.getItemFactory().warning("風暴噴射背包電量不足，請對準儲能機器 蹲下 + 右鍵充電。"));
             this.refreshJetpackFlightState(player);
             return;
         }
@@ -1469,7 +1470,7 @@ public final class TechListener implements Listener {
         final ItemStack held = event.getItem();
         final long energy = this.plugin.getItemFactory().getItemStoredEnergy(held);
         if (energy < GRAPPLE_ENERGY_COST) {
-            player.sendActionBar(this.plugin.getItemFactory().warning("向量抓鉤電量不足，請對準儲能機器 Shift + 右鍵充電。"));
+            player.sendActionBar(this.plugin.getItemFactory().warning("向量抓鉤電量不足，請對準儲能機器 蹲下 + 右鍵充電。"));
             return true;
         }
 
@@ -1559,7 +1560,7 @@ public final class TechListener implements Listener {
         final ItemStack thrusterItem = event.getItem();
         final long thrusterEnergy = this.plugin.getItemFactory().getItemStoredEnergy(thrusterItem);
         if (thrusterEnergy < THRUSTER_ENERGY_COST) {
-            player.sendActionBar(this.plugin.getItemFactory().warning("脈衝推進器電量不足，請對準儲能機器 Shift + 右鍵充電。"));
+            player.sendActionBar(this.plugin.getItemFactory().warning("脈衝推進器電量不足，請對準儲能機器 蹲下 + 右鍵充電。"));
             return true;
         }
 
@@ -2107,7 +2108,7 @@ public final class TechListener implements Listener {
         final ItemStack held = event.getItem();
         final long energy = this.plugin.getItemFactory().getItemStoredEnergy(held);
         if (energy < energyCost) {
-            player.sendActionBar(this.plugin.getItemFactory().warning("法器電量不足，請對準儲能機器 Shift + 右鍵充電。"));
+            player.sendActionBar(this.plugin.getItemFactory().warning("法器電量不足，請對準儲能機器 蹲下 + 右鍵充電。"));
             return true;
         }
 

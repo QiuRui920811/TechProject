@@ -1766,6 +1766,15 @@ items:
       - "科技書詳細頁"
       - "可用於後續科技線"
       - "支援配方與解鎖鏈"
+  auto_processing_card:
+    display-name: "自動化模組"
+    category: ADVANCED
+    icon: COMPARATOR
+    description: "嵌入手動機器核心即可將其升級為全自動純電力版。"
+    unlock: "advanced_assembler"
+    use-cases:
+      - "製作純電力版機器的關鍵元件"
+      - "需搭配原機器一起合成"
 machines:
   research_desk:
     display-name: 研究台
@@ -2196,6 +2205,79 @@ machines:
     energy-per-tick: 0
     effect: "物品穿透傳輸"
     unlock: "wire_mill"
+  # ═══ 純電力版機器（全自動，高耗能） ═══
+  electric_crusher:
+    display-name: "電動粉碎機"
+    category: ADVANCED
+    block: BLAST_FURNACE
+    inputs: ["iron_ore", "copper_ore"]
+    outputs: ["iron_dust", "copper_dust"]
+    energy-per-tick: 12
+    effect: "高速旋轉渦輪"
+    unlock: "crusher&advanced_assembler"
+  electric_compressor:
+    display-name: "電動壓縮機"
+    category: ADVANCED
+    block: PISTON
+    inputs: ["iron_ingot", "iron_plate"]
+    outputs: ["iron_plate", "steel_plate", "compressed_iron_bundle", "dense_carbon_block"]
+    energy-per-tick: 18
+    effect: "電動壓縮衝程"
+    unlock: "compressor&advanced_assembler"
+  electric_ore_washer:
+    display-name: "電動洗礦機"
+    category: ADVANCED
+    block: BARREL
+    inputs: ["iron_dust"]
+    outputs: ["ore_slurry"]
+    energy-per-tick: 16
+    effect: "高壓水流翻騰"
+    unlock: "ore_washer&advanced_assembler"
+  electric_wire_mill:
+    display-name: "電動拉線機"
+    category: ADVANCED
+    block: ANVIL
+    inputs: ["copper_ingot", "steel_plate"]
+    outputs: ["copper_wire", "steel_wire", "wiring_bundle"]
+    energy-per-tick: 20
+    effect: "自動高速牽引"
+    unlock: "wire_mill&advanced_assembler"
+  electric_purifier:
+    display-name: "電動淨化器"
+    category: ADVANCED
+    block: CAULDRON
+    inputs: ["ore_slurry"]
+    outputs: ["purified_shard", "coolant_cell", "purifier_membrane"]
+    energy-per-tick: 22
+    effect: "加壓淨化脈衝"
+    unlock: "purifier&advanced_assembler"
+  electric_centrifuge:
+    display-name: "電動離心機"
+    category: ADVANCED
+    block: HOPPER
+    inputs: ["purified_shard"]
+    outputs: ["ion_dust", "magnetic_ring", "centrifuge_rotor"]
+    energy-per-tick: 38
+    effect: "超高速離心"
+    unlock: "centrifuge&advanced_assembler"
+  electric_bio_lab:
+    display-name: "電動生質實驗室"
+    category: ADVANCED
+    block: BREWING_STAND
+    inputs: ["crops", "wood_dust"]
+    outputs: ["bio_resin", "bio_fiber"]
+    energy-per-tick: 24
+    effect: "自動培養循環"
+    unlock: "bio_lab&advanced_assembler"
+  electric_chemical_reactor:
+    display-name: "電動化學反應器"
+    category: ADVANCED
+    block: BEACON
+    inputs: ["bio_resin", "coal_dust"]
+    outputs: ["polymer_resin", "synthetic_fiber", "precision_nozzle"]
+    energy-per-tick: 34
+    effect: "自動化學反應"
+    unlock: "chemical_reactor&advanced_assembler"
 recipes:
   crusher_iron_ore:
     machine: "crusher"
@@ -2893,6 +2975,231 @@ recipes:
     output: "item_tube"
     energy: 11
     guide: "壓力導管 + 鋼線 → 拉線機 → 物流導管"
+  # ═══ 自動化模組 ═══
+  assembler_auto_processing_card:
+    machine: "advanced_assembler"
+    inputs: ["advanced_circuit", "machine_component", "speed_upgrade"]
+    output: "auto_processing_card"
+    energy: 28
+    guide: "進階電路 + 機械零件 + 速度升級 → 進階製造機 → 自動化模組"
+  # ═══ 純電力版機器合成 ═══
+  assembler_electric_crusher:
+    machine: "advanced_assembler"
+    inputs: ["crusher", "auto_processing_card", "wiring_bundle"]
+    output: "electric_crusher"
+    energy: 30
+    guide: "粉碎機 + 自動化模組 + 工業線束 → 進階製造機 → 電動粉碎機"
+  assembler_electric_compressor:
+    machine: "advanced_assembler"
+    inputs: ["compressor", "auto_processing_card", "servo_motor"]
+    output: "electric_compressor"
+    energy: 32
+    guide: "壓縮機 + 自動化模組 + 伺服馬達 → 進階製造機 → 電動壓縮機"
+  assembler_electric_ore_washer:
+    machine: "advanced_assembler"
+    inputs: ["ore_washer", "auto_processing_card", "pressure_tube"]
+    output: "electric_ore_washer"
+    energy: 30
+    guide: "洗礦機 + 自動化模組 + 壓力導管 → 進階製造機 → 電動洗礦機"
+  assembler_electric_wire_mill:
+    machine: "advanced_assembler"
+    inputs: ["wire_mill", "auto_processing_card", "servo_motor"]
+    output: "electric_wire_mill"
+    energy: 34
+    guide: "拉線機 + 自動化模組 + 伺服馬達 → 進階製造機 → 電動拉線機"
+  assembler_electric_purifier:
+    machine: "advanced_assembler"
+    inputs: ["purifier", "auto_processing_card", "coolant_cell"]
+    output: "electric_purifier"
+    energy: 34
+    guide: "淨化器 + 自動化模組 + 冷卻電池 → 進階製造機 → 電動淨化器"
+  assembler_electric_centrifuge:
+    machine: "advanced_assembler"
+    inputs: ["centrifuge", "auto_processing_card", "magnetic_ring"]
+    output: "electric_centrifuge"
+    energy: 40
+    guide: "離心機 + 自動化模組 + 磁環 → 進階製造機 → 電動離心機"
+  assembler_electric_bio_lab:
+    machine: "advanced_assembler"
+    inputs: ["bio_lab", "auto_processing_card", "bio_fiber"]
+    output: "electric_bio_lab"
+    energy: 34
+    guide: "生質實驗室 + 自動化模組 + 生質纖維 → 進階製造機 → 電動生質實驗室"
+  assembler_electric_chemical_reactor:
+    machine: "advanced_assembler"
+    inputs: ["chemical_reactor", "auto_processing_card", "precision_nozzle"]
+    output: "electric_chemical_reactor"
+    energy: 40
+    guide: "化學反應器 + 自動化模組 + 精密噴嘴 → 進階製造機 → 電動化學反應器"
+  # ═══ 純電力版加工配方（複製手動版配方，能源翻倍） ═══
+  electric_crusher_iron_ore:
+    machine: "electric_crusher"
+    inputs: ["iron_ore"]
+    output: "iron_dust"
+    energy: 10
+    guide: "鐵礦石 → 電動粉碎機 → 鐵粉"
+  electric_crusher_copper_ore:
+    machine: "electric_crusher"
+    inputs: ["copper_ore"]
+    output: "copper_dust"
+    energy: 10
+    guide: "銅礦石 → 電動粉碎機 → 銅粉"
+  electric_crusher_quartz:
+    machine: "electric_crusher"
+    inputs: ["quartz"]
+    output: "silicon"
+    energy: 12
+    guide: "石英 → 電動粉碎機 → 矽晶"
+  electric_crusher_coal:
+    machine: "electric_crusher"
+    inputs: ["coal"]
+    output: "coal_dust"
+    energy: 10
+    guide: "煤炭 → 電動粉碎機 → 煤粉"
+  electric_compressor_iron_plate:
+    machine: "electric_compressor"
+    inputs: ["iron_ingot"]
+    output: "iron_plate"
+    energy: 14
+    guide: "鐵錠 → 電動壓縮機 → 鐵板"
+  electric_compressor_steel_plate:
+    machine: "electric_compressor"
+    inputs: ["iron_plate"]
+    output: "steel_plate"
+    energy: 16
+    guide: "鐵板 → 電動壓縮機 → 鋼板"
+  electric_compressor_iron_bundle:
+    machine: "electric_compressor"
+    inputs: ["iron_plate", "iron_plate"]
+    output: "compressed_iron_bundle"
+    energy: 24
+    guide: "鐵板×2 → 電動壓縮機 → 壓實鐵胚"
+  electric_compressor_carbon:
+    machine: "electric_compressor"
+    inputs: ["coal_dust"]
+    output: "carbon_mesh"
+    energy: 14
+    guide: "煤粉 → 電動壓縮機 → 碳纖網"
+  electric_compressor_dense_carbon:
+    machine: "electric_compressor"
+    inputs: ["carbon_mesh", "carbon_mesh"]
+    output: "dense_carbon_block"
+    energy: 22
+    guide: "碳纖網×2 → 電動壓縮機 → 高密碳塊"
+  electric_compressor_pressure_tube:
+    machine: "electric_compressor"
+    inputs: ["copper_ingot", "glass_panel"]
+    output: "pressure_tube"
+    energy: 18
+    guide: "銅錠 + 玻璃板 → 電動壓縮機 → 壓力導管"
+  electric_compressor_composite:
+    machine: "electric_compressor"
+    inputs: ["steel_plate", "plastic"]
+    output: "composite_panel"
+    energy: 18
+    guide: "鋼板 + 塑膠 → 電動壓縮機 → 複合面板"
+  electric_ore_washer_slurry:
+    machine: "electric_ore_washer"
+    inputs: ["iron_dust"]
+    output: "ore_slurry"
+    energy: 14
+    guide: "鐵粉 → 電動洗礦機 → 礦漿"
+  electric_ore_washer_biomass:
+    machine: "electric_ore_washer"
+    inputs: ["crops"]
+    output: "crushed_biomass"
+    energy: 12
+    guide: "作物 → 電動洗礦機 → 粉碎生質"
+  electric_wire_mill_copper:
+    machine: "electric_wire_mill"
+    inputs: ["copper_ingot"]
+    output: "copper_wire"
+    energy: 18
+    guide: "銅錠 → 電動拉線機 → 銅線"
+  electric_wire_mill_steel:
+    machine: "electric_wire_mill"
+    inputs: ["steel_plate"]
+    output: "steel_wire"
+    energy: 22
+    guide: "鋼板 → 電動拉線機 → 鋼線"
+  electric_wire_mill_bundle:
+    machine: "electric_wire_mill"
+    inputs: ["copper_wire", "steel_wire"]
+    output: "wiring_bundle"
+    energy: 24
+    guide: "銅線 + 鋼線 → 電動拉線機 → 工業線束"
+  electric_wire_mill_item_tube:
+    machine: "electric_wire_mill"
+    inputs: ["pressure_tube", "steel_wire"]
+    output: "item_tube"
+    energy: 22
+    guide: "壓力導管 + 鋼線 → 電動拉線機 → 物流導管"
+  electric_purifier_shard:
+    machine: "electric_purifier"
+    inputs: ["ore_slurry"]
+    output: "purified_shard"
+    energy: 18
+    guide: "礦漿 → 電動淨化器 → 淨化碎晶"
+  electric_purifier_coolant:
+    machine: "electric_purifier"
+    inputs: ["snowball", "glass_panel", "purifier_membrane"]
+    output: "coolant_cell"
+    energy: 20
+    guide: "雪球 + 玻璃板 + 淨化膜片 → 電動淨化器 → 冷卻電池"
+  electric_purifier_membrane:
+    machine: "electric_purifier"
+    inputs: ["rust_filter", "fiber_mesh"]
+    output: "purifier_membrane"
+    energy: 20
+    guide: "鏽蝕濾芯 + 纖維網 → 電動淨化器 → 淨化膜片"
+  electric_centrifuge_ion:
+    machine: "electric_centrifuge"
+    inputs: ["purified_shard"]
+    output: "ion_dust"
+    energy: 36
+    guide: "淨化碎晶 → 電動離心機 → 離子粉"
+  electric_centrifuge_rotor:
+    machine: "electric_centrifuge"
+    inputs: ["ion_dust", "alloy_frame"]
+    output: "centrifuge_rotor"
+    energy: 40
+    guide: "離子粉 + 合金框架 → 電動離心機 → 離心轉子"
+  electric_centrifuge_ring:
+    machine: "electric_centrifuge"
+    inputs: ["ion_dust", "steel_wire", "centrifuge_rotor"]
+    output: "magnetic_ring"
+    energy: 40
+    guide: "離子粉 + 鋼線 + 離心轉子 → 電動離心機 → 磁環"
+  electric_bio_lab_resin:
+    machine: "electric_bio_lab"
+    inputs: ["crops", "wood_dust"]
+    output: "bio_resin"
+    energy: 22
+    guide: "作物 + 木屑 → 電動生質實驗室 → 生質樹脂"
+  electric_bio_lab_fiber:
+    machine: "electric_bio_lab"
+    inputs: ["crushed_biomass", "fiber_mesh"]
+    output: "bio_fiber"
+    energy: 20
+    guide: "粉碎生質 + 纖維網 → 電動生質實驗室 → 生質纖維"
+  electric_chemical_polymer:
+    machine: "electric_chemical_reactor"
+    inputs: ["bio_resin", "coal_dust"]
+    output: "polymer_resin"
+    energy: 32
+    guide: "生質樹脂 + 煤粉 → 電動化學反應器 → 聚合樹脂"
+  electric_chemical_fiber:
+    machine: "electric_chemical_reactor"
+    inputs: ["polymer_resin", "bio_fiber"]
+    output: "synthetic_fiber"
+    energy: 32
+    guide: "聚合樹脂 + 生質纖維 → 電動化學反應器 → 合成纖維"
+  electric_chemical_nozzle:
+    machine: "electric_chemical_reactor"
+    inputs: ["pressure_tube", "steel_wire"]
+    output: "precision_nozzle"
+    energy: 30
+    guide: "壓力導管 + 鋼線 → 電動化學反應器 → 精密噴嘴"
 achievements:
   # ═══ 入門（BEGINNER） ═══
   first_machine:
