@@ -1612,7 +1612,8 @@ public final class MachineService {
         }
         switch (definition.id()) {
             case "research_desk" -> this.tickResearchDesk(machine, location);
-            case "solar_generator", "solar_array" -> this.tickSolarGenerator(machine, location);
+            case "solar_generator" -> this.tickSolarGenerator(machine, location);
+            case "solar_array" -> this.tickSolarArray(machine, definition, location);
             case "coal_generator" -> this.tickCoalGenerator(machine, location);
             case "storm_turbine" -> this.tickStormTurbine(machine, location);
             case "planetary_gate" -> this.tickPlanetaryGate(machine, location);
@@ -1698,6 +1699,18 @@ public final class MachineService {
             return;
         }
         this.tickGenerator(machine, location, 3L, Particle.END_ROD, Sound.BLOCK_BEACON_POWER_SELECT);
+    }
+
+    private void tickSolarArray(final PlacedMachine machine, final MachineDefinition definition, final Location location) {
+        this.tickSolarGenerator(machine, location);
+        if (this.processMachineRecipes(machine, location, "solar_array_cycles", Particle.END_ROD, Sound.BLOCK_BEACON_AMBIENT)) {
+            this.setRuntimeState(machine, MachineRuntimeState.RUNNING, "加工中");
+            return;
+        }
+        final RecipeRuntimeSnapshot snapshot = this.inspectRecipeRuntime(machine);
+        if (snapshot.state() != MachineRuntimeState.IDLE) {
+            this.setRuntimeState(machine, snapshot.state(), snapshot.detail());
+        }
     }
 
     private void tickCoalGenerator(final PlacedMachine machine, final Location location) {
@@ -6638,14 +6651,14 @@ public final class MachineService {
 
     private boolean machineDisablesInputSlots(final String machineId) {
         return switch (machineId) {
-            case "solar_generator", "solar_array", "storm_turbine", "energy_node", "energy_cable", "logistics_node", "item_tube" -> true;
+            case "solar_generator", "storm_turbine", "energy_node", "energy_cable", "logistics_node", "item_tube" -> true;
             default -> false;
         };
     }
 
     private boolean machineDisablesOutputSlots(final String machineId) {
         return switch (machineId) {
-            case "solar_generator", "coal_generator", "solar_array", "storm_turbine", "energy_node", "energy_cable", "logistics_node", "item_tube" -> true;
+            case "solar_generator", "coal_generator", "storm_turbine", "energy_node", "energy_cable", "logistics_node", "item_tube" -> true;
             default -> false;
         };
     }
