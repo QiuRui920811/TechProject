@@ -79,6 +79,10 @@
 - [系統機器](automation/system-machines.md)
 - [安卓機器人](automation/android.md)
 
+# 🐔 基因雞工程
+
+- [基因雞工程總覽](chickens/README.md)
+
 # 🏆 成就系統
 
 - [成就一覽](achievements/README.md)
