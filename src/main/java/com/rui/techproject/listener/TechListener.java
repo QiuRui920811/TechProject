@@ -44,6 +44,7 @@ import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.inventory.PrepareItemCraftEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerBucketEmptyEvent;
 import org.bukkit.event.player.PlayerItemConsumeEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
@@ -61,6 +62,7 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.Chicken;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Mob;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
@@ -305,6 +307,44 @@ public final class TechListener implements Listener {
     @EventHandler(priority = EventPriority.MONITOR)
     public void onPlanetMobDeath(final EntityDeathEvent event) {
         this.plugin.getPlanetService().handlePlanetEliteDeath(event.getEntity(), event.getEntity().getKiller(), event.getDrops());
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST)
+    public void onInteractEntity(final PlayerInteractEntityEvent event) {
+        if (event.getHand() != EquipmentSlot.HAND) {
+            return;
+        }
+        final Player player = event.getPlayer();
+        final ItemStack hand = player.getInventory().getItemInMainHand();
+        if (hand.getType() == Material.AIR || !this.plugin.getItemFactory().isChickenNet(hand)) {
+            return;
+        }
+        if (!(event.getRightClicked() instanceof Chicken chicken)) {
+            player.sendMessage(this.plugin.getItemFactory().warning("雞網只能對雞使用！"));
+            return;
+        }
+        event.setCancelled(true);
+        // 消耗一個雞網
+        hand.setAmount(hand.getAmount() - 1);
+        // 移除雞實體
+        chicken.remove();
+        // 產生隨機 DNA 口袋雞
+        final com.rui.techproject.service.ChickenGeneticsService genetics = new com.rui.techproject.service.ChickenGeneticsService();
+        final String dna = genetics.generateWildDna();
+        final String resourceName = genetics.resourceNameZh(dna);
+        final ItemStack pocketChicken = this.plugin.getItemFactory().buildPocketChicken(dna, false, resourceName);
+        // 給予玩家
+        final Map<Integer, ItemStack> overflow = player.getInventory().addItem(pocketChicken);
+        for (final ItemStack drop : overflow.values()) {
+            player.getWorld().dropItemNaturally(player.getLocation(), drop);
+        }
+        // 音效 & 粒子
+        player.getWorld().playSound(player.getLocation(), Sound.ENTITY_CHICKEN_HURT, 0.6f, 1.3f);
+        player.getWorld().spawnParticle(Particle.CLOUD, chicken.getLocation().add(0, 0.5, 0), 8, 0.3, 0.3, 0.3, 0.02);
+        player.sendMessage(this.plugin.getItemFactory().success("成功捕捉一隻口袋雞！放入基因定序器分析 DNA。"));
+        this.plugin.getPlayerProgressService().incrementStat(player.getUniqueId(), "chickens_captured", 1);
+        this.plugin.getPlayerProgressService().unlockItem(player.getUniqueId(), "pocket_chicken");
+        this.plugin.getPlayerProgressService().unlockByRequirement(player.getUniqueId(), "chicken_net");
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)

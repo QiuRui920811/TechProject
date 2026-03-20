@@ -2329,3 +2329,45 @@ machines:
     acquisition-mode: ADVANCED_WORKBENCH
     family: omega
     role: civilization-forge
+
+  # ── 基因雞工程 ──────────────────────────────────────────
+  chicken_net:
+    guide-category: TOOLS
+    system-group: AGRI_BIO
+    item-class: TECH_MATERIAL
+    visual-tier: VANILLA
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: chicken_genetics
+    role: capture-tool
+  pocket_chicken:
+    guide-category: MATERIALS
+    system-group: AGRI_BIO
+    item-class: TECH_MATERIAL
+    visual-tier: VANILLA
+    acquisition-mode: FIELD_COLLECTION
+    family: chicken_genetics
+    role: genetic-carrier
+  genetic_sequencer:
+    guide-category: MACHINES
+    system-group: AGRI_BIO
+    machine-archetype: PROCESSOR
+    visual-tier: TECH
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: chicken_genetics
+    role: dna-analysis
+  private_coop:
+    guide-category: MACHINES
+    system-group: AGRI_BIO
+    machine-archetype: PROCESSOR
+    visual-tier: TECH
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: chicken_genetics
+    role: breeding
+  excitation_chamber:
+    guide-category: MACHINES
+    system-group: AGRI_BIO
+    machine-archetype: PROCESSOR
+    visual-tier: TECH
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: chicken_genetics
+    role: resource-extraction

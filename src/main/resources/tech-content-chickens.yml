@@ -1,0 +1,99 @@
+# ============================================================================
+#   基因雞工程 (Genetic Chickengineering)
+# ============================================================================
+# 雞基因系統 — 捕捉、分析、繁殖、產出資源
+# 6 個基因位點 (B–W)，每位點由顯性 (大寫) / 隱性 (小寫) 等位基因組成
+# 隱性同型合子越多 → 可產出越稀有的資源
+# 共 64 種資源雞
+# ============================================================================
+
+items:
+  chicken_net:
+    display-name: "雞網"
+    category: BASIC
+    icon: LEAD
+    description: "對準野生雞右鍵使用，將雞捕捉為口袋雞。一次性消耗。"
+    unlock: "initial"
+    guide-category: TOOLS
+    use-cases:
+      - "右鍵野生雞 → 獲得口袋雞"
+
+  pocket_chicken:
+    display-name: "口袋雞"
+    category: BASIC
+    icon: EGG
+    description: "被捕獲的雞，帶有隱藏基因。需經基因定序器分析。"
+    unlock: "chicken_net"
+    guide-category: MATERIALS
+    use-cases:
+      - "基因定序器 → 顯示 DNA"
+      - "私人雞舍 × 2 → 繁殖後代"
+      - "激發室 → 持續產出資源"
+
+machines:
+  genetic_sequencer:
+    display-name: "基因定序器"
+    category: BASIC
+    block: STONECUTTER
+    inputs: ["pocket_chicken"]
+    outputs: ["pocket_chicken"]
+    energy-per-tick: 3
+    effect: "分析 DNA 序列"
+    unlock: "chicken_net"
+
+  private_coop:
+    display-name: "私人雞舍"
+    category: BASIC
+    block: COMPOSTER
+    inputs: ["pocket_chicken", "pocket_chicken"]
+    outputs: ["pocket_chicken"]
+    energy-per-tick: 2
+    effect: "基因繁殖"
+    unlock: "genetic_sequencer"
+
+  excitation_chamber:
+    display-name: "激發室"
+    category: BASIC
+    block: BREWING_STAND
+    inputs: ["pocket_chicken"]
+    outputs: []
+    energy-per-tick: 4
+    effect: "激發基因產出資源"
+    unlock: "private_coop"
+
+recipes:
+  # ── 雞網合成 ──────────────────────────────────────────
+  assembler_chicken_net:
+    machine: "assembler"
+    inputs: ["string", "string", "stick"]
+    output: "chicken_net"
+    count: 4
+    energy: 3
+    guide: "線×2 + 木棍 → 雞網×4"
+
+  # ── 基因定序器合成 ────────────────────────────────────
+  assembler_genetic_sequencer:
+    machine: "assembler"
+    inputs: ["glass", "iron_ingot", "redstone"]
+    output: "genetic_sequencer"
+    count: 1
+    energy: 8
+    guide: "玻璃 + 鐵錠 + 紅石 → 基因定序器"
+
+  # ── 私人雞舍合成 ──────────────────────────────────────
+  assembler_private_coop:
+    machine: "assembler"
+    inputs: ["oak_planks", "hay_block"]
+    output: "private_coop"
+    count: 1
+    energy: 5
+    guide: "橡木板 + 乾草捆 → 私人雞舍"
+
+  # ── 激發室合成 ────────────────────────────────────────
+  assembler_excitation_chamber:
+    machine: "assembler"
+    inputs: ["iron_ingot", "glass", "redstone"]
+    output: "excitation_chamber"
+    count: 1
+    energy: 10
+    guide: "鐵錠 + 玻璃 + 紅石 → 激發室"

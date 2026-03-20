@@ -69,6 +69,7 @@ public final class TechProjectPlugin extends JavaPlugin {
             "tech-content.yml",
             "tech-content-expansion.yml",
             "tech-content-megastructures.yml",
+            "tech-content-chickens.yml",
             "tech-blueprints.yml",
             "tech-guides.yml",
             "tech-guides_zh_tw.yml",

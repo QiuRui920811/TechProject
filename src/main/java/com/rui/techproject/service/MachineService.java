@@ -138,6 +138,7 @@ public final class MachineService {
     private final SafeScheduler scheduler;
     private final ItemFactoryUtil itemFactory;
     private final TechCropService techCropService;
+    private final ChickenGeneticsService chickenGenetics = new ChickenGeneticsService();
     private final Map<LocationKey, PlacedMachine> machines = new ConcurrentHashMap<>();
     private final Map<UUID, MachineViewSession> openViews = new ConcurrentHashMap<>();
     private final Map<LocationKey, java.util.Set<UUID>> viewersByMachine = new ConcurrentHashMap<>();
@@ -1627,6 +1628,9 @@ public final class MachineService {
             case "recycler" -> this.tickRecycler(machine, location);
             case "vacuum_inlet" -> this.tickVacuumInlet(machine, location);
             case "battery_bank" -> this.tickBatteryBank(machine, location);
+            case "genetic_sequencer" -> this.tickGeneticSequencer(machine, location);
+            case "private_coop" -> this.tickPrivateCoop(machine, location);
+            case "excitation_chamber" -> this.tickExcitationChamber(machine, location);
             case "greenhouse" -> this.tickGreenhouse(machine, definition, location);
             case "quarry_drill", "quarry_drill_mk2", "quarry_drill_mk3" -> this.tickQuarryDrill(machine, location);
             case "storage_hub" -> this.tickStorageHub(machine, location);
@@ -2738,6 +2742,170 @@ public final class MachineService {
         final RecipeRuntimeSnapshot snapshot = this.inspectRecipeRuntime(machine);
         this.setRuntimeState(machine, snapshot.state(), snapshot.detail());
         world.spawnParticle(Particle.GLOW, location.clone().add(0.5, 1.0, 0.5), 6, 0.25, 0.25, 0.25, 0.01);
+    }
+
+    // ── 基因雞工程：基因定序器 ─────────────────────────────
+    private void tickGeneticSequencer(final PlacedMachine machine, final Location location) {
+        final World world = location.getWorld();
+        if (world == null) {
+            return;
+        }
+        final long energy = 3L;
+        this.absorbNearbyEnergy(machine, location, energy);
+
+        // 搜尋輸入格中未定序的口袋雞
+        for (int slot = 0; slot < 9; slot++) {
+            final ItemStack input = machine.inputAt(slot);
+            if (input == null || input.getType() == Material.AIR) {
+                continue;
+            }
+            if (!this.itemFactory.isPocketChicken(input)) {
+                continue;
+            }
+            if (this.itemFactory.isChickenSequenced(input)) {
+                continue; // 已定序，跳過
+            }
+            // 消耗能源
+            if (!machine.consumeEnergy(energy)) {
+                this.setRuntimeState(machine, MachineRuntimeState.NO_POWER, "電力不足");
+                return;
+            }
+            // 讀取 DNA，建立已定序版本
+            final String dna = this.itemFactory.getChickenDna(input);
+            if (dna == null) {
+                continue;
+            }
+            final String resourceName = this.chickenGenetics.resourceNameZh(dna);
+            final ItemStack sequenced = this.itemFactory.buildPocketChicken(dna, true, resourceName);
+            // 嘗試放入輸出格
+            if (!this.canStoreOutput(machine, sequenced)) {
+                this.setRuntimeState(machine, MachineRuntimeState.OUTPUT_BLOCKED, "輸出已滿");
+                return;
+            }
+            // 消耗輸入，存入輸出
+            input.setAmount(input.getAmount() - 1);
+            if (input.getAmount() <= 0) {
+                machine.setInputAt(slot, null);
+            }
+            this.storeOutput(machine, sequenced);
+            this.progressService.incrementStat(machine.owner(), "chickens_sequenced", 1);
+            this.progressService.unlockByRequirement(machine.owner(), "genetic_sequencer");
+            this.setRuntimeState(machine, MachineRuntimeState.RUNNING, "定序中");
+            world.spawnParticle(Particle.ENCHANT, location.clone().add(0.5, 1.0, 0.5), 15, 0.3, 0.3, 0.3, 0.1);
+            world.playSound(location, Sound.BLOCK_ENCHANTMENT_TABLE_USE, 0.4f, 1.4f);
+            return;
+        }
+        this.setRuntimeState(machine, MachineRuntimeState.NO_INPUT, "等待未定序口袋雞");
+    }
+
+    // ── 基因雞工程：私人雞舍 ──────────────────────────────
+    private void tickPrivateCoop(final PlacedMachine machine, final Location location) {
+        final World world = location.getWorld();
+        if (world == null) {
+            return;
+        }
+        final long energy = 2L;
+        this.absorbNearbyEnergy(machine, location, energy);
+
+        // 搜尋兩隻已定序口袋雞
+        int parentSlotA = -1;
+        int parentSlotB = -1;
+        String dnaA = null;
+        String dnaB = null;
+        for (int slot = 0; slot < 9; slot++) {
+            final ItemStack input = machine.inputAt(slot);
+            if (input == null || input.getType() == Material.AIR) {
+                continue;
+            }
+            if (!this.itemFactory.isPocketChicken(input) || !this.itemFactory.isChickenSequenced(input)) {
+                continue;
+            }
+            final String dna = this.itemFactory.getChickenDna(input);
+            if (dna == null || dna.length() != 12) {
+                continue;
+            }
+            if (parentSlotA < 0) {
+                parentSlotA = slot;
+                dnaA = dna;
+            } else {
+                parentSlotB = slot;
+                dnaB = dna;
+                break;
+            }
+        }
+        if (parentSlotA < 0 || parentSlotB < 0) {
+            this.setRuntimeState(machine, MachineRuntimeState.NO_INPUT, "需要兩隻已定序口袋雞");
+            return;
+        }
+        if (!machine.consumeEnergy(energy)) {
+            this.setRuntimeState(machine, MachineRuntimeState.NO_POWER, "電力不足");
+            return;
+        }
+        // 繁殖後代
+        final String childDna = this.chickenGenetics.breed(dnaA, dnaB);
+        final String childResource = this.chickenGenetics.resourceNameZh(childDna);
+        final ItemStack child = this.itemFactory.buildPocketChicken(childDna, true, childResource);
+        if (!this.canStoreOutput(machine, child)) {
+            machine.addEnergy(energy); // 退還能源
+            this.setRuntimeState(machine, MachineRuntimeState.OUTPUT_BLOCKED, "輸出已滿");
+            return;
+        }
+        this.storeOutput(machine, child);
+        this.progressService.incrementStat(machine.owner(), "chickens_bred", 1);
+        this.progressService.unlockByRequirement(machine.owner(), "private_coop");
+        this.setRuntimeState(machine, MachineRuntimeState.RUNNING, "繁殖中");
+        world.spawnParticle(Particle.HEART, location.clone().add(0.5, 1.2, 0.5), 5, 0.3, 0.3, 0.3, 0.0);
+        world.playSound(location, Sound.ENTITY_CHICKEN_EGG, 0.5f, 1.2f);
+    }
+
+    // ── 基因雞工程：激發室 ───────────────────────────────
+    private void tickExcitationChamber(final PlacedMachine machine, final Location location) {
+        final World world = location.getWorld();
+        if (world == null) {
+            return;
+        }
+        final long energy = 4L;
+        this.absorbNearbyEnergy(machine, location, energy);
+
+        // 搜尋輸入格中有資源能力的已定序口袋雞
+        for (int slot = 0; slot < 9; slot++) {
+            final ItemStack input = machine.inputAt(slot);
+            if (input == null || input.getType() == Material.AIR) {
+                continue;
+            }
+            if (!this.itemFactory.isPocketChicken(input) || !this.itemFactory.isChickenSequenced(input)) {
+                continue;
+            }
+            final String dna = this.itemFactory.getChickenDna(input);
+            if (dna == null || !this.chickenGenetics.canProduceResource(dna)) {
+                continue;
+            }
+            // 消耗能源
+            if (!machine.consumeEnergy(energy)) {
+                this.setRuntimeState(machine, MachineRuntimeState.NO_POWER, "電力不足");
+                return;
+            }
+            // 產出資源
+            final String resourceId = this.chickenGenetics.resourceId(dna);
+            final ItemStack product = this.buildStackForId(resourceId, 1);
+            if (product == null) {
+                continue;
+            }
+            if (!this.canStoreOutput(machine, product)) {
+                machine.addEnergy(energy);
+                this.setRuntimeState(machine, MachineRuntimeState.OUTPUT_BLOCKED, "輸出已滿");
+                return;
+            }
+            this.storeOutput(machine, product);
+            final String resourceName = this.chickenGenetics.resourceNameZh(dna);
+            this.progressService.incrementStat(machine.owner(), "chicken_resources_produced", 1);
+            this.progressService.unlockByRequirement(machine.owner(), "excitation_chamber");
+            this.setRuntimeState(machine, MachineRuntimeState.RUNNING, "產出：" + resourceName);
+            world.spawnParticle(Particle.HAPPY_VILLAGER, location.clone().add(0.5, 1.0, 0.5), 8, 0.25, 0.25, 0.25, 0.02);
+            world.playSound(location, Sound.ENTITY_CHICKEN_AMBIENT, 0.3f, 1.5f);
+            return; // 雞不被消耗，留在輸入格
+        }
+        this.setRuntimeState(machine, MachineRuntimeState.NO_INPUT, "需要有資源能力的口袋雞");
     }
 
     private void tickPlanetaryGate(final PlacedMachine machine, final Location location) {

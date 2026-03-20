@@ -62,6 +62,9 @@ public final class ItemFactoryUtil {
     private final NamespacedKey guiPlaceholderKey;
     private final NamespacedKey previewClaimKey;
     private final NamespacedKey dataVersionKey;
+    private final NamespacedKey chickenDnaKey;
+    private final NamespacedKey chickenSequencedKey;
+    private final NamespacedKey chickenResourceKey;
     private final TechRegistry registry;
     private final Map<String, GuiButtonDefinition> guiButtons = new LinkedHashMap<>();
     private final Map<String, GuiIconDefinition> guiIcons = new LinkedHashMap<>();
@@ -77,6 +80,9 @@ public final class ItemFactoryUtil {
         this.guiPlaceholderKey = new NamespacedKey(plugin, "gui_placeholder");
         this.previewClaimKey = new NamespacedKey(plugin, "preview_claim");
         this.dataVersionKey = new NamespacedKey(plugin, "item_data_version");
+        this.chickenDnaKey = new NamespacedKey(plugin, "chicken_dna");
+        this.chickenSequencedKey = new NamespacedKey(plugin, "chicken_sequenced");
+        this.chickenResourceKey = new NamespacedKey(plugin, "chicken_resource");
         this.registry = registry;
         this.loadGuiConfig();
     }
@@ -675,6 +681,93 @@ public final class ItemFactoryUtil {
 
     public boolean hasWrenchTag(final ItemStack stack) {
         return "tech_wrench".equalsIgnoreCase(this.getTechItemId(stack));
+    }
+
+    // ── 基因雞工程 ─────────────────────────────────────────
+
+    public ItemStack buildChickenNet() {
+        final TechItemDefinition definition = this.registry.getItem("chicken_net");
+        final ItemStack stack = new ItemStack(Material.LEAD);
+        final ItemMeta meta = stack.getItemMeta();
+        meta.displayName(this.success("◆ 雞網"));
+        meta.lore(List.of(
+                this.muted("對準野生雞右鍵使用，將雞捕捉為口袋雞。"),
+                this.secondary("每次使用消耗一個"),
+                this.muted("合成器配方：線×2 + 木棍")
+        ));
+        if (definition != null && definition.itemModel() != null && !definition.itemModel().isBlank() && !definition.itemModel().trim().equals("-1")) {
+            this.applyConfiguredItemModel(meta, definition.itemModel());
+        }
+        meta.getPersistentDataContainer().set(this.techItemKey, PersistentDataType.STRING, "chicken_net");
+        meta.getPersistentDataContainer().set(this.dataVersionKey, PersistentDataType.INTEGER, this.currentItemDataVersion());
+        stack.setItemMeta(meta);
+        return stack;
+    }
+
+    public ItemStack buildPocketChicken(final String dna, final boolean sequenced, final String resourceNameZh) {
+        final ItemStack stack = new ItemStack(Material.EGG);
+        final ItemMeta meta = stack.getItemMeta();
+        final List<net.kyori.adventure.text.Component> lore = new java.util.ArrayList<>();
+        if (sequenced) {
+            final com.rui.techproject.service.ChickenGeneticsService genetics = new com.rui.techproject.service.ChickenGeneticsService();
+            meta.displayName(this.warning("◆ 口袋雞 §f[§a" + genetics.formatDnaShort(dna) + "§f]"));
+            lore.add(this.muted("───── 基因序列 ─────"));
+            lore.add(this.secondary("基因型：" + genetics.formatDna(dna)));
+            lore.add(this.secondary("簡碼型：" + genetics.formatDnaShort(dna)));
+            final int tier = genetics.resourceTier(dna);
+            lore.add(this.secondary("資源等級：Tier " + tier));
+            if (genetics.canProduceResource(dna)) {
+                lore.add(this.success("▶ 資源：" + resourceNameZh));
+                lore.add(this.success("▶ 可放入激發室產出資源"));
+            } else {
+                lore.add(this.muted("▶ 無資源 (純顯性)"));
+            }
+            lore.add(this.muted("───────────────"));
+        } else {
+            meta.displayName(this.warning("◆ 口袋雞 §7[未定序]"));
+            lore.add(this.muted("放入基因定序器分析 DNA。"));
+        }
+        meta.lore(lore);
+        meta.getPersistentDataContainer().set(this.techItemKey, PersistentDataType.STRING, "pocket_chicken");
+        meta.getPersistentDataContainer().set(this.chickenDnaKey, PersistentDataType.STRING, dna);
+        meta.getPersistentDataContainer().set(this.chickenSequencedKey, PersistentDataType.BYTE, (byte) (sequenced ? 1 : 0));
+        if (resourceNameZh != null && !resourceNameZh.isEmpty()) {
+            meta.getPersistentDataContainer().set(this.chickenResourceKey, PersistentDataType.STRING, resourceNameZh);
+        }
+        meta.getPersistentDataContainer().set(this.dataVersionKey, PersistentDataType.INTEGER, this.currentItemDataVersion());
+        stack.setItemMeta(meta);
+        return stack;
+    }
+
+    public String getChickenDna(final ItemStack stack) {
+        if (stack == null || !stack.hasItemMeta()) return null;
+        return stack.getItemMeta().getPersistentDataContainer().get(this.chickenDnaKey, PersistentDataType.STRING);
+    }
+
+    public boolean isChickenSequenced(final ItemStack stack) {
+        if (stack == null || !stack.hasItemMeta()) return false;
+        final Byte val = stack.getItemMeta().getPersistentDataContainer().get(this.chickenSequencedKey, PersistentDataType.BYTE);
+        return val != null && val == 1;
+    }
+
+    public boolean isChickenNet(final ItemStack stack) {
+        return "chicken_net".equalsIgnoreCase(this.getTechItemId(stack));
+    }
+
+    public boolean isPocketChicken(final ItemStack stack) {
+        return "pocket_chicken".equalsIgnoreCase(this.getTechItemId(stack));
+    }
+
+    public NamespacedKey chickenDnaKey() {
+        return this.chickenDnaKey;
+    }
+
+    public NamespacedKey chickenSequencedKey() {
+        return this.chickenSequencedKey;
+    }
+
+    public NamespacedKey chickenResourceKey() {
+        return this.chickenResourceKey;
     }
 
     public Component primary(final String text) {
