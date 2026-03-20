@@ -704,8 +704,12 @@ public final class ItemFactoryUtil {
         return stack;
     }
 
+    /** 雞頭顱材質 (minecraft-heads #51 Chicken) */
+    private static final String CHICKEN_HEAD_TEXTURE = "1638469a599ceef7527546d67d48eef60983d5b1a75ca4dab7c77826e3bc";
+
     public ItemStack buildPocketChicken(final String dna, final boolean sequenced, final String resourceNameZh) {
-        final ItemStack stack = new ItemStack(Material.EGG);
+        final ItemStack stack = new ItemStack(Material.PLAYER_HEAD);
+        this.applyHeadTexture(stack, CHICKEN_HEAD_TEXTURE);
         final ItemMeta meta = stack.getItemMeta();
         final List<net.kyori.adventure.text.Component> lore = new java.util.ArrayList<>();
         if (sequenced) {
