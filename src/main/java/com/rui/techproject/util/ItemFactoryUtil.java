@@ -332,6 +332,9 @@ public final class ItemFactoryUtil {
         lore.add(this.colored("└─────────────────────────┘", MUTED));
         meta.lore(lore);
         meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
+        if (stack.getType() == Material.PLAYER_HEAD) {
+            meta.setMaxStackSize(64);
+        }
         this.applyConfiguredItemModel(meta, definition.itemModel());
         meta.getPersistentDataContainer().set(this.techItemKey, PersistentDataType.STRING, definition.id());
         meta.getPersistentDataContainer().set(this.dataVersionKey, PersistentDataType.INTEGER, this.currentItemDataVersion());
@@ -396,7 +399,7 @@ public final class ItemFactoryUtil {
             return;
         }
         try {
-            final PlayerProfile profile = Bukkit.createPlayerProfile(UUID.randomUUID());
+            final PlayerProfile profile = Bukkit.createPlayerProfile(UUID.nameUUIDFromBytes(headTexture.getBytes(java.nio.charset.StandardCharsets.UTF_8)));
             profile.getTextures().setSkin(skinUrl);
             skullMeta.setOwnerProfile(profile);
             stack.setItemMeta(skullMeta);
@@ -595,16 +598,20 @@ public final class ItemFactoryUtil {
                 ? "科技樹、配方與教學入口"
                 : this.localizeInlineTerms(definition.description());
         meta.displayName(this.primary(displayName));
-        meta.lore(List.of(
-                this.muted(description),
-                this.success("右鍵：開啟科技書（等同 /tech book）"),
-                this.warning("左鍵：無特殊功能"),
-                this.secondary("補發：/tech book get")
-        ));
+        final String rightClickText = this.plugin.getConfig().getString("techbook-lore.right-click", "右鍵：開啟科技書（等同 /tech book）");
+        final String leftClickText = this.plugin.getConfig().getString("techbook-lore.left-click", "左鍵：無特殊功能");
+        final String extraText = this.plugin.getConfig().getString("techbook-lore.extra", "補發：/tech book get");
+        final List<Component> lore = new ArrayList<>();
+        lore.add(this.muted(description));
+        if (!rightClickText.isBlank()) lore.add(this.success(rightClickText));
+        if (!leftClickText.isBlank()) lore.add(this.warning(leftClickText));
+        if (!extraText.isBlank()) lore.add(this.secondary(extraText));
+        meta.lore(lore);
         if (definition != null) {
             this.applyConfiguredItemModel(meta, definition.itemModel());
         }
         meta.getPersistentDataContainer().set(this.techItemKey, PersistentDataType.STRING, "tech_book");
+        meta.getPersistentDataContainer().set(this.dataVersionKey, PersistentDataType.INTEGER, this.currentItemDataVersion());
         stack.setItemMeta(meta);
         return stack;
     }
@@ -642,6 +649,32 @@ public final class ItemFactoryUtil {
         meta.getPersistentDataContainer().set(this.techItemKey, PersistentDataType.STRING, "achievement_badge:" + id);
         stack.setItemMeta(meta);
         return stack;
+    }
+
+    public ItemStack buildWrench() {
+        final TechItemDefinition definition = this.registry.getItem("tech_wrench");
+        final ItemStack stack = new ItemStack(Material.IRON_SHOVEL);
+        final ItemMeta meta = stack.getItemMeta();
+        meta.displayName(this.warning("⚙ 科技扳手"));
+        meta.lore(List.of(
+                this.muted("萬用科技拆卸工具。"),
+                this.success("蹲下+右鍵：瞬間拆除科技方塊"),
+                this.secondary("保留機器儲存的能源"),
+                this.muted("合成器配方：鐵板 + 銅錠")
+        ));
+        meta.setUnbreakable(true);
+        meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES, ItemFlag.HIDE_UNBREAKABLE);
+        if (definition != null && definition.itemModel() != null && !definition.itemModel().isBlank() && !definition.itemModel().trim().equals("-1")) {
+            this.applyConfiguredItemModel(meta, definition.itemModel());
+        }
+        meta.getPersistentDataContainer().set(this.techItemKey, PersistentDataType.STRING, "tech_wrench");
+        meta.getPersistentDataContainer().set(this.dataVersionKey, PersistentDataType.INTEGER, this.currentItemDataVersion());
+        stack.setItemMeta(meta);
+        return stack;
+    }
+
+    public boolean hasWrenchTag(final ItemStack stack) {
+        return "tech_wrench".equalsIgnoreCase(this.getTechItemId(stack));
     }
 
     public Component primary(final String text) {
@@ -1121,6 +1154,101 @@ public final class ItemFactoryUtil {
             case LIGHTNING_ROD -> "避雷針";
             case RESPAWN_ANCHOR -> "重生錨";
             case ENCHANTED_BOOK -> "附魔書";
+            // ── 藍圖配方用 ──
+            case BOOK -> "書";
+            case COBBLESTONE -> "圓石";
+            case CRAFTER -> "合成器";
+            case CRYING_OBSIDIAN -> "哭泣黑曜石";
+            case LECTERN -> "講台";
+            case LOOM -> "織布機";
+            case MANGROVE_LEAVES -> "紅樹林樹葉";
+            case REDSTONE_LAMP -> "紅石燈";
+            case DIAMOND -> "鑽石";
+            case NETHER_STAR -> "乾燥之星";
+            // ── 機器方塊材料 ──
+            case IRON_BLOCK -> "鐵方塊";
+            case ANVIL -> "鐵砧";
+            case BEACON -> "信標";
+            case BLAST_FURNACE -> "高爐";
+            case BREWING_STAND -> "釀造台";
+            case BRICKS -> "紅磚";
+            case CAMPFIRE -> "營火";
+            case CARTOGRAPHY_TABLE -> "製圖台";
+            case CAULDRON -> "大釜";
+            case CHISELED_BOOKSHELF -> "雕紋書架";
+            case CONDUIT -> "潮湧核心";
+            case DAYLIGHT_DETECTOR -> "日照感測器";
+            case ENCHANTING_TABLE -> "附魔台";
+            case ENDER_CHEST -> "終界箱";
+            case END_ROD -> "末地燭";
+            case HONEY_BLOCK -> "蜂蜜方塊";
+            case LODESTONE -> "磁石";
+            case MAGMA_BLOCK -> "岩漿塊";
+            case MOSS_BLOCK -> "青苔方塊";
+            case NETHERITE_BLOCK -> "獄髓方塊";
+            case SCULK_CATALYST -> "伏聯催化器";
+            case SEA_LANTERN -> "海晶燈";
+            case SHULKER_BOX -> "界伏殼箱";
+            case SMITHING_TABLE -> "鍛造台";
+            case SMOKER -> "煙燻爐";
+            case AMETHYST_BLOCK -> "紫水晶方塊";
+            case BLACK_STAINED_GLASS -> "黑色玻璃";
+            case BLUE_STAINED_GLASS -> "藍色玻璃";
+            case CALIBRATED_SCULK_SENSOR -> "校頻伏聯感測器";
+            case CHISELED_TUFF -> "雕紋凝灰岩";
+            case CRAFTING_TABLE -> "工作台";
+            // ── 礦場 / 系統產出 ──
+            case RAW_IRON -> "鐵原礦";
+            case RAW_COPPER -> "銅原礦";
+            case RAW_GOLD -> "金原礦";
+            case LAPIS_LAZULI -> "青金石";
+            case EMERALD -> "綠寶石";
+            case GOLD_INGOT -> "金錠";
+            case GOLD_NUGGET -> "金粒";
+            // ── 伐木機產出 ──
+            case OAK_LOG -> "橡木原木";
+            case BIRCH_LOG -> "樺木原木";
+            case SPRUCE_LOG -> "雲杉原木";
+            case JUNGLE_LOG -> "叢林原木";
+            case ACACIA_LOG -> "相思木原木";
+            case DARK_OAK_LOG -> "深色橡木原木";
+            case CHERRY_LOG -> "櫻花原木";
+            case MANGROVE_LOG -> "紅樹林原木";
+            case OAK_SAPLING -> "橡木樹苗";
+            // ── 生物收集器產出 ──
+            case LEATHER -> "皮革";
+            case BEEF -> "生牛肉";
+            case WHITE_WOOL -> "白色羊毛";
+            case MUTTON -> "生羊肉";
+            case PORKCHOP -> "生豬排";
+            case CHICKEN -> "生雞肉";
+            case FEATHER -> "羽毛";
+            case ROTTEN_FLESH -> "腐肉";
+            case BONE -> "骨頭";
+            case GUNPOWDER -> "火藥";
+            case STRING -> "線";
+            case SPIDER_EYE -> "蜘蛛眼";
+            case SLIME_BALL -> "黏液球";
+            // ── 漁獲碼頭產出 ──
+            case COD -> "鱈魚";
+            case SALMON -> "鮭魚";
+            case TROPICAL_FISH -> "熱帶魚";
+            case PUFFERFISH -> "河魨";
+            case NAUTILUS_SHELL -> "鸚鵡螺殼";
+            case FISHING_ROD -> "釣竿";
+            // ── 擴充配方材料 ──
+            case CHORUS_FRUIT -> "紫頌果";
+            case ENDER_EYE -> "終界之眼";
+            case GLOW_INK_SAC -> "螢光墨囊";
+            case LAVA_BUCKET -> "熔岩桶";
+            case OBSIDIAN -> "黑曜石";
+            case PHANTOM_MEMBRANE -> "乳翼膜";
+            case PRISMARINE_SHARD -> "海磷碎片";
+            case SOUL_LANTERN -> "靈魂燈籠";
+            case WATER_BUCKET -> "水桶";
+            case MELON_SLICE -> "西瓜片";
+            case WITHER_SKELETON_SKULL -> "凋靈骷髏頭顱";
+            case KNOWLEDGE_BOOK -> "知識之書";
             default -> this.humanize(material.name());
         };
     }
@@ -2133,6 +2261,10 @@ public final class ItemFactoryUtil {
         // 嘗試以科技物品刷新
         final String techId = this.getTechItemId(stack);
         if (techId != null) {
+            // 科技書用專用刷新，避免套用標準科技物品 lore
+            if (techId.equals("tech_book")) {
+                return this.refreshTechBookLore(stack, current);
+            }
             final var definition = this.registry.getItem(techId);
             if (definition == null) {
                 return false; // 已刪除的物品不處理
@@ -2151,6 +2283,31 @@ public final class ItemFactoryUtil {
         }
 
         return false;
+    }
+
+    private boolean refreshTechBookLore(final ItemStack stack, final int newVersion) {
+        final TechItemDefinition definition = this.registry.getItem("tech_book");
+        final ItemMeta meta = stack.getItemMeta();
+        final String displayName = definition == null ? "科技書" : this.displayNameForId(definition.id());
+        final String description = definition == null || definition.description() == null || definition.description().isBlank()
+                ? "科技樹、配方與教學入口"
+                : this.localizeInlineTerms(definition.description());
+        meta.displayName(this.primary(displayName));
+        final String rightClickText = this.plugin.getConfig().getString("techbook-lore.right-click", "右鍵：開啟科技書（等同 /tech book）");
+        final String leftClickText = this.plugin.getConfig().getString("techbook-lore.left-click", "左鍵：無特殊功能");
+        final String extraText = this.plugin.getConfig().getString("techbook-lore.extra", "補發：/tech book get");
+        final List<Component> lore = new ArrayList<>();
+        lore.add(this.muted(description));
+        if (!rightClickText.isBlank()) lore.add(this.success(rightClickText));
+        if (!leftClickText.isBlank()) lore.add(this.warning(leftClickText));
+        if (!extraText.isBlank()) lore.add(this.secondary(extraText));
+        meta.lore(lore);
+        if (definition != null) {
+            this.applyConfiguredItemModel(meta, definition.itemModel());
+        }
+        meta.getPersistentDataContainer().set(this.dataVersionKey, PersistentDataType.INTEGER, newVersion);
+        stack.setItemMeta(meta);
+        return true;
     }
 
     private boolean refreshTechItemLore(final ItemStack stack, final TechItemDefinition definition, final int newVersion) {

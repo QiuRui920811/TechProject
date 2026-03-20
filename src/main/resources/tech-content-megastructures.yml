@@ -219,6 +219,7 @@ machines:
     category: ADVANCED
     tier: TIER4
     block: SMITHING_TABLE
+    head-texture: d83571ff589f1a59bb02b80800fc736116e27c3dcf9efebede8cf1fdde
     inputs: [stellar_alloy, neutronium_ingot, orbit_frame]
     outputs: [starsteel_ingot, starsteel_frame]
     energy-per-tick: 38
@@ -229,6 +230,7 @@ machines:
     category: ADVANCED
     tier: TIER4
     block: BLACK_STAINED_GLASS
+    head-texture: c6cac59b2aae489aa0687b5d802b2555eb14a40bd62b21eb116fa569cdb756
     inputs: [stellar_glass, void_crystal, graviton_lens, quantum_fabric, dark_matter_sheet]
     outputs: [vacuum_glass, harmonic_crystal, celestial_lens, nebula_fiber]
     energy-per-tick: 34
@@ -239,6 +241,7 @@ machines:
     category: ADVANCED
     tier: TIER4
     block: ENDER_CHEST
+    head-texture: eb49e6ec10771e899225aea73cd8cf03684f411d1415c7323c93cb9476230
     inputs: [antimatter_cell, chrono_thread, magnetic_ring, orbit_processor, celestial_lens]
     outputs: [warp_cell, warp_coil, astral_circuit]
     energy-per-tick: 42
@@ -249,6 +252,7 @@ machines:
     category: ADVANCED
     tier: TIER4
     block: NETHERITE_BLOCK
+    head-texture: 25cf91b7388665a6d7c1b6026bdb2322c6d278997a44478677cbcc15f76124f
     inputs: [singularity_core, entropy_plate, dark_matter_sheet, neutronium_plate]
     outputs: [event_horizon_plate, singularity_casing]
     energy-per-tick: 44
@@ -259,6 +263,7 @@ machines:
     category: ADVANCED
     tier: TIER4
     block: STONECUTTER
+    head-texture: 6837ca12f222f4787196a17b8ab656985f8404c50767adbcb6e7f14254fee
     inputs: [chrono_core, reactor_lattice, vacuum_glass, harmonic_crystal, photon_plate]
     outputs: [chrono_lattice, continuum_shell, aurora_plate]
     energy-per-tick: 40
@@ -269,6 +274,7 @@ machines:
     category: ADVANCED
     tier: TIER4
     block: CARTOGRAPHY_TABLE
+    head-texture: ce8f5adb14d6c9f6b810d027543f1a8c1f417e2fed993c97bcd89c74f5e2e8
     inputs: [star_chart, void_beacon_core, data_core, archive_plate]
     outputs: [relic_data, archive_core]
     energy-per-tick: 30
@@ -279,6 +285,7 @@ machines:
     category: ADVANCED
     tier: TIER4
     block: RESPAWN_ANCHOR
+    head-texture: 3ce2dad9baf7eaba7e80d4d0f9fac0aab01a76b12fb71c3d2af2a16fdd4c7383
     inputs: [singularity_casing, void_beacon_core, warp_coil, graviton_core]
     outputs: [dimension_anchor, cluster_manifold]
     energy-per-tick: 46
@@ -289,6 +296,7 @@ machines:
     category: ADVANCED
     tier: TIER4
     block: ENCHANTING_TABLE
+    head-texture: 7a2569415c14e31c98ec993a2f99e6d64846db367a13b199965ad99c438c86c
     inputs: [cosmic_matrix, archive_core, continuum_shell, relic_data]
     outputs: [omega_matrix, apex_core, omega_archive]
     energy-per-tick: 52

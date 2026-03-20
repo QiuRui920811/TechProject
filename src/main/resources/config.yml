@@ -1,5 +1,16 @@
 machine-tick-interval: 20
 starting-techbook: true
+starting-wrench: false
+
+# 科技書左鍵時讓玩家執行的指令（留空或移除則不會觸發任何指令）
+# 支援 {player} 佔位符
+
+# 科技書 Lore 文案（可自由修改，支援 & 色碼）
+techbook-lore:
+  right-click: "右鍵：開啟科技書"
+  left-click: "左鍵：打開主選單"
+  extra: ""
+techbook-left-click-command: "pa open s1"
 
 # 物品資料版本 — 每次修改物品/機器的 lore、名稱、描述時，手動遞增此值。
 # 持有舊版本物品的玩家在登入時會自動更新外觀（不影響 ID、儲能等狀態）。

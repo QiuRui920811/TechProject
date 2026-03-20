@@ -81,6 +81,20 @@ public final class TechCommand implements CommandExecutor, TabCompleter {
             return true;
         }
 
+        if (args[0].equalsIgnoreCase("wrench")) {
+            if (!(sender instanceof Player player)) {
+                sender.sendMessage(Component.text("只有玩家可以取得科技扳手。", NamedTextColor.RED));
+                return true;
+            }
+            if (args.length >= 2 && args[1].equalsIgnoreCase("get")) {
+                player.getInventory().addItem(this.itemFactory.buildWrench());
+                player.sendMessage(Component.text("已補發一把科技扳手。", NamedTextColor.GREEN));
+                return true;
+            }
+            player.sendMessage(Component.text("用法：/tech wrench get", NamedTextColor.YELLOW));
+            return true;
+        }
+
         if (args[0].equalsIgnoreCase("stats")) {
             if (!(sender instanceof Player player)) {
                 sender.sendMessage(Component.text("只有玩家可以查看科技進度。", NamedTextColor.RED));
@@ -332,7 +346,10 @@ public final class TechCommand implements CommandExecutor, TabCompleter {
                                                 @NotNull final String alias,
                                                 @NotNull final String[] args) {
         if (args.length == 1) {
-            return List.of("book", "research", "planet", "list", "stats", "xp", "achievements", "title", "search", "give", "reload");
+            return List.of("book", "wrench", "research", "planet", "list", "stats", "xp", "achievements", "title", "search", "give", "reload");
+        }
+        if (args.length == 2 && args[0].equalsIgnoreCase("wrench")) {
+            return List.of("get");
         }
         if (args.length == 2 && args[0].equalsIgnoreCase("title")) {
             return List.of("clear", "list");

@@ -611,7 +611,7 @@ public final class MachineService {
             player.sendMessage(this.itemFactory.warning(machine.manualOperationTicks() > 0 ? "粉碎機正在震動運轉中。" : "粉碎機已完成本輪，請先清空輸出。"));
             return true;
         }
-        final List<MachineRecipe> recipes = this.registry.getRecipesForMachine(machine.machineId());
+        final List<MachineRecipe> recipes = this.effectiveRecipes(machine);
         if (recipes.isEmpty()) {
             this.setRuntimeState(machine, MachineRuntimeState.IDLE, "等待互動");
             player.sendMessage(this.itemFactory.warning("這台粉碎機目前沒有可用配方。"));
@@ -621,7 +621,7 @@ public final class MachineService {
             if (!this.canCraftRecipe(machine, recipe)) {
                 continue;
             }
-            final ItemStack output = this.buildStackForId(recipe.outputId(), 1 + this.countUpgrade(machine, "stack_upgrade"));
+            final ItemStack output = this.buildStackForId(recipe.outputId(), recipe.outputCount() + this.countUpgrade(machine, "stack_upgrade"));
             if (output == null) {
                 this.setRuntimeState(machine, MachineRuntimeState.IDLE, "等待配方初始化");
                 player.sendMessage(this.itemFactory.warning("目前無法初始化粉碎配方產物。"));
@@ -670,11 +670,11 @@ public final class MachineService {
             player.sendMessage(this.itemFactory.warning(machine.manualOperationTicks() > 0 ? "壓縮機正在反覆下壓。" : "壓縮機已完成本輪，請先清空輸出。"));
             return true;
         }
-        for (final MachineRecipe recipe : this.registry.getRecipesForMachine(machine.machineId())) {
+        for (final MachineRecipe recipe : this.effectiveRecipes(machine)) {
             if (!this.canCraftRecipe(machine, recipe)) {
                 continue;
             }
-            final ItemStack output = this.buildStackForId(recipe.outputId(), 1 + this.countUpgrade(machine, "stack_upgrade"));
+            final ItemStack output = this.buildStackForId(recipe.outputId(), recipe.outputCount() + this.countUpgrade(machine, "stack_upgrade"));
             if (output == null) {
                 this.setRuntimeState(machine, MachineRuntimeState.IDLE, "等待配方初始化");
                 player.sendMessage(this.itemFactory.warning("目前無法初始化壓縮配方產物。"));
@@ -719,11 +719,11 @@ public final class MachineService {
             player.sendMessage(this.itemFactory.warning(machine.manualOperationTicks() > 0 ? "洗礦機正在翻攪礦漿。" : "洗礦機已完成本輪，請先清空輸出。"));
             return true;
         }
-        for (final MachineRecipe recipe : this.registry.getRecipesForMachine(machine.machineId())) {
+        for (final MachineRecipe recipe : this.effectiveRecipes(machine)) {
             if (!this.canCraftRecipe(machine, recipe)) {
                 continue;
             }
-            final ItemStack output = this.buildStackForId(recipe.outputId(), 1 + this.countUpgrade(machine, "stack_upgrade"));
+            final ItemStack output = this.buildStackForId(recipe.outputId(), recipe.outputCount() + this.countUpgrade(machine, "stack_upgrade"));
             if (output == null) {
                 this.setRuntimeState(machine, MachineRuntimeState.IDLE, "等待配方初始化");
                 player.sendMessage(this.itemFactory.warning("目前無法初始化洗礦配方產物。"));
@@ -776,11 +776,11 @@ public final class MachineService {
             player.sendMessage(this.itemFactory.warning(machine.manualOperationTicks() > 0 ? "拉線機正在持續牽引。" : "拉線機已完成本輪，請先清空輸出。"));
             return true;
         }
-        for (final MachineRecipe recipe : this.registry.getRecipesForMachine(machine.machineId())) {
+        for (final MachineRecipe recipe : this.effectiveRecipes(machine)) {
             if (!this.canCraftRecipe(machine, recipe)) {
                 continue;
             }
-            final ItemStack output = this.buildStackForId(recipe.outputId(), 1 + this.countUpgrade(machine, "stack_upgrade"));
+            final ItemStack output = this.buildStackForId(recipe.outputId(), recipe.outputCount() + this.countUpgrade(machine, "stack_upgrade"));
             if (output == null) {
                 this.setRuntimeState(machine, MachineRuntimeState.IDLE, "等待配方初始化");
                 player.sendMessage(this.itemFactory.warning("目前無法初始化拉線配方產物。"));
@@ -825,11 +825,11 @@ public final class MachineService {
             player.sendMessage(this.itemFactory.warning(machine.manualOperationTicks() > 0 ? "淨化器正在脈衝過濾。" : "淨化器已完成本輪，請先清空輸出。"));
             return true;
         }
-        for (final MachineRecipe recipe : this.registry.getRecipesForMachine(machine.machineId())) {
+        for (final MachineRecipe recipe : this.effectiveRecipes(machine)) {
             if (!this.canCraftRecipe(machine, recipe)) {
                 continue;
             }
-            final ItemStack output = this.buildStackForId(recipe.outputId(), 1 + this.countUpgrade(machine, "stack_upgrade"));
+            final ItemStack output = this.buildStackForId(recipe.outputId(), recipe.outputCount() + this.countUpgrade(machine, "stack_upgrade"));
             if (output == null) {
                 this.setRuntimeState(machine, MachineRuntimeState.IDLE, "等待配方初始化");
                 player.sendMessage(this.itemFactory.warning("目前無法初始化淨化配方產物。"));
@@ -874,11 +874,11 @@ public final class MachineService {
             player.sendMessage(this.itemFactory.warning(machine.manualOperationTicks() > 0 ? "離心機正在高速旋轉。" : "離心機已完成本輪，請先清空輸出。"));
             return true;
         }
-        for (final MachineRecipe recipe : this.registry.getRecipesForMachine(machine.machineId())) {
+        for (final MachineRecipe recipe : this.effectiveRecipes(machine)) {
             if (!this.canCraftRecipe(machine, recipe)) {
                 continue;
             }
-            final ItemStack output = this.buildStackForId(recipe.outputId(), 1 + this.countUpgrade(machine, "stack_upgrade"));
+            final ItemStack output = this.buildStackForId(recipe.outputId(), recipe.outputCount() + this.countUpgrade(machine, "stack_upgrade"));
             if (output == null) {
                 this.setRuntimeState(machine, MachineRuntimeState.IDLE, "等待配方初始化");
                 player.sendMessage(this.itemFactory.warning("目前無法初始化離心配方產物。"));
@@ -935,11 +935,11 @@ public final class MachineService {
             player.sendMessage(this.itemFactory.warning(machine.manualOperationTicks() > 0 ? "生質實驗室正在培養反應中。" : "實驗室已完成本輪，請先清空輸出。"));
             return true;
         }
-        for (final MachineRecipe recipe : this.registry.getRecipesForMachine(machine.machineId())) {
+        for (final MachineRecipe recipe : this.effectiveRecipes(machine)) {
             if (!this.canCraftRecipe(machine, recipe)) {
                 continue;
             }
-            final ItemStack output = this.buildStackForId(recipe.outputId(), 1 + this.countUpgrade(machine, "stack_upgrade"));
+            final ItemStack output = this.buildStackForId(recipe.outputId(), recipe.outputCount() + this.countUpgrade(machine, "stack_upgrade"));
             if (output == null) {
                 this.setRuntimeState(machine, MachineRuntimeState.IDLE, "等待配方初始化");
                 player.sendMessage(this.itemFactory.warning("目前無法初始化生質配方產物。"));
@@ -988,11 +988,11 @@ public final class MachineService {
             player.sendMessage(this.itemFactory.warning(machine.manualOperationTicks() > 0 ? "化學反應器正在進行鏈式反應。" : "反應器已完成本輪，請先清空輸出。"));
             return true;
         }
-        for (final MachineRecipe recipe : this.registry.getRecipesForMachine(machine.machineId())) {
+        for (final MachineRecipe recipe : this.effectiveRecipes(machine)) {
             if (!this.canCraftRecipe(machine, recipe)) {
                 continue;
             }
-            final ItemStack output = this.buildStackForId(recipe.outputId(), 1 + this.countUpgrade(machine, "stack_upgrade"));
+            final ItemStack output = this.buildStackForId(recipe.outputId(), recipe.outputCount() + this.countUpgrade(machine, "stack_upgrade"));
             if (output == null) {
                 this.setRuntimeState(machine, MachineRuntimeState.IDLE, "等待配方初始化");
                 player.sendMessage(this.itemFactory.warning("目前無法初始化反應配方產物。"));
@@ -1300,16 +1300,22 @@ public final class MachineService {
     public void purgeOrphanDisplays() {
         for (final World world : Bukkit.getWorlds()) {
             for (final Entity entity : world.getEntities()) {
-                if (!(entity instanceof TextDisplay display)) {
+                if (!(entity instanceof TextDisplay)) {
                     continue;
                 }
-                if (display.isPersistent() || !display.isInvulnerable()) {
-                    continue;
-                }
-                if (!display.hasGravity() && display.getBrightness() != null && display.getBrightness().getBlockLight() == 15
-                        && display.getScoreboardTags().contains("techproject_display")) {
-                    this.safeRemoveEntity(entity);
-                }
+                this.scheduler.runEntity(entity, () -> {
+                    final TextDisplay display = (TextDisplay) entity;
+                    try {
+                        if (display.isPersistent() || !display.isInvulnerable()) {
+                            return;
+                        }
+                        if (!display.hasGravity() && display.getBrightness() != null && display.getBrightness().getBlockLight() == 15
+                                && display.getScoreboardTags().contains("techproject_display")) {
+                            entity.remove();
+                        }
+                    } catch (final Exception ignored) {
+                    }
+                });
             }
         }
     }
@@ -1349,6 +1355,7 @@ public final class MachineService {
             entry.put("runtime-detail", machine.runtimeDetail());
             entry.put("manual-operation-ticks", machine.manualOperationTicks());
             entry.put("manual-operation-recipe", machine.manualOperationRecipeId());
+            entry.put("locked-recipe", machine.lockedRecipeId());
             entry.put("input-direction", machine.inputDirection());
             entry.put("output-direction", machine.outputDirection());
             entry.put("filter-mode", machine.filterMode());
@@ -1398,6 +1405,7 @@ public final class MachineService {
                         data.get("runtime-detail") instanceof String s ? s : "待命");
                 machine.setManualOperationTicks(data.get("manual-operation-ticks") instanceof Number n ? n.intValue() : 0);
                 machine.setManualOperationRecipeId(data.get("manual-operation-recipe") instanceof String s ? s : null);
+                machine.setLockedRecipeId(data.get("locked-recipe") instanceof String s ? s : null);
                 if (machine.manualOperationTicks() > 0 && machine.manualOperationRecipeId() == null) {
                     machine.clearManualOperation();
                 }
@@ -3882,7 +3890,7 @@ public final class MachineService {
             this.setRuntimeState(machine, MachineRuntimeState.IDLE, "等待手動啟動");
             return;
         }
-        final ItemStack output = this.buildStackForId(recipe.outputId(), 1 + this.countUpgrade(machine, "stack_upgrade"));
+        final ItemStack output = this.buildStackForId(recipe.outputId(), recipe.outputCount() + this.countUpgrade(machine, "stack_upgrade"));
         if (output == null) {
             machine.clearManualOperation();
             this.setRuntimeState(machine, MachineRuntimeState.IDLE, "等待配方初始化");
@@ -3940,7 +3948,7 @@ public final class MachineService {
             this.setRuntimeState(machine, MachineRuntimeState.IDLE, "等待手動啟動");
             return;
         }
-        final ItemStack output = this.buildStackForId(recipe.outputId(), 1 + this.countUpgrade(machine, "stack_upgrade"));
+        final ItemStack output = this.buildStackForId(recipe.outputId(), recipe.outputCount() + this.countUpgrade(machine, "stack_upgrade"));
         if (output == null) {
             machine.clearManualOperation();
             this.setRuntimeState(machine, MachineRuntimeState.IDLE, "等待配方初始化");
@@ -3998,7 +4006,7 @@ public final class MachineService {
             this.setRuntimeState(machine, MachineRuntimeState.IDLE, "等待手動啟動");
             return;
         }
-        final ItemStack output = this.buildStackForId(recipe.outputId(), 1 + this.countUpgrade(machine, "stack_upgrade"));
+        final ItemStack output = this.buildStackForId(recipe.outputId(), recipe.outputCount() + this.countUpgrade(machine, "stack_upgrade"));
         if (output == null) {
             machine.clearManualOperation();
             this.setRuntimeState(machine, MachineRuntimeState.IDLE, "等待配方初始化");
@@ -4056,7 +4064,7 @@ public final class MachineService {
             this.setRuntimeState(machine, MachineRuntimeState.IDLE, "等待手動啟動");
             return;
         }
-        final ItemStack output = this.buildStackForId(recipe.outputId(), 1 + this.countUpgrade(machine, "stack_upgrade"));
+        final ItemStack output = this.buildStackForId(recipe.outputId(), recipe.outputCount() + this.countUpgrade(machine, "stack_upgrade"));
         if (output == null) {
             machine.clearManualOperation();
             this.setRuntimeState(machine, MachineRuntimeState.IDLE, "等待配方初始化");
@@ -4114,7 +4122,7 @@ public final class MachineService {
             this.setRuntimeState(machine, MachineRuntimeState.IDLE, "等待手動啟動");
             return;
         }
-        final ItemStack output = this.buildStackForId(recipe.outputId(), 1 + this.countUpgrade(machine, "stack_upgrade"));
+        final ItemStack output = this.buildStackForId(recipe.outputId(), recipe.outputCount() + this.countUpgrade(machine, "stack_upgrade"));
         if (output == null) {
             machine.clearManualOperation();
             this.setRuntimeState(machine, MachineRuntimeState.IDLE, "等待配方初始化");
@@ -4199,7 +4207,7 @@ public final class MachineService {
             return;
         }
 
-        final ItemStack output = this.buildStackForId(recipe.outputId(), 1 + this.countUpgrade(machine, "stack_upgrade"));
+        final ItemStack output = this.buildStackForId(recipe.outputId(), recipe.outputCount() + this.countUpgrade(machine, "stack_upgrade"));
         if (output == null) {
             machine.clearManualOperation();
             this.setRuntimeState(machine, MachineRuntimeState.IDLE, "等待配方初始化");
@@ -4262,7 +4270,7 @@ public final class MachineService {
             this.setRuntimeState(machine, MachineRuntimeState.IDLE, "等待手動啟動");
             return;
         }
-        final ItemStack output = this.buildStackForId(recipe.outputId(), 1 + this.countUpgrade(machine, "stack_upgrade"));
+        final ItemStack output = this.buildStackForId(recipe.outputId(), recipe.outputCount() + this.countUpgrade(machine, "stack_upgrade"));
         if (output == null) {
             machine.clearManualOperation();
             this.setRuntimeState(machine, MachineRuntimeState.IDLE, "等待配方初始化");
@@ -4320,7 +4328,7 @@ public final class MachineService {
             this.setRuntimeState(machine, MachineRuntimeState.IDLE, "等待手動啟動");
             return;
         }
-        final ItemStack output = this.buildStackForId(recipe.outputId(), 1 + this.countUpgrade(machine, "stack_upgrade"));
+        final ItemStack output = this.buildStackForId(recipe.outputId(), recipe.outputCount() + this.countUpgrade(machine, "stack_upgrade"));
         if (output == null) {
             machine.clearManualOperation();
             this.setRuntimeState(machine, MachineRuntimeState.IDLE, "等待配方初始化");
@@ -4382,7 +4390,7 @@ public final class MachineService {
     }
 
     private RecipeRuntimeSnapshot inspectRecipeRuntime(final PlacedMachine machine) {
-        final List<MachineRecipe> recipes = this.registry.getRecipesForMachine(machine.machineId());
+        final List<MachineRecipe> recipes = this.effectiveRecipes(machine);
         if (recipes.isEmpty()) {
             return new RecipeRuntimeSnapshot(MachineRuntimeState.IDLE, "等待互動");
         }
@@ -4397,7 +4405,7 @@ public final class MachineService {
             if (!this.canCraftRecipe(machine, recipe)) {
                 continue;
             }
-            final ItemStack output = this.buildStackForId(recipe.outputId(), 1 + this.countUpgrade(machine, "stack_upgrade"));
+            final ItemStack output = this.buildStackForId(recipe.outputId(), recipe.outputCount() + this.countUpgrade(machine, "stack_upgrade"));
             if (output == null) {
                 return new RecipeRuntimeSnapshot(MachineRuntimeState.IDLE, "等待配方初始化");
             }
@@ -4483,12 +4491,12 @@ public final class MachineService {
     }
 
     private MachineRecipe firstReadyManualRecipe(final PlacedMachine machine) {
-        final List<MachineRecipe> recipes = this.registry.getRecipesForMachine(machine.machineId());
+        final List<MachineRecipe> recipes = this.effectiveRecipes(machine);
         for (final MachineRecipe recipe : recipes) {
             if (!this.canCraftRecipe(machine, recipe)) {
                 continue;
             }
-            final ItemStack output = this.buildStackForId(recipe.outputId(), 1 + this.countUpgrade(machine, "stack_upgrade"));
+            final ItemStack output = this.buildStackForId(recipe.outputId(), recipe.outputCount() + this.countUpgrade(machine, "stack_upgrade"));
             if (output == null || !this.canStoreOutput(machine, output)) {
                 continue;
             }
@@ -4513,12 +4521,31 @@ public final class MachineService {
         machine.clearManualOperation();
     }
 
+    /**
+     * 傳回該機器「有效」的配方清單：若已鎖定某配方，只回傳該配方；否則回傳全部。
+     */
+    private List<MachineRecipe> effectiveRecipes(final PlacedMachine machine) {
+        final List<MachineRecipe> all = this.registry.getRecipesForMachine(machine.machineId());
+        final String locked = machine.lockedRecipeId();
+        if (locked == null) {
+            return all;
+        }
+        for (final MachineRecipe recipe : all) {
+            if (recipe.id().equals(locked)) {
+                return List.of(recipe);
+            }
+        }
+        // 鎖定的配方已被刪除或改名，退回全部
+        machine.setLockedRecipeId(null);
+        return all;
+    }
+
     private boolean processMachineRecipes(final PlacedMachine machine,
                                           final Location location,
                                           final String statKey,
                                           final Particle particle,
                                           final Sound sound) {
-        final List<MachineRecipe> recipes = this.registry.getRecipesForMachine(machine.machineId());
+        final List<MachineRecipe> recipes = this.effectiveRecipes(machine);
         if (recipes.isEmpty()) {
             return false;
         }
@@ -4527,38 +4554,38 @@ public final class MachineService {
         final int attempts = 1 + this.countUpgrade(machine, "speed_upgrade");
         for (int attempt = 0; attempt < attempts; attempt++) {
             boolean processedThisAttempt = false;
-        for (final MachineRecipe recipe : recipes) {
-            if (!this.canCraftRecipe(machine, recipe)) {
-                continue;
-            }
-            final long requiredEnergy = this.effectiveEnergyCost(machine, recipe.energyCost());
-            this.absorbNearbyEnergy(machine, location, requiredEnergy);
-            if (!machine.consumeEnergy(requiredEnergy)) {
-                return processedAny;
-            }
+            for (final MachineRecipe recipe : recipes) {
+                if (!this.canCraftRecipe(machine, recipe)) {
+                    continue;
+                }
+                final long requiredEnergy = this.effectiveEnergyCost(machine, recipe.energyCost());
+                this.absorbNearbyEnergy(machine, location, requiredEnergy);
+                if (!machine.consumeEnergy(requiredEnergy)) {
+                    return processedAny;
+                }
 
-            final ItemStack output = this.buildStackForId(recipe.outputId(), 1 + this.countUpgrade(machine, "stack_upgrade"));
-            if (output == null || !this.canStoreOutput(machine, output)) {
-                this.addEnergyCapped(machine, requiredEnergy);
-                return processedAny;
-            }
+                final ItemStack output = this.buildStackForId(recipe.outputId(), recipe.outputCount() + this.countUpgrade(machine, "stack_upgrade"));
+                if (output == null || !this.canStoreOutput(machine, output)) {
+                    this.addEnergyCapped(machine, requiredEnergy);
+                    return processedAny;
+                }
 
-            this.consumeRecipeInputs(machine, recipe);
-            this.storeOutput(machine, output);
-            this.progressService.incrementStat(machine.owner(), statKey, output.getAmount());
-            this.progressService.unlockItem(machine.owner(), recipe.outputId());
-            this.progressService.unlockByRequirement(machine.owner(), machine.machineId());
-            this.progressService.unlockByRequirement(machine.owner(), "machine:" + machine.machineId());
-            this.progressService.unlockByRequirement(machine.owner(), "item:" + recipe.outputId());
-            final World world = location.getWorld();
-            if (world != null) {
-                world.spawnParticle(particle, location.clone().add(0.5, 1.0, 0.5), 7, 0.22, 0.22, 0.22, 0.01);
-                world.playSound(location, sound, 0.3f, 1.15f);
+                this.consumeRecipeInputs(machine, recipe);
+                this.storeOutput(machine, output);
+                this.progressService.incrementStat(machine.owner(), statKey, output.getAmount());
+                this.progressService.unlockItem(machine.owner(), recipe.outputId());
+                this.progressService.unlockByRequirement(machine.owner(), machine.machineId());
+                this.progressService.unlockByRequirement(machine.owner(), "machine:" + machine.machineId());
+                this.progressService.unlockByRequirement(machine.owner(), "item:" + recipe.outputId());
+                final World world = location.getWorld();
+                if (world != null) {
+                    world.spawnParticle(particle, location.clone().add(0.5, 1.0, 0.5), 7, 0.22, 0.22, 0.22, 0.01);
+                    world.playSound(location, sound, 0.3f, 1.15f);
+                }
+                processedAny = true;
+                processedThisAttempt = true;
+                break;
             }
-            processedAny = true;
-            processedThisAttempt = true;
-            break;
-        }
             if (!processedThisAttempt) {
                 break;
             }
@@ -4829,6 +4856,11 @@ public final class MachineService {
         return new ItemStack(displayMaterial, Math.min(amount, displayMaterial.getMaxStackSize()));
     }
 
+    /** 讓指定機器嘗試從鄰近電網拉取電力（供充電用途）。 */
+    public void pullNearbyEnergyInto(final PlacedMachine machine, final Location location) {
+        this.absorbNearbyEnergy(machine, location, this.remainingEnergyCapacity(machine));
+    }
+
     private void absorbNearbyEnergy(final PlacedMachine machine, final Location location, final long amountPerSource) {
         for (final PlacedMachine neighbor : this.findConnectedMachines(machine, location, machine.inputDirection(), null, false)) {
             final long transfer = Math.min(Math.min(amountPerSource, neighbor.storedEnergy()), this.remainingEnergyCapacity(machine));
@@ -4976,6 +5008,9 @@ public final class MachineService {
     }
 
     private void transferOutputs(final PlacedMachine machine, final Location location) {
+        if (!this.isAutoTransferSource(machine.machineId())) {
+            return;
+        }
         final List<PlacedMachine> targets = new ArrayList<>(this.findConnectedMachines(machine, location, null, machine.outputDirection(), true));
         if (targets.isEmpty()) {
             return;
@@ -5071,6 +5106,40 @@ public final class MachineService {
                 this.openMachineMenuNextTick(player, key);
             }
             case "android-guide" -> this.scheduler.runEntityDelayed(player, () -> this.plugin.getTechBookService().openGuideDetail(player, "android_system_overview", 0), 1L);
+            case "lock-recipe" -> {
+                final List<MachineRecipe> allRecipes = this.registry.getRecipesForMachine(machine.machineId());
+                if (allRecipes.size() <= 1) {
+                    break;
+                }
+                final String current = machine.lockedRecipeId();
+                if (current == null) {
+                    // 未鎖定 → 鎖定第一個配方
+                    machine.setLockedRecipeId(allRecipes.getFirst().id());
+                } else {
+                    // 找當前鎖定的下一個，超過最後則解鎖
+                    int idx = -1;
+                    for (int i = 0; i < allRecipes.size(); i++) {
+                        if (allRecipes.get(i).id().equals(current)) {
+                            idx = i;
+                            break;
+                        }
+                    }
+                    if (idx >= 0 && idx + 1 < allRecipes.size()) {
+                        machine.setLockedRecipeId(allRecipes.get(idx + 1).id());
+                    } else {
+                        machine.setLockedRecipeId(null);
+                    }
+                }
+                final String newLock = machine.lockedRecipeId();
+                if (newLock == null) {
+                    player.sendMessage(this.itemFactory.secondary("配方鎖定已解除，恢復自動匹配。"));
+                } else {
+                    final MachineRecipe locked = this.findMachineRecipeById(machine.machineId(), newLock);
+                    final String name = locked != null ? this.itemFactory.displayNameForId(locked.outputId()) : newLock;
+                    player.sendMessage(this.itemFactory.secondary("配方已鎖定為：" + name));
+                }
+                this.openMachineMenuNextTick(player, key);
+            }
             case "back-main" -> this.openMachineMenuNextTick(player, key);
             default -> {
                 if (action.startsWith("recipes:")) {
@@ -6138,6 +6207,19 @@ public final class MachineService {
         return this.hasMachineInputRoom(machine, stack, 0, INPUT_SLOTS.length);
     }
 
+    /** 判斷一台機器是否應該自動轉移輸出（物流類機器才允許）。 */
+    private boolean isAutoTransferSource(final String machineId) {
+        return switch (machineId.toLowerCase()) {
+            case "storage_hub", "filter_router", "splitter_node", "industrial_bus",
+                 "cargo_manager", "cargo_motor", "cargo_input_node", "trash_node",
+                 "logistics_node", "item_tube", "recycler", "vacuum_inlet",
+                 "auto_farm", "crop_harvester", "planetary_harvester", "tree_feller",
+                 "mob_collector", "fishing_dock", "greenhouse",
+                 "quarry_drill", "quarry_drill_mk2", "quarry_drill_mk3" -> true;
+            default -> false;
+        };
+    }
+
     private boolean isRelayMachine(final String machineId, final boolean logisticsMode) {
         final String id = machineId.toLowerCase();
         return logisticsMode
@@ -6571,140 +6653,76 @@ public final class MachineService {
     }
 
     private void decorateMachineMenu(final Inventory inventory, final PlacedMachine machine, final MachineDefinition definition) {
+        boolean handled = true;
         switch (this.normalizeId(definition.id())) {
-            case "crusher" -> {
-                this.decorateCrusherMenu(inventory, machine, definition);
-                return;
-            }
-            case "furnace" -> {
-                this.decorateFurnaceMenu(inventory, machine, definition);
-                return;
-            }
-            case "assembler" -> {
-                this.decorateAssemblerMenu(inventory, machine, definition);
-                return;
-            }
-            case "battery_bank" -> {
-                this.decorateBatteryBankMenu(inventory, machine, definition);
-                return;
-            }
-            case "logistics_node" -> {
-                this.decorateLogisticsNodeMenu(inventory, machine, definition);
-                return;
-            }
-            case "auto_farm" -> {
-                this.decorateAutoFarmMenu(inventory, machine, definition);
-                return;
-            }
-            case "electric_saw" -> {
-                this.decorateElectricSawMenu(inventory, machine, definition);
-                return;
-            }
-            case "recycler" -> {
-                this.decorateRecyclerMenu(inventory, machine, definition);
-                return;
-            }
-            case "solar_generator" -> {
-                this.decorateSolarGeneratorMenu(inventory, machine, definition);
-                return;
-            }
-            case "coal_generator" -> {
-                this.decorateCoalGeneratorMenu(inventory, machine, definition);
-                return;
-            }
-            case "compressor" -> {
-                this.decorateCompressorMenu(inventory, machine, definition);
-                return;
-            }
-            case "wire_mill" -> {
-                this.decorateWireMillMenu(inventory, machine, definition);
-                return;
-            }
-            case "ore_washer" -> {
-                this.decorateOreWasherMenu(inventory, machine, definition);
-                return;
-            }
-            case "purifier" -> {
-                this.decoratePurifierMenu(inventory, machine, definition);
-                return;
-            }
-            case "centrifuge" -> {
-                this.decorateCentrifugeMenu(inventory, machine, definition);
-                return;
-            }
-            case "greenhouse" -> {
-                this.decorateGreenhouseMenu(inventory, machine, definition);
-                return;
-            }
-            case "bio_lab" -> {
-                this.decorateBioLabMenu(inventory, machine, definition);
-                return;
-            }
-            case "energy_node" -> {
-                this.decorateEnergyNodeMenu(inventory, machine, definition);
-                return;
-            }
-            case "item_tube" -> {
-                this.decorateItemTubeMenu(inventory, machine, definition);
-                return;
-            }
-            case "storage_hub" -> {
-                this.decorateStorageHubMenu(inventory, machine, definition);
-                return;
-            }
-            case "filter_router" -> {
-                this.decorateFilterRouterMenu(inventory, machine, definition);
-                return;
-            }
-            case "splitter_node" -> {
-                this.decorateSplitterNodeMenu(inventory, machine, definition);
-                return;
-            }
-            case "industrial_bus" -> {
-                this.decorateIndustrialBusMenu(inventory, machine, definition);
-                return;
-            }
-            case "cargo_input_node" -> {
-                this.decorateCargoInputNodeMenu(inventory, machine, definition);
-                return;
-            }
-            case "cargo_manager" -> {
-                this.decorateCargoManagerMenu(inventory, machine, definition);
-                return;
-            }
-            case "trash_node" -> {
-                this.decorateTrashNodeMenu(inventory, machine, definition);
-                return;
-            }
-            case "cargo_motor" -> {
-                this.decorateCargoMotorMenu(inventory, machine, definition);
-                return;
-            }
-            case "quarry_drill", "quarry_drill_mk2", "quarry_drill_mk3" -> {
-                this.decorateQuarryDrillMenu(inventory, machine, definition);
-                return;
-            }
-            case "android_station" -> {
-                this.decorateAndroidStationMenu(inventory, machine, definition);
-                return;
-            }
-            case "android_item_interface" -> {
-                this.decorateAndroidItemInterfaceMenu(inventory, machine, definition);
-                return;
-            }
-            case "android_fuel_interface" -> {
-                this.decorateAndroidFuelInterfaceMenu(inventory, machine, definition);
-                return;
-            }
-            default -> {
+            case "crusher" -> this.decorateCrusherMenu(inventory, machine, definition);
+            case "furnace" -> this.decorateFurnaceMenu(inventory, machine, definition);
+            case "assembler" -> this.decorateAssemblerMenu(inventory, machine, definition);
+            case "battery_bank" -> this.decorateBatteryBankMenu(inventory, machine, definition);
+            case "logistics_node" -> this.decorateLogisticsNodeMenu(inventory, machine, definition);
+            case "auto_farm" -> this.decorateAutoFarmMenu(inventory, machine, definition);
+            case "electric_saw" -> this.decorateElectricSawMenu(inventory, machine, definition);
+            case "recycler" -> this.decorateRecyclerMenu(inventory, machine, definition);
+            case "solar_generator" -> this.decorateSolarGeneratorMenu(inventory, machine, definition);
+            case "coal_generator" -> this.decorateCoalGeneratorMenu(inventory, machine, definition);
+            case "compressor" -> this.decorateCompressorMenu(inventory, machine, definition);
+            case "wire_mill" -> this.decorateWireMillMenu(inventory, machine, definition);
+            case "ore_washer" -> this.decorateOreWasherMenu(inventory, machine, definition);
+            case "purifier" -> this.decoratePurifierMenu(inventory, machine, definition);
+            case "centrifuge" -> this.decorateCentrifugeMenu(inventory, machine, definition);
+            case "greenhouse" -> this.decorateGreenhouseMenu(inventory, machine, definition);
+            case "bio_lab" -> this.decorateBioLabMenu(inventory, machine, definition);
+            case "energy_node" -> this.decorateEnergyNodeMenu(inventory, machine, definition);
+            case "item_tube" -> this.decorateItemTubeMenu(inventory, machine, definition);
+            case "storage_hub" -> this.decorateStorageHubMenu(inventory, machine, definition);
+            case "filter_router" -> this.decorateFilterRouterMenu(inventory, machine, definition);
+            case "splitter_node" -> this.decorateSplitterNodeMenu(inventory, machine, definition);
+            case "industrial_bus" -> this.decorateIndustrialBusMenu(inventory, machine, definition);
+            case "cargo_input_node" -> this.decorateCargoInputNodeMenu(inventory, machine, definition);
+            case "cargo_manager" -> this.decorateCargoManagerMenu(inventory, machine, definition);
+            case "trash_node" -> this.decorateTrashNodeMenu(inventory, machine, definition);
+            case "cargo_motor" -> this.decorateCargoMotorMenu(inventory, machine, definition);
+            case "quarry_drill", "quarry_drill_mk2", "quarry_drill_mk3" -> this.decorateQuarryDrillMenu(inventory, machine, definition);
+            case "android_station" -> this.decorateAndroidStationMenu(inventory, machine, definition);
+            case "android_item_interface" -> this.decorateAndroidItemInterfaceMenu(inventory, machine, definition);
+            case "android_fuel_interface" -> this.decorateAndroidFuelInterfaceMenu(inventory, machine, definition);
+            default -> handled = false;
+        }
+        if (!handled) {
+            switch (this.resolveMachineGuiTheme(definition.id())) {
+                case GENERATOR -> this.decorateGeneratorMachineMenu(inventory, machine, definition);
+                case LOGISTICS -> this.decorateLogisticsMachineMenu(inventory, machine, definition);
+                case FIELD -> this.decorateFieldMachineMenu(inventory, machine, definition);
+                case PROCESSOR -> this.decorateProcessorMachineMenu(inventory, machine, definition);
             }
         }
-        switch (this.resolveMachineGuiTheme(definition.id())) {
-            case GENERATOR -> this.decorateGeneratorMachineMenu(inventory, machine, definition);
-            case LOGISTICS -> this.decorateLogisticsMachineMenu(inventory, machine, definition);
-            case FIELD -> this.decorateFieldMachineMenu(inventory, machine, definition);
-            case PROCESSOR -> this.decorateProcessorMachineMenu(inventory, machine, definition);
+        // 配方鎖定按鈕 — 放在所有裝飾之後，避免被 applyIdentityBand 等覆蓋
+        this.applyRecipeLockButton(inventory, machine);
+    }
+
+    private void applyRecipeLockButton(final Inventory inventory, final PlacedMachine machine) {
+        final List<MachineRecipe> allRecipes = this.registry.getRecipesForMachine(machine.machineId());
+        if (allRecipes.size() <= 1) {
+            return;
         }
+        final String lockedId = machine.lockedRecipeId();
+        String lockLabel;
+        if (lockedId == null) {
+            lockLabel = "§7未鎖定（自動匹配）";
+        } else {
+            lockLabel = lockedId;
+            for (final MachineRecipe r : allRecipes) {
+                if (r.id().equals(lockedId)) {
+                    lockLabel = this.itemFactory.displayNameForId(r.outputId());
+                    break;
+                }
+            }
+        }
+        inventory.setItem(15, this.itemFactory.tagGuiAction(this.guiButton("machine-lock-recipe", Material.COMPARATOR, "配方鎖定", List.of(
+            "目前：" + lockLabel,
+            "點一下切換鎖定配方",
+            "§8鎖定後機器只跑該配方"
+        )), "lock-recipe"));
     }
 
     private void decorateMachineRecipeMenu(final Inventory inventory, final MachineGuiTheme theme, final int safePage, final int maxPage) {

@@ -32,6 +32,7 @@ public final class PlacedMachine {
     private String runtimeDetail = "待命";
     private int manualOperationTicks;
     private String manualOperationRecipeId;
+    private String lockedRecipeId;
 
     public PlacedMachine(final LocationKey locationKey, final String machineId, final UUID owner) {
         this.locationKey = locationKey;
@@ -117,6 +118,14 @@ public final class PlacedMachine {
 
     public String manualOperationRecipeId() {
         return this.manualOperationRecipeId;
+    }
+
+    public String lockedRecipeId() {
+        return this.lockedRecipeId;
+    }
+
+    public void setLockedRecipeId(final String lockedRecipeId) {
+        this.lockedRecipeId = lockedRecipeId == null || lockedRecipeId.isBlank() ? null : lockedRecipeId;
     }
 
     public String inputDirection() {

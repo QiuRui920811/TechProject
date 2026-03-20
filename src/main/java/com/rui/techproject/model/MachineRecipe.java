@@ -7,6 +7,7 @@ public record MachineRecipe(
         String machineId,
         List<String> inputIds,
         String outputId,
+        int outputCount,
         int energyCost,
         String guideText
 ) {

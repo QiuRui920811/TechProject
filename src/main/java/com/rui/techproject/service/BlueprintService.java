@@ -230,8 +230,7 @@ public final class BlueprintService {
     }
 
     private String fallbackMaterialLabel(final String rawMaterial) {
-        final Material material = Material.matchMaterial(rawMaterial);
-        return material == null ? rawMaterial : material.name();
+        return this.displayIngredientName(rawMaterial);
     }
 
     public boolean isAdvancedWorkbench(final Location location) {
@@ -296,10 +295,19 @@ public final class BlueprintService {
         if (material == null || material == Material.AIR) {
             return false;
         }
-        return stack != null
-                && stack.getType() == material
-                && this.itemFactory.getTechItemId(stack) == null
-                && this.itemFactory.getMachineId(stack) == null;
+        if (stack == null || stack.getType() != material) {
+            return false;
+        }
+        if (this.itemFactory.getMachineId(stack) != null) {
+            return false;
+        }
+        final String techId = this.itemFactory.getTechItemId(stack);
+        if (techId == null) {
+            return true;
+        }
+        // 允許 tech 標記物品在 tech ID 與材料名稱一致時匹配
+        // 例：tech:copper_ingot 匹配 COPPER_INGOT 配方格
+        return this.normalize(techId).equals(this.normalize(materialToken));
     }
 
     private String displayIngredientName(final String rawToken) {

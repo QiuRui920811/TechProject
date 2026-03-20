@@ -50,6 +50,12 @@ public final class TechBookService {
     private static final String TECH_MENU_TITLE_SHIFT = "\uF102";
     private static final String TECH_MENU_TITLE_GLYPH = "\uF002";
     private static final String TECH_MENU_TITLE = TECH_MENU_TITLE_SHIFT + TECH_MENU_TITLE_GLYPH;
+    private static final Key DETAIL_MENU_TITLE_FONT = Key.key("minecraft", "techproject_detail");
+    private static final String DETAIL_MENU_TITLE_GLYPH = "\uF003";
+    private static final String DETAIL_MENU_TITLE = TECH_MENU_TITLE_SHIFT + DETAIL_MENU_TITLE_GLYPH;
+    private static final Key RECIPE_MENU_TITLE_FONT = Key.key("minecraft", "techproject_recipe");
+    private static final String RECIPE_MENU_TITLE_GLYPH = "\uF004";
+    private static final String RECIPE_MENU_TITLE = TECH_MENU_TITLE_SHIFT + RECIPE_MENU_TITLE_GLYPH;
     private static final String STARTER_GUIDE_ID = "starter_path";
     private static final String ANDROID_GUIDE_ID = "android_system_overview";
     private static final String MAIN_TITLE = "科技書";
@@ -367,7 +373,7 @@ public final class TechBookService {
         if (STARTER_GUIDE_ID.equalsIgnoreCase(guideId)) {
             this.progressService.incrementStat(player.getUniqueId(), "starter_guide_seen", 1L);
         }
-        final Inventory inventory = this.createBookInventory(GUIDE_TITLE);
+        final Inventory inventory = this.createDetailHudBookInventory();
         this.decorateMenuFrame(inventory);
         inventory.setItem(4, this.info(Material.WRITABLE_BOOK, entry.title(), List.of("主題：" + entry.topic(), entry.preview())));
         final int[] guideSlots = {19, 20, 21, 22, 23, 24, 25, 28, 29, 30, 31, 32, 33, 34, 37, 38, 39, 40, 41, 42, 43};
@@ -384,7 +390,7 @@ public final class TechBookService {
     }
 
     public void openDetail(final Player player, final String targetId) {
-        final Inventory inventory = this.createHudBookInventory();
+        final Inventory inventory = this.createDetailHudBookInventory();
         this.decorateMenuFrame(inventory);
         final TechItemDefinition item = this.registry.getItem(targetId);
         if (item != null) {
@@ -470,8 +476,8 @@ public final class TechBookService {
             if (recipeViewCount > 0) {
                 inventory.setItem(49, this.itemFactory.tagGuiAction(this.guiButton("machine-detail-view-recipe", Material.KNOWLEDGE_BOOK, "查看製作配方", List.of(
                     "共有 {count} 種配方圖",
-                    "點擊查看完整配方頁"
-                ), this.placeholders("count", String.valueOf(recipeViewCount))), "recipe-view:" + machine.id() + ":0"));
+                    "{hint}"
+                ), this.placeholders("count", String.valueOf(recipeViewCount), "hint", "點擊查看完整配方頁")), "recipe-view:" + machine.id() + ":0"));
             }
             inventory.setItem(50, this.itemFactory.tagGuiAction(this.guiButton("detail-tech-tree", Material.MANGROVE_PROPAGULE, "科技樹前置線", this.buildTechTreeSummaryLines(machine.id(), machine.unlockRequirement()), this.indexedPlaceholders("line", this.buildTechTreeSummaryLines(machine.id(), machine.unlockRequirement()), 6)), "tree:machine:" + machine.id()));
             if (relatedInteraction != null) {
@@ -495,7 +501,7 @@ public final class TechBookService {
         final int maxPage = Math.max(0, recipeViews.size() - 1);
         final int safePage = Math.max(0, Math.min(page, maxPage));
         final RecipeView view = recipeViews.get(safePage);
-        final Inventory inventory = this.createHudBookInventory();
+        final Inventory inventory = this.createRecipeHudBookInventory();
         inventory.setItem(4, this.info(Material.CRAFTING_TABLE, "配方預覽", List.of(
                 "結果：" + view.resultName(),
                 "第 " + (safePage + 1) + " / " + (maxPage + 1) + " 種",
@@ -526,7 +532,7 @@ public final class TechBookService {
             case "interaction" -> this.addonService.getInteraction(targetId) != null ? this.addonService.getInteraction(targetId).unlockRequirement() : "";
             default -> "";
         };
-        final Inventory inventory = this.createHudBookInventory();
+        final Inventory inventory = this.createDetailHudBookInventory();
         inventory.setItem(4, this.info(Material.MANGROVE_PROPAGULE, "科技樹 / 前置線", List.of(
                 "目標：" + targetName,
                 "只保留前置與後續重點"
@@ -561,7 +567,7 @@ public final class TechBookService {
             return;
         }
         final String displayName = this.itemFactory.displayNameForId(definition.id());
-        final Inventory inventory = this.createBookInventory(INTERACTION_PREFIX + displayName);
+        final Inventory inventory = this.createDetailHudBookInventory();
         this.decorateMenuFrame(inventory);
         inventory.setItem(4, this.info(this.interactionIcon(definition.type()), displayName, List.of(
                 "類型：" + this.interactionTypeLabel(definition.type()),
@@ -1576,6 +1582,22 @@ public final class TechBookService {
         return Bukkit.createInventory(BOOK_VIEW_HOLDER, 54, this.techMenuTitle());
     }
 
+    private Component detailMenuTitle() {
+        return Component.text(DETAIL_MENU_TITLE, NamedTextColor.WHITE).font(DETAIL_MENU_TITLE_FONT);
+    }
+
+    private Inventory createDetailHudBookInventory() {
+        return Bukkit.createInventory(BOOK_VIEW_HOLDER, 54, this.detailMenuTitle());
+    }
+
+    private Component recipeMenuTitle() {
+        return Component.text(RECIPE_MENU_TITLE, NamedTextColor.WHITE).font(RECIPE_MENU_TITLE_FONT);
+    }
+
+    private Inventory createRecipeHudBookInventory() {
+        return Bukkit.createInventory(BOOK_VIEW_HOLDER, 54, this.recipeMenuTitle());
+    }
+
     private Inventory createBookInventory(final String title) {
         return Bukkit.createInventory(BOOK_VIEW_HOLDER, 54, this.plainBookTitle(title));
     }
@@ -2069,10 +2091,6 @@ public final class TechBookService {
         for (final int slot : borderSlots) {
             inventory.setItem(slot, border);
         }
-        inventory.setItem(0, this.sectionPane(Material.GRAY_STAINED_GLASS_PANE, "←", List.of()));
-        inventory.setItem(8, this.sectionPane(Material.GRAY_STAINED_GLASS_PANE, "→", List.of()));
-        inventory.setItem(36, this.sectionPane(Material.GRAY_STAINED_GLASS_PANE, "◀", List.of()));
-        inventory.setItem(44, this.sectionPane(Material.GRAY_STAINED_GLASS_PANE, "▶", List.of()));
     }
 
     private void fillEmptySlots(final Inventory inventory, final ItemStack filler) {

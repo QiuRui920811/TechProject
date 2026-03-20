@@ -297,6 +297,7 @@ machines:
     display-name: 真空吸入口
     category: INTERMEDIATE
     block: HOPPER
+    head-texture: aba8ebc4c6a81730947499bf7e1d5e73fed6c1bb2c051e96d35eb16d24610e7
     item-model: "-1"
     inputs: [vacuum_core, pressure_tube]
     outputs: [junk, crops, iron_dust, copper_dust, plastic, circuit_board]
@@ -307,6 +308,7 @@ machines:
     display-name: 風暴渦輪機
     category: ADVANCED
     block: LIGHTNING_ROD
+    head-texture: 5584432af6f382167120258d1eee8c87c6e75d9e479e7b0d4c7b6ad48cfeef
     item-model: "-1"
     inputs: [storm_rotor, weather_sensor]
     outputs: [energy_cell]
@@ -371,6 +373,7 @@ machines:
     display-name: 倉儲匯流站
     category: INTERMEDIATE
     block: CHEST
+    head-texture: 7a44ff3a5f49c69cab676bad8d98a063fa78cfa61916fdef3e267557fec18283
     item-model: "-1"
     inputs: [storage_crate, machine_casing, wiring_bundle]
     outputs: [machine_component, steel_plate, circuit_board, crops, plastic]
@@ -381,6 +384,7 @@ machines:
     display-name: 過濾路由器
     category: ADVANCED
     block: TARGET
+    head-texture: 16d1c1a69a3de9fec962a77bf3b2e376dd25c873a3d8f14f1dd345dae4c4
     item-model: "-1"
     inputs: [filter_mesh_core, routing_chip, purifier_membrane]
     outputs: [machine_component, steel_plate, circuit_board, crops, plastic]
@@ -391,6 +395,7 @@ machines:
     display-name: 分流節點
     category: ADVANCED
     block: DROPPER
+    head-texture: c2f910c47da042e4aa28af6cc81cf48ac6caf37dab35f88db993accb9dfe516
     item-model: "-1"
     inputs: [splitter_core, routing_chip, servo_motor]
     outputs: [machine_component, steel_plate, circuit_board, crops, plastic]
@@ -401,6 +406,7 @@ machines:
     display-name: 工業總線
     category: ADVANCED
     block: IRON_BARS
+    head-texture: f2599bd986659b8ce2c4988525c94e19ddd39fad08a38284a197f1b70675acc
     item-model: "-1"
     inputs: [bus_frame, routing_chip, storage_crate, centrifuge_rotor]
     outputs: [machine_component, steel_plate, circuit_board, crops, plastic]
@@ -411,6 +417,7 @@ machines:
     display-name: 貨物抽取節點
     category: ADVANCED
     block: HOPPER
+    head-texture: b439e3f5acbee9be4c4259289d6d9f35c635ffa661114687b3ea6dda8c79
     item-model: "-1"
     inputs: [routing_chip, servo_motor, storage_crate]
     outputs: [machine_component, steel_plate, circuit_board, crops, plastic]
@@ -421,6 +428,7 @@ machines:
     display-name: 貨物管理站
     category: ADVANCED
     block: LODESTONE
+    head-texture: e510bc85362a130a6ff9d91ff11d6fa46d7d1912a3431f751558ef3c4d9c2
     item-model: "-1"
     inputs: [bus_frame, routing_chip, control_unit, signal_relay]
     outputs: [machine_component, steel_plate, circuit_board, crops, plastic]
@@ -431,6 +439,7 @@ machines:
     display-name: 銷毀節點
     category: INTERMEDIATE
     block: MAGMA_BLOCK
+    head-texture: 32d41042ce99147cc38cac9e46741576e7ee791283e6fac8d3292cae2935f1f
     item-model: "-1"
     inputs: [machine_casing, lava_bucket]
     outputs: []
@@ -441,6 +450,7 @@ machines:
     display-name: 貨物驅動器
     category: ADVANCED
     block: PISTON
+    head-texture: 8e47f99abcd645a3ef1122c9d850a981979f431ba293255c1680e91ab117ed35
     item-model: "-1"
     inputs: [bus_frame, servo_motor, routing_chip]
     outputs: [machine_component, steel_plate, circuit_board, crops, plastic]

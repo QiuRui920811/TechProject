@@ -309,6 +309,19 @@ public final class TechListener implements Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onInteract(final PlayerInteractEvent event) {
+        if (event.getAction() == Action.LEFT_CLICK_AIR || event.getAction() == Action.LEFT_CLICK_BLOCK) {
+            final ItemStack leftStack = event.getItem();
+            if (leftStack != null && this.plugin.getItemFactory().hasTechBookTag(leftStack)) {
+                final String cmd = this.plugin.getConfig().getString("techbook-left-click-command", "");
+                if (cmd != null && !cmd.isBlank()) {
+                    event.setCancelled(true);
+                    final Player clicker = event.getPlayer();
+                    this.plugin.getSafeScheduler().runEntity(clicker, () ->
+                            clicker.performCommand(cmd.replace("{player}", clicker.getName()).trim()));
+                }
+            }
+            return;
+        }
         if (event.getAction() != Action.RIGHT_CLICK_AIR && event.getAction() != Action.RIGHT_CLICK_BLOCK) {
             return;
         }
@@ -388,6 +401,17 @@ public final class TechListener implements Listener {
         }
         final Block machineBlock = event.getClickedBlock() == null ? null : this.plugin.getMachineService().resolveManagedMachineBlock(event.getClickedBlock());
         if (machineBlock != null) {
+            // ── 扳手拆卸：蹲下+右鍵 ──
+            if (event.getPlayer().isSneaking() && this.plugin.getItemFactory().hasWrenchTag(stack)) {
+                event.setUseInteractedBlock(Result.DENY);
+                event.setUseItemInHand(Result.DENY);
+                event.setCancelled(true);
+                if (!this.plugin.getMachineService().canModifyMachine(event.getPlayer(), machineBlock, true)) {
+                    return;
+                }
+                this.handleWrenchDismantle(event.getPlayer(), machineBlock);
+                return;
+            }
             event.setUseInteractedBlock(Result.DENY);
             event.setUseItemInHand(Result.DENY);
             event.setCancelled(true);
@@ -789,6 +813,18 @@ public final class TechListener implements Listener {
                 continue;
             }
             if (this.plugin.getItemFactory().hasTechBookTag(item)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean hasWrench(final Player player) {
+        for (final ItemStack item : player.getInventory().getContents()) {
+            if (item == null || item.getType() == Material.AIR) {
+                continue;
+            }
+            if (this.plugin.getItemFactory().hasWrenchTag(item)) {
                 return true;
             }
         }
@@ -1429,7 +1465,12 @@ public final class TechListener implements Listener {
             return false;
         }
         final var machine = this.plugin.getMachineService().placedMachineAt(machineBlock);
-        if (machine == null || machine.storedEnergy() <= 0L) {
+        if (machine == null) {
+            return false;
+        }
+        /* 先從鄰近發電機吸收電力，避免因放置順序而無法充電 */
+        this.plugin.getMachineService().pullNearbyEnergyInto(machine, machineBlock.getLocation());
+        if (machine.storedEnergy() <= 0L) {
             return false;
         }
         event.setUseInteractedBlock(Result.DENY);
@@ -2093,6 +2134,10 @@ public final class TechListener implements Listener {
         if (techItemId == null || !ARTIFACT_IDS.contains(techItemId.toLowerCase())) {
             return false;
         }
+        /* 蹲下 + 右鍵方塊 → 跳過法器技能，讓充電邏輯接手 */
+        if (event.getPlayer().isSneaking() && event.getAction() == Action.RIGHT_CLICK_BLOCK) {
+            return false;
+        }
         final Player player = event.getPlayer();
         event.setUseInteractedBlock(Result.DENY);
         event.setUseItemInHand(Result.DENY);
@@ -2528,6 +2573,39 @@ public final class TechListener implements Listener {
             }
         }
         loc.getWorld().spawnParticle(Particle.ENCHANT, loc.add(0, 1, 0), 5, 1, 0.5, 1, 0.05);
+    }
+
+    private void handleWrenchDismantle(final Player player, final Block machineBlock) {
+        // 互動烹調：拆卸方塊會中斷烹調
+        this.plugin.getCookingService().interruptByBlockBreak(machineBlock);
+        // 取得機器掉落物（含儲存能量）
+        final ItemStack machineDrop = this.plugin.getMachineService().buildPlacedMachineItem(machineBlock);
+        // 取得科技方塊掉落物
+        final ItemStack techBlockDrop = this.plugin.getPlacedTechBlockService().buildDrop(machineBlock);
+        // 清理機器資料（彈出輸入/輸出/升級欄物品）
+        this.plugin.getMachineService().unregisterMachine(machineBlock);
+        if (techBlockDrop != null) {
+            this.plugin.getPlacedTechBlockService().unregister(machineBlock);
+        }
+        // 移除方塊
+        machineBlock.setType(org.bukkit.Material.AIR, false);
+        // 掉落物放進玩家背包（裝不下才掉地上）
+        final org.bukkit.Location dropLoc = machineBlock.getLocation().add(0.5, 0.5, 0.5);
+        if (machineDrop != null) {
+            final java.util.Map<Integer, ItemStack> overflow = player.getInventory().addItem(machineDrop);
+            for (final ItemStack leftover : overflow.values()) {
+                machineBlock.getWorld().dropItemNaturally(dropLoc, leftover);
+            }
+        }
+        if (techBlockDrop != null) {
+            final java.util.Map<Integer, ItemStack> overflow = player.getInventory().addItem(techBlockDrop);
+            for (final ItemStack leftover : overflow.values()) {
+                machineBlock.getWorld().dropItemNaturally(dropLoc, leftover);
+            }
+        }
+        player.sendActionBar(this.plugin.getItemFactory().success("⚙ 已拆除機器！"));
+        player.playSound(player.getLocation(), Sound.BLOCK_IRON_DOOR_OPEN, 0.8f, 1.2f);
+        machineBlock.getWorld().spawnParticle(Particle.CLOUD, dropLoc, 8, 0.3, 0.3, 0.3, 0.02);
     }
 
     private boolean tryToggleMagnet(final PlayerInteractEvent event) {

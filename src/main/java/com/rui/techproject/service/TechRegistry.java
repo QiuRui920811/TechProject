@@ -261,9 +261,10 @@ public final class TechRegistry {
                                 final String machineId,
                                 final List<String> inputIds,
                                 final String outputId,
+                                final int outputCount,
                                 final int energyCost,
                                 final String guideText) {
-        this.recipes.put(this.normalize(id), new MachineRecipe(id, machineId, List.copyOf(inputIds), outputId, energyCost, guideText));
+        this.recipes.put(this.normalize(id), new MachineRecipe(id, machineId, List.copyOf(inputIds), outputId, Math.max(1, outputCount), energyCost, guideText));
     }
 
     private void registerAchievement(final String id,
@@ -382,6 +383,7 @@ public final class TechRegistry {
                     section.getString(path + "machine", ""),
                     section.getStringList(path + "inputs"),
                     section.getString(path + "output", ""),
+                    section.getInt(path + "count", 1),
                     section.getInt(path + "energy", 1),
                     section.getString(path + "guide", "")
             );

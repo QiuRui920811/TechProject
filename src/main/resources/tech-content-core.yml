@@ -608,7 +608,7 @@ items:
     display-name: "科技書"
     category: SPECIAL
     icon: ENCHANTED_BOOK
-    # item-model: techproject:item/tech_book
+    item-model: "nexo:book_image_71c8269ed2e50370"
     # nexo-id: tech_book
     # 實際發給玩家時顯示：
     # name: 科技書
@@ -644,6 +644,16 @@ items:
     use-cases:
       - "成就獎勵"
       - "裝飾"
+  tech_wrench:
+    display-name: "科技扳手"
+    category: BASIC
+    icon: IRON_SHOVEL
+    description: "蹲下+右鍵對準機器可瞬間拆除並回收；不消耗耐久。"
+    unlock: "assembler"
+    use-cases:
+      - "蹲下+右鍵：瞬間拆除科技方塊"
+      - "保留機器儲存的能源"
+      - "合成器配方：鐵板 + 銅錠"
   wood_dust:
     display-name: "木屑"
     category: BASIC
@@ -1780,6 +1790,7 @@ machines:
     display-name: 研究台
     category: BASIC
     block: ENCHANTING_TABLE
+    head-texture: ddcfba58faf1f64847884111822b64afa21d7fc62d4481f14f3f3bcb6330
     # item-model: techproject:item/research_desk
     # nexo-id: research_desk
     inputs: [tech_book, copper_ingot]
@@ -1808,6 +1819,7 @@ machines:
     display-name: "熔爐"
     category: BASIC
     block: FURNACE
+    head-texture: 7e3bc4893ba41a3f73ee28174cdf4fef6b145e41fe6c82cb7be8d8e9771a5
     inputs: ["iron_dust", "copper_dust"]
     outputs: ["iron_ingot", "copper_ingot"]
     energy-per-tick: 10
@@ -1817,6 +1829,7 @@ machines:
     display-name: "自動農場"
     category: BASIC
     block: MOSS_BLOCK
+    head-texture: f9d33357e8418823bf783de92de80291b4ebd392aec8706698e06896d498f6
     inputs: ["crop_seeds"]
     outputs: ["crops"]
     energy-per-tick: 3
@@ -1826,6 +1839,7 @@ machines:
     display-name: "電鋸"
     category: BASIC
     block: STONECUTTER
+    head-texture: d32a814510142205169a1ad32f0a745f18e9cb6c66ee64eca2e65babdef9ff
     inputs: ["oak_planks"]
     outputs: ["wood_dust"]
     energy-per-tick: 4
@@ -1835,6 +1849,7 @@ machines:
     display-name: "回收機"
     category: BASIC
     block: SMOKER
+    head-texture: b2faaceab6384fff5ed24bb44a4af2f584eb1382729ecd93a5369acfd6654
     inputs: ["wood_dust", "paper", "coal_dust"]
     outputs: ["recycled_material", "plastic", "rust_filter"]
     energy-per-tick: 3
@@ -1844,6 +1859,7 @@ machines:
     display-name: "太陽能發電機"
     category: BASIC
     block: DAYLIGHT_DETECTOR
+    head-texture: 91361e576b493cbfdfae328661cedd1add55fab4e5eb418b92cebf6275f8bb4
     inputs: ["sunlight"]
     outputs: ["energy_cell"]
     energy-per-tick: 0
@@ -1853,6 +1869,7 @@ machines:
     display-name: "煤炭發電機"
     category: BASIC
     block: CAMPFIRE
+    head-texture: 9343ce58da54c79924a2c9331cfc417fe8ccbbea9be45a7ac85860a6c730
     inputs: ["coal"]
     outputs: ["energy_cell"]
     energy-per-tick: 5
@@ -1879,6 +1896,7 @@ machines:
     display-name: "製造機"
     category: INTERMEDIATE
     block: CRAFTER
+    head-texture: 80a4334f6a61e40c0c63deb665fa7b581e6eb259f7a3207ced7a1ff8bdc8a9f9
     inputs: ["circuit_board", "steel_plate"]
     outputs: ["machine_component"]
     energy-per-tick: 15
@@ -1888,6 +1906,7 @@ machines:
     display-name: "量子處理器"
     category: ADVANCED
     block: RESPAWN_ANCHOR
+    head-texture: 53c1b036b6e03517b285a811bd85e73f5abfdacc1ddf90dff962e180934e3
     inputs: ["advanced_circuit", "nano_coating"]
     outputs: ["quantum_chip"]
     energy-per-tick: 20
@@ -1897,6 +1916,7 @@ machines:
     display-name: "合金熔煉爐"
     category: INTERMEDIATE
     block: MAGMA_BLOCK
+    head-texture: a3ad8ee849edf04ed9a26ca3341f6033bd76dcc4231ed1ea63b7565751b27ac
     inputs: ["iron_dust", "coal_dust"]
     outputs: ["titanium_alloy"]
     energy-per-tick: 12
@@ -1906,6 +1926,7 @@ machines:
     display-name: "進階製造機"
     category: ADVANCED
     block: LOOM
+    head-texture: 5038298306a5e28584df39e88896917c38d40a326226d8c83070723c95798b24
     inputs: ["machine_component", "advanced_circuit"]
     outputs: ["nano_coating"]
     energy-per-tick: 24
@@ -1915,6 +1936,7 @@ machines:
     display-name: "太陽能陣列"
     category: INTERMEDIATE
     block: BLUE_STAINED_GLASS
+    head-texture: 305323394a7d91bfb33df06d92b63cb414ef80f054d04734ea015a23c539
     inputs: ["starlight_plate"]
     outputs: ["energy_cell"]
     energy-per-tick: 0
@@ -1924,6 +1946,7 @@ machines:
     display-name: "電池庫"
     category: INTERMEDIATE
     block: REDSTONE_LAMP
+    head-texture: 6e2dda6ef6185d4dd6ea8684e97d39ba8ab037e25f75cdea6bd29df8eb34ee
     inputs: ["energy_cell", "lithium_cell"]
     outputs: ["capacitor_bank"]
     energy-per-tick: 2
@@ -2001,6 +2024,7 @@ machines:
     display-name: "溫室培育艙"
     category: INTERMEDIATE
     block: MANGROVE_LEAVES
+    head-texture: a37741f764dd3dd7adaeb43b63d3959eb70e5eb28f15d6b34cab34a1d1f60387
     inputs: ["seed_cluster", "fertilizer_mix"]
     outputs: ["growth_lamp", "hydro_gel"]
     energy-per-tick: 8
@@ -2010,6 +2034,7 @@ machines:
     display-name: "聚合壓床"
     category: INTERMEDIATE
     block: HONEY_BLOCK
+    head-texture: 8d5cf92bc79ec19f4106441affff1406a1367010dcafb197dd94cfca1a6de0fc
     inputs: ["rubber_sheet", "polymer_resin"]
     outputs: ["treated_plastic"]
     energy-per-tick: 10
@@ -2053,6 +2078,7 @@ machines:
     display-name: "冷卻混合器"
     category: INTERMEDIATE
     block: CAULDRON
+    head-texture: 754bad86c99df780c889a1098f77648ead7385cc1ddb093da5a7d8c4c2ae54d
     inputs: ["coolant_cell", "hydro_gel"]
     outputs: ["coolant_mix"]
     energy-per-tick: 7
@@ -2062,6 +2088,7 @@ machines:
     display-name: "精煉塔"
     category: INTERMEDIATE
     block: SMOKER
+    head-texture: afe1a040a425e31a46d4f9a9b9806fa2f0c47ee84711cc1932fd8ab32b2d038
     inputs: ["bio_resin", "ore_slurry"]
     outputs: ["refined_oil"]
     energy-per-tick: 10
@@ -2071,6 +2098,7 @@ machines:
     display-name: "雷射雕刻機"
     category: ADVANCED
     block: END_ROD
+    head-texture: 2ad8cfeb387a56e3e5bcf85345d6a417b242293887db3ce3ba91fa409b254b86
     inputs: ["silicon", "optic_lens"]
     outputs: ["laser_lens", "etched_circuit", "control_unit"]
     energy-per-tick: 18
@@ -2080,6 +2108,7 @@ machines:
     display-name: "無人機艙"
     category: ADVANCED
     block: SHULKER_BOX
+    head-texture: b0c9c1a022f40b73f14b4cba37c718c6a533f3a2864b6536d5f456934cc1f
     inputs: ["drone_core", "machine_casing"]
     outputs: ["drone_shell", "drone_frame"]
     energy-per-tick: 18
@@ -2089,6 +2118,7 @@ machines:
     display-name: "安卓艙"
     category: ADVANCED
     block: CHISELED_BOOKSHELF
+    head-texture: 3503cb7ed845e7a507f569afc647c47ac483771465c9a679a54594c76afba
     inputs: ["android_core", "machine_casing"]
     outputs: ["android_shell", "android_frame", "android_memory_matrix"]
     energy-per-tick: 20
@@ -2118,6 +2148,7 @@ machines:
     display-name: "安卓物品介面"
     category: ADVANCED
     block: BARREL
+    head-texture: 55b21fd480c1c43bf3b9f842c869bdc3bc5acc2599bf2eb6b8a1c95dce978f
     inputs: ["signal_relay", "chest"]
     outputs: []
     energy-per-tick: 4
@@ -2127,6 +2158,7 @@ machines:
     display-name: "安卓燃料介面"
     category: ADVANCED
     block: BLAST_FURNACE
+    head-texture: a84ddca766725b8b97413f259c3f7668070f6ae55483a90c8e5525394f9c099
     inputs: ["emitter_node", "pressure_tube"]
     outputs: []
     energy-per-tick: 4
@@ -2137,6 +2169,7 @@ machines:
     category: ADVANCED
     tier: TIER4
     block: CRYING_OBSIDIAN
+    head-texture: fa5de0bc2bfb5cc2d23eb72f96402ada479524dd0de404bc23b6dacee3ffd080
     inputs: ["fusion_mesh", "stability_core"]
     outputs: ["fusion_core"]
     energy-per-tick: 28
@@ -2146,6 +2179,7 @@ machines:
     display-name: "晶體培育艙"
     category: ADVANCED
     block: AMETHYST_BLOCK
+    head-texture: e35032f4d7d01de8ec99d89f8723012d4e74fa73022c4facf1b57c7ff6ff0
     inputs: ["crystal_seed", "coolant_mix"]
     outputs: ["grown_crystal"]
     energy-per-tick: 19
@@ -2155,6 +2189,7 @@ machines:
     display-name: "力場鍛造台"
     category: ADVANCED
     block: LODESTONE
+    head-texture: 12f4b1577f5160c6893172571c4a71d8b321cdceaa032c6e0e3b60e0b328fa
     inputs: ["field_emitter", "phase_plate"]
     outputs: ["field_plate"]
     energy-per-tick: 22
@@ -2164,6 +2199,7 @@ machines:
     display-name: "物質編譯器"
     category: ADVANCED
     block: SCULK_CATALYST
+    head-texture: a11ed1d1b25b624665ecdddc3d3a5dff0b9f35e3de77a12f516e60fe8501cc8d
     inputs: ["quantum_fluid", "grown_crystal"]
     outputs: ["matter_blob", "singularity_fragment"]
     energy-per-tick: 26
@@ -2173,6 +2209,7 @@ machines:
     display-name: "能源節點"
     category: INTERMEDIATE
     block: LIGHTNING_ROD
+    head-texture: d78f2b7e5e75639ea7fb796c35d364c4df28b4243e66b76277aadcd6261337
     inputs: ["energy_cell"]
     outputs: ["energy_cell"]
     energy-per-tick: 0
@@ -2191,6 +2228,7 @@ machines:
     display-name: "物流節點"
     category: INTERMEDIATE
     block: TARGET
+    head-texture: 07b7ef6fd7864865c31c1dc87bed24ab5973579f5c6638fecb8dedeb443ff0
     inputs: ["machine_component"]
     outputs: ["machine_component"]
     energy-per-tick: 0
@@ -2210,6 +2248,7 @@ machines:
     display-name: "電動粉碎機"
     category: ADVANCED
     block: BLAST_FURNACE
+    head-texture: 8cbca012f67e54de9aee72ff424e056c2ae58de5eacc949ab2bcd9683cec
     inputs: ["iron_ore", "copper_ore"]
     outputs: ["iron_dust", "copper_dust"]
     energy-per-tick: 12
@@ -2219,6 +2258,7 @@ machines:
     display-name: "電動壓縮機"
     category: ADVANCED
     block: PISTON
+    head-texture: 321d495165748d3116f99d6b5bd5d42eb8ba592bcdfad37fd95f9b6c04a3b
     inputs: ["iron_ingot", "iron_plate"]
     outputs: ["iron_plate", "steel_plate", "compressed_iron_bundle", "dense_carbon_block"]
     energy-per-tick: 18
@@ -2228,6 +2268,7 @@ machines:
     display-name: "電動洗礦機"
     category: ADVANCED
     block: BARREL
+    head-texture: de4073be40cb3deb310a0be959b4cac68e825372728fafb6c2973e4e7c33
     inputs: ["iron_dust"]
     outputs: ["ore_slurry"]
     energy-per-tick: 16
@@ -2237,6 +2278,7 @@ machines:
     display-name: "電動拉線機"
     category: ADVANCED
     block: ANVIL
+    head-texture: 1085e098756b995b00241644089c55a8f9acde35b9a37785d5e057a923613b
     inputs: ["copper_ingot", "steel_plate"]
     outputs: ["copper_wire", "steel_wire", "wiring_bundle"]
     energy-per-tick: 20
@@ -2246,6 +2288,7 @@ machines:
     display-name: "電動淨化器"
     category: ADVANCED
     block: CAULDRON
+    head-texture: 4edea6bfd37e49de43f154fe6fca617d4129e61b95759a3d49a15935a1c2dcf0
     inputs: ["ore_slurry"]
     outputs: ["purified_shard", "coolant_cell", "purifier_membrane"]
     energy-per-tick: 22
@@ -2255,6 +2298,7 @@ machines:
     display-name: "電動離心機"
     category: ADVANCED
     block: HOPPER
+    head-texture: 1003620899f1afa271e8e521ecbee2977a06c8529d3f389e8cc04af06d8c7940
     inputs: ["purified_shard"]
     outputs: ["ion_dust", "magnetic_ring", "centrifuge_rotor"]
     energy-per-tick: 38
@@ -2264,6 +2308,7 @@ machines:
     display-name: "電動生質實驗室"
     category: ADVANCED
     block: BREWING_STAND
+    head-texture: 1762a15b04692a2e4b3fb3663bd4b78434dce1732b8eb1c7a9f7c0fbf6f
     inputs: ["crops", "wood_dust"]
     outputs: ["bio_resin", "bio_fiber"]
     energy-per-tick: 24
@@ -2273,6 +2318,7 @@ machines:
     display-name: "電動化學反應器"
     category: ADVANCED
     block: BEACON
+    head-texture: c8b29afa6d6dc923e2e1324bf8192750f7bdbddc689632a2b6c18d9fe7a5e
     inputs: ["bio_resin", "coal_dust"]
     outputs: ["polymer_resin", "synthetic_fiber", "precision_nozzle"]
     energy-per-tick: 34
@@ -2283,26 +2329,30 @@ recipes:
     machine: "crusher"
     inputs: ["iron_ore"]
     output: "iron_dust"
+    count: 2
     energy: 5
-    guide: "鐵礦石 → 粉碎機 → 鐵粉"
+    guide: "鐵礦石 → 粉碎機 → 鐵粉×2"
   crusher_copper_ore:
     machine: "crusher"
     inputs: ["copper_ore"]
     output: "copper_dust"
+    count: 2
     energy: 5
-    guide: "銅礦石 → 粉碎機 → 銅粉"
+    guide: "銅礦石 → 粉碎機 → 銅粉×2"
   crusher_quartz:
     machine: "crusher"
     inputs: ["quartz"]
     output: "silicon"
+    count: 2
     energy: 6
-    guide: "石英 → 粉碎機 → 矽晶"
+    guide: "石英 → 粉碎機 → 矽晶×2"
   crusher_coal:
     machine: "crusher"
     inputs: ["coal"]
     output: "coal_dust"
+    count: 2
     energy: 5
-    guide: "煤炭 → 粉碎機 → 煤粉"
+    guide: "煤炭 → 粉碎機 → 煤粉×2"
   compressor_iron_plate:
     machine: "compressor"
     inputs: ["iron_ingot"]
@@ -2471,6 +2521,12 @@ recipes:
     output: "advanced_circuit"
     energy: 18
     guide: "電路板 + 邏輯閘 + 工業線束 → 製造機 → 進階電路"
+  assembler_tech_wrench:
+    machine: "assembler"
+    inputs: ["iron_plate", "copper_ingot"]
+    output: "tech_wrench"
+    energy: 12
+    guide: "鐵板 + 銅錠 → 合成器 → 科技扳手"
   assembler_energy_cell:
     machine: "assembler"
     inputs: ["copper_ingot", "redstone"]
@@ -3036,26 +3092,30 @@ recipes:
     machine: "electric_crusher"
     inputs: ["iron_ore"]
     output: "iron_dust"
+    count: 2
     energy: 10
-    guide: "鐵礦石 → 電動粉碎機 → 鐵粉"
+    guide: "鐵礦石 → 電動粉碎機 → 鐵粉×2"
   electric_crusher_copper_ore:
     machine: "electric_crusher"
     inputs: ["copper_ore"]
     output: "copper_dust"
+    count: 2
     energy: 10
-    guide: "銅礦石 → 電動粉碎機 → 銅粉"
+    guide: "銅礦石 → 電動粉碎機 → 銅粉×2"
   electric_crusher_quartz:
     machine: "electric_crusher"
     inputs: ["quartz"]
     output: "silicon"
+    count: 2
     energy: 12
-    guide: "石英 → 電動粉碎機 → 矽晶"
+    guide: "石英 → 電動粉碎機 → 矽晶×2"
   electric_crusher_coal:
     machine: "electric_crusher"
     inputs: ["coal"]
     output: "coal_dust"
+    count: 2
     energy: 10
-    guide: "煤炭 → 電動粉碎機 → 煤粉"
+    guide: "煤炭 → 電動粉碎機 → 煤粉×2"
   electric_compressor_iron_plate:
     machine: "electric_compressor"
     inputs: ["iron_ingot"]
