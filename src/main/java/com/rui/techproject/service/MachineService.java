@@ -2715,10 +2715,15 @@ public final class MachineService {
             return;
         }
 
-        this.absorbNearbyEnergy(machine, location, 4L);
+        final long requiredEnergy = 2L;
+        this.absorbNearbyEnergy(machine, location, requiredEnergy);
         this.distributeNearbyEnergy(machine, location, 4L);
-        this.progressService.unlockItem(machine.owner(), "lithium_cell");
-        this.progressService.unlockItem(machine.owner(), "capacitor_bank");
+        if (this.processMachineRecipes(machine, location, "battery_bank_cycles", Particle.GLOW, Sound.BLOCK_AMETHYST_BLOCK_STEP)) {
+            this.setRuntimeState(machine, MachineRuntimeState.RUNNING, "加工中");
+            return;
+        }
+        final RecipeRuntimeSnapshot snapshot = this.inspectRecipeRuntime(machine);
+        this.setRuntimeState(machine, snapshot.state(), snapshot.detail());
         world.spawnParticle(Particle.GLOW, location.clone().add(0.5, 1.0, 0.5), 6, 0.25, 0.25, 0.25, 0.01);
     }
 
@@ -6633,14 +6638,14 @@ public final class MachineService {
 
     private boolean machineDisablesInputSlots(final String machineId) {
         return switch (machineId) {
-            case "solar_generator", "solar_array", "storm_turbine", "battery_bank", "energy_node", "energy_cable", "logistics_node", "item_tube" -> true;
+            case "solar_generator", "solar_array", "storm_turbine", "energy_node", "energy_cable", "logistics_node", "item_tube" -> true;
             default -> false;
         };
     }
 
     private boolean machineDisablesOutputSlots(final String machineId) {
         return switch (machineId) {
-            case "solar_generator", "coal_generator", "solar_array", "storm_turbine", "battery_bank", "energy_node", "energy_cable", "logistics_node", "item_tube" -> true;
+            case "solar_generator", "coal_generator", "solar_array", "storm_turbine", "energy_node", "energy_cable", "logistics_node", "item_tube" -> true;
             default -> false;
         };
     }
