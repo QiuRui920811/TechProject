@@ -1464,6 +1464,7 @@ public final class ItemFactoryUtil {
             case "bio_chain" -> "生質鏈";
             case "biosynth" -> "生質合成";
             case "capture_tools" -> "捕捉工具";
+            case "chicken_genetics" -> "基因雞工程";
             case "chemistry" -> "化工";
             case "chrono" -> "時序";
             case "combustion_power" -> "燃燒發電";
@@ -1554,6 +1555,7 @@ public final class ItemFactoryUtil {
             case "bio_template" -> "生質模板";
             case "bread_food" -> "麵包類";
             case "capture_tool" -> "捕捉工具";
+            case "breeding" -> "基因繁殖";
             case "central_buffer" -> "中央緩衝";
             case "ceramic_firing" -> "陶瓷燒製";
             case "chemical_synthesis" -> "化學合成";
@@ -1585,6 +1587,7 @@ public final class ItemFactoryUtil {
             case "dense_fabric" -> "高密度織物";
             case "dimension_anchor" -> "維度錨";
             case "drone_assembly" -> "無人機裝配";
+            case "dna_analysis" -> "DNA 分析";
             case "dust_material" -> "粉末材料";
             case "endgame_circuit" -> "終局電路";
             case "endgame_core" -> "終局核心";
@@ -1615,6 +1618,7 @@ public final class ItemFactoryUtil {
             case "fishing_harvest" -> "漁獲";
             case "flare_module" -> "閃焰模組";
             case "food_output" -> "食品產出";
+            case "genetic_carrier" -> "基因載體";
             case "forestry_tool" -> "林業工具";
             case "frontier_core" -> "前線核心";
             case "frontier_fragment" -> "前線碎片";
@@ -1691,6 +1695,7 @@ public final class ItemFactoryUtil {
             case "relic_data" -> "遺物資料";
             case "relic_signal" -> "遺物信號";
             case "research_gateway" -> "研究入口";
+            case "resource_extraction" -> "資源激發";
             case "reward_currency" -> "獎勵貨幣";
             case "safety_filter" -> "安全濾芯";
             case "salad_food" -> "沙拉類";
