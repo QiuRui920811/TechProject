@@ -157,6 +157,27 @@ blueprints:
     placement:
       - 放在製造機旁邊延伸產線。
       - 這台是通往 TIER3 科技的關鍵閘門。
+  laser_engraver:
+    shape:
+      - "OGO"
+      - "SES"
+      - "APA"
+    ingredients:
+      O: tech:optic_lens
+      G: tech:reinforced_glass
+      S: tech:silicon
+      E: END_ROD
+      A: tech:advanced_circuit
+      P: tech:precision_frame
+    tutorial:
+      - 先用熔爐做好光學鏡片（玻璃板 + 矽晶）與強化玻璃（玻璃板 + 碳纖網）。
+      - 確保有進階電路與精密框架（製造機產出）。
+      - 先在地上放鐵方塊，再把工作台放在上方形成進階工作台。
+      - 用進階工作台照配方擺出雷射雕刻機，中央放末地燭。
+      - 雷射雕刻機能做出雷射鏡、蝕刻電路與控制單元。
+    placement:
+      - 放在製造機與進階製造機旁邊。
+      - 蝕刻電路與控制單元是建造量子處理器的前置材料。
   quantum_processor:
     shape:
       - "NAN"
