@@ -2629,7 +2629,7 @@ machines:
     outputs: [survey_data]
     energy-per-tick: 24
     effect: 將觀測資料轉成可用的星球測繪樣本
-    unlock: observatory&item:anti_radiation_helmet&stat:planetary_samples_collected>=6
+    unlock: observatory&item:radiation_filter&stat:planetary_samples_collected>=6
   relic_analyzer:
     display-name: 遺物解析儀
     category: ADVANCED

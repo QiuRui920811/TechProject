@@ -520,10 +520,16 @@ blueprints:
       - 前後各保留足夠支線空間。
       - 最適合放在跨區大通道中央。
   kiln:
-    register-recipe: false
-    ingredient-lines:
-      - 製作站：熔爐後段 / 工業加工線
-      - 主材料：黏土球 → 陶瓷板 → 熱線圈
+    shape:
+      - "BCB"
+      - "IKI"
+      - "IRI"
+    ingredients:
+      B: BRICK
+      C: CLAY_BALL
+      K: BRICKS
+      I: IRON_INGOT
+      R: REDSTONE
     tutorial:
       - 這台是擴充加工線的第一個門檻，先把熔爐、拉線與鋼板穩定下來。
       - 先燒出陶瓷板，再進一步推成熱穩陶瓷，後面低溫與高熱設備都會反覆用到。
@@ -532,10 +538,16 @@ blueprints:
       - 最好放在標準加工區尾端，方便直接銜接低溫與電漿支線。
       - 可與熔爐、合金熔煉爐放成同一區，統一管理熱製程材料。
   cryo_distiller:
-    register-recipe: false
-    ingredient-lines:
-      - 製作站：進階工作台後段
-      - 主材料：冷卻混合液 + 精煉油 + 水凝膠
+    shape:
+      - "GSG"
+      - "IPI"
+      - "IRI"
+    ingredients:
+      G: GLASS
+      S: tech:steel_plate
+      P: POWDER_SNOW_CAULDRON
+      I: IRON_INGOT
+      R: REDSTONE
     tutorial:
       - 低溫蒸餾器代表你正式進入保護層與相變化材料線。
       - 先把農業線、生質線、精煉塔都跑穩，不然冷卻材料會斷供。
@@ -544,10 +556,16 @@ blueprints:
       - 建議貼近冷卻混合液與精煉油來源，減少長距離搬運。
       - 最好獨立一段儲能，避免高峰時被主工廠搶電停機。
   gene_splicer:
-    register-recipe: false
-    ingredient-lines:
-      - 製作站：進階工作台後段
-      - 主材料：生質樹脂 + 作物線 + 蝕刻電路
+    shape:
+      - "SCS"
+      - "RBR"
+      - "SPS"
+    ingredients:
+      S: tech:steel_plate
+      C: tech:circuit_board
+      R: REDSTONE
+      B: BREWING_STAND
+      P: tech:precision_frame
     tutorial:
       - 基因切片台是農業線升級成真正工業生質線的轉折點。
       - 先補穩作物、生質樹脂、精密電路，再來碰基因樣板。
@@ -556,10 +574,16 @@ blueprints:
       - 最好放在生質實驗室與精密加工區之間，方便雙線匯流。
       - 後面通常會直接接生質合成槽，形成完整生質工業鏈。
   plasma_refiner:
-    register-recipe: false
-    ingredient-lines:
-      - 製作站：聚變後段設備
-      - 主材料：離子粉 + 精煉油 + 鈦合金 + 合金機架
+    shape:
+      - "TRT"
+      - "QBQ"
+      - "TFT"
+    ingredients:
+      T: tech:titanium_alloy
+      R: tech:reactor_core
+      Q: tech:quantum_chip
+      B: BLAST_FURNACE
+      F: tech:field_plate
     tutorial:
       - 電漿精煉爐不是單獨分支，而是把聚變成果往終局材料再壓一層。
       - 先確保聚變核心、離心機、精煉塔與合金線都能穩定量產。
@@ -568,10 +592,16 @@ blueprints:
       - 建議與聚變反應爐同區，直接共享高階供能骨幹。
       - 輸出最好接獨立倉儲，避免終局材料跟一般中間件混線。
   observatory:
-    register-recipe: false
-    ingredient-lines:
-      - 製作站：量子 / 光學支線
-      - 主材料：觀測透鏡 + 資料矩陣 + 重力透鏡
+    shape:
+      - "QEQ"
+      - "CLC"
+      - "QNQ"
+    ingredients:
+      Q: tech:quantum_chip
+      E: tech:etched_circuit
+      C: tech:control_unit
+      L: LECTERN
+      N: tech:nano_coating
     tutorial:
       - 觀測站是資料科技線與終局科技樹的交叉樞紐。
       - 先把光子編織機、量子處理器、重力材料線做穩，再開始跑星圖與資料核心。
@@ -580,10 +610,16 @@ blueprints:
       - 建議獨立成觀測資料區，避免與一般裝配線混在一起。
       - 旁邊預留資料封存庫與高階儲能位置，後面擴張會很頻繁。
   survey_beacon:
-    register-recipe: false
-    ingredient-lines:
-      - 製作站：觀測站後段
-      - 主材料：觀測透鏡 + 路由晶片 + 掃描晶片
+    shape:
+      - "QEQ"
+      - "ABA"
+      - "QCQ"
+    ingredients:
+      Q: tech:quantum_chip
+      E: tech:etched_circuit
+      A: tech:advanced_circuit
+      B: BEACON
+      C: tech:control_unit
     tutorial:
       - 星球線真正起點不是直接跳上去挖，而是先用觀測站做出掃描晶片。
       - 勘測信標會把星球探索轉成穩定資料流，讓後面的遺跡分析與模組化防護裝有基礎可做。
@@ -592,22 +628,32 @@ blueprints:
       - 建議放在觀測資料區旁，直接承接觀測站與資料封存庫。
       - 後面通常會接遺跡解析儀與異星精煉機，形成獨立的星球研究支線。
   relic_analyzer:
-    register-recipe: false
-    ingredient-lines:
-      - 製作站：星球研究前段
-      - 主材料：星核遺物 / 冰霜遺物 / 虛空遺物 + 資料矩陣
+    shape:
+      - "QAQ"
+      - "EDE"
+      - "QAQ"
+    ingredients:
+      Q: tech:quantum_chip
+      A: tech:advanced_circuit
+      E: tech:etched_circuit
+      D: CALIBRATED_SCULK_SENSOR
     tutorial:
       - 遺跡解析儀負責把各星球採回來的遺物拆成可用訊號與研究素材。
-      - Aurelia、Cryon、Nyx 都能提供不同遺物，這台就是把探索成果轉成工業 科技進程 的核心。
+      - Aurelia、Cryon、Nyx 都能提供不同遺物，這台就是把探索成果轉成工業科技進程的核心。
       - 若想推模組化防護裝，先把這台跑穩，比硬屯礦更重要。
     placement:
       - 建議放在勘測信標後方，形成資料進、遺物進、研究料出的節點。
       - 最好接獨立倉儲，避免高價值遺物被一般材料混走。
   xeno_refinery:
-    register-recipe: false
-    ingredient-lines:
-      - 製作站：星球材料中段
-      - 主材料：異星訊號 + 行星素材 + 合金機架
+    shape:
+      - "QCQ"
+      - "ESE"
+      - "QCQ"
+    ingredients:
+      Q: tech:quantum_chip
+      C: tech:control_unit
+      E: tech:etched_circuit
+      S: SMITHING_TABLE
     tutorial:
       - 異星精煉機把各星球的特殊素材轉成可量產的模組材料，是探索線工業化的關鍵。
       - 輻射網層、耐寒內襯、耐壓膜層都要先經過這台處理，不能只靠手工拼裝。
@@ -616,10 +662,15 @@ blueprints:
       - 建議與行星鍛造台放成同區，減少中階模組搬運。
       - 周圍預留高吞吐物流，方便同時接入三顆星球的材料支線。
   planetary_forge:
-    register-recipe: false
-    ingredient-lines:
-      - 製作站：星球裝備終端
-      - 主材料：外骨骼框架 + 密封織層 + 行星模組材料
+    shape:
+      - "QFQ"
+      - "CNC"
+      - "QFQ"
+    ingredients:
+      Q: tech:quantum_chip
+      F: tech:field_plate
+      C: tech:control_unit
+      N: NETHERITE_BLOCK
     tutorial:
       - 行星鍛造台負責把通用骨架與專用模組組成真正可用的探索套裝。
       - 抗輻射、防寒、耐壓三種裝備都共用相同骨架，因此這台會成為整條星球裝備鏈的總裝站。
@@ -641,10 +692,15 @@ blueprints:
       - 建議獨立蓋成發射平台，四周留出特效與升空空間。
       - 旁邊放補給箱、防護裝與食物線，讓每次出星前都能完整整備。
   planetary_harvester:
-    register-recipe: false
-    ingredient-lines:
-      - 製作站：星球外勤自動化
-      - 主材料：收割模組 + 感測陣列 + 伺服模組束 + 異星合金
+    shape:
+      - "QAQ"
+      - "COC"
+      - "QAQ"
+    ingredients:
+      Q: tech:quantum_chip
+      A: tech:advanced_circuit
+      C: tech:control_unit
+      O: OBSERVER
     tutorial:
       - 行星採集機專門處理星球表面的特殊樣本，適合把 Aurelia 到 Tempest 的採收轉成半自動外勤據點。
       - 它不會解析遺跡核心，只會收可重複清理的地表資源，因此仍需要你親自處理遺跡互動機關。
@@ -653,10 +709,16 @@ blueprints:
       - 只能放在星球世界中，建議面向樣本最密集的地表或球體邊緣。
       - 最好直接接倉儲、真空入口與補給箱，做成一體式行星前哨。
   void_extractor:
-    register-recipe: false
-    ingredient-lines:
-      - 製作站：物質編譯器後段
-      - 主材料：量子流體 + 成長晶體
+    shape:
+      - "NCN"
+      - "QMQ"
+      - "NFN"
+    ingredients:
+      N: tech:nano_coating
+      C: tech:control_unit
+      Q: tech:quantum_chip
+      M: CRYING_OBSIDIAN
+      F: tech:field_plate
     tutorial:
       - 這是終局物質鏈真正的起點，代表你從量子工業跨進虛空科技。
       - 先把量子流體、晶體培育、能量骨幹做好，不然虛空線只會不停缺料。
@@ -665,10 +727,16 @@ blueprints:
       - 建議單獨設成終局物質區，避免一般物流混入。
       - 最好直接接終局儲能與高吞吐物流，不然後段很容易塞住。
   singularity_press:
-    register-recipe: false
-    ingredient-lines:
-      - 製作站：終局物質鏈中段
-      - 主材料：暗物質薄片 + 中子合金錠
+    shape:
+      - "QFQ"
+      - "CVC"
+      - "QRQ"
+    ingredients:
+      Q: tech:quantum_chip
+      F: tech:field_plate
+      C: tech:control_unit
+      V: ANVIL
+      R: tech:reactor_core
     tutorial:
       - 奇點壓縮台是從高階材料邁向真正終局結構的分水嶺。
       - 在碰這台之前，請先確保虛空、星核、中子合金線都已經能持續供貨。
@@ -677,10 +745,16 @@ blueprints:
       - 建議放在終局壓縮區，附近只留高價值材料與終局發電骨幹。
       - 後面最好直接銜接反物質與事件視界線，減少中途倉儲搬運。
   chrono_engine:
-    register-recipe: false
-    ingredient-lines:
-      - 製作站：軌道 / 時序支線
-      - 主材料：軌道處理器 + 虛空晶體
+    shape:
+      - "QRQ"
+      - "FCF"
+      - "QNQ"
+    ingredients:
+      Q: tech:quantum_chip
+      R: tech:reactor_core
+      F: tech:field_plate
+      C: CLOCK
+      N: tech:nano_coating
     tutorial:
       - 時序引擎是終局多分支中最常被低估的一台，因為它本身就會卡住很多後續線。
       - 先完成軌道列印與虛空穩定化，再把時序線束與時序核心推起來。
@@ -689,10 +763,16 @@ blueprints:
       - 最好與軌道列印機、虛空信標放在同一終局子區域。
       - 周圍務必留高等儲能與範圍模組空間，這台很吃骨幹品質。
   starsteel_foundry:
-    register-recipe: false
-    ingredient-lines:
-      - 製作站：巨構階段入口
-      - 主材料：星核合金 + 中子合金錠 + 軌道框架
+    shape:
+      - "FRF"
+      - "QSQ"
+      - "FNF"
+    ingredients:
+      F: tech:field_plate
+      R: tech:reactor_core
+      Q: tech:quantum_chip
+      S: SMITHING_TABLE
+      N: tech:nano_coating
     tutorial:
       - 星鋼鑄造廠是巨構階段的第一道正式入口。
       - 若星核、軌道、中子合金三線還不穩，先不要急著硬推巨構。
@@ -701,14 +781,19 @@ blueprints:
       - 建議與真空工藝艙同區，當作巨構材料前場。
       - 這區最好使用獨立高吞吐物流，避免跟一般終局物質鏈互卡。
   apex_forge:
-    register-recipe: false
-    ingredient-lines:
-      - 製作站：巨構最終鍛造線
-      - 主材料：宇宙矩陣 + 封存核心 + 連續體外殼 + 遺產資料
+    shape:
+      - "QFQ"
+      - "RER"
+      - "QFQ"
+    ingredients:
+      Q: tech:quantum_chip
+      F: tech:field_plate
+      R: tech:reactor_core
+      E: ENCHANTING_TABLE
     tutorial:
       - 巔峰鍛成儀不是單一機器，而是整條文明級科技線的總結點。
       - 在做它前，請先確認終局鏈、觀測資料線、巨構材料線都已成熟。
-      - 終極矩陣、巔峰核心與終極檔案庫就是這套 科技進程 的最後展示物。
+      - 終極矩陣、巔峰核心與終極檔案庫就是這套科技進程的最後展示物。
     placement:
       - 應獨立成最終展示區或文明核心區，不建議塞回一般工廠角落。
       - 周圍可搭配典藏、儲能與主幹節點，作為全園區終點區域。
