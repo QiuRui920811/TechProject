@@ -88,6 +88,7 @@ starting-kit:
   item-items: []
 machine-safety:
   restrict-machine-access: true
+  trust-can-break: true
   allowed-worlds: []
   vacuum-min-item-age: 40
   quarry-skip-exposed-ores: true

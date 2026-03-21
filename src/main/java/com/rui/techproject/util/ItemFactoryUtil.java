@@ -852,7 +852,10 @@ public final class ItemFactoryUtil {
         return this.colored("  ✧ " + this.localizeInlineTerms(text), this.visualTierColor(visualTier));
     }
 
-    public Component energyLine(final int energyPerTick, final MachineArchetype archetype) {
+    public Component energyLine(final int energyPerTick, final int energyGeneration, final MachineArchetype archetype) {
+        if (archetype == MachineArchetype.GENERATOR && energyGeneration > 0) {
+            return this.success("  ⚡ 每刻發電：" + energyGeneration + " EU");
+        }
         if (energyPerTick <= 0) {
             final String label = archetype == MachineArchetype.GENERATOR ? "被動供能 / 內建產能" : "無持續耗能";
             return this.success("  ⚡ 每刻耗能：" + label);
@@ -932,6 +935,9 @@ public final class ItemFactoryUtil {
             default -> {
                 final boolean hasRecipes = !this.registry.getRecipesForMachine(definition.id()).isEmpty();
                 if (definition.archetype() == MachineArchetype.GENERATOR) {
+                    if (definition.energyGeneration() > 0) {
+                        yield List.of("發電：" + definition.energyGeneration() + " EU / 刻");
+                    }
                     yield List.of("被動供能 / 內建產能");
                 }
                 if (hasRecipes) {

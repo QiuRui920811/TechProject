@@ -22,6 +22,7 @@ public record MachineDefinition(
         List<String> inputs,
         List<String> outputs,
         int energyPerTick,
+        int energyGeneration,
         String effectDescription,
         String unlockRequirement
 ) {

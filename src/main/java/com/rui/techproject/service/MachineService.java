@@ -574,6 +574,10 @@ public final class MachineService {
         if (!breaking && this.isGloballyTrusted(machine.owner(), player.getUniqueId())) {
             return true;
         }
+        if (breaking && this.isGloballyTrusted(machine.owner(), player.getUniqueId())
+                && this.plugin.getConfig().getBoolean("machine-safety.trust-can-break", false)) {
+            return true;
+        }
         player.sendMessage(this.itemFactory.danger(breaking ? "這台機器不是你的，不能拆除。" : "這台機器不是你的，不能打開。"));
         return false;
     }
@@ -1223,7 +1227,7 @@ public final class MachineService {
             event.setCancelled(true);
             final String action = this.itemFactory.getGuiAction(event.getCurrentItem());
             if (action != null) {
-                this.handleMachineAction(player, session.locationKey(), action);
+                this.handleMachineAction(player, session.locationKey(), action, event.isRightClick());
                 return;
             }
             if (this.isInputSlot(rawSlot) || this.isUpgradeSlot(rawSlot)) {
@@ -5412,7 +5416,7 @@ public final class MachineService {
         return false;
     }
 
-    private void handleMachineAction(final Player player, final LocationKey key, final String action) {
+    private void handleMachineAction(final Player player, final LocationKey key, final String action, final boolean rightClick) {
         final PlacedMachine machine = this.machines.get(key);
         if (machine == null) {
             return;
@@ -5459,10 +5463,9 @@ public final class MachineService {
                 }
                 final String current = machine.lockedRecipeId();
                 if (current == null) {
-                    // 未鎖定 → 鎖定第一個配方
-                    machine.setLockedRecipeId(allRecipes.getFirst().id());
+                    // 未鎖定 → 左鍵鎖第一個，右鍵鎖最後一個
+                    machine.setLockedRecipeId(rightClick ? allRecipes.getLast().id() : allRecipes.getFirst().id());
                 } else {
-                    // 找當前鎖定的下一個，超過最後則解鎖
                     int idx = -1;
                     for (int i = 0; i < allRecipes.size(); i++) {
                         if (allRecipes.get(i).id().equals(current)) {
@@ -5470,10 +5473,20 @@ public final class MachineService {
                             break;
                         }
                     }
-                    if (idx >= 0 && idx + 1 < allRecipes.size()) {
-                        machine.setLockedRecipeId(allRecipes.get(idx + 1).id());
+                    if (rightClick) {
+                        // 右鍵：往前一個，到開頭則解鎖
+                        if (idx > 0) {
+                            machine.setLockedRecipeId(allRecipes.get(idx - 1).id());
+                        } else {
+                            machine.setLockedRecipeId(null);
+                        }
                     } else {
-                        machine.setLockedRecipeId(null);
+                        // 左鍵：往下一個，超過最後則解鎖
+                        if (idx >= 0 && idx + 1 < allRecipes.size()) {
+                            machine.setLockedRecipeId(allRecipes.get(idx + 1).id());
+                        } else {
+                            machine.setLockedRecipeId(null);
+                        }
                     }
                 }
                 final String newLock = machine.lockedRecipeId();
@@ -7070,7 +7083,7 @@ public final class MachineService {
         }
         inventory.setItem(15, this.itemFactory.tagGuiAction(this.guiButton("machine-lock-recipe", Material.COMPARATOR, "配方鎖定", List.of(
             "目前：" + lockLabel,
-            "點一下切換鎖定配方",
+            "左鍵→下一個 / 右鍵→上一個",
             "§8鎖定後機器只跑該配方"
         )), "lock-recipe"));
     }

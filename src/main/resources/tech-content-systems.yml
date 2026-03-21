@@ -313,7 +313,8 @@ machines:
     inputs: [storm_rotor, weather_sensor]
     outputs: [energy_cell]
     energy-per-tick: 0
-    effect: 暴雨與雷暴時會大幅增加發電量
+    energy-generation: 2
+    effect: 暴雨與雷暴時會大幅增加發電量（晴天 2 EU/刻，風暴 8 EU/刻）
     unlock: machine:wire_mill&item:storm_rotor&item:weather_sensor
   tree_feller:
     display-name: 伐木機

@@ -1863,6 +1863,7 @@ machines:
     inputs: ["sunlight"]
     outputs: ["energy_cell"]
     energy-per-tick: 0
+    energy-generation: 3
     effect: "太陽光束"
     unlock: "initial"
   coal_generator:
@@ -1873,6 +1874,7 @@ machines:
     inputs: ["coal"]
     outputs: ["energy_cell"]
     energy-per-tick: 5
+    energy-generation: 2
     effect: "火焰 + 蒸氣"
     unlock: "initial"
   compressor:
@@ -1940,6 +1942,7 @@ machines:
     inputs: ["starlight_plate"]
     outputs: ["energy_cell"]
     energy-per-tick: 0
+    energy-generation: 3
     effect: "多段光能動畫"
     unlock: "battery_bank"
   battery_bank:

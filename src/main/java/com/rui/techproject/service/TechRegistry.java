@@ -231,6 +231,7 @@ public final class TechRegistry {
                 inputs,
                 outputs,
                 energyPerTick,
+                0,
                 effectDescription,
                 unlockRequirement
         );
@@ -253,9 +254,10 @@ public final class TechRegistry {
                                  final List<String> inputs,
                                  final List<String> outputs,
                                  final int energyPerTick,
+                                 final int energyGeneration,
                                  final String effectDescription,
                                  final String unlockRequirement) {
-        this.machines.put(this.normalize(id), new MachineDefinition(id, displayName, tier, guideCategory, systemGroup, archetype, visualTier, acquisitionMode, family, role, blockMaterial, itemModel, nexoId, headTexture, List.copyOf(inputs), List.copyOf(outputs), energyPerTick, effectDescription, unlockRequirement));
+        this.machines.put(this.normalize(id), new MachineDefinition(id, displayName, tier, guideCategory, systemGroup, archetype, visualTier, acquisitionMode, family, role, blockMaterial, itemModel, nexoId, headTexture, List.copyOf(inputs), List.copyOf(outputs), energyPerTick, energyGeneration, effectDescription, unlockRequirement));
     }
 
     private void registerRecipe(final String id,
@@ -367,6 +369,7 @@ public final class TechRegistry {
                     this.metadataStringList("machines", key, "inputs", section.getStringList(path + "inputs")),
                     this.metadataStringList("machines", key, "outputs", section.getStringList(path + "outputs")),
                     this.metadataInt("machines", key, "energy-per-tick", section.getInt(path + "energy-per-tick", 0)),
+                    this.metadataInt("machines", key, "energy-generation", section.getInt(path + "energy-generation", 0)),
                     this.metadataString("machines", key, "effect", section.getString(path + "effect", "")),
                     this.metadataString("machines", key, "unlock", section.getString(path + "unlock", "initial"))
             );
