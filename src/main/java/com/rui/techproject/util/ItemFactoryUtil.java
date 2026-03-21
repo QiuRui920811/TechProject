@@ -704,8 +704,8 @@ public final class ItemFactoryUtil {
         return stack;
     }
 
-    /** 雞頭顱材質 (minecraft-heads #51 Chicken) */
-    private static final String CHICKEN_HEAD_TEXTURE = "1638469a599ceef7527546d67d48eef60983d5b1a75ca4dab7c77826e3bc";
+    /** 雞頭顱材質 (GCE 原版 Chicken Head) */
+    private static final String CHICKEN_HEAD_TEXTURE = "1638469a599ceef7207537603248a9ab11ff591fd378bea4735b346a7fae893";
 
     public ItemStack buildPocketChicken(final String dna, final boolean sequenced, final String resourceNameZh) {
         final ItemStack stack = new ItemStack(Material.PLAYER_HEAD);

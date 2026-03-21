@@ -22,7 +22,7 @@ items:
     display-name: "口袋雞"
     category: BASIC
     icon: PLAYER_HEAD
-    head-texture: 1638469a599ceef7527546d67d48eef60983d5b1a75ca4dab7c77826e3bc
+    head-texture: 1638469a599ceef7207537603248a9ab11ff591fd378bea4735b346a7fae893
     description: "被捕獲的雞，帶有隱藏基因。需經基因定序器分析。"
     unlock: "chicken_net"
     guide-category: MATERIALS
