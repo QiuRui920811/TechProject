@@ -797,3 +797,42 @@ blueprints:
     placement:
       - 應獨立成最終展示區或文明核心區，不建議塞回一般工廠角落。
       - 周圍可搭配典藏、儲能與主幹節點，作為全園區終點區域。
+  purifier:
+    shape:
+      - "GBG"
+      - "CKC"
+      - "IRI"
+    ingredients:
+      G: GLASS
+      B: BUCKET
+      K: CAULDRON
+      C: tech:copper_ingot
+      I: IRON_INGOT
+      R: REDSTONE
+    tutorial:
+      - 先準備水桶、玻璃、鍋釜、銅錠、鐵錠與紅石。
+      - 先在地上放鐵方塊，再把工作台放在上方形成進階工作台。
+      - 用進階工作台照配方擺出淨化器。
+      - 放下後右鍵開啟介面，將礦漿淨化為高純度碎片與副產物。
+    placement:
+      - 建議接在洗礦機後面，形成淨化產線。
+      - 淨化後的材料可供給離心機與更高階的機器使用。
+  coolant_mixer:
+    shape:
+      - "ISI"
+      - "CKC"
+      - "SPS"
+    ingredients:
+      I: PACKED_ICE
+      S: tech:steel_plate
+      K: CAULDRON
+      C: tech:copper_ingot
+      P: PISTON
+    tutorial:
+      - 先準備冰磚、鋼板、鍋釜、銅錠與活塞。
+      - 先在地上放鐵方塊，再把工作台放在上方形成進階工作台。
+      - 用進階工作台照配方擺出冷卻混合器。
+      - 放下後右鍵開啟介面，可將冷卻元件與水凝膠混合為冷卻液。
+    placement:
+      - 建議放在需要冷卻的高耗能設備附近。
+      - 產出的冷卻液是中後期機器的重要原料。

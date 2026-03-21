@@ -46,6 +46,8 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -59,6 +61,7 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
+import org.bukkit.configuration.file.YamlConfiguration;
 
 public final class MachineService {
     private static final String MACHINE_TITLE_PREFIX = "機器:";
@@ -151,6 +154,7 @@ public final class MachineService {
     private final java.util.Set<LocationKey> quarryWarmedUp = ConcurrentHashMap.newKeySet();
     private final Map<UUID, BossBar> machineBossBars = new ConcurrentHashMap<>();
     private final Map<UUID, LocationKey> playerLookingAt = new ConcurrentHashMap<>();
+    private final Map<UUID, Set<UUID>> globalTrust = new ConcurrentHashMap<>();
     private StorageBackend storageBackend;
 
     private record MachineViewSession(LocationKey locationKey, ViewMode mode, int page, Inventory inventory) {
@@ -259,6 +263,7 @@ public final class MachineService {
     public void setStorageBackend(final StorageBackend backend) {
         this.storageBackend = backend;
         this.loadMachines();
+        this.loadGlobalTrust();
     }
 
     public void start() {
@@ -390,30 +395,26 @@ public final class MachineService {
         return this.machines.get(LocationKey.from(block.getLocation()));
     }
 
-    public int trustAllMachines(final UUID owner, final UUID trusted) {
-        int count = 0;
-        for (final PlacedMachine machine : this.machines.values()) {
-            if (machine.owner().equals(owner) && !machine.isTrusted(trusted)) {
-                machine.addTrusted(trusted);
-                count++;
-            }
-        }
-        return count;
+    public boolean addGlobalTrust(final UUID owner, final UUID trusted) {
+        return this.globalTrust.computeIfAbsent(owner, k -> ConcurrentHashMap.newKeySet()).add(trusted);
     }
 
-    public int untrustAllMachines(final UUID owner, final UUID trusted) {
-        int count = 0;
-        for (final PlacedMachine machine : this.machines.values()) {
-            if (machine.owner().equals(owner) && machine.isTrusted(trusted)) {
-                machine.removeTrusted(trusted);
-                count++;
-            }
-        }
-        return count;
+    public boolean removeGlobalTrust(final UUID owner, final UUID trusted) {
+        final Set<UUID> set = this.globalTrust.get(owner);
+        if (set == null) return false;
+        final boolean removed = set.remove(trusted);
+        if (set.isEmpty()) this.globalTrust.remove(owner);
+        return removed;
     }
 
-    public long countMachinesOwnedBy(final UUID owner) {
-        return this.machines.values().stream().filter(m -> m.owner().equals(owner)).count();
+    public boolean isGloballyTrusted(final UUID owner, final UUID player) {
+        final Set<UUID> set = this.globalTrust.get(owner);
+        return set != null && set.contains(player);
+    }
+
+    public Set<UUID> getGlobalTrustedPlayers(final UUID owner) {
+        final Set<UUID> set = this.globalTrust.get(owner);
+        return set == null ? Set.of() : Collections.unmodifiableSet(set);
     }
 
     public void openMachineMenu(final Player player, final Block block) {
@@ -561,7 +562,7 @@ public final class MachineService {
         if (player.hasPermission("techproject.admin") || machine.owner().equals(player.getUniqueId())) {
             return true;
         }
-        if (!breaking && machine.isTrusted(player.getUniqueId())) {
+        if (!breaking && this.isGloballyTrusted(machine.owner(), player.getUniqueId())) {
             return true;
         }
         player.sendMessage(this.itemFactory.danger(breaking ? "這台機器不是你的，不能拆除。" : "這台機器不是你的，不能打開。"));
@@ -1403,16 +1404,48 @@ public final class MachineService {
             entry.put("input-direction", machine.inputDirection());
             entry.put("output-direction", machine.outputDirection());
             entry.put("filter-mode", machine.filterMode());
-            if (!machine.trustedPlayers().isEmpty()) {
-                entry.put("trusted-players", machine.trustedPlayers().stream()
-                        .map(UUID::toString).collect(Collectors.joining(",")));
-            }
             entry.put("input", ItemStackSerializer.toBase64(machine.inputInventory()));
             entry.put("output", ItemStackSerializer.toBase64(machine.outputInventory()));
             entry.put("upgrades", ItemStackSerializer.toBase64(machine.upgradeInventory()));
             machineMap.put(String.valueOf(index++), entry);
         }
         this.storageBackend.saveAllMachines(machineMap);
+        this.saveGlobalTrust();
+    }
+
+    private void loadGlobalTrust() {
+        final File file = new File(this.plugin.getDataFolder(), "trust.yml");
+        if (!file.exists()) return;
+        try {
+            final YamlConfiguration yaml = YamlConfiguration.loadConfiguration(file);
+            for (final String ownerKey : yaml.getKeys(false)) {
+                try {
+                    final UUID owner = UUID.fromString(ownerKey);
+                    final List<String> list = yaml.getStringList(ownerKey);
+                    final Set<UUID> trusted = ConcurrentHashMap.newKeySet();
+                    for (final String s : list) {
+                        try { trusted.add(UUID.fromString(s)); } catch (final IllegalArgumentException ignored) { }
+                    }
+                    if (!trusted.isEmpty()) this.globalTrust.put(owner, trusted);
+                } catch (final IllegalArgumentException ignored) { }
+            }
+        } catch (final Exception e) {
+            this.plugin.getLogger().warning("載入信任清單失敗：" + e.getMessage());
+        }
+    }
+
+    private void saveGlobalTrust() {
+        final File file = new File(this.plugin.getDataFolder(), "trust.yml");
+        final YamlConfiguration yaml = new YamlConfiguration();
+        for (final Map.Entry<UUID, Set<UUID>> entry : this.globalTrust.entrySet()) {
+            if (entry.getValue().isEmpty()) continue;
+            yaml.set(entry.getKey().toString(), entry.getValue().stream().map(UUID::toString).collect(Collectors.toList()));
+        }
+        try {
+            yaml.save(file);
+        } catch (final IOException e) {
+            this.plugin.getLogger().warning("儲存信任清單失敗：" + e.getMessage());
+        }
     }
 
     private void loadMachines() {
@@ -1462,15 +1495,14 @@ public final class MachineService {
                 machine.setInputDirection(data.get("input-direction") instanceof String s ? s : "ALL");
                 machine.setOutputDirection(data.get("output-direction") instanceof String s ? s : "ALL");
                 machine.setFilterMode(data.get("filter-mode") instanceof String s ? s : "WHITELIST");
+                // 舊版逐台信任 → 自動遷移到全域信任
                 final String trustedRaw = data.get("trusted-players") instanceof String s ? s : "";
                 if (!trustedRaw.isBlank()) {
-                    final Set<UUID> trusted = new HashSet<>();
                     for (final String part : trustedRaw.split(",")) {
                         try {
-                            trusted.add(UUID.fromString(part.trim()));
+                            this.addGlobalTrust(java.util.UUID.fromString(ownerRaw), UUID.fromString(part.trim()));
                         } catch (final IllegalArgumentException ignored) { }
                     }
-                    machine.setTrustedPlayers(trusted);
                 }
                 final Object inputData = data.get("input");
                 final Object outputData = data.get("output");
