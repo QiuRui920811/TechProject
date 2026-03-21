@@ -2033,20 +2033,29 @@ public final class TechBookService {
             return this.itemFactory.tagPreviewClaim(this.itemFactory.buildTechItem(item), "item:" + item.id());
         }
         final MachineDefinition machine = resolvedId == null ? null : this.registry.getMachine(resolvedId);
-        if (machine != null) {
+        // 無前綴 token 如果同時匹配 Material 和 Machine，優先顯示原版材料
+        // （藍圖中 FURNACE 表示原版熔爐，而非科技熔爐；要指定科技機器需用 machine: 前綴）
+        if (machine != null && materialToken == null) {
             return this.itemFactory.tagPreviewClaim(this.itemFactory.buildMachineItem(machine), "machine:" + machine.id());
         }
         final String materialId = materialToken == null ? normalized : materialToken;
         final Material material = Material.matchMaterial(materialId.toUpperCase(Locale.ROOT));
-        if (material == null || material == Material.AIR) {
-            return this.info(Material.BARRIER, "未知材料", List.of(id));
+        if (material != null && material != Material.AIR) {
+            final ItemStack stack = new ItemStack(this.itemFactory.safeItemMaterial(material));
+            final ItemMeta meta = stack.getItemMeta();
+            final String displayName = this.itemFactory.displayNameForId(materialId);
+            // 若同名機器存在，加「原版」標記避免混淆
+            final String label = machine != null ? displayName + "（原版）" : displayName;
+            meta.displayName(this.itemFactory.warning(label));
+            meta.lore(List.of(this.itemFactory.muted("原版材料")));
+            stack.setItemMeta(meta);
+            return this.itemFactory.tagPreviewClaim(stack, "material:" + materialId);
         }
-        final ItemStack stack = new ItemStack(this.itemFactory.safeItemMaterial(material));
-        final ItemMeta meta = stack.getItemMeta();
-        meta.displayName(this.itemFactory.warning(this.itemFactory.displayNameForId(materialId)));
-        meta.lore(List.of(this.itemFactory.muted("原版材料")));
-        stack.setItemMeta(meta);
-        return this.itemFactory.tagPreviewClaim(stack, "material:" + materialId);
+        // 無前綴、不是材料 → 回退到機器顯示
+        if (machine != null) {
+            return this.itemFactory.tagPreviewClaim(this.itemFactory.buildMachineItem(machine), "machine:" + machine.id());
+        }
+        return this.info(Material.BARRIER, "未知材料", List.of(id));
     }
 
     private ItemStack recipeBlankPane() {
