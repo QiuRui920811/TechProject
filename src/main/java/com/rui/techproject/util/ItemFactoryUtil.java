@@ -65,6 +65,7 @@ public final class ItemFactoryUtil {
     private final NamespacedKey chickenDnaKey;
     private final NamespacedKey chickenSequencedKey;
     private final NamespacedKey chickenResourceKey;
+    private final NamespacedKey chickenUsesKey;
     private final TechRegistry registry;
     private final Map<String, GuiButtonDefinition> guiButtons = new LinkedHashMap<>();
     private final Map<String, GuiIconDefinition> guiIcons = new LinkedHashMap<>();
@@ -83,6 +84,7 @@ public final class ItemFactoryUtil {
         this.chickenDnaKey = new NamespacedKey(plugin, "chicken_dna");
         this.chickenSequencedKey = new NamespacedKey(plugin, "chicken_sequenced");
         this.chickenResourceKey = new NamespacedKey(plugin, "chicken_resource");
+        this.chickenUsesKey = new NamespacedKey(plugin, "chicken_uses");
         this.registry = registry;
         this.loadGuiConfig();
     }
@@ -723,9 +725,12 @@ public final class ItemFactoryUtil {
             if (genetics.canProduceResource(dna)) {
                 lore.add(this.success("▶ 資源：" + resourceNameZh));
                 lore.add(this.success("▶ 可放入激發室產出資源"));
+                final int maxProd = genetics.maxProductionUses(tier);
+                lore.add(this.secondary("▶ 激發壽命：" + maxProd + " 次"));
             } else {
                 lore.add(this.muted("▶ 無資源 (純顯性)"));
             }
+            lore.add(this.secondary("▶ 繁殖壽命：" + com.rui.techproject.service.ChickenGeneticsService.MAX_BREED_USES + " 次"));
             lore.add(this.muted("───────────────"));
         } else {
             meta.displayName(this.warning("◆ 口袋雞 §7[未定序]"));
@@ -738,6 +743,7 @@ public final class ItemFactoryUtil {
         if (resourceNameZh != null && !resourceNameZh.isEmpty()) {
             meta.getPersistentDataContainer().set(this.chickenResourceKey, PersistentDataType.STRING, resourceNameZh);
         }
+        meta.getPersistentDataContainer().set(this.chickenUsesKey, PersistentDataType.INTEGER, 0);
         meta.getPersistentDataContainer().set(this.dataVersionKey, PersistentDataType.INTEGER, this.currentItemDataVersion());
         stack.setItemMeta(meta);
         return stack;
@@ -772,6 +778,20 @@ public final class ItemFactoryUtil {
 
     public NamespacedKey chickenResourceKey() {
         return this.chickenResourceKey;
+    }
+
+    public int getChickenUses(final ItemStack stack) {
+        if (stack == null || !stack.hasItemMeta()) return 0;
+        final Integer val = stack.getItemMeta().getPersistentDataContainer().get(this.chickenUsesKey, PersistentDataType.INTEGER);
+        return val != null ? val : 0;
+    }
+
+    public void incrementChickenUses(final ItemStack stack, final int delta) {
+        if (stack == null || !stack.hasItemMeta()) return;
+        final ItemMeta meta = stack.getItemMeta();
+        final int current = meta.getPersistentDataContainer().getOrDefault(this.chickenUsesKey, PersistentDataType.INTEGER, 0);
+        meta.getPersistentDataContainer().set(this.chickenUsesKey, PersistentDataType.INTEGER, current + delta);
+        stack.setItemMeta(meta);
     }
 
     public Component primary(final String text) {

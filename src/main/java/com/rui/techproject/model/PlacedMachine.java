@@ -22,6 +22,7 @@ public final class PlacedMachine {
     private long storedEnergy;
     private long totalGenerated;
     private long ticksActive;
+    private double chickenProgress;
     private int quarryFuel;
     private int quarryCursorX;
     private int quarryCursorZ;
@@ -89,6 +90,18 @@ public final class PlacedMachine {
 
     public long ticksActive() {
         return this.ticksActive;
+    }
+
+    public double chickenProgress() {
+        return this.chickenProgress;
+    }
+
+    public void setChickenProgress(final double value) {
+        this.chickenProgress = value;
+    }
+
+    public void addChickenProgress(final double delta) {
+        this.chickenProgress += delta;
     }
 
     public int quarryFuel() {
@@ -367,5 +380,9 @@ public final class PlacedMachine {
         this.storedEnergy = Math.max(0L, storedEnergy);
         this.totalGenerated = Math.max(0L, totalGenerated);
         this.ticksActive = Math.max(0L, ticksActive);
+    }
+
+    public void restoreChickenProgress(final double progress) {
+        this.chickenProgress = Math.max(0.0, progress);
     }
 }

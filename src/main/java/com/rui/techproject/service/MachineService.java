@@ -1413,6 +1413,7 @@ public final class MachineService {
             entry.put("input-direction", machine.inputDirection());
             entry.put("output-direction", machine.outputDirection());
             entry.put("filter-mode", machine.filterMode());
+            entry.put("chicken-progress", machine.chickenProgress());
             entry.put("input", ItemStackSerializer.toBase64(machine.inputInventory()));
             entry.put("output", ItemStackSerializer.toBase64(machine.outputInventory()));
             entry.put("upgrades", ItemStackSerializer.toBase64(machine.upgradeInventory()));
@@ -1504,6 +1505,7 @@ public final class MachineService {
                 machine.setInputDirection(data.get("input-direction") instanceof String s ? s : "ALL");
                 machine.setOutputDirection(data.get("output-direction") instanceof String s ? s : "ALL");
                 machine.setFilterMode(data.get("filter-mode") instanceof String s ? s : "WHITELIST");
+                machine.restoreChickenProgress(data.get("chicken-progress") instanceof Number n ? n.doubleValue() : 0.0);
                 // 舊版逐台信任 → 自動遷移到全域信任
                 final String trustedRaw = data.get("trusted-players") instanceof String s ? s : "";
                 if (!trustedRaw.isBlank()) {
@@ -2935,6 +2937,30 @@ public final class MachineService {
             this.setRuntimeState(machine, MachineRuntimeState.NO_INPUT, "需要兩隻已定序口袋雞");
             return;
         }
+        // ── 繁殖冷卻：每 120 秒繁殖一次（約 30 隻/小時）──
+        final long breedInterval = 120L;
+        if (machine.ticksActive() % breedInterval != 0L) {
+            final long remaining = breedInterval - (machine.ticksActive() % breedInterval);
+            this.setRuntimeState(machine, MachineRuntimeState.RUNNING, "繁殖冷卻中（" + remaining + "秒）");
+            return;
+        }
+        // 檢查親代壽命
+        final int usesA = this.itemFactory.getChickenUses(machine.inputAt(parentSlotA));
+        final int usesB = this.itemFactory.getChickenUses(machine.inputAt(parentSlotB));
+        final int maxBreed = com.rui.techproject.service.ChickenGeneticsService.MAX_BREED_USES;
+        if (usesA >= maxBreed || usesB >= maxBreed) {
+            // 移除耗盡的親代
+            if (usesA >= maxBreed) {
+                machine.setInputAt(parentSlotA, null);
+            }
+            if (usesB >= maxBreed) {
+                machine.setInputAt(parentSlotB, null);
+            }
+            this.setRuntimeState(machine, MachineRuntimeState.NO_INPUT, "口袋雞壽命耗盡，已消失");
+            world.spawnParticle(Particle.SMOKE, location.clone().add(0.5, 1.2, 0.5), 10, 0.3, 0.3, 0.3, 0.02);
+            world.playSound(location, Sound.ENTITY_CHICKEN_DEATH, 0.6f, 0.8f);
+            return;
+        }
         if (!machine.consumeEnergy(energy)) {
             this.setRuntimeState(machine, MachineRuntimeState.NO_POWER, "電力不足");
             return;
@@ -2949,9 +2975,14 @@ public final class MachineService {
             return;
         }
         this.storeOutput(machine, child);
+        // 增加親代使用次數
+        this.itemFactory.incrementChickenUses(machine.inputAt(parentSlotA), 1);
+        this.itemFactory.incrementChickenUses(machine.inputAt(parentSlotB), 1);
+        final int remainA = maxBreed - this.itemFactory.getChickenUses(machine.inputAt(parentSlotA));
+        final int remainB = maxBreed - this.itemFactory.getChickenUses(machine.inputAt(parentSlotB));
         this.progressService.incrementStat(machine.owner(), "chickens_bred", 1);
         this.progressService.unlockByRequirement(machine.owner(), "private_coop");
-        this.setRuntimeState(machine, MachineRuntimeState.RUNNING, "繁殖中");
+        this.setRuntimeState(machine, MachineRuntimeState.RUNNING, "繁殖成功！親代剩餘 " + Math.min(remainA, remainB) + "/" + maxBreed);
         world.spawnParticle(Particle.HEART, location.clone().add(0.5, 1.2, 0.5), 5, 0.3, 0.3, 0.3, 0.0);
         world.playSound(location, Sound.ENTITY_CHICKEN_EGG, 0.5f, 1.2f);
     }
@@ -2978,12 +3009,37 @@ public final class MachineService {
             if (dna == null || !this.chickenGenetics.canProduceResource(dna)) {
                 continue;
             }
+            // 檢查雞的壽命
+            final int tier = this.chickenGenetics.recessiveCount(dna);
+            final int maxUses = this.chickenGenetics.maxProductionUses(tier);
+            final int currentUses = this.itemFactory.getChickenUses(input);
+            if (currentUses >= maxUses) {
+                // 壽命耗盡，移除雞
+                machine.setInputAt(slot, null);
+                machine.setChickenProgress(0.0);
+                this.setRuntimeState(machine, MachineRuntimeState.NO_INPUT, "口袋雞壽命耗盡，已消失");
+                world.spawnParticle(Particle.SMOKE, location.clone().add(0.5, 1.0, 0.5), 10, 0.3, 0.3, 0.3, 0.02);
+                world.playSound(location, Sound.ENTITY_CHICKEN_DEATH, 0.6f, 0.8f);
+                return;
+            }
             // 消耗能源
             if (!machine.consumeEnergy(energy)) {
                 this.setRuntimeState(machine, MachineRuntimeState.NO_POWER, "電力不足");
                 return;
             }
-            // 產出資源
+            // 累積生產進度
+            final double rate = this.chickenGenetics.productionRate(dna);
+            machine.addChickenProgress(rate);
+            if (machine.chickenProgress() < 1.0) {
+                final String resName = this.chickenGenetics.resourceNameZh(dna);
+                final int percent = (int) (machine.chickenProgress() * 100);
+                final int remainingUses = maxUses - currentUses;
+                this.setRuntimeState(machine, MachineRuntimeState.RUNNING,
+                        "激發中：" + resName + " " + percent + "% ┃ 壽命 " + remainingUses + "/" + maxUses);
+                return;
+            }
+            // 進度到達 1.0 → 產出資源
+            machine.setChickenProgress(machine.chickenProgress() - 1.0);
             final String resourceId = this.chickenGenetics.resourceId(dna);
             final ItemStack product = this.buildStackForId(resourceId, 1);
             if (product == null) {
@@ -2991,18 +3047,24 @@ public final class MachineService {
             }
             if (!this.canStoreOutput(machine, product)) {
                 machine.addEnergy(energy);
+                machine.addChickenProgress(-rate); // 退還進度
                 this.setRuntimeState(machine, MachineRuntimeState.OUTPUT_BLOCKED, "輸出已滿");
                 return;
             }
             this.storeOutput(machine, product);
+            // 增加雞的使用次數
+            this.itemFactory.incrementChickenUses(input, 1);
+            final int remainingUses = maxUses - (currentUses + 1);
             final String resourceName = this.chickenGenetics.resourceNameZh(dna);
             this.progressService.incrementStat(machine.owner(), "chicken_resources_produced", 1);
             this.progressService.unlockByRequirement(machine.owner(), "excitation_chamber");
-            this.setRuntimeState(machine, MachineRuntimeState.RUNNING, "產出：" + resourceName);
+            this.setRuntimeState(machine, MachineRuntimeState.RUNNING,
+                    "產出：" + resourceName + " ┃ 壽命 " + remainingUses + "/" + maxUses);
             world.spawnParticle(Particle.HAPPY_VILLAGER, location.clone().add(0.5, 1.0, 0.5), 8, 0.25, 0.25, 0.25, 0.02);
             world.playSound(location, Sound.ENTITY_CHICKEN_AMBIENT, 0.3f, 1.5f);
-            return; // 雞不被消耗，留在輸入格
+            return; // 雞留在輸入格（直到壽命耗盡）
         }
+        machine.setChickenProgress(0.0);
         this.setRuntimeState(machine, MachineRuntimeState.NO_INPUT, "需要有資源能力的口袋雞");
     }
 

@@ -227,19 +227,52 @@ public final class ChickenGeneticsService {
         return recessiveFlags(dna) != 0;
     }
 
+    /** 繁殖最大使用次數 (每隻親代)。 */
+    public static final int MAX_BREED_USES = 30;
+
     /**
-     * 計算激發室的產出效率 (隱性越多越快)。
-     * 回傳每次 tick 的生產進度 (0.0 ~ 1.0)。
-     * 全顯性 = 0, 1 隱性 = 0.10, 6 隱性 = 0.50。
+     * 計算激發室的每 tick 生產進度 (累積到 1.0 產出一次)。
+     * 等級越高，間隔越長：
+     * <ul>
+     *   <li>Tier 1: 30 秒 (1/30 per tick)  ~120/hr</li>
+     *   <li>Tier 2: 60 秒 (1/60 per tick)  ~60/hr</li>
+     *   <li>Tier 3: 120 秒 (1/120 per tick) ~30/hr</li>
+     *   <li>Tier 4: 180 秒 (1/180 per tick) ~20/hr</li>
+     *   <li>Tier 5: 300 秒 (1/300 per tick) ~12/hr</li>
+     *   <li>Tier 6: 600 秒 (1/600 per tick) ~6/hr</li>
+     * </ul>
      */
     public double productionRate(final String dna) {
         final int count = recessiveCount(dna);
         if (count == 0) return 0.0;
-        // 全同型隱性的位點越多，異型合子的干擾越少
-        final int totalLoci = 6;
+        final double baseInterval = switch (count) {
+            case 1 -> 30.0;
+            case 2 -> 60.0;
+            case 3 -> 120.0;
+            case 4 -> 180.0;
+            case 5 -> 300.0;
+            case 6 -> 600.0;
+            default -> 30.0;
+        };
+        // 純度加成：異型合子越少、實際間隔越短（最多加速 10%）
         final int heteroCount = countHeterozygous(dna);
-        // 基礎速率 + 純度加成
-        return 0.08 + (count * 0.04) + ((totalLoci - heteroCount - (totalLoci - count)) * 0.02);
+        final double purityBonus = 1.0 + (6 - heteroCount) * 0.015;
+        return purityBonus / baseInterval;
+    }
+
+    /**
+     * 取得激發室中此等級雞的最大生產次數 (壽命)。
+     */
+    public int maxProductionUses(final int tier) {
+        return switch (tier) {
+            case 1 -> 1000;
+            case 2 -> 500;
+            case 3 -> 200;
+            case 4 -> 120;
+            case 5 -> 60;
+            case 6 -> 30;
+            default -> 0;
+        };
     }
 
     /**
