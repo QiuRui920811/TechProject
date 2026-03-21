@@ -1276,7 +1276,18 @@ public final class MachineService {
         }
         event.setCancelled(true);
         this.applyManualMachineDrag(player, machine, event);
-        this.refreshManualMachineInteraction(player, machine);
+        // Capture the correct cursor BEFORE the event-cancel revert overwrites it
+        final ItemStack correctedCursor = player.getItemOnCursor() == null || player.getItemOnCursor().getType() == Material.AIR
+                ? null : player.getItemOnCursor().clone();
+        this.pushOpenViewState(machine.locationKey(), machine);
+        player.updateInventory();
+        // Re-set cursor & view on next tick to counteract InventoryDragEvent cancel revert
+        final LocationKey dragKey = machine.locationKey();
+        this.scheduler.runEntityDelayed(player, () -> {
+            this.setPlayerCursor(player, correctedCursor);
+            this.pushOpenViewState(dragKey, machine);
+            player.updateInventory();
+        }, 1L);
     }
 
     public void removeAllDisplays() {
@@ -6647,7 +6658,11 @@ public final class MachineService {
     private void refreshManualMachineInteraction(final Player player, final PlacedMachine machine) {
         this.pushOpenViewState(machine.locationKey(), machine);
         player.updateInventory();
-        this.scheduler.runEntityDelayed(player, player::updateInventory, 1L);
+        final LocationKey refreshKey = machine.locationKey();
+        this.scheduler.runEntityDelayed(player, () -> {
+            this.pushOpenViewState(refreshKey, machine);
+            player.updateInventory();
+        }, 1L);
     }
 
     private ItemStack pushIntoMachineStorage(final PlacedMachine machine, final ItemStack stack) {
