@@ -4,7 +4,10 @@ import com.rui.techproject.util.LocationKey;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 public final class PlacedMachine {
     private final LocationKey locationKey;
@@ -28,6 +31,7 @@ public final class PlacedMachine {
     private int androidRouteCursor;
     private String androidRouteMode = "SERPENTINE";
     private String filterMode = "WHITELIST";
+    private final Set<UUID> trustedPlayers = ConcurrentHashMap.newKeySet();
     private MachineRuntimeState runtimeState = MachineRuntimeState.IDLE;
     private String runtimeDetail = "待命";
     private int manualOperationTicks;
@@ -50,6 +54,29 @@ public final class PlacedMachine {
 
     public UUID owner() {
         return this.owner;
+    }
+
+    public boolean isTrusted(final UUID playerUuid) {
+        return this.trustedPlayers.contains(playerUuid);
+    }
+
+    public boolean addTrusted(final UUID playerUuid) {
+        return this.trustedPlayers.add(playerUuid);
+    }
+
+    public boolean removeTrusted(final UUID playerUuid) {
+        return this.trustedPlayers.remove(playerUuid);
+    }
+
+    public Set<UUID> trustedPlayers() {
+        return Collections.unmodifiableSet(this.trustedPlayers);
+    }
+
+    public void setTrustedPlayers(final Set<UUID> uuids) {
+        this.trustedPlayers.clear();
+        if (uuids != null) {
+            this.trustedPlayers.addAll(uuids);
+        }
     }
 
     public long storedEnergy() {

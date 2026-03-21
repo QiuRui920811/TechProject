@@ -50,12 +50,15 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.stream.Collectors;
 
 public final class MachineService {
     private static final String MACHINE_TITLE_PREFIX = "機器:";
@@ -530,6 +533,9 @@ public final class MachineService {
             return true;
         }
         if (player.hasPermission("techproject.admin") || machine.owner().equals(player.getUniqueId())) {
+            return true;
+        }
+        if (!breaking && machine.isTrusted(player.getUniqueId())) {
             return true;
         }
         player.sendMessage(this.itemFactory.danger(breaking ? "這台機器不是你的，不能拆除。" : "這台機器不是你的，不能打開。"));
@@ -1360,6 +1366,10 @@ public final class MachineService {
             entry.put("input-direction", machine.inputDirection());
             entry.put("output-direction", machine.outputDirection());
             entry.put("filter-mode", machine.filterMode());
+            if (!machine.trustedPlayers().isEmpty()) {
+                entry.put("trusted-players", machine.trustedPlayers().stream()
+                        .map(UUID::toString).collect(Collectors.joining(",")));
+            }
             entry.put("input", ItemStackSerializer.toBase64(machine.inputInventory()));
             entry.put("output", ItemStackSerializer.toBase64(machine.outputInventory()));
             entry.put("upgrades", ItemStackSerializer.toBase64(machine.upgradeInventory()));
@@ -1415,6 +1425,16 @@ public final class MachineService {
                 machine.setInputDirection(data.get("input-direction") instanceof String s ? s : "ALL");
                 machine.setOutputDirection(data.get("output-direction") instanceof String s ? s : "ALL");
                 machine.setFilterMode(data.get("filter-mode") instanceof String s ? s : "WHITELIST");
+                final String trustedRaw = data.get("trusted-players") instanceof String s ? s : "";
+                if (!trustedRaw.isBlank()) {
+                    final Set<UUID> trusted = new HashSet<>();
+                    for (final String part : trustedRaw.split(",")) {
+                        try {
+                            trusted.add(UUID.fromString(part.trim()));
+                        } catch (final IllegalArgumentException ignored) { }
+                    }
+                    machine.setTrustedPlayers(trusted);
+                }
                 final Object inputData = data.get("input");
                 final Object outputData = data.get("output");
                 final Object upgradeData = data.get("upgrades");

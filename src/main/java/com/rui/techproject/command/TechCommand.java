@@ -1,11 +1,14 @@
 package com.rui.techproject.command;
 
 import com.rui.techproject.TechProjectPlugin;
+import com.rui.techproject.model.PlacedMachine;
 import com.rui.techproject.service.TechRegistry;
 import com.rui.techproject.util.ItemFactoryUtil;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
+import org.bukkit.OfflinePlayer;
+import org.bukkit.block.Block;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -17,6 +20,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.UUID;
 
 public final class TechCommand implements CommandExecutor, TabCompleter {
     private final TechProjectPlugin plugin;
@@ -336,6 +340,114 @@ public final class TechCommand implements CommandExecutor, TabCompleter {
             return true;
         }
 
+        if (args[0].equalsIgnoreCase("trust")) {
+            if (!(sender instanceof Player player)) {
+                sender.sendMessage(Component.text("只有玩家可以使用信任指令。", NamedTextColor.RED));
+                return true;
+            }
+            if (args.length < 2) {
+                player.sendMessage(Component.text("用法：/tech trust <玩家名稱>　—　對準你的機器後共享操作權", NamedTextColor.YELLOW));
+                return true;
+            }
+            final Block target = player.getTargetBlockExact(5);
+            if (target == null) {
+                player.sendMessage(Component.text("請對準你要共享的機器。", NamedTextColor.RED));
+                return true;
+            }
+            final PlacedMachine machine = this.plugin.getMachineService().placedMachineAt(target);
+            if (machine == null) {
+                player.sendMessage(Component.text("你看的方塊不是科技機器。", NamedTextColor.RED));
+                return true;
+            }
+            if (!machine.owner().equals(player.getUniqueId()) && !player.hasPermission("techproject.admin")) {
+                player.sendMessage(Component.text("只有機器主人可以管理信任清單。", NamedTextColor.RED));
+                return true;
+            }
+            @SuppressWarnings("deprecation")
+            final OfflinePlayer trusted = Bukkit.getOfflinePlayer(args[1]);
+            if (!trusted.hasPlayedBefore() && !trusted.isOnline()) {
+                player.sendMessage(Component.text("找不到玩家：" + args[1], NamedTextColor.RED));
+                return true;
+            }
+            if (trusted.getUniqueId().equals(player.getUniqueId())) {
+                player.sendMessage(Component.text("你不需要信任自己。", NamedTextColor.YELLOW));
+                return true;
+            }
+            if (machine.isTrusted(trusted.getUniqueId())) {
+                player.sendMessage(Component.text(trusted.getName() + " 已經在信任清單中了。", NamedTextColor.YELLOW));
+                return true;
+            }
+            machine.addTrusted(trusted.getUniqueId());
+            player.sendMessage(Component.text("✔ 已將 " + trusted.getName() + " 加入這台機器的信任清單。", NamedTextColor.GREEN));
+            return true;
+        }
+
+        if (args[0].equalsIgnoreCase("untrust")) {
+            if (!(sender instanceof Player player)) {
+                sender.sendMessage(Component.text("只有玩家可以使用信任指令。", NamedTextColor.RED));
+                return true;
+            }
+            if (args.length < 2) {
+                player.sendMessage(Component.text("用法：/tech untrust <玩家名稱>　—　對準你的機器後移除操作權", NamedTextColor.YELLOW));
+                return true;
+            }
+            final Block target = player.getTargetBlockExact(5);
+            if (target == null) {
+                player.sendMessage(Component.text("請對準你要管理的機器。", NamedTextColor.RED));
+                return true;
+            }
+            final PlacedMachine machine = this.plugin.getMachineService().placedMachineAt(target);
+            if (machine == null) {
+                player.sendMessage(Component.text("你看的方塊不是科技機器。", NamedTextColor.RED));
+                return true;
+            }
+            if (!machine.owner().equals(player.getUniqueId()) && !player.hasPermission("techproject.admin")) {
+                player.sendMessage(Component.text("只有機器主人可以管理信任清單。", NamedTextColor.RED));
+                return true;
+            }
+            @SuppressWarnings("deprecation")
+            final OfflinePlayer trusted = Bukkit.getOfflinePlayer(args[1]);
+            if (!machine.removeTrusted(trusted.getUniqueId())) {
+                player.sendMessage(Component.text(args[1] + " 不在這台機器的信任清單中。", NamedTextColor.YELLOW));
+                return true;
+            }
+            player.sendMessage(Component.text("✔ 已將 " + (trusted.getName() != null ? trusted.getName() : args[1]) + " 從信任清單移除。", NamedTextColor.GREEN));
+            return true;
+        }
+
+        if (args[0].equalsIgnoreCase("trustlist")) {
+            if (!(sender instanceof Player player)) {
+                sender.sendMessage(Component.text("只有玩家可以查看信任清單。", NamedTextColor.RED));
+                return true;
+            }
+            final Block target = player.getTargetBlockExact(5);
+            if (target == null) {
+                player.sendMessage(Component.text("請對準你要查看的機器。", NamedTextColor.RED));
+                return true;
+            }
+            final PlacedMachine machine = this.plugin.getMachineService().placedMachineAt(target);
+            if (machine == null) {
+                player.sendMessage(Component.text("你看的方塊不是科技機器。", NamedTextColor.RED));
+                return true;
+            }
+            if (!machine.owner().equals(player.getUniqueId()) && !player.hasPermission("techproject.admin")) {
+                player.sendMessage(Component.text("只有機器主人可以查看信任清單。", NamedTextColor.RED));
+                return true;
+            }
+            if (machine.trustedPlayers().isEmpty()) {
+                player.sendMessage(Component.text("這台機器尚未共享給任何人。", NamedTextColor.YELLOW));
+                return true;
+            }
+            player.sendMessage(Component.text("=== 信任清單 ===", NamedTextColor.GOLD));
+            for (final UUID uuid : machine.trustedPlayers()) {
+                final OfflinePlayer op = Bukkit.getOfflinePlayer(uuid);
+                final String name = op.getName() != null ? op.getName() : uuid.toString();
+                player.sendMessage(Component.text(" - " + name, NamedTextColor.AQUA));
+            }
+            player.sendMessage(Component.text("共 " + machine.trustedPlayers().size() + " 位信任玩家。", NamedTextColor.GRAY));
+            return true;
+        }
+
         sender.sendMessage(Component.text("未知子命令。", NamedTextColor.RED));
         return true;
     }
@@ -346,7 +458,7 @@ public final class TechCommand implements CommandExecutor, TabCompleter {
                                                 @NotNull final String alias,
                                                 @NotNull final String[] args) {
         if (args.length == 1) {
-            return List.of("book", "wrench", "research", "planet", "list", "stats", "xp", "achievements", "title", "search", "give", "reload");
+            return List.of("book", "wrench", "research", "planet", "list", "stats", "xp", "achievements", "title", "search", "give", "trust", "untrust", "trustlist", "reload");
         }
         if (args.length == 2 && args[0].equalsIgnoreCase("wrench")) {
             return List.of("get");
@@ -386,6 +498,13 @@ public final class TechCommand implements CommandExecutor, TabCompleter {
             return options;
         }
         if (args.length == 3 && args[0].equalsIgnoreCase("give")) {
+            final List<String> names = new ArrayList<>();
+            for (final Player player : Bukkit.getOnlinePlayers()) {
+                names.add(player.getName());
+            }
+            return names;
+        }
+        if (args.length == 2 && (args[0].equalsIgnoreCase("trust") || args[0].equalsIgnoreCase("untrust"))) {
             final List<String> names = new ArrayList<>();
             for (final Player player : Bukkit.getOnlinePlayers()) {
                 names.add(player.getName());
