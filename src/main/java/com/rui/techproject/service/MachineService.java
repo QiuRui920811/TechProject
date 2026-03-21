@@ -412,6 +412,15 @@ public final class MachineService {
         return set != null && set.contains(player);
     }
 
+    /**
+     * 兩位玩家的機器是否可以互連電網 / 物流。
+     * 條件：同一人，或任一方信任對方。
+     */
+    public boolean isNetworkAllied(final UUID ownerA, final UUID ownerB) {
+        if (ownerA.equals(ownerB)) return true;
+        return this.isGloballyTrusted(ownerA, ownerB) || this.isGloballyTrusted(ownerB, ownerA);
+    }
+
     public Set<UUID> getGlobalTrustedPlayers(final UUID owner) {
         final Set<UUID> set = this.globalTrust.get(owner);
         return set == null ? Set.of() : Collections.unmodifiableSet(set);
@@ -5255,7 +5264,7 @@ public final class MachineService {
                         continue;
                     }
                     final PlacedMachine neighbor = this.machines.get(key);
-                    if (neighbor == null || neighbor.owner().equals(machine.owner()) == false) {
+                    if (neighbor == null || !this.isNetworkAllied(machine.owner(), neighbor.owner())) {
                         continue;
                     }
                     if (this.isRelayMachine(neighbor.machineId(), logisticsMode)) {
