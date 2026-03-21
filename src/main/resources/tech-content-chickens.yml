@@ -93,8 +93,8 @@ recipes:
   # ── 激發室合成 ────────────────────────────────────────
   assembler_excitation_chamber:
     machine: "assembler"
-    inputs: ["iron_ingot", "glass", "redstone"]
+    inputs: ["iron_ingot", "glass", "circuit_board"]
     output: "excitation_chamber"
     count: 1
     energy: 10
-    guide: "鐵錠 + 玻璃 + 紅石 → 激發室"
+    guide: "鐵錠 + 玻璃 + 電路板 → 激發室"
