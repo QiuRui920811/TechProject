@@ -415,6 +415,58 @@ public final class TechCommand implements CommandExecutor, TabCompleter {
             return true;
         }
 
+        if (args[0].equalsIgnoreCase("trustall")) {
+            if (!(sender instanceof Player player)) {
+                sender.sendMessage(Component.text("只有玩家可以使用信任指令。", NamedTextColor.RED));
+                return true;
+            }
+            if (args.length < 2) {
+                player.sendMessage(Component.text("用法：/tech trustall <玩家名稱>　—　共享你所有機器的操作權", NamedTextColor.YELLOW));
+                return true;
+            }
+            @SuppressWarnings("deprecation")
+            final OfflinePlayer trusted = Bukkit.getOfflinePlayer(args[1]);
+            if (!trusted.hasPlayedBefore() && !trusted.isOnline()) {
+                player.sendMessage(Component.text("找不到玩家：" + args[1], NamedTextColor.RED));
+                return true;
+            }
+            if (trusted.getUniqueId().equals(player.getUniqueId())) {
+                player.sendMessage(Component.text("你不需要信任自己。", NamedTextColor.YELLOW));
+                return true;
+            }
+            final int count = this.plugin.getMachineService().trustAllMachines(player.getUniqueId(), trusted.getUniqueId());
+            if (count == 0) {
+                player.sendMessage(Component.text(trusted.getName() + " 已經在你所有機器的信任清單中了。", NamedTextColor.YELLOW));
+            } else {
+                player.sendMessage(Component.text("✔ 已將 " + trusted.getName() + " 加入你全部 " + count + " 台機器的信任清單。", NamedTextColor.GREEN));
+            }
+            return true;
+        }
+
+        if (args[0].equalsIgnoreCase("untrustall")) {
+            if (!(sender instanceof Player player)) {
+                sender.sendMessage(Component.text("只有玩家可以使用信任指令。", NamedTextColor.RED));
+                return true;
+            }
+            if (args.length < 2) {
+                player.sendMessage(Component.text("用法：/tech untrustall <玩家名稱>　—　從你所有機器移除操作權", NamedTextColor.YELLOW));
+                return true;
+            }
+            @SuppressWarnings("deprecation")
+            final OfflinePlayer trusted = Bukkit.getOfflinePlayer(args[1]);
+            if (trusted.getUniqueId().equals(player.getUniqueId())) {
+                player.sendMessage(Component.text("你不需要取消信任自己。", NamedTextColor.YELLOW));
+                return true;
+            }
+            final int count = this.plugin.getMachineService().untrustAllMachines(player.getUniqueId(), trusted.getUniqueId());
+            if (count == 0) {
+                player.sendMessage(Component.text((trusted.getName() != null ? trusted.getName() : args[1]) + " 不在你任何機器的信任清單中。", NamedTextColor.YELLOW));
+            } else {
+                player.sendMessage(Component.text("✔ 已從 " + count + " 台機器移除 " + (trusted.getName() != null ? trusted.getName() : args[1]) + " 的操作權。", NamedTextColor.GREEN));
+            }
+            return true;
+        }
+
         if (args[0].equalsIgnoreCase("trustlist")) {
             if (!(sender instanceof Player player)) {
                 sender.sendMessage(Component.text("只有玩家可以查看信任清單。", NamedTextColor.RED));
@@ -458,7 +510,7 @@ public final class TechCommand implements CommandExecutor, TabCompleter {
                                                 @NotNull final String alias,
                                                 @NotNull final String[] args) {
         if (args.length == 1) {
-            return List.of("book", "wrench", "research", "planet", "list", "stats", "xp", "achievements", "title", "search", "give", "trust", "untrust", "trustlist", "reload");
+            return List.of("book", "wrench", "research", "planet", "list", "stats", "xp", "achievements", "title", "search", "give", "trust", "untrust", "trustall", "untrustall", "trustlist", "reload");
         }
         if (args.length == 2 && args[0].equalsIgnoreCase("wrench")) {
             return List.of("get");
@@ -504,7 +556,8 @@ public final class TechCommand implements CommandExecutor, TabCompleter {
             }
             return names;
         }
-        if (args.length == 2 && (args[0].equalsIgnoreCase("trust") || args[0].equalsIgnoreCase("untrust"))) {
+        if (args.length == 2 && (args[0].equalsIgnoreCase("trust") || args[0].equalsIgnoreCase("untrust")
+                || args[0].equalsIgnoreCase("trustall") || args[0].equalsIgnoreCase("untrustall"))) {
             final List<String> names = new ArrayList<>();
             for (final Player player : Bukkit.getOnlinePlayers()) {
                 names.add(player.getName());

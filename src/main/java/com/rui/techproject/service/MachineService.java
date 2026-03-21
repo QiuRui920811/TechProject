@@ -390,6 +390,32 @@ public final class MachineService {
         return this.machines.get(LocationKey.from(block.getLocation()));
     }
 
+    public int trustAllMachines(final UUID owner, final UUID trusted) {
+        int count = 0;
+        for (final PlacedMachine machine : this.machines.values()) {
+            if (machine.owner().equals(owner) && !machine.isTrusted(trusted)) {
+                machine.addTrusted(trusted);
+                count++;
+            }
+        }
+        return count;
+    }
+
+    public int untrustAllMachines(final UUID owner, final UUID trusted) {
+        int count = 0;
+        for (final PlacedMachine machine : this.machines.values()) {
+            if (machine.owner().equals(owner) && machine.isTrusted(trusted)) {
+                machine.removeTrusted(trusted);
+                count++;
+            }
+        }
+        return count;
+    }
+
+    public long countMachinesOwnedBy(final UUID owner) {
+        return this.machines.values().stream().filter(m -> m.owner().equals(owner)).count();
+    }
+
     public void openMachineMenu(final Player player, final Block block) {
         final LocationKey key = LocationKey.from(block.getLocation());
         this.openMachineMenu(player, key);
