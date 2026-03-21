@@ -260,6 +260,64 @@ public final class BlueprintService {
         return null;
     }
 
+    /**
+     * 偵測是否有某個藍圖「幾乎匹配」但因為機器物品被放到原版材料槽而失敗。
+     * 回傳被誤放的機器物品的顯示名稱列表（例如 ["科技熔爐"]），若無衝突則回傳空列表。
+     */
+    public List<String> detectMachineItemMisuse(final ItemStack[] matrix) {
+        if (matrix == null || matrix.length < 9) {
+            return List.of();
+        }
+        for (final BlueprintEntry entry : this.entries.values()) {
+            if (!entry.registerRecipe() || entry.shape().isEmpty() || entry.ingredientSection() == null) {
+                continue;
+            }
+            final List<String> misused = this.findMisusedMachineItems(entry, matrix);
+            if (!misused.isEmpty()) {
+                return misused;
+            }
+        }
+        return List.of();
+    }
+
+    /**
+     * 對單一藍圖檢查：是否所有格子都匹配或僅因「機器物品放到原版材料格」而失敗。
+     * 若確認是此情況，回傳被誤放的機器顯示名稱；否則回傳空列表。
+     */
+    private List<String> findMisusedMachineItems(final BlueprintEntry entry, final ItemStack[] matrix) {
+        final List<String> misused = new ArrayList<>();
+        boolean hasMisuse = false;
+        for (int row = 0; row < 3; row++) {
+            final String shapeRow = entry.shape().size() > row ? entry.shape().get(row) : "";
+            for (int column = 0; column < 3; column++) {
+                final char symbol = shapeRow.length() > column ? shapeRow.charAt(column) : ' ';
+                final ItemStack stack = matrix[(row * 3) + column];
+                if (this.matchesSymbol(entry, symbol, stack)) {
+                    continue;
+                }
+                // 不匹配 — 檢查是否因為機器物品被放到原版材料格
+                if (symbol == ' ' || stack == null || stack.getType() == Material.AIR) {
+                    return List.of();
+                }
+                final String machineId = this.itemFactory.getMachineId(stack);
+                if (machineId == null) {
+                    return List.of();
+                }
+                // 配方格期望原版材料，但玩家放了機器物品 → 誤用
+                final String token = this.normalize(entry.ingredientSection().getString(String.valueOf(symbol), "AIR"));
+                if (!token.startsWith("tech:") && !token.startsWith("machine:")) {
+                    final MachineDefinition machineDef = this.registry.getMachine(machineId);
+                    final String name = machineDef != null ? machineDef.displayName() : machineId;
+                    misused.add(name);
+                    hasMisuse = true;
+                } else {
+                    return List.of();
+                }
+            }
+        }
+        return hasMisuse ? misused : List.of();
+    }
+
     private boolean matches(final BlueprintEntry entry, final ItemStack[] matrix) {
         for (int row = 0; row < 3; row++) {
             final String shapeRow = entry.shape().size() > row ? entry.shape().get(row) : "";
@@ -323,7 +381,15 @@ public final class BlueprintService {
         }
         final String materialToken = token.startsWith("vanilla:") ? token.substring(8) : token;
         final Material material = Material.matchMaterial(materialToken.toUpperCase(Locale.ROOT));
-        return material == null ? this.itemFactory.displayNameForId(materialToken) : this.itemFactory.displayNameForMaterial(material);
+        if (material == null) {
+            return this.itemFactory.displayNameForId(materialToken);
+        }
+        final String displayName = this.itemFactory.displayNameForMaterial(material);
+        // 如果同名機器存在，加上「原版」標記避免混淆（例如 熔爐 vs 科技熔爐）
+        if (this.registry.getMachine(materialToken) != null) {
+            return displayName + "（原版）";
+        }
+        return displayName;
     }
 
     private String normalize(final String input) {

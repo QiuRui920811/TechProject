@@ -618,9 +618,14 @@ public final class TechListener implements Listener {
                 : null;
         if (match == null) {
             if (this.containsTaggedTechMaterial(craftingInventory.getMatrix())) {
-                craftingInventory.setResult(this.plugin.getBlueprintService().isAdvancedWorkbench(craftingInventory.getLocation())
-                        ? this.invalidTechProcessingResult()
-                        : this.isolatedTechMaterialResult());
+                final var misused = this.plugin.getBlueprintService().detectMachineItemMisuse(craftingInventory.getMatrix());
+                if (!misused.isEmpty()) {
+                    craftingInventory.setResult(this.machineItemMisuseResult(misused));
+                } else {
+                    craftingInventory.setResult(this.plugin.getBlueprintService().isAdvancedWorkbench(craftingInventory.getLocation())
+                            ? this.invalidTechProcessingResult()
+                            : this.isolatedTechMaterialResult());
+                }
             }
             return;
         }
@@ -2012,6 +2017,22 @@ public final class TechListener implements Listener {
                 this.plugin.getItemFactory().muted("帶有科技標記的物品已與原版合成鏈分離"),
                 this.plugin.getItemFactory().muted("請改用科技機器或對應科技藍圖處理")
         ));
+        stack.setItemMeta(meta);
+        return stack;
+    }
+
+    private ItemStack machineItemMisuseResult(final java.util.List<String> misusedNames) {
+        final ItemStack stack = this.plugin.getItemFactory().tagGuiPlaceholder(new ItemStack(Material.BARRIER));
+        final ItemMeta meta = stack.getItemMeta();
+        meta.displayName(this.plugin.getItemFactory().danger("放入了科技機器，但配方要原版方塊"));
+        final java.util.List<net.kyori.adventure.text.Component> lore = new java.util.ArrayList<>();
+        lore.add(this.plugin.getItemFactory().muted("你放的是科技機器物品："));
+        for (final String name : misusedNames) {
+            lore.add(this.plugin.getItemFactory().muted("  ▸ " + name + "（科技版）"));
+        }
+        lore.add(this.plugin.getItemFactory().muted("配方需要的是原版方塊（用圓石等原版材料製作的）"));
+        lore.add(this.plugin.getItemFactory().muted("請用原版合成台 crafting 取得後再放入"));
+        meta.lore(lore);
         stack.setItemMeta(meta);
         return stack;
     }
