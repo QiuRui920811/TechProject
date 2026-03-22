@@ -6078,8 +6078,8 @@ public final class MachineService {
     }
 
     private ItemStack recipeInfo(final MachineRecipe recipe) {
-        final Material icon = this.resolveRecipeIconMaterial(recipe.outputId());
-        return this.info(icon, this.itemFactory.displayNameForId(recipe.outputId()), List.of(
+        return this.info(this.resolveRecipeIconStack(recipe.outputId()),
+                this.itemFactory.displayNameForId(recipe.outputId()), List.of(
             "輸入：" + this.itemFactory.joinDisplayNames(recipe.inputIds(), " + "),
             "輸出：" + this.itemFactory.displayNameForId(recipe.outputId()),
                 "耗能：" + recipe.energyCost() + " EU",
@@ -6089,19 +6089,16 @@ public final class MachineService {
     }
 
     /**
-     * 根據配方輸出 ID 解析其對應圖示材質，用於配方列表中取代 PAPER。
+     * 根據配方輸出 ID 解析其對應圖示 ItemStack（含正確的 item-model / Nexo 模型），
+     * 用於配方列表中取代純 Material 建構。
      */
-    private Material resolveRecipeIconMaterial(final String outputId) {
-        final var techItem = this.registry.getItem(outputId);
-        if (techItem != null && techItem.icon() != null && techItem.icon() != Material.AIR) {
-            return techItem.icon();
+    private ItemStack resolveRecipeIconStack(final String outputId) {
+        final ItemStack full = this.buildStackForId(outputId);
+        if (full != null) {
+            full.setAmount(1);
+            return full;
         }
-        final var machine = this.registry.getMachine(outputId);
-        if (machine != null && machine.blockMaterial() != null && machine.blockMaterial() != Material.AIR) {
-            return machine.blockMaterial();
-        }
-        final Material vanilla = Material.matchMaterial(outputId.toUpperCase());
-        return vanilla != null && vanilla != Material.AIR ? vanilla : Material.PAPER;
+        return new ItemStack(Material.PAPER);
     }
 
     private void showRecipeDetail(final Player player, final LocationKey key, final String recipeId, final int backPage) {
@@ -6141,7 +6138,7 @@ public final class MachineService {
         inventory.setItem(25, this.sectionPane(this.recipeAccentPane(theme), "→", List.of()));
         inventory.setItem(32, this.sectionPane(this.recipeOutputPane(theme), "產出", List.of("完成後會進入輸出槽")));
         inventory.setItem(33, this.recipeResultStack(recipe.outputId()));
-        inventory.setItem(42, this.info(this.resolveRecipeIconMaterial(recipe.outputId()), "配方說明", List.of(
+        inventory.setItem(42, this.info(this.resolveRecipeIconStack(recipe.outputId()), "配方說明", List.of(
             "輸入：" + this.itemFactory.joinDisplayNames(recipe.inputIds(), " + "),
             "輸出：" + this.itemFactory.displayNameForId(recipe.outputId()),
             this.describeRecipeFlow(recipe)
@@ -6172,6 +6169,20 @@ public final class MachineService {
             ));
         }
         final ItemStack stack = new ItemStack(this.itemFactory.safeItemMaterial(material));
+        final ItemMeta meta = stack.getItemMeta();
+        meta.displayName(this.itemFactory.warning(title));
+        meta.lore(this.itemFactory.mutedLore(lines));
+        this.itemFactory.applyGuiHudModel(meta, stack.getType(), true);
+        stack.setItemMeta(meta);
+        return this.itemFactory.tagGuiPlaceholder(stack);
+    }
+
+    /**
+     * 以已帶有正確 item-model 的 ItemStack 為基底建立資訊欄位，
+     * 覆寫其 displayName / lore 但保留原始材質與模型。
+     */
+    private ItemStack info(final ItemStack baseStack, final String title, final List<String> lines) {
+        final ItemStack stack = baseStack.clone();
         final ItemMeta meta = stack.getItemMeta();
         meta.displayName(this.itemFactory.warning(title));
         meta.lore(this.itemFactory.mutedLore(lines));
