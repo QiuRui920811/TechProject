@@ -806,7 +806,7 @@ blueprints:
       G: GLASS
       B: BUCKET
       K: CAULDRON
-      C: tech:copper_ingot
+      C: COPPER_INGOT
       I: IRON_INGOT
       R: REDSTONE
     tutorial:
@@ -826,7 +826,7 @@ blueprints:
       I: PACKED_ICE
       S: tech:steel_plate
       K: CAULDRON
-      C: tech:copper_ingot
+      C: COPPER_INGOT
       P: PISTON
     tutorial:
       - 先準備冰磚、鋼板、鍋釜、銅錠與活塞。

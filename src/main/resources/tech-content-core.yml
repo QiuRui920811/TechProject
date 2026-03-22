@@ -489,10 +489,10 @@ items:
     icon: COPPER_INGOT
     # item-model: techproject:item/copper_ingot
     # nexo-id: copper_ingot
-    description: "科技系統使用的銅錠，需透過科技熔爐把銅粉加工而成，與原版銅錠分流。"
+    description: "科技系統使用的銅錠。可用科技熔爐把銅粉加工取得，也可直接使用原版銅錠替代。"
     unlock: "furnace"
     use-cases:
-      - "銅粉 → 科技熔爐 → 科技銅錠"
+      - "銅粉 → 科技熔爐 → 銅錠（原版銅錠亦可替代）"
       - "電路製作"
       - "機器外殼"
   coal_dust:

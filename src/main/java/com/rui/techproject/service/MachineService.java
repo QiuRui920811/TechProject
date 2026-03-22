@@ -2945,7 +2945,12 @@ public final class MachineService {
         final long breedInterval = 120L;
         if (machine.ticksActive() % breedInterval != 0L) {
             final long remaining = breedInterval - (machine.ticksActive() % breedInterval);
-            this.setRuntimeState(machine, MachineRuntimeState.RUNNING, "繁殖冷卻中（" + remaining + "秒）");
+            final int usesANow = this.itemFactory.getChickenUses(machine.inputAt(parentSlotA));
+            final int usesBNow = this.itemFactory.getChickenUses(machine.inputAt(parentSlotB));
+            final int maxBreedNow = com.rui.techproject.service.ChickenGeneticsService.MAX_BREED_USES;
+            final int minRemainNow = Math.min(maxBreedNow - usesANow, maxBreedNow - usesBNow);
+            this.setRuntimeState(machine, MachineRuntimeState.RUNNING,
+                    "冷卻 " + remaining + "s ┃ 壽命 " + minRemainNow + "/" + maxBreedNow);
             return;
         }
         // 檢查親代壽命
@@ -3038,8 +3043,13 @@ public final class MachineService {
                 final String resName = this.chickenGenetics.resourceNameZh(dna);
                 final int percent = (int) (machine.chickenProgress() * 100);
                 final int remainingUses = maxUses - currentUses;
+                // 計算可讀速率：rate 是每 tick（秒），先算出幾秒產一次
+                final long secPerCycle = Math.round(1.0 / rate);
+                final String speedLabel = secPerCycle <= 60
+                        ? secPerCycle + "s/個"
+                        : (secPerCycle / 60) + "m" + (secPerCycle % 60) + "s/個";
                 this.setRuntimeState(machine, MachineRuntimeState.RUNNING,
-                        "激發中：" + resName + " " + percent + "% ┃ 壽命 " + remainingUses + "/" + maxUses);
+                        "激發：" + resName + " " + percent + "% ┃ " + speedLabel + " ┃ 壽命 " + remainingUses + "/" + maxUses);
                 return;
             }
             // 進度到達 1.0 → 產出資源
@@ -6068,13 +6078,30 @@ public final class MachineService {
     }
 
     private ItemStack recipeInfo(final MachineRecipe recipe) {
-        return this.info(Material.PAPER, this.itemFactory.displayNameForId(recipe.outputId()), List.of(
+        final Material icon = this.resolveRecipeIconMaterial(recipe.outputId());
+        return this.info(icon, this.itemFactory.displayNameForId(recipe.outputId()), List.of(
             "輸入：" + this.itemFactory.joinDisplayNames(recipe.inputIds(), " + "),
             "輸出：" + this.itemFactory.displayNameForId(recipe.outputId()),
                 "耗能：" + recipe.energyCost() + " EU",
                 this.describeRecipeFlow(recipe),
                 "提示：條件不足、輸出滿格或能量不足時不會生產"
         ));
+    }
+
+    /**
+     * 根據配方輸出 ID 解析其對應圖示材質，用於配方列表中取代 PAPER。
+     */
+    private Material resolveRecipeIconMaterial(final String outputId) {
+        final var techItem = this.registry.getItem(outputId);
+        if (techItem != null && techItem.icon() != null && techItem.icon() != Material.AIR) {
+            return techItem.icon();
+        }
+        final var machine = this.registry.getMachine(outputId);
+        if (machine != null && machine.blockMaterial() != null && machine.blockMaterial() != Material.AIR) {
+            return machine.blockMaterial();
+        }
+        final Material vanilla = Material.matchMaterial(outputId.toUpperCase());
+        return vanilla != null && vanilla != Material.AIR ? vanilla : Material.PAPER;
     }
 
     private void showRecipeDetail(final Player player, final LocationKey key, final String recipeId, final int backPage) {
@@ -6114,7 +6141,7 @@ public final class MachineService {
         inventory.setItem(25, this.sectionPane(this.recipeAccentPane(theme), "→", List.of()));
         inventory.setItem(32, this.sectionPane(this.recipeOutputPane(theme), "產出", List.of("完成後會進入輸出槽")));
         inventory.setItem(33, this.recipeResultStack(recipe.outputId()));
-        inventory.setItem(42, this.info(Material.PAPER, "配方說明", List.of(
+        inventory.setItem(42, this.info(this.resolveRecipeIconMaterial(recipe.outputId()), "配方說明", List.of(
             "輸入：" + this.itemFactory.joinDisplayNames(recipe.inputIds(), " + "),
             "輸出：" + this.itemFactory.displayNameForId(recipe.outputId()),
             this.describeRecipeFlow(recipe)
