@@ -13,6 +13,7 @@ import com.rui.techproject.util.LocationKey;
 import com.rui.techproject.util.SafeScheduler;
 import com.rui.techproject.util.ItemFactoryUtil;
 import net.kyori.adventure.bossbar.BossBar;
+import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
@@ -68,6 +69,10 @@ import org.bukkit.configuration.file.YamlConfiguration;
 public final class MachineService {
     private static final String MACHINE_TITLE_PREFIX = "機器:";
     private static final String RECIPE_TITLE_PREFIX = "機器配方:";
+    private static final Key MACHINE_MENU_FONT = Key.key("minecraft", "techproject_machine");
+    private static final String MACHINE_MENU_SHIFT = "\uF102";
+    private static final String MACHINE_MENU_GLYPH = "\uF005";
+    private static final String MACHINE_MENU_HUD = MACHINE_MENU_SHIFT + MACHINE_MENU_GLYPH;
     private static final int[] INPUT_SLOTS = {0, 1, 2, 3, 4, 5, 6, 7, 8};
     private static final int[] OUTPUT_SLOTS = {27, 28, 29, 30, 31, 32, 33, 34, 35};
     private static final int[] UPGRADE_SLOTS = {39, 40, 41};
@@ -1120,7 +1125,8 @@ public final class MachineService {
         }
 
         final MachineGuiTheme theme = this.resolveMachineGuiTheme(definition.id());
-        final Inventory inventory = Bukkit.createInventory(null, 45, this.itemFactory.hex(MACHINE_TITLE_PREFIX + this.itemFactory.displayNameForId(definition.id()), this.titleColor(theme)));
+        final Inventory inventory = Bukkit.createInventory(null, 45,
+                this.machineMenuTitle(MACHINE_TITLE_PREFIX + this.itemFactory.displayNameForId(definition.id())));
         this.decorateMachineMenu(inventory, machine, definition);
         this.renderMachineStorageSlots(inventory, machine, definition);
         this.trackViewOpen(player.getUniqueId(), key, new MachineViewSession(key, ViewMode.MAIN, 0, inventory));
@@ -1141,7 +1147,8 @@ public final class MachineService {
         final int maxPage = Math.max(0, (recipes.size() - 1) / 21);
         final int safePage = Math.max(0, Math.min(maxPage, page));
         final MachineGuiTheme theme = this.resolveMachineGuiTheme(definition.id());
-        final Inventory inventory = Bukkit.createInventory(null, 54, this.itemFactory.hex(RECIPE_TITLE_PREFIX + this.itemFactory.displayNameForId(definition.id()) + " • P" + (safePage + 1), this.titleColor(theme)));
+        final Inventory inventory = Bukkit.createInventory(null, 54,
+                this.machineMenuTitle(RECIPE_TITLE_PREFIX + this.itemFactory.displayNameForId(definition.id()) + " • P" + (safePage + 1)));
         this.decorateMachineRecipeMenu(inventory, theme, safePage, maxPage);
         final int[] slots = {19, 20, 21, 22, 23, 24, 25, 28, 29, 30, 31, 32, 33, 34, 37, 38, 39, 40, 41, 42, 43};
         final int start = safePage * slots.length;
@@ -1162,7 +1169,8 @@ public final class MachineService {
     }
 
     public boolean isMachineView(final String title) {
-        return title.startsWith(MACHINE_TITLE_PREFIX) || title.startsWith(RECIPE_TITLE_PREFIX);
+        return title.contains(MACHINE_TITLE_PREFIX) || title.contains(RECIPE_TITLE_PREFIX)
+                || title.contains(MACHINE_MENU_GLYPH);
     }
 
     public void closeMachineView(final Player player, final Inventory inventory) {
@@ -6186,7 +6194,8 @@ public final class MachineService {
         if (recipe == null) {
             return;
         }
-        final Inventory inventory = Bukkit.createInventory(null, 54, this.itemFactory.hex(RECIPE_TITLE_PREFIX + this.itemFactory.displayNameForId(recipe.outputId()), this.titleColor(theme)));
+        final Inventory inventory = Bukkit.createInventory(null, 54,
+                this.machineMenuTitle(RECIPE_TITLE_PREFIX + this.itemFactory.displayNameForId(recipe.outputId())));
         this.decorateMachineRecipeDetailMenu(inventory, theme);
         inventory.setItem(4, this.info(this.recipeBookMaterial(theme), this.itemFactory.displayNameForId(recipe.outputId()), List.of(
             "機器：" + this.itemFactory.displayNameForId(recipe.machineId()),
@@ -7987,6 +7996,10 @@ public final class MachineService {
             return MachineGuiTheme.BIOTECH;
         }
         return MachineGuiTheme.PROCESSOR;
+    }
+
+    private Component machineMenuTitle(final String label) {
+        return Component.text(MACHINE_MENU_HUD, NamedTextColor.WHITE).font(MACHINE_MENU_FONT);
     }
 
     private String titleColor(final MachineGuiTheme theme) {
