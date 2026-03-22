@@ -6409,7 +6409,13 @@ public final class MachineService {
         if (machineId != null && !machineId.isBlank()) {
             return "machine:" + this.normalizeId(machineId);
         }
-        return "vanilla:" + this.resolveVanillaAlias(stack.getType());
+        // 原版物品：若 vanilla alias 對應到已註冊的 tech item，則回傳 tech: key，
+        // 這樣原版小麥和自動農場的「作物」tech item 都能匹配同一個配方 key。
+        final String alias = this.resolveVanillaAlias(stack.getType());
+        if (this.registry.getItem(alias) != null) {
+            return "tech:" + alias;
+        }
+        return "vanilla:" + alias;
     }
 
     private String normalizeRecipeInputKey(final String input) {
@@ -6417,14 +6423,16 @@ public final class MachineService {
         if (normalized.startsWith("tech:") || normalized.startsWith("machine:") || normalized.startsWith("vanilla:")) {
             return normalized;
         }
-        if (this.isVanillaBackedAlias(normalized)) {
-            return "vanilla:" + normalized;
-        }
+        // tech item 優先於 vanilla alias — crops / crop_seeds 同時是 tech item 和 vanilla 別名，
+        // 但自動農場產出的是 tech item，所以這裡必須先匹配 tech。
         if (this.registry.getItem(normalized) != null) {
             return "tech:" + normalized;
         }
         if (this.registry.getMachine(normalized) != null) {
             return "machine:" + normalized;
+        }
+        if (this.isVanillaBackedAlias(normalized)) {
+            return "vanilla:" + normalized;
         }
         return "vanilla:" + normalized;
     }
