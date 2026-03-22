@@ -129,6 +129,9 @@ public final class TechListener implements Listener {
         this.refreshJetpackFlightState(player);
         // 自動刷新背包中版本過舊的科技物品（延遲 1 tick 確保載入完成）
         this.plugin.getSafeScheduler().runEntityDelayed(player, () -> this.refreshPlayerInventory(player), 5L);
+        // 登入時延遲掃描成就，補發任何已達成但未解鎖的成就
+        this.plugin.getSafeScheduler().runEntityDelayed(player,
+                () -> this.plugin.getAchievementService().evaluate(player.getUniqueId()), 40L);
     }
 
     @EventHandler

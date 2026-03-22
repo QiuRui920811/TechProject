@@ -115,8 +115,10 @@ public final class AchievementGuiService {
 
     /**
      * 開啟成就 GUI。
+     * 開啟時先對玩家執行一次全面成就掃描，補發任何已達成但未解鎖的成就。
      */
     public void openAchievementGui(final Player player) {
+        this.plugin.getAchievementService().evaluate(player.getUniqueId());
         this.openAchievementGui(player, AchievementCategory.ALL, 0);
     }
 
