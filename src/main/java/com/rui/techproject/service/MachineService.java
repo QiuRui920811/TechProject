@@ -6761,14 +6761,12 @@ public final class MachineService {
 
     /** 判斷一台機器是否應該自動轉移輸出（物流類機器才允許）。 */
     private boolean isAutoTransferSource(final String machineId) {
+        // 只有純能源機器（不產物品）和中繼器排除，其餘所有機器都可推送產出
         return switch (machineId.toLowerCase()) {
-            case "storage_hub", "filter_router", "splitter_node", "industrial_bus",
-                 "cargo_manager", "cargo_motor", "cargo_input_node", "cargo_output_node", "trash_node",
-                 "logistics_node", "item_tube", "recycler", "vacuum_inlet",
-                 "auto_farm", "crop_harvester", "planetary_harvester", "tree_feller",
-                 "mob_collector", "fishing_dock", "greenhouse",
-                 "quarry_drill", "quarry_drill_mk2", "quarry_drill_mk3" -> true;
-            default -> false;
+            case "energy_node", "energy_cable",
+                 "solar_generator", "coal_generator", "solar_array", "storm_turbine",
+                 "fusion_reactor", "battery_bank", "chrono_engine", "entropy_chamber" -> false;
+            default -> true;
         };
     }
 
