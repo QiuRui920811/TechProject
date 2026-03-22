@@ -1,10 +1,12 @@
 package com.rui.techproject.service;
 
 import com.rui.techproject.TechProjectPlugin;
+import com.rui.techproject.model.MachineArchetype;
 import com.rui.techproject.model.MachineDefinition;
 import com.rui.techproject.model.MachineRecipe;
 import com.rui.techproject.model.MachineRuntimeState;
 import com.rui.techproject.model.PlacedMachine;
+import com.rui.techproject.model.SystemGroup;
 import com.rui.techproject.storage.StorageBackend;
 import com.rui.techproject.util.ItemStackSerializer;
 import com.rui.techproject.util.LocationKey;
@@ -290,6 +292,15 @@ public final class MachineService {
         this.progressService.unlockByRequirement(player.getUniqueId(), machineId);
         this.progressService.unlockByRequirement(player.getUniqueId(), "machine:" + machineId);
         this.progressService.incrementStat(player.getUniqueId(), "machines_placed", 1);
+        if (definition.archetype() == MachineArchetype.GENERATOR) {
+            this.progressService.incrementStat(player.getUniqueId(), "generators_placed", 1);
+        }
+        if (definition.archetype() == MachineArchetype.STORAGE) {
+            this.progressService.incrementStat(player.getUniqueId(), "storage_units_placed", 1);
+        }
+        if (definition.systemGroup() == SystemGroup.MEGASTRUCTURE) {
+            this.progressService.incrementStat(player.getUniqueId(), "megastructures_built", 1);
+        }
         final long activeMachines = this.progressService.incrementStat(player.getUniqueId(), "active_machines", 1);
         this.progressService.setStatMax(player.getUniqueId(), "max_active_machines", activeMachines);
         this.achievementService.evaluate(player.getUniqueId());
@@ -4930,6 +4941,8 @@ public final class MachineService {
                                            final ItemStack output) {
         this.storeOutput(machine, output);
         this.progressService.incrementStat(machine.owner(), definition.id() + "_cycles", output.getAmount());
+        this.progressService.incrementStat(machine.owner(), "items_crafted", output.getAmount());
+        this.progressService.incrementStat(machine.owner(), "total_processed", output.getAmount());
         this.progressService.unlockItem(machine.owner(), recipe.outputId());
         this.progressService.unlockByRequirement(machine.owner(), machine.machineId());
         this.progressService.unlockByRequirement(machine.owner(), "machine:" + machine.machineId());
@@ -4989,6 +5002,8 @@ public final class MachineService {
                 this.consumeRecipeInputs(machine, recipe);
                 this.storeOutput(machine, output);
                 this.progressService.incrementStat(machine.owner(), statKey, output.getAmount());
+                this.progressService.incrementStat(machine.owner(), "items_crafted", output.getAmount());
+                this.progressService.incrementStat(machine.owner(), "total_processed", output.getAmount());
                 this.progressService.unlockItem(machine.owner(), recipe.outputId());
                 this.progressService.unlockByRequirement(machine.owner(), machine.machineId());
                 this.progressService.unlockByRequirement(machine.owner(), "machine:" + machine.machineId());

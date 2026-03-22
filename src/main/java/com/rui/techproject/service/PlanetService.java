@@ -3708,6 +3708,7 @@ public final class PlanetService {
                         if (!player.isValid() || player.getWorld() != targetWorld) {
                             return;
                         }
+                        this.plugin.getPlayerProgressService().incrementStat(player.getUniqueId(), "planets_visited", 1);
                         player.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 16, 0, false, false, true));
                         player.addPotionEffect(new PotionEffect(PotionEffectType.DARKNESS, 20, 0, false, false, true));
                         this.showTravelTitle(player,

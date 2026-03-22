@@ -1681,6 +1681,7 @@ public final class TechBookService {
         } else if (!this.progressService.spendTechXp(uuid, cost)) {
             player.sendMessage(this.itemFactory.warning("研究點不足，需要 " + cost + "。"));
         } else {
+            this.progressService.incrementStat(uuid, "research_spent", cost);
             switch (kind) {
                 case "item" -> {
                     this.progressService.unlockItem(uuid, id);

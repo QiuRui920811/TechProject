@@ -12,6 +12,30 @@
 - 打開成就選單（`/tech achievements`）時，系統會自動掃描所有成就並補發已達成但未解鎖的項目
 - 玩家登入時也會延遲 2 秒自動檢查一次，確保離線期間達成的條件不會漏掉
 
+### 🐛 成就統計遺漏大修
+
+修復 **8 個成就統計值從未被追蹤** 的嚴重 bug，導致大量成就永遠無法解鎖：
+
+| 成就 | 統計鍵 | 問題 |
+|------|--------|------|
+| 合成學徒 | `items_crafted` | 從未遞增 |
+| 初始電力 | `generators_placed` | 從未遞增 |
+| 首次研究 | `research_spent` | 從未遞增 |
+| 冶煉先行 | `smelter_cycles` | 機器 ID 是 smeltery，但查詢 smelter → 永遠 0 |
+| 加工里程碑 ×3 | `total_processed` | 從未遞增 |
+| 儲存大師 | `storage_units_placed` | 從未遞增 |
+| 果園管理員 | `crop_varieties` | 從未遞增 |
+| 首次造訪星球 | `planets_visited` | 從未遞增 |
+| 巨構建造者 | `megastructures_built` | 從未遞增 |
+
+修復內容：
+- 在配方完成時遞增 `items_crafted` 和 `total_processed`（手動 + 自動管線）
+- 在放置機器時根據類型遞增 `generators_placed`、`storage_units_placed`、`megastructures_built`
+- 在研究科技時遞增 `research_spent`
+- 在抵達星球時遞增 `planets_visited`
+- 修正 `smelter_cycles` → `smeltery_cycles` 的名稱不匹配
+- 所有成就條件新增**回溯判定**：基於玩家已解鎖的物品/機器數量推斷歷史成就，現有玩家重新登入或開選單即可自動補發
+
 ### 📦 貨物輸出節點
 
 - 新增 **貨物輸出節點** `cargo_output_node` — 自動將產線物品推送到相鄰原版容器（箱子/桶/漏斗/熔爐等）
