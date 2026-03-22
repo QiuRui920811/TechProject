@@ -7271,49 +7271,132 @@ public final class MachineService {
     }
 
     // ══════════════════════ 基因雞工程專屬 GUI ══════════════════════
+    //
+    // 各機器在 row 2 (slots 20-24) 有獨特中央帶，row 4 (slots 39-41) 有不同形狀：
+    //   定序儀 — 39-41 空白（實驗室留白）
+    //   雞  舍 — 40 置中提示（巢穴焦點）
+    //   激發室 — 39+40+41 三格能量條
+    //   剪接台 — 39+41 對稱指標（40 留空）
 
     private void decorateGeneticSequencerMenu(final Inventory inventory, final PlacedMachine machine, final MachineDefinition definition) {
         this.decorateMinimalMachineMenu(inventory, machine, definition,
-                Material.WHITE_STAINED_GLASS_PANE,   // input: 乾淨白色（DNA 實驗室風格）
-                Material.LIGHT_GRAY_STAINED_GLASS_PANE, // center: 淺灰（儀器）
-                Material.LIME_STAINED_GLASS_PANE,    // output: 螢光綠（定序完成）
-                Material.CYAN_STAINED_GLASS_PANE,    // upgrade: 青色（分析模組）
-                Material.GLOW_INK_SAC);              // recipe: 螢光墨囊（DNA 分析）
-        this.applyIdentityBand(inventory, Material.LIGHT_GRAY_STAINED_GLASS_PANE,
-                "◇", "◇", "未知雞", "→", "DNA 分析", "→", "基因圖譜");
+                Material.WHITE_STAINED_GLASS_PANE,
+                Material.LIGHT_GRAY_STAINED_GLASS_PANE,
+                Material.LIME_STAINED_GLASS_PANE,
+                Material.CYAN_STAINED_GLASS_PANE,
+                Material.GLOW_INK_SAC);
+        // ── row 1：掃描資訊 ──
+        inventory.setItem(12, this.info(Material.SPYGLASS, "掃描進度", List.of(
+                "將未知的雞放入輸入欄",
+                "定序儀會自動掃描 DNA",
+                "完成後輸出基因圖譜")));
+        inventory.setItem(15, this.info(Material.EXPERIENCE_BOTTLE, "分析品質", List.of(
+                "升級分析模組可提升品質",
+                "高品質能解鎖稀有基因型",
+                "精密基因需多輪定序")));
+        // ── row 2：◈ 樣本 ▸ 核心 ▸ ◈ 圖譜 ──
+        inventory.setItem(20, this.sectionPane(Material.WHITE_STAINED_GLASS_PANE, "◈ 樣本", List.of()));
+        inventory.setItem(21, this.sectionPane(Material.LIGHT_GRAY_STAINED_GLASS_PANE, "▸", List.of()));
+        inventory.setItem(22, this.info(Material.GLOW_INK_SAC, "DNA 定序核心", List.of(
+                "核心分析區",
+                "逐步解碼雞的基因序列")));
+        inventory.setItem(23, this.sectionPane(Material.LIGHT_GRAY_STAINED_GLASS_PANE, "▸", List.of()));
+        inventory.setItem(24, this.sectionPane(Material.LIME_STAINED_GLASS_PANE, "◈ 圖譜", List.of()));
+        // ── row 4：留白（乾淨實驗室風格）──
     }
 
     private void decoratePrivateCoopMenu(final Inventory inventory, final PlacedMachine machine, final MachineDefinition definition) {
         this.decorateMinimalMachineMenu(inventory, machine, definition,
-                Material.YELLOW_STAINED_GLASS_PANE,  // input: 暖黃（稻草/雞舍）
-                Material.BROWN_STAINED_GLASS_PANE,   // center: 棕色（木質雞舍）
-                Material.ORANGE_STAINED_GLASS_PANE,  // output: 橙色（蛋/後代）
-                Material.GREEN_STAINED_GLASS_PANE,   // upgrade: 綠色（培育升級）
-                Material.EGG);                       // recipe: 雞蛋
-        this.applyIdentityBand(inventory, Material.BROWN_STAINED_GLASS_PANE,
-                "🐔", "🐔", "親代", "→", "孵化", "→", "後代");
+                Material.YELLOW_STAINED_GLASS_PANE,
+                Material.BROWN_STAINED_GLASS_PANE,
+                Material.ORANGE_STAINED_GLASS_PANE,
+                Material.GREEN_STAINED_GLASS_PANE,
+                Material.EGG);
+        // ── row 1：飼育 / 後代資訊 ──
+        inventory.setItem(12, this.info(Material.WHEAT_SEEDS, "飼育品質", List.of(
+                "投入飼料可加速孵化",
+                "不同飼料影響後代品質",
+                "升級雞舍提升整體效率")));
+        inventory.setItem(15, this.info(Material.FEATHER, "後代特徵", List.of(
+                "後代會繼承親代部分基因",
+                "每次孵化結果隨機",
+                "稀有親代有更高機率出好苗")));
+        // ── row 2：♀ 親代 ♥ 孵化巢 ♥ ♂ 後代 ──
+        inventory.setItem(20, this.sectionPane(Material.YELLOW_STAINED_GLASS_PANE, "♀ 親代", List.of()));
+        inventory.setItem(21, this.sectionPane(Material.BROWN_STAINED_GLASS_PANE, "♥", List.of()));
+        inventory.setItem(22, this.info(Material.HAY_BLOCK, "孵化巢", List.of(
+                "溫暖的巢穴",
+                "親代在此孵化下一代")));
+        inventory.setItem(23, this.sectionPane(Material.BROWN_STAINED_GLASS_PANE, "♥", List.of()));
+        inventory.setItem(24, this.sectionPane(Material.ORANGE_STAINED_GLASS_PANE, "♂ 後代", List.of()));
+        // ── row 4：置中孵化提示 ──
+        inventory.setItem(40, this.info(Material.EGG, "孵化小提示", List.of(
+                "親代品質越高越好",
+                "孵化時間受雞舍等級影響",
+                "升級欄可放培育增幅模組")));
     }
 
     private void decorateExcitationChamberMenu(final Inventory inventory, final PlacedMachine machine, final MachineDefinition definition) {
         this.decorateMinimalMachineMenu(inventory, machine, definition,
-                Material.MAGENTA_STAINED_GLASS_PANE, // input: 洋紅（能量激發）
-                Material.PURPLE_STAINED_GLASS_PANE,  // center: 紫色（激發核心）
-                Material.PINK_STAINED_GLASS_PANE,    // output: 粉紅（資源產出）
-                Material.RED_STAINED_GLASS_PANE,     // upgrade: 紅色（激發強化）
-                Material.GLOWSTONE_DUST);            // recipe: 螢光粉（能量激發）
-        this.applyIdentityBand(inventory, Material.PURPLE_STAINED_GLASS_PANE,
-                "⚡", "⚡", "基因雞", "→", "激發", "→", "資源");
+                Material.MAGENTA_STAINED_GLASS_PANE,
+                Material.PURPLE_STAINED_GLASS_PANE,
+                Material.PINK_STAINED_GLASS_PANE,
+                Material.RED_STAINED_GLASS_PANE,
+                Material.GLOWSTONE_DUST);
+        // ── row 1：能量狀態 ──
+        inventory.setItem(12, this.info(Material.REDSTONE, "能量狀態", List.of(
+                "持續供應能量以激發基因雞",
+                "不同雞種產出不同資源",
+                "輸出升級可提升產量")));
+        inventory.setItem(15, this.info(Material.GLOWSTONE_DUST, "激發頻率", List.of(
+                "每次激發消耗一定能量",
+                "升級可加快激發速度",
+                "連續激發效率最高")));
+        // ── row 2：⚡ 投入 ~ 激發核心 ~ ⚡ 產出 ──
+        inventory.setItem(20, this.sectionPane(Material.MAGENTA_STAINED_GLASS_PANE, "⚡ 投入", List.of()));
+        inventory.setItem(21, this.sectionPane(Material.PURPLE_STAINED_GLASS_PANE, "~", List.of()));
+        inventory.setItem(22, this.info(Material.GLOWSTONE, "激發核心", List.of(
+                "能量轉化中心",
+                "將基因能量轉為資源")));
+        inventory.setItem(23, this.sectionPane(Material.PURPLE_STAINED_GLASS_PANE, "~", List.of()));
+        inventory.setItem(24, this.sectionPane(Material.PINK_STAINED_GLASS_PANE, "⚡ 產出", List.of()));
+        // ── row 4：三格能量指示條 ──
+        inventory.setItem(39, this.sectionPane(Material.RED_STAINED_GLASS_PANE, "◆", List.of()));
+        inventory.setItem(40, this.sectionPane(Material.MAGENTA_STAINED_GLASS_PANE, "能量指示", List.of()));
+        inventory.setItem(41, this.sectionPane(Material.RED_STAINED_GLASS_PANE, "◆", List.of()));
     }
 
     private void decorateGeneSplicerMenu(final Inventory inventory, final PlacedMachine machine, final MachineDefinition definition) {
         this.decorateMinimalMachineMenu(inventory, machine, definition,
-                Material.CYAN_STAINED_GLASS_PANE,    // input: 青色（生物工程）
-                Material.LIGHT_BLUE_STAINED_GLASS_PANE, // center: 淺藍（精密操作）
-                Material.LIME_STAINED_GLASS_PANE,    // output: 螢光綠（切片結果）
-                Material.GREEN_STAINED_GLASS_PANE,   // upgrade: 綠色（精密升級）
-                Material.SHEARS);                    // recipe: 剪刀（基因切片）
-        this.applyIdentityBand(inventory, Material.LIGHT_BLUE_STAINED_GLASS_PANE,
-                "✂", "✂", "DNA", "→", "切片", "→", "基因組");
+                Material.CYAN_STAINED_GLASS_PANE,
+                Material.LIGHT_BLUE_STAINED_GLASS_PANE,
+                Material.LIME_STAINED_GLASS_PANE,
+                Material.GREEN_STAINED_GLASS_PANE,
+                Material.SHEARS);
+        // ── row 1：精度 / 藍圖資訊 ──
+        inventory.setItem(12, this.info(Material.SHEARS, "剪接精度", List.of(
+                "精密切割可提升成功率",
+                "失敗時可能損失樣本",
+                "精密升級降低損耗風險")));
+        inventory.setItem(15, this.info(Material.PAPER, "基因藍圖", List.of(
+                "切片完成的基因組",
+                "可用於後續育種或定序",
+                "高級基因組需多次剪接")));
+        // ── row 2：✂ DNA ╌ 剪接台 ╌ ✂ 基因組 ──
+        inventory.setItem(20, this.sectionPane(Material.CYAN_STAINED_GLASS_PANE, "✂ DNA", List.of()));
+        inventory.setItem(21, this.sectionPane(Material.LIGHT_BLUE_STAINED_GLASS_PANE, "╌", List.of()));
+        inventory.setItem(22, this.info(Material.BREWING_STAND, "剪接台", List.of(
+                "精密重組平台",
+                "在此切割與拼接基因")));
+        inventory.setItem(23, this.sectionPane(Material.LIGHT_BLUE_STAINED_GLASS_PANE, "╌", List.of()));
+        inventory.setItem(24, this.sectionPane(Material.LIME_STAINED_GLASS_PANE, "✂ 基因組", List.of()));
+        // ── row 4：對稱成功 / 損耗指標 ──
+        inventory.setItem(39, this.info(Material.LIME_DYE, "成功率", List.of(
+                "升級精密模組",
+                "可提升剪接成功機率")));
+        inventory.setItem(41, this.info(Material.GRAY_DYE, "損耗率", List.of(
+                "剪接失敗會損耗樣本",
+                "升級可降低損耗")));
     }
 
     private void decorateCrusherMenu(final Inventory inventory, final PlacedMachine machine, final MachineDefinition definition) {
