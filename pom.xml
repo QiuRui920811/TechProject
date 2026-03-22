@@ -41,6 +41,13 @@
             <version>2.11.6</version>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>com.discordsrv</groupId>
+            <artifactId>discordsrv</artifactId>
+            <version>1.30.4</version>
+            <scope>system</scope>
+            <systemPath>/media/ruiouo/d5339ede-13e7-49e2-8d9b-b6abc85649eb2/tech/plugins/DiscordSRV-Build-1.30.4.jar</systemPath>
+        </dependency>
     </dependencies>
 
     <build>

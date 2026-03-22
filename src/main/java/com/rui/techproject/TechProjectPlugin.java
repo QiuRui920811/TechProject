@@ -95,6 +95,7 @@ public final class TechProjectPlugin extends JavaPlugin {
     private MeteorService meteorService;
     private StorageManager storageManager;
     private TitleService titleService;
+    private com.rui.techproject.listener.DiscordSrvHook discordSrvHook;
 
     @Override
     public void onEnable() {
@@ -154,6 +155,12 @@ public final class TechProjectPlugin extends JavaPlugin {
         if (this.getServer().getPluginManager().getPlugin("PlaceholderAPI") != null) {
             new com.rui.techproject.service.TechPlaceholderExpansion(this).register();
             this.getLogger().info("PlaceholderAPI 已挂接，請使用 %techproject_title% 等佔位符。");
+        }
+
+        // DiscordSRV 挂接：攤截搜尋指令等訊息不轉發至 Discord
+        if (this.getServer().getPluginManager().getPlugin("DiscordSRV") != null) {
+            this.discordSrvHook = new com.rui.techproject.listener.DiscordSrvHook(this);
+            this.discordSrvHook.tryRegister();
         }
 
         // 定期自動存檔（每 5 分鐘），防止崩潰時資料遺失
@@ -276,6 +283,9 @@ public final class TechProjectPlugin extends JavaPlugin {
 
     @Override
     public void onDisable() {
+        if (this.discordSrvHook != null) {
+            this.discordSrvHook.tryUnregister();
+        }
         if (this.meteorService != null) {
             this.meteorService.shutdown();
         }
