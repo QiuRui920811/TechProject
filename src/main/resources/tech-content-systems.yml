@@ -319,7 +319,7 @@ machines:
   tree_feller:
     display-name: 伐木機
     category: INTERMEDIATE
-    block: STRIPPED_OAK_LOG
+    block: SMITHING_TABLE
     item-model: "-1"
     inputs: [logging_blade, arbor_frame]
     outputs: [oak_log, birch_log, spruce_log, jungle_log, acacia_log, dark_oak_log, cherry_log, mangrove_log, oak_sapling]

@@ -2025,14 +2025,22 @@ public final class MachineService {
         }
         final int radius = 2 + Math.min(2, this.countUpgrade(machine, "range_upgrade"));
         final int maxLogs = 16 + this.countUpgrade(machine, "stack_upgrade") * 6;
+        final LocationKey selfKey = machine.locationKey();
         for (int dx = -radius; dx <= radius; dx++) {
             for (int dz = -radius; dz <= radius; dz++) {
                 for (int dy = 0; dy <= 6; dy++) {
+                    if (dx == 0 && dy == 0 && dz == 0) {
+                        continue;
+                    }
                     final Block origin = world.getBlockAt(location.getBlockX() + dx, location.getBlockY() + dy, location.getBlockZ() + dz);
+                    if (this.machines.containsKey(LocationKey.from(origin.getLocation()))) {
+                        continue;
+                    }
                     if (!this.isTreeLog(origin.getType()) || !this.isSafeTreeTarget(origin)) {
                         continue;
                     }
                     final List<Block> logs = this.collectConnectedLogs(origin, maxLogs);
+                    logs.removeIf(b -> this.machines.containsKey(LocationKey.from(b.getLocation())));
                     if (logs.isEmpty()) {
                         continue;
                     }
