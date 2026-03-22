@@ -1147,8 +1147,7 @@ public final class MachineService {
         final int maxPage = Math.max(0, (recipes.size() - 1) / 21);
         final int safePage = Math.max(0, Math.min(maxPage, page));
         final MachineGuiTheme theme = this.resolveMachineGuiTheme(definition.id());
-        final Inventory inventory = Bukkit.createInventory(null, 54,
-                this.machineMenuTitle(RECIPE_TITLE_PREFIX + this.itemFactory.displayNameForId(definition.id()) + " • P" + (safePage + 1)));
+        final Inventory inventory = Bukkit.createInventory(null, 54, this.itemFactory.hex(RECIPE_TITLE_PREFIX + this.itemFactory.displayNameForId(definition.id()) + " • P" + (safePage + 1), this.titleColor(theme)));
         this.decorateMachineRecipeMenu(inventory, theme, safePage, maxPage);
         final int[] slots = {19, 20, 21, 22, 23, 24, 25, 28, 29, 30, 31, 32, 33, 34, 37, 38, 39, 40, 41, 42, 43};
         final int start = safePage * slots.length;
@@ -6194,8 +6193,7 @@ public final class MachineService {
         if (recipe == null) {
             return;
         }
-        final Inventory inventory = Bukkit.createInventory(null, 54,
-                this.machineMenuTitle(RECIPE_TITLE_PREFIX + this.itemFactory.displayNameForId(recipe.outputId())));
+        final Inventory inventory = Bukkit.createInventory(null, 54, this.itemFactory.hex(RECIPE_TITLE_PREFIX + this.itemFactory.displayNameForId(recipe.outputId()), this.titleColor(theme)));
         this.decorateMachineRecipeDetailMenu(inventory, theme);
         inventory.setItem(4, this.info(this.recipeBookMaterial(theme), this.itemFactory.displayNameForId(recipe.outputId()), List.of(
             "機器：" + this.itemFactory.displayNameForId(recipe.machineId()),
