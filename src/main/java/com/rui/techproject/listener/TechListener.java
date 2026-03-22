@@ -285,6 +285,22 @@ public final class TechListener implements Listener {
         this.plugin.getTechBookService().consumeSearchInput(event.getPlayer(), plainText);
     }
 
+    /**
+     * 舊式 Bukkit 聊天事件的同步攔截 — 確保 DiscordSRV 等使用舊事件的插件也看到 cancel。
+     */
+    @SuppressWarnings("deprecation")
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void onLegacyChatSearchCancel(final org.bukkit.event.player.AsyncPlayerChatEvent event) {
+        final String message = event.getMessage();
+        if (message != null && this.plugin.getItemSearchService().isSearchQuery(message)) {
+            event.setCancelled(true);
+            return;
+        }
+        if (this.plugin.getTechBookService().isAwaitingSearchInput(event.getPlayer().getUniqueId())) {
+            event.setCancelled(true);
+        }
+    }
+
     @EventHandler
     public void onChunkLoad(final ChunkLoadEvent event) {
         this.plugin.getPlanetService().handleChunkLoad(event.getChunk());
