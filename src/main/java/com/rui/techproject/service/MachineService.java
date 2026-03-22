@@ -2059,9 +2059,28 @@ public final class MachineService {
                     if (!machine.consumeEnergy(energy)) {
                         return;
                     }
+                    // 找到最低的原木位置用於回種
+                    Block lowestLog = logs.get(0);
+                    for (final Block log : logs) {
+                        if (log.getY() < lowestLog.getY()) {
+                            lowestLog = log;
+                        }
+                    }
+                    final Block replantTarget = lowestLog;
+                    final Material saplingMaterial = this.saplingForLog(logType);
                     for (final Block log : logs) {
                         log.setType(Material.AIR, false);
                         world.spawnParticle(Particle.BLOCK, log.getLocation().add(0.5, 0.5, 0.5), 8, 0.2, 0.2, 0.2, log.getBlockData());
+                    }
+                    // 回種樹苗
+                    if (replantTarget.getType() == Material.AIR && saplingMaterial != null) {
+                        final Material below = replantTarget.getRelative(BlockFace.DOWN).getType();
+                        if (below == Material.DIRT || below == Material.GRASS_BLOCK || below == Material.PODZOL
+                                || below == Material.MYCELIUM || below == Material.MOSS_BLOCK
+                                || below == Material.ROOTED_DIRT || below == Material.MUD) {
+                            replantTarget.setType(saplingMaterial, true);
+                            world.spawnParticle(Particle.HAPPY_VILLAGER, replantTarget.getLocation().add(0.5, 0.5, 0.5), 6, 0.2, 0.2, 0.2, 0.01);
+                        }
                     }
                     this.storeOutputs(machine, outputs);
                     this.progressService.incrementStat(machine.owner(), "logs_felled", logs.size());
