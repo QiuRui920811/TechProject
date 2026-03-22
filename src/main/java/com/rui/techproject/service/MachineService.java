@@ -1742,6 +1742,7 @@ public final class MachineService {
             case "splitter_node" -> this.tickSplitterNode(machine, location);
             case "industrial_bus" -> this.tickIndustrialBus(machine, location);
             case "cargo_input_node" -> this.tickCargoInputNode(machine, location);
+            case "cargo_output_node" -> this.tickCargoOutputNode(machine, location);
             case "cargo_manager" -> this.tickCargoManager(machine, location);
             case "trash_node" -> this.tickTrashNode(machine, location);
             case "cargo_motor" -> this.tickCargoMotor(machine, location);
@@ -4116,6 +4117,61 @@ public final class MachineService {
             world.spawnParticle(Particle.ENCHANT, location.clone().add(0.5, 0.8, 0.5), 6, 0.25, 0.25, 0.25, 0.02);
         } else {
             this.setRuntimeState(machine, MachineRuntimeState.NO_INPUT, "周圍無可拉取容器");
+        }
+    }
+
+    private void tickCargoOutputNode(final PlacedMachine machine, final Location location) {
+        final World world = location.getWorld();
+        if (world == null) {
+            this.setRuntimeState(machine, MachineRuntimeState.IDLE, "待命");
+            return;
+        }
+        final int moved = this.moveInputToOutput(machine, 0, null, false, 4);
+        int pushed = 0;
+        final int[][] offsets = {{1, 0, 0}, {-1, 0, 0}, {0, 0, 1}, {0, 0, -1}, {0, 1, 0}, {0, -1, 0}};
+        final String dirFilter = machine.outputDirection();
+        for (final int[] offset : offsets) {
+            if (pushed >= 4) {
+                break;
+            }
+            if (!dirFilter.equalsIgnoreCase("ALL") && !this.matchesDirection(dirFilter, this.directionForOffset(offset))) {
+                continue;
+            }
+            final Block neighbor = world.getBlockAt(location.clone().add(offset[0], offset[1], offset[2]));
+            final LocationKey neighborKey = LocationKey.from(neighbor.getLocation());
+            if (this.machines.containsKey(neighborKey)) {
+                continue;
+            }
+            final Inventory inventory = this.containerInventory(neighbor);
+            if (inventory == null) {
+                continue;
+            }
+            for (int slot = 0; slot < OUTPUT_SLOTS.length && pushed < 4; slot++) {
+                final ItemStack outStack = machine.outputAt(slot);
+                if (outStack == null || outStack.getType() == Material.AIR) {
+                    continue;
+                }
+                final ItemStack oneItem = outStack.clone();
+                oneItem.setAmount(1);
+                if (!this.canStoreInInventory(inventory, oneItem)) {
+                    continue;
+                }
+                inventory.addItem(oneItem);
+                outStack.setAmount(outStack.getAmount() - 1);
+                if (outStack.getAmount() <= 0) {
+                    machine.setOutputAt(slot, null);
+                } else {
+                    machine.setOutputAt(slot, outStack);
+                }
+                pushed++;
+            }
+        }
+        final int total = moved + pushed;
+        if (total > 0) {
+            this.setRuntimeState(machine, MachineRuntimeState.RUNNING, "推送 x" + pushed);
+            world.spawnParticle(Particle.ENCHANT, location.clone().add(0.5, 0.8, 0.5), 6, 0.25, 0.25, 0.25, 0.02);
+        } else {
+            this.setRuntimeState(machine, MachineRuntimeState.NO_INPUT, "周圍無可推送容器或無物品");
         }
     }
 
@@ -6616,7 +6672,7 @@ public final class MachineService {
     private boolean isAutoTransferSource(final String machineId) {
         return switch (machineId.toLowerCase()) {
             case "storage_hub", "filter_router", "splitter_node", "industrial_bus",
-                 "cargo_manager", "cargo_motor", "cargo_input_node", "trash_node",
+                 "cargo_manager", "cargo_motor", "cargo_input_node", "cargo_output_node", "trash_node",
                  "logistics_node", "item_tube", "recycler", "vacuum_inlet",
                  "auto_farm", "crop_harvester", "planetary_harvester", "tree_feller",
                  "mob_collector", "fishing_dock", "greenhouse",

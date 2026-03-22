@@ -447,6 +447,17 @@ machines:
     energy-per-tick: 0
     effect: 永久銷毀所有匯入的物品
     unlock: machine:assembler&item:machine_casing
+  cargo_output_node:
+    display-name: 貨物輸出節點
+    category: ADVANCED
+    block: DROPPER
+    head-texture: b439e3f5acbee9be4c4259289d6d9f35c635ffa661114687b3ea6dda8c79
+    item-model: "-1"
+    inputs: [routing_chip, servo_motor, storage_crate]
+    outputs: [machine_component, steel_plate, circuit_board, crops, plastic]
+    energy-per-tick: 2
+    effect: 將輸入物品推送至相鄰原版容器（箱子/桶/漏斗）
+    unlock: machine:assembler&item:routing_chip&item:servo_motor
   cargo_motor:
     display-name: 貨物驅動器
     category: ADVANCED
@@ -657,6 +668,12 @@ recipes:
     output: trash_node
     energy: 12
     guide: 機械外殼 + 岩漿桶 → 製造機 → 銷毀節點
+  cargo_output_node_recipe:
+    machine: assembler
+    inputs: [routing_chip, servo_motor, storage_crate]
+    output: cargo_output_node
+    energy: 20
+    guide: 路由晶片 + 伺服馬達 + 儲物箱 → 製造機 → 貨物輸出節點
   cargo_motor_recipe:
     machine: assembler
     inputs: [bus_frame, servo_motor, routing_chip]
@@ -684,7 +701,7 @@ achievements:
     hint: 建立真正的工業物流網路
   cargo_architect:
     display-name: 貨運架構師
-    description: 擁有貨物抽取節點、貨物管理站、貨物驅動器與銷毀節點。
+    description: 擁有貨物抽取節點、貨物輸出節點、貨物管理站、貨物驅動器與銷毀節點。
     reward-xp: 400
     reward-tokens: 25
     hint: 建立完整的進階貨物物流系統
