@@ -7889,18 +7889,7 @@ public final class MachineService {
                                             final Material upgradePane,
                                             final Material recipeMaterial) {
         final MachineLayoutSpec spec = this.resolveMachineLayoutSpec(definition.id());
-        final int[] centerFrame = {9, 10, 12, 15, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26};
-        for (final int slot : centerFrame) {
-            inventory.setItem(slot, this.sectionPane(centerPane, " ", List.of()));
-        }
-        inventory.setItem(9, this.sectionPane(inputPane, "↘", List.of()));
-        inventory.setItem(10, this.sectionPane(inputPane, "↓", List.of()));
-        inventory.setItem(17, this.sectionPane(outputPane, "↙", List.of()));
-        inventory.setItem(18, this.sectionPane(inputPane, spec.inputZone(), List.of()));
-        inventory.setItem(19, this.sectionPane(inputPane, "↓", List.of()));
-        inventory.setItem(25, this.sectionPane(outputPane, "↑", List.of()));
-        inventory.setItem(26, this.sectionPane(outputPane, spec.outputZone(), List.of()));
-
+        // HUD 已提供背景，只放功能性按鈕，不再填充裝飾玻璃片
         inventory.setItem(11, this.itemFactory.tagGuiAction(this.guiButton("machine-dir-input", Material.HOPPER, spec.inputDirectionTitle(), List.of(
             "目前：" + this.directionDisplayName(machine.inputDirection()),
             "點一下切換方向",
@@ -7913,13 +7902,6 @@ public final class MachineService {
             "點一下切換方向",
             this.directionCycleDisplay()
         ), this.placeholders("current", String.valueOf(machine.outputDirection()))), "dir-output"));
-
-        inventory.setItem(36, this.sectionPane(outputPane, "↑", List.of()));
-        inventory.setItem(37, this.sectionPane(outputPane, spec.outputZone(), List.of()));
-        inventory.setItem(38, this.sectionPane(outputPane, "↑", List.of()));
-        inventory.setItem(42, this.sectionPane(upgradePane, spec.upgradeZone(), List.of()));
-        inventory.setItem(43, this.sectionPane(upgradePane, "↑", List.of()));
-        inventory.setItem(44, this.sectionPane(upgradePane, spec.upgradeZone(), List.of()));
     }
 
     private MachineLayoutSpec resolveMachineLayoutSpec(final String machineId) {
