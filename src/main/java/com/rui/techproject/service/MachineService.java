@@ -171,7 +171,8 @@ public final class MachineService {
         GENERATOR,
         LOGISTICS,
         FIELD,
-        PROCESSOR
+        PROCESSOR,
+        BIOTECH
     }
 
     private void trackViewOpen(final UUID uuid, final LocationKey key, final MachineViewSession session) {
@@ -7166,6 +7167,10 @@ public final class MachineService {
             case "android_station" -> this.decorateAndroidStationMenu(inventory, machine, definition);
             case "android_item_interface" -> this.decorateAndroidItemInterfaceMenu(inventory, machine, definition);
             case "android_fuel_interface" -> this.decorateAndroidFuelInterfaceMenu(inventory, machine, definition);
+            case "genetic_sequencer" -> this.decorateGeneticSequencerMenu(inventory, machine, definition);
+            case "private_coop" -> this.decoratePrivateCoopMenu(inventory, machine, definition);
+            case "excitation_chamber" -> this.decorateExcitationChamberMenu(inventory, machine, definition);
+            case "gene_splicer" -> this.decorateGeneSplicerMenu(inventory, machine, definition);
             default -> handled = false;
         }
         if (!handled) {
@@ -7174,6 +7179,7 @@ public final class MachineService {
                 case LOGISTICS -> this.decorateLogisticsMachineMenu(inventory, machine, definition);
                 case FIELD -> this.decorateFieldMachineMenu(inventory, machine, definition);
                 case PROCESSOR -> this.decorateProcessorMachineMenu(inventory, machine, definition);
+                case BIOTECH -> this.decorateProcessorMachineMenu(inventory, machine, definition);
             }
         }
         // 配方鎖定按鈕 — 放在所有裝飾之後，避免被 applyIdentityBand 等覆蓋
@@ -7262,6 +7268,52 @@ public final class MachineService {
                 Material.BROWN_STAINED_GLASS_PANE,
                 Material.GREEN_STAINED_GLASS_PANE,
                 Material.OAK_SAPLING);
+    }
+
+    // ══════════════════════ 基因雞工程專屬 GUI ══════════════════════
+
+    private void decorateGeneticSequencerMenu(final Inventory inventory, final PlacedMachine machine, final MachineDefinition definition) {
+        this.decorateMinimalMachineMenu(inventory, machine, definition,
+                Material.WHITE_STAINED_GLASS_PANE,   // input: 乾淨白色（DNA 實驗室風格）
+                Material.LIGHT_GRAY_STAINED_GLASS_PANE, // center: 淺灰（儀器）
+                Material.LIME_STAINED_GLASS_PANE,    // output: 螢光綠（定序完成）
+                Material.CYAN_STAINED_GLASS_PANE,    // upgrade: 青色（分析模組）
+                Material.GLOW_INK_SAC);              // recipe: 螢光墨囊（DNA 分析）
+        this.applyIdentityBand(inventory, Material.LIGHT_GRAY_STAINED_GLASS_PANE,
+                "◇", "◇", "未知雞", "→", "DNA 分析", "→", "基因圖譜");
+    }
+
+    private void decoratePrivateCoopMenu(final Inventory inventory, final PlacedMachine machine, final MachineDefinition definition) {
+        this.decorateMinimalMachineMenu(inventory, machine, definition,
+                Material.YELLOW_STAINED_GLASS_PANE,  // input: 暖黃（稻草/雞舍）
+                Material.BROWN_STAINED_GLASS_PANE,   // center: 棕色（木質雞舍）
+                Material.ORANGE_STAINED_GLASS_PANE,  // output: 橙色（蛋/後代）
+                Material.GREEN_STAINED_GLASS_PANE,   // upgrade: 綠色（培育升級）
+                Material.EGG);                       // recipe: 雞蛋
+        this.applyIdentityBand(inventory, Material.BROWN_STAINED_GLASS_PANE,
+                "🐔", "🐔", "親代", "→", "孵化", "→", "後代");
+    }
+
+    private void decorateExcitationChamberMenu(final Inventory inventory, final PlacedMachine machine, final MachineDefinition definition) {
+        this.decorateMinimalMachineMenu(inventory, machine, definition,
+                Material.MAGENTA_STAINED_GLASS_PANE, // input: 洋紅（能量激發）
+                Material.PURPLE_STAINED_GLASS_PANE,  // center: 紫色（激發核心）
+                Material.PINK_STAINED_GLASS_PANE,    // output: 粉紅（資源產出）
+                Material.RED_STAINED_GLASS_PANE,     // upgrade: 紅色（激發強化）
+                Material.GLOWSTONE_DUST);            // recipe: 螢光粉（能量激發）
+        this.applyIdentityBand(inventory, Material.PURPLE_STAINED_GLASS_PANE,
+                "⚡", "⚡", "基因雞", "→", "激發", "→", "資源");
+    }
+
+    private void decorateGeneSplicerMenu(final Inventory inventory, final PlacedMachine machine, final MachineDefinition definition) {
+        this.decorateMinimalMachineMenu(inventory, machine, definition,
+                Material.CYAN_STAINED_GLASS_PANE,    // input: 青色（生物工程）
+                Material.LIGHT_BLUE_STAINED_GLASS_PANE, // center: 淺藍（精密操作）
+                Material.LIME_STAINED_GLASS_PANE,    // output: 螢光綠（切片結果）
+                Material.GREEN_STAINED_GLASS_PANE,   // upgrade: 綠色（精密升級）
+                Material.SHEARS);                    // recipe: 剪刀（基因切片）
+        this.applyIdentityBand(inventory, Material.LIGHT_BLUE_STAINED_GLASS_PANE,
+                "✂", "✂", "DNA", "→", "切片", "→", "基因組");
     }
 
     private void decorateCrusherMenu(final Inventory inventory, final PlacedMachine machine, final MachineDefinition definition) {
@@ -7791,8 +7843,16 @@ public final class MachineService {
                 new MachineLayoutSpec("零件", "組件", "模組", "裝配配方", "進件方向", "出件方向");
             case "laser_engraver", "wire_mill", "polymer_press", "insulation_press", "photon_weaver", "continuum_lathe" ->
                 new MachineLayoutSpec("素材", "加工件", "調校", "加工配方", "素材方向", "成品方向");
-            case "auto_farm", "greenhouse", "bio_lab", "gene_splicer", "biosynth_vat", "crystal_growth_chamber", "nanite_foundry" ->
+            case "auto_farm", "greenhouse", "bio_lab", "biosynth_vat", "crystal_growth_chamber", "nanite_foundry" ->
                 new MachineLayoutSpec("培育材", "培育物", "培養", "培育配方", "投入方向", "收成方向");
+            case "genetic_sequencer" ->
+                new MachineLayoutSpec("植入雞", "DNA 序列", "分析模組", "定序配方", "輸入方向", "輸出方向");
+            case "private_coop" ->
+                new MachineLayoutSpec("親代雞", "後代雞", "培育升級", "繁殖配方", "投入方向", "孵化方向");
+            case "excitation_chamber" ->
+                new MachineLayoutSpec("激發雞", "資源產出", "輸出升級", "激發配方", "投入方向", "產出方向");
+            case "gene_splicer" ->
+                new MachineLayoutSpec("基因樣本", "切片結果", "精密升級", "切片配方", "樣本方向", "結果方向");
             case "solar_generator", "coal_generator", "solar_array", "storm_turbine", "fusion_reactor", "battery_bank", "chrono_engine", "entropy_chamber" ->
                 new MachineLayoutSpec("能源材", "電力", "增幅", "能源配方", "進能方向", "出能方向");
             case "energy_node", "energy_cable" ->
@@ -7840,6 +7900,9 @@ public final class MachineService {
         if (normalized.equals("android_station")) {
             return MachineGuiTheme.FIELD;
         }
+        if (normalized.equals("genetic_sequencer") || normalized.equals("private_coop") || normalized.equals("excitation_chamber") || normalized.equals("gene_splicer")) {
+            return MachineGuiTheme.BIOTECH;
+        }
         return MachineGuiTheme.PROCESSOR;
     }
 
@@ -7849,6 +7912,7 @@ public final class MachineService {
             case LOGISTICS -> "#4CC9F0";
             case FIELD -> "#80ED99";
             case PROCESSOR -> "#C77DFF";
+            case BIOTECH -> "#77DD77";
         };
     }
 
@@ -7858,6 +7922,7 @@ public final class MachineService {
             case LOGISTICS -> Material.LIGHT_BLUE_DYE;
             case FIELD -> Material.LIME_DYE;
             case PROCESSOR -> Material.LIME_DYE;
+            case BIOTECH -> Material.LIME_DYE;
         };
     }
 
@@ -7867,6 +7932,7 @@ public final class MachineService {
             case LOGISTICS -> Material.CYAN_DYE;
             case FIELD -> Material.GREEN_DYE;
             case PROCESSOR -> Material.MAGENTA_DYE;
+            case BIOTECH -> Material.GREEN_DYE;
         };
     }
 
@@ -7876,6 +7942,7 @@ public final class MachineService {
             case LOGISTICS -> Material.COMPASS;
             case FIELD -> Material.OAK_SAPLING;
             case PROCESSOR -> Material.BOOK;
+            case BIOTECH -> Material.EGG;
         };
     }
 
@@ -7885,6 +7952,7 @@ public final class MachineService {
             case LOGISTICS -> Material.LIGHT_BLUE_STAINED_GLASS_PANE;
             case FIELD -> Material.LIME_STAINED_GLASS_PANE;
             case PROCESSOR -> Material.LIGHT_BLUE_STAINED_GLASS_PANE;
+            case BIOTECH -> Material.PINK_STAINED_GLASS_PANE;
         };
     }
 
@@ -7894,6 +7962,7 @@ public final class MachineService {
             case LOGISTICS -> Material.CYAN_STAINED_GLASS_PANE;
             case FIELD -> Material.GREEN_STAINED_GLASS_PANE;
             case PROCESSOR -> Material.LIME_STAINED_GLASS_PANE;
+            case BIOTECH -> Material.LIME_STAINED_GLASS_PANE;
         };
     }
 
@@ -7903,6 +7972,7 @@ public final class MachineService {
             case LOGISTICS -> Material.BLUE_STAINED_GLASS_PANE;
             case FIELD -> Material.BROWN_STAINED_GLASS_PANE;
             case PROCESSOR -> Material.CYAN_STAINED_GLASS_PANE;
+            case BIOTECH -> Material.GREEN_STAINED_GLASS_PANE;
         };
     }
 
@@ -7912,6 +7982,7 @@ public final class MachineService {
             case LOGISTICS -> Material.GRAY_STAINED_GLASS_PANE;
             case FIELD -> Material.GRAY_STAINED_GLASS_PANE;
             case PROCESSOR -> Material.GRAY_STAINED_GLASS_PANE;
+            case BIOTECH -> Material.WHITE_STAINED_GLASS_PANE;
         };
     }
 
@@ -7921,6 +7992,7 @@ public final class MachineService {
             case LOGISTICS -> Material.BLUE_STAINED_GLASS_PANE;
             case FIELD -> Material.GREEN_STAINED_GLASS_PANE;
             case PROCESSOR -> Material.PURPLE_STAINED_GLASS_PANE;
+            case BIOTECH -> Material.PINK_STAINED_GLASS_PANE;
         };
     }
 
@@ -7930,6 +8002,7 @@ public final class MachineService {
             case LOGISTICS -> Material.COMPASS;
             case FIELD -> Material.CHEST;
             case PROCESSOR -> Material.REDSTONE;
+            case BIOTECH -> Material.GLOW_INK_SAC;
         };
     }
 
@@ -7939,6 +8012,7 @@ public final class MachineService {
             case LOGISTICS -> "物流流程";
             case FIELD -> "作業流程";
             case PROCESSOR -> "製程";
+            case BIOTECH -> "基因工程";
         };
     }
 
@@ -7948,6 +8022,7 @@ public final class MachineService {
             case LOGISTICS -> "物流配方總覽";
             case FIELD -> "戶外作業配方總覽";
             case PROCESSOR -> "加工配方總覽";
+            case BIOTECH -> "基因雞配方總覽";
         };
     }
 
