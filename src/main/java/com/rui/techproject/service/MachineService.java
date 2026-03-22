@@ -1151,6 +1151,12 @@ public final class MachineService {
         this.decorateMachineRecipeMenu(inventory, theme, safePage, maxPage);
         final int[] slots = {19, 20, 21, 22, 23, 24, 25, 28, 29, 30, 31, 32, 33, 34, 37, 38, 39, 40, 41, 42, 43};
         final int start = safePage * slots.length;
+        if (recipes.isEmpty()) {
+            final ItemStack hint = this.hardcodedRecipeHint(definition.id());
+            if (hint != null) {
+                inventory.setItem(31, hint);
+            }
+        }
         for (int index = 0; index < slots.length && start + index < recipes.size(); index++) {
             final MachineRecipe recipe = recipes.get(start + index);
             inventory.setItem(slots[index], this.itemFactory.tagGuiAction(this.recipeInfo(recipe), "recipe-detail:" + recipe.id()));
@@ -8118,6 +8124,18 @@ public final class MachineService {
 
     private boolean isResearchDesk(final String machineId) {
         return machineId != null && machineId.equalsIgnoreCase("research_desk");
+    }
+
+    private ItemStack hardcodedRecipeHint(final String machineId) {
+        return switch (machineId.toLowerCase()) {
+            case "genetic_sequencer" -> this.sectionPane(Material.KNOWLEDGE_BOOK, "§e定序流程",
+                    List.of("§7投入 未定序口袋雞", "§7→ 分析 DNA 序列", "", "§8此機器無配方列表", "§8直接放入口袋雞即可運作"));
+            case "private_coop" -> this.sectionPane(Material.KNOWLEDGE_BOOK, "§e繁殖流程",
+                    List.of("§7投入 2 隻已定序口袋雞", "§7→ 繁殖後代", "", "§8每 120 秒繁殖 1 次", "§8親代有壽命限制", "§8此機器無配方列表"));
+            case "excitation_chamber" -> this.sectionPane(Material.KNOWLEDGE_BOOK, "§e激發流程",
+                    List.of("§7投入 已定序口袋雞", "§7→ 持續產出對應資源", "", "§8隱性基因越多 → 資源越稀有", "§8雞有壽命限制", "§8此機器無配方列表"));
+            default -> null;
+        };
     }
 
     private ItemStack sectionPane(final Material material, final String title, final List<String> lines) {
