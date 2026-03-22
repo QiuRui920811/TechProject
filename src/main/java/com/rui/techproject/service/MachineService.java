@@ -5545,12 +5545,12 @@ public final class MachineService {
         }
         switch (action) {
             case "dir-input" -> {
-                machine.setInputDirection(this.nextDirection(machine.inputDirection()));
+                machine.setInputDirection(rightClick ? this.prevDirection(machine.inputDirection()) : this.nextDirection(machine.inputDirection()));
                 player.sendMessage(this.itemFactory.secondary("輸入方向已切換為：" + this.directionDisplayName(machine.inputDirection())));
                 this.openMachineMenuNextTick(player, key);
             }
             case "dir-output" -> {
-                machine.setOutputDirection(this.nextDirection(machine.outputDirection()));
+                machine.setOutputDirection(rightClick ? this.prevDirection(machine.outputDirection()) : this.nextDirection(machine.outputDirection()));
                 player.sendMessage(this.itemFactory.secondary("輸出方向已切換為：" + this.directionDisplayName(machine.outputDirection())));
                 this.openMachineMenuNextTick(player, key);
             }
@@ -6655,6 +6655,17 @@ public final class MachineService {
         return "ALL";
     }
 
+    private String prevDirection(final String current) {
+        final String normalized = current == null ? "ALL" : current.toUpperCase();
+        for (int index = 0; index < DIRECTION_ORDER.length; index++) {
+            if (!DIRECTION_ORDER[index].equals(normalized)) {
+                continue;
+            }
+            return DIRECTION_ORDER[(index - 1 + DIRECTION_ORDER.length) % DIRECTION_ORDER.length];
+        }
+        return "ALL";
+    }
+
     private String directionDisplayName(final String direction) {
         return switch ((direction == null ? "ALL" : direction).toUpperCase()) {
             case "NORTH" -> "北";
@@ -6668,7 +6679,31 @@ public final class MachineService {
     }
 
     private String directionCycleDisplay() {
-        return "順序：全部 → 北 → 東 → 南 → 西 → 上 → 下";
+        return "左鍵下一個 / 右鍵上一個";
+    }
+
+    private List<String> neighborDirectionSummary(final PlacedMachine machine) {
+        final List<String> lines = new ArrayList<>();
+        lines.add("§7--- 鄰居 ---");
+        final int[][] offsets = {{0, 0, -1}, {1, 0, 0}, {0, 0, 1}, {-1, 0, 0}, {0, 1, 0}, {0, -1, 0}};
+        final String[] dirs = {"北", "東", "南", "西", "上", "下"};
+        boolean anyFound = false;
+        for (int i = 0; i < offsets.length; i++) {
+            final LocationKey nk = new LocationKey(
+                machine.locationKey().worldName(),
+                machine.locationKey().x() + offsets[i][0],
+                machine.locationKey().y() + offsets[i][1],
+                machine.locationKey().z() + offsets[i][2]);
+            final PlacedMachine neighbor = this.machines.get(nk);
+            if (neighbor != null) {
+                lines.add("§f" + dirs[i] + "§7: §e" + this.itemFactory.displayNameForId(neighbor.machineId()));
+                anyFound = true;
+            }
+        }
+        if (!anyFound) {
+            lines.add("§7四周沒有相鄰機器");
+        }
+        return lines;
     }
 
     private record QuarryDrop(String outputId, Material replacement, int amount, long energyCost) {
@@ -7761,18 +7796,23 @@ public final class MachineService {
                 Material.PURPLE_STAINED_GLASS_PANE,
                 Material.LIGHTNING_ROD);
         this.applyIdentityBand(inventory, Material.ORANGE_STAINED_GLASS_PANE, "⚡", "⚡", "匯入", "→", "節點", "→", "匯出");
-        inventory.setItem(11, this.itemFactory.tagGuiAction(this.guiButton("machine-dir-input", Material.HOPPER, "收電方向", List.of(
-            "目前：" + this.directionDisplayName(machine.inputDirection()),
-            "點一下切換方向",
-            "這一側會從相鄰機器 / 節點收電",
-            "全部 表示四周都可收"
-        ), this.placeholders("current", String.valueOf(machine.inputDirection()))), "dir-input"));
-        inventory.setItem(16, this.itemFactory.tagGuiAction(this.guiButton("machine-dir-output", Material.DROPPER, "送電方向", List.of(
-            "目前：" + this.directionDisplayName(machine.outputDirection()),
-            "點一下切換方向",
-            "這一側會把電送往相鄰機器 / 節點",
-            "全部 表示四周都可送"
-        ), this.placeholders("current", String.valueOf(machine.outputDirection()))), "dir-output"));
+        final List<String> neighbors = this.neighborDirectionSummary(machine);
+        final List<String> enInputLore = new ArrayList<>();
+        enInputLore.add("§f目前：§a" + this.directionDisplayName(machine.inputDirection()));
+        enInputLore.add("§7此節點會從這一側的機器/節點拉電");
+        enInputLore.add("§7全部 = 六面都可拉電");
+        enInputLore.add(this.directionCycleDisplay());
+        enInputLore.addAll(neighbors);
+        inventory.setItem(11, this.itemFactory.tagGuiAction(this.guiButton("machine-dir-input", Material.HOPPER, "收電方向", enInputLore,
+            this.placeholders("current", String.valueOf(machine.inputDirection()))), "dir-input"));
+        final List<String> enOutputLore = new ArrayList<>();
+        enOutputLore.add("§f目前：§a" + this.directionDisplayName(machine.outputDirection()));
+        enOutputLore.add("§7此節點會往這一側的機器/節點送電");
+        enOutputLore.add("§7全部 = 六面都可送電");
+        enOutputLore.add(this.directionCycleDisplay());
+        enOutputLore.addAll(neighbors);
+        inventory.setItem(16, this.itemFactory.tagGuiAction(this.guiButton("machine-dir-output", Material.DROPPER, "送電方向", enOutputLore,
+            this.placeholders("current", String.valueOf(machine.outputDirection()))), "dir-output"));
         inventory.setItem(14, this.itemFactory.tagGuiAction(this.guiButton("energy-node-usage", Material.LIGHTNING_ROD, "節點用法", List.of(
             "至少成對放置最容易看懂",
             "A 節點收電，B 節點送電",
@@ -7922,19 +7962,26 @@ public final class MachineService {
                                             final Material upgradePane,
                                             final Material recipeMaterial) {
         final MachineLayoutSpec spec = this.resolveMachineLayoutSpec(definition.id());
+        final List<String> neighbors = this.neighborDirectionSummary(machine);
         // HUD 已提供背景，只放功能性按鈕，不再填充裝飾玻璃片
-        inventory.setItem(11, this.itemFactory.tagGuiAction(this.guiButton("machine-dir-input", Material.HOPPER, spec.inputDirectionTitle(), List.of(
-            "目前：" + this.directionDisplayName(machine.inputDirection()),
-            "點一下切換方向",
-            this.directionCycleDisplay()
-        ), this.placeholders("current", String.valueOf(machine.inputDirection()))), "dir-input"));
+        final List<String> inputLore = new ArrayList<>();
+        inputLore.add("§f目前：§a" + this.directionDisplayName(machine.inputDirection()));
+        inputLore.add("§7限制此機器只從某一面接收物品/能量");
+        inputLore.add("§7全部 = 六面都可接收");
+        inputLore.add(this.directionCycleDisplay());
+        inputLore.addAll(neighbors);
+        inventory.setItem(11, this.itemFactory.tagGuiAction(this.guiButton("machine-dir-input", Material.HOPPER, spec.inputDirectionTitle(), inputLore,
+            this.placeholders("current", String.valueOf(machine.inputDirection()))), "dir-input"));
         inventory.setItem(13, this.itemFactory.buildMachineGuiIcon(definition));
         inventory.setItem(14, this.itemFactory.tagGuiAction(this.guiButton("machine-open-recipes", recipeMaterial, spec.recipeTitle(), List.of("點擊查看此機器配方列表")), "recipes:0"));
-        inventory.setItem(16, this.itemFactory.tagGuiAction(this.guiButton("machine-dir-output", Material.DROPPER, spec.outputDirectionTitle(), List.of(
-            "目前：" + this.directionDisplayName(machine.outputDirection()),
-            "點一下切換方向",
-            this.directionCycleDisplay()
-        ), this.placeholders("current", String.valueOf(machine.outputDirection()))), "dir-output"));
+        final List<String> outputLore = new ArrayList<>();
+        outputLore.add("§f目前：§a" + this.directionDisplayName(machine.outputDirection()));
+        outputLore.add("§7限制此機器只往某一面送出物品/能量");
+        outputLore.add("§7全部 = 六面都可送出");
+        outputLore.add(this.directionCycleDisplay());
+        outputLore.addAll(neighbors);
+        inventory.setItem(16, this.itemFactory.tagGuiAction(this.guiButton("machine-dir-output", Material.DROPPER, spec.outputDirectionTitle(), outputLore,
+            this.placeholders("current", String.valueOf(machine.outputDirection()))), "dir-output"));
     }
 
     private MachineLayoutSpec resolveMachineLayoutSpec(final String machineId) {
