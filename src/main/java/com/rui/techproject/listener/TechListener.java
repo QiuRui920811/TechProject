@@ -694,6 +694,12 @@ public final class TechListener implements Listener {
             this.plugin.getMachineService().registerPlacedMachine(event.getPlayer(), event.getBlockPlaced(), machineId, event.getItemInHand());
             return;
         }
+        // 口袋雞頭顱 / 雞網等不可放置的科技消耗品
+        if (this.plugin.getItemFactory().isPocketChicken(event.getItemInHand())
+                || this.plugin.getItemFactory().isChickenNet(event.getItemInHand())) {
+            event.setCancelled(true);
+            return;
+        }
         if (this.plugin.getPlacedTechBlockService().shouldTrackPlacement(techItemId)) {
             this.plugin.getPlacedTechBlockService().registerPlacedBlock(event.getBlockPlaced(), techItemId);
             return;
