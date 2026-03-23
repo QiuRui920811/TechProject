@@ -2123,11 +2123,11 @@ public final class TechBookService {
 
     private RecipeView blueprintRecipeView(final MachineDefinition machine, final BlueprintService.BlueprintEntry blueprint) {
         final List<ItemStack> inputs = new ArrayList<>();
-        final Map<Character, ItemStack> symbolMap = new LinkedHashMap<>();
+        final Map<Character, String> rawIdMap = new LinkedHashMap<>();
         if (blueprint.ingredientSection() != null) {
             for (final String key : blueprint.ingredientSection().getKeys(false)) {
                 if (!key.isBlank()) {
-                    symbolMap.put(key.charAt(0), this.displayStack(blueprint.ingredientSection().getString(key, "AIR")));
+                    rawIdMap.put(key.charAt(0), blueprint.ingredientSection().getString(key, "AIR"));
                 }
             }
         }
@@ -2135,7 +2135,8 @@ public final class TechBookService {
             final String shapeRow = blueprint.shape().size() > row ? blueprint.shape().get(row) : "";
             for (int column = 0; column < 3; column++) {
                 final char symbol = shapeRow.length() > column ? shapeRow.charAt(column) : ' ';
-                inputs.add(symbolMap.getOrDefault(symbol, null));
+                final String ingredientId = rawIdMap.get(symbol);
+                inputs.add(ingredientId != null ? this.clickableReference(ingredientId, true) : null);
             }
         }
         return new RecipeView(
