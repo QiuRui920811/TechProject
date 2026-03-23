@@ -1772,11 +1772,11 @@ public final class MachineService {
             case "filter_router" -> this.tickFilterRouter(machine, location);
             case "splitter_node" -> this.tickSplitterNode(machine, location);
             case "industrial_bus" -> this.tickIndustrialBus(machine, location);
-            case "cargo_input_node" -> this.tickCargoInputNode(machine, location);
-            case "cargo_output_node" -> this.tickCargoOutputNode(machine, location);
-            case "cargo_manager" -> this.tickCargoManager(machine, location);
+            case "cargo_input_node" -> this.tickCargoInputNode(machine, definition, location);
+            case "cargo_output_node" -> this.tickCargoOutputNode(machine, definition, location);
+            case "cargo_manager" -> this.tickCargoManager(machine, definition, location);
             case "trash_node" -> this.tickTrashNode(machine, location);
-            case "cargo_motor" -> this.tickCargoMotor(machine, location);
+            case "cargo_motor" -> this.tickCargoMotor(machine, definition, location);
             case "android_station" -> this.tickAndroidStation(machine, definition, location);
             case "android_item_interface" -> this.tickAndroidItemInterface(machine, location);
             case "android_fuel_interface" -> this.tickAndroidFuelInterface(machine, location);
@@ -4129,11 +4129,20 @@ public final class MachineService {
         }
     }
 
-    private void tickCargoInputNode(final PlacedMachine machine, final Location location) {
+    private void tickCargoInputNode(final PlacedMachine machine, final MachineDefinition definition, final Location location) {
         final World world = location.getWorld();
         if (world == null) {
             this.setRuntimeState(machine, MachineRuntimeState.IDLE, "待命");
             return;
+        }
+        final long requiredEnergy = definition.energyPerTick();
+        if (requiredEnergy > 0) {
+            this.absorbNearbyEnergy(machine, location, requiredEnergy);
+            if (!machine.consumeEnergy(requiredEnergy)) {
+                this.setRuntimeState(machine, MachineRuntimeState.NO_POWER, "電力不足");
+                world.spawnParticle(Particle.SMOKE, location.clone().add(0.5, 0.8, 0.5), 3, 0.15, 0.15, 0.15, 0.0);
+                return;
+            }
         }
         int pulled = 0;
         final int[][] offsets = {{1, 0, 0}, {-1, 0, 0}, {0, 0, 1}, {0, 0, -1}, {0, 1, 0}, {0, -1, 0}};
@@ -4180,11 +4189,20 @@ public final class MachineService {
         }
     }
 
-    private void tickCargoOutputNode(final PlacedMachine machine, final Location location) {
+    private void tickCargoOutputNode(final PlacedMachine machine, final MachineDefinition definition, final Location location) {
         final World world = location.getWorld();
         if (world == null) {
             this.setRuntimeState(machine, MachineRuntimeState.IDLE, "待命");
             return;
+        }
+        final long requiredEnergy = definition.energyPerTick();
+        if (requiredEnergy > 0) {
+            this.absorbNearbyEnergy(machine, location, requiredEnergy);
+            if (!machine.consumeEnergy(requiredEnergy)) {
+                this.setRuntimeState(machine, MachineRuntimeState.NO_POWER, "電力不足");
+                world.spawnParticle(Particle.SMOKE, location.clone().add(0.5, 0.8, 0.5), 3, 0.15, 0.15, 0.15, 0.0);
+                return;
+            }
         }
         final int moved = this.moveInputToOutput(machine, 0, null, false, 4);
         int pushed = 0;
@@ -4249,13 +4267,22 @@ public final class MachineService {
         }
     }
 
-    private void tickCargoManager(final PlacedMachine machine, final Location location) {
-        final int moved = this.moveInputToOutput(machine, 0, null, false, 16);
+    private void tickCargoManager(final PlacedMachine machine, final MachineDefinition definition, final Location location) {
         final World world = location.getWorld();
         if (world == null) {
             this.setRuntimeState(machine, MachineRuntimeState.IDLE, "待命");
             return;
         }
+        final long requiredEnergy = definition.energyPerTick();
+        if (requiredEnergy > 0) {
+            this.absorbNearbyEnergy(machine, location, requiredEnergy);
+            if (!machine.consumeEnergy(requiredEnergy)) {
+                this.setRuntimeState(machine, MachineRuntimeState.NO_POWER, "電力不足");
+                world.spawnParticle(Particle.SMOKE, location.clone().add(0.5, 1.2, 0.5), 3, 0.15, 0.15, 0.15, 0.0);
+                return;
+            }
+        }
+        final int moved = this.moveInputToOutput(machine, 0, null, false, 16);
         int pulled = 0;
         final int scanRadius = 16 + this.countUpgrade(machine, "range_upgrade") * 8;
         for (int dx = -scanRadius; dx <= scanRadius && pulled < 8; dx++) {
@@ -4335,7 +4362,19 @@ public final class MachineService {
         }
     }
 
-    private void tickCargoMotor(final PlacedMachine machine, final Location location) {
+    private void tickCargoMotor(final PlacedMachine machine, final MachineDefinition definition, final Location location) {
+        final long requiredEnergy = definition.energyPerTick();
+        if (requiredEnergy > 0) {
+            this.absorbNearbyEnergy(machine, location, requiredEnergy);
+            if (!machine.consumeEnergy(requiredEnergy)) {
+                final World w = location.getWorld();
+                this.setRuntimeState(machine, MachineRuntimeState.NO_POWER, "電力不足");
+                if (w != null) {
+                    w.spawnParticle(Particle.SMOKE, location.clone().add(0.5, 0.8, 0.5), 3, 0.15, 0.15, 0.15, 0.0);
+                }
+                return;
+            }
+        }
         final int moved = this.moveInputToOutput(machine, 0, null, false, 8);
         if (moved > 0) {
             this.setRuntimeState(machine, MachineRuntimeState.RUNNING, "加速中繼 x" + moved);
