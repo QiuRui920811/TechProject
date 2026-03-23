@@ -794,6 +794,11 @@ public final class TechListener implements Listener {
         if (event.getItem() == null || (event.getAction() != Action.RIGHT_CLICK_AIR && event.getAction() != Action.RIGHT_CLICK_BLOCK)) {
             return false;
         }
+        // 若玩家右鍵的是烹調站，優先交給烹調系統處理，不要直接吃掉食材
+        if (event.getClickedBlock() != null
+                && this.plugin.getCookingService().isCookingStation(event.getClickedBlock().getType())) {
+            return false;
+        }
         final String techItemId = this.plugin.getItemFactory().getTechItemId(event.getItem());
         if (techItemId == null) {
             return false;
