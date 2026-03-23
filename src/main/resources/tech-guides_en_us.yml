@@ -5,7 +5,7 @@ guides:
     preview: Craft the first machines by hand, then learn power, placement, and routing.
     lines:
       - Start with either Solar Generator or Coal Generator. Both are meant to be hand-crafted starter machines.
-      - Place the generator directly beside a Crusher, then feed ores into the top input row.
+      - Place the generator directly beside a Crusher. The Crusher is a manual-structure machine—place Iron Bars on top of it and right-click the Iron Bars to trigger processing. Feed ores into the GUI input row first.
       - Add Electric Saw and Recycler early so wood and recycled materials stop bottlenecking the factory.
       - Auto Farm is the farming entry point, then you branch into Greenhouse, Bio Lab, and Crop Harvester.
       - When power production and consumption split into different areas, add Battery Bank, Energy Node, and Energy Cable.
@@ -59,7 +59,7 @@ guides:
     lines:
       - AutoFarm crops are not only food; they are industrial resources.
       - Greenhouse converts plant throughput into hydro gel and growth support materials.
-      - Bio Lab turns crops and wood dust into bio resin for later chains.
+      - Bio Lab turns crops and wood dust into bio resin for later chains. It is a manual-structure machine—place a Tripwire Hook on top and right-click it to start.
       - Early automation of farm lines reduces pressure on polymer and coolant production.
       - A separate logistics backbone for farming prevents cross-line starvation.
   chapter_06:
