@@ -5420,6 +5420,8 @@ public final class MachineService {
         frontier.add(machine.locationKey());
         visited.add(machine.locationKey());
         final int maxDepth = this.networkDepth(machine, logisticsMode);
+        /* 加工機器（非採集、非物流）只能透過中繼推送，不能直接推給相鄰的加工機器 */
+        final boolean requireRelay = logisticsMode && this.requiresLogisticsRelay(machine.machineId());
         final int[][] offsets = {
                 {1, 0, 0}, {-1, 0, 0},
                 {0, 0, 1}, {0, 0, -1},
@@ -5469,6 +5471,10 @@ public final class MachineService {
                         continue;
                     }
                     if (inputDirection != null && !this.matchesDirection(neighbor.outputDirection(), this.oppositeDirection(direction))) {
+                        continue;
+                    }
+                    /* 加工機器在 depth==0（直接相鄰）只能推給物流終端，不能推給其他加工機器 */
+                    if (requireRelay && depth == 0 && !this.isLogisticsTerminal(neighbor.machineId())) {
                         continue;
                     }
                     result.add(neighbor);
@@ -6761,12 +6767,49 @@ public final class MachineService {
 
     /** 判斷一台機器是否應該自動轉移輸出（物流類機器才允許）。 */
     private boolean isAutoTransferSource(final String machineId) {
-        // 只有純能源機器（不產物品）和中繼器排除，其餘所有機器都可推送產出
+        // 純能源機器（不產物品）排除，其餘所有機器都可嘗試推送
         return switch (machineId.toLowerCase()) {
             case "energy_node", "energy_cable",
                  "solar_generator", "coal_generator", "solar_array", "storm_turbine",
                  "fusion_reactor", "battery_bank", "chrono_engine", "entropy_chamber" -> false;
             default -> true;
+        };
+    }
+
+    /**
+     * 加工機器在物流傳輸時必須透過至少一個中繼（item_tube / logistics_node 等），
+     * 或推送到物流終端（storage_hub / filter_router 等），不能直接推給隔壁的加工機器。
+     * 採集機器與物流機器則可直接推給任何相鄰機器。
+     */
+    private boolean requiresLogisticsRelay(final String machineId) {
+        return switch (machineId.toLowerCase()) {
+            // 採集機器 → 不需要中繼
+            case "auto_farm", "tree_feller", "fishing_dock", "mob_collector",
+                 "crop_harvester", "vacuum_inlet",
+                 "quarry_drill", "quarry_drill_mk2", "quarry_drill_mk3",
+                 "android_item_interface" -> false;
+            // 物流基礎設施 → 不需要中繼
+            case "logistics_node", "item_tube", "industrial_bus", "cargo_motor",
+                 "splitter_node", "filter_router", "storage_hub", "trash_node",
+                 "cargo_manager", "cargo_input_node", "cargo_output_node" -> false;
+            // 能源機器 → 不會推物品（isAutoTransferSource=false），不影響
+            case "energy_node", "energy_cable",
+                 "solar_generator", "coal_generator", "solar_array", "storm_turbine",
+                 "fusion_reactor", "battery_bank", "chrono_engine", "entropy_chamber" -> false;
+            // 加工機器 → 必須透過中繼
+            default -> true;
+        };
+    }
+
+    /**
+     * 非中繼的物流終端：加工機器即使在 depth==0 也可以直接推送到這些機器
+     * （它們是物流基礎設施的一部分）。
+     */
+    private boolean isLogisticsTerminal(final String machineId) {
+        return switch (machineId.toLowerCase()) {
+            case "splitter_node", "filter_router", "storage_hub", "trash_node",
+                 "cargo_manager", "cargo_input_node", "cargo_output_node" -> true;
+            default -> false;
         };
     }
 
