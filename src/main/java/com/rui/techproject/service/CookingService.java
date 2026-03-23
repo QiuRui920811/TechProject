@@ -77,6 +77,22 @@ public final class CookingService {
             Material.SMOKER, Material.BLAST_FURNACE, Material.FURNACE
     );
 
+    // ── 互動烹飪 ──
+    private static final String[] INTERACTION_LABELS = {
+            "\uD83D\uDD14 點擊翻面！",
+            "\uD83D\uDD14 點擊攪拌！",
+            "\uD83D\uDD14 點擊調味！"
+    };
+    private static final float[] INTERACTION_THRESHOLDS = {0.30f, 0.55f, 0.80f};
+    private static final int INTERACTION_WINDOW_TICKS = 60; // 3 秒
+    private static final int INTERACTION_SPEED_BONUS = 16;
+    private static final Sound[] INTERACTION_CUES = {
+            Sound.BLOCK_NOTE_BLOCK_BELL,
+            Sound.BLOCK_NOTE_BLOCK_CHIME,
+            Sound.BLOCK_NOTE_BLOCK_PLING
+    };
+    private static final String[] INTERACTION_SUCCESS = {"翻面成功！", "攪拌完成！", "調味完美！"};
+
     // ── 記錄類 ──
     private record CookingRecipe(String id, String inputId, Material inputMaterial,
                                  String outputId, int cookTimeTicks,
@@ -93,6 +109,11 @@ public final class CookingService {
         int ticksElapsed;
         int lastPhase = -1;
         ScheduledTask tickTask;
+        boolean awaitingInteraction;
+        int nextInteractionIndex;   // 下一個互動階段 (0→翻面, 1→攪拌, 2→調味)
+        int interactionsCompleted;
+        int interactionPromptTick;  // 互動提示出現的 tick
+        int bonusTicks;             // 互動成功累計加速
 
         CookingSession(UUID playerId, LocationKey location, CookingRecipe recipe,
                        long startTick, int totalTicks) {
@@ -154,21 +175,28 @@ public final class CookingService {
         if (!this.isCookingStation(block)) {
             return false;
         }
+
+        // 互動烹飪：檢查待處理的翻面/攪拌/調味互動
+        final LocationKey activeKey = LocationKey.from(block.getLocation());
+        final CookingSession active = this.activeSessions.get(activeKey);
+        if (active != null && active.awaitingInteraction && active.playerId.equals(player.getUniqueId())) {
+            this.handleInteraction(player, active, block.getLocation());
+            return true;
+        }
+
         if (handItem == null || handItem.getType().isAir()) {
             // 空手右鍵：如果正在烹調，顯示進度
-            final LocationKey key = LocationKey.from(block.getLocation());
-            final CookingSession session = this.activeSessions.get(key);
-            if (session != null) {
-                final float progress = (float) session.ticksElapsed / session.totalTicks;
+            if (active != null) {
+                final int effectiveTicks = Math.max(1, active.totalTicks - active.bonusTicks);
+                final float progress = Math.min(1f, (float) active.ticksElapsed / effectiveTicks);
                 final int pct = (int) (progress * 100);
-                player.sendActionBar(Component.text("烹調進度：" + pct + "% — " + session.recipe.displayName, COOK_COLOR));
+                player.sendActionBar(Component.text("烹調進度：" + pct + "% — " + active.recipe.displayName, COOK_COLOR));
                 return true;
             }
             return false;
         }
 
-        final LocationKey key = LocationKey.from(block.getLocation());
-        if (this.activeSessions.containsKey(key)) {
+        if (active != null) {
             player.sendActionBar(Component.text("這個烹飪台正在使用中！", TextColor.color(0xFF7B7B)));
             return true;
         }
@@ -302,42 +330,118 @@ public final class CookingService {
         }
 
         session.ticksElapsed += 4;
-        final float progress = Math.min(1.0f, (float) session.ticksElapsed / session.totalTicks);
+        final int effectiveTotalTicks = Math.max(1, session.totalTicks - session.bonusTicks);
+        final float progress = Math.min(1.0f, (float) session.ticksElapsed / effectiveTotalTicks);
         final int phaseIndex = Math.min(PHASE_LABELS.length - 1,
                 (int) (progress * PHASE_LABELS.length));
 
-        // 更新 BossBar
+        final Player player = Bukkit.getPlayer(session.playerId);
+        final World world = Bukkit.getWorld(key.worldName());
+
+        // ── 互動提示系統 ──
+        if (session.awaitingInteraction) {
+            // 檢查互動窗口是否過期
+            if (session.ticksElapsed - session.interactionPromptTick >= INTERACTION_WINDOW_TICKS) {
+                session.awaitingInteraction = false;
+                if (player != null) {
+                    player.sendActionBar(Component.text("⏳ 互動超時", TextColor.color(0x888888)));
+                    player.playSound(player.getLocation(), Sound.BLOCK_FIRE_EXTINGUISH, 0.3f, 0.8f);
+                }
+            } else if (player != null) {
+                // 閃爍 ActionBar 提示
+                final int idx = session.nextInteractionIndex - 1;
+                final boolean flash = (session.ticksElapsed / 4) % 2 == 0;
+                final TextColor promptColor = flash ? TextColor.color(0xFFE066) : TextColor.color(0xFF9F43);
+                player.sendActionBar(Component.text("▶ " + INTERACTION_LABELS[idx] + " ◀", promptColor)
+                        .decoration(TextDecoration.BOLD, true));
+            }
+        } else if (session.nextInteractionIndex < INTERACTION_THRESHOLDS.length) {
+            // 檢查是否到達下一個互動觸發點
+            if (progress >= INTERACTION_THRESHOLDS[session.nextInteractionIndex]) {
+                session.awaitingInteraction = true;
+                session.interactionPromptTick = session.ticksElapsed;
+                final int idx = session.nextInteractionIndex;
+                session.nextInteractionIndex++;
+                if (player != null) {
+                    player.showTitle(Title.title(
+                            Component.text(INTERACTION_LABELS[idx].substring(0, 2),
+                                    TextColor.color(0xFFE066)).decoration(TextDecoration.BOLD, true),
+                            Component.text(INTERACTION_LABELS[idx].substring(2).trim(),
+                                    TextColor.color(0xFFF4C2)),
+                            Title.Times.times(Duration.ofMillis(50), Duration.ofMillis(800), Duration.ofMillis(200))
+                    ));
+                    player.playSound(player.getLocation(), INTERACTION_CUES[idx], 0.8f, 1.2f);
+                    player.playSound(player.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 0.3f, 2.0f);
+                }
+                // 互動提示粒子環
+                if (world != null) {
+                    final Location ringLoc = new Location(world, key.x() + 0.5, key.y() + 1.3, key.z() + 0.5);
+                    for (int i = 0; i < 12; i++) {
+                        final double angle = Math.toRadians(i * 30);
+                        final Location pt = ringLoc.clone().add(Math.cos(angle) * 0.4, 0, Math.sin(angle) * 0.4);
+                        world.spawnParticle(Particle.END_ROD, pt, 1, 0, 0.05, 0, 0.01);
+                    }
+                }
+            }
+        }
+
+        // ── 更新 BossBar ──
         final TextColor barColor = progress < 0.5f ? HEAT_COLOR : (progress < 0.9f ? COOK_COLOR : DONE_COLOR);
+        final String interactHint = session.awaitingInteraction ? " ⚡" : "";
         session.bossBar.name(Component.text(
                 this.buildProgressBar(progress) + " " + PHASE_LABELS[phaseIndex] + " " +
-                        session.recipe.displayName + " " + (int) (progress * 100) + "%",
+                        session.recipe.displayName + " " + (int) (progress * 100) + "%" + interactHint,
                 barColor
         ));
         session.bossBar.progress(progress);
-        session.bossBar.color(progress < 0.5f ? BossBar.Color.RED : (progress < 0.9f ? BossBar.Color.YELLOW : BossBar.Color.GREEN));
+        session.bossBar.color(progress < 0.5f ? BossBar.Color.RED
+                : (progress < 0.9f ? BossBar.Color.YELLOW : BossBar.Color.GREEN));
 
-        // 粒子效果
-        final World world = Bukkit.getWorld(key.worldName());
+        // ── 粒子效果 ──
         if (world != null) {
             final Location particleLoc = new Location(world, key.x() + 0.5, key.y() + 1.3, key.z() + 0.5);
+            final Location fireLoc = particleLoc.clone().add(0, -0.3, 0);
+
             if (progress < 0.3f) {
+                // 加熱階段：煙霧 + 小火焰
                 world.spawnParticle(Particle.SMOKE, particleLoc, 3, 0.15, 0.1, 0.15, 0.01);
-                world.spawnParticle(Particle.FLAME, particleLoc.clone().add(0, -0.3, 0), 2, 0.1, 0.05, 0.1, 0.005);
-            } else if (progress < 0.7f) {
+                world.spawnParticle(Particle.FLAME, fireLoc, 2, 0.1, 0.05, 0.1, 0.005);
+            } else if (progress < 0.6f) {
+                // 烹調階段：營火煙 + 蒸氣 + 油星
                 world.spawnParticle(Particle.CAMPFIRE_COSY_SMOKE, particleLoc, 1, 0.08, 0.1, 0.08, 0.01);
+                world.spawnParticle(Particle.CLOUD, particleLoc.clone().add(0, 0.2, 0), 1, 0.06, 0.08, 0.06, 0.005);
                 world.spawnParticle(Particle.LAVA, particleLoc, 1, 0.1, 0.05, 0.1, 0.0);
-            } else {
-                world.spawnParticle(Particle.HAPPY_VILLAGER, particleLoc, 3, 0.2, 0.15, 0.2, 0.0);
+                // 偶爾油爆粒子
+                if (session.ticksElapsed % 16 == 0) {
+                    world.spawnParticle(Particle.ELECTRIC_SPARK, particleLoc, 4, 0.15, 0.1, 0.15, 0.08);
+                }
+            } else if (progress < 0.85f) {
+                // 收汁階段：金色光點 + 蒸氣
+                world.spawnParticle(Particle.HAPPY_VILLAGER, particleLoc, 2, 0.2, 0.15, 0.2, 0.0);
                 world.spawnParticle(Particle.WAX_ON, particleLoc, 2, 0.15, 0.1, 0.15, 0.0);
+                world.spawnParticle(Particle.CLOUD, particleLoc.clone().add(0, 0.3, 0), 1, 0.04, 0.06, 0.04, 0.003);
+            } else {
+                // 完成階段：璀璨星光
+                world.spawnParticle(Particle.HAPPY_VILLAGER, particleLoc, 3, 0.2, 0.15, 0.2, 0.0);
+                world.spawnParticle(Particle.WAX_ON, particleLoc, 3, 0.15, 0.1, 0.15, 0.0);
+                world.spawnParticle(Particle.END_ROD, particleLoc, 1, 0.1, 0.15, 0.1, 0.02);
+            }
+
+            // 互動等待期間額外粒子（旋轉光環）
+            if (session.awaitingInteraction && session.ticksElapsed % 8 == 0) {
+                for (int i = 0; i < 6; i++) {
+                    final double angle = Math.toRadians(i * 60 + session.ticksElapsed * 6);
+                    final Location pt = particleLoc.clone().add(Math.cos(angle) * 0.35, 0.05, Math.sin(angle) * 0.35);
+                    world.spawnParticle(Particle.END_ROD, pt, 1, 0, 0, 0, 0.0);
+                }
             }
 
             // 旋轉食物展示
             this.rotateFoodDisplay(session, world);
         }
 
-        // 階段切換 Title 動畫
-        final Player player = Bukkit.getPlayer(session.playerId);
-        if (player != null && phaseIndex != session.lastPhase) {
+        // ── 階段切換 Title（非互動期間）──
+        if (player != null && phaseIndex != session.lastPhase && !session.awaitingInteraction) {
             session.lastPhase = phaseIndex;
             if (phaseIndex > 0) {
                 player.showTitle(Title.title(
@@ -349,15 +453,20 @@ public final class CookingService {
                 player.playSound(player.getLocation(), PHASE_SOUNDS[phaseIndex], 0.45f, 1.0f + phaseIndex * 0.1f);
             }
 
-            // ActionBar 進度文字
             player.sendActionBar(Component.text(
                     this.buildProgressBar(progress) + " " + session.recipe.displayName + " " + (int) (progress * 100) + "%",
                     barColor
             ));
         }
 
-        // 完成
-        if (session.ticksElapsed >= session.totalTicks) {
+        // ── 烹調環境音效 ──
+        if (player != null && session.ticksElapsed % 20 == 0) {
+            player.playSound(new Location(world, key.x() + 0.5, key.y(), key.z() + 0.5),
+                    Sound.BLOCK_FURNACE_FIRE_CRACKLE, 0.25f, 0.9f + (float) (Math.random() * 0.3));
+        }
+
+        // ── 完成 ──
+        if (session.ticksElapsed >= effectiveTotalTicks) {
             task.cancel();
             this.completeCooking(key);
         }
@@ -376,28 +485,46 @@ public final class CookingService {
 
         // 建立產物
         final ItemStack output = this.buildOutputItem(session.recipe);
+        final boolean perfect = session.interactionsCompleted >= 3;
+        final String bonusText = session.interactionsCompleted > 0
+                ? " (互動 " + session.interactionsCompleted + "/3)"
+                : "";
 
         // 掉落物品
         if (loc != null && world != null) {
             world.dropItemNaturally(loc, output);
 
-            // 完成特效
-            world.spawnParticle(Particle.TOTEM_OF_UNDYING, loc, 25, 0.3, 0.4, 0.3, 0.08);
-            world.spawnParticle(Particle.HAPPY_VILLAGER, loc, 12, 0.25, 0.3, 0.25, 0.0);
+            // 完成特效 — 根據互動完成數增強
+            world.spawnParticle(Particle.TOTEM_OF_UNDYING, loc, perfect ? 40 : 25, 0.3, 0.5, 0.3, 0.1);
+            world.spawnParticle(Particle.HAPPY_VILLAGER, loc, perfect ? 20 : 12, 0.3, 0.35, 0.3, 0.0);
+            world.spawnParticle(Particle.END_ROD, loc, perfect ? 15 : 6, 0.2, 0.4, 0.2, 0.05);
+            world.spawnParticle(Particle.WAX_ON, loc, 10, 0.25, 0.3, 0.25, 0.0);
+            if (perfect) {
+                world.spawnParticle(Particle.ELECTRIC_SPARK, loc, 20, 0.3, 0.4, 0.3, 0.08);
+            }
             world.playSound(loc, Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 0.8f, 1.3f);
             world.playSound(loc, Sound.BLOCK_AMETHYST_BLOCK_CHIME, 0.6f, 1.5f);
-            world.playSound(loc, Sound.UI_TOAST_CHALLENGE_COMPLETE, 0.4f, 1.2f);
+            world.playSound(loc, Sound.UI_TOAST_CHALLENGE_COMPLETE, 0.5f, 1.2f);
+            if (perfect) {
+                world.playSound(loc, Sound.ENTITY_PLAYER_LEVELUP, 0.6f, 1.4f);
+            }
         }
 
         // 玩家通知
         final Player player = Bukkit.getPlayer(session.playerId);
         if (player != null) {
+            final Component titleText = perfect
+                    ? Component.text("\uD83C\uDF1F", TextColor.color(0xFFD700)).decoration(TextDecoration.BOLD, true)
+                    : Component.text("✅", DONE_COLOR).decoration(TextDecoration.BOLD, true);
+            final Component subtitleText = perfect
+                    ? Component.text("完美烹調！ " + session.recipe.displayName, TextColor.color(0xFFD700))
+                    : Component.text(session.recipe.displayName + " 烹調完成！" + bonusText, DONE_COLOR);
+
             player.showTitle(Title.title(
-                    Component.text("✅", DONE_COLOR).decoration(TextDecoration.BOLD, true),
-                    Component.text(session.recipe.displayName + " 烹調完成！", DONE_COLOR),
-                    Title.Times.times(Duration.ofMillis(100), Duration.ofMillis(1200), Duration.ofMillis(500))
+                    titleText, subtitleText,
+                    Title.Times.times(Duration.ofMillis(100), Duration.ofMillis(1500), Duration.ofMillis(600))
             ));
-            player.sendActionBar(Component.text("🍽 " + session.recipe.displayName + " 已完成烹調", DONE_COLOR));
+            player.sendActionBar(Component.text("🍽 " + session.recipe.displayName + " 已完成烹調" + bonusText, DONE_COLOR));
             player.hideBossBar(session.bossBar);
 
             // 成就追蹤
@@ -406,6 +533,66 @@ public final class CookingService {
         }
 
         this.removeDisplayEntity(session);
+    }
+
+    // ══════════════════════ 互動烹飪處理 ══════════════════════
+
+    private void handleInteraction(final Player player, final CookingSession session, final Location blockLoc) {
+        session.awaitingInteraction = false;
+        session.interactionsCompleted++;
+        session.bonusTicks += INTERACTION_SPEED_BONUS;
+
+        final int idx = session.nextInteractionIndex - 1;
+        final String successMsg = idx >= 0 && idx < INTERACTION_SUCCESS.length
+                ? INTERACTION_SUCCESS[idx] : "操作成功！";
+
+        // 成功 Title
+        player.showTitle(Title.title(
+                Component.text("✓", DONE_COLOR).decoration(TextDecoration.BOLD, true),
+                Component.text(successMsg, COOK_COLOR),
+                Title.Times.times(Duration.ofMillis(50), Duration.ofMillis(500), Duration.ofMillis(200))
+        ));
+
+        // 音效
+        player.playSound(blockLoc, Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 0.7f, 1.5f);
+        player.playSound(blockLoc, Sound.BLOCK_AMETHYST_BLOCK_CHIME, 0.5f, 1.8f);
+        player.playSound(blockLoc, Sound.ENTITY_PLAYER_BURP, 0.3f, 1.3f);
+
+        // 爆發粒子
+        final World world = blockLoc.getWorld();
+        if (world != null) {
+            final Location loc = blockLoc.clone().add(0.5, 1.3, 0.5);
+            world.spawnParticle(Particle.ELECTRIC_SPARK, loc, 18, 0.25, 0.2, 0.25, 0.15);
+            world.spawnParticle(Particle.FLAME, loc, 10, 0.15, 0.1, 0.15, 0.05);
+            world.spawnParticle(Particle.WAX_ON, loc, 12, 0.2, 0.15, 0.2, 0.0);
+            world.spawnParticle(Particle.HAPPY_VILLAGER, loc, 6, 0.2, 0.1, 0.2, 0.0);
+        }
+
+        // 翻轉食物展示
+        this.flipFoodDisplay(session);
+
+        // ActionBar 加速提示
+        player.sendActionBar(Component.text("⚡ " + successMsg + " 烹調加速！", DONE_COLOR));
+    }
+
+    private void flipFoodDisplay(final CookingSession session) {
+        if (session.displayEntityId == null) {
+            return;
+        }
+        final Entity entity = Bukkit.getEntity(session.displayEntityId);
+        if (!(entity instanceof ItemDisplay display)) {
+            return;
+        }
+        // 翻轉動畫：放大 + 旋轉 180°
+        final float currentAngle = (session.ticksElapsed * 4.5f) % 360f;
+        display.setTransformation(new Transformation(
+                new Vector3f(0, 0.3f, 0),
+                new AxisAngle4f((float) Math.toRadians(currentAngle + 180), 0, 1, 0),
+                new Vector3f(0.85f, 0.85f, 0.85f),
+                new AxisAngle4f((float) Math.toRadians(360), 1, 0, 0)
+        ));
+        display.setInterpolationDuration(5);
+        display.setInterpolationDelay(0);
     }
 
     // ══════════════════════ 食物展示實體 ══════════════════════
@@ -446,21 +633,44 @@ public final class CookingService {
         if (!(entity instanceof ItemDisplay display)) {
             return;
         }
-        final float angle = (session.ticksElapsed * 4.5f) % 360f;
+        final int effectiveTotal = Math.max(1, session.totalTicks - session.bonusTicks);
+        final float progress = Math.min(1f, (float) session.ticksElapsed / effectiveTotal);
+
+        // 旋轉速度隨進度加快
+        final float speedMultiplier = 1.0f + progress * 1.5f;
+        final float angle = (session.ticksElapsed * 4.5f * speedMultiplier) % 360f;
         final float bobY = (float) (Math.sin(session.ticksElapsed * 0.15) * 0.04);
+
+        // 互動等待期間脈動效果
+        final float scale;
+        if (session.awaitingInteraction) {
+            final float pulse = (float) (Math.sin(session.ticksElapsed * 0.4) * 0.08);
+            scale = 0.65f + pulse;
+        } else {
+            scale = 0.65f + progress * 0.1f;  // 隨進度略微放大
+        }
+
+        // 高度隨進度略微上升
+        final float baseY = 0.1f + progress * 0.08f;
+
         display.setTransformation(new Transformation(
-                new Vector3f(0, 0.1f + bobY, 0),
+                new Vector3f(0, baseY + bobY, 0),
                 new AxisAngle4f((float) Math.toRadians(angle), 0, 1, 0),
-                new Vector3f(0.65f, 0.65f, 0.65f),
+                new Vector3f(scale, scale, scale),
                 new AxisAngle4f(0, 0, 1, 0)
         ));
 
         // 更新發光顏色
-        final float progress = (float) session.ticksElapsed / session.totalTicks;
-        if (progress > 0.8f) {
+        if (session.awaitingInteraction) {
+            // 互動等待：金色閃爍
+            final boolean flash = (session.ticksElapsed / 4) % 2 == 0;
+            display.setGlowColorOverride(flash ? Color.fromRGB(0xFFE066) : Color.fromRGB(0xFF9F43));
+        } else if (progress > 0.85f) {
             display.setGlowColorOverride(Color.fromRGB(0x7CFC9A));
-        } else if (progress > 0.5f) {
+        } else if (progress > 0.6f) {
             display.setGlowColorOverride(Color.fromRGB(0xFFD166));
+        } else if (progress > 0.3f) {
+            display.setGlowColorOverride(Color.fromRGB(0xFF8C42));
         }
     }
 
