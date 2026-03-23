@@ -123,6 +123,29 @@ public final class TechRegistry {
         return this.machines.values().stream().filter(def -> def.guideCategory() == category && def.tier() == tier).toList();
     }
 
+    public List<TechItemDefinition> getItemsByGuideCategoryAndSystemGroup(final GuideCategory category, final SystemGroup group) {
+        return this.items.values().stream().filter(def -> def.guideCategory() == category && def.systemGroup() == group).toList();
+    }
+
+    public List<MachineDefinition> getMachinesByGuideCategoryAndSystemGroup(final GuideCategory category, final SystemGroup group) {
+        return this.machines.values().stream().filter(def -> def.guideCategory() == category && def.systemGroup() == group).toList();
+    }
+
+    public List<SystemGroup> getSystemGroupsForGuideCategory(final GuideCategory category) {
+        final java.util.LinkedHashSet<SystemGroup> groups = new java.util.LinkedHashSet<>();
+        for (final TechItemDefinition item : this.items.values()) {
+            if (item.guideCategory() == category) {
+                groups.add(item.systemGroup());
+            }
+        }
+        for (final MachineDefinition machine : this.machines.values()) {
+            if (machine.guideCategory() == category) {
+                groups.add(machine.systemGroup());
+            }
+        }
+        return new ArrayList<>(groups);
+    }
+
     public List<MachineRecipe> getRecipesForOutput(final String itemId) {
         return this.recipes.values().stream()
                 .filter(recipe -> recipe.outputId().equalsIgnoreCase(itemId))

@@ -7,6 +7,7 @@ import com.rui.techproject.addon.TechInteractionType;
 import com.rui.techproject.model.GuideCategory;
 import com.rui.techproject.model.MachineDefinition;
 import com.rui.techproject.model.MachineRecipe;
+import com.rui.techproject.model.SystemGroup;
 import com.rui.techproject.model.TechItemDefinition;
 import com.rui.techproject.model.TechTier;
 import com.rui.techproject.util.ItemFactoryUtil;
@@ -143,7 +144,7 @@ public final class TechBookService {
         inventory.setItem(4, this.info(Material.ENCHANTED_BOOK, "功能分類", List.of("先選你要看的功能類別", "進去後直接看內容，想縮小再用階級篩選")));
 
         final GuideCategory[] order = HUB_ORDER;
-        final int[] slots = {10, 12, 14, 16, 28, 30, 32, 34};
+        final int[] slots = {10, 12, 14, 16, 19, 21, 23, 25, 31};
         for (int index = 0; index < Math.min(order.length, slots.length); index++) {
             inventory.setItem(slots[index], this.renderGuideCategoryCard(player, order[index]));
         }
@@ -156,6 +157,58 @@ public final class TechBookService {
         inventory.setItem(51, this.itemFactory.tagGuiAction(this.guiButton("hub-achievements", Material.DIAMOND, "成就系統", List.of("查看所有成就進度", "包含分類篩選與獎勵")), "achievements"));
         inventory.setItem(52, this.researchOverviewIcon(player.getUniqueId(), null, null, false));
         inventory.setItem(53, this.itemFactory.tagGuiAction(this.guiButton("hub-refresh", Material.BOOK, "重新整理分類", List.of("更新分類解鎖狀態", "也能當成回首頁")), "hub"));
+        this.openBookInventory(player, inventory);
+    }
+
+    public void openSubCategoryPage(final Player player, final GuideCategory category) {
+        final List<SystemGroup> groups = this.registry.getSystemGroupsForGuideCategory(category);
+        final Inventory inventory = this.createHudBookInventory();
+        inventory.setItem(4, this.info(category.icon(), category.displayName() + " — 子分類", List.of(
+                this.guideCategoryFlavor(category),
+                "選一個子分類深入查看，或選全部瀏覽"
+        )));
+
+        // 第一排 slot 10: "全部" 按鈕
+        final int totalItems = this.registry.getItemsByGuideCategory(category).size() + this.registry.getMachinesByGuideCategory(category).size();
+        inventory.setItem(10, this.itemFactory.tagGuiAction(this.buildConfiguredIcon(
+            "subcat-all-" + category.name().toLowerCase(Locale.ROOT),
+            Material.NETHER_STAR,
+            this.itemFactory.warning("◆ 全部瀏覽"),
+            this.itemFactory.mutedLore(List.of("共 " + totalItems + " 個項目", "不篩選，直接看全部")),
+            true
+        ), "browse-all:" + category.name() + ":ALL:0"));
+
+        // 子分類卡片 — 放在 CONTENT_SLOTS 但跳過第一格 (已用於全部)
+        final int[] subSlots = {11, 12, 13, 14, 15, 16, 19, 20, 21, 22, 23, 24, 25, 28, 29, 30, 31, 32, 33, 34, 37, 38, 39, 40, 41, 42, 43};
+        int slotIndex = 0;
+        for (final SystemGroup group : groups) {
+            if (slotIndex >= subSlots.length) {
+                break;
+            }
+            final int itemCount = this.registry.getItemsByGuideCategoryAndSystemGroup(category, group).size();
+            final int machineCount = this.registry.getMachinesByGuideCategoryAndSystemGroup(category, group).size();
+            final int count = itemCount + machineCount;
+            if (count <= 0) {
+                continue;
+            }
+            inventory.setItem(subSlots[slotIndex], this.itemFactory.tagGuiAction(this.buildConfiguredIcon(
+                "subcat-" + group.name().toLowerCase(Locale.ROOT),
+                group.icon(),
+                this.itemFactory.warning("▶ " + group.displayName()),
+                this.itemFactory.mutedLore(List.of(
+                    "物品：" + itemCount + " | 機器：" + machineCount,
+                    "點擊查看此子分類內容"
+                )),
+                true
+            ), "browse:" + category.name() + ":" + group.name() + ":ALL:0"));
+            slotIndex++;
+        }
+
+        // 底部工具列
+        inventory.setItem(45, this.itemFactory.tagGuiAction(this.guiButton("subcat-back-hub", Material.ARROW, "返回分類首頁", List.of("回到功能分類大廳")), "hub"));
+        inventory.setItem(48, this.itemFactory.tagGuiAction(this.guiButton("subcat-search", Material.COMPASS, "搜尋物品", List.of("點擊後在聊天輸入關鍵字")), "search-prompt"));
+        inventory.setItem(49, this.itemFactory.tagGuiAction(this.guiButton("subcat-guide-list", Material.WRITABLE_BOOK, "科技指南", List.of("教學 / 配線 / 物流 / 升級")), "guide-list:0"));
+        inventory.setItem(53, this.researchOverviewIcon(player.getUniqueId(), category, null, false));
         this.openBookInventory(player, inventory);
     }
 
@@ -192,10 +245,14 @@ public final class TechBookService {
     }
 
     public void openMainBook(final Player player, final GuideCategory category, final TechTier tier) {
-        this.openMainBook(player, category, tier, 0);
+        this.openMainBook(player, category, tier, null, 0);
     }
 
     public void openMainBook(final Player player, final GuideCategory category, final TechTier tier, final int page) {
+        this.openMainBook(player, category, tier, null, page);
+    }
+
+    public void openMainBook(final Player player, final GuideCategory category, final TechTier tier, final SystemGroup systemGroup, final int page) {
         if (tier != null && !this.isTierUnlocked(player.getUniqueId(), tier)) {
             player.sendMessage(this.itemFactory.warning("這個階級尚未解鎖，請先完成前一階內容。"));
             this.openTierHub(player, category);
@@ -215,12 +272,20 @@ public final class TechBookService {
             }
         }
         final String tierLabel = tier == null ? "全部" : tier.shortName();
+        final String groupLabel = systemGroup == null ? "全部" : systemGroup.displayName();
+        final String browseAction = systemGroup != null
+                ? "browse:" + category.name() + ":" + systemGroup.name()
+                : "browse-all:" + category.name();
         final Inventory inventory = this.createHudBookInventory();
         inventory.setItem(1, this.buildConfiguredIcon(
             "main-overview",
             category.icon(),
             this.itemFactory.warning("科技總覽"),
-            this.itemFactory.mutedLore(List.of("直接列出這個分類的內容", "右側可切換各階級篩選", this.guideCategoryFlavor(category))),
+            this.itemFactory.mutedLore(List.of(
+                "分類：" + category.displayName(),
+                systemGroup != null ? "子分類：" + systemGroup.displayName() : "顯示全部",
+                this.guideCategoryFlavor(category)
+            )),
             true
         ));
         inventory.setItem(2, this.itemFactory.tagGuiAction(this.buildConfiguredIcon(
@@ -229,7 +294,7 @@ public final class TechBookService {
             this.itemFactory.warning(tier == null ? "◆ 全部階級" : "全部階級"),
             this.itemFactory.mutedLore(List.of("顯示此分類全部內容", tier == null ? "目前未套用階級篩選" : "點擊切回全部")),
             true
-        ), "category:" + category.name()));
+        ), browseAction + ":ALL:0"));
         int tierIndex = 0;
         for (final TechTier current : TechTier.values()) {
             final boolean unlocked = this.isTierUnlocked(player.getUniqueId(), current);
@@ -241,7 +306,7 @@ public final class TechBookService {
                     : this.itemFactory.hex((unlocked ? "• " : "🔒 ") + current.displayName(), unlocked ? "#A8B2C1" : "#7D8597"),
                 List.of(this.itemFactory.muted(unlocked ? (current == tier ? "目前階級" : "點擊切換到此階級") : "前一個階級尚未完成")),
                 true
-            ), "tier:" + category.name() + ":" + current.name());
+            ), browseAction + ":" + current.name() + ":0");
             if (tierIndex < TIER_SLOTS.length) {
                 inventory.setItem(TIER_SLOTS[tierIndex], icon);
             }
@@ -252,26 +317,10 @@ public final class TechBookService {
         final List<ItemStack> entries = new ArrayList<>();
         if (tier == null) {
             for (final TechTier current : TechTier.values()) {
-                for (final TechItemDefinition item : this.registry.getItemsByGuideCategoryAndTier(category, current)) {
-                    entries.add(this.renderItemEntry(uuid, item));
-                }
-                for (final MachineDefinition machine : this.registry.getMachinesByGuideCategoryAndTier(category, current)) {
-                    entries.add(this.renderMachineEntry(uuid, machine));
-                }
-                for (final TechInteractionDefinition interaction : this.addonService.getInteractionsByCategoryAndTier(category, current)) {
-                    entries.add(this.renderInteractionEntry(uuid, interaction));
-                }
+                this.collectFilteredEntries(entries, uuid, category, current, systemGroup);
             }
         } else {
-            for (final TechItemDefinition item : this.registry.getItemsByGuideCategoryAndTier(category, tier)) {
-                entries.add(this.renderItemEntry(uuid, item));
-            }
-            for (final MachineDefinition machine : this.registry.getMachinesByGuideCategoryAndTier(category, tier)) {
-                entries.add(this.renderMachineEntry(uuid, machine));
-            }
-            for (final TechInteractionDefinition interaction : this.addonService.getInteractionsByCategoryAndTier(category, tier)) {
-                entries.add(this.renderInteractionEntry(uuid, interaction));
-            }
+            this.collectFilteredEntries(entries, uuid, category, tier, systemGroup);
         }
 
         final int maxPage = Math.max(0, (entries.size() - 1) / CONTENT_SLOTS.length);
@@ -281,14 +330,20 @@ public final class TechBookService {
             inventory.setItem(CONTENT_SLOTS[index], entries.get(startIndex + index));
         }
 
-        inventory.setItem(45, this.itemFactory.tagGuiAction(this.guiButton("main-page-prev", Material.ARROW, "上一頁", List.of("頁數 {page}/{max-page}"), this.placeholders("page", String.valueOf(safePage + 1), "max-page", String.valueOf(maxPage + 1))), "page:" + category.name() + ":" + (tier == null ? "ALL" : tier.name()) + ":" + Math.max(0, safePage - 1)));
+        final String pageAction = browseAction + ":" + (tier == null ? "ALL" : tier.name());
+        inventory.setItem(45, this.itemFactory.tagGuiAction(this.guiButton("main-page-prev", Material.ARROW, "上一頁", List.of("頁數 {page}/{max-page}"), this.placeholders("page", String.valueOf(safePage + 1), "max-page", String.valueOf(maxPage + 1))), pageAction + ":" + Math.max(0, safePage - 1)));
         inventory.setItem(46, this.itemFactory.tagGuiAction(this.guiButton("main-starter-guide", Material.KNOWLEDGE_BOOK, "新手起步", List.of("先看第一條生存科技流程", "包含合成、擺放、接電順序")), "guide-direct:" + STARTER_GUIDE_ID));
         inventory.setItem(47, this.itemFactory.tagGuiAction(this.guiButton("main-guide-list", Material.WRITABLE_BOOK, "科技指南", List.of("教學 / 配線 / 物流 / 升級")), "guide-list:0"));
         inventory.setItem(48, this.itemFactory.tagGuiAction(this.guiButton("main-search", Material.COMPASS, "搜尋目標", List.of("點擊後在聊天輸入關鍵字", "會跨分類搜尋")), "search-prompt"));
-        inventory.setItem(49, this.itemFactory.tagGuiAction(this.guiButton("main-back-hub", Material.BOOK, "返回分類首頁", List.of("分類：{category}", "篩選：{tier}"), this.placeholders("category", category.displayName(), "tier", tierLabel)), "hub"));
-        inventory.setItem(50, this.info(tier == null ? Material.NETHER_STAR : tier.icon(), "目前篩選", List.of("分類：" + category.displayName(), tier == null ? this.categoryProgressLine(player.getUniqueId(), category) : this.categoryTierProgressLine(player.getUniqueId(), category, tier), tier == null ? "顯示全部內容" : (this.isTierUnlocked(player.getUniqueId(), tier) ? "已可正式推進" : "前一個階級尚未完成"))));
+        inventory.setItem(49, this.itemFactory.tagGuiAction(this.guiButton("main-back-subcats", Material.BOOK, "返回子分類", List.of("分類：{category}", "子分類：{group}", "篩選：{tier}"), this.placeholders("category", category.displayName(), "group", groupLabel, "tier", tierLabel)), "category:" + category.name()));
+        inventory.setItem(50, this.info(tier == null ? Material.NETHER_STAR : tier.icon(), "目前篩選", List.of(
+                "分類：" + category.displayName(),
+                systemGroup != null ? "子分類：" + systemGroup.displayName() : "子分類：全部",
+                tier == null ? this.categoryProgressLine(player.getUniqueId(), category) : this.categoryTierProgressLine(player.getUniqueId(), category, tier),
+                tier == null ? "顯示全部內容" : (this.isTierUnlocked(player.getUniqueId(), tier) ? "已可正式推進" : "前一個階級尚未完成")
+        )));
         inventory.setItem(52, this.researchOverviewIcon(player.getUniqueId(), category, tier, false));
-        inventory.setItem(53, this.itemFactory.tagGuiAction(this.guiButton("main-page-next", Material.SPECTRAL_ARROW, "下一頁", List.of("頁數 {page}/{max-page}"), this.placeholders("page", String.valueOf(safePage + 1), "max-page", String.valueOf(maxPage + 1))), "page:" + category.name() + ":" + (tier == null ? "ALL" : tier.name()) + ":" + Math.min(maxPage, safePage + 1)));
+        inventory.setItem(53, this.itemFactory.tagGuiAction(this.guiButton("main-page-next", Material.SPECTRAL_ARROW, "下一頁", List.of("頁數 {page}/{max-page}"), this.placeholders("page", String.valueOf(safePage + 1), "max-page", String.valueOf(maxPage + 1))), pageAction + ":" + Math.min(maxPage, safePage + 1)));
         this.openBookInventory(player, inventory);
     }
 
@@ -457,12 +512,19 @@ public final class TechBookService {
             inventory.setItem(22, this.info(Material.REDSTONE, "機器資訊", machineInfoLines));
             final int recipeViewCount = this.recipeViewsFor(machine.id()).size();
             inventory.setItem(37, this.researchActionIcon(player, "machine", machine.id(), machine.unlockRequirement(), this.researchCost(machine), this.progressService.hasMachineUnlocked(player.getUniqueId(), machine.id())));
-            if (recipeViewCount > 0) {
-                inventory.setItem(40, this.itemFactory.tagGuiAction(this.guiButton("machine-detail-view-recipe", Material.KNOWLEDGE_BOOK, "查看製作配方", List.of(
-                    "共有 {count} 種配方圖",
+            if (recipeViewCount > 1) {
+                inventory.setItem(40, this.itemFactory.tagGuiAction(this.guiButton("machine-detail-recipe-index", Material.KNOWLEDGE_BOOK, "配方總覽", List.of(
+                    "共有 {count} 種配方",
                     "{hint}"
                 ), this.placeholders(
                     "count", String.valueOf(recipeViewCount),
+                    "hint", "點擊打開配方一覽表格"
+                )), "recipe-index:" + machine.id() + ":0"));
+            } else if (recipeViewCount == 1) {
+                inventory.setItem(40, this.itemFactory.tagGuiAction(this.guiButton("machine-detail-view-recipe", Material.KNOWLEDGE_BOOK, "查看製作配方", List.of(
+                    "共有 1 種配方圖",
+                    "{hint}"
+                ), this.placeholders(
                     "hint", "點擊後直接顯示九宮格 / 製程格"
                 )), "recipe-view:" + machine.id() + ":0"));
             } else {
@@ -473,11 +535,16 @@ public final class TechBookService {
             this.renderMachineStructurePreview(inventory, machine);
             inventory.setItem(47, this.itemFactory.tagGuiAction(this.guiButton("detail-back-tier", Material.ARROW, "返回階級內容", List.of("{category}", "{tier}"), this.placeholders("category", machine.guideCategory().displayName(), "tier", machine.tier().displayName())), "back:" + machine.guideCategory().name() + ":" + machine.tier().name() + ":0"));
             inventory.setItem(48, this.researchActionIcon(player, "machine", machine.id(), machine.unlockRequirement(), this.researchCost(machine), this.progressService.hasMachineUnlocked(player.getUniqueId(), machine.id())));
-            if (recipeViewCount > 0) {
-                inventory.setItem(49, this.itemFactory.tagGuiAction(this.guiButton("machine-detail-view-recipe", Material.KNOWLEDGE_BOOK, "查看製作配方", List.of(
-                    "共有 {count} 種配方圖",
+            if (recipeViewCount > 1) {
+                inventory.setItem(49, this.itemFactory.tagGuiAction(this.guiButton("machine-detail-recipe-index-2", Material.KNOWLEDGE_BOOK, "配方總覽", List.of(
+                    "共有 {count} 種配方",
                     "{hint}"
-                ), this.placeholders("count", String.valueOf(recipeViewCount), "hint", "點擊查看完整配方頁")), "recipe-view:" + machine.id() + ":0"));
+                ), this.placeholders("count", String.valueOf(recipeViewCount), "hint", "點擊打開配方一覽表格")), "recipe-index:" + machine.id() + ":0"));
+            } else if (recipeViewCount == 1) {
+                inventory.setItem(49, this.itemFactory.tagGuiAction(this.guiButton("machine-detail-view-recipe", Material.KNOWLEDGE_BOOK, "查看製作配方", List.of(
+                    "共有 1 種配方圖",
+                    "{hint}"
+                ), this.placeholders("hint", "點擊查看完整配方頁")), "recipe-view:" + machine.id() + ":0"));
             }
             inventory.setItem(50, this.itemFactory.tagGuiAction(this.guiButton("detail-tech-tree", Material.MANGROVE_PROPAGULE, "科技樹前置線", this.buildTechTreeSummaryLines(machine.id(), machine.unlockRequirement()), this.indexedPlaceholders("line", this.buildTechTreeSummaryLines(machine.id(), machine.unlockRequirement()), 6)), "tree:machine:" + machine.id()));
             if (relatedInteraction != null) {
@@ -522,6 +589,61 @@ public final class TechBookService {
         inventory.setItem(49, this.itemFactory.tagGuiAction(this.guiButton("recipe-view-back-detail", Material.ARROW, "返回詳情", List.of("{name}"), this.placeholders("name", view.resultName())), (this.registry.getMachine(targetId) != null ? "machine:" : "item:") + targetId));
         inventory.setItem(53, this.itemFactory.tagGuiAction(this.guiButton("recipe-view-next", Material.MAGENTA_DYE, "下一種配方 ▶", List.of("目前第 {page} / {max-page} 種", "{hint}"), this.placeholders("page", String.valueOf(safePage + 1), "max-page", String.valueOf(maxPage + 1), "hint", safePage >= maxPage ? "已經是最後一種" : "點擊查看下一種")), "recipe-view:" + targetId + ":" + Math.min(maxPage, safePage + 1)));
         this.openBookInventory(player, inventory);
+    }
+
+    public void openRecipeIndex(final Player player, final String machineId, final int page) {
+        final List<MachineRecipe> recipes = this.registry.getRecipesForMachine(machineId);
+        if (recipes.isEmpty()) {
+            this.openDetail(player, machineId);
+            return;
+        }
+        final String machineName = this.itemFactory.displayNameForId(machineId);
+        final Inventory inventory = this.createHudBookInventory();
+        inventory.setItem(4, this.info(Material.KNOWLEDGE_BOOK, machineName + " — 配方總覽", List.of(
+                "共有 " + recipes.size() + " 種配方",
+                "點擊任一項直接查看完整配方圖"
+        )));
+
+        final List<ItemStack> entries = new ArrayList<>();
+        for (int index = 0; index < recipes.size(); index++) {
+            final MachineRecipe recipe = recipes.get(index);
+            final String outputName = this.itemFactory.displayNameForId(recipe.outputId());
+            final String inputSummary = this.itemFactory.joinDisplayNames(recipe.inputIds(), " + ");
+            final ItemStack icon = this.clickableReference(recipe.outputId(), false);
+            final ItemMeta meta = icon.getItemMeta();
+            if (meta != null) {
+                final List<net.kyori.adventure.text.Component> lore = new ArrayList<>();
+                lore.add(this.itemFactory.muted("輸入：" + inputSummary));
+                lore.add(this.itemFactory.muted("耗能：" + recipe.energyCost() + " EU"));
+                lore.add(this.itemFactory.muted("點擊查看完整配方圖"));
+                meta.lore(lore);
+                icon.setItemMeta(meta);
+            }
+            entries.add(this.itemFactory.tagGuiAction(icon, "recipe-view:" + recipe.outputId() + ":" + this.findRecipeViewIndex(recipe)));
+        }
+
+        final int maxPage = Math.max(0, (entries.size() - 1) / CONTENT_SLOTS.length);
+        final int safePage = Math.max(0, Math.min(page, maxPage));
+        final int startIndex = safePage * CONTENT_SLOTS.length;
+        for (int index = 0; index < CONTENT_SLOTS.length && startIndex + index < entries.size(); index++) {
+            inventory.setItem(CONTENT_SLOTS[index], entries.get(startIndex + index));
+        }
+
+        inventory.setItem(45, this.itemFactory.tagGuiAction(this.guiButton("recipe-idx-prev", Material.ARROW, "上一頁", List.of("頁數 {page}/{max-page}"), this.placeholders("page", String.valueOf(safePage + 1), "max-page", String.valueOf(maxPage + 1))), "recipe-index:" + machineId + ":" + Math.max(0, safePage - 1)));
+        inventory.setItem(49, this.itemFactory.tagGuiAction(this.guiButton("recipe-idx-back", Material.BOOK, "返回機器詳情", List.of(machineName)), "machine:" + machineId));
+        inventory.setItem(53, this.itemFactory.tagGuiAction(this.guiButton("recipe-idx-next", Material.SPECTRAL_ARROW, "下一頁", List.of("頁數 {page}/{max-page}"), this.placeholders("page", String.valueOf(safePage + 1), "max-page", String.valueOf(maxPage + 1))), "recipe-index:" + machineId + ":" + Math.min(maxPage, safePage + 1)));
+        this.openBookInventory(player, inventory);
+    }
+
+    private int findRecipeViewIndex(final MachineRecipe target) {
+        final List<RecipeView> views = this.recipeViewsFor(target.outputId());
+        for (int index = 0; index < views.size(); index++) {
+            final RecipeView view = views.get(index);
+            if (view.stationLine().contains(this.itemFactory.displayNameForId(target.machineId()))) {
+                return index;
+            }
+        }
+        return 0;
     }
 
     public void openTechTree(final Player player, final String kind, final String targetId) {
@@ -676,7 +798,32 @@ public final class TechBookService {
         final String argument = split.length > 1 ? split[1] : "";
         this.playBookActionSound(player, verb);
         switch (verb) {
-            case "category" -> this.openMainBook(player, GuideCategory.valueOf(argument), 0);
+            case "category" -> this.openSubCategoryPage(player, GuideCategory.valueOf(argument));
+            case "browse-all" -> {
+                final String[] detail = argument.split(":");
+                final GuideCategory category = GuideCategory.valueOf(detail[0]);
+                final TechTier tier = detail.length > 1 && !detail[1].equalsIgnoreCase("ALL") ? TechTier.valueOf(detail[1]) : null;
+                final int page = detail.length > 2 ? this.parsePage(detail[2]) : 0;
+                this.openMainBook(player, category, tier, null, page);
+            }
+            case "browse" -> {
+                final String[] detail = argument.split(":");
+                final GuideCategory category = GuideCategory.valueOf(detail[0]);
+                final SystemGroup group = detail.length > 1 && !detail[1].equalsIgnoreCase("ALL") ? SystemGroup.valueOf(detail[1]) : null;
+                final TechTier tier = detail.length > 2 && !detail[2].equalsIgnoreCase("ALL") ? TechTier.valueOf(detail[2]) : null;
+                final int page = detail.length > 3 ? this.parsePage(detail[3]) : 0;
+                if (group == null) {
+                    this.openMainBook(player, category, tier, null, page);
+                } else {
+                    this.openMainBook(player, category, tier, group, page);
+                }
+            }
+            case "recipe-index" -> {
+                final String[] detail = argument.split(":");
+                final String machineId = detail[0];
+                final int page = detail.length > 1 ? this.parsePage(detail[1]) : 0;
+                this.openRecipeIndex(player, machineId, page);
+            }
             case "hub" -> this.openCategoryHub(player);
             case "search-prompt" -> this.promptSearch(player);
             case "search-results" -> {
@@ -877,6 +1024,38 @@ public final class TechBookService {
         return this.registry.getItemsByGuideCategoryAndTier(category, tier).size()
                 + this.registry.getMachinesByGuideCategoryAndTier(category, tier).size()
                 + this.addonService.getInteractionsByCategoryAndTier(category, tier).size();
+    }
+
+    private void collectFilteredEntries(final List<ItemStack> entries,
+                                        final UUID uuid,
+                                        final GuideCategory category,
+                                        final TechTier tier,
+                                        final SystemGroup systemGroup) {
+        if (systemGroup == null) {
+            for (final TechItemDefinition item : this.registry.getItemsByGuideCategoryAndTier(category, tier)) {
+                entries.add(this.renderItemEntry(uuid, item));
+            }
+            for (final MachineDefinition machine : this.registry.getMachinesByGuideCategoryAndTier(category, tier)) {
+                entries.add(this.renderMachineEntry(uuid, machine));
+            }
+            for (final TechInteractionDefinition interaction : this.addonService.getInteractionsByCategoryAndTier(category, tier)) {
+                entries.add(this.renderInteractionEntry(uuid, interaction));
+            }
+        } else {
+            for (final TechItemDefinition item : this.registry.getItemsByGuideCategoryAndTier(category, tier)) {
+                if (item.systemGroup() == systemGroup) {
+                    entries.add(this.renderItemEntry(uuid, item));
+                }
+            }
+            for (final MachineDefinition machine : this.registry.getMachinesByGuideCategoryAndTier(category, tier)) {
+                if (machine.systemGroup() == systemGroup) {
+                    entries.add(this.renderMachineEntry(uuid, machine));
+                }
+            }
+            for (final TechInteractionDefinition interaction : this.addonService.getInteractionsByCategoryAndTier(category, tier)) {
+                entries.add(this.renderInteractionEntry(uuid, interaction));
+            }
+        }
     }
 
     private TechTier nearestTierWithContent(final GuideCategory category, final TechTier requestedTier) {
