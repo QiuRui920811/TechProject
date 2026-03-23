@@ -99,12 +99,24 @@ public final class PlayerProgressService {
         return Set.copyOf(this.progress(uuid).unlockedItems);
     }
 
+    public int unlockedItemCount(final UUID uuid) {
+        return this.progress(uuid).unlockedItems.size();
+    }
+
     public Set<String> unlockedMachines(final UUID uuid) {
         return Set.copyOf(this.progress(uuid).unlockedMachines);
     }
 
+    public int unlockedMachineCount(final UUID uuid) {
+        return this.progress(uuid).unlockedMachines.size();
+    }
+
     public Set<String> unlockedAchievements(final UUID uuid) {
         return Set.copyOf(this.progress(uuid).unlockedAchievements);
+    }
+
+    public int unlockedAchievementCount(final UUID uuid) {
+        return this.progress(uuid).unlockedAchievements.size();
     }
 
     public Set<String> unlockedInteractions(final UUID uuid) {

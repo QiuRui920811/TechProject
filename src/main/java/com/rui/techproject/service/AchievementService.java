@@ -32,8 +32,8 @@ public final class AchievementService {
 
     public void evaluate(final UUID uuid) {
         final Set<String> unlocked = new HashSet<>(this.progressService.unlockedAchievements(uuid));
-        final int unlockedItemCount = this.progressService.unlockedItems(uuid).size();
-        final int unlockedMachineCount = this.progressService.unlockedMachines(uuid).size();
+        final int unlockedItemCount = this.progressService.unlockedItemCount(uuid);
+        final int unlockedMachineCount = this.progressService.unlockedMachineCount(uuid);
 
         // ═══ 入門 ═══
         this.tryUnlock(uuid, unlocked, "first_machine", this.progressService.getStat(uuid, "machines_placed") >= 1

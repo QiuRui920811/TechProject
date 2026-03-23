@@ -249,7 +249,7 @@ public final class TechListener implements Listener {
             .append(net.kyori.adventure.text.Component.newline())
             .append(net.kyori.adventure.text.Component.text("⚡ 可用研究點 " + progressService.getAvailableTechXp(uuid), net.kyori.adventure.text.format.TextColor.color(0xFFD740)))
             .append(net.kyori.adventure.text.Component.newline())
-            .append(net.kyori.adventure.text.Component.text("🏆 成就 " + progressService.unlockedAchievements(uuid).size() + "/" + registry.allAchievements().size(), net.kyori.adventure.text.format.TextColor.color(0x66BB6A)))
+            .append(net.kyori.adventure.text.Component.text("🏆 成就 " + progressService.unlockedAchievementCount(uuid) + "/" + registry.allAchievements().size(), net.kyori.adventure.text.format.TextColor.color(0x66BB6A)))
             .append(net.kyori.adventure.text.Component.newline())
             .append(net.kyori.adventure.text.Component.text("🎖 稱號 " + titleService.getPlayerUnlockedTitleCount(uuid) + "/" + titleService.totalTitleCount(), net.kyori.adventure.text.format.TextColor.color(0xCE93D8)))
             .build();

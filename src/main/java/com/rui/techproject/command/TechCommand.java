@@ -106,9 +106,9 @@ public final class TechCommand implements CommandExecutor, TabCompleter {
             final var progress = this.plugin.getPlayerProgressService();
             final var uuid = player.getUniqueId();
             sender.sendMessage(Component.text("=== 科技進度統計 ===", NamedTextColor.GOLD));
-            sender.sendMessage(Component.text("已解鎖物品：" + progress.unlockedItems(uuid).size() + " / " + this.registry.allItems().size(), NamedTextColor.YELLOW));
-            sender.sendMessage(Component.text("已解鎖機器：" + progress.unlockedMachines(uuid).size() + " / " + this.registry.allMachines().size(), NamedTextColor.YELLOW));
-            sender.sendMessage(Component.text("已完成成就：" + progress.unlockedAchievements(uuid).size() + " / " + this.registry.allAchievements().size(), NamedTextColor.YELLOW));
+            sender.sendMessage(Component.text("已解鎖物品：" + progress.unlockedItemCount(uuid) + " / " + this.registry.allItems().size(), NamedTextColor.YELLOW));
+            sender.sendMessage(Component.text("已解鎖機器：" + progress.unlockedMachineCount(uuid) + " / " + this.registry.allMachines().size(), NamedTextColor.YELLOW));
+            sender.sendMessage(Component.text("已完成成就：" + progress.unlockedAchievementCount(uuid) + " / " + this.registry.allAchievements().size(), NamedTextColor.YELLOW));
             sender.sendMessage(Component.text("研究等級：Lv." + progress.getTechLevel(uuid) + "  (" + progress.getXpIntoCurrentLevel(uuid) + " / " + progress.getXpForNextLevel(uuid) + ")", NamedTextColor.LIGHT_PURPLE));
             sender.sendMessage(Component.text("研究點數：可用 " + progress.getAvailableTechXp(uuid) + " / 累計 " + progress.getTechXpTotal(uuid) + " / 已花費 " + progress.getTechXpSpent(uuid), NamedTextColor.LIGHT_PURPLE));
             sender.sendMessage(Component.text("累計發電：" + progress.getStat(uuid, "energy_generated") + " EU", NamedTextColor.AQUA));

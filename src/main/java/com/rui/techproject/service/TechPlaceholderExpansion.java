@@ -52,10 +52,10 @@ public final class TechPlaceholderExpansion extends PlaceholderExpansion {
             case "level" -> String.valueOf(progressService.getTechLevel(uuid));
             case "xp" -> String.valueOf(progressService.getTechXpTotal(uuid));
             case "xp_available" -> String.valueOf(progressService.getAvailableTechXp(uuid));
-            case "achievements" -> String.valueOf(progressService.unlockedAchievements(uuid).size());
+            case "achievements" -> String.valueOf(progressService.unlockedAchievementCount(uuid));
             case "achievements_total" -> String.valueOf(registry.allAchievements().size());
-            case "items" -> String.valueOf(progressService.unlockedItems(uuid).size());
-            case "machines" -> String.valueOf(progressService.unlockedMachines(uuid).size());
+            case "items" -> String.valueOf(progressService.unlockedItemCount(uuid));
+            case "machines" -> String.valueOf(progressService.unlockedMachineCount(uuid));
             default -> null;
         };
     }

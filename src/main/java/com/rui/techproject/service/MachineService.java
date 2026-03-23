@@ -278,6 +278,8 @@ public final class MachineService {
         final long interval = Math.max(1L, this.plugin.getConfig().getLong("machine-tick-interval", 20L));
         this.scheduler.runGlobalTimer(task -> this.tickAllMachines(), interval, interval);
         this.scheduler.runGlobalTimer(task -> this.tickMachineLookAt(), 4L, 4L);
+        // 每 5 分鐘清除孤兒 TextDisplay 實體
+        this.scheduler.runGlobalTimer(task -> this.purgeOrphanDisplays(), 6000L, 6000L);
     }
 
     public void registerPlacedMachine(final Player player, final Block block, final String machineId, final ItemStack sourceStack) {
@@ -1381,10 +1383,14 @@ public final class MachineService {
     }
 
     public void purgeOrphanDisplays() {
+        final Set<UUID> trackedIds = new HashSet<>(this.machineDisplays.values());
         for (final World world : Bukkit.getWorlds()) {
             for (final Entity entity : world.getEntities()) {
                 if (!(entity instanceof TextDisplay)) {
                     continue;
+                }
+                if (trackedIds.contains(entity.getUniqueId())) {
+                    continue; // 仍在追蹤中，不要移除
                 }
                 this.scheduler.runEntity(entity, () -> {
                     final TextDisplay display = (TextDisplay) entity;
@@ -1793,7 +1799,10 @@ public final class MachineService {
         this.transferOutputs(machine, location);
         this.pushOpenViewState(machine.locationKey(), machine);
         this.updateMachineDisplay(machine, definition, location);
-        this.achievementService.evaluate(machine.owner());
+        // 成就評估改為節流：每個擁有者每 300 tick（15 秒）最多評估一次
+        if (machine.ticksActive() % 300L == 0L) {
+            this.achievementService.evaluate(machine.owner());
+        }
     }
 
     private void tickRelay(final PlacedMachine machine, final Location location, final String relayId) {
@@ -3815,7 +3824,6 @@ public final class MachineService {
         if (uuid != null) {
             final Entity entity = Bukkit.getEntity(uuid);
             if (entity instanceof TextDisplay display && entity.isValid()) {
-                this.configureMachineTextDisplay(display);
                 return display;
             }
             if (entity != null) {
