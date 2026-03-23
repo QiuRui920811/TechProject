@@ -4223,7 +4223,21 @@ public final class MachineService {
             this.setRuntimeState(machine, MachineRuntimeState.RUNNING, "推送 x" + pushed);
             world.spawnParticle(Particle.ENCHANT, location.clone().add(0.5, 0.8, 0.5), 6, 0.25, 0.25, 0.25, 0.02);
         } else {
-            this.setRuntimeState(machine, MachineRuntimeState.NO_INPUT, "周圍無可推送容器或無物品");
+            // 區分：完全沒有物品 vs 有物品但周圍沒有容器
+            boolean hasItems = false;
+            for (int s = 0; s < INPUT_SLOTS.length; s++) {
+                final ItemStack inSlot = machine.inputAt(s);
+                if (inSlot != null && inSlot.getType() != Material.AIR) { hasItems = true; break; }
+            }
+            for (int s = 0; !hasItems && s < OUTPUT_SLOTS.length; s++) {
+                final ItemStack outSlot = machine.outputAt(s);
+                if (outSlot != null && outSlot.getType() != Material.AIR) { hasItems = true; break; }
+            }
+            if (hasItems) {
+                this.setRuntimeState(machine, MachineRuntimeState.OUTPUT_BLOCKED, "周圍無可推送容器");
+            } else {
+                this.setRuntimeState(machine, MachineRuntimeState.IDLE, "等待物流輸入");
+            }
         }
     }
 
@@ -6728,7 +6742,8 @@ public final class MachineService {
         }
 
         if (mid.equals("storage_hub") || mid.equals("splitter_node") || mid.equals("industrial_bus")
-                || mid.equals("cargo_manager") || mid.equals("cargo_motor")) {
+                || mid.equals("cargo_manager") || mid.equals("cargo_motor")
+                || mid.equals("cargo_output_node")) {
             return this.hasMachineInputRoom(machine, stack, 0, INPUT_SLOTS.length);
         }
         if (mid.equals("filter_router")) {
