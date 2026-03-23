@@ -2492,7 +2492,12 @@ public final class TechListener implements Listener {
             }
         }
         final double maxHealth = player.getAttribute(Attribute.MAX_HEALTH).getValue();
-        if (player.getHealth() <= maxHealth * 0.5 && event.getCause() == EntityDamageEvent.DamageCause.ENTITY_ATTACK) {
+        final double healthAfterHit = player.getHealth() - event.getFinalDamage();
+        if (healthAfterHit <= maxHealth * 0.5 && (event.getCause() == EntityDamageEvent.DamageCause.ENTITY_ATTACK
+                || event.getCause() == EntityDamageEvent.DamageCause.ENTITY_SWEEP_ATTACK
+                || event.getCause() == EntityDamageEvent.DamageCause.ENTITY_EXPLOSION
+                || event.getCause() == EntityDamageEvent.DamageCause.PROJECTILE
+                || event.getCause() == EntityDamageEvent.DamageCause.MAGIC)) {
             if (this.hasTalismanInInventory(player, "talisman_knight") && this.isTalismanCooldownReady(player, "talisman_knight")) {
                 player.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE, 20 * 5, 1, false, true, true));
                 this.startTalismanCooldown(player, "talisman_knight", 60_000L);
