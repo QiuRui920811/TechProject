@@ -455,6 +455,10 @@ public final class TechListener implements Listener {
                 this.handleWrenchDismantle(event.getPlayer(), machineBlock);
                 return;
             }
+            // ── 蹲下+手持告示牌/展示框/畫：允許原版放置，方便玩家備註機台 ──
+            if (event.getPlayer().isSneaking() && stack != null && this.isDecorationPlaceable(stack.getType())) {
+                return;
+            }
             event.setUseInteractedBlock(Result.DENY);
             event.setUseItemInHand(Result.DENY);
             event.setCancelled(true);
@@ -2601,6 +2605,15 @@ public final class TechListener implements Listener {
     private boolean isProtectedTechBlock(final Block block) {
         return this.plugin.getMachineService().resolveManagedMachineBlock(block) != null
                 || this.plugin.getPlacedTechBlockService().isTrackedBlock(block);
+    }
+
+    /** 蹲下右鍵機器時，允許這些裝飾物品正常放置（告示牌、展示框、畫）。 */
+    private boolean isDecorationPlaceable(final Material type) {
+        if (type == null) { return false; }
+        final String name = type.name();
+        return name.contains("SIGN")
+                || type == Material.ITEM_FRAME || type == Material.GLOW_ITEM_FRAME
+                || type == Material.PAINTING;
     }
 
     private void handleTalismanFarmer(final BlockBreakEvent event) {
