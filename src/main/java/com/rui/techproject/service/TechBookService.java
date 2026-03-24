@@ -519,7 +519,7 @@ public final class TechBookService {
                 ), this.placeholders(
                     "count", String.valueOf(recipeViewCount),
                     "hint", "點擊打開配方一覽表格"
-                )), "recipe-index:" + machine.id() + ":0"));
+                )), "recipe-view:" + machine.id() + ":0"));
             } else if (recipeViewCount == 1) {
                 inventory.setItem(40, this.itemFactory.tagGuiAction(this.guiButton("machine-detail-view-recipe", Material.KNOWLEDGE_BOOK, "查看製作配方", List.of(
                     "共有 1 種配方圖",
@@ -539,7 +539,7 @@ public final class TechBookService {
                 inventory.setItem(49, this.itemFactory.tagGuiAction(this.guiButton("machine-detail-recipe-index-2", Material.KNOWLEDGE_BOOK, "配方總覽", List.of(
                     "共有 {count} 種配方",
                     "{hint}"
-                ), this.placeholders("count", String.valueOf(recipeViewCount), "hint", "點擊打開配方一覽表格")), "recipe-index:" + machine.id() + ":0"));
+                ), this.placeholders("count", String.valueOf(recipeViewCount), "hint", "點擊打開配方一覽表格")), "recipe-view:" + machine.id() + ":0"));
             } else if (recipeViewCount == 1) {
                 inventory.setItem(49, this.itemFactory.tagGuiAction(this.guiButton("machine-detail-view-recipe", Material.KNOWLEDGE_BOOK, "查看製作配方", List.of(
                     "共有 1 種配方圖",
@@ -584,6 +584,22 @@ public final class TechBookService {
         inventory.setItem(33, view.result());
         if (!view.detailLines().isEmpty()) {
             inventory.setItem(42, this.info(Material.PAPER, "配方說明", view.detailLines()));
+        }
+        // 右側配方選擇列表 — 讓玩家直接點選而非翻頁
+        if (maxPage > 0) {
+            final int[] selectorSlots = {5, 6, 7, 14, 15, 16, 25, 34, 43};
+            for (int index = 0; index < Math.min(recipeViews.size(), selectorSlots.length); index++) {
+                final RecipeView option = recipeViews.get(index);
+                final boolean current = index == safePage;
+                final ItemStack selectorIcon = this.buildConfiguredIcon(
+                    "recipe-selector-" + index,
+                    current ? Material.LIME_DYE : Material.GRAY_DYE,
+                    current ? this.itemFactory.hex("◆ " + option.resultName(), "#FFD166") : this.itemFactory.muted("▸ " + option.resultName()),
+                    List.of(this.itemFactory.muted(option.stationLine()), this.itemFactory.muted(current ? "目前查看中" : "點擊切換")),
+                    true
+                );
+                inventory.setItem(selectorSlots[index], current ? selectorIcon : this.itemFactory.tagGuiAction(selectorIcon, "recipe-view:" + targetId + ":" + index));
+            }
         }
         inventory.setItem(45, this.itemFactory.tagGuiAction(this.guiButton("recipe-view-prev", Material.LIME_DYE, "◀ 上一種配方", List.of("目前第 {page} / {max-page} 種", "{hint}"), this.placeholders("page", String.valueOf(safePage + 1), "max-page", String.valueOf(maxPage + 1), "hint", safePage <= 0 ? "已經是第一種" : "點擊查看上一種")), "recipe-view:" + targetId + ":" + Math.max(0, safePage - 1)));
         inventory.setItem(49, this.itemFactory.tagGuiAction(this.guiButton("recipe-view-back-detail", Material.ARROW, "返回詳情", List.of("{name}"), this.placeholders("name", view.resultName())), (this.registry.getMachine(targetId) != null ? "machine:" : "item:") + targetId));
@@ -749,6 +765,20 @@ public final class TechBookService {
 
     public void clearBookView(final UUID uuid) {
         if (uuid != null) {
+            this.openBookViewPlayers.remove(uuid);
+            this.openBookInventories.remove(uuid);
+        }
+    }
+
+    /**
+     * 強制關閉所有正在瀏覽科技書的玩家選單，防止重載期間拿取物品。
+     */
+    public void closeAllBookViews() {
+        for (final UUID uuid : java.util.Set.copyOf(this.openBookViewPlayers)) {
+            final org.bukkit.entity.Player player = org.bukkit.Bukkit.getPlayer(uuid);
+            if (player != null && player.isOnline()) {
+                player.closeInventory();
+            }
             this.openBookViewPlayers.remove(uuid);
             this.openBookInventories.remove(uuid);
         }

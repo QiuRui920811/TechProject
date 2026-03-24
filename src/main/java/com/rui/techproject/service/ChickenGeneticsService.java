@@ -234,25 +234,25 @@ public final class ChickenGeneticsService {
      * 計算激發室的每 tick 生產進度 (累積到 1.0 產出一次)。
      * 等級越高，間隔越長：
      * <ul>
-     *   <li>Tier 1: 30 秒 (1/30 per tick)  ~120/hr</li>
-     *   <li>Tier 2: 60 秒 (1/60 per tick)  ~60/hr</li>
-     *   <li>Tier 3: 120 秒 (1/120 per tick) ~30/hr</li>
-     *   <li>Tier 4: 180 秒 (1/180 per tick) ~20/hr</li>
-     *   <li>Tier 5: 300 秒 (1/300 per tick) ~12/hr</li>
-     *   <li>Tier 6: 600 秒 (1/600 per tick) ~6/hr</li>
+     *   <li>Tier 1: 60 秒 (1/60 per tick)  ~60/hr</li>
+     *   <li>Tier 2: 120 秒 (1/120 per tick) ~30/hr</li>
+     *   <li>Tier 3: 240 秒 (1/240 per tick) ~15/hr</li>
+     *   <li>Tier 4: 360 秒 (1/360 per tick) ~10/hr</li>
+     *   <li>Tier 5: 600 秒 (1/600 per tick) ~6/hr</li>
+     *   <li>Tier 6: 1200 秒 (1/1200 per tick) ~3/hr</li>
      * </ul>
      */
     public double productionRate(final String dna) {
         final int count = recessiveCount(dna);
         if (count == 0) return 0.0;
         final double baseInterval = switch (count) {
-            case 1 -> 30.0;
-            case 2 -> 60.0;
-            case 3 -> 120.0;
-            case 4 -> 180.0;
-            case 5 -> 300.0;
-            case 6 -> 600.0;
-            default -> 30.0;
+            case 1 -> 60.0;
+            case 2 -> 120.0;
+            case 3 -> 240.0;
+            case 4 -> 360.0;
+            case 5 -> 600.0;
+            case 6 -> 1200.0;
+            default -> 60.0;
         };
         // 純度加成：異型合子越少、實際間隔越短（最多加速 10%）
         final int heteroCount = countHeterozygous(dna);

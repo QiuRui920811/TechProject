@@ -137,6 +137,8 @@ public final class PlanetService {
     private final Map<java.util.UUID, Long> boundaryWarningCooldowns = new ConcurrentHashMap<>();
     private final Map<java.util.UUID, Map<HazardType, Long>> cuisineWardExpiries = new ConcurrentHashMap<>();
     private final Map<String, ItemStack> techItemStackCache = new ConcurrentHashMap<>();
+    /** 精英技能冷卻：entityUUID → 下次可施放時間 (ms) */
+    private final Map<java.util.UUID, Long> eliteSkillCooldowns = new ConcurrentHashMap<>();
     private final Random ambientRandom = new Random();
     private StorageBackend storageBackend;
     private volatile boolean worldCreationUnsupported;
@@ -285,7 +287,9 @@ public final class PlanetService {
         this.scheduler.runGlobalTimer(task -> {
             this.tickPlanetHazards();
             this.tickPlanetAmbience();
+            this.tickPlanetMobSpawning();
         }, 40L, 40L);
+        this.scheduler.runGlobalTimer(task -> this.tickPlanetEliteAuras(), ELITE_AURA_TICK_INTERVAL, ELITE_AURA_TICK_INTERVAL);
         this.scheduler.runGlobalTimer(task -> this.tickPlanetGravity(), 2L, 2L);
         this.scheduler.runGlobalTimer(task -> this.tickPersonalPlanetNodes(), PERSONAL_NODE_TICK_INTERVAL, PERSONAL_NODE_TICK_INTERVAL);
         this.scheduler.runGlobalTimer(task -> this.cleanupHarvestNodeDisplays(), HARVEST_DISPLAY_CLEANUP_INTERVAL, HARVEST_DISPLAY_CLEANUP_INTERVAL);
@@ -576,6 +580,127 @@ public final class PlanetService {
                 .toList();
     }
 
+    public List<String> planetDebugLines(final Player player) {
+        final List<String> lines = new ArrayList<>();
+        lines.add("§e=== 星球除錯資訊 ===");
+
+        // 玩家當前世界
+        final World currentWorld = player.getWorld();
+        final PlanetDefinition currentPlanet = this.planetByWorld(currentWorld);
+        lines.add("§7你的世界: §f" + currentWorld.getName());
+        lines.add("§7是否為星球: " + (currentPlanet != null ? "§a是 (" + currentPlanet.displayName() + ")" : "§c否"));
+        lines.add("");
+
+        for (final PlanetDefinition definition : this.planets.values()) {
+            final World world = this.resolveExistingPlanetWorld(definition);
+            lines.add("§6【" + definition.displayName() + "】 §7id=" + definition.id());
+            if (world == null) {
+                lines.add("  §c世界未載入 (worldName=" + definition.worldName() + ")");
+                lines.add("");
+                continue;
+            }
+            lines.add("  §7世界名: §f" + world.getName());
+            lines.add("  §7環境: §f" + world.getEnvironment());
+            lines.add("  §7難度: §f" + world.getDifficulty());
+            lines.add("  §7生怪旗標(怪物/動物): §f" + world.getAllowMonsters() + " / " + world.getAllowAnimals());
+            final int monsterCount = (int) world.getEntities().stream()
+                    .filter(e -> e instanceof Monster).count();
+            final int eliteCount = (int) world.getEntities().stream()
+                    .filter(e -> e instanceof Monster && e.getScoreboardTags().contains(PLANET_ELITE_TAG)).count();
+            final int totalEntities = world.getEntities().size();
+            final int loadedChunks = world.getLoadedChunks().length;
+            lines.add("  §7載入區塊: §f" + loadedChunks);
+            lines.add("  §7實體總數: §f" + totalEntities + " §7(怪物: §f" + monsterCount + "§7, 精英: §f" + eliteCount + "§7)");
+            final PlanetEliteProfile profile = this.eliteProfileFor(definition);
+            if (profile != null) {
+                lines.add("  §7精英名稱: §d" + profile.displayName() + " §7(掉落: " + profile.combatSampleId() + ", " + profile.bonusSampleId() + ")");
+            }
+            lines.add("");
+        }
+        return lines;
+    }
+
+    /**
+     * 生怪診斷 — 手動嘗試在玩家附近找位置並生成怪物，回報每個步驟的結果。
+     */
+    public List<String> planetSpawnTestLines(final Player player) {
+        final List<String> lines = new ArrayList<>();
+        lines.add("§e=== 星球生怪診斷 ===");
+        final World world = player.getWorld();
+        final PlanetDefinition definition = this.planetByWorld(world);
+        if (definition == null) {
+            lines.add("§c你不在星球世界中。");
+            return lines;
+        }
+        lines.add("§7星球: §f" + definition.displayName() + " §7(" + definition.id() + ")");
+        lines.add("§7你的位置: §f" + player.getLocation().getBlockX() + ", " + player.getLocation().getBlockY() + ", " + player.getLocation().getBlockZ());
+        lines.add("");
+
+        // 測試生怪位置搜尋
+        lines.add("§e── 位置搜尋測試 (10次) ──");
+        int foundCount = 0;
+        final Location base = player.getLocation();
+        for (int i = 0; i < 10; i++) {
+            final double angle = this.ambientRandom.nextDouble() * Math.PI * 2.0D;
+            final int radius = MOB_SPAWN_MIN_DISTANCE + this.ambientRandom.nextInt(MOB_SPAWN_MAX_DISTANCE - MOB_SPAWN_MIN_DISTANCE + 1);
+            final int x = base.getBlockX() + (int) Math.round(Math.cos(angle) * radius);
+            final int z = base.getBlockZ() + (int) Math.round(Math.sin(angle) * radius);
+            final boolean chunkLoaded = world.isChunkLoaded(x >> 4, z >> 4);
+            if (!chunkLoaded) {
+                lines.add("§c  #" + (i + 1) + " (" + x + "," + z + ") r=" + radius + " → 區塊未載入");
+                continue;
+            }
+            final int y = world.getHighestBlockYAt(x, z, HeightMap.MOTION_BLOCKING_NO_LEAVES) + 1;
+            final boolean yValid = y > world.getMinHeight() + 1 && y <= world.getMaxHeight() - 2;
+            if (!yValid) {
+                lines.add("§c  #" + (i + 1) + " (" + x + "," + y + "," + z + ") r=" + radius + " → Y值無效 (min=" + world.getMinHeight() + ", max=" + world.getMaxHeight() + ", heightMap=" + (y - 1) + ")");
+                continue;
+            }
+            final Block feet = world.getBlockAt(x, y, z);
+            final Block below = world.getBlockAt(x, y - 1, z);
+            final Block head = feet.getRelative(BlockFace.UP);
+            final boolean solidBelow = below.isSolid();
+            final boolean passableFeet = feet.isPassable();
+            final boolean passableHead = head.isPassable();
+            if (solidBelow && passableFeet && passableHead) {
+                lines.add("§a  #" + (i + 1) + " (" + x + "," + y + "," + z + ") r=" + radius + " → §a✔ 有效 (下=" + below.getType() + " 腳=" + feet.getType() + " 頭=" + head.getType() + ")");
+                foundCount++;
+            } else {
+                lines.add("§c  #" + (i + 1) + " (" + x + "," + y + "," + z + ") r=" + radius + " → ✘ solid=" + solidBelow + " pass=" + passableFeet + "/" + passableHead + " (下=" + below.getType() + " 腳=" + feet.getType() + " 頭=" + head.getType() + ")");
+            }
+        }
+        lines.add("§7找到有效位置: §f" + foundCount + "/10");
+        lines.add("");
+
+        // 測試直接生成
+        lines.add("§e── 直接生怪測試 ──");
+        final Location testLoc = this.findPlanetSpawnLocation(player);
+        if (testLoc == null) {
+            lines.add("§c  findPlanetSpawnLocation 回傳 null — 無可用位置！");
+        } else {
+            lines.add("§7  找到位置: §f" + testLoc.getBlockX() + ", " + testLoc.getBlockY() + ", " + testLoc.getBlockZ());
+            final org.bukkit.entity.EntityType mobType = this.planetMobTypeFor(definition);
+            lines.add("§7  怪物類型: §f" + mobType);
+            try {
+                final Entity spawned = world.spawnEntity(testLoc, mobType);
+                if (spawned instanceof LivingEntity living) {
+                    living.setRemoveWhenFarAway(true);
+                    if (living instanceof Monster && this.isUndead(mobType)) {
+                        living.addPotionEffect(new PotionEffect(PotionEffectType.FIRE_RESISTANCE, 20 * 60 * 10, 0, true, false, false));
+                    }
+                    this.tryEmpowerPlanetMob(living);
+                    lines.add("§a  ✔ 生成成功！ " + spawned.getType() + " at " + testLoc.getBlockX() + "," + testLoc.getBlockY() + "," + testLoc.getBlockZ());
+                    lines.add("§7  entityId=" + spawned.getEntityId() + " uuid=" + spawned.getUniqueId().toString().substring(0, 8));
+                } else {
+                    lines.add("§e  生成了非 LivingEntity: " + spawned.getType());
+                }
+            } catch (final Exception ex) {
+                lines.add("§c  ✘ 生成失敗: " + ex.getClass().getSimpleName() + " — " + ex.getMessage());
+            }
+        }
+        return lines;
+    }
+
     public boolean applyPlanetCuisineBuff(final Player player, final String techItemId) {
         if (player == null || techItemId == null || techItemId.isBlank()) {
             return false;
@@ -675,7 +800,339 @@ public final class PlanetService {
         this.plugin.getPlayerProgressService().incrementStat(killer.getUniqueId(), "planet_elites_defeated", 1L);
         entity.getWorld().spawnParticle(Particle.TRIAL_SPAWNER_DETECTION, entity.getLocation().add(0.0D, 0.8D, 0.0D), 12, 0.35D, 0.35D, 0.35D, 0.02D);
         entity.getWorld().spawnParticle(Particle.END_ROD, entity.getLocation().add(0.0D, 0.9D, 0.0D), 8, 0.28D, 0.28D, 0.28D, 0.01D);
+        this.eliteSkillCooldowns.remove(entity.getUniqueId());
         killer.sendActionBar(this.itemFactory.success("已擊退「" + profile.displayName() + "」，回收戰鬥樣本。"));
+    }
+
+    // ──────────────────────────────────────────────────────────────
+    //  精英怪物技能系統 — 攻擊觸發 + 被動光環
+    // ──────────────────────────────────────────────────────────────
+
+    /**
+     * 當精英怪攻擊玩家時觸發主動技能。
+     * 由 TechListener#onEntityDamageByEntity 呼叫。
+     */
+    public void handleEliteSkillOnAttack(final Monster attacker, final Player victim) {
+        if (!attacker.getScoreboardTags().contains(PLANET_ELITE_TAG)) {
+            return;
+        }
+        final long now = System.currentTimeMillis();
+        final Long nextAllowed = this.eliteSkillCooldowns.get(attacker.getUniqueId());
+        if (nextAllowed != null && now < nextAllowed) {
+            return;
+        }
+        final String planetId = this.identifyElitePlanet(attacker);
+        if (planetId == null) {
+            return;
+        }
+        boolean fired = switch (planetId) {
+            case "aurelia" -> this.eliteSkillAureliaAttack(attacker, victim);
+            case "cryon" -> this.eliteSkillCryonAttack(attacker, victim);
+            case "nyx" -> this.eliteSkillNyxAttack(attacker, victim);
+            case "helion" -> this.eliteSkillHelionAttack(attacker, victim);
+            case "tempest" -> this.eliteSkillTempestAttack(attacker, victim);
+            default -> false;
+        };
+        if (fired) {
+            this.eliteSkillCooldowns.put(attacker.getUniqueId(), now + ELITE_SKILL_COOLDOWN_MS);
+        }
+    }
+
+    /* ── Aurelia 輻塵寄生體 ─ 攻擊技能：輻射爆裂 ── */
+    private boolean eliteSkillAureliaAttack(final Monster attacker, final Player victim) {
+        final int roll = this.ambientRandom.nextInt(3);
+        final Location loc = attacker.getLocation();
+        final World world = attacker.getWorld();
+        if (roll == 0) {
+            // 孢子噴發 — 附近 5 格 AoE 毒 + 凋零
+            world.spawnParticle(Particle.SPORE_BLOSSOM_AIR, loc.clone().add(0, 1, 0), 40, 2.5, 1.5, 2.5, 0.01);
+            world.spawnParticle(Particle.DUST, loc.clone().add(0, 1, 0), 25, 2.5, 1.5, 2.5, 0.0,
+                    new Particle.DustOptions(Color.fromRGB(100, 200, 50), 1.4f));
+            world.playSound(loc, Sound.ENTITY_PUFFER_FISH_BLOW_UP, SoundCategory.HOSTILE, 1.2f, 0.6f);
+            for (final Entity nearby : attacker.getNearbyEntities(ELITE_SKILL_RANGE, 3.0, ELITE_SKILL_RANGE)) {
+                if (nearby instanceof Player p && p.getGameMode() == GameMode.SURVIVAL) {
+                    p.addPotionEffect(new PotionEffect(PotionEffectType.POISON, 80, 1, true, true, true));
+                    p.addPotionEffect(new PotionEffect(PotionEffectType.WITHER, 60, 0, true, true, true));
+                    p.sendActionBar(this.itemFactory.error("⚠ 輻塵孢子噴發！"));
+                }
+            }
+        } else {
+            // 寄生注射 — 單體中毒 + 飢餓
+            victim.addPotionEffect(new PotionEffect(PotionEffectType.POISON, 100, 1, true, true, true));
+            victim.addPotionEffect(new PotionEffect(PotionEffectType.HUNGER, 120, 1, true, true, true));
+            world.spawnParticle(Particle.ITEM_SLIME, victim.getLocation().add(0, 0.5, 0), 15, 0.3, 0.5, 0.3, 0.02);
+            world.playSound(victim.getLocation(), Sound.ENTITY_SPIDER_AMBIENT, SoundCategory.HOSTILE, 1.0f, 0.5f);
+            victim.sendActionBar(this.itemFactory.error("⚠ 寄生注射—正在侵蝕身體！"));
+        }
+        return true;
+    }
+
+    /* ── Cryon 霜脊潛獵者 ─ 攻擊技能：冰鋒突刺 ── */
+    private boolean eliteSkillCryonAttack(final Monster attacker, final Player victim) {
+        final int roll = this.ambientRandom.nextInt(3);
+        final Location loc = attacker.getLocation();
+        final World world = attacker.getWorld();
+        if (roll == 0) {
+            // 極寒衝擊波 — AoE 緩慢 + 冰凍
+            world.spawnParticle(Particle.SNOWFLAKE, loc.clone().add(0, 1, 0), 50, 3.0, 1.5, 3.0, 0.05);
+            world.spawnParticle(Particle.BLOCK_CRUMBLE, loc.clone().add(0, 0.5, 0), 20, 2.0, 0.5, 2.0, 0.0,
+                    Material.PACKED_ICE.createBlockData());
+            world.playSound(loc, Sound.BLOCK_GLASS_BREAK, SoundCategory.HOSTILE, 1.3f, 0.5f);
+            for (final Entity nearby : attacker.getNearbyEntities(ELITE_SKILL_RANGE, 3.0, ELITE_SKILL_RANGE)) {
+                if (nearby instanceof Player p && p.getGameMode() == GameMode.SURVIVAL) {
+                    p.addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS, 100, 2, true, true, true));
+                    p.setFreezeTicks(Math.min(p.getMaxFreezeTicks(), p.getFreezeTicks() + 120));
+                    p.sendActionBar(this.itemFactory.error("⚠ 極寒衝擊波—身體凍結中！"));
+                }
+            }
+        } else if (roll == 1) {
+            // 霜刺穿心 — 單體高傷 + 緩慢
+            victim.addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS, 80, 3, true, true, true));
+            victim.damage(4.0, attacker);
+            world.spawnParticle(Particle.SNOWFLAKE, victim.getLocation().add(0, 1, 0), 20, 0.3, 0.8, 0.3, 0.05);
+            world.spawnParticle(Particle.CRIT, victim.getLocation().add(0, 1, 0), 10, 0.2, 0.5, 0.2, 0.1);
+            world.playSound(victim.getLocation(), Sound.ENTITY_PLAYER_HURT_FREEZE, SoundCategory.HOSTILE, 1.0f, 0.8f);
+            victim.sendActionBar(this.itemFactory.error("⚠ 霜刺穿心！"));
+        } else {
+            // 冰脊防衛 — 自身獲得抗性提升
+            attacker.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE, 100, 1, true, false, true));
+            world.spawnParticle(Particle.SNOWFLAKE, loc.clone().add(0, 1.2, 0), 30, 0.8, 1.0, 0.8, 0.02);
+            world.playSound(loc, Sound.BLOCK_POWDER_SNOW_STEP, SoundCategory.HOSTILE, 1.0f, 0.4f);
+        }
+        return true;
+    }
+
+    /* ── Nyx 虛響觀測者 ─ 攻擊技能：相位跳躍 ── */
+    private boolean eliteSkillNyxAttack(final Monster attacker, final Player victim) {
+        final int roll = this.ambientRandom.nextInt(3);
+        final Location loc = attacker.getLocation();
+        final World world = attacker.getWorld();
+        if (roll == 0) {
+            // 虛空閃現 — 傳送到玩家背後並給予失明
+            final Vector behindVec = victim.getLocation().getDirection().normalize().multiply(-2.0);
+            final Location behind = victim.getLocation().add(behindVec);
+            behind.setY(victim.getLocation().getY());
+            if (behind.getBlock().isPassable() && behind.clone().add(0, 1, 0).getBlock().isPassable()) {
+                world.spawnParticle(Particle.REVERSE_PORTAL, loc.clone().add(0, 1, 0), 30, 0.4, 0.8, 0.4, 0.05);
+                attacker.teleport(behind);
+                world.spawnParticle(Particle.REVERSE_PORTAL, behind.clone().add(0, 1, 0), 30, 0.4, 0.8, 0.4, 0.05);
+                world.playSound(behind, Sound.ENTITY_ENDERMAN_TELEPORT, SoundCategory.HOSTILE, 1.0f, 1.2f);
+            }
+            victim.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 50, 0, true, true, true));
+            victim.addPotionEffect(new PotionEffect(PotionEffectType.DARKNESS, 60, 0, true, true, true));
+            victim.sendActionBar(this.itemFactory.error("⚠ 虛空閃現—視野被扭曲！"));
+        } else if (roll == 1) {
+            // 虛空牽引 — 將玩家拉向精英
+            final Vector pull = attacker.getLocation().toVector().subtract(victim.getLocation().toVector()).normalize().multiply(1.2);
+            pull.setY(0.35);
+            victim.setVelocity(pull);
+            world.spawnParticle(Particle.REVERSE_PORTAL, victim.getLocation().add(0, 1, 0), 20, 0.5, 0.8, 0.5, 0.1);
+            world.playSound(victim.getLocation(), Sound.ENTITY_ENDERMAN_SCREAM, SoundCategory.HOSTILE, 0.8f, 0.4f);
+            victim.addPotionEffect(new PotionEffect(PotionEffectType.WEAKNESS, 60, 0, true, true, true));
+            victim.sendActionBar(this.itemFactory.error("⚠ 虛空牽引—被拉入深淵！"));
+        } else {
+            // 相位迴避 — 給自身隱形 + 速度
+            attacker.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY, 60, 0, true, false, true));
+            attacker.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 60, 1, true, false, true));
+            world.spawnParticle(Particle.REVERSE_PORTAL, loc.clone().add(0, 1, 0), 25, 0.5, 0.8, 0.5, 0.08);
+            world.playSound(loc, Sound.ENTITY_PHANTOM_FLAP, SoundCategory.HOSTILE, 1.0f, 0.6f);
+        }
+        return true;
+    }
+
+    /* ── Helion 日灼焰獸 ─ 攻擊技能：太陽焰息 ── */
+    private boolean eliteSkillHelionAttack(final Monster attacker, final Player victim) {
+        final int roll = this.ambientRandom.nextInt(3);
+        final Location loc = attacker.getLocation();
+        final World world = attacker.getWorld();
+        if (roll == 0) {
+            // 日冕爆發 — AoE 火焰 + 高温灼傷
+            world.spawnParticle(Particle.FLAME, loc.clone().add(0, 1, 0), 60, 3.0, 1.0, 3.0, 0.08);
+            world.spawnParticle(Particle.LAVA, loc.clone().add(0, 1.5, 0), 15, 2.0, 0.5, 2.0, 0.0);
+            world.playSound(loc, Sound.ENTITY_BLAZE_SHOOT, SoundCategory.HOSTILE, 1.2f, 0.6f);
+            for (final Entity nearby : attacker.getNearbyEntities(ELITE_SKILL_RANGE, 3.0, ELITE_SKILL_RANGE)) {
+                if (nearby instanceof Player p && p.getGameMode() == GameMode.SURVIVAL) {
+                    p.setFireTicks(Math.max(p.getFireTicks(), 80));
+                    p.damage(3.0, attacker);
+                    p.sendActionBar(this.itemFactory.error("⚠ 日冕爆發—高温灼傷！"));
+                }
+            }
+        } else if (roll == 1) {
+            // 隕石轟擊 — 延遲落點攻擊
+            final Location impact = victim.getLocation().clone();
+            world.spawnParticle(Particle.DUST, impact.clone().add(0, 0.2, 0), 20, 1.5, 0.1, 1.5, 0.0,
+                    new Particle.DustOptions(Color.fromRGB(255, 80, 0), 2.0f));
+            world.playSound(impact, Sound.ENTITY_FIREWORK_ROCKET_LAUNCH, SoundCategory.HOSTILE, 1.0f, 0.5f);
+            victim.sendActionBar(this.itemFactory.error("⚠ 注意腳下—隕石即將落下！"));
+            this.scheduler.runRegionDelayed(impact, task -> {
+                if (!impact.isWorldLoaded()) {
+                    return;
+                }
+                world.spawnParticle(Particle.EXPLOSION, impact.clone().add(0, 1, 0), 3, 0.5, 0.5, 0.5, 0.0);
+                world.spawnParticle(Particle.FLAME, impact.clone().add(0, 0.5, 0), 40, 2.0, 0.5, 2.0, 0.08);
+                world.spawnParticle(Particle.LAVA, impact, 10, 1.5, 0.3, 1.5, 0.0);
+                world.playSound(impact, Sound.ENTITY_GENERIC_EXPLODE, SoundCategory.HOSTILE, 1.5f, 0.7f);
+                for (final Entity nearby : world.getNearbyEntities(impact, 3.0, 3.0, 3.0)) {
+                    if (nearby instanceof Player p && p.getGameMode() == GameMode.SURVIVAL) {
+                        p.damage(6.0);
+                        p.setFireTicks(Math.max(p.getFireTicks(), 60));
+                    }
+                }
+            }, 30L);
+        } else {
+            // 熔岩護盾 — 自身抗火 + 抗性
+            attacker.addPotionEffect(new PotionEffect(PotionEffectType.FIRE_RESISTANCE, 200, 0, true, false, true));
+            attacker.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE, 100, 1, true, false, true));
+            world.spawnParticle(Particle.FLAME, loc.clone().add(0, 1, 0), 30, 0.6, 1.0, 0.6, 0.03);
+            world.playSound(loc, Sound.BLOCK_FIRE_AMBIENT, SoundCategory.HOSTILE, 1.0f, 0.4f);
+        }
+        return true;
+    }
+
+    /* ── Tempest 雷殻追獵者 ─ 攻擊技能：風暴鏈擊 ── */
+    private boolean eliteSkillTempestAttack(final Monster attacker, final Player victim) {
+        final int roll = this.ambientRandom.nextInt(3);
+        final Location loc = attacker.getLocation();
+        final World world = attacker.getWorld();
+        if (roll == 0) {
+            // 雷擊召喚 — 在玩家位置召喚閃電
+            final Location strikeLoc = victim.getLocation();
+            world.strikeLightningEffect(strikeLoc);
+            victim.damage(5.0, attacker);
+            victim.addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS, 40, 1, true, true, true));
+            world.spawnParticle(Particle.ELECTRIC_SPARK, strikeLoc.clone().add(0, 1, 0), 20, 0.5, 1.0, 0.5, 0.1);
+            victim.sendActionBar(this.itemFactory.error("⚠ 雷擊召喚—被雷電擊中！"));
+        } else if (roll == 1) {
+            // 風暴衝擊波 — AoE 擊退
+            world.spawnParticle(Particle.CLOUD, loc.clone().add(0, 1, 0), 40, 3.0, 1.0, 3.0, 0.1);
+            world.spawnParticle(Particle.ELECTRIC_SPARK, loc.clone().add(0, 1, 0), 25, 3.0, 1.0, 3.0, 0.08);
+            world.playSound(loc, Sound.ENTITY_LIGHTNING_BOLT_THUNDER, SoundCategory.HOSTILE, 0.8f, 1.5f);
+            for (final Entity nearby : attacker.getNearbyEntities(ELITE_SKILL_RANGE, 3.0, ELITE_SKILL_RANGE)) {
+                if (nearby instanceof Player p && p.getGameMode() == GameMode.SURVIVAL) {
+                    final Vector kb = p.getLocation().toVector().subtract(loc.toVector()).normalize().multiply(1.8);
+                    kb.setY(0.6);
+                    p.setVelocity(kb);
+                    p.addPotionEffect(new PotionEffect(PotionEffectType.WEAKNESS, 60, 0, true, true, true));
+                    p.sendActionBar(this.itemFactory.error("⚠ 風暴衝擊波—被擊飛！"));
+                }
+            }
+        } else {
+            // 鏈式閃電 — 連鎖打擊附近多名玩家
+            final List<Player> targets = new java.util.ArrayList<>();
+            targets.add(victim);
+            for (final Entity nearby : attacker.getNearbyEntities(8.0, 4.0, 8.0)) {
+                if (nearby instanceof Player p && p != victim && p.getGameMode() == GameMode.SURVIVAL) {
+                    targets.add(p);
+                    if (targets.size() >= 3) {
+                        break;
+                    }
+                }
+            }
+            for (int i = 0; i < targets.size(); i++) {
+                final Player target = targets.get(i);
+                final double dmg = Math.max(1.0, 4.0 - i * 1.5);
+                target.damage(dmg, attacker);
+                target.addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS, 30, 0, true, true, true));
+                world.spawnParticle(Particle.ELECTRIC_SPARK, target.getLocation().add(0, 1, 0), 15, 0.3, 0.6, 0.3, 0.1);
+                target.sendActionBar(this.itemFactory.error("⚠ 鏈式閃電！"));
+            }
+            world.playSound(loc, Sound.ENTITY_LIGHTNING_BOLT_IMPACT, SoundCategory.HOSTILE, 1.0f, 1.2f);
+        }
+        return true;
+    }
+
+    /**
+     * 辨識精英怪所屬星球 id。
+     */
+    private String identifyElitePlanet(final LivingEntity entity) {
+        for (final String tag : entity.getScoreboardTags()) {
+            if (tag.startsWith(PLANET_ELITE_TAG_PREFIX)) {
+                return tag.substring(PLANET_ELITE_TAG_PREFIX.length());
+            }
+        }
+        return null;
+    }
+
+    /**
+     * 被動光環 — 每 3 秒 (60 ticks) 對周圍玩家產生效果。
+     * 必須透過 runEntity 切到玩家的 Region Thread 才能呼叫 getNearbyEntities。
+     */
+    private void tickPlanetEliteAuras() {
+        for (final PlanetDefinition definition : this.planets.values()) {
+            final World world = this.resolveExistingPlanetWorld(definition);
+            if (world == null) {
+                continue;
+            }
+            for (final Player player : world.getPlayers()) {
+                if (player.getGameMode() != GameMode.SURVIVAL) {
+                    continue;
+                }
+                final String planetId = definition.id();
+                this.scheduler.runEntity(player, () -> {
+                    if (!player.isValid() || player.getGameMode() != GameMode.SURVIVAL) {
+                        return;
+                    }
+                    for (final Entity nearby : player.getNearbyEntities(10.0, 6.0, 10.0)) {
+                        if (!(nearby instanceof Monster monster)) {
+                            continue;
+                        }
+                        if (!monster.getScoreboardTags().contains(PLANET_ELITE_TAG)) {
+                            continue;
+                        }
+                        this.applyEliteAura(planetId, monster, player);
+                    }
+                });
+            }
+        }
+    }
+
+    private void applyEliteAura(final String planetId, final Monster elite, final Player player) {
+        final double dist = elite.getLocation().distance(player.getLocation());
+        if (dist > 8.0) {
+            return;
+        }
+        final Location eliteLoc = elite.getLocation();
+        final World world = elite.getWorld();
+        switch (planetId) {
+            case "aurelia" -> {
+                // 輻射光環 — 近距離持續中毒
+                if (dist <= 4.0) {
+                    player.addPotionEffect(new PotionEffect(PotionEffectType.POISON, 60, 0, true, false, false));
+                }
+                world.spawnParticle(Particle.DUST, eliteLoc.clone().add(0, 1, 0), 5, 2.5, 1.0, 2.5, 0.0,
+                        new Particle.DustOptions(Color.fromRGB(120, 220, 40), 1.0f));
+            }
+            case "cryon" -> {
+                // 霜寒光環 — 靠近時增加凍結值
+                if (dist <= 5.0) {
+                    player.setFreezeTicks(Math.min(player.getMaxFreezeTicks(), player.getFreezeTicks() + 30));
+                }
+                world.spawnParticle(Particle.SNOWFLAKE, eliteLoc.clone().add(0, 1, 0), 5, 2.0, 0.8, 2.0, 0.01);
+            }
+            case "nyx" -> {
+                // 虛影光環 — 靠近時給予黑暗效果
+                if (dist <= 5.0) {
+                    player.addPotionEffect(new PotionEffect(PotionEffectType.DARKNESS, 60, 0, true, false, false));
+                }
+                world.spawnParticle(Particle.REVERSE_PORTAL, eliteLoc.clone().add(0, 1.2, 0), 5, 1.5, 0.8, 1.5, 0.02);
+            }
+            case "helion" -> {
+                // 灼熱光環 — 靠近時著火
+                if (dist <= 4.0) {
+                    player.setFireTicks(Math.max(player.getFireTicks(), 40));
+                }
+                world.spawnParticle(Particle.FLAME, eliteLoc.clone().add(0, 1, 0), 5, 2.0, 0.8, 2.0, 0.02);
+            }
+            case "tempest" -> {
+                // 電磁光環 — 靠近時噁心 + 粒子
+                if (dist <= 5.0) {
+                    player.addPotionEffect(new PotionEffect(PotionEffectType.NAUSEA, 80, 0, true, false, false));
+                }
+                world.spawnParticle(Particle.ELECTRIC_SPARK, eliteLoc.clone().add(0, 1.2, 0), 5, 2.0, 0.8, 2.0, 0.05);
+            }
+            default -> {
+            }
+        }
     }
 
     public void saveAll() {
@@ -976,6 +1433,8 @@ public final class PlanetService {
 
     private void applyPlanetWorldSettings(final PlanetDefinition definition, final World world) {
         this.scheduler.runGlobal(task -> {
+            world.setDifficulty(org.bukkit.Difficulty.HARD);
+            world.setSpawnFlags(true, true);
             world.setGameRule(GameRules.ADVANCE_TIME, false);
             world.setGameRule(GameRules.ADVANCE_WEATHER, false);
             switch (definition.id()) {
@@ -2039,6 +2498,225 @@ public final class PlanetService {
         for (int y = 0; y < height; y++) {
             world.getBlockAt(baseX, baseY + y, baseZ).setType(material, false);
         }
+    }
+
+    // ═══ 星球主動怪物生成（繞過光照限制）═══
+
+    /** 每個玩家附近維持的最大怪物數量 */
+    private static final int PLANET_MOB_CAP_PER_PLAYER = 12;
+    private static final long ELITE_SKILL_COOLDOWN_MS = 4000L;
+    private static final long ELITE_AURA_TICK_INTERVAL = 60L;
+    private static final double ELITE_SKILL_RANGE = 6.0D;
+    /** 怪物生成的最小/最大距離（格） */
+    private static final int MOB_SPAWN_MIN_DISTANCE = 20;
+    private static final int MOB_SPAWN_MAX_DISTANCE = 48;
+
+    private void tickPlanetMobSpawning() {
+        for (final PlanetDefinition definition : this.planets.values()) {
+            final World world = this.resolveExistingPlanetWorld(definition);
+            if (world == null) {
+                continue;
+            }
+            for (final Player player : world.getPlayers()) {
+                if (player.getGameMode() == GameMode.CREATIVE || player.getGameMode() == GameMode.SPECTATOR) {
+                    continue;
+                }
+                this.scheduler.runEntity(player, () -> {
+                    if (!player.isValid() || player.getGameMode() == GameMode.CREATIVE || player.getGameMode() == GameMode.SPECTATOR) {
+                        return;
+                    }
+                    this.trySpawnPlanetMobNear(definition, player);
+                });
+            }
+        }
+    }
+
+    private void trySpawnPlanetMobNear(final PlanetDefinition definition, final Player player) {
+        // 計算玩家附近已存在的怪物數量
+        final int nearbyMonsters = (int) player.getNearbyEntities(MOB_SPAWN_MAX_DISTANCE, 32.0D, MOB_SPAWN_MAX_DISTANCE).stream()
+                .filter(e -> e instanceof Monster).count();
+        if (nearbyMonsters >= PLANET_MOB_CAP_PER_PLAYER) {
+            return;
+        }
+        // 每次 tick 嘗試生成 1~2 隻
+        final int attempts = 1 + this.ambientRandom.nextInt(2);
+        for (int i = 0; i < attempts; i++) {
+            final Location spawnLoc = this.findPlanetSpawnLocation(player);
+            if (spawnLoc == null) {
+                continue;
+            }
+            final org.bukkit.entity.EntityType mobType = this.planetMobTypeFor(definition);
+            if (mobType == null) {
+                continue;
+            }
+            try {
+                // 直接在玩家 entity thread 上生成（24-48 格，通常在同一 Folia region）
+                final Block feet = spawnLoc.getBlock();
+                final Block below = feet.getRelative(BlockFace.DOWN);
+                if (!below.isSolid() || !feet.isPassable() || !feet.getRelative(BlockFace.UP).isPassable()) {
+                    continue;
+                }
+                final Entity spawned = spawnLoc.getWorld().spawnEntity(spawnLoc, mobType);
+                this.applyPlanetMobSpawn(spawned, spawnLoc, mobType, definition);
+            } catch (final Exception ex) {
+                // Folia region 不匹配時改用 runRegion 降級
+                this.scheduler.runRegion(spawnLoc, task -> {
+                    try {
+                        final Block feet = spawnLoc.getBlock();
+                        final Block below = feet.getRelative(BlockFace.DOWN);
+                        if (!below.isSolid() || !feet.isPassable() || !feet.getRelative(BlockFace.UP).isPassable()) {
+                            return;
+                        }
+                        final Entity spawned = spawnLoc.getWorld().spawnEntity(spawnLoc, mobType);
+                        this.applyPlanetMobSpawn(spawned, spawnLoc, mobType, definition);
+                    } catch (final Exception ignored) {
+                    }
+                });
+            }
+        }
+    }
+
+    private Location findPlanetSpawnLocation(final Player player) {
+        final World world = player.getWorld();
+        final Location base = player.getLocation();
+        for (int attempt = 0; attempt < 5; attempt++) {
+            final double angle = this.ambientRandom.nextDouble() * Math.PI * 2.0D;
+            final int radius = MOB_SPAWN_MIN_DISTANCE + this.ambientRandom.nextInt(MOB_SPAWN_MAX_DISTANCE - MOB_SPAWN_MIN_DISTANCE + 1);
+            final int x = base.getBlockX() + (int) Math.round(Math.cos(angle) * radius);
+            final int z = base.getBlockZ() + (int) Math.round(Math.sin(angle) * radius);
+            if (!world.isChunkLoaded(x >> 4, z >> 4)) {
+                continue;
+            }
+            final int y = world.getHighestBlockYAt(x, z, HeightMap.MOTION_BLOCKING_NO_LEAVES) + 1;
+            if (y <= world.getMinHeight() + 1 || y > world.getMaxHeight() - 2) {
+                continue;
+            }
+            final Block feet = world.getBlockAt(x, y, z);
+            final Block below = world.getBlockAt(x, y - 1, z);
+            if (below.isSolid() && feet.isPassable() && feet.getRelative(BlockFace.UP).isPassable()) {
+                return new Location(world, x + 0.5D, y, z + 0.5D);
+            }
+        }
+        return null;
+    }
+
+    /**
+     * 統一處理新生成的星球怪物 — 設定屬性 + 出場特效。
+     */
+    private void applyPlanetMobSpawn(final Entity spawned, final Location spawnLoc, final org.bukkit.entity.EntityType mobType, final PlanetDefinition definition) {
+        if (!(spawned instanceof LivingEntity living)) {
+            return;
+        }
+        living.setRemoveWhenFarAway(true);
+        // 白天星球的亡靈系怪物需要防火
+        if (living instanceof Monster && this.isUndead(mobType)) {
+            living.addPotionEffect(new PotionEffect(PotionEffectType.FIRE_RESISTANCE, 20 * 60 * 10, 0, true, false, false));
+        }
+        // 嘗試菁英化
+        this.tryEmpowerPlanetMob(living);
+
+        // ── 出場特效 ──
+        final World world = spawnLoc.getWorld();
+        final Location vfxLoc = spawnLoc.clone().add(0.0, 0.5, 0.0);
+        final boolean isElite = living.getScoreboardTags().contains(PLANET_ELITE_TAG);
+
+        // 基礎粒子 — 所有怪物都有地面裂隙效果
+        final Particle.DustOptions baseDust = this.planetSpawnDust(definition.id());
+        world.spawnParticle(Particle.DUST, vfxLoc, 20, 0.5, 0.8, 0.5, 0.01, baseDust);
+        world.spawnParticle(Particle.SMOKE, spawnLoc.clone().add(0, 0.2, 0), 10, 0.4, 0.1, 0.4, 0.03);
+        world.playSound(spawnLoc, Sound.BLOCK_SCULK_SPREAD, SoundCategory.HOSTILE, 0.7f, 0.6f);
+
+        if (isElite) {
+            // 精英出場特效 — 更華麗
+            world.spawnParticle(Particle.DUST, vfxLoc, 35, 0.8, 1.2, 0.8, 0.02, baseDust);
+            world.spawnParticle(Particle.TRIAL_SPAWNER_DETECTION, vfxLoc, 15, 0.5, 0.8, 0.5, 0.03);
+            world.spawnParticle(Particle.END_ROD, vfxLoc.clone().add(0, 0.5, 0), 10, 0.3, 0.5, 0.3, 0.02);
+            // 上升螺旋粒子（延遲執行 3 幀）
+            this.scheduler.runRegionDelayed(spawnLoc, task -> {
+                if (!spawnLoc.isWorldLoaded()) return;
+                for (int ring = 0; ring < 8; ring++) {
+                    final double angle = Math.toRadians(ring * 45);
+                    final double rx = Math.cos(angle) * 1.0;
+                    final double rz = Math.sin(angle) * 1.0;
+                    world.spawnParticle(Particle.DUST, spawnLoc.clone().add(rx, 0.3 + ring * 0.15, rz), 2, 0.05, 0.05, 0.05, 0.0, baseDust);
+                }
+            }, 3L);
+            // 精英出場音效
+            world.playSound(spawnLoc, Sound.ENTITY_WARDEN_EMERGE, SoundCategory.HOSTILE, 0.6f, 1.3f);
+            world.playSound(spawnLoc, Sound.BLOCK_TRIAL_SPAWNER_SPAWN_MOB, SoundCategory.HOSTILE, 0.8f, 0.8f);
+
+            // 精英發光效果 2 秒
+            living.setGlowing(true);
+            this.scheduler.runEntityDelayed(living, () -> {
+                if (living.isValid()) {
+                    living.setGlowing(false);
+                }
+            }, 40L);
+        }
+    }
+
+    /**
+     * 根據星球返回出場粒子顏色。
+     */
+    private Particle.DustOptions planetSpawnDust(final String planetId) {
+        return switch (planetId) {
+            case "aurelia" -> new Particle.DustOptions(Color.fromRGB(100, 220, 50), 1.5f);   // 輻射綠
+            case "cryon" -> new Particle.DustOptions(Color.fromRGB(140, 210, 255), 1.5f);     // 冰藍
+            case "nyx" -> new Particle.DustOptions(Color.fromRGB(130, 60, 200), 1.5f);        // 虛空紫
+            case "helion" -> new Particle.DustOptions(Color.fromRGB(255, 120, 30), 1.5f);     // 烈焰橙
+            case "tempest" -> new Particle.DustOptions(Color.fromRGB(60, 180, 255), 1.5f);    // 雷電青
+            default -> new Particle.DustOptions(Color.fromRGB(200, 200, 200), 1.2f);
+        };
+    }
+
+    private org.bukkit.entity.EntityType planetMobTypeFor(final PlanetDefinition definition) {
+        return switch (definition.id()) {
+            case "aurelia" -> {
+                final int roll = this.ambientRandom.nextInt(10);
+                yield roll < 4 ? org.bukkit.entity.EntityType.HUSK
+                        : roll < 7 ? org.bukkit.entity.EntityType.SKELETON
+                        : roll < 9 ? org.bukkit.entity.EntityType.SPIDER
+                        : org.bukkit.entity.EntityType.CAVE_SPIDER;
+            }
+            case "cryon" -> {
+                final int roll = this.ambientRandom.nextInt(10);
+                yield roll < 4 ? org.bukkit.entity.EntityType.STRAY
+                        : roll < 7 ? org.bukkit.entity.EntityType.SKELETON
+                        : roll < 9 ? org.bukkit.entity.EntityType.ZOMBIE
+                        : org.bukkit.entity.EntityType.SPIDER;
+            }
+            case "nyx" -> {
+                final int roll = this.ambientRandom.nextInt(10);
+                yield roll < 3 ? org.bukkit.entity.EntityType.ENDERMAN
+                        : roll < 6 ? org.bukkit.entity.EntityType.PHANTOM
+                        : roll < 8 ? org.bukkit.entity.EntityType.SKELETON
+                        : org.bukkit.entity.EntityType.CREEPER;
+            }
+            case "helion" -> {
+                final int roll = this.ambientRandom.nextInt(10);
+                yield roll < 4 ? org.bukkit.entity.EntityType.BLAZE
+                        : roll < 7 ? org.bukkit.entity.EntityType.WITHER_SKELETON
+                        : roll < 9 ? org.bukkit.entity.EntityType.HUSK
+                        : org.bukkit.entity.EntityType.MAGMA_CUBE;
+            }
+            case "tempest" -> {
+                final int roll = this.ambientRandom.nextInt(10);
+                yield roll < 4 ? org.bukkit.entity.EntityType.ZOMBIE
+                        : roll < 7 ? org.bukkit.entity.EntityType.CREEPER
+                        : roll < 9 ? org.bukkit.entity.EntityType.SKELETON
+                        : org.bukkit.entity.EntityType.WITCH;
+            }
+            default -> null;
+        };
+    }
+
+    private boolean isUndead(final org.bukkit.entity.EntityType type) {
+        return type == org.bukkit.entity.EntityType.SKELETON
+                || type == org.bukkit.entity.EntityType.STRAY
+                || type == org.bukkit.entity.EntityType.ZOMBIE
+                || type == org.bukkit.entity.EntityType.HUSK
+                || type == org.bukkit.entity.EntityType.PHANTOM
+                || type == org.bukkit.entity.EntityType.WITHER_SKELETON;
     }
 
     private void tickPlanetHazards() {

@@ -65,6 +65,7 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.Chicken;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Mob;
+import org.bukkit.entity.Monster;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.player.PlayerItemDamageEvent;
 import org.bukkit.event.player.PlayerToggleSneakEvent;
@@ -98,6 +99,7 @@ public final class TechListener implements Listener {
     private final Map<UUID, Map<String, Long>> talismanCooldowns = new ConcurrentHashMap<>();
     private final Map<UUID, Long> lastEquipmentTick = new ConcurrentHashMap<>();
     private final Set<UUID> magnetDisabled = ConcurrentHashMap.newKeySet();
+    private final Set<UUID> thornsProcessing = ConcurrentHashMap.newKeySet();
     private static final String TECH_MAGNET = "tech_magnet";
     private static final double MAGNET_RANGE = 5.0;
 
@@ -654,13 +656,19 @@ public final class TechListener implements Listener {
         craftingInventory.setResult(this.plugin.getItemFactory().buildMachineItem(match.machine()));
     }
 
+    /** 應走科技加工鏈的原版礦石/粗礦，禁止直接用原版熔爐燒製。 */
+    private static final java.util.Set<Material> TECH_CHAIN_ORES = java.util.Set.of(
+            Material.RAW_IRON, Material.RAW_COPPER, Material.RAW_GOLD,
+            Material.IRON_ORE, Material.COPPER_ORE, Material.GOLD_ORE,
+            Material.DEEPSLATE_IRON_ORE, Material.DEEPSLATE_COPPER_ORE, Material.DEEPSLATE_GOLD_ORE
+    );
+
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onFurnaceSmelt(final FurnaceSmeltEvent event) {
-        if (!this.isTaggedTechMaterial(event.getSource())) {
-            return;
+        if (this.isTaggedTechMaterial(event.getSource()) || TECH_CHAIN_ORES.contains(event.getSource().getType())) {
+            event.setCancelled(true);
+            event.setResult(new ItemStack(Material.AIR));
         }
-        event.setCancelled(true);
-        event.setResult(new ItemStack(Material.AIR));
     }
 
     @EventHandler
@@ -934,55 +942,55 @@ public final class TechListener implements Listener {
 
     private String rollWildForageDrop() {
         final double roll = ThreadLocalRandom.current().nextDouble();
-        if (roll < 0.030D) {
+        if (roll < 0.015D) {
             return "soybean_seeds";
         }
-        if (roll < 0.055D) {
+        if (roll < 0.0275D) {
             return "spiceberry_seeds";
         }
-        if (roll < 0.080D) {
+        if (roll < 0.040D) {
             return "tea_leaf_seeds";
         }
-        if (roll < 0.102D) {
+        if (roll < 0.051D) {
             return "tomato_seeds";
         }
-        if (roll < 0.124D) {
+        if (roll < 0.062D) {
             return "cabbage_seeds";
         }
-        if (roll < 0.146D) {
+        if (roll < 0.073D) {
             return "corn_seeds";
         }
-        if (roll < 0.168D) {
+        if (roll < 0.084D) {
             return "onion_bulbs";
         }
-        if (roll < 0.178D) {
+        if (roll < 0.089D) {
             return "lumenfruit_sapling";
         }
-        if (roll < 0.188D) {
+        if (roll < 0.094D) {
             return "frost_apple_sapling";
         }
-        if (roll < 0.198D) {
+        if (roll < 0.099D) {
             return "shadow_berry_sapling";
         }
-        if (roll < 0.208D) {
+        if (roll < 0.104D) {
             return "sunflare_fig_sapling";
         }
-        if (roll < 0.218D) {
+        if (roll < 0.109D) {
             return "stormplum_sapling";
         }
-        if (roll < 0.226D) {
+        if (roll < 0.113D) {
             return "cherry_sapling";
         }
-        if (roll < 0.234D) {
+        if (roll < 0.117D) {
             return "lemon_sapling";
         }
-        if (roll < 0.242D) {
+        if (roll < 0.121D) {
             return "peach_sapling";
         }
-        if (roll < 0.250D) {
+        if (roll < 0.125D) {
             return "pear_sapling";
         }
-        if (roll < 0.258D) {
+        if (roll < 0.129D) {
             return "orange_sapling";
         }
         return null;
@@ -2115,6 +2123,26 @@ public final class TechListener implements Listener {
         this.handleTalismanOnDamage(player, event);
     }
 
+    /**
+     * 星球怪物 PVE 保護繞過 — 在 LOW 優先級取消 Residence 等保護插件的攔截。
+     * 允許：玩家攻擊星球怪物 / 星球怪物攻擊玩家。
+     */
+    @EventHandler(priority = EventPriority.LOW, ignoreCancelled = false)
+    public void onPlanetMobDamageBypass(final EntityDamageByEntityEvent event) {
+        // 玩家 → 星球怪物
+        if (event.getDamager() instanceof Player && event.getEntity() instanceof Monster mob) {
+            if (this.plugin.getPlanetService().isPlanetWorld(mob.getWorld())) {
+                event.setCancelled(false);
+            }
+        }
+        // 星球怪物 → 玩家
+        if (event.getDamager() instanceof Monster mob && event.getEntity() instanceof Player) {
+            if (this.plugin.getPlanetService().isPlanetWorld(mob.getWorld())) {
+                event.setCancelled(false);
+            }
+        }
+    }
+
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onEntityDamageByEntity(final EntityDamageByEntityEvent event) {
         if (event.getDamager() instanceof Player attacker) {
@@ -2123,6 +2151,10 @@ public final class TechListener implements Listener {
         if (event.getEntity() instanceof Player victim && event.getDamager() instanceof LivingEntity) {
             this.handleTalismanWhirlwind(victim);
             this.handleEquipmentThorns(victim, event);
+        }
+        // 精英技能觸發 — 怪物攻擊玩家時
+        if (event.getDamager() instanceof Monster monster && event.getEntity() instanceof Player target) {
+            this.plugin.getPlanetService().handleEliteSkillOnAttack(monster, target);
         }
     }
 
@@ -2464,12 +2496,19 @@ public final class TechListener implements Listener {
     }
 
     private void handleEquipmentThorns(final Player victim, final EntityDamageByEntityEvent event) {
+        final UUID uid = victim.getUniqueId();
+        if (this.thornsProcessing.contains(uid)) { return; }
         final ItemStack chestplate = victim.getInventory().getChestplate();
         if (chestplate == null) { return; }
         final String id = this.plugin.getItemFactory().getTechItemId(chestplate);
         if (!"quantum_chestplate".equalsIgnoreCase(id)) { return; }
         if (event.getDamager() instanceof LivingEntity attacker) {
-            attacker.damage(event.getDamage() * 0.25, victim);
+            this.thornsProcessing.add(uid);
+            try {
+                attacker.damage(event.getDamage() * 0.25, victim);
+            } finally {
+                this.thornsProcessing.remove(uid);
+            }
             victim.getWorld().playSound(victim.getLocation(), Sound.ENCHANT_THORNS_HIT, 0.6f, 1.2f);
         }
     }

@@ -260,6 +260,10 @@ public final class TechProjectPlugin extends JavaPlugin {
     }
 
     public void reloadProjectData() {
+        // 重載前先關閉所有科技書選單，防止玩家趁機拿取物品
+        if (this.techBookService != null) {
+            this.techBookService.closeAllBookViews();
+        }
         if (this.techRegistry != null) {
             this.techRegistry.reload(this);
         }
@@ -283,6 +287,10 @@ public final class TechProjectPlugin extends JavaPlugin {
 
     @Override
     public void onDisable() {
+        // 關閉所有科技書選單
+        if (this.techBookService != null) {
+            this.techBookService.closeAllBookViews();
+        }
         if (this.discordSrvHook != null) {
             this.discordSrvHook.tryUnregister();
         }

@@ -288,6 +288,26 @@ public final class TechCommand implements CommandExecutor, TabCompleter {
                 }
                 return true;
             }
+            if (args.length >= 2 && args[1].equalsIgnoreCase("debug")) {
+                if (!sender.hasPermission("techproject.admin")) {
+                    sender.sendMessage(Component.text("缺少權限。", NamedTextColor.RED));
+                    return true;
+                }
+                for (final String line : this.plugin.getPlanetService().planetDebugLines(player)) {
+                    sender.sendMessage(Component.text(line));
+                }
+                return true;
+            }
+            if (args.length >= 2 && args[1].equalsIgnoreCase("spawntest")) {
+                if (!sender.hasPermission("techproject.admin")) {
+                    sender.sendMessage(Component.text("缺少權限。", NamedTextColor.RED));
+                    return true;
+                }
+                for (final String line : this.plugin.getPlanetService().planetSpawnTestLines(player)) {
+                    sender.sendMessage(Component.text(line));
+                }
+                return true;
+            }
             final String target = args.length >= 2 ? args[1].toLowerCase(Locale.ROOT) : "aurelia";
             if (!this.plugin.getPlanetService().teleportToPlanet(player, target)) {
                 final String message = this.plugin.getPlanetService().isWorldCreationUnsupported()
@@ -451,6 +471,8 @@ public final class TechCommand implements CommandExecutor, TabCompleter {
         if (args.length == 2 && args[0].equalsIgnoreCase("planet")) {
             final List<String> options = new ArrayList<>(this.plugin.getPlanetService().planetIds());
             options.add("info");
+            options.add("debug");
+            options.add("spawntest");
             return options;
         }
         if (args.length == 3 && args[0].equalsIgnoreCase("give")) {

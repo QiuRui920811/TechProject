@@ -2349,6 +2349,20 @@ recipes:
     count: 2
     energy: 6
     guide: "石英 → 粉碎機 → 矽晶×2"
+  crusher_raw_iron:
+    machine: "crusher"
+    inputs: ["raw_iron"]
+    output: "iron_dust"
+    count: 2
+    energy: 5
+    guide: "粗鐵 → 粉碎機 → 鐵粉×2"
+  crusher_raw_copper:
+    machine: "crusher"
+    inputs: ["raw_copper"]
+    output: "copper_dust"
+    count: 2
+    energy: 5
+    guide: "粗銅 → 粉碎機 → 銅粉×2"
   crusher_coal:
     machine: "crusher"
     inputs: ["coal"]
@@ -3112,6 +3126,20 @@ recipes:
     count: 2
     energy: 12
     guide: "石英 → 電動粉碎機 → 矽晶×2"
+  electric_crusher_raw_iron:
+    machine: "electric_crusher"
+    inputs: ["raw_iron"]
+    output: "iron_dust"
+    count: 2
+    energy: 10
+    guide: "粗鐵 → 電動粉碎機 → 鐵粉×2"
+  electric_crusher_raw_copper:
+    machine: "electric_crusher"
+    inputs: ["raw_copper"]
+    output: "copper_dust"
+    count: 2
+    energy: 10
+    guide: "粗銅 → 電動粉碎機 → 銅粉×2"
   electric_crusher_coal:
     machine: "electric_crusher"
     inputs: ["coal"]
