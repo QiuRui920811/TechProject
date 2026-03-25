@@ -370,7 +370,7 @@ machines:
     display-name: 時序引擎
     category: ADVANCED
     tier: TIER4
-    block: CLOCK
+    block: SCULK_SENSOR
     inputs: [orbit_processor, void_crystal]
     outputs: [chrono_thread, chrono_core]
     energy-per-tick: 38
