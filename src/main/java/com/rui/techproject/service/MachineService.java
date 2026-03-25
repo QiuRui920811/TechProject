@@ -4920,58 +4920,76 @@ public final class MachineService {
         final long requiredEnergy = Math.max(1L, definition.energyPerTick());
         this.absorbNearbyEnergy(machine, location, requiredEnergy);
 
-        // 在輸入欄尋找礫石或靈魂沙
-        int sourceSlot = -1;
-        boolean isGravel = false;
+        // 快速檢查輸入欄是否有礫石或靈魂沙
+        boolean hasInput = false;
         for (int slot = 0; slot < 9; slot++) {
             final ItemStack stack = machine.inputAt(slot);
-            if (stack == null || stack.getType() == Material.AIR) { continue; }
-            if (stack.getType() == Material.GRAVEL) {
-                sourceSlot = slot;
-                isGravel = true;
-                break;
-            }
-            if (stack.getType() == Material.SOUL_SAND || stack.getType() == Material.SOUL_SOIL) {
-                sourceSlot = slot;
+            if (stack != null && stack.getType() != Material.AIR
+                    && (stack.getType() == Material.GRAVEL || stack.getType() == Material.SOUL_SAND || stack.getType() == Material.SOUL_SOIL)) {
+                hasInput = true;
                 break;
             }
         }
 
-        if (sourceSlot == -1) {
+        if (!hasInput) {
             this.setRuntimeState(machine, MachineRuntimeState.NO_INPUT, "無輸入");
             return;
         }
-        if (!machine.consumeEnergy(requiredEnergy)) {
-            this.setRuntimeState(machine, MachineRuntimeState.NO_POWER, "缺電");
-            return;
+
+        // speed_upgrade：每個 tick 額外執行 N 次篩礦
+        final int attempts = 1 + this.countUpgrade(machine, "speed_upgrade");
+        boolean processedAny = false;
+        for (int attempt = 0; attempt < attempts; attempt++) {
+            // 重新尋找來源（上一輪可能消耗完）
+            int slot = -1;
+            boolean gravel = false;
+            for (int s = 0; s < 9; s++) {
+                final ItemStack st = machine.inputAt(s);
+                if (st == null || st.getType() == Material.AIR) { continue; }
+                if (st.getType() == Material.GRAVEL) { slot = s; gravel = true; break; }
+                if (st.getType() == Material.SOUL_SAND || st.getType() == Material.SOUL_SOIL) { slot = s; break; }
+            }
+            if (slot == -1) { break; }
+
+            if (!machine.consumeEnergy(requiredEnergy)) {
+                if (!processedAny) {
+                    this.setRuntimeState(machine, MachineRuntimeState.NO_POWER, "缺電");
+                    return;
+                }
+                break;
+            }
+
+            // 擲骰掉落（電力版無空回合，100% 產出）
+            final String dropId = gravel ? this.rollSifterGravelDrop() : this.rollSifterSoulSandDrop();
+            final int stackBonus = this.countUpgrade(machine, "stack_upgrade");
+            final ItemStack output = this.buildStackForId(dropId, 1 + stackBonus);
+            if (output == null || !this.canStoreOutput(machine, output)) {
+                this.addEnergyCapped(machine, requiredEnergy);
+                if (!processedAny) {
+                    this.setRuntimeState(machine, MachineRuntimeState.OUTPUT_BLOCKED, "輸出滿");
+                    return;
+                }
+                break;
+            }
+
+            // 消耗一個來源方塊
+            final ItemStack source = machine.inputAt(slot);
+            source.setAmount(source.getAmount() - 1);
+            machine.setInputAt(slot, source.getAmount() <= 0 ? null : source);
+
+            // 存入產出
+            this.storeOutput(machine, output);
+            processedAny = true;
+
+            // 統計與解鎖
+            this.progressService.incrementStat(machine.owner(), "electric_sifter_cycles", output.getAmount());
+            this.progressService.incrementStat(machine.owner(), "items_crafted", output.getAmount());
+            this.progressService.incrementStat(machine.owner(), "total_processed", output.getAmount());
+            this.progressService.unlockItem(machine.owner(), dropId);
+            this.progressService.unlockByRequirement(machine.owner(), machine.machineId());
+            this.progressService.unlockByRequirement(machine.owner(), "machine:" + machine.machineId());
+            this.progressService.unlockByRequirement(machine.owner(), "item:" + dropId);
         }
-
-        // 擲骰掉落（電力版無空回合，100% 產出）
-        final String dropId = isGravel ? this.rollSifterGravelDrop() : this.rollSifterSoulSandDrop();
-        final int stackBonus = this.countUpgrade(machine, "stack_upgrade");
-        final ItemStack output = this.buildStackForId(dropId, 1 + stackBonus);
-        if (output == null || !this.canStoreOutput(machine, output)) {
-            this.addEnergyCapped(machine, requiredEnergy);
-            this.setRuntimeState(machine, MachineRuntimeState.OUTPUT_BLOCKED, "輸出滿");
-            return;
-        }
-
-        // 消耗一個來源方塊
-        final ItemStack source = machine.inputAt(sourceSlot);
-        source.setAmount(source.getAmount() - 1);
-        machine.setInputAt(sourceSlot, source.getAmount() <= 0 ? null : source);
-
-        // 存入產出
-        this.storeOutput(machine, output);
-
-        // 統計與解鎖
-        this.progressService.incrementStat(machine.owner(), "electric_sifter_cycles", output.getAmount());
-        this.progressService.incrementStat(machine.owner(), "items_crafted", output.getAmount());
-        this.progressService.incrementStat(machine.owner(), "total_processed", output.getAmount());
-        this.progressService.unlockItem(machine.owner(), dropId);
-        this.progressService.unlockByRequirement(machine.owner(), machine.machineId());
-        this.progressService.unlockByRequirement(machine.owner(), "machine:" + machine.machineId());
-        this.progressService.unlockByRequirement(machine.owner(), "item:" + dropId);
 
         // 視覺回饋
         this.setRuntimeState(machine, MachineRuntimeState.RUNNING, "篩礦中");

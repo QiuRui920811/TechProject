@@ -2067,9 +2067,13 @@ public final class TechListener implements Listener {
         }
         craftingInventory.setMatrix(matrix);
         final var nextMatch = this.plugin.getBlueprintService().matchCraftingMatrix(craftingInventory.getMatrix());
-        craftingInventory.setResult(nextMatch != null && this.plugin.getBlueprintService().isAdvancedWorkbench(craftingInventory.getLocation())
-                ? this.plugin.getItemFactory().buildMachineItem(nextMatch.machine())
-                : null);
+        if (nextMatch != null && this.plugin.getBlueprintService().isAdvancedWorkbench(craftingInventory.getLocation())) {
+            craftingInventory.setResult(nextMatch.isItemBlueprint()
+                    ? this.plugin.getItemFactory().buildTechItem(nextMatch.item())
+                    : this.plugin.getItemFactory().buildMachineItem(nextMatch.machine()));
+        } else {
+            craftingInventory.setResult(null);
+        }
         return true;
     }
 
