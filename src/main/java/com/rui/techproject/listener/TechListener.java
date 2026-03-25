@@ -670,10 +670,10 @@ public final class TechListener implements Listener {
         }
     }
 
-    /** 禁止科技專屬物品放入原版熔爐/高爐燒製（避免產出錯誤物品）。 */
+    /** 禁止科技機器物品放入原版熔爐/高爐燒製（避免產出錯誤物品）。一般科技材料（粉塵、礦砂等）允許正常燒煉。 */
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onFurnaceSmelt(final FurnaceSmeltEvent event) {
-        if (this.isTaggedTechMaterial(event.getSource())) {
+        if (this.plugin.getItemFactory().getMachineId(event.getSource()) != null) {
             event.setCancelled(true);
             event.setResult(new ItemStack(Material.AIR));
         }
