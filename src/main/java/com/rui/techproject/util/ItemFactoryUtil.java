@@ -745,6 +745,11 @@ public final class ItemFactoryUtil {
         }
         meta.getPersistentDataContainer().set(this.chickenUsesKey, PersistentDataType.INTEGER, 0);
         meta.getPersistentDataContainer().set(this.dataVersionKey, PersistentDataType.INTEGER, this.currentItemDataVersion());
+        // 套用 pocket_chicken 的自訂 item-model（Nexo 材質）
+        final TechItemDefinition chickenDef = this.registry.getItem("pocket_chicken");
+        if (chickenDef != null) {
+            this.applyConfiguredItemModel(meta, chickenDef.itemModel());
+        }
         stack.setItemMeta(meta);
         return stack;
     }
