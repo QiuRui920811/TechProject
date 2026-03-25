@@ -24,6 +24,7 @@
 
 - [物品總覽](items/README.md)
 - [基礎材料](items/basic-materials.md)
+- [合金材料](items/alloy-materials.md)
 - [進階材料](items/advanced-materials.md)
 - [魔法物品](items/magical-items.md)
 - [升級模組](items/upgrades.md)

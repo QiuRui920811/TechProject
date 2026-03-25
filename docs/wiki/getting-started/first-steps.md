@@ -58,6 +58,24 @@
 
 ---
 
+## 製作淘金盤
+
+淘金盤是你最早可以做的科技工具，不需要任何機器！在進階工作台上擺出：
+
+| | 第 1 格 | 第 2 格 | 第 3 格 |
+|:---:|:---:|:---:|:---:|
+| **第 1 排** | 　 | 　 | 　 |
+| **第 2 排** | 鐵錠 | 碗 | 鐵錠 |
+| **第 3 排** | 　 | 鐵錠 | 　 |
+
+**材料清單**：4 鐵錠 + 1 碗
+
+做好後手持淘金盤，準備一大堆碎石（用鎬挖石頭就會掉碎石），對準碎石方塊右鍵即可開始篩礦。你需要大量收集**錫粉**、**鋅粉**和**鉛粉**，後面做合金用得到。
+
+> 💡 靈魂沙也可以篩，會得到鉛粉和金粒，值得一去地獄收集！
+
+---
+
 ## 建造粉碎機
 
 粉碎機能把礦石變成粉末（雙倍產出），是前期最重要的加工機器：
@@ -66,9 +84,9 @@
 |:---:|:---:|:---:|:---:|
 | **第 1 排** | ![圓石](https://minecraft.wiki/images/Invicon_Cobblestone.png) 圓石 | ![圓石](https://minecraft.wiki/images/Invicon_Cobblestone.png) 圓石 | ![圓石](https://minecraft.wiki/images/Invicon_Cobblestone.png) 圓石 |
 | **第 2 排** | ![鐵錠](https://minecraft.wiki/images/Invicon_Iron_Ingot.png) 鐵錠 | ![紅石](https://minecraft.wiki/images/Invicon_Redstone.png) 紅石 | ![鐵錠](https://minecraft.wiki/images/Invicon_Iron_Ingot.png) 鐵錠 |
-| **第 3 排** | ![鐵錠](https://minecraft.wiki/images/Invicon_Iron_Ingot.png) 鐵錠 | ![活塞](https://minecraft.wiki/images/Invicon_Piston.png) 活塞 | ![鐵錠](https://minecraft.wiki/images/Invicon_Iron_Ingot.png) 鐵錠 |
+| **第 3 排** | 鋼板 | ![活塞](https://minecraft.wiki/images/Invicon_Piston.png) 活塞 | 鋼板 |
 
-**材料清單**：4 鐵錠 + 3 圓石 + 1 紅石 + 1 活塞
+**材料清單**：3 圓石 + 2 鐵錠 + 1 紅石 + 2 鋼板 + 1 活塞
 
 放在太陽能發電機旁邊。粉碎機是**手動結構機**，放好後還需要在上方放一個**鐵柵欄**，然後**右鍵鐵柵欄**才能啟動加工。丟入鐵礦或銅礦就能開始雙倍產礦。
 
@@ -81,9 +99,13 @@
         ↓
 製作研究台 → 放下 → 開始研究
         ↓
+製作淘金盤 → 開始篩碎石收集金屬粉
+        ↓
 解鎖太陽能發電機 → 製作 → 放在露天
         ↓
-解鎖粉碎機 → 製作 → 放在發電機旁
+解鎖粉碎機 → 製作（需要鋼板！）→ 放在發電機旁
+        ↓
+解鎖合金熔煉爐 → 用合金材料做電路板和齒輪
         ↓
 開始雙倍產礦，逐步解鎖更多科技！
 ```
