@@ -431,173 +431,173 @@ recipes:
     machine: stellar_forge
     inputs: [fusion_core, titanium_alloy]
     output: neutronium_ingot
-    energy: 34
+    energy: 51
     guide: 聚變核心 + 鈦合金 → 恆星鍛爐 → 中子錠
   singularity_neutronium_plate:
     machine: singularity_press
     inputs: [neutronium_ingot, neutronium_ingot]
     output: neutronium_plate
-    energy: 32
+    energy: 48
     guide: 兩個中子錠 → 奇點壓機 → 中子板
   void_dark_matter_dust:
     machine: void_extractor
     inputs: [quantum_fluid, grown_crystal]
     output: dark_matter_dust
-    energy: 30
+    energy: 45
     guide: 量子流體 + 培育晶體 → 虛空萃取器 → 暗物質粉
   void_shard_recipe:
     machine: void_extractor
     inputs: [quantum_fluid, ion_dust]
     output: void_shard
-    energy: 28
+    energy: 42
     guide: 量子流體 + 離子粉 → 虛空萃取器 → 虛空碎片
   loom_quantum_fabric:
     machine: dark_matter_loom
     inputs: [synthetic_fiber, nano_coating]
     output: quantum_fabric
-    energy: 24
+    energy: 36
     guide: 合成纖維 + 奈米塗層 → 暗物質織機 → 量子布料
   loom_dark_matter_sheet:
     machine: dark_matter_loom
     inputs: [dark_matter_dust, quantum_fabric]
     output: dark_matter_sheet
-    energy: 26
+    energy: 39
     guide: 暗物質粉 + 量子布料 → 暗物質織機 → 暗物質片材
   graviton_lens_recipe:
     machine: graviton_stabilizer
     inputs: [magnetic_ring, grown_crystal]
     output: graviton_lens
-    energy: 24
+    energy: 36
     guide: 磁環 + 培育晶體 → 重力子穩定器 → 重力子透鏡
   graviton_core_recipe:
     machine: graviton_stabilizer
     inputs: [flux_link, field_plate]
     output: graviton_core
-    energy: 26
+    energy: 39
     guide: 通量連結 + 力場板 → 重力子穩定器 → 重力子核心
   singularity_mesh_recipe:
     machine: singularity_press
     inputs: [dark_matter_sheet, neutronium_ingot]
     output: singularity_mesh
-    energy: 32
+    energy: 48
     guide: 暗物質片材 + 中子錠 → 奇點壓機 → 奇點網格
   singularity_core_recipe:
     machine: singularity_press
     inputs: [singularity_mesh, graviton_core]
     output: singularity_core
-    energy: 34
+    energy: 51
     guide: 奇點網格 + 重力子核心 → 奇點壓機 → 奇點核心
   antimatter_cluster_recipe:
     machine: antimatter_synthesizer
     inputs: [dark_matter_dust, singularity_mesh]
     output: antimatter_cluster
-    energy: 34
+    energy: 51
     guide: 暗物質粉 + 奇點網格 → 反物質合成器 → 反物質簇
   antimatter_cell_recipe:
     machine: antimatter_synthesizer
     inputs: [antimatter_cluster, capacitor_bank]
     output: antimatter_cell
-    energy: 36
+    energy: 54
     guide: 反物質簇 + 電容組 → 反物質合成器 → 反物質電池
   stellar_alloy_recipe:
     machine: stellar_forge
     inputs: [antimatter_cluster, neutronium_plate]
     output: stellar_alloy
-    energy: 36
+    energy: 54
     guide: 反物質簇 + 中子板 → 恆星鍛爐 → 恆星合金
   stellar_glass_recipe:
     machine: stellar_forge
     inputs: [reinforced_glass, starlight_plate]
     output: stellar_glass
-    energy: 28
+    energy: 42
     guide: 強化玻璃 + 星光板 → 恆星鍛爐 → 恆星玻璃
   orbit_frame_recipe:
     machine: orbital_printer
     inputs: [stellar_alloy, graviton_lens]
     output: orbit_frame
-    energy: 28
+    energy: 42
     guide: 恆星合金 + 重力子透鏡 → 軌道列印機 → 軌道框架
   orbit_processor_recipe:
     machine: orbital_printer
     inputs: [advanced_circuit, graviton_core]
     output: orbit_processor
-    energy: 30
+    energy: 45
     guide: 進階電路 + 重力子核心 → 軌道列印機 → 軌道處理器
   void_crystal_recipe:
     machine: void_beacon
     inputs: [void_shard, graviton_lens]
     output: void_crystal
-    energy: 22
+    energy: 33
     guide: 虛空碎片 + 重力子透鏡 → 虛空信標 → 虛空晶體
   void_beacon_core_recipe:
     machine: void_beacon
     inputs: [void_crystal, energy_node]
     output: void_beacon_core
-    energy: 24
+    energy: 36
     guide: 虛空晶體 + 能源節點 → 虛空信標 → 虛空信標核心
   nanite_slurry_recipe:
     machine: nanite_foundry
     inputs: [synthetic_fiber, polymer_resin]
     output: nanite_slurry
-    energy: 22
+    energy: 33
     guide: 合成纖維 + 聚合樹脂 → 奈米體鑄造廠 → 奈米漿液
   nanite_cluster_recipe:
     machine: nanite_foundry
     inputs: [nanite_slurry, quantum_fluid]
     output: nanite_cluster
-    energy: 24
+    energy: 36
     guide: 奈米漿液 + 量子流體 → 奈米體鑄造廠 → 奈米簇
   chrono_thread_recipe:
     machine: chrono_engine
     inputs: [orbit_processor, void_crystal]
     output: chrono_thread
-    energy: 38
+    energy: 57
     guide: 軌道處理器 + 虛空晶體 → 時序引擎 → 時序線
   chrono_core_recipe:
     machine: chrono_engine
     inputs: [chrono_thread, graviton_core]
     output: chrono_core
-    energy: 40
+    energy: 60
     guide: 時序線 + 重力子核心 → 時序引擎 → 時序核心
   entropy_plate_recipe:
     machine: entropy_chamber
     inputs: [chrono_core, antimatter_cell]
     output: entropy_plate
-    energy: 40
+    energy: 60
     guide: 時序核心 + 反物質電池 → 熵室 → 熵板
   entropy_core_recipe:
     machine: entropy_chamber
     inputs: [entropy_plate, singularity_core]
     output: entropy_core
-    energy: 42
+    energy: 63
     guide: 熵板 + 奇點核心 → 熵室 → 熵核心
   cosmic_matrix_recipe:
     machine: celestial_assembler
     inputs: [stellar_glass, orbit_frame]
     output: cosmic_matrix
-    energy: 34
+    energy: 51
     guide: 恆星玻璃 + 軌道框架 → 天穹裝配機 → 宇宙矩陣
   cosmic_panel_recipe:
     machine: celestial_assembler
     inputs: [cosmic_matrix, neutronium_plate]
     output: cosmic_panel
-    energy: 34
+    energy: 51
     guide: 宇宙矩陣 + 中子板 → 天穹裝配機 → 宇宙面板
   omega_core_recipe:
     machine: omega_fabricator
     inputs: [cosmic_matrix, entropy_core]
     output: omega_core
-    energy: 48
+    energy: 72
     guide: 宇宙矩陣 + 熵核心 → 歐米伽製造台 → 歐米伽核心
   relay_node_chain:
     machine: celestial_assembler
     inputs: [void_beacon_core, logistics_node]
     output: energy_node
-    energy: 18
+    energy: 27
     guide: 虛空信標核心 + 物流節點 → 天穹裝配機 → 強化能源節點骨幹
   long_range_tube_recipe:
     machine: orbital_printer
     inputs: [item_tube, void_crystal]
     output: item_tube
-    energy: 16
+    energy: 24
     guide: 物流導管 + 虛空晶體 → 軌道列印機 → 更穩定的遠距物流導管

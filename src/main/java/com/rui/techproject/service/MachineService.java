@@ -2055,13 +2055,8 @@ public final class MachineService {
         final long passiveGen = 18L;
         final long accepted = this.addEnergyCapped(machine, passiveGen);
         this.progressService.incrementStat(machine.owner(), "energy_generated", accepted);
-        this.distributeNearbyEnergy(machine, location, 10L);
 
-        // ── 吸收外部能源補足加工差額（28 − 18 = 10） ──
-        final long deficit = Math.max(1L, definition.energyPerTick() - passiveGen);
-        this.absorbNearbyEnergy(machine, location, deficit);
-
-        // ── 配方加工 ──
+        // ── 配方加工（processMachineRecipes 內部已有 absorbNearbyEnergy 補電邏輯） ──
         if (this.processMachineRecipes(machine, location, "fusion_reactor_cycles", Particle.LAVA, Sound.BLOCK_AMETHYST_BLOCK_STEP)) {
             this.setRuntimeState(machine, MachineRuntimeState.RUNNING, "聚變環流 · 加工中");
             if (this.isChunkViewable(machine.locationKey())) {
@@ -2074,7 +2069,8 @@ public final class MachineService {
             return;
         }
 
-        // ── 閒置：純發電模式 ──
+        // ── 閒置：純發電模式 → 多餘電力分配給鄰居 ──
+        this.distributeNearbyEnergy(machine, location, 10L);
         final RecipeRuntimeSnapshot snapshot = this.inspectRecipeRuntime(machine);
         if (snapshot.state() != MachineRuntimeState.IDLE) {
             this.setRuntimeState(machine, snapshot.state(), snapshot.detail());
@@ -7455,7 +7451,14 @@ public final class MachineService {
     }
 
     private ItemStack pushIntoMachineStorage(final PlacedMachine machine, final ItemStack stack) {
+        final String mid = this.normalizeId(machine.machineId());
+        if (this.machineDisablesInputSlots(mid) && this.machineDisablesUpgradeSlots(mid)) {
+            return stack;
+        }
         if (this.isUpgradeItem(stack)) {
+            if (this.machineDisablesUpgradeSlots(mid)) {
+                return stack;
+            }
             ItemStack remaining = stack.clone();
             for (int slot = 0; slot < UPGRADE_SLOTS.length; slot++) {
                 final ItemStack current = machine.upgradeAt(slot);
@@ -7476,6 +7479,9 @@ public final class MachineService {
                 }
             }
             return remaining;
+        }
+        if (this.machineDisablesInputSlots(mid)) {
+            return stack;
         }
         return this.insertIntoMachineInputs(machine, stack);
     }

@@ -36,27 +36,19 @@ public final class AchievementService {
         final int unlockedMachineCount = this.progressService.unlockedMachineCount(uuid);
 
         // ═══ 入門 ═══
-        this.tryUnlock(uuid, unlocked, "first_machine", this.progressService.getStat(uuid, "machines_placed") >= 1
-            || unlockedMachineCount >= 1);
-        this.tryUnlock(uuid, unlocked, "newcomer_craft", this.progressService.getStat(uuid, "items_crafted") >= 1
-            || unlockedItemCount >= 1);
-        this.tryUnlock(uuid, unlocked, "starter_power", this.progressService.getStat(uuid, "generators_placed") >= 1
-            || this.countGenerators(uuid) >= 1);
-        this.tryUnlock(uuid, unlocked, "first_research", this.progressService.getStat(uuid, "research_spent") >= 1
-            || unlockedItemCount >= 2 || unlockedMachineCount >= 2);
+        this.tryUnlock(uuid, unlocked, "first_machine", this.progressService.getStat(uuid, "machines_placed") >= 1);
+        this.tryUnlock(uuid, unlocked, "newcomer_craft", this.progressService.getStat(uuid, "items_crafted") >= 1);
+        this.tryUnlock(uuid, unlocked, "starter_power", this.progressService.getStat(uuid, "generators_placed") >= 1);
+        this.tryUnlock(uuid, unlocked, "first_research", this.progressService.getStat(uuid, "research_spent") >= 1);
 
         // ═══ 加工 ═══
         this.tryUnlock(uuid, unlocked, "first_crush", this.progressService.getStat(uuid, "crusher_cycles") >= 1);
         this.tryUnlock(uuid, unlocked, "first_compress", this.progressService.getStat(uuid, "compressor_cycles") >= 1);
-        this.tryUnlock(uuid, unlocked, "first_smelt", this.progressService.getStat(uuid, "smeltery_cycles") >= 1
-            || this.progressService.hasMachineUnlocked(uuid, "smeltery"));
+        this.tryUnlock(uuid, unlocked, "first_smelt", this.progressService.getStat(uuid, "smeltery_cycles") >= 1);
         this.tryUnlock(uuid, unlocked, "assembly_starter", this.progressService.getStat(uuid, "assembler_cycles") >= 1);
-        this.tryUnlock(uuid, unlocked, "process_milestone_100", this.progressService.getStat(uuid, "total_processed") >= 100
-            || unlockedItemCount >= 15);
-        this.tryUnlock(uuid, unlocked, "process_milestone_500", this.progressService.getStat(uuid, "total_processed") >= 500
-            || unlockedItemCount >= 30);
-        this.tryUnlock(uuid, unlocked, "process_milestone_2000", this.progressService.getStat(uuid, "total_processed") >= 2000
-            || unlockedItemCount >= 60);
+        this.tryUnlock(uuid, unlocked, "process_milestone_100", this.progressService.getStat(uuid, "total_processed") >= 100);
+        this.tryUnlock(uuid, unlocked, "process_milestone_500", this.progressService.getStat(uuid, "total_processed") >= 500);
+        this.tryUnlock(uuid, unlocked, "process_milestone_2000", this.progressService.getStat(uuid, "total_processed") >= 2000);
         this.tryUnlock(uuid, unlocked, "recycler_expert", this.progressService.getStat(uuid, "recycled_items") >= 1000);
 
         // ═══ 能源 ═══
@@ -84,8 +76,7 @@ public final class AchievementService {
         this.tryUnlock(uuid, unlocked, "transfer_500", this.progressService.getStat(uuid, "items_transferred") >= 500);
         this.tryUnlock(uuid, unlocked, "network_architect", this.progressService.getStat(uuid, "items_transferred") >= 2000);
         this.tryUnlock(uuid, unlocked, "upgrade_engineer", this.progressService.hasItemUnlocked(uuid, "range_upgrade"));
-        this.tryUnlock(uuid, unlocked, "storage_master", this.progressService.getStat(uuid, "storage_units_placed") >= 5
-            || this.progressService.hasMachineUnlocked(uuid, "storage_hub"));
+        this.tryUnlock(uuid, unlocked, "storage_master", this.progressService.getStat(uuid, "storage_units_placed") >= 5);
 
         // ═══ 探索 ═══
         this.tryUnlock(uuid, unlocked, "field_operator", this.progressService.hasMachineUnlocked(uuid, "crop_harvester")
@@ -133,10 +124,7 @@ public final class AchievementService {
         this.tryUnlock(uuid, unlocked, "apex_of_tech", this.progressService.hasItemUnlocked(uuid, "omega_core"));
         this.tryUnlock(uuid, unlocked, "plasma_forge_master", this.progressService.hasMachineUnlocked(uuid, "plasma_refinery"));
         this.tryUnlock(uuid, unlocked, "cosmic_assembler", this.progressService.hasMachineUnlocked(uuid, "celestial_assembler"));
-        this.tryUnlock(uuid, unlocked, "mega_builder", this.progressService.getStat(uuid, "megastructures_built") >= 1
-            || this.progressService.hasMachineUnlocked(uuid, "singularity_compressor")
-            || this.progressService.hasMachineUnlocked(uuid, "temporal_engine")
-            || this.progressService.hasMachineUnlocked(uuid, "starsteel_foundry"));
+        this.tryUnlock(uuid, unlocked, "mega_builder", this.progressService.getStat(uuid, "megastructures_built") >= 1);
 
         // ═══ 通用 ═══
         this.tryUnlock(uuid, unlocked, "automation_master", this.progressService.getStat(uuid, "max_active_machines") >= 10);
@@ -146,7 +134,7 @@ public final class AchievementService {
         // ═══ 擴展 ═══
         this.tryUnlock(uuid, unlocked, "cryo_specialist", this.progressService.hasMachineUnlocked(uuid, "cryo_distiller"));
         this.tryUnlock(uuid, unlocked, "refinery_master", this.progressService.hasMachineUnlocked(uuid, "refinery")
-            && (this.progressService.getStat(uuid, "total_processed") >= 500 || unlockedItemCount >= 30));
+            && this.progressService.getStat(uuid, "total_processed") >= 500);
 
         // ═══ 全成就 ═══
         final boolean allCore = this.registry.allAchievements().stream()

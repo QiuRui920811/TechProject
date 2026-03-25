@@ -2195,11 +2195,20 @@ public final class TechBookService {
         while (inputs.size() < 9) {
             inputs.add(null);
         }
+        final MachineDefinition machineDef = this.registry.getMachine(recipe.machineId());
+        final ItemStack stationStack;
+        if (machineDef != null) {
+            stationStack = this.itemFactory.tagPreviewClaim(
+                this.itemFactory.tagGuiAction(this.itemFactory.buildMachineItem(machineDef), "machine:" + recipe.machineId()),
+                "machine:" + recipe.machineId());
+        } else {
+            stationStack = this.clickableReference(recipe.machineId(), false);
+        }
         return new RecipeView(
                 this.itemFactory.displayNameForId(recipe.outputId()),
                 inputs,
             this.clickableReference(recipe.outputId(), false),
-            this.clickableReference(recipe.machineId(), false),
+            stationStack,
                 this.itemFactory.displayNameForId(recipe.machineId()) + " • " + recipe.energyCost() + " EU",
                 List.of(
                         "製作站：" + this.itemFactory.displayNameForId(recipe.machineId()),

@@ -1,4 +1,23 @@
 blueprints:
+  gold_pan:
+    shape:
+      - "___"
+      - "IBI"
+      - "_I_"
+    ingredients:
+      I: IRON_INGOT
+      B: BOWL
+    tutorial:
+      - 準備 4 個鐵錠與 1 個碗。
+      - 先在地上放鐵方塊，再把工作台放在上方形成進階工作台。
+      - 用進階工作台照配方擺出淘金盤。
+      - 手持淘金盤對準碎石或靈魂沙右鍵即可篩礦。
+      - 碎石可篩出鐵粉、銅粉、錫粉、鋅粉。
+      - 靈魂沙可篩出鉛粉、金粒、石英。
+      - 前期收集合金材料的最重要工具！
+    placement:
+      - 這是手持工具，不需要放置。
+      - 建議在基地附近堆一大堆碎石和靈魂沙慢慢篩。
   research_desk:
     shape:
       - "BLB"
@@ -63,11 +82,12 @@ blueprints:
     shape:
       - "CCC"
       - "IRI"
-      - "IPI"
+      - "SPS"
     ingredients:
       C: COBBLESTONE
       I: IRON_INGOT
       R: REDSTONE
+      S: tech:steel_plate
       P: PISTON
     tutorial:
       - 先挖圓石、鐵礦、紅石。
@@ -101,13 +121,14 @@ blueprints:
       - 開著介面時目前會暫停加工，關閉後恢復運作。
   compressor:
     shape:
-      - "IPI"
+      - "SPS"
       - "RPR"
       - "ICI"
     ingredients:
-      I: IRON_INGOT
+      S: tech:steel_plate
       P: PISTON
       R: REDSTONE
+      I: IRON_INGOT
       C: COPPER_INGOT
     tutorial:
       - 先做出兩個原版活塞、準備鐵錠、紅石與銅錠。
@@ -121,14 +142,15 @@ blueprints:
       - 上排放入鐵板等原料，等輸出區出現成品。
   assembler:
     shape:
-      - "ICI"
-      - "SBS"
+      - "SCS"
+      - "GBG"
       - "IPI"
     ingredients:
-      I: IRON_INGOT
-      C: COPPER_INGOT
       S: tech:steel_plate
+      C: COPPER_INGOT
+      G: tech:bronze_gear
       B: CRAFTER
+      I: IRON_INGOT
       P: PISTON
     tutorial:
       - 先用壓縮機把鐵板壓成鋼板。
@@ -142,11 +164,12 @@ blueprints:
   advanced_assembler:
     shape:
       - "ACA"
-      - "CMC"
+      - "NMN"
       - "APA"
     ingredients:
       A: tech:advanced_circuit
       C: tech:circuit_board
+      N: tech:nano_coating
       M: LOOM
       P: tech:precision_frame
     tutorial:
@@ -157,6 +180,25 @@ blueprints:
     placement:
       - 放在製造機旁邊延伸產線。
       - 這台是通往 TIER3 科技的關鍵閘門。
+  smeltery:
+    shape:
+      - "NIN"
+      - "IMI"
+      - "CIC"
+    ingredients:
+      N: NETHER_BRICKS
+      I: IRON_INGOT
+      M: MAGMA_BLOCK
+      C: tech:bronze_ingot
+    tutorial:
+      - 先用淘金盤篩碎石取得錫粉，再搭配銅粉用熔爐/合金流程取得青銅錠。
+      - 準備地獄磚、鐵錠與岩漿塊。
+      - 先在地上放鐵方塊，再把工作台放在上方形成進階工作台。
+      - 用進階工作台照配方擺出合金熔煉爐。
+      - 合金熔煉爐可以把鐵粉+煤粉做成鈦合金，也可熔煉青銅、焊錫、黃銅。
+    placement:
+      - 放在熔爐旁邊，延伸金屬加工線。
+      - 吃電量偏高，建議用好的發電機。
   laser_engraver:
     shape:
       - "OGO"

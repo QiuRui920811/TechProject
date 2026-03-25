@@ -90,9 +90,9 @@ public final class ChickenGeneticsService {
         r(45, "BASALT",              "玄武岩");
         r(46, "CRYING_OBSIDIAN",     "哭泣黑曜石");
         r(51, "SOUL_SAND",           "靈魂砂");
-        r(53, "ENDER_PEARL",         "乖離珍珠");
+        r(53, "ENDER_PEARL",         "終界珍珠");
         r(54, "NETHER_WART",         "乖離疣");
-        r(57, "PHANTOM_MEMBRANE",    "乖離乖靈薄膜");
+        r(57, "PHANTOM_MEMBRANE",    "乖翼膜");
         r(58, "MAGMA_CREAM",         "岩漿球");
         r(60, "GLOWSTONE_DUST",      "螢光粉");
         // ── Tier 5 (5 個隱性) ──

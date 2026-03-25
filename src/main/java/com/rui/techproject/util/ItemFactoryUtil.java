@@ -1328,6 +1328,7 @@ public final class ItemFactoryUtil {
             case EMERALD -> "綠寶石";
             case GOLD_INGOT -> "金錠";
             case GOLD_NUGGET -> "金粒";
+            case FLINT -> "燧石";
             // ── 伐木機產出 ──
             case OAK_LOG -> "橡木原木";
             case BIRCH_LOG -> "樺木原木";
@@ -1365,7 +1366,7 @@ public final class ItemFactoryUtil {
             case GLOW_INK_SAC -> "螢光墨囊";
             case LAVA_BUCKET -> "熔岩桶";
             case OBSIDIAN -> "黑曜石";
-            case PHANTOM_MEMBRANE -> "乳翼膜";
+            case PHANTOM_MEMBRANE -> "乖翼膜";
             case PRISMARINE_SHARD -> "海磷碎片";
             case SOUL_LANTERN -> "靈魂燈籠";
             case WATER_BUCKET -> "水桶";
@@ -2227,6 +2228,18 @@ public final class ItemFactoryUtil {
             case "lithium_cell" -> "鋰電池";
             case "emitter_node" -> "發射節點";
             case "capacitor_bank" -> "電容組";
+            // ═══ 淘金盤 & 合金材料 ═══
+            case "gold_pan" -> "淘金盤";
+            case "sifted_ore" -> "篩出礦砂";
+            case "tin_dust" -> "錫粉";
+            case "lead_dust" -> "鉛粉";
+            case "zinc_dust" -> "鋅粉";
+            case "tin_ingot" -> "錫錠";
+            case "lead_ingot" -> "鉛錠";
+            case "zinc_ingot" -> "鋅錠";
+            case "bronze_ingot" -> "青銅錠";
+            case "solder_alloy" -> "焊錫合金";
+            case "brass_ingot" -> "黃銅錠";
             case "crusher" -> "粉碎機";
             case "furnace" -> "熔爐";
             case "auto_farm" -> "自動農場";

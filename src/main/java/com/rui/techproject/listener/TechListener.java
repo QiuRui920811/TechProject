@@ -38,6 +38,7 @@ import org.bukkit.event.entity.ProjectileHitEvent;
 import org.bukkit.event.hanging.HangingPlaceEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryMoveItemEvent;
+import org.bukkit.event.inventory.FurnaceBurnEvent;
 import org.bukkit.event.inventory.FurnaceSmeltEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
@@ -428,7 +429,7 @@ public final class TechListener implements Listener {
             event.setCancelled(true);
             return;
         }
-        if (this.tryPlantTechCrop(event) || this.tryUseHydroSpade(event) || this.tryToggleMagnet(event) || this.tryUseMobilityTool(event)) {
+        if (this.tryPlantTechCrop(event) || this.tryUseGoldPan(event) || this.tryUseHydroSpade(event) || this.tryToggleMagnet(event) || this.tryUseMobilityTool(event)) {
             return;
         }
         // 互動烹調：右鍵營火/煙燻/高爐並手持食物
@@ -668,6 +669,17 @@ public final class TechListener implements Listener {
         if (this.isTaggedTechMaterial(event.getSource()) || TECH_CHAIN_ORES.contains(event.getSource().getType())) {
             event.setCancelled(true);
             event.setResult(new ItemStack(Material.AIR));
+        }
+    }
+
+    /** 當輸入槽含科技鏈原礦時，阻止燃料點燃，避免空燒浪費。 */
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    public void onFurnaceBurn(final FurnaceBurnEvent event) {
+        if (event.getBlock().getState() instanceof org.bukkit.block.Furnace furnace) {
+            final ItemStack smelting = furnace.getInventory().getSmelting();
+            if (smelting != null && (this.isTaggedTechMaterial(smelting) || TECH_CHAIN_ORES.contains(smelting.getType()))) {
+                event.setCancelled(true);
+            }
         }
     }
 
@@ -942,55 +954,55 @@ public final class TechListener implements Listener {
 
     private String rollWildForageDrop() {
         final double roll = ThreadLocalRandom.current().nextDouble();
-        if (roll < 0.015D) {
+        if (roll < 0.0075D) {
             return "soybean_seeds";
         }
-        if (roll < 0.0275D) {
+        if (roll < 0.01375D) {
             return "spiceberry_seeds";
         }
-        if (roll < 0.040D) {
+        if (roll < 0.020D) {
             return "tea_leaf_seeds";
         }
-        if (roll < 0.051D) {
+        if (roll < 0.0255D) {
             return "tomato_seeds";
         }
-        if (roll < 0.062D) {
+        if (roll < 0.031D) {
             return "cabbage_seeds";
         }
-        if (roll < 0.073D) {
+        if (roll < 0.0365D) {
             return "corn_seeds";
         }
-        if (roll < 0.084D) {
+        if (roll < 0.042D) {
             return "onion_bulbs";
         }
-        if (roll < 0.089D) {
+        if (roll < 0.0445D) {
             return "lumenfruit_sapling";
         }
-        if (roll < 0.094D) {
+        if (roll < 0.047D) {
             return "frost_apple_sapling";
         }
-        if (roll < 0.099D) {
+        if (roll < 0.0495D) {
             return "shadow_berry_sapling";
         }
-        if (roll < 0.104D) {
+        if (roll < 0.052D) {
             return "sunflare_fig_sapling";
         }
-        if (roll < 0.109D) {
+        if (roll < 0.0545D) {
             return "stormplum_sapling";
         }
-        if (roll < 0.113D) {
+        if (roll < 0.0565D) {
             return "cherry_sapling";
         }
-        if (roll < 0.117D) {
+        if (roll < 0.0585D) {
             return "lemon_sapling";
         }
-        if (roll < 0.121D) {
+        if (roll < 0.0605D) {
             return "peach_sapling";
         }
-        if (roll < 0.125D) {
+        if (roll < 0.0625D) {
             return "pear_sapling";
         }
-        if (roll < 0.129D) {
+        if (roll < 0.0645D) {
             return "orange_sapling";
         }
         return null;
@@ -1467,6 +1479,106 @@ public final class TechListener implements Listener {
             }
         }
         return true;
+    }
+
+    // ═══ 淘金盤：右鍵碎石/靈魂沙篩出金屬粉塵 ═══
+    private boolean tryUseGoldPan(final PlayerInteractEvent event) {
+        if (event.getAction() != Action.RIGHT_CLICK_BLOCK || event.getClickedBlock() == null || event.getItem() == null) {
+            return false;
+        }
+        final String techItemId = this.plugin.getItemFactory().getTechItemId(event.getItem());
+        if (!"gold_pan".equalsIgnoreCase(techItemId)) {
+            return false;
+        }
+        final Block target = event.getClickedBlock();
+        final Material blockType = target.getType();
+        final boolean isGravel = blockType == Material.GRAVEL;
+        final boolean isSoulSand = blockType == Material.SOUL_SAND || blockType == Material.SOUL_SOIL;
+        if (!isGravel && !isSoulSand) {
+            return false;
+        }
+        event.setUseInteractedBlock(Result.DENY);
+        event.setUseItemInHand(Result.DENY);
+        event.setCancelled(true);
+        final Player player = event.getPlayer();
+        // 冷卻檢查（20 tick = 1 秒）
+        if (player.getCooldown(event.getItem().getType()) > 0) {
+            return true;
+        }
+        player.setCooldown(event.getItem().getType(), 20);
+        // 消耗方塊
+        final Location loc = target.getLocation().add(0.5, 0.5, 0.5);
+        target.setType(Material.AIR);
+        // 音效與粒子
+        player.getWorld().playSound(loc, Sound.ENTITY_FISHING_BOBBER_SPLASH, 0.7f, 1.2f);
+        player.getWorld().spawnParticle(Particle.FALLING_WATER, loc, 12, 0.3, 0.2, 0.3, 0.01);
+        // 篩礦掉落
+        final String dropId = isGravel ? this.rollGravelPanDrop() : this.rollSoulSandPanDrop();
+        if (dropId == null) {
+            player.sendActionBar(this.plugin.getItemFactory().warning("什麼都沒篩到…"));
+            return true;
+        }
+        final ItemStack drop;
+        if ("flint".equalsIgnoreCase(dropId)) {
+            drop = new ItemStack(Material.FLINT, 1);
+        } else if ("gold_nugget".equalsIgnoreCase(dropId)) {
+            drop = new ItemStack(Material.GOLD_NUGGET, 1);
+        } else if ("quartz".equalsIgnoreCase(dropId)) {
+            drop = new ItemStack(Material.QUARTZ, 1);
+        } else {
+            drop = this.buildTechDrop(dropId, 1);
+        }
+        if (drop == null || drop.getType() == Material.AIR) {
+            return true;
+        }
+        player.getWorld().dropItemNaturally(loc, drop);
+        player.getWorld().spawnParticle(Particle.HAPPY_VILLAGER, loc, 8, 0.2, 0.15, 0.2, 0.01);
+        player.sendActionBar(this.plugin.getItemFactory().success("篩出了「" + this.plugin.getItemFactory().displayNameForId(dropId) + "」！"));
+        return true;
+    }
+
+    /**
+     * 碎石淘金盤掉落表：
+     * 30% 無 → null
+     * 15% 碎石(flint)
+     * 15% 篩出礦砂
+     * 12% 鐵粉
+     * 10% 銅粉
+     * 8%  錫粉
+     * 6%  鋅粉
+     * 4%  矽晶
+     */
+    private String rollGravelPanDrop() {
+        final double r = ThreadLocalRandom.current().nextDouble();
+        if (r < 0.30) return null;
+        if (r < 0.45) return "flint";
+        if (r < 0.60) return "sifted_ore";
+        if (r < 0.72) return "iron_dust";
+        if (r < 0.82) return "copper_dust";
+        if (r < 0.90) return "tin_dust";
+        if (r < 0.96) return "zinc_dust";
+        return "silicon";
+    }
+
+    /**
+     * 靈魂沙淘金盤掉落表：
+     * 30% 無
+     * 18% 鉛粉
+     * 15% 篩出礦砂
+     * 12% 金粒
+     * 10% 石英
+     * 8%  鋅粉
+     * 7%  鐵粉
+     */
+    private String rollSoulSandPanDrop() {
+        final double r = ThreadLocalRandom.current().nextDouble();
+        if (r < 0.30) return null;
+        if (r < 0.48) return "lead_dust";
+        if (r < 0.63) return "sifted_ore";
+        if (r < 0.75) return "gold_nugget";
+        if (r < 0.85) return "quartz";
+        if (r < 0.93) return "zinc_dust";
+        return "iron_dust";
     }
 
     private boolean tryUseHydroSpade(final PlayerInteractEvent event) {
