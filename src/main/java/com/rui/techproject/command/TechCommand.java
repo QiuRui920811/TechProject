@@ -74,6 +74,24 @@ public final class TechCommand implements CommandExecutor, TabCompleter {
                 player.sendMessage(Component.text("已補發一本科技書。", NamedTextColor.GREEN));
                 return true;
             }
+            if (args.length >= 2 && args[1].equalsIgnoreCase("remember")) {
+                final boolean newState = this.plugin.getTechBookService().toggleRememberPage(player.getUniqueId());
+                if (newState) {
+                    player.sendMessage(Component.text("✔ 已開啟「記住頁面」：下次打開科技書會回到上次瀏覽的頁面。", NamedTextColor.GREEN));
+                } else {
+                    player.sendMessage(Component.text("✖ 已關閉「記住頁面」：打開科技書會固定回到首頁。", NamedTextColor.YELLOW));
+                }
+                return true;
+            }
+            if (args.length >= 3 && args[1].equalsIgnoreCase("open")) {
+                // Reconstruct the action string from remaining args (action may contain spaces... but normally it doesn't)
+                final StringBuilder actionBuilder = new StringBuilder(args[2]);
+                for (int i = 3; i < args.length; i++) {
+                    actionBuilder.append(' ').append(args[i]);
+                }
+                this.plugin.getTechBookService().handleAction(player, actionBuilder.toString());
+                return true;
+            }
             this.plugin.getTechBookService().openDefaultBook(player);
             return true;
         }
@@ -443,7 +461,7 @@ public final class TechCommand implements CommandExecutor, TabCompleter {
             return List.of("clear", "list");
         }
         if (args.length == 2 && args[0].equalsIgnoreCase("book")) {
-            return List.of("get", "getall");
+            return List.of("get", "getall", "remember", "open");
         }
         if (args.length == 3 && args[0].equalsIgnoreCase("book") && args[1].equalsIgnoreCase("getall")) {
             final List<String> names = new ArrayList<>();

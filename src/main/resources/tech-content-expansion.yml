@@ -99,6 +99,7 @@ items:
     display-name: 神經樹脂
     category: ADVANCED
     icon: HONEYCOMB
+    item-model: "nexo:neural_resin"
     description: 神經樣本聚合樹脂，可用於高階感測與資料結構。
     unlock: gene_splicer
     use-cases:
@@ -481,7 +482,7 @@ items:
   nebula_juice:
     display-name: 星霧果飲
     category: ADVANCED
-    icon: POTION
+    icon: PAPER
     description: 以霜蘋與流明果調成的探索飲品，可提供夜視、加速與緩降，適合長距離星球作業。
     unlock: initial
     use-cases:
@@ -499,8 +500,8 @@ items:
   lemon_juice:
     display-name: 檸果汁
     category: INTERMEDIATE
-    icon: POTION
-    nexo-id: lemon_juice
+    icon: PAPER
+    item-model: "nexo:lemon_juice"
     description: 用黃檸果壓出的清爽飲品，適合短程探索與炎熱地區作業。
     unlock: initial
     use-cases:
@@ -509,8 +510,8 @@ items:
   orange_juice:
     display-name: 香橙汁
     category: INTERMEDIATE
-    icon: POTION
-    nexo-id: orange_juice
+    icon: PAPER
+    item-model: "nexo:orange_juice"
     description: 甜味較高的日常果汁，適合當作基礎補給飲品。
     unlock: initial
     use-cases:
@@ -519,7 +520,7 @@ items:
   peach_juice:
     display-name: 蜜桃汁
     category: INTERMEDIATE
-    icon: POTION
+    icon: PAPER
     item-model: "nexo:peach_juice"
     description: 帶有甜香的桃汁，適合搭配果園食物一起使用。
     unlock: initial
@@ -529,8 +530,8 @@ items:
   pear_juice:
     display-name: 青梨汁
     category: INTERMEDIATE
-    icon: POTION
-    nexo-id: pear_juice
+    icon: PAPER
+    item-model: "nexo:pear_juice"
     description: 清甜型果汁，適合長時間日常活動中的緩和補給。
     unlock: initial
     use-cases:
@@ -539,8 +540,8 @@ items:
   cherry_juice:
     display-name: 櫻桃汁
     category: INTERMEDIATE
-    icon: POTION
-    nexo-id: cherry_juice
+    icon: PAPER
+    item-model: "nexo:cherry_juice"
     description: 帶有濃厚果香的紅色果汁，可作為甜點與派類的搭配飲品。
     unlock: initial
     use-cases:
@@ -568,7 +569,7 @@ items:
     display-name: 果園沙拉
     category: INTERMEDIATE
     icon: BEETROOT_SOUP
-    nexo-id: orchard_salad
+    item-model: "nexo:orchard_salad"
     description: 番茄與葉菜拌出的簡單沙拉，是最容易入門的基地料理之一。
     unlock: initial
     use-cases:
@@ -578,7 +579,7 @@ items:
     display-name: 玉米麵包
     category: INTERMEDIATE
     icon: BREAD
-    nexo-id: cornbread
+    item-model: "nexo:cornbread"
     description: 用玉米和豆類做成的簡單主食，適合作為外出的便攜口糧。
     unlock: initial
     use-cases:
@@ -614,7 +615,7 @@ items:
   orchard_smoothie:
     display-name: 果園奶昔
     category: INTERMEDIATE
-    icon: POTION
+    icon: HONEY_BOTTLE
     description: 把多種家園水果打成果昔，偏向穩定恢復與輕量增益。
     unlock: initial
     use-cases:
@@ -623,7 +624,7 @@ items:
   sparkling_lemonade:
     display-name: 氣泡檸橙飲
     category: INTERMEDIATE
-    icon: POTION
+    icon: HONEY_BOTTLE
     description: 檸果與香橙調成的帶氣果飲，適合長跑與外勤搬運。
     unlock: initial
     use-cases:
@@ -686,7 +687,7 @@ items:
   tempest_fizz:
     display-name: 雷雲汽泡飲
     category: ADVANCED
-    icon: POTION
+    icon: PAPER
     description: 風暴李與暴嵐玻片調出的汽泡飲，能暫時降低坦佩斯特的導電亂流壓力。
     unlock: stormglass_shard
     use-cases:
@@ -777,7 +778,7 @@ items:
     display-name: 草莓
     category: INTERMEDIATE
     icon: SWEET_BERRIES
-    nexo-id: strawberry
+    item-model: "nexo:strawberry"
     description: 紅潤嬌小的漿果，味道鮮甜可口，適合做成果醬或甜品。
     unlock: strawberry_bush
     use-cases:
@@ -814,7 +815,7 @@ items:
     display-name: 覆盆子
     category: INTERMEDIATE
     icon: SWEET_BERRIES
-    nexo-id: raspberry
+    item-model: "nexo:raspberry"
     description: 酸中帶甜的紅色漿果，搭配甜品或果汁都非常適合。
     unlock: raspberry_bush
     use-cases:
@@ -824,7 +825,7 @@ items:
     display-name: 科技西瓜片
     category: INTERMEDIATE
     icon: MELON_SLICE
-    nexo-id: watermelon_slice
+    item-model: "nexo:watermelon_slice"
     description: 改良品種的大片西瓜，含水量極高，清涼消暑。
     unlock: initial
     use-cases:
@@ -834,7 +835,7 @@ items:
     display-name: 鳳梨
     category: INTERMEDIATE
     icon: GOLD_NUGGET
-    nexo-id: pineapple
+    item-model: "nexo:pineapple"
     description: 帶有鱗紋外殼的熱帶甜果，果肉酸甜多汁。
     unlock: initial
     use-cases:
@@ -844,7 +845,7 @@ items:
     display-name: 奇異果
     category: INTERMEDIATE
     icon: GREEN_DYE
-    nexo-id: kiwi
+    item-model: "nexo:kiwi"
     description: 毛茸茸的小型水果，內裡翠綠酸甜，富含維生素。
     unlock: initial
     use-cases:
@@ -854,7 +855,7 @@ items:
     display-name: 大蒜
     category: INTERMEDIATE
     icon: BEETROOT
-    nexo-id: garlic
+    item-model: "nexo:garlic"
     description: 辛香濃烈的調味根莖，幾乎所有熱食都需要它。
     unlock: initial
     use-cases:
@@ -864,7 +865,7 @@ items:
     display-name: 生菜
     category: INTERMEDIATE
     icon: FERN
-    nexo-id: lettuce
+    item-model: "nexo:lettuce"
     description: 清脆的葉菜，是沙拉與包捲類料理的基底。
     unlock: initial
     use-cases:
@@ -874,7 +875,7 @@ items:
     display-name: 甜椒
     category: INTERMEDIATE
     icon: ORANGE_DYE
-    nexo-id: bell_pepper
+    item-model: "nexo:bell_pepper"
     description: 色彩鮮豔的甜椒，可直接食用或拿來炒菜。
     unlock: initial
     use-cases:
@@ -884,7 +885,7 @@ items:
     display-name: 菠菜
     category: INTERMEDIATE
     icon: FERN
-    nexo-id: spinach
+    item-model: "nexo:spinach"
     description: 深綠色的營養葉菜，適合做成湯品或拌菜。
     unlock: initial
     use-cases:
@@ -902,8 +903,8 @@ items:
   grape_juice:
     display-name: 葡萄汁
     category: INTERMEDIATE
-    icon: POTION
-    nexo-id: grape_juice
+    icon: PAPER
+    item-model: "nexo:grape_juice"
     description: 濃郁香甜的紫色果汁，令人精神一振。
     unlock: initial
     use-cases:
@@ -912,8 +913,8 @@ items:
   mango_smoothie:
     display-name: 芒果奶昔
     category: INTERMEDIATE
-    icon: POTION
-    nexo-id: mango_smoothie
+    icon: PAPER
+    item-model: "nexo:mango_smoothie"
     description: 芒果打成的濃稠冰飲，香甜消暑。
     unlock: initial
     use-cases:
@@ -922,8 +923,8 @@ items:
   coconut_water:
     display-name: 椰子水
     category: INTERMEDIATE
-    icon: POTION
-    nexo-id: coconut_water
+    icon: PAPER
+    item-model: "nexo:coconut_water"
     description: 直接從椰子殼倒出的天然飲品，清涼補水。
     unlock: initial
     use-cases:
@@ -932,8 +933,8 @@ items:
   berry_blend:
     display-name: 綜合莓果汁
     category: INTERMEDIATE
-    icon: POTION
-    nexo-id: berry_blend
+    icon: PAPER
+    item-model: "nexo:berry_blend"
     description: 草莓、藍莓與覆盆子混打而成的莓果飲，酸甜清新。
     unlock: initial
     use-cases:
@@ -942,7 +943,7 @@ items:
   tropical_punch:
     display-name: 熱帶水果賓治
     category: ADVANCED
-    icon: POTION
+    icon: PAPER
     description: 鳳梨、芒果與香橙混合的大杯水果飲，適合工地慶功用。
     unlock: initial
     use-cases:
@@ -951,8 +952,8 @@ items:
   green_tea:
     display-name: 綠茶
     category: INTERMEDIATE
-    icon: POTION
-    nexo-id: green_tea
+    icon: PAPER
+    item-model: "nexo:green_tea"
     description: 清香淡雅的基本茶飲，能舒緩疲勞並提升專注力。
     unlock: initial
     use-cases:
@@ -961,8 +962,8 @@ items:
   iced_tea:
     display-name: 冰紅茶
     category: INTERMEDIATE
-    icon: POTION
-    nexo-id: iced_tea
+    icon: PAPER
+    item-model: "nexo:iced_tea"
     description: 冰鎮後的清爽紅茶，適合炎熱環境下飲用。
     unlock: initial
     use-cases:
@@ -971,8 +972,8 @@ items:
   hot_cocoa:
     display-name: 熱可可
     category: INTERMEDIATE
-    icon: POTION
-    nexo-id: hot_cocoa
+    icon: PAPER
+    item-model: "nexo:hot_cocoa"
     description: 濃郁溫暖的可可飲品，適合在寒冷星球或冬日基地飲用。
     unlock: initial
     use-cases:
@@ -981,8 +982,8 @@ items:
   apple_cider:
     display-name: 蘋果醋飲
     category: INTERMEDIATE
-    icon: POTION
-    nexo-id: apple_cider
+    icon: PAPER
+    item-model: "nexo:apple_cider"
     description: 以蘋果發酵而成的酸甜飲品，帶有淡淡果香。
     unlock: initial
     use-cases:
@@ -991,8 +992,8 @@ items:
   ginger_ale:
     display-name: 薑汁汽水
     category: INTERMEDIATE
-    icon: POTION
-    nexo-id: ginger_ale
+    icon: PAPER
+    item-model: "nexo:ginger_ale"
     description: 帶有辛辣氣泡的薑味飲品，能提振精神。
     unlock: initial
     use-cases:
@@ -1001,8 +1002,8 @@ items:
   milk_tea:
     display-name: 奶茶
     category: INTERMEDIATE
-    icon: POTION
-    nexo-id: milk_tea
+    icon: PAPER
+    item-model: "nexo:milk_tea"
     description: 加了鮮奶的溫潤茶飲，是基地休息時的好選擇。
     unlock: initial
     use-cases:
@@ -1011,8 +1012,8 @@ items:
   matcha_latte:
     display-name: 抹茶拿鐵
     category: ADVANCED
-    icon: POTION
-    nexo-id: matcha_latte
+    icon: PAPER
+    item-model: "nexo:matcha_latte"
     description: 濃厚抹茶與鮮奶拉出的綿密飲品，能提供持久的專注效果。
     unlock: initial
     use-cases:
@@ -1021,8 +1022,8 @@ items:
   espresso:
     display-name: 濃縮咖啡
     category: INTERMEDIATE
-    icon: POTION
-    nexo-id: espresso
+    icon: PAPER
+    item-model: "nexo:espresso"
     description: 高壓萃取的濃縮黑咖啡，一杯就能迅速提神。
     unlock: initial
     use-cases:
@@ -1031,8 +1032,8 @@ items:
   vanilla_milkshake:
     display-name: 香草奶昔
     category: INTERMEDIATE
-    icon: POTION
-    nexo-id: vanilla_milkshake
+    icon: PAPER
+    item-model: "nexo:vanilla_milkshake"
     description: 經典香草口味的奶昔，甜蜜順口。
     unlock: initial
     use-cases:
@@ -1041,7 +1042,7 @@ items:
   strawberry_milkshake:
     display-name: 草莓奶昔
     category: INTERMEDIATE
-    icon: POTION
+    icon: PAPER
     description: 草莓與鮮奶混打的粉紅色奶昔，酸甜順口。
     unlock: initial
     use-cases:
@@ -1077,7 +1078,7 @@ items:
   mushroom_risotto:
     display-name: 蘑菇燉飯
     category: ADVANCED
-    nexo-id: mushroom_risotto
+    item-model: "nexo:mushroom_risotto"
     icon: MUSHROOM_STEW
     description: 蘑菇與穀物慢燉而成的濃郁飯食，口感綿密。
     unlock: initial
@@ -1087,7 +1088,7 @@ items:
   vegetable_curry:
     display-name: 蔬菜咖哩
     category: ADVANCED
-    nexo-id: vegetable_curry
+    item-model: "nexo:vegetable_curry"
     icon: RABBIT_STEW
     description: 多種蔬菜與辛香料燉煮的濃厚咖哩，配飯或麵皆宜。
     unlock: initial
@@ -1097,7 +1098,7 @@ items:
   sushi_roll:
     display-name: 壽司捲
     category: INTERMEDIATE
-    nexo-id: sushi_roll
+    item-model: "nexo:sushi_roll"
     icon: COOKED_COD
     description: 米飯包裹鮮魚與蔬菜的小份精緻食物，適合當零食或配菜。
     unlock: initial
@@ -1107,7 +1108,7 @@ items:
   ramen:
     display-name: 拉麵
     category: ADVANCED
-    nexo-id: ramen
+    item-model: "nexo:ramen"
     icon: RABBIT_STEW
     description: 濃郁豚骨湯底搭配彈牙麵條與配料，令人大快朵頤。
     unlock: initial
@@ -1135,7 +1136,7 @@ items:
   cheese_pizza:
     display-name: 起司披薩
     category: ADVANCED
-    nexo-id: cheese_pizza
+    item-model: "nexo:cheese_pizza"
     icon: PUMPKIN_PIE
     description: 鋪滿拉絲起司的圓形大餅，是基地聚餐首選。
     unlock: initial
@@ -1145,7 +1146,7 @@ items:
   dumpling:
     display-name: 蒸餃
     category: INTERMEDIATE
-    nexo-id: dumpling
+    item-model: "nexo:dumpling"
     icon: COOKED_CHICKEN
     description: 薄皮包裹肉餡蒸製而成的小巧食物，一口一個剛剛好。
     unlock: initial
@@ -1155,7 +1156,7 @@ items:
   fish_stew:
     display-name: 鮮魚湯
     category: INTERMEDIATE
-    nexo-id: fish_stew
+    item-model: "nexo:fish_stew"
     icon: MUSHROOM_STEW
     description: 用鮮魚與蔬菜熬煮的清爽湯品，營養豐富。
     unlock: initial
@@ -1165,7 +1166,7 @@ items:
   roasted_corn:
     display-name: 烤玉米
     category: INTERMEDIATE
-    nexo-id: roasted_corn
+    item-model: "nexo:roasted_corn"
     icon: GOLD_NUGGET
     description: 新鮮玉米塗上醬料直接碳烤，香甜焦脆。
     unlock: initial
@@ -1194,7 +1195,7 @@ items:
     display-name: 巧克力蛋糕
     category: ADVANCED
     icon: CAKE
-    nexo-id: chocolate_cake
+    item-model: "nexo:chocolate_cake"
     description: 濃郁巧克力淋面蛋糕，是基地慶祝活動的人氣甜品。
     unlock: initial
     use-cases:
@@ -1213,7 +1214,7 @@ items:
     display-name: 甜甜圈
     category: INTERMEDIATE
     icon: COOKIE
-    nexo-id: donut
+    item-model: "nexo:donut"
     description: 油炸後裹上糖霜的環形麵包，鬆軟甜蜜。
     unlock: initial
     use-cases:
@@ -1241,7 +1242,7 @@ items:
     display-name: 起司蛋糕
     category: ADVANCED
     icon: CAKE
-    nexo-id: cheesecake
+    item-model: "nexo:cheesecake"
     description: 細膩綿滑的起司蛋糕，是基地下午茶的奢華選項。
     unlock: initial
     use-cases:
@@ -2350,6 +2351,7 @@ items:
     category: BASIC
     tier: TIER1
     icon: GOLD_NUGGET
+    item-model: "nexo:magic_crystal_1"
     description: 從金粒中提煉的初級魔法結晶，是所有魔法合成的基礎材料。
     unlock: assembler
     use-cases:
@@ -2380,6 +2382,7 @@ items:
     category: BASIC
     tier: TIER1
     icon: ENDER_PEARL
+    item-model: "nexo:ender_crystal_1"
     description: 從末影珍珠中提取的初級末影結晶。
     unlock: assembler
     use-cases:

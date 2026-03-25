@@ -450,34 +450,27 @@ gui-panes:
   planetary-gate-earth:
     icon: PAPER
     item-model: "nexo:techproject_gate_hover"
-    nexo-id: techproject_gate_hover
   planetary-gate-aurelia:
     icon: PAPER
     item-model: "nexo:techproject_gate_hover"
-    nexo-id: techproject_gate_hover
   planetary-gate-helion:
     icon: PAPER
     item-model: "nexo:techproject_gate_hover"
-    nexo-id: techproject_gate_hover
   planetary-gate-nyx:
     icon: PAPER
     item-model: "nexo:techproject_gate_hover"
-    nexo-id: techproject_gate_hover
   planetary-gate-cryon:
     icon: PAPER
     item-model: "nexo:techproject_gate_hover"
-    nexo-id: techproject_gate_hover
   planetary-gate-tempest:
     icon: PAPER
     item-model: "nexo:techproject_gate_hover"
-    nexo-id: techproject_gate_hover
 items:
   iron_dust:
     display-name: "鐵粉"
     category: BASIC
     icon: GUNPOWDER
     item-model: "nexo:iron_powder_material"
-    nexo-id: iron_powder_material
     description: "冶煉成鐵錠或製作線路板。"
     unlock: "crusher"
     use-cases:
@@ -487,8 +480,7 @@ items:
     display-name: "銅錠"
     category: BASIC
     icon: COPPER_INGOT
-    # item-model: techproject:item/copper_ingot
-    nexo-id: copper_ingot
+    item-model: "nexo:copper_ingot"
     description: "科技系統使用的銅錠。可用科技熔爐把銅粉加工取得，也可直接使用原版銅錠替代。"
     unlock: "furnace"
     use-cases:
@@ -500,7 +492,6 @@ items:
     category: BASIC
     icon: BLACK_DYE
     item-model: "nexo:coal_powder_material"
-    nexo-id: coal_powder_material
     description: "燃料與發電基礎。"
     unlock: "crusher"
     use-cases:
@@ -530,8 +521,7 @@ items:
     display-name: "鋼板"
     category: INTERMEDIATE
     icon: IRON_INGOT
-    # item-model: techproject:item/steel_plate
-    nexo-id: steel_plate
+    item-model: "nexo:steel_plate"
     description: "機器主體與重型製程材料。"
     unlock: "compressor"
     use-cases:
@@ -542,7 +532,6 @@ items:
     category: INTERMEDIATE
     icon: GREEN_DYE
     item-model: "nexo:circuit_board"
-    nexo-id: circuit_board
     description: "核心電子部件。"
     unlock: "assembler"
     use-cases:
@@ -553,7 +542,6 @@ items:
     category: INTERMEDIATE
     icon: GLASS_BOTTLE
     item-model: "nexo:glass_panel"
-    nexo-id: glass_panel
     description: "機器視窗與高級材料。"
     unlock: "furnace"
     use-cases:
@@ -598,7 +586,6 @@ items:
     tier: TIER2
     icon: REDSTONE
     item-model: "nexo:advanced_circuit"
-    nexo-id: advanced_circuit
     description: "高級科技製作電路。"
     unlock: "assembler"
     use-cases:
@@ -648,7 +635,7 @@ items:
     display-name: "科技扳手"
     category: BASIC
     icon: IRON_SHOVEL
-    nexo-id: tech_wrench
+    item-model: "nexo:tech_wrench"
     description: "蹲下+右鍵對準機器可瞬間拆除並回收；不消耗耐久。"
     unlock: "assembler"
     use-cases:
@@ -660,7 +647,6 @@ items:
     category: BASIC
     icon: BROWN_DYE
     item-model: "nexo:sawdust"
-    nexo-id: sawdust
     description: "木屑材料，可作燃料或塑膠前置。"
     unlock: "electric_saw"
     use-cases:
@@ -671,7 +657,6 @@ items:
     category: INTERMEDIATE
     icon: IRON_INGOT
     item-model: "nexo:iron_plate"
-    nexo-id: iron_plate
     description: "機器基礎零件。"
     unlock: "compressor"
     use-cases:
@@ -691,7 +676,6 @@ items:
     category: BASIC
     icon: FLINT
     item-model: "nexo:recycled_materials"
-    nexo-id: recycled_materials
     description: "回收產出基礎材料。"
     unlock: "recycler"
     use-cases:
@@ -702,7 +686,6 @@ items:
     category: BASIC
     icon: WHEAT_SEEDS
     item-model: "nexo:crop_seeds"
-    nexo-id: crop_seeds
     description: "自動農場種植種子。"
     unlock: "initial"
     use-cases:
@@ -724,7 +707,6 @@ items:
     category: BASIC
     icon: ORANGE_DYE
     item-model: "nexo:copper_powder_material"
-    nexo-id: copper_powder_material
     description: "粉碎銅礦後產出的金屬粉，屬於中前期標準加工線。"
     unlock: "crusher"
     use-cases:
@@ -736,7 +718,6 @@ items:
     category: INTERMEDIATE
     icon: IRON_NUGGET
     item-model: "nexo:machine_parts"
-    nexo-id: machine_parts
     description: "通用機器部件。"
     unlock: "assembler"
     use-cases:
@@ -836,8 +817,7 @@ items:
     display-name: "青銅齒輪"
     category: INTERMEDIATE
     icon: CLOCK
-    # item-model: techproject:item/bronze_gear
-    # nexo-id: bronze_gear
+    item-model: "nexo:copper_gear"
     description: "傳動齒輪材料。"
     unlock: "assembler"
     use-cases:
@@ -873,7 +853,6 @@ items:
     category: BASIC
     icon: STRING
     item-model: "nexo:fiber_mesh_material"
-    nexo-id: fiber_mesh_material
     description: "纖維複合網。"
     unlock: "electric_saw"
     use-cases:
@@ -1095,7 +1074,6 @@ items:
     category: BASIC
     icon: GHAST_TEAR
     item-model: "nexo:hydrogel_material"
-    nexo-id: hydrogel_material
     description: "農業與冷卻膠體。"
     unlock: "auto_farm"
     use-cases:
@@ -1119,7 +1097,6 @@ items:
     category: BASIC
     icon: BONE_MEAL
     item-model: "nexo:fertilizer_mix"
-    nexo-id: fertilizer_mix
     description: "加速作物生長混合物。"
     unlock: "auto_farm"
     use-cases:
@@ -1131,7 +1108,6 @@ items:
     category: BASIC
     icon: LEATHER
     item-model: "nexo:biomass_fiber"
-    nexo-id: biomass_fiber
     description: "生質纖維。"
     unlock: "auto_farm"
     use-cases:
@@ -1254,7 +1230,6 @@ items:
     category: BASIC
     icon: CLAY_BALL
     item-model: "nexo:mineral_slurry"
-    nexo-id: mineral_slurry
     description: "洗礦後形成的礦漿。"
     unlock: "ore_washer"
     use-cases:
@@ -1287,7 +1262,6 @@ items:
     category: BASIC
     icon: HONEYCOMB
     item-model: "nexo:biomass_resin"
-    nexo-id: biomass_resin
     description: "生質樹脂。"
     unlock: "bio_lab"
     use-cases:
@@ -1405,7 +1379,6 @@ items:
     category: BASIC
     icon: GREEN_DYE
     item-model: "nexo:biomass_scrap"
-    nexo-id: biomass_scrap
     description: "生質粉碎物。"
     unlock: "bio_lab"
     use-cases:
@@ -1417,7 +1390,6 @@ items:
     category: BASIC
     icon: MELON_SEEDS
     item-model: "nexo:seed_family"
-    nexo-id: seed_family
     description: "高密度種子簇。"
     unlock: "auto_farm"
     use-cases:
@@ -1464,8 +1436,7 @@ items:
     display-name: "橡膠片"
     category: BASIC
     icon: RABBIT_HIDE
-    # item-model: techproject:item/rubber_sheet
-    nexo-id: rubber_sheet
+    item-model: "nexo:rubber_sheet"
     description: "聚合壓製用基底。"
     unlock: "polymer_press"
     use-cases:
@@ -1791,33 +1762,37 @@ items:
     display-name: "淘金盤"
     category: BASIC
     icon: BOWL
-    description: "手持右鍵碎石或靈魂沙可篩出金屬粉塵。前期最核心的手動工具。"
+    item-model: "nexo:gold_pan"
+    description: "手持右鍵礫石或靈魂沙可篩出金屬粉塵。前期最核心的手動工具。"
     unlock: "initial"
     use-cases:
-      - "右鍵碎石 → 鐵粉/銅粉/錫粉/鋅粉"
+      - "右鍵礫石 → 鐵粉/銅粉/錫粉/鋅粉"
       - "右鍵靈魂沙 → 鉛粉/金粒/石英"
   sifted_ore:
     display-name: "篩出礦砂"
     category: BASIC
     icon: GUNPOWDER
-    description: "淘金盤從碎石中篩出的混合礦砂，可在熔爐加工成鐵錠。"
+    item-model: "nexo:sifted_ore"
+    description: "淘金盤從礫石中篩出的混合礦砂，可在熔爐加工成鐵錠。"
     unlock: "initial"
     use-cases:
-      - "碎石/靈魂沙 → 淘金盤 → 篩出礦砂"
+      - "礫石/靈魂沙 → 淘金盤 → 篩出礦砂"
       - "篩出礦砂 → 熔爐 → 鐵錠"
   tin_dust:
     display-name: "錫粉"
     category: BASIC
     icon: LIGHT_GRAY_DYE
-    description: "淘金盤從碎石中篩出的錫粉，合金冶煉的關鍵材料。"
+    item-model: "nexo:tin_dust"
+    description: "淘金盤從礫石中篩出的錫粉，合金冶煉的關鍵材料。"
     unlock: "initial"
     use-cases:
-      - "碎石 → 淘金盤 → 錫粉"
+      - "礫石 → 淘金盤 → 錫粉"
       - "銅粉 + 錫粉 → 合金熔煉爐 → 青銅錠"
   lead_dust:
     display-name: "鉛粉"
     category: BASIC
     icon: GRAY_DYE
+    item-model: "nexo:lead_dust"
     description: "淘金盤從靈魂沙中篩出的鉛粉，焊錫合金的材料。"
     unlock: "initial"
     use-cases:
@@ -1827,15 +1802,17 @@ items:
     display-name: "鋅粉"
     category: BASIC
     icon: WHITE_DYE
-    description: "淘金盤從碎石中篩出的鋅粉，合金冶煉的材料。"
+    item-model: "nexo:zinc_dust"
+    description: "淘金盤從礫石中篩出的鋅粉，合金冶煉的材料。"
     unlock: "initial"
     use-cases:
-      - "碎石 → 淘金盤 → 鋅粉"
+      - "礫石 → 淘金盤 → 鋅粉"
       - "銅粉 + 鋅粉 → 合金熔煉爐 → 黃銅錠"
   tin_ingot:
     display-name: "錫錠"
     category: BASIC
     icon: IRON_NUGGET
+    item-model: "nexo:tin_ingot"
     description: "錫粉冶煉而成的金屬錠。"
     unlock: "furnace"
     use-cases:
@@ -1844,6 +1821,7 @@ items:
     display-name: "鉛錠"
     category: BASIC
     icon: NETHERITE_SCRAP
+    item-model: "nexo:lead_ingot"
     description: "鉛粉冶煉而成的沉重金屬。"
     unlock: "furnace"
     use-cases:
@@ -1852,6 +1830,7 @@ items:
     display-name: "鋅錠"
     category: BASIC
     icon: QUARTZ
+    item-model: "nexo:zinc_ingot"
     description: "鋅粉冶煉而成的金屬錠。"
     unlock: "furnace"
     use-cases:
@@ -2425,6 +2404,15 @@ machines:
     energy-per-tick: 34
     effect: "自動化學反應"
     unlock: "chemical_reactor&advanced_assembler"
+  electric_sifter:
+    display-name: "電動篩礦機"
+    category: ADVANCED
+    block: COMPOSTER
+    inputs: ["gravel", "soul_sand"]
+    outputs: ["iron_dust", "copper_dust", "tin_dust", "zinc_dust", "sifted_ore", "silicon", "lead_dust"]
+    energy-per-tick: 10
+    effect: "自動篩礦循環"
+    unlock: "gold_pan&advanced_assembler"
 recipes:
   crusher_iron_ore:
     machine: "crusher"
@@ -3202,6 +3190,12 @@ recipes:
     output: "electric_chemical_reactor"
     energy: 40
     guide: "化學反應器 + 自動化模組 + 精密噴嘴 → 進階製造機 → 電動化學反應器"
+  assembler_electric_sifter:
+    machine: "advanced_assembler"
+    inputs: ["gold_pan", "auto_processing_card", "bronze_gear"]
+    output: "electric_sifter"
+    energy: 30
+    guide: "淘金盤 + 自動化模組 + 青銅齒輪 → 進階製造機 → 電動篩礦機"
   # ═══ 純電力版加工配方（複製手動版配方，能源翻倍） ═══
   electric_crusher_iron_ore:
     machine: "electric_crusher"
@@ -3389,6 +3383,80 @@ recipes:
     output: "precision_nozzle"
     energy: 45
     guide: "壓力導管 + 鋼線 → 電動化學反應器 → 精密噴嘴"
+  # ═══ 電動篩礦機配方（礫石） ═══
+  electric_sifter_gravel_iron:
+    machine: "electric_sifter"
+    inputs: ["gravel"]
+    output: "iron_dust"
+    energy: 10
+    guide: "礫石 → 電動篩礦機 → 鐵粉"
+  electric_sifter_gravel_copper:
+    machine: "electric_sifter"
+    inputs: ["gravel"]
+    output: "copper_dust"
+    energy: 10
+    guide: "礫石 → 電動篩礦機 → 銅粉"
+  electric_sifter_gravel_tin:
+    machine: "electric_sifter"
+    inputs: ["gravel"]
+    output: "tin_dust"
+    energy: 10
+    guide: "礫石 → 電動篩礦機 → 錫粉"
+  electric_sifter_gravel_zinc:
+    machine: "electric_sifter"
+    inputs: ["gravel"]
+    output: "zinc_dust"
+    energy: 10
+    guide: "礫石 → 電動篩礦機 → 鋅粉"
+  electric_sifter_gravel_sifted:
+    machine: "electric_sifter"
+    inputs: ["gravel"]
+    output: "sifted_ore"
+    energy: 10
+    guide: "礫石 → 電動篩礦機 → 篩出礦砂"
+  electric_sifter_gravel_silicon:
+    machine: "electric_sifter"
+    inputs: ["gravel"]
+    output: "silicon"
+    energy: 10
+    guide: "礫石 → 電動篩礦機 → 矽晶"
+  # ═══ 電動篩礦機配方（靈魂沙） ═══
+  electric_sifter_soul_lead:
+    machine: "electric_sifter"
+    inputs: ["soul_sand"]
+    output: "lead_dust"
+    energy: 10
+    guide: "靈魂沙 → 電動篩礦機 → 鉛粉"
+  electric_sifter_soul_sifted:
+    machine: "electric_sifter"
+    inputs: ["soul_sand"]
+    output: "sifted_ore"
+    energy: 10
+    guide: "靈魂沙 → 電動篩礦機 → 篩出礦砂"
+  electric_sifter_soul_gold:
+    machine: "electric_sifter"
+    inputs: ["soul_sand"]
+    output: "gold_nugget"
+    energy: 10
+    guide: "靈魂沙 → 電動篩礦機 → 金粒"
+  electric_sifter_soul_quartz:
+    machine: "electric_sifter"
+    inputs: ["soul_sand"]
+    output: "quartz"
+    energy: 10
+    guide: "靈魂沙 → 電動篩礦機 → 石英"
+  electric_sifter_soul_zinc:
+    machine: "electric_sifter"
+    inputs: ["soul_sand"]
+    output: "zinc_dust"
+    energy: 10
+    guide: "靈魂沙 → 電動篩礦機 → 鋅粉"
+  electric_sifter_soul_iron:
+    machine: "electric_sifter"
+    inputs: ["soul_sand"]
+    output: "iron_dust"
+    energy: 10
+    guide: "靈魂沙 → 電動篩礦機 → 鐵粉"
   # ═══ 合金配方 ═══
   smeltery_bronze:
     machine: "smeltery"

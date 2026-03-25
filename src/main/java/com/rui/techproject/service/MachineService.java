@@ -1901,6 +1901,7 @@ public final class MachineService {
             case "electric_crusher", "electric_compressor", "electric_ore_washer", "electric_wire_mill",
                  "electric_purifier", "electric_centrifuge", "electric_bio_lab", "electric_chemical_reactor" ->
                     this.tickProcessor(machine, definition, location, Particle.ELECTRIC_SPARK, definition.id() + "_cycles");
+            case "electric_sifter" -> this.tickElectricSifter(machine, definition, location);
             default -> this.tickConsumer(machine, location, definition.energyPerTick());
         }
         this.transferOutputs(machine, location);
@@ -4908,6 +4909,107 @@ public final class MachineService {
         this.setRuntimeState(machine, snapshot.state(), snapshot.detail());
     }
 
+    // ═══ 電動篩礦機：隨機掉落（淘金盤的全自動版） ═══
+
+    private void tickElectricSifter(final PlacedMachine machine,
+                                    final MachineDefinition definition,
+                                    final Location location) {
+        final World world = location.getWorld();
+        if (world == null) { return; }
+
+        final long requiredEnergy = Math.max(1L, definition.energyPerTick());
+        this.absorbNearbyEnergy(machine, location, requiredEnergy);
+
+        // 在輸入欄尋找礫石或靈魂沙
+        int sourceSlot = -1;
+        boolean isGravel = false;
+        for (int slot = 0; slot < 9; slot++) {
+            final ItemStack stack = machine.inputAt(slot);
+            if (stack == null || stack.getType() == Material.AIR) { continue; }
+            if (stack.getType() == Material.GRAVEL) {
+                sourceSlot = slot;
+                isGravel = true;
+                break;
+            }
+            if (stack.getType() == Material.SOUL_SAND || stack.getType() == Material.SOUL_SOIL) {
+                sourceSlot = slot;
+                break;
+            }
+        }
+
+        if (sourceSlot == -1) {
+            this.setRuntimeState(machine, MachineRuntimeState.NO_INPUT, "無輸入");
+            return;
+        }
+        if (!machine.consumeEnergy(requiredEnergy)) {
+            this.setRuntimeState(machine, MachineRuntimeState.NO_POWER, "缺電");
+            return;
+        }
+
+        // 擲骰掉落（電力版無空回合，100% 產出）
+        final String dropId = isGravel ? this.rollSifterGravelDrop() : this.rollSifterSoulSandDrop();
+        final int stackBonus = this.countUpgrade(machine, "stack_upgrade");
+        final ItemStack output = this.buildStackForId(dropId, 1 + stackBonus);
+        if (output == null || !this.canStoreOutput(machine, output)) {
+            this.addEnergyCapped(machine, requiredEnergy);
+            this.setRuntimeState(machine, MachineRuntimeState.OUTPUT_BLOCKED, "輸出滿");
+            return;
+        }
+
+        // 消耗一個來源方塊
+        final ItemStack source = machine.inputAt(sourceSlot);
+        source.setAmount(source.getAmount() - 1);
+        machine.setInputAt(sourceSlot, source.getAmount() <= 0 ? null : source);
+
+        // 存入產出
+        this.storeOutput(machine, output);
+
+        // 統計與解鎖
+        this.progressService.incrementStat(machine.owner(), "electric_sifter_cycles", output.getAmount());
+        this.progressService.incrementStat(machine.owner(), "items_crafted", output.getAmount());
+        this.progressService.incrementStat(machine.owner(), "total_processed", output.getAmount());
+        this.progressService.unlockItem(machine.owner(), dropId);
+        this.progressService.unlockByRequirement(machine.owner(), machine.machineId());
+        this.progressService.unlockByRequirement(machine.owner(), "machine:" + machine.machineId());
+        this.progressService.unlockByRequirement(machine.owner(), "item:" + dropId);
+
+        // 視覺回饋
+        this.setRuntimeState(machine, MachineRuntimeState.RUNNING, "篩礦中");
+        if (this.isChunkViewable(machine.locationKey()) && machine.ticksActive() % 8L == 0L) {
+            world.spawnParticle(Particle.FALLING_WATER, location.getX() + 0.5, location.getY() + 1.0,
+                    location.getZ() + 0.5, 7, 0.22, 0.22, 0.22, 0.01);
+            world.playSound(location, Sound.ENTITY_FISHING_BOBBER_SPLASH, 0.25f, 1.3f);
+        }
+    }
+
+    /**
+     * 電動篩礦機礫石掉落表（100% 產出，無空回合）：
+     * 20% 鐵粉  18% 銅粉  17% 錫粉  15% 鋅粉  18% 篩出礦砂  12% 矽晶
+     */
+    private String rollSifterGravelDrop() {
+        final double r = ThreadLocalRandom.current().nextDouble();
+        if (r < 0.20) return "iron_dust";
+        if (r < 0.38) return "copper_dust";
+        if (r < 0.55) return "tin_dust";
+        if (r < 0.70) return "zinc_dust";
+        if (r < 0.88) return "sifted_ore";
+        return "silicon";
+    }
+
+    /**
+     * 電動篩礦機靈魂沙掉落表（100% 產出，無空回合）：
+     * 22% 鉛粉  20% 篩出礦砂  18% 金粒  16% 石英  14% 鋅粉  10% 鐵粉
+     */
+    private String rollSifterSoulSandDrop() {
+        final double r = ThreadLocalRandom.current().nextDouble();
+        if (r < 0.22) return "lead_dust";
+        if (r < 0.42) return "sifted_ore";
+        if (r < 0.60) return "gold_nugget";
+        if (r < 0.76) return "quartz";
+        if (r < 0.90) return "zinc_dust";
+        return "iron_dust";
+    }
+
     private void tickManualCrusher(final PlacedMachine machine,
                                    final MachineDefinition definition,
                                    final Location location) {
@@ -6191,7 +6293,8 @@ public final class MachineService {
     private boolean isElectricAutoMachine(final String machineId) {
         return switch (this.normalizeId(machineId)) {
             case "electric_crusher", "electric_compressor", "electric_ore_washer", "electric_wire_mill",
-                 "electric_purifier", "electric_centrifuge", "electric_bio_lab", "electric_chemical_reactor" -> true;
+                 "electric_purifier", "electric_centrifuge", "electric_bio_lab", "electric_chemical_reactor",
+                 "electric_sifter" -> true;
             default -> false;
         };
     }

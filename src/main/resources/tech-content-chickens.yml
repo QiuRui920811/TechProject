@@ -22,6 +22,7 @@ items:
     display-name: "口袋雞"
     category: BASIC
     icon: PLAYER_HEAD
+    item-model: "nexo:pocket_chicken"
     head-texture: 1638469a599ceef7207537603248a9ab11ff591fd378bea4735b346a7fae893
     description: "被捕獲的雞，帶有隱藏基因。需經基因定序器分析。"
     unlock: "chicken_net"

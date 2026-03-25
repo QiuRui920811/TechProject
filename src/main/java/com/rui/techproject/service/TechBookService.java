@@ -106,6 +106,7 @@ public final class TechBookService {
     private final java.util.Set<UUID> pendingSearchInput = java.util.concurrent.ConcurrentHashMap.newKeySet();
     private final java.util.Set<UUID> openBookViewPlayers = java.util.concurrent.ConcurrentHashMap.newKeySet();
     private final Map<UUID, Inventory> openBookInventories = new java.util.concurrent.ConcurrentHashMap<>();
+    private final Map<UUID, String> lastBookAction = new java.util.concurrent.ConcurrentHashMap<>();
 
     public TechBookService(final TechProjectPlugin plugin,
                            final TechRegistry registry,
@@ -125,7 +126,25 @@ public final class TechBookService {
 
     public void openDefaultBook(final Player player) {
         this.playBookOpenSound(player);
+        final UUID uuid = player.getUniqueId();
+        if (this.isRememberPageEnabled(uuid)) {
+            final String saved = this.lastBookAction.get(uuid);
+            if (saved != null && !saved.isBlank()) {
+                this.handleAction(player, saved);
+                return;
+            }
+        }
         this.openCategoryHub(player);
+    }
+
+    public boolean isRememberPageEnabled(final UUID uuid) {
+        return this.progressService.getStat(uuid, "book_remember_page") > 0L;
+    }
+
+    public boolean toggleRememberPage(final UUID uuid) {
+        final boolean newState = !this.isRememberPageEnabled(uuid);
+        this.progressService.setStat(uuid, "book_remember_page", newState ? 1L : 0L);
+        return newState;
     }
 
     public void reload(final TechProjectPlugin plugin) {
@@ -476,11 +495,12 @@ public final class TechBookService {
             inventory.setItem(22, this.info(Material.PAPER, "來源配方", recipeSummaryLines));
             inventory.setItem(23, this.info(Material.KNOWLEDGE_BOOK, "用途", item.useCases().stream().map(this.itemFactory::localizeInlineTerms).toList()));
             inventory.setItem(30, this.researchActionIcon(player, "item", item.id(), item.unlockRequirement(), this.researchCost(item), this.progressService.hasItemUnlocked(player.getUniqueId(), item.id())));
-            if (!outputRecipes.isEmpty()) {
+            final int totalRecipeViews = this.recipeViewsFor(item.id()).size();
+            if (totalRecipeViews > 0) {
                 inventory.setItem(31, this.itemFactory.tagGuiAction(this.guiButton("detail-view-recipe", Material.KNOWLEDGE_BOOK, "查看配方圖", List.of(
                     "共有 {count} 種取得方式",
                     "點擊後直接顯示九宮格 / 製程格"
-                ), this.placeholders("count", String.valueOf(outputRecipes.size()))), "recipe-view:" + item.id() + ":0"));
+                ), this.placeholders("count", String.valueOf(totalRecipeViews))), "recipe-view:" + item.id() + ":0"));
             } else {
                 inventory.setItem(31, this.info(Material.BARRIER, "暫無配方圖", List.of("這個物品目前沒有額外配方頁可查看")));
             }
@@ -819,6 +839,10 @@ public final class TechBookService {
         return true;
     }
 
+    private static final java.util.Set<String> NON_REMEMBERABLE_ACTIONS = java.util.Set.of(
+            "hub", "search-prompt", "book-claim", "research", "achievements"
+    );
+
     public void handleAction(final Player player, final String action) {
         if (action == null || action.isBlank()) {
             return;
@@ -826,6 +850,9 @@ public final class TechBookService {
         final String[] split = action.split(":", 2);
         final String verb = split[0];
         final String argument = split.length > 1 ? split[1] : "";
+        if (!NON_REMEMBERABLE_ACTIONS.contains(verb)) {
+            this.lastBookAction.put(player.getUniqueId(), action);
+        }
         this.playBookActionSound(player, verb);
         switch (verb) {
             case "category" -> this.openSubCategoryPage(player, GuideCategory.valueOf(argument));
@@ -932,6 +959,81 @@ public final class TechBookService {
             default -> {
             }
         }
+    }
+
+    /**
+     * Share a book page action to chat so other players can click to open it.
+     */
+    public void shareBookAction(final Player player, final String action, final ItemStack clickedItem) {
+        if (action == null || action.isBlank()) {
+            player.sendMessage(this.itemFactory.warning("這個格子無法分享。"));
+            return;
+        }
+        // Resolve display name from the action
+        final String displayName = this.resolveShareDisplayName(player, action, clickedItem);
+        if (displayName == null) {
+            player.sendMessage(this.itemFactory.warning("這個選項無法分享。"));
+            return;
+        }
+        // Build clickable chat message
+        final String command = "/tech book open " + action;
+        final Component bracket = Component.text("[", net.kyori.adventure.text.format.NamedTextColor.GOLD);
+        final Component name = Component.text(displayName, net.kyori.adventure.text.format.TextColor.color(0xF38CFF));
+        final Component bracketClose = Component.text("]", net.kyori.adventure.text.format.NamedTextColor.GOLD);
+        final Component clickable = Component.empty()
+                .append(bracket).append(name).append(bracketClose)
+                .hoverEvent(net.kyori.adventure.text.event.HoverEvent.showText(
+                        Component.text("點擊打開科技書頁面", net.kyori.adventure.text.format.NamedTextColor.YELLOW)))
+                .clickEvent(net.kyori.adventure.text.event.ClickEvent.runCommand(command));
+        final Component message = Component.empty()
+                .append(Component.text(player.getName(), net.kyori.adventure.text.format.NamedTextColor.WHITE))
+                .append(Component.text(" 提供了科技樹選項 ", net.kyori.adventure.text.format.NamedTextColor.GRAY))
+                .append(clickable);
+        for (final Player online : org.bukkit.Bukkit.getOnlinePlayers()) {
+            online.sendMessage(message);
+        }
+        player.playSound(player.getLocation(), org.bukkit.Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 0.5f, 1.2f);
+    }
+
+    private String resolveShareDisplayName(final Player player, final String action, final ItemStack clickedItem) {
+        final String[] split = action.split(":", 2);
+        final String verb = split[0];
+        final String argument = split.length > 1 ? split[1] : "";
+        return switch (verb) {
+            case "item", "machine", "interaction" -> this.itemFactory.displayNameForId(argument);
+            case "guide-direct" -> {
+                final GuideEntry entry = this.guidesFor(player).get(argument);
+                yield entry != null ? entry.title() : this.itemFactory.displayNameForId(argument);
+            }
+            case "guide" -> {
+                final String guideId = argument.split(":")[0];
+                final GuideEntry entry = this.guidesFor(player).get(guideId);
+                yield entry != null ? entry.title() : this.itemFactory.displayNameForId(guideId);
+            }
+            case "recipe-view", "recipe-index" -> {
+                final String targetId = argument.split(":")[0];
+                yield this.itemFactory.displayNameForId(targetId) + " 配方";
+            }
+            case "tree" -> {
+                final String[] detail = argument.split(":");
+                yield detail.length >= 2 ? this.itemFactory.displayNameForId(detail[1]) + " 科技樹" : null;
+            }
+            case "category" -> {
+                try {
+                    yield GuideCategory.valueOf(argument).displayName();
+                } catch (final IllegalArgumentException e) {
+                    yield null;
+                }
+            }
+            default -> {
+                // Try to get display name from the clicked item itself
+                if (clickedItem != null && clickedItem.hasItemMeta() && clickedItem.getItemMeta().hasDisplayName()) {
+                    yield net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer.plainText()
+                            .serialize(clickedItem.getItemMeta().displayName());
+                }
+                yield null;
+            }
+        };
     }
 
     private void promptSearch(final Player player) {

@@ -37,6 +37,7 @@ import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.ProjectileHitEvent;
 import org.bukkit.event.hanging.HangingPlaceEvent;
+import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryMoveItemEvent;
 import org.bukkit.event.inventory.FurnaceBurnEvent;
@@ -584,6 +585,11 @@ public final class TechListener implements Listener {
         event.setCancelled(true);
         final ItemStack current = event.getCurrentItem();
         if (!(event.getWhoClicked() instanceof Player player)) {
+            return;
+        }
+        if (event.getClick() == ClickType.SWAP_OFFHAND) {
+            final String shareAction = this.plugin.getItemFactory().getGuiAction(current);
+            this.plugin.getTechBookService().shareBookAction(player, shareAction, current);
             return;
         }
         if (event.isRightClick() && this.plugin.getTechBookService().tryGrantPreviewItem(player, current)) {
@@ -1477,7 +1483,7 @@ public final class TechListener implements Listener {
         return true;
     }
 
-    // ═══ 淘金盤：右鍵碎石/靈魂沙篩出金屬粉塵 ═══
+    // ═══ 淘金盤：右鍵礫石/靈魂沙篩出金屬粉塵 ═══
     private boolean tryUseGoldPan(final PlayerInteractEvent event) {
         if (event.getAction() != Action.RIGHT_CLICK_BLOCK || event.getClickedBlock() == null || event.getItem() == null) {
             return false;
@@ -1539,9 +1545,9 @@ public final class TechListener implements Listener {
     }
 
     /**
-     * 碎石淘金盤掉落表：
+     * 礫石淘金盤掉落表：
      * 30% 無 → null
-     * 15% 碎石(flint)
+     * 15% 礫石(flint)
      * 15% 篩出礦砂
      * 12% 鐵粉
      * 10% 銅粉

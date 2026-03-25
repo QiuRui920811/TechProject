@@ -72,19 +72,19 @@ public final class TechRegistry {
     }
 
     public Collection<TechItemDefinition> allItems() {
-        return Collections.unmodifiableCollection(this.items.values());
+        return List.copyOf(this.items.values());
     }
 
     public Collection<MachineDefinition> allMachines() {
-        return Collections.unmodifiableCollection(this.machines.values());
+        return List.copyOf(this.machines.values());
     }
 
     public Collection<MachineRecipe> allRecipes() {
-        return Collections.unmodifiableCollection(this.recipes.values());
+        return List.copyOf(this.recipes.values());
     }
 
     public Collection<AchievementDefinition> allAchievements() {
-        return Collections.unmodifiableCollection(this.achievements.values());
+        return List.copyOf(this.achievements.values());
     }
 
     public TechItemDefinition getItem(final String id) {

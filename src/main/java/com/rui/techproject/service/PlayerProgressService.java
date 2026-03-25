@@ -230,6 +230,10 @@ public final class PlayerProgressService {
         return this.progress(uuid).stats.getOrDefault(statKey, 0L);
     }
 
+    public void setStat(final UUID uuid, final String statKey, final long value) {
+        this.progress(uuid).stats.put(statKey, value);
+    }
+
     public void save(final UUID uuid) {
         final PlayerProgress progress = this.cache.get(uuid);
         if (progress == null) {
