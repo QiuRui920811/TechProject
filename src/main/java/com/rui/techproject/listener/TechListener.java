@@ -2008,7 +2008,9 @@ public final class TechListener implements Listener {
             player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 0.7f, 0.6f);
             return true;
         }
-        final ItemStack result = this.plugin.getItemFactory().buildMachineItem(match.machine());
+        final ItemStack result = match.isItemBlueprint()
+                ? this.plugin.getItemFactory().buildTechItem(match.item())
+                : this.plugin.getItemFactory().buildMachineItem(match.machine());
         event.setCancelled(true);
         if (event.isShiftClick()) {
             if (!this.canStoreCraftResult(player, result)) {

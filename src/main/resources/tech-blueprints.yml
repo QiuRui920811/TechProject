@@ -768,6 +768,44 @@ blueprints:
     placement:
       - 建議單獨設成終局物質區，避免一般物流混入。
       - 最好直接接終局儲能與高吞吐物流，不然後段很容易塞住。
+  graviton_stabilizer:
+    shape:
+      - "CFC"
+      - "RBR"
+      - "QNQ"
+    ingredients:
+      C: tech:crystal_matrix
+      F: tech:field_plate
+      R: tech:reactor_core
+      B: BEACON
+      Q: tech:quantum_chip
+      N: tech:nano_coating
+    tutorial:
+      - 重力穩定器是重力子科學的基礎，解鎖後才能煉製重力子透鏡與重力子核心。
+      - 先確保場能鍛爐的磁環與培育晶體產線穩住，再推這台。
+      - 重力子透鏡之後會流向軌道列印與巨構分支。
+    placement:
+      - 建議放在終局材料區，與虛空萃取器同層管理。
+      - 周圍要留高等儲能與輸出管道空間，重力子核心會流向多條終局線。
+  void_beacon:
+    shape:
+      - "FNF"
+      - "QBQ"
+      - "RCR"
+    ingredients:
+      F: tech:fusion_core
+      N: tech:nano_coating
+      Q: tech:quantum_chip
+      B: BEACON
+      R: tech:reactor_core
+      C: tech:control_unit
+    tutorial:
+      - 虛空信標是虛空科技線的核心節點，能產出虛空水晶與虛空信標核心。
+      - 在推這台之前，先確保虛空萃取器的碎片產量已穩定。
+      - 虛空信標核心是高階裝備與巨構鏈的關鍵中間材料。
+    placement:
+      - 建議放在終局虛空子區域，與時序引擎、軌道列印機同區。
+      - 信標核心產出後要分流到武裝與巨構兩條線，物流規劃要預留。
   singularity_press:
     shape:
       - "QFQ"
