@@ -4,6 +4,7 @@ import com.rui.techproject.TechProjectPlugin;
 import com.rui.techproject.model.PlacedMachine;
 import io.papermc.paper.event.player.AsyncChatEvent;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
+import org.bukkit.Bukkit;
 import org.bukkit.FluidCollisionMode;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
@@ -1492,10 +1493,15 @@ public final class TechListener implements Listener {
         if (!isGravel && !isSoulSand) {
             return false;
         }
+        final Player player = event.getPlayer();
+        // 領地保護：檢查玩家是否有權操作此方塊
+        if (!this.canModifyBlock(player, target)) {
+            player.sendActionBar(this.plugin.getItemFactory().danger("你沒有權限在這裡使用淘金盤。"));
+            return true;
+        }
         event.setUseInteractedBlock(Result.DENY);
         event.setUseItemInHand(Result.DENY);
         event.setCancelled(true);
-        final Player player = event.getPlayer();
         // 冷卻檢查（20 tick = 1 秒）
         if (player.getCooldown(event.getItem().getType()) > 0) {
             return true;
@@ -1587,6 +1593,11 @@ public final class TechListener implements Listener {
         final Block center = event.getClickedBlock().getBlockData() instanceof Ageable
                 ? event.getClickedBlock()
                 : event.getClickedBlock().getRelative(BlockFace.UP);
+        // 領地保護：檢查玩家是否有權操作中心方塊
+        if (!this.canModifyBlock(event.getPlayer(), center)) {
+            event.getPlayer().sendActionBar(this.plugin.getItemFactory().danger("你沒有權限在這裡使用水利鏟。"));
+            return true;
+        }
         int grown = 0;
         for (int dx = -1; dx <= 1; dx++) {
             for (int dz = -1; dz <= 1; dz++) {
@@ -1851,6 +1862,10 @@ public final class TechListener implements Listener {
         for (int dx = -1; dx <= 1; dx++) {
             for (int dz = -1; dz <= 1; dz++) {
                 final Block crop = origin.getWorld().getBlockAt(origin.getX() + dx, origin.getY(), origin.getZ() + dz);
+                // 領地保護：跳過無權操作的方塊
+                if ((dx != 0 || dz != 0) && !this.canModifyBlock(event.getPlayer(), crop)) {
+                    continue;
+                }
                 if (this.plugin.getTechCropService().isTrackedCrop(crop)) {
                     if (!this.plugin.getTechCropService().isMature(crop)) {
                         continue;
@@ -2870,5 +2885,16 @@ public final class TechListener implements Listener {
             player.playSound(player.getLocation(), Sound.BLOCK_BEACON_DEACTIVATE, 0.6f, 1.0f);
         }
         return true;
+    }
+
+    /**
+     * 透過模擬 BlockBreakEvent 檢查玩家是否有權修改指定方塊。
+     * 任何領地/保護插件（Residence、WorldGuard 等）若監聽 BlockBreakEvent
+     * 並 cancel 了該事件，表示玩家無權操作該方塊。
+     */
+    private boolean canModifyBlock(final Player player, final Block block) {
+        final BlockBreakEvent simulated = new BlockBreakEvent(block, player);
+        Bukkit.getPluginManager().callEvent(simulated);
+        return !simulated.isCancelled();
     }
 }
