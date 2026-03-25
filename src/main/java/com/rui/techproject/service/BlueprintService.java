@@ -3,6 +3,7 @@ package com.rui.techproject.service;
 import com.rui.techproject.TechProjectPlugin;
 import com.rui.techproject.model.MachineDefinition;
 import com.rui.techproject.model.MachineRecipe;
+import com.rui.techproject.model.TechItemDefinition;
 import com.rui.techproject.model.TechTier;
 import com.rui.techproject.util.ItemFactoryUtil;
 import org.bukkit.Bukkit;
@@ -250,11 +251,12 @@ public final class BlueprintService {
                 continue;
             }
             final MachineDefinition machine = this.registry.getMachine(entry.id());
-            if (machine == null) {
+            final TechItemDefinition item = machine == null ? this.registry.getItem(entry.id()) : null;
+            if (machine == null && item == null) {
                 continue;
             }
             if (this.matches(entry, matrix)) {
-                return new BlueprintMatch(entry, machine);
+                return new BlueprintMatch(entry, machine, item);
             }
         }
         return null;
@@ -416,6 +418,20 @@ public final class BlueprintService {
         }
     }
 
-    public record BlueprintMatch(BlueprintEntry entry, MachineDefinition machine) {
+    public record BlueprintMatch(BlueprintEntry entry, MachineDefinition machine, TechItemDefinition item) {
+        /** 此藍圖是否為物品（非機器）藍圖。 */
+        public boolean isItemBlueprint() {
+            return this.machine == null && this.item != null;
+        }
+
+        /** 取得藍圖產出的 ID（機器或物品）。 */
+        public String outputId() {
+            return this.machine != null ? this.machine.id() : (this.item != null ? this.item.id() : this.entry.id());
+        }
+
+        /** 取得藍圖產出的顯示名稱。 */
+        public String outputDisplayName() {
+            return this.machine != null ? this.machine.displayName() : (this.item != null ? this.item.displayName() : this.entry.id());
+        }
     }
 }

@@ -2142,8 +2142,15 @@ public final class TechBookService {
         final List<RecipeView> views = new ArrayList<>();
         final MachineDefinition machine = this.registry.getMachine(targetId);
         final BlueprintService.BlueprintEntry blueprint = this.blueprintService.get(targetId);
-        if (machine != null && blueprint != null && blueprint.registerRecipe()) {
-            views.add(this.blueprintRecipeView(machine, blueprint));
+        if (blueprint != null && blueprint.registerRecipe()) {
+            if (machine != null) {
+                views.add(this.blueprintRecipeView(machine, blueprint));
+            } else {
+                final TechItemDefinition item = this.registry.getItem(targetId);
+                if (item != null) {
+                    views.add(this.blueprintRecipeViewForItem(item, blueprint));
+                }
+            }
         }
         for (final MachineRecipe recipe : this.registry.getRecipesForOutput(targetId)) {
             views.add(this.machineRecipeView(recipe));
@@ -2178,6 +2185,39 @@ public final class TechBookService {
                 List.of(
                         "類型：進階工作台合成",
                         "結果：" + this.itemFactory.displayNameForId(machine.id()),
+                        "結構：下方鐵方塊，上方工作台",
+                        "左側九宮格就是實際放法"
+                )
+        );
+    }
+
+    private RecipeView blueprintRecipeViewForItem(final TechItemDefinition item, final BlueprintService.BlueprintEntry blueprint) {
+        final List<ItemStack> inputs = new ArrayList<>();
+        final Map<Character, String> rawIdMap = new LinkedHashMap<>();
+        if (blueprint.ingredientSection() != null) {
+            for (final String key : blueprint.ingredientSection().getKeys(false)) {
+                if (!key.isBlank()) {
+                    rawIdMap.put(key.charAt(0), blueprint.ingredientSection().getString(key, "AIR"));
+                }
+            }
+        }
+        for (int row = 0; row < 3; row++) {
+            final String shapeRow = blueprint.shape().size() > row ? blueprint.shape().get(row) : "";
+            for (int column = 0; column < 3; column++) {
+                final char symbol = shapeRow.length() > column ? shapeRow.charAt(column) : ' ';
+                final String ingredientId = rawIdMap.get(symbol);
+                inputs.add(ingredientId != null ? this.clickableReference(ingredientId, true) : null);
+            }
+        }
+        return new RecipeView(
+                this.itemFactory.displayNameForId(item.id()),
+                inputs,
+                this.clickableReference(item.id(), false),
+                this.info(Material.CRAFTING_TABLE, "進階工作台", List.of("下方先墊鐵方塊", "上方放工作台後再照左側九宮格擺法")),
+                "進階工作台（鐵方塊底座）",
+                List.of(
+                        "類型：進階工作台合成",
+                        "結果：" + this.itemFactory.displayNameForId(item.id()),
                         "結構：下方鐵方塊，上方工作台",
                         "左側九宮格就是實際放法"
                 )

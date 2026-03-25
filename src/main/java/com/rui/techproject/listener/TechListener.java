@@ -640,7 +640,7 @@ public final class TechListener implements Listener {
             return;
         }
         if (!this.plugin.getBlueprintService().isAdvancedWorkbench(craftingInventory.getLocation())) {
-            craftingInventory.setResult(this.invalidAdvancedWorkbenchResult(match.machine().displayName()));
+            craftingInventory.setResult(this.invalidAdvancedWorkbenchResult(match.outputDisplayName()));
             return;
         }
         final Player viewer = event.getViewers().stream()
@@ -648,38 +648,33 @@ public final class TechListener implements Listener {
                 .map(Player.class::cast)
                 .findFirst()
                 .orElse(null);
-        if (viewer != null
-                && !viewer.hasPermission("techproject.admin")
-                && !this.plugin.getPlayerProgressService().hasMachineUnlocked(viewer.getUniqueId(), match.machine().id())) {
-            craftingInventory.setResult(this.lockedMachineResult(match.machine().displayName()));
-            return;
+        if (match.isItemBlueprint()) {
+            // 物品藍圖（例如淘金盤）— 檢查物品解鎖
+            if (viewer != null
+                    && !viewer.hasPermission("techproject.admin")
+                    && !this.plugin.getPlayerProgressService().hasItemUnlocked(viewer.getUniqueId(), match.item().id())) {
+                craftingInventory.setResult(this.lockedMachineResult(match.item().displayName()));
+                return;
+            }
+            craftingInventory.setResult(this.plugin.getItemFactory().buildTechItem(match.item()));
+        } else {
+            // 機器藍圖
+            if (viewer != null
+                    && !viewer.hasPermission("techproject.admin")
+                    && !this.plugin.getPlayerProgressService().hasMachineUnlocked(viewer.getUniqueId(), match.machine().id())) {
+                craftingInventory.setResult(this.lockedMachineResult(match.machine().displayName()));
+                return;
+            }
+            craftingInventory.setResult(this.plugin.getItemFactory().buildMachineItem(match.machine()));
         }
-        craftingInventory.setResult(this.plugin.getItemFactory().buildMachineItem(match.machine()));
     }
 
-    /** 應走科技加工鏈的原版礦石/粗礦，禁止直接用原版熔爐燒製。 */
-    private static final java.util.Set<Material> TECH_CHAIN_ORES = java.util.Set.of(
-            Material.RAW_IRON, Material.RAW_COPPER, Material.RAW_GOLD,
-            Material.IRON_ORE, Material.COPPER_ORE, Material.GOLD_ORE,
-            Material.DEEPSLATE_IRON_ORE, Material.DEEPSLATE_COPPER_ORE, Material.DEEPSLATE_GOLD_ORE
-    );
-
+    /** 禁止科技專屬物品放入原版熔爐/高爐燒製（避免產出錯誤物品）。 */
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onFurnaceSmelt(final FurnaceSmeltEvent event) {
-        if (this.isTaggedTechMaterial(event.getSource()) || TECH_CHAIN_ORES.contains(event.getSource().getType())) {
+        if (this.isTaggedTechMaterial(event.getSource())) {
             event.setCancelled(true);
             event.setResult(new ItemStack(Material.AIR));
-        }
-    }
-
-    /** 當輸入槽含科技鏈原礦時，阻止燃料點燃，避免空燒浪費。 */
-    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
-    public void onFurnaceBurn(final FurnaceBurnEvent event) {
-        if (event.getBlock().getState() instanceof org.bukkit.block.Furnace furnace) {
-            final ItemStack smelting = furnace.getInventory().getSmelting();
-            if (smelting != null && (this.isTaggedTechMaterial(smelting) || TECH_CHAIN_ORES.contains(smelting.getType()))) {
-                event.setCancelled(true);
-            }
         }
     }
 
