@@ -488,7 +488,7 @@ items:
     category: BASIC
     icon: COPPER_INGOT
     # item-model: techproject:item/copper_ingot
-    # nexo-id: copper_ingot
+    nexo-id: copper_ingot
     description: "科技系統使用的銅錠。可用科技熔爐把銅粉加工取得，也可直接使用原版銅錠替代。"
     unlock: "furnace"
     use-cases:
@@ -531,7 +531,7 @@ items:
     category: INTERMEDIATE
     icon: IRON_INGOT
     # item-model: techproject:item/steel_plate
-    # nexo-id: steel_plate
+    nexo-id: steel_plate
     description: "機器主體與重型製程材料。"
     unlock: "compressor"
     use-cases:
@@ -648,6 +648,7 @@ items:
     display-name: "科技扳手"
     category: BASIC
     icon: IRON_SHOVEL
+    nexo-id: tech_wrench
     description: "蹲下+右鍵對準機器可瞬間拆除並回收；不消耗耐久。"
     unlock: "assembler"
     use-cases:
@@ -1464,7 +1465,7 @@ items:
     category: BASIC
     icon: RABBIT_HIDE
     # item-model: techproject:item/rubber_sheet
-    # nexo-id: rubber_sheet
+    nexo-id: rubber_sheet
     description: "聚合壓製用基底。"
     unlock: "polymer_press"
     use-cases:
