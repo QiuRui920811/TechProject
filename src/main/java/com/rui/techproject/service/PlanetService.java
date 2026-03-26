@@ -35,6 +35,7 @@ import org.bukkit.entity.Display;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.ItemDisplay;
 import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Mob;
 import org.bukkit.entity.Monster;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.BlockBreakEvent;
@@ -291,10 +292,12 @@ public final class PlanetService {
             try { this.tickPlanetAmbience(); } catch (final Exception ex) {
                 this.plugin.getLogger().warning("[Planet] tickPlanetAmbience 異常：" + ex);
             }
+        }, 40L, 40L);
+        this.scheduler.runGlobalTimer(task -> {
             try { this.tickPlanetMobSpawning(); } catch (final Exception ex) {
                 this.plugin.getLogger().warning("[Planet] tickPlanetMobSpawning 異常：" + ex);
             }
-        }, 40L, 40L);
+        }, 15L, 15L);
         this.scheduler.runGlobalTimer(task -> this.tickPlanetEliteAuras(), ELITE_AURA_TICK_INTERVAL, ELITE_AURA_TICK_INTERVAL);
         this.scheduler.runGlobalTimer(task -> this.tickPlanetGravity(), 2L, 2L);
         this.scheduler.runGlobalTimer(task -> this.tickPersonalPlanetNodes(), PERSONAL_NODE_TICK_INTERVAL, PERSONAL_NODE_TICK_INTERVAL);
@@ -2508,14 +2511,16 @@ public final class PlanetService {
 
     // ═══ 星球主動怪物生成（繞過光照限制）═══
 
-    /** 每個玩家附近維持的最大怪物數量 */
-    private static final int PLANET_MOB_CAP_PER_PLAYER = 12;
+    /** 每個玩家附近維持的最大怪物數量（接近原版體感） */
+    private static final int PLANET_MOB_CAP_PER_PLAYER = 30;
     private static final long ELITE_SKILL_COOLDOWN_MS = 4000L;
     private static final long ELITE_AURA_TICK_INTERVAL = 60L;
     private static final double ELITE_SKILL_RANGE = 6.0D;
     /** 怪物生成的最小/最大距離（格） */
-    private static final int MOB_SPAWN_MIN_DISTANCE = 20;
+    private static final int MOB_SPAWN_MIN_DISTANCE = 16;
     private static final int MOB_SPAWN_MAX_DISTANCE = 48;
+    /** 生成後的最低存活時間（ticks），防止怪物剛生成就消失 */
+    private static final int MOB_SPAWN_GRACE_TICKS = 20 * 60;
 
     private void tickPlanetMobSpawning() {
         for (final PlanetDefinition definition : this.planets.values()) {
@@ -2549,9 +2554,9 @@ public final class PlanetService {
         if (nearbyMonsters >= PLANET_MOB_CAP_PER_PLAYER) {
             return;
         }
-        // 每次 tick 嘗試生成 1~2 隻
+        // 每次 tick 嘗試生成 3~5 隻
         final java.util.concurrent.ThreadLocalRandom rng = java.util.concurrent.ThreadLocalRandom.current();
-        final int attempts = 1 + rng.nextInt(2);
+        final int attempts = 3 + rng.nextInt(3);
         for (int i = 0; i < attempts; i++) {
             final Location spawnLoc = this.findPlanetSpawnLocation(player);
             if (spawnLoc == null) {
@@ -2584,7 +2589,7 @@ public final class PlanetService {
         final World world = player.getWorld();
         final Location base = player.getLocation();
         final java.util.concurrent.ThreadLocalRandom rng = java.util.concurrent.ThreadLocalRandom.current();
-        for (int attempt = 0; attempt < 5; attempt++) {
+        for (int attempt = 0; attempt < 8; attempt++) {
             final double angle = rng.nextDouble() * Math.PI * 2.0D;
             final int radius = MOB_SPAWN_MIN_DISTANCE + rng.nextInt(MOB_SPAWN_MAX_DISTANCE - MOB_SPAWN_MIN_DISTANCE + 1);
             final int x = base.getBlockX() + (int) Math.round(Math.cos(angle) * radius);
@@ -2613,6 +2618,18 @@ public final class PlanetService {
             return;
         }
         living.setRemoveWhenFarAway(true);
+        // 給予生成保護時間，避免剛生出來就原版消失
+        living.setNoDamageTicks(0);
+        if (living instanceof Mob mob) {
+            mob.setAware(true);
+        }
+        // 暫時設為不會消失，grace 時間後恢復
+        living.setPersistent(true);
+        this.scheduler.runEntityDelayed(living, () -> {
+            if (living.isValid()) {
+                living.setPersistent(false);
+            }
+        }, MOB_SPAWN_GRACE_TICKS);
         // 白天星球的亡靈系怪物需要防火
         if (living instanceof Monster && this.isUndead(mobType)) {
             living.addPotionEffect(new PotionEffect(PotionEffectType.FIRE_RESISTANCE, 20 * 60 * 10, 0, true, false, false));
