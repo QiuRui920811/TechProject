@@ -631,6 +631,7 @@ public final class PlanetService {
 
     /**
      * 生怪診斷 — 手動嘗試在玩家附近找位置並生成怪物，回報每個步驟的結果。
+     * 這個方法專門在 entity thread 上執行，因此直接在附近 region 做測試。
      */
     public List<String> planetSpawnTestLines(final Player player) {
         final List<String> lines = new ArrayList<>();
@@ -643,69 +644,49 @@ public final class PlanetService {
         }
         lines.add("§7星球: §f" + definition.displayName() + " §7(" + definition.id() + ")");
         lines.add("§7你的位置: §f" + player.getLocation().getBlockX() + ", " + player.getLocation().getBlockY() + ", " + player.getLocation().getBlockZ());
+        lines.add("§7世界名: §f" + world.getName());
+        lines.add("§7resolveExistingPlanetWorld: §f" + (this.resolveExistingPlanetWorld(definition) != null ? "✔" : "✘ null"));
         lines.add("");
 
-        // 測試生怪位置搜尋
-        lines.add("§e── 位置搜尋測試 (10次) ──");
-        int foundCount = 0;
+        // 測試座標計算（純數學，不存取方塊）
+        lines.add("§e── 座標計算測試 (10次) ──");
         final Location base = player.getLocation();
+        final java.util.concurrent.ThreadLocalRandom rng = java.util.concurrent.ThreadLocalRandom.current();
+        int chunkLoadedCount = 0;
         for (int i = 0; i < 10; i++) {
-            final double angle = this.ambientRandom.nextDouble() * Math.PI * 2.0D;
-            final int radius = MOB_SPAWN_MIN_DISTANCE + this.ambientRandom.nextInt(MOB_SPAWN_MAX_DISTANCE - MOB_SPAWN_MIN_DISTANCE + 1);
+            final double angle = rng.nextDouble() * Math.PI * 2.0D;
+            final int radius = MOB_SPAWN_MIN_DISTANCE + rng.nextInt(MOB_SPAWN_MAX_DISTANCE - MOB_SPAWN_MIN_DISTANCE + 1);
             final int x = base.getBlockX() + (int) Math.round(Math.cos(angle) * radius);
             final int z = base.getBlockZ() + (int) Math.round(Math.sin(angle) * radius);
             final boolean chunkLoaded = world.isChunkLoaded(x >> 4, z >> 4);
-            if (!chunkLoaded) {
-                lines.add("§c  #" + (i + 1) + " (" + x + "," + z + ") r=" + radius + " → 區塊未載入");
-                continue;
-            }
-            final int y = world.getHighestBlockYAt(x, z, HeightMap.MOTION_BLOCKING_NO_LEAVES) + 1;
-            final boolean yValid = y > world.getMinHeight() + 1 && y <= world.getMaxHeight() - 2;
-            if (!yValid) {
-                lines.add("§c  #" + (i + 1) + " (" + x + "," + y + "," + z + ") r=" + radius + " → Y值無效 (min=" + world.getMinHeight() + ", max=" + world.getMaxHeight() + ", heightMap=" + (y - 1) + ")");
-                continue;
-            }
-            final Block feet = world.getBlockAt(x, y, z);
-            final Block below = world.getBlockAt(x, y - 1, z);
-            final Block head = feet.getRelative(BlockFace.UP);
-            final boolean solidBelow = below.isSolid();
-            final boolean passableFeet = feet.isPassable();
-            final boolean passableHead = head.isPassable();
-            if (solidBelow && passableFeet && passableHead) {
-                lines.add("§a  #" + (i + 1) + " (" + x + "," + y + "," + z + ") r=" + radius + " → §a✔ 有效 (下=" + below.getType() + " 腳=" + feet.getType() + " 頭=" + head.getType() + ")");
-                foundCount++;
+            if (chunkLoaded) {
+                chunkLoadedCount++;
+                lines.add("§a  #" + (i + 1) + " (" + x + "," + z + ") r=" + radius + " → 區塊已載入 ✔");
             } else {
-                lines.add("§c  #" + (i + 1) + " (" + x + "," + y + "," + z + ") r=" + radius + " → ✘ solid=" + solidBelow + " pass=" + passableFeet + "/" + passableHead + " (下=" + below.getType() + " 腳=" + feet.getType() + " 頭=" + head.getType() + ")");
+                lines.add("§c  #" + (i + 1) + " (" + x + "," + z + ") r=" + radius + " → 區塊未載入 ✘");
             }
         }
-        lines.add("§7找到有效位置: §f" + foundCount + "/10");
+        lines.add("§7區塊已載入: §f" + chunkLoadedCount + "/10");
         lines.add("");
 
-        // 測試直接生成
-        lines.add("§e── 直接生怪測試 ──");
-        final Location testLoc = this.findPlanetSpawnLocation(player);
-        if (testLoc == null) {
-            lines.add("§c  findPlanetSpawnLocation 回傳 null — 無可用位置！");
-        } else {
-            lines.add("§7  找到位置: §f" + testLoc.getBlockX() + ", " + testLoc.getBlockY() + ", " + testLoc.getBlockZ());
-            final org.bukkit.entity.EntityType mobType = this.planetMobTypeFor(definition);
-            lines.add("§7  怪物類型: §f" + mobType);
-            try {
-                final Entity spawned = world.spawnEntity(testLoc, mobType);
-                if (spawned instanceof LivingEntity living) {
-                    living.setRemoveWhenFarAway(true);
-                    if (living instanceof Monster && this.isUndead(mobType)) {
-                        living.addPotionEffect(new PotionEffect(PotionEffectType.FIRE_RESISTANCE, 20 * 60 * 10, 0, true, false, false));
-                    }
-                    this.tryEmpowerPlanetMob(living);
-                    lines.add("§a  ✔ 生成成功！ " + spawned.getType() + " at " + testLoc.getBlockX() + "," + testLoc.getBlockY() + "," + testLoc.getBlockZ());
-                    lines.add("§7  entityId=" + spawned.getEntityId() + " uuid=" + spawned.getUniqueId().toString().substring(0, 8));
-                } else {
-                    lines.add("§e  生成了非 LivingEntity: " + spawned.getType());
-                }
-            } catch (final Exception ex) {
-                lines.add("§c  ✘ 生成失敗: " + ex.getClass().getSimpleName() + " — " + ex.getMessage());
+        // 測試直接在玩家腳下位置生成（同 region，一定安全）
+        lines.add("§e── 直接生怪測試（玩家附近） ──");
+        final org.bukkit.entity.EntityType mobType = this.planetMobTypeFor(definition);
+        lines.add("§7  怪物類型: §f" + mobType);
+        // 在玩家面前 3 格生成
+        final Location testLoc = base.clone().add(base.getDirection().normalize().multiply(3));
+        testLoc.setY(base.getBlockY());
+        try {
+            final Entity spawned = world.spawnEntity(testLoc, mobType);
+            if (spawned instanceof LivingEntity living) {
+                this.applyPlanetMobSpawn(spawned, testLoc, mobType, definition);
+                lines.add("§a  ✔ 生成成功！ " + spawned.getType() + " at " + testLoc.getBlockX() + "," + testLoc.getBlockY() + "," + testLoc.getBlockZ());
+                lines.add("§7  entityId=" + spawned.getEntityId());
+            } else {
+                lines.add("§e  生成了非 LivingEntity: " + spawned.getType());
             }
+        } catch (final Exception ex) {
+            lines.add("§c  ✘ 生成失敗: " + ex.getClass().getSimpleName() + " — " + ex.getMessage());
         }
         return lines;
     }
@@ -2528,86 +2509,58 @@ public final class PlanetService {
             if (world == null) {
                 continue;
             }
-            for (final Player player : world.getPlayers()) {
-                if (player.getGameMode() == GameMode.CREATIVE || player.getGameMode() == GameMode.SPECTATOR) {
+            // 在 global thread 安全讀取玩家列表快照
+            final List<Player> players = new ArrayList<>(world.getPlayers());
+            // 簡易 mob cap：世界中每位玩家最多 PLANET_MOB_CAP_PER_PLAYER 隻怪
+            final long worldMonsterCount = world.getEntityCount(org.bukkit.entity.SpawnCategory.MONSTER);
+            final int maxForWorld = players.size() * PLANET_MOB_CAP_PER_PLAYER;
+            if (worldMonsterCount >= maxForWorld) {
+                continue;
+            }
+            for (final Player player : players) {
+                if (!player.isValid() || player.getGameMode() == GameMode.CREATIVE || player.getGameMode() == GameMode.SPECTATOR) {
                     continue;
                 }
-                this.scheduler.runEntity(player, () -> {
-                    if (!player.isValid() || player.getGameMode() == GameMode.CREATIVE || player.getGameMode() == GameMode.SPECTATOR) {
-                        return;
+                // ── 全部在 global thread 算好座標，再分發到目標 region ──
+                final Location base = player.getLocation();
+                final java.util.concurrent.ThreadLocalRandom rng = java.util.concurrent.ThreadLocalRandom.current();
+                final int attempts = 3 + rng.nextInt(3);
+                for (int i = 0; i < attempts; i++) {
+                    final double angle = rng.nextDouble() * Math.PI * 2.0D;
+                    final int radius = MOB_SPAWN_MIN_DISTANCE + rng.nextInt(MOB_SPAWN_MAX_DISTANCE - MOB_SPAWN_MIN_DISTANCE + 1);
+                    final int x = base.getBlockX() + (int) Math.round(Math.cos(angle) * radius);
+                    final int z = base.getBlockZ() + (int) Math.round(Math.sin(angle) * radius);
+                    if (!world.isChunkLoaded(x >> 4, z >> 4)) {
+                        continue;
                     }
-                    try {
-                        this.trySpawnPlanetMobNear(definition, player);
-                    } catch (final Exception ex) {
-                        this.plugin.getLogger().warning("[Planet] trySpawnPlanetMobNear 異常 ("
-                                + definition.id() + " / " + player.getName() + "): " + ex);
+                    final org.bukkit.entity.EntityType mobType = this.planetMobTypeFor(definition);
+                    if (mobType == null) {
+                        continue;
                     }
-                });
-            }
-        }
-    }
-
-    private void trySpawnPlanetMobNear(final PlanetDefinition definition, final Player player) {
-        // 計算玩家附近已存在的怪物數量
-        final int nearbyMonsters = (int) player.getNearbyEntities(MOB_SPAWN_MAX_DISTANCE, 32.0D, MOB_SPAWN_MAX_DISTANCE).stream()
-                .filter(e -> e instanceof Monster).count();
-        if (nearbyMonsters >= PLANET_MOB_CAP_PER_PLAYER) {
-            return;
-        }
-        // 每次 tick 嘗試生成 3~5 隻
-        final java.util.concurrent.ThreadLocalRandom rng = java.util.concurrent.ThreadLocalRandom.current();
-        final int attempts = 3 + rng.nextInt(3);
-        for (int i = 0; i < attempts; i++) {
-            final Location spawnLoc = this.findPlanetSpawnLocation(player);
-            if (spawnLoc == null) {
-                continue;
-            }
-            final org.bukkit.entity.EntityType mobType = this.planetMobTypeFor(definition);
-            if (mobType == null) {
-                continue;
-            }
-            // 在目標位置的 region 上生成（避免 Folia 跨 region 問題）
-            this.scheduler.runRegion(spawnLoc, task -> {
-                try {
-                    final Block feet = spawnLoc.getBlock();
-                    final Block below = feet.getRelative(BlockFace.DOWN);
-                    if (!below.isSolid() || !feet.isPassable() || !feet.getRelative(BlockFace.UP).isPassable()) {
-                        return;
-                    }
-                    final Entity spawned = spawnLoc.getWorld().spawnEntity(spawnLoc, mobType);
-                    this.applyPlanetMobSpawn(spawned, spawnLoc, mobType, definition);
-                } catch (final Exception ex) {
-                    this.plugin.getLogger().warning("[Planet] 怪物生成失敗 ("
-                            + definition.id() + " " + mobType + " @ " + spawnLoc.getBlockX()
-                            + "," + spawnLoc.getBlockY() + "," + spawnLoc.getBlockZ() + "): " + ex);
+                    // 用任意 Y 值建立 anchor，在目標 region thread 裡做方塊存取 + 生怪
+                    final Location regionAnchor = new Location(world, x + 0.5D, 64, z + 0.5D);
+                    this.scheduler.runRegion(regionAnchor, task -> {
+                        try {
+                            final int y = world.getHighestBlockYAt(x, z, HeightMap.MOTION_BLOCKING_NO_LEAVES) + 1;
+                            if (y <= world.getMinHeight() + 1 || y > world.getMaxHeight() - 2) {
+                                return;
+                            }
+                            final Block feet = world.getBlockAt(x, y, z);
+                            final Block below = world.getBlockAt(x, y - 1, z);
+                            if (!below.isSolid() || !feet.isPassable() || !feet.getRelative(BlockFace.UP).isPassable()) {
+                                return;
+                            }
+                            final Location spawnLoc = new Location(world, x + 0.5D, y, z + 0.5D);
+                            final Entity spawned = world.spawnEntity(spawnLoc, mobType);
+                            this.applyPlanetMobSpawn(spawned, spawnLoc, mobType, definition);
+                        } catch (final Exception ex) {
+                            this.plugin.getLogger().warning("[Planet] 怪物生成失敗 ("
+                                    + definition.id() + " " + mobType + " @ " + x + "," + z + "): " + ex);
+                        }
+                    });
                 }
-            });
-        }
-    }
-
-    private Location findPlanetSpawnLocation(final Player player) {
-        final World world = player.getWorld();
-        final Location base = player.getLocation();
-        final java.util.concurrent.ThreadLocalRandom rng = java.util.concurrent.ThreadLocalRandom.current();
-        for (int attempt = 0; attempt < 8; attempt++) {
-            final double angle = rng.nextDouble() * Math.PI * 2.0D;
-            final int radius = MOB_SPAWN_MIN_DISTANCE + rng.nextInt(MOB_SPAWN_MAX_DISTANCE - MOB_SPAWN_MIN_DISTANCE + 1);
-            final int x = base.getBlockX() + (int) Math.round(Math.cos(angle) * radius);
-            final int z = base.getBlockZ() + (int) Math.round(Math.sin(angle) * radius);
-            if (!world.isChunkLoaded(x >> 4, z >> 4)) {
-                continue;
-            }
-            final int y = world.getHighestBlockYAt(x, z, HeightMap.MOTION_BLOCKING_NO_LEAVES) + 1;
-            if (y <= world.getMinHeight() + 1 || y > world.getMaxHeight() - 2) {
-                continue;
-            }
-            final Block feet = world.getBlockAt(x, y, z);
-            final Block below = world.getBlockAt(x, y - 1, z);
-            if (below.isSolid() && feet.isPassable() && feet.getRelative(BlockFace.UP).isPassable()) {
-                return new Location(world, x + 0.5D, y, z + 0.5D);
             }
         }
-        return null;
     }
 
     /**
