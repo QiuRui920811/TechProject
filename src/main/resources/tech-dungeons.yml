@@ -1,0 +1,443 @@
+# ============================================================
+#  TechProject 副本系統設定檔  —  tech-dungeons.yml
+# ============================================================
+#
+#  每個頂層 key 就是一個副本的唯一 ID。
+#  模板世界放在 server/dungeon_templates/<template-world>/ 目錄下。
+#  系統會自動複製模板世界來建立實例，通關或超時後自動刪除。
+#
+#  腳本系統 (scripts) 支援以下觸發器 (trigger)：
+#    enter_region    — 玩家進入指定座標範圍
+#    kill_all        — 當前波次所有怪物被擊殺
+#    interact_block  — 右鍵點擊指定座標的方塊
+#    chat_password   — 玩家在頻道輸入指定密碼
+#    timer           — 副本開始後經過指定秒數
+#    boss_death      — 指定 Boss 被擊殺
+#    wave_clear      — 指定波次被清完
+#    player_death    — 有玩家死亡
+#    function_call   — 被其他腳本的 function 動作呼叫
+#    variable_check  — 檢查變數條件
+#
+#  腳本動作 (actions) 支援：
+#    message        — 發送訊息給所有隊員
+#    title          — 顯示大標題 / 副標題
+#    actionbar      — 顯示動作列訊息
+#    sound          — 播放音效
+#    teleport       — 傳送所有隊員到指定座標
+#    spawn_mob      — 在指定位置生怪
+#    set_block      — 設定方塊（開門等）
+#    give_item      — 給予物品
+#    run_command     — 以控制台執行指令
+#    start_wave     — 開始指定波次
+#    spawn_boss     — 生成 Boss
+#    complete_dungeon — 強制通關
+#    fail_dungeon   — 強制失敗
+#    set_variable   — 設定副本變數
+#    check_variable — 檢查變數（不符合則中斷後續動作）
+#    particle       — 播放粒子效果
+#    explosion      — 製造爆炸
+#    function       — 呼叫其他腳本
+#    wait           — 等待指定 tick 數後繼續
+# ============================================================
+
+lost_factory:
+  display-name: "§c失控工廠"
+  description: "深入失控的自動化工廠，清除所有暴走機器人"
+  category: "科技"
+  tech-themed: true
+  template-world: "dungeon_lost_factory"
+  min-players: 1
+  max-players: 4
+  time-limit: 600
+  cooldown: 1800
+  daily-limit: 3
+  required-permission: null
+  spawn-point: [0.5, 65.0, 0.5, 0.0, 0.0]
+  exit-point: null
+
+  waves:
+    - wave: 0
+      spawn-delay: 5
+      message: "§c§l第一波 §7— 偵察無人機"
+      require-clear: true
+      mobs:
+        - entity-type: VEX
+          count: 6
+          level: 1
+          spawn-offset: [5.0, 1.0, 0.0]
+          custom-name: "§7偵察無人機"
+        - entity-type: VEX
+          count: 4
+          level: 1
+          spawn-offset: [-5.0, 1.0, 0.0]
+
+    - wave: 1
+      spawn-delay: 8
+      message: "§c§l第二波 §7— 守衛機器人"
+      require-clear: true
+      mobs:
+        - entity-type: IRON_GOLEM
+          count: 3
+          level: 2
+          spawn-offset: [0.0, 1.0, 8.0]
+          custom-name: "§6守衛機器人"
+        - entity-type: SKELETON
+          count: 8
+          level: 1
+          spawn-offset: [4.0, 1.0, 4.0]
+          custom-name: "§7弓箭哨兵"
+
+    - wave: 2
+      spawn-delay: 10
+      message: "§c§l最終波 §7— 核心防禦"
+      require-clear: true
+      mobs:
+        - entity-type: WARDEN
+          count: 1
+          level: 3
+          spawn-offset: [0.0, 1.0, 15.0]
+          custom-name: "§4核心守衛"
+        - entity-type: IRON_GOLEM
+          count: 4
+          level: 2
+          spawn-offset: [3.0, 1.0, 12.0]
+        - entity-type: BLAZE
+          count: 6
+          level: 2
+          spawn-offset: [-3.0, 2.0, 10.0]
+          custom-name: "§c火焰砲塔"
+
+  bosses:
+    - id: "factory_overlord"
+      display-name: "§4§l失控核心 OverL0RD"
+      entity-type: WITHER_SKELETON
+      health: 500.0
+      damage: 12.0
+      spawn-point: [0.0, 66.0, 25.0]
+      after-wave: 2
+      boss-bar: true
+      skills:
+        - id: "emp_pulse"
+          type: "aoe_damage"
+          cooldown: 200
+          radius: 8.0
+          damage: 6.0
+          message: "§c§l[OverL0RD] §7EMP 脈衝啟動！"
+          params:
+            particle: ELECTRIC_SPARK
+            particle-count: 50
+        - id: "summon_drones"
+          type: "summon"
+          cooldown: 300
+          radius: 0
+          damage: 0
+          message: "§c§l[OverL0RD] §7啟動後備無人機！"
+          params:
+            mob-type: VEX
+            mob-count: 4
+            mob-name: "§7增援無人機"
+        - id: "laser_beam"
+          type: "line_damage"
+          cooldown: 100
+          radius: 2.0
+          damage: 15.0
+          message: "§c§l[OverL0RD] §7雷射鎖定！"
+          params:
+            range: 20
+            particle: END_ROD
+      phases:
+        - health-threshold: 0.6
+          message: "§c§l[OverL0RD] §7切換至攻擊模式！"
+          damage-multiplier: 1.5
+          speed-multiplier: 1.2
+        - health-threshold: 0.3
+          message: "§4§l[OverL0RD] §c系統過載！全火力輸出！"
+          damage-multiplier: 2.0
+          speed-multiplier: 1.5
+          reinforcements:
+            - entity-type: BLAZE
+              count: 4
+              level: 3
+              spawn-offset: [0.0, 2.0, 0.0]
+              custom-name: "§c過載砲塔"
+          activate-skills: ["emp_pulse"]
+      loot-table:
+        - "advanced_circuit"
+        - "quantum_chip"
+        - "fusion_core"
+
+  rewards:
+    - type: tech_material
+      value: "advanced_circuit"
+      amount: 3
+      chance: 1.0
+      first-clear-only: false
+    - type: tech_material
+      value: "quantum_chip"
+      amount: 1
+      chance: 0.3
+      first-clear-only: false
+    - type: tech_blueprint
+      value: "fusion_reactor"
+      amount: 1
+      chance: 0.1
+      first-clear-only: true
+    - type: command
+      value: "give {player} diamond 5"
+      amount: 1
+      chance: 1.0
+      first-clear-only: false
+    - type: exp
+      value: "500"
+      amount: 1
+      chance: 1.0
+
+  scripts:
+    # 進入副本後的歡迎腳本
+    - id: "welcome"
+      trigger: "timer"
+      one-shot: true
+      delay-ticks: 40
+      conditions:
+        - type: "state"
+          params:
+            state: "RUNNING"
+      actions:
+        - type: title
+          params:
+            title: "§c§l失控工廠"
+            subtitle: "§7清除所有暴走機器人"
+            fade-in: 10
+            stay: 60
+            fade-out: 20
+        - type: sound
+          params:
+            sound: "ENTITY_WITHER_SPAWN"
+            volume: 0.8
+            pitch: 0.5
+        - type: message
+          params:
+            text: "§7[系統] §f警告：工廠核心已失控，所有自動化單元進入攻擊模式。"
+        - type: start_wave
+          params:
+            wave: 0
+
+    # 密碼門機關
+    - id: "password_door"
+      trigger: "chat_password"
+      one-shot: true
+      delay-ticks: 0
+      conditions:
+        - type: "password"
+          params:
+            password: "OVERRIDE-7742"
+            case-sensitive: false
+      actions:
+        - type: message
+          params:
+            text: "§a[系統] §f存取碼正確，安全門已開啟。"
+        - type: sound
+          params:
+            sound: "BLOCK_IRON_DOOR_OPEN"
+            volume: 1.0
+            pitch: 1.0
+        - type: set_block
+          params:
+            x: 10
+            y: 65
+            z: 15
+            material: AIR
+        - type: set_block
+          params:
+            x: 10
+            y: 66
+            z: 15
+            material: AIR
+        - type: set_variable
+          params:
+            key: "door_opened"
+            value: true
+
+    # 互動方塊觸發器 — 右鍵按鈕啟動 Boss
+    - id: "boss_button"
+      trigger: "interact_block"
+      one-shot: true
+      delay-ticks: 0
+      conditions:
+        - type: "block_location"
+          params:
+            x: 0
+            y: 66
+            z: 20
+        - type: "variable"
+          params:
+            key: "door_opened"
+            value: true
+      actions:
+        - type: message
+          params:
+            text: "§c[警報] §f核心防禦系統啟動中..."
+        - type: sound
+          params:
+            sound: "ENTITY_ENDER_DRAGON_GROWL"
+            volume: 1.0
+            pitch: 0.6
+        - type: spawn_boss
+          params:
+            boss-id: "factory_overlord"
+
+    # Boss 擊殺後完成副本
+    - id: "boss_killed"
+      trigger: "boss_death"
+      one-shot: true
+      delay-ticks: 60
+      conditions:
+        - type: "boss_id"
+          params:
+            id: "factory_overlord"
+      actions:
+        - type: title
+          params:
+            title: "§a§l通關！"
+            subtitle: "§7失控工廠已被淨化"
+            fade-in: 10
+            stay: 80
+            fade-out: 20
+        - type: message
+          params:
+            text: "§a[系統] §f工廠核心已關閉，所有自動化單元已停機。"
+        - type: sound
+          params:
+            sound: "UI_TOAST_CHALLENGE_COMPLETE"
+            volume: 1.0
+            pitch: 1.0
+        - type: complete_dungeon
+          params: {}
+
+    # 全滅判定
+    - id: "party_wipe"
+      trigger: "player_death"
+      one-shot: false
+      delay-ticks: 40
+      conditions:
+        - type: "all_dead"
+          params: {}
+      actions:
+        - type: title
+          params:
+            title: "§4§l全滅"
+            subtitle: "§7副本失敗"
+            fade-in: 10
+            stay: 60
+            fade-out: 20
+        - type: fail_dungeon
+          params: {}
+
+# ────────────────────────────────────────────────
+# 第二個範例副本
+# ────────────────────────────────────────────────
+ancient_ruins:
+  display-name: "§6遠古遺跡"
+  description: "探索星球上的遠古文明遺跡，解開封印的秘密"
+  category: "冒險"
+  tech-themed: false
+  template-world: "dungeon_ancient_ruins"
+  min-players: 1
+  max-players: 6
+  time-limit: 900
+  cooldown: 3600
+  daily-limit: 2
+  spawn-point: [0.5, 80.0, 0.5, 0.0, 0.0]
+
+  waves:
+    - wave: 0
+      spawn-delay: 3
+      message: "§6§l封印解除 §7— 守護者甦醒"
+      require-clear: true
+      mobs:
+        - entity-type: ZOMBIE
+          count: 12
+          level: 1
+          spawn-offset: [0.0, 1.0, 10.0]
+          custom-name: "§2遺跡屍兵"
+        - entity-type: SKELETON
+          count: 8
+          level: 1
+          spawn-offset: [8.0, 3.0, 8.0]
+          custom-name: "§f骨弓守衛"
+
+    - wave: 1
+      spawn-delay: 5
+      message: "§6§l第二封印 §7— 石像兵團"
+      require-clear: true
+      mobs:
+        - entity-type: HUSK
+          count: 10
+          level: 2
+          spawn-offset: [0.0, 1.0, 0.0]
+          custom-name: "§8石化屍兵"
+        - entity-type: EVOKER
+          count: 2
+          level: 2
+          spawn-offset: [5.0, 1.0, 5.0]
+          custom-name: "§5遺跡術士"
+
+  bosses:
+    - id: "ruins_guardian"
+      display-name: "§6§l遺跡守護者"
+      entity-type: ELDER_GUARDIAN
+      health: 800.0
+      damage: 15.0
+      spawn-point: [0.0, 75.0, 30.0]
+      after-wave: 1
+      boss-bar: true
+      skills:
+        - id: "ancient_blast"
+          type: "aoe_damage"
+          cooldown: 150
+          radius: 10.0
+          damage: 8.0
+          message: "§6§l[守護者] §7遠古之力爆發！"
+          params:
+            particle: SCULK_SOUL
+            particle-count: 40
+      phases:
+        - health-threshold: 0.5
+          message: "§6§l[守護者] §7你們休想通過！"
+          damage-multiplier: 1.8
+          speed-multiplier: 1.0
+      loot-table:
+        - "titanium_ingot"
+        - "ancient_core"
+
+  rewards:
+    - type: item
+      value: DIAMOND
+      amount: 10
+      chance: 1.0
+    - type: exp
+      value: "800"
+      amount: 1
+      chance: 1.0
+    - type: tech_material
+      value: "titanium_ingot"
+      amount: 2
+      chance: 0.5
+      first-clear-only: false
+
+  scripts:
+    - id: "ruins_welcome"
+      trigger: "timer"
+      one-shot: true
+      delay-ticks: 60
+      actions:
+        - type: title
+          params:
+            title: "§6§l遠古遺跡"
+            subtitle: "§7解開封印的秘密"
+            fade-in: 20
+            stay: 60
+            fade-out: 20
+        - type: start_wave
+          params:
+            wave: 0

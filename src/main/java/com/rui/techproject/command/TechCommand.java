@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 public final class TechCommand implements CommandExecutor, TabCompleter {
     private final TechProjectPlugin plugin;
@@ -442,6 +443,135 @@ public final class TechCommand implements CommandExecutor, TabCompleter {
             return true;
         }
 
+        if (args[0].equalsIgnoreCase("dungeon") || args[0].equalsIgnoreCase("dg")) {
+            if (!(sender instanceof Player player)) {
+                sender.sendMessage(Component.text("只有玩家可以使用副本系統。", NamedTextColor.RED));
+                return true;
+            }
+            final var dungeonService = this.plugin.getDungeonService();
+            if (dungeonService == null) {
+                player.sendMessage(Component.text("副本系統尚未載入。", NamedTextColor.RED));
+                return true;
+            }
+            if (args.length < 2) {
+                player.sendMessage(Component.text("=== 副本系統 ===", NamedTextColor.GOLD));
+                player.sendMessage(Component.text("/tech dungeon list - 瀏覽可用副本", NamedTextColor.YELLOW));
+                player.sendMessage(Component.text("/tech dungeon join <副本ID> - 進入副本", NamedTextColor.YELLOW));
+                player.sendMessage(Component.text("/tech dungeon leave - 離開副本", NamedTextColor.YELLOW));
+                player.sendMessage(Component.text("/tech dungeon party - 建立隊伍", NamedTextColor.YELLOW));
+                player.sendMessage(Component.text("/tech dungeon invite <玩家> - 邀請隊友", NamedTextColor.YELLOW));
+                player.sendMessage(Component.text("/tech dungeon accept - 接受邀請", NamedTextColor.YELLOW));
+                player.sendMessage(Component.text("/tech dungeon info <副本ID> - 副本資訊", NamedTextColor.YELLOW));
+                player.sendMessage(Component.text("/tech dungeon top <副本ID> - 排行榜", NamedTextColor.YELLOW));
+                return true;
+            }
+            final String sub = args[1].toLowerCase(Locale.ROOT);
+            switch (sub) {
+                case "list" -> {
+                    player.sendMessage(Component.text("=== 可用副本 ===", NamedTextColor.GOLD));
+                    for (final var def : dungeonService.definitions().values()) {
+                        final String status;
+                        final var pd = dungeonService.getPlayerData(player.getUniqueId());
+                        if (pd != null && pd.hasCleared(def.id())) {
+                            status = "§a✔ 已通關";
+                        } else {
+                            status = "§7未通關";
+                        }
+                        player.sendMessage(Component.text("§e" + def.id() + " §f- " + def.displayName() + " §7[" + def.minPlayers() + "-" + def.maxPlayers() + "人] " + status));
+                    }
+                }
+                case "join", "start" -> {
+                    if (args.length < 3) {
+                        player.sendMessage(Component.text("用法：/tech dungeon join <副本ID>", NamedTextColor.RED));
+                        return true;
+                    }
+                    dungeonService.startDungeon(player, args[2].toLowerCase(Locale.ROOT));
+                }
+                case "leave", "quit" -> dungeonService.leaveDungeon(player);
+                case "party", "create" -> dungeonService.createParty(player);
+                case "invite" -> {
+                    if (args.length < 3) {
+                        player.sendMessage(Component.text("用法：/tech dungeon invite <玩家>", NamedTextColor.RED));
+                        return true;
+                    }
+                    final Player target = Bukkit.getPlayerExact(args[2]);
+                    if (target == null) {
+                        player.sendMessage(Component.text("找不到玩家。", NamedTextColor.RED));
+                        return true;
+                    }
+                    dungeonService.inviteToParty(player, target);
+                }
+                case "accept" -> dungeonService.acceptInvite(player);
+                case "info" -> {
+                    if (args.length < 3) {
+                        player.sendMessage(Component.text("用法：/tech dungeon info <副本ID>", NamedTextColor.RED));
+                        return true;
+                    }
+                    final var def = dungeonService.definitions().get(args[2].toLowerCase(Locale.ROOT));
+                    if (def == null) {
+                        player.sendMessage(Component.text("找不到副本：" + args[2], NamedTextColor.RED));
+                        return true;
+                    }
+                    player.sendMessage(Component.text("=== " + def.displayName() + " ===", NamedTextColor.GOLD));
+                    player.sendMessage(Component.text("§7" + def.description()));
+                    player.sendMessage(Component.text("§f人數：§e" + def.minPlayers() + " ~ " + def.maxPlayers()));
+                    if (def.timeLimitSeconds() > 0) {
+                        player.sendMessage(Component.text("§f限時：§e" + def.timeLimitSeconds() / 60 + " 分鐘"));
+                    }
+                    player.sendMessage(Component.text("§f波次：§e" + def.waves().size() + " 波"));
+                    player.sendMessage(Component.text("§fBoss：§e" + def.bosses().size() + " 隻"));
+                    if (def.cooldownSeconds() > 0) {
+                        player.sendMessage(Component.text("§f冷卻：§e" + def.cooldownSeconds() / 60 + " 分鐘"));
+                    }
+                    if (def.dailyLimit() > 0) {
+                        player.sendMessage(Component.text("§f每日上限：§e" + def.dailyLimit() + " 次"));
+                    }
+                    player.sendMessage(Component.text("§f分類：§e" + def.category()));
+                }
+                case "top", "leaderboard", "rank" -> {
+                    if (args.length < 3) {
+                        player.sendMessage(Component.text("用法：/tech dungeon top <副本ID>", NamedTextColor.RED));
+                        return true;
+                    }
+                    final String dungeonId = args[2].toLowerCase(Locale.ROOT);
+                    final var lb = dungeonService.getLeaderboard(dungeonId);
+                    if (lb.isEmpty()) {
+                        player.sendMessage(Component.text("該副本尚無通關記錄。", NamedTextColor.YELLOW));
+                        return true;
+                    }
+                    player.sendMessage(Component.text("=== " + dungeonId + " 排行榜 ===", NamedTextColor.GOLD));
+                    for (int i = 0; i < lb.size(); i++) {
+                        final var entry = lb.get(i);
+                        player.sendMessage(Component.text("§e#" + (i + 1) + " §f" + entry.name() + " §7- §a" + entry.seconds() / 60 + ":" + String.format("%02d", entry.seconds() % 60)));
+                    }
+                }
+                case "reload" -> {
+                    if (!sender.hasPermission("techproject.admin")) {
+                        sender.sendMessage(Component.text("缺少權限。", NamedTextColor.RED));
+                        return true;
+                    }
+                    dungeonService.reload();
+                    sender.sendMessage(Component.text("副本設定已重新載入。", NamedTextColor.GREEN));
+                }
+                case "forceclose" -> {
+                    if (!sender.hasPermission("techproject.admin")) {
+                        sender.sendMessage(Component.text("缺少權限。", NamedTextColor.RED));
+                        return true;
+                    }
+                    final var active = dungeonService.activeInstances();
+                    if (active.isEmpty()) {
+                        sender.sendMessage(Component.text("沒有活躍的副本實例。", NamedTextColor.YELLOW));
+                        return true;
+                    }
+                    sender.sendMessage(Component.text("正在關閉 " + active.size() + " 個副本實例...", NamedTextColor.YELLOW));
+                    dungeonService.shutdown();
+                    sender.sendMessage(Component.text("所有副本已關閉。", NamedTextColor.GREEN));
+                }
+                default -> player.sendMessage(Component.text("未知副本子命令：" + sub, NamedTextColor.RED));
+            }
+            return true;
+        }
+
         sender.sendMessage(Component.text("未知子命令。", NamedTextColor.RED));
         return true;
     }
@@ -452,7 +582,7 @@ public final class TechCommand implements CommandExecutor, TabCompleter {
                                                 @NotNull final String alias,
                                                 @NotNull final String[] args) {
         if (args.length == 1) {
-            return List.of("book", "wrench", "research", "planet", "list", "stats", "xp", "achievements", "title", "search", "give", "trust", "untrust", "trustlist", "reload");
+            return List.of("book", "wrench", "research", "planet", "list", "stats", "xp", "achievements", "title", "search", "give", "trust", "untrust", "trustlist", "dungeon", "reload");
         }
         if (args.length == 2 && args[0].equalsIgnoreCase("wrench")) {
             return List.of("get");
@@ -506,6 +636,21 @@ public final class TechCommand implements CommandExecutor, TabCompleter {
                 names.add(player.getName());
             }
             return names;
+        }
+        if (args.length == 2 && (args[0].equalsIgnoreCase("dungeon") || args[0].equalsIgnoreCase("dg"))) {
+            return List.of("list", "join", "leave", "party", "invite", "accept", "info", "top", "reload", "forceclose");
+        }
+        if (args.length == 3 && (args[0].equalsIgnoreCase("dungeon") || args[0].equalsIgnoreCase("dg"))) {
+            final String sub = args[1].toLowerCase(Locale.ROOT);
+            if (sub.equals("join") || sub.equals("start") || sub.equals("info") || sub.equals("top")) {
+                final var ds = this.plugin.getDungeonService();
+                if (ds != null) {
+                    return new ArrayList<>(ds.definitions().keySet());
+                }
+            }
+            if (sub.equals("invite")) {
+                return Bukkit.getOnlinePlayers().stream().map(Player::getName).collect(Collectors.toList());
+            }
         }
         return List.of();
     }

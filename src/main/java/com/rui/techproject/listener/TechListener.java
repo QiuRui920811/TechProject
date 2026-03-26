@@ -155,6 +155,9 @@ public final class TechListener implements Listener {
         this.plugin.getCookingService().cancelSession(playerId);
         this.plugin.getAchievementGuiService().clearState(playerId);
         this.plugin.getPlanetService().cleanupPlayer(playerId);
+        if (this.plugin.getDungeonService() != null) {
+            this.plugin.getDungeonService().handlePlayerQuit(event.getPlayer());
+        }
         this.plugin.getPlayerProgressService().saveAndEvict(playerId);
     }
 
@@ -273,6 +276,24 @@ public final class TechListener implements Listener {
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onBookSearchChat(final AsyncChatEvent event) {
         final String plainText = PlainTextComponentSerializer.plainText().serialize(event.message());
+        // 副本聊天密碼攔截
+        if (this.plugin.getDungeonService() != null) {
+            final Player dp = event.getPlayer();
+            // DungeonService.handleChat 內部會判斷玩家是否在副本中
+            // 需切回主線程執行腳本
+            final boolean[] handled = {false};
+            // 由於 AsyncChatEvent 在異步線程，先同步檢查
+            if (this.plugin.getDungeonService().getPlayerInstanceId(dp.getUniqueId()) != null) {
+                this.plugin.getSafeScheduler().runEntity(dp, () -> {
+                    if (this.plugin.getDungeonService().handleChat(dp, plainText)) {
+                        // 密碼匹配，訊息已被消費
+                    }
+                });
+                // 不論密碼是否正確，在副本中的聊天訊息都不廣播
+                event.setCancelled(true);
+                return;
+            }
+        }
         // 物品搜尋：以 ? 開頭的訊息 → 打開鐵砧搜尋 GUI（或帶關鍵字直接開圖鑑結果）
         if (this.plugin.getItemSearchService().isSearchQuery(plainText)) {
             event.setCancelled(true);
@@ -301,6 +322,13 @@ public final class TechListener implements Listener {
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onPlayerDeathDungeon(final org.bukkit.event.entity.PlayerDeathEvent event) {
+        if (this.plugin.getDungeonService() != null) {
+            this.plugin.getDungeonService().handlePlayerDeath(event.getEntity());
+        }
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onPlanetMobSpawn(final CreatureSpawnEvent event) {
         if (event.getSpawnReason() != CreatureSpawnEvent.SpawnReason.NATURAL
                 && event.getSpawnReason() != CreatureSpawnEvent.SpawnReason.REINFORCEMENTS) {
@@ -315,6 +343,9 @@ public final class TechListener implements Listener {
     @EventHandler(priority = EventPriority.MONITOR)
     public void onPlanetMobDeath(final EntityDeathEvent event) {
         this.plugin.getPlanetService().handlePlanetEliteDeath(event.getEntity(), event.getEntity().getKiller(), event.getDrops());
+        if (this.plugin.getDungeonService() != null) {
+            this.plugin.getDungeonService().handleEntityDeath(event.getEntity());
+        }
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
@@ -375,6 +406,11 @@ public final class TechListener implements Listener {
         }
         if (event.getHand() == EquipmentSlot.OFF_HAND) {
             return;
+        }
+        // 副本方塊互動
+        if (event.getAction() == Action.RIGHT_CLICK_BLOCK && event.getClickedBlock() != null
+                && this.plugin.getDungeonService() != null) {
+            this.plugin.getDungeonService().handleInteract(event.getPlayer(), event.getClickedBlock());
         }
         ItemStack stack = event.getItem();
         if (stack == null && event.getHand() != null) {
