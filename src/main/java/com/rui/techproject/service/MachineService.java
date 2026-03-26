@@ -5904,11 +5904,20 @@ public final class MachineService {
                             continue;
                         }
                     } else if (currentMachine != null && this.isRelayMachine(currentMachine.machineId(), logisticsMode)) {
-                        if (inputDirection != null && !this.matchesDirection(currentMachine.inputDirection(), direction)) {
-                            continue;
+                        if (inputDirection != null) {
+                            /* 中繼方向為 ALL 時繼承來源機器的方向限制，避免物品亂傳 */
+                            final String effectiveIn = currentMachine.inputDirection().equalsIgnoreCase("ALL")
+                                    ? inputDirection : currentMachine.inputDirection();
+                            if (!this.matchesDirection(effectiveIn, direction)) {
+                                continue;
+                            }
                         }
-                        if (outputDirection != null && !this.matchesDirection(currentMachine.outputDirection(), direction)) {
-                            continue;
+                        if (outputDirection != null) {
+                            final String effectiveOut = currentMachine.outputDirection().equalsIgnoreCase("ALL")
+                                    ? outputDirection : currentMachine.outputDirection();
+                            if (!this.matchesDirection(effectiveOut, direction)) {
+                                continue;
+                            }
                         }
                     }
                     final LocationKey key = currentKey.offset(offset[0], offset[1], offset[2]);
