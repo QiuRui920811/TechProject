@@ -285,9 +285,15 @@ public final class PlanetService {
             }
         }
         this.scheduler.runGlobalTimer(task -> {
-            this.tickPlanetHazards();
-            this.tickPlanetAmbience();
-            this.tickPlanetMobSpawning();
+            try { this.tickPlanetHazards(); } catch (final Exception ex) {
+                this.plugin.getLogger().warning("[Planet] tickPlanetHazards 異常：" + ex);
+            }
+            try { this.tickPlanetAmbience(); } catch (final Exception ex) {
+                this.plugin.getLogger().warning("[Planet] tickPlanetAmbience 異常：" + ex);
+            }
+            try { this.tickPlanetMobSpawning(); } catch (final Exception ex) {
+                this.plugin.getLogger().warning("[Planet] tickPlanetMobSpawning 異常：" + ex);
+            }
         }, 40L, 40L);
         this.scheduler.runGlobalTimer(task -> this.tickPlanetEliteAuras(), ELITE_AURA_TICK_INTERVAL, ELITE_AURA_TICK_INTERVAL);
         this.scheduler.runGlobalTimer(task -> this.tickPlanetGravity(), 2L, 2L);
@@ -2525,7 +2531,12 @@ public final class PlanetService {
                     if (!player.isValid() || player.getGameMode() == GameMode.CREATIVE || player.getGameMode() == GameMode.SPECTATOR) {
                         return;
                     }
-                    this.trySpawnPlanetMobNear(definition, player);
+                    try {
+                        this.trySpawnPlanetMobNear(definition, player);
+                    } catch (final Exception ex) {
+                        this.plugin.getLogger().warning("[Planet] trySpawnPlanetMobNear 異常 ("
+                                + definition.id() + " / " + player.getName() + "): " + ex);
+                    }
                 });
             }
         }
@@ -2539,7 +2550,8 @@ public final class PlanetService {
             return;
         }
         // 每次 tick 嘗試生成 1~2 隻
-        final int attempts = 1 + this.ambientRandom.nextInt(2);
+        final java.util.concurrent.ThreadLocalRandom rng = java.util.concurrent.ThreadLocalRandom.current();
+        final int attempts = 1 + rng.nextInt(2);
         for (int i = 0; i < attempts; i++) {
             final Location spawnLoc = this.findPlanetSpawnLocation(player);
             if (spawnLoc == null) {
@@ -2549,39 +2561,32 @@ public final class PlanetService {
             if (mobType == null) {
                 continue;
             }
-            try {
-                // 直接在玩家 entity thread 上生成（24-48 格，通常在同一 Folia region）
-                final Block feet = spawnLoc.getBlock();
-                final Block below = feet.getRelative(BlockFace.DOWN);
-                if (!below.isSolid() || !feet.isPassable() || !feet.getRelative(BlockFace.UP).isPassable()) {
-                    continue;
-                }
-                final Entity spawned = spawnLoc.getWorld().spawnEntity(spawnLoc, mobType);
-                this.applyPlanetMobSpawn(spawned, spawnLoc, mobType, definition);
-            } catch (final Exception ex) {
-                // Folia region 不匹配時改用 runRegion 降級
-                this.scheduler.runRegion(spawnLoc, task -> {
-                    try {
-                        final Block feet = spawnLoc.getBlock();
-                        final Block below = feet.getRelative(BlockFace.DOWN);
-                        if (!below.isSolid() || !feet.isPassable() || !feet.getRelative(BlockFace.UP).isPassable()) {
-                            return;
-                        }
-                        final Entity spawned = spawnLoc.getWorld().spawnEntity(spawnLoc, mobType);
-                        this.applyPlanetMobSpawn(spawned, spawnLoc, mobType, definition);
-                    } catch (final Exception ignored) {
+            // 在目標位置的 region 上生成（避免 Folia 跨 region 問題）
+            this.scheduler.runRegion(spawnLoc, task -> {
+                try {
+                    final Block feet = spawnLoc.getBlock();
+                    final Block below = feet.getRelative(BlockFace.DOWN);
+                    if (!below.isSolid() || !feet.isPassable() || !feet.getRelative(BlockFace.UP).isPassable()) {
+                        return;
                     }
-                });
-            }
+                    final Entity spawned = spawnLoc.getWorld().spawnEntity(spawnLoc, mobType);
+                    this.applyPlanetMobSpawn(spawned, spawnLoc, mobType, definition);
+                } catch (final Exception ex) {
+                    this.plugin.getLogger().warning("[Planet] 怪物生成失敗 ("
+                            + definition.id() + " " + mobType + " @ " + spawnLoc.getBlockX()
+                            + "," + spawnLoc.getBlockY() + "," + spawnLoc.getBlockZ() + "): " + ex);
+                }
+            });
         }
     }
 
     private Location findPlanetSpawnLocation(final Player player) {
         final World world = player.getWorld();
         final Location base = player.getLocation();
+        final java.util.concurrent.ThreadLocalRandom rng = java.util.concurrent.ThreadLocalRandom.current();
         for (int attempt = 0; attempt < 5; attempt++) {
-            final double angle = this.ambientRandom.nextDouble() * Math.PI * 2.0D;
-            final int radius = MOB_SPAWN_MIN_DISTANCE + this.ambientRandom.nextInt(MOB_SPAWN_MAX_DISTANCE - MOB_SPAWN_MIN_DISTANCE + 1);
+            final double angle = rng.nextDouble() * Math.PI * 2.0D;
+            final int radius = MOB_SPAWN_MIN_DISTANCE + rng.nextInt(MOB_SPAWN_MAX_DISTANCE - MOB_SPAWN_MIN_DISTANCE + 1);
             final int x = base.getBlockX() + (int) Math.round(Math.cos(angle) * radius);
             final int z = base.getBlockZ() + (int) Math.round(Math.sin(angle) * radius);
             if (!world.isChunkLoaded(x >> 4, z >> 4)) {
@@ -2670,37 +2675,38 @@ public final class PlanetService {
     }
 
     private org.bukkit.entity.EntityType planetMobTypeFor(final PlanetDefinition definition) {
+        final java.util.concurrent.ThreadLocalRandom rng = java.util.concurrent.ThreadLocalRandom.current();
         return switch (definition.id()) {
             case "aurelia" -> {
-                final int roll = this.ambientRandom.nextInt(10);
+                final int roll = rng.nextInt(10);
                 yield roll < 4 ? org.bukkit.entity.EntityType.HUSK
                         : roll < 7 ? org.bukkit.entity.EntityType.SKELETON
                         : roll < 9 ? org.bukkit.entity.EntityType.SPIDER
                         : org.bukkit.entity.EntityType.CAVE_SPIDER;
             }
             case "cryon" -> {
-                final int roll = this.ambientRandom.nextInt(10);
+                final int roll = rng.nextInt(10);
                 yield roll < 4 ? org.bukkit.entity.EntityType.STRAY
                         : roll < 7 ? org.bukkit.entity.EntityType.SKELETON
                         : roll < 9 ? org.bukkit.entity.EntityType.ZOMBIE
                         : org.bukkit.entity.EntityType.SPIDER;
             }
             case "nyx" -> {
-                final int roll = this.ambientRandom.nextInt(10);
+                final int roll = rng.nextInt(10);
                 yield roll < 3 ? org.bukkit.entity.EntityType.ENDERMAN
                         : roll < 6 ? org.bukkit.entity.EntityType.PHANTOM
                         : roll < 8 ? org.bukkit.entity.EntityType.SKELETON
                         : org.bukkit.entity.EntityType.CREEPER;
             }
             case "helion" -> {
-                final int roll = this.ambientRandom.nextInt(10);
+                final int roll = rng.nextInt(10);
                 yield roll < 4 ? org.bukkit.entity.EntityType.BLAZE
                         : roll < 7 ? org.bukkit.entity.EntityType.WITHER_SKELETON
                         : roll < 9 ? org.bukkit.entity.EntityType.HUSK
                         : org.bukkit.entity.EntityType.MAGMA_CUBE;
             }
             case "tempest" -> {
-                final int roll = this.ambientRandom.nextInt(10);
+                final int roll = rng.nextInt(10);
                 yield roll < 4 ? org.bukkit.entity.EntityType.ZOMBIE
                         : roll < 7 ? org.bukkit.entity.EntityType.CREEPER
                         : roll < 9 ? org.bukkit.entity.EntityType.SKELETON
