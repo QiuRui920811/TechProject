@@ -843,7 +843,7 @@ public final class PlanetService {
                 if (nearby instanceof Player p && p.getGameMode() == GameMode.SURVIVAL) {
                     p.addPotionEffect(new PotionEffect(PotionEffectType.POISON, 80, 1, true, true, true));
                     p.addPotionEffect(new PotionEffect(PotionEffectType.WITHER, 60, 0, true, true, true));
-                    p.sendActionBar(this.itemFactory.error("⚠ 輻塵孢子噴發！"));
+                    p.sendActionBar(this.itemFactory.danger("⚠ 輻塵孢子噴發！"));
                 }
             }
         } else {
@@ -852,7 +852,7 @@ public final class PlanetService {
             victim.addPotionEffect(new PotionEffect(PotionEffectType.HUNGER, 120, 1, true, true, true));
             world.spawnParticle(Particle.ITEM_SLIME, victim.getLocation().add(0, 0.5, 0), 15, 0.3, 0.5, 0.3, 0.02);
             world.playSound(victim.getLocation(), Sound.ENTITY_SPIDER_AMBIENT, SoundCategory.HOSTILE, 1.0f, 0.5f);
-            victim.sendActionBar(this.itemFactory.error("⚠ 寄生注射—正在侵蝕身體！"));
+            victim.sendActionBar(this.itemFactory.danger("⚠ 寄生注射—正在侵蝕身體！"));
         }
         return true;
     }
@@ -872,7 +872,7 @@ public final class PlanetService {
                 if (nearby instanceof Player p && p.getGameMode() == GameMode.SURVIVAL) {
                     p.addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS, 100, 2, true, true, true));
                     p.setFreezeTicks(Math.min(p.getMaxFreezeTicks(), p.getFreezeTicks() + 120));
-                    p.sendActionBar(this.itemFactory.error("⚠ 極寒衝擊波—身體凍結中！"));
+                    p.sendActionBar(this.itemFactory.danger("⚠ 極寒衝擊波—身體凍結中！"));
                 }
             }
         } else if (roll == 1) {
@@ -882,7 +882,7 @@ public final class PlanetService {
             world.spawnParticle(Particle.SNOWFLAKE, victim.getLocation().add(0, 1, 0), 20, 0.3, 0.8, 0.3, 0.05);
             world.spawnParticle(Particle.CRIT, victim.getLocation().add(0, 1, 0), 10, 0.2, 0.5, 0.2, 0.1);
             world.playSound(victim.getLocation(), Sound.ENTITY_PLAYER_HURT_FREEZE, SoundCategory.HOSTILE, 1.0f, 0.8f);
-            victim.sendActionBar(this.itemFactory.error("⚠ 霜刺穿心！"));
+            victim.sendActionBar(this.itemFactory.danger("⚠ 霜刺穿心！"));
         } else {
             // 冰脊防衛 — 自身獲得抗性提升
             attacker.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE, 100, 1, true, false, true));
@@ -910,7 +910,7 @@ public final class PlanetService {
             }
             victim.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 50, 0, true, true, true));
             victim.addPotionEffect(new PotionEffect(PotionEffectType.DARKNESS, 60, 0, true, true, true));
-            victim.sendActionBar(this.itemFactory.error("⚠ 虛空閃現—視野被扭曲！"));
+            victim.sendActionBar(this.itemFactory.danger("⚠ 虛空閃現—視野被扭曲！"));
         } else if (roll == 1) {
             // 虛空牽引 — 將玩家拉向精英
             final Vector pull = attacker.getLocation().toVector().subtract(victim.getLocation().toVector()).normalize().multiply(1.2);
@@ -919,7 +919,7 @@ public final class PlanetService {
             world.spawnParticle(Particle.REVERSE_PORTAL, victim.getLocation().add(0, 1, 0), 20, 0.5, 0.8, 0.5, 0.1);
             world.playSound(victim.getLocation(), Sound.ENTITY_ENDERMAN_SCREAM, SoundCategory.HOSTILE, 0.8f, 0.4f);
             victim.addPotionEffect(new PotionEffect(PotionEffectType.WEAKNESS, 60, 0, true, true, true));
-            victim.sendActionBar(this.itemFactory.error("⚠ 虛空牽引—被拉入深淵！"));
+            victim.sendActionBar(this.itemFactory.danger("⚠ 虛空牽引—被拉入深淵！"));
         } else {
             // 相位迴避 — 給自身隱形 + 速度
             attacker.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY, 60, 0, true, false, true));
@@ -944,7 +944,7 @@ public final class PlanetService {
                 if (nearby instanceof Player p && p.getGameMode() == GameMode.SURVIVAL) {
                     p.setFireTicks(Math.max(p.getFireTicks(), 80));
                     p.damage(3.0, attacker);
-                    p.sendActionBar(this.itemFactory.error("⚠ 日冕爆發—高温灼傷！"));
+                    p.sendActionBar(this.itemFactory.danger("⚠ 日冕爆發—高温灼傷！"));
                 }
             }
         } else if (roll == 1) {
@@ -953,7 +953,7 @@ public final class PlanetService {
             world.spawnParticle(Particle.DUST, impact.clone().add(0, 0.2, 0), 20, 1.5, 0.1, 1.5, 0.0,
                     new Particle.DustOptions(Color.fromRGB(255, 80, 0), 2.0f));
             world.playSound(impact, Sound.ENTITY_FIREWORK_ROCKET_LAUNCH, SoundCategory.HOSTILE, 1.0f, 0.5f);
-            victim.sendActionBar(this.itemFactory.error("⚠ 注意腳下—隕石即將落下！"));
+            victim.sendActionBar(this.itemFactory.danger("⚠ 注意腳下—隕石即將落下！"));
             this.scheduler.runRegionDelayed(impact, task -> {
                 if (!impact.isWorldLoaded()) {
                     return;
@@ -991,7 +991,7 @@ public final class PlanetService {
             victim.damage(5.0, attacker);
             victim.addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS, 40, 1, true, true, true));
             world.spawnParticle(Particle.ELECTRIC_SPARK, strikeLoc.clone().add(0, 1, 0), 20, 0.5, 1.0, 0.5, 0.1);
-            victim.sendActionBar(this.itemFactory.error("⚠ 雷擊召喚—被雷電擊中！"));
+            victim.sendActionBar(this.itemFactory.danger("⚠ 雷擊召喚—被雷電擊中！"));
         } else if (roll == 1) {
             // 風暴衝擊波 — AoE 擊退
             world.spawnParticle(Particle.CLOUD, loc.clone().add(0, 1, 0), 40, 3.0, 1.0, 3.0, 0.1);
@@ -1003,7 +1003,7 @@ public final class PlanetService {
                     kb.setY(0.6);
                     p.setVelocity(kb);
                     p.addPotionEffect(new PotionEffect(PotionEffectType.WEAKNESS, 60, 0, true, true, true));
-                    p.sendActionBar(this.itemFactory.error("⚠ 風暴衝擊波—被擊飛！"));
+                    p.sendActionBar(this.itemFactory.danger("⚠ 風暴衝擊波—被擊飛！"));
                 }
             }
         } else {
@@ -1024,7 +1024,7 @@ public final class PlanetService {
                 target.damage(dmg, attacker);
                 target.addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS, 30, 0, true, true, true));
                 world.spawnParticle(Particle.ELECTRIC_SPARK, target.getLocation().add(0, 1, 0), 15, 0.3, 0.6, 0.3, 0.1);
-                target.sendActionBar(this.itemFactory.error("⚠ 鏈式閃電！"));
+                target.sendActionBar(this.itemFactory.danger("⚠ 鏈式閃電！"));
             }
             world.playSound(loc, Sound.ENTITY_LIGHTNING_BOLT_IMPACT, SoundCategory.HOSTILE, 1.0f, 1.2f);
         }
