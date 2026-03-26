@@ -1840,9 +1840,10 @@ items:
     category: INTERMEDIATE
     icon: COPPER_INGOT
     description: "銅與錫的合金，比純銅更堅韌耐用，機械零件的核心材料。"
-    unlock: "smeltery"
+    unlock: "furnace"
     use-cases:
-      - "銅粉 + 錫粉 → 合金熔煉爐 → 青銅錠"
+      - "銅粉 + 錫粉 → 熔爐 → 青銅錠（基礎）"
+      - "銅粉 + 錫粉 → 合金熔煉爐 → 青銅錠（更省電）"
       - "青銅齒輪、機械零件"
   solder_alloy:
     display-name: "焊錫合金"
@@ -3495,6 +3496,12 @@ recipes:
     output: "zinc_ingot"
     energy: 12
     guide: "鋅粉 → 熔爐 → 鋅錠"
+  furnace_bronze:
+    machine: "furnace"
+    inputs: ["copper_dust", "tin_dust"]
+    output: "bronze_ingot"
+    energy: 18
+    guide: "銅粉 + 錫粉 → 熔爐 → 青銅錠（基礎合金，可解鎖合金熔煉爐）"
   furnace_sifted_ore:
     machine: "furnace"
     inputs: ["sifted_ore"]
