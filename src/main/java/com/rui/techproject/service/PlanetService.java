@@ -2511,12 +2511,6 @@ public final class PlanetService {
             }
             // 在 global thread 安全讀取玩家列表快照
             final List<Player> players = new ArrayList<>(world.getPlayers());
-            // 簡易 mob cap：世界中每位玩家最多 PLANET_MOB_CAP_PER_PLAYER 隻怪
-            final long worldMonsterCount = world.getEntityCount(org.bukkit.entity.SpawnCategory.MONSTER);
-            final int maxForWorld = players.size() * PLANET_MOB_CAP_PER_PLAYER;
-            if (worldMonsterCount >= maxForWorld) {
-                continue;
-            }
             for (final Player player : players) {
                 if (!player.isValid() || player.getGameMode() == GameMode.CREATIVE || player.getGameMode() == GameMode.SPECTATOR) {
                     continue;
@@ -2541,6 +2535,13 @@ public final class PlanetService {
                     final Location regionAnchor = new Location(world, x + 0.5D, 64, z + 0.5D);
                     this.scheduler.runRegion(regionAnchor, task -> {
                         try {
+                            // region-safe mob cap：計算生成點附近的怪物數
+                            final Location capCenter = new Location(world, x + 0.5D, 64, z + 0.5D);
+                            final long nearby = world.getNearbyEntities(capCenter, MOB_SPAWN_MAX_DISTANCE, 64, MOB_SPAWN_MAX_DISTANCE)
+                                    .stream().filter(e -> e instanceof Monster).count();
+                            if (nearby >= PLANET_MOB_CAP_PER_PLAYER) {
+                                return;
+                            }
                             final int y = world.getHighestBlockYAt(x, z, HeightMap.MOTION_BLOCKING_NO_LEAVES) + 1;
                             if (y <= world.getMinHeight() + 1 || y > world.getMaxHeight() - 2) {
                                 return;
