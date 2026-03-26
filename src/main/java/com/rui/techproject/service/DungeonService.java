@@ -1273,11 +1273,13 @@ public final class DungeonService {
         for (final UUID uuid : instance.members()) {
             this.playerInstanceMap.remove(uuid);
         }
-        // 卸載並刪除世界
+        // 卸載並刪除世界（需在 Global Region 上執行）
         final World world = instance.instanceWorld();
         if (world != null) {
-            Bukkit.unloadWorld(world, false);
-            this.scheduler.runAsync(() -> this.deleteWorldFolder(new File(Bukkit.getWorldContainer(), instanceId)));
+            this.scheduler.runGlobal(task -> {
+                Bukkit.unloadWorld(world, false);
+                this.scheduler.runAsync(() -> this.deleteWorldFolder(new File(Bukkit.getWorldContainer(), instanceId)));
+            });
         }
     }
 
@@ -1842,47 +1844,70 @@ public final class DungeonService {
         }
 
         final String worldName = "dungeon_edit_" + dungeonId;
-        World world = Bukkit.getWorld(worldName);
+        final World existing = Bukkit.getWorld(worldName);
 
-        if (world == null) {
-            // 嘗試從模板複製
+        if (existing != null) {
+            // 世界已載入，直接進入
+            this.enterEditWorld(admin, existing, def, dungeonId);
+            return;
+        }
+
+        // 需要建立世界 — 先記錄返回位置（在指令執行緒上安全取得）
+        final Location returnLoc = admin.getLocation().clone();
+        admin.sendMessage(this.msg("§e正在準備編輯世界..."));
+
+        // 非同步複製模板
+        this.scheduler.runAsync(() -> {
             final File templateDir = new File(this.plugin.getDataFolder(),
                     TEMPLATE_DIR + File.separator + def.templateWorld());
             final File editDir = new File(Bukkit.getWorldContainer(), worldName);
             if (templateDir.exists() && templateDir.isDirectory()) {
                 try {
                     this.copyFolder(templateDir.toPath(), editDir.toPath());
-                    // 刪除 uid.dat / session.lock
                     final File uid = new File(editDir, "uid.dat");
                     if (uid.exists()) uid.delete();
                     final File session = new File(editDir, "session.lock");
                     if (session.exists()) session.delete();
                 } catch (final IOException e) {
-                    admin.sendMessage(this.msg("§c複製模板世界失敗：" + e.getMessage()));
+                    this.scheduler.runEntity(admin, () ->
+                            admin.sendMessage(this.msg("§c複製模板世界失敗：" + e.getMessage())));
                     return;
                 }
             }
-            // 載入世界
-            final WorldCreator creator = new WorldCreator(worldName);
-            creator.environment(World.Environment.NORMAL);
-            creator.generateStructures(false);
-            world = Bukkit.createWorld(creator);
-            if (world == null) {
-                admin.sendMessage(this.msg("§c載入編輯世界失敗！如果是新副本，模板世界目錄可能是空的。"));
-                admin.sendMessage(this.msg("§7請先將地圖檔案放入：§f" + templateDir.getAbsolutePath()));
-                return;
-            }
-            world.setAutoSave(true);
-            world.setDifficulty(Difficulty.PEACEFUL);
-            world.setGameRule(GameRule.DO_MOB_SPAWNING, false);
-            world.setGameRule(GameRule.MOB_GRIEFING, false);
-            world.setGameRule(GameRule.DO_DAYLIGHT_CYCLE, false);
-            world.setGameRule(GameRule.DO_WEATHER_CYCLE, false);
-            world.setTime(6000L);
-        }
+            // 切回 Global Region 建立世界（Folia 要求）
+            this.scheduler.runGlobal(task -> {
+                final WorldCreator creator = new WorldCreator(worldName);
+                creator.environment(World.Environment.NORMAL);
+                creator.generateStructures(false);
+                final World world = Bukkit.createWorld(creator);
+                if (world == null) {
+                    this.scheduler.runEntity(admin, () -> {
+                        admin.sendMessage(this.msg("§c載入編輯世界失敗！如果是新副本，模板世界目錄可能是空的。"));
+                        admin.sendMessage(this.msg("§7請先將地圖檔案放入：§f" + templateDir.getAbsolutePath()));
+                    });
+                    return;
+                }
+                world.setAutoSave(true);
+                world.setDifficulty(Difficulty.PEACEFUL);
+                world.setGameRule(GameRule.DO_MOB_SPAWNING, false);
+                world.setGameRule(GameRule.MOB_GRIEFING, false);
+                world.setGameRule(GameRule.DO_DAYLIGHT_CYCLE, false);
+                world.setGameRule(GameRule.DO_WEATHER_CYCLE, false);
+                world.setTime(6000L);
 
-        // 記錄返回位置 & 進入編輯
-        this.editReturnLocations.put(admin.getUniqueId(), admin.getLocation().clone());
+                // 切回玩家的 Entity Scheduler 做傳送
+                this.editReturnLocations.put(admin.getUniqueId(), returnLoc);
+                this.scheduler.runEntity(admin, () ->
+                        this.enterEditWorld(admin, world, def, dungeonId));
+            });
+        });
+    }
+
+    /** 在玩家的 Entity Scheduler 上完成進入編輯模式的最後步驟。 */
+    private void enterEditWorld(final Player admin, final World world,
+                                final DungeonDefinition def, final String dungeonId) {
+        // 如果是從已載入的世界進入，returnLoc 還沒記錄
+        this.editReturnLocations.putIfAbsent(admin.getUniqueId(), admin.getLocation().clone());
         this.editingSessions.put(admin.getUniqueId(), dungeonId);
 
         final double[] sp = def.spawnPoint();
@@ -2077,45 +2102,49 @@ public final class DungeonService {
         }
 
         final String worldName = "dungeon_edit_" + dungeonId;
-        final World editWorld = Bukkit.getWorld(worldName);
 
-        // 先把管理員傳回原位
+        // 先把管理員傳回原位 & 清理狀態（在 entity thread 上安全）
         this.teleportBackFromEdit(admin);
-
-        // 儲存 YAML 設定
-        this.saveDungeonDefinition(dungeonId, def);
-
-        // 儲存並卸載編輯世界，複製回模板目錄
-        if (editWorld != null) {
-            editWorld.save();
-            // 確保所有玩家離開
-            final World fallback = Bukkit.getWorlds().get(0);
-            for (final Player p : editWorld.getPlayers()) {
-                p.teleport(fallback.getSpawnLocation());
-            }
-            Bukkit.unloadWorld(editWorld, true);
-
-            // 複製回模板
-            final File editDir = new File(Bukkit.getWorldContainer(), worldName);
-            final File templateDir = new File(this.plugin.getDataFolder(),
-                    TEMPLATE_DIR + File.separator + def.templateWorld());
-            try {
-                // 先清空舊模板
-                if (templateDir.exists()) this.deleteWorldFolder(templateDir);
-                this.copyFolder(editDir.toPath(), templateDir.toPath());
-                // 清理編輯世界
-                this.deleteWorldFolder(editDir);
-            } catch (final IOException e) {
-                admin.sendMessage(this.msg("§c儲存模板失敗：" + e.getMessage()));
-                this.plugin.getLogger().log(Level.WARNING, "[副本] 儲存模板失敗", e);
-            }
-        }
-
         this.editingSessions.remove(admin.getUniqueId());
         this.editReturnLocations.remove(admin.getUniqueId());
         this.cleanupEditorState(admin.getUniqueId());
         admin.getInventory().clear();
-        admin.sendMessage(this.msg("§a副本 §e" + dungeonId + " §a已儲存！"));
+
+        // 儲存 YAML 設定
+        this.saveDungeonDefinition(dungeonId, def);
+        admin.sendMessage(this.msg("§e正在儲存副本世界..."));
+
+        // 在 Global Region 上卸載世界（Folia 要求）
+        this.scheduler.runGlobal(task -> {
+            final World editWorld = Bukkit.getWorld(worldName);
+            if (editWorld != null) {
+                editWorld.save();
+                final World fallback = Bukkit.getWorlds().get(0);
+                for (final Player p : editWorld.getPlayers()) {
+                    p.teleport(fallback.getSpawnLocation());
+                }
+                Bukkit.unloadWorld(editWorld, true);
+            }
+            // 非同步複製回模板 & 清理
+            this.scheduler.runAsync(() -> {
+                if (Bukkit.getWorld(worldName) == null) {
+                    final File editDir = new File(Bukkit.getWorldContainer(), worldName);
+                    final File templateDir = new File(this.plugin.getDataFolder(),
+                            TEMPLATE_DIR + File.separator + def.templateWorld());
+                    try {
+                        if (templateDir.exists()) this.deleteWorldFolder(templateDir);
+                        this.copyFolder(editDir.toPath(), templateDir.toPath());
+                        this.deleteWorldFolder(editDir);
+                    } catch (final IOException e) {
+                        this.plugin.getLogger().log(Level.WARNING, "[副本] 儲存模板失敗", e);
+                        this.scheduler.runEntity(admin, () ->
+                                admin.sendMessage(this.msg("§c儲存模板失敗：" + e.getMessage())));
+                    }
+                }
+                this.scheduler.runEntity(admin, () ->
+                        admin.sendMessage(this.msg("§a副本 §e" + dungeonId + " §a已儲存！")));
+            });
+        });
     }
 
     /** 放棄修改並退出編輯模式。 */
@@ -2127,26 +2156,28 @@ public final class DungeonService {
         }
 
         final String worldName = "dungeon_edit_" + dungeonId;
-        final World editWorld = Bukkit.getWorld(worldName);
 
-        // 傳回
+        // 傳回 & 清理狀態（entity thread）
         this.teleportBackFromEdit(admin);
-
-        // 卸載並刪除編輯世界（不儲存）
-        if (editWorld != null) {
-            final World fallback = Bukkit.getWorlds().get(0);
-            for (final Player p : editWorld.getPlayers()) {
-                p.teleport(fallback.getSpawnLocation());
-            }
-            Bukkit.unloadWorld(editWorld, false);
-            final File editDir = new File(Bukkit.getWorldContainer(), worldName);
-            this.deleteWorldFolder(editDir);
-        }
-
         this.editingSessions.remove(admin.getUniqueId());
         this.editReturnLocations.remove(admin.getUniqueId());
         this.cleanupEditorState(admin.getUniqueId());
         admin.getInventory().clear();
+
+        // 在 Global Region 上卸載世界（Folia 要求）
+        this.scheduler.runGlobal(task -> {
+            final World editWorld = Bukkit.getWorld(worldName);
+            if (editWorld != null) {
+                final World fallback = Bukkit.getWorlds().get(0);
+                for (final Player p : editWorld.getPlayers()) {
+                    p.teleport(fallback.getSpawnLocation());
+                }
+                Bukkit.unloadWorld(editWorld, false);
+                this.scheduler.runAsync(() ->
+                        this.deleteWorldFolder(new File(Bukkit.getWorldContainer(), worldName)));
+            }
+        });
+
         admin.sendMessage(this.msg("§e已取消編輯 §c" + dungeonId + " §e（修改未儲存）。"));
     }
 
