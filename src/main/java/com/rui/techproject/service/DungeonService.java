@@ -81,6 +81,12 @@ public final class DungeonService {
     private final AtomicInteger instanceCounter = new AtomicInteger(0);
     private final Map<String, List<LeaderboardEntry>> leaderboards = new ConcurrentHashMap<>();
 
+    // ── 編輯模式 ──
+    /** 玩家 UUID → 正在編輯的副本 ID */
+    private final Map<UUID, String> editingSessions = new ConcurrentHashMap<>();
+    /** 玩家 UUID → 進入編輯模式前的位置 */
+    private final Map<UUID, Location> editReturnLocations = new ConcurrentHashMap<>();
+
     public record LeaderboardEntry(UUID uuid, String name, int seconds) implements Comparable<LeaderboardEntry> {
         @Override public int compareTo(final LeaderboardEntry o) { return Integer.compare(this.seconds, o.seconds); }
     }
@@ -1759,6 +1765,452 @@ public final class DungeonService {
         final int minutes = totalSeconds / 60;
         final int seconds = totalSeconds % 60;
         return String.format("%d:%02d", minutes, seconds);
+    }
+
+    // ──────────────────────────────────────────────
+    //  管理員 — 編輯模式（類 MythicDungeons）
+    // ──────────────────────────────────────────────
+
+    /** 取得正在編輯的副本 ID，若不在編輯模式則 null。 */
+    public String getEditingDungeonId(final UUID uuid) {
+        return this.editingSessions.get(uuid);
+    }
+
+    /**
+     * 建立新副本定義（僅骨架），自動載入模板世界並進入編輯模式。
+     * 等同於 MythicDungeons 的 {@code /md create <name>}。
+     */
+    public void adminCreate(final Player admin, final String dungeonId) {
+        if (this.definitions.containsKey(dungeonId)) {
+            admin.sendMessage(this.msg("§c副本 '" + dungeonId + "' 已存在。使用 edit 進入編輯。"));
+            return;
+        }
+        // 建立模板目錄
+        final File templateDir = new File(this.plugin.getDataFolder(),
+                TEMPLATE_DIR + File.separator + "dungeon_" + dungeonId);
+        if (!templateDir.exists()) templateDir.mkdirs();
+
+        // 建立最小定義
+        final DungeonDefinition stub = new DungeonDefinition(
+                dungeonId,
+                "§e" + dungeonId,
+                "新副本 - 請使用 /tech dg edit " + dungeonId + " 編輯",
+                "dungeon_" + dungeonId,
+                1, 4, 0, 0, 0,
+                new double[]{0.5, 65, 0.5, 0, 0},
+                null,
+                List.of(), List.of(), List.of(), List.of(),
+                null, false, "冒險"
+        );
+        this.definitions.put(dungeonId, stub);
+        this.saveDungeonDefinition(dungeonId, stub);
+
+        admin.sendMessage(this.msg("§a已建立副本骨架：§e" + dungeonId));
+        admin.sendMessage(this.msg("§7模板目錄：§f" + templateDir.getAbsolutePath()));
+        admin.sendMessage(this.msg("§7使用 §e/tech dg edit " + dungeonId + " §7進入編輯模式。"));
+    }
+
+    /**
+     * 進入編輯模式 — 載入模板世界並傳送管理員進去。
+     * 等同於 MythicDungeons 的 {@code /md edit <name>}。
+     */
+    public void adminEdit(final Player admin, final String dungeonId) {
+        final DungeonDefinition def = this.definitions.get(dungeonId);
+        if (def == null) {
+            admin.sendMessage(this.msg("§c找不到副本：" + dungeonId + "。先用 create 建立。"));
+            return;
+        }
+        if (this.editingSessions.containsKey(admin.getUniqueId())) {
+            admin.sendMessage(this.msg("§c你已在編輯模式中（" + this.editingSessions.get(admin.getUniqueId()) + "）。先用 §e/tech dg save §c或 §e/tech dg cancel §c退出。"));
+            return;
+        }
+
+        final String worldName = "dungeon_edit_" + dungeonId;
+        World world = Bukkit.getWorld(worldName);
+
+        if (world == null) {
+            // 嘗試從模板複製
+            final File templateDir = new File(this.plugin.getDataFolder(),
+                    TEMPLATE_DIR + File.separator + def.templateWorld());
+            final File editDir = new File(Bukkit.getWorldContainer(), worldName);
+            if (templateDir.exists() && templateDir.isDirectory()) {
+                try {
+                    this.copyFolder(templateDir.toPath(), editDir.toPath());
+                    // 刪除 uid.dat / session.lock
+                    final File uid = new File(editDir, "uid.dat");
+                    if (uid.exists()) uid.delete();
+                    final File session = new File(editDir, "session.lock");
+                    if (session.exists()) session.delete();
+                } catch (final IOException e) {
+                    admin.sendMessage(this.msg("§c複製模板世界失敗：" + e.getMessage()));
+                    return;
+                }
+            }
+            // 載入世界
+            final WorldCreator creator = new WorldCreator(worldName);
+            creator.environment(World.Environment.NORMAL);
+            creator.generateStructures(false);
+            world = Bukkit.createWorld(creator);
+            if (world == null) {
+                admin.sendMessage(this.msg("§c載入編輯世界失敗！如果是新副本，模板世界目錄可能是空的。"));
+                admin.sendMessage(this.msg("§7請先將地圖檔案放入：§f" + templateDir.getAbsolutePath()));
+                return;
+            }
+            world.setAutoSave(true);
+            world.setDifficulty(Difficulty.PEACEFUL);
+            world.setGameRule(GameRule.DO_MOB_SPAWNING, false);
+            world.setGameRule(GameRule.MOB_GRIEFING, false);
+            world.setGameRule(GameRule.DO_DAYLIGHT_CYCLE, false);
+            world.setGameRule(GameRule.DO_WEATHER_CYCLE, false);
+            world.setTime(6000L);
+        }
+
+        // 記錄返回位置 & 進入編輯
+        this.editReturnLocations.put(admin.getUniqueId(), admin.getLocation().clone());
+        this.editingSessions.put(admin.getUniqueId(), dungeonId);
+
+        final double[] sp = def.spawnPoint();
+        final Location spawn = new Location(world, sp[0], sp[1], sp[2],
+                sp.length > 3 ? (float) sp[3] : 0f, sp.length > 4 ? (float) sp[4] : 0f);
+        admin.teleport(spawn);
+        admin.setGameMode(GameMode.CREATIVE);
+
+        admin.sendMessage(this.msg("§a已進入副本 §e" + dungeonId + " §a的編輯模式。"));
+        admin.sendMessage(this.msg("§7可用指令："));
+        admin.sendMessage(this.msg("§e  /tech dg setspawn §7- 設定玩家出生點"));
+        admin.sendMessage(this.msg("§e  /tech dg setexit §7- 設定離開傳送點（世界座標）"));
+        admin.sendMessage(this.msg("§e  /tech dg setlobby §7- 設定等候大廳位置"));
+        admin.sendMessage(this.msg("§e  /tech dg setname <名稱> §7- 設定顯示名稱"));
+        admin.sendMessage(this.msg("§e  /tech dg settime <秒> §7- 設定限時"));
+        admin.sendMessage(this.msg("§e  /tech dg setplayers <最少> <最多> §7- 設定人數"));
+        admin.sendMessage(this.msg("§e  /tech dg save §7- 儲存並退出編輯模式"));
+        admin.sendMessage(this.msg("§e  /tech dg cancel §7- 放棄修改並退出"));
+    }
+
+    /** 設定出生點為管理員目前站立的位置。 */
+    public void adminSetSpawn(final Player admin) {
+        final String dungeonId = this.editingSessions.get(admin.getUniqueId());
+        if (dungeonId == null) {
+            admin.sendMessage(this.msg("§c你不在編輯模式中。"));
+            return;
+        }
+        final Location loc = admin.getLocation();
+        final double[] sp = {loc.getX(), loc.getY(), loc.getZ(), loc.getYaw(), loc.getPitch()};
+        this.replaceDungeonField(dungeonId, def -> new DungeonDefinition(
+                def.id(), def.displayName(), def.description(), def.templateWorld(),
+                def.minPlayers(), def.maxPlayers(), def.timeLimitSeconds(), def.cooldownSeconds(), def.dailyLimit(),
+                sp, def.exitPoint(), def.waves(), def.bosses(), def.rewards(), def.scripts(),
+                def.requiredPermission(), def.techThemed(), def.category()
+        ));
+        admin.sendMessage(this.msg("§a出生點已設定為 §e" + formatLoc(loc)));
+    }
+
+    /** 設定離開副本後傳送的世界座標。需要離開編輯世界設定。此指令記錄管理員當前位置。 */
+    public void adminSetExit(final Player admin) {
+        final String dungeonId = this.editingSessions.get(admin.getUniqueId());
+        if (dungeonId == null) {
+            admin.sendMessage(this.msg("§c你不在編輯模式中。"));
+            return;
+        }
+        final Location loc = admin.getLocation();
+        final double[] ep = {loc.getX(), loc.getY(), loc.getZ(), loc.getYaw(), loc.getPitch()};
+        this.replaceDungeonField(dungeonId, def -> new DungeonDefinition(
+                def.id(), def.displayName(), def.description(), def.templateWorld(),
+                def.minPlayers(), def.maxPlayers(), def.timeLimitSeconds(), def.cooldownSeconds(), def.dailyLimit(),
+                def.spawnPoint(), ep, def.waves(), def.bosses(), def.rewards(), def.scripts(),
+                def.requiredPermission(), def.techThemed(), def.category()
+        ));
+        admin.sendMessage(this.msg("§a離開傳送點已設定為 §e" + formatLoc(loc)));
+    }
+
+    /** 設定等待大廳位置（在編輯世界中的相對座標）。 */
+    public void adminSetLobby(final Player admin) {
+        final String dungeonId = this.editingSessions.get(admin.getUniqueId());
+        if (dungeonId == null) {
+            admin.sendMessage(this.msg("§c你不在編輯模式中。"));
+            return;
+        }
+        final Location loc = admin.getLocation();
+        // lobby 暫存在 variables 裡，save 時寫入 YAML
+        final double[] lobby = {loc.getX(), loc.getY(), loc.getZ(), loc.getYaw(), loc.getPitch()};
+        this.replaceDungeonField(dungeonId, def -> new DungeonDefinition(
+                def.id(), def.displayName(), def.description(), def.templateWorld(),
+                def.minPlayers(), def.maxPlayers(), def.timeLimitSeconds(), def.cooldownSeconds(), def.dailyLimit(),
+                lobby, def.exitPoint(), def.waves(), def.bosses(), def.rewards(), def.scripts(),
+                def.requiredPermission(), def.techThemed(), def.category()
+        ));
+        admin.sendMessage(this.msg("§a大廳 / 出生點已設定為 §e" + formatLoc(loc)));
+    }
+
+    /** 設定副本顯示名稱。 */
+    public void adminSetName(final Player admin, final String displayName) {
+        final String dungeonId = this.editingSessions.get(admin.getUniqueId());
+        if (dungeonId == null) {
+            admin.sendMessage(this.msg("§c你不在編輯模式中。"));
+            return;
+        }
+        this.replaceDungeonField(dungeonId, def -> new DungeonDefinition(
+                def.id(), displayName, def.description(), def.templateWorld(),
+                def.minPlayers(), def.maxPlayers(), def.timeLimitSeconds(), def.cooldownSeconds(), def.dailyLimit(),
+                def.spawnPoint(), def.exitPoint(), def.waves(), def.bosses(), def.rewards(), def.scripts(),
+                def.requiredPermission(), def.techThemed(), def.category()
+        ));
+        admin.sendMessage(this.msg("§a顯示名稱已設定為 §e" + displayName));
+    }
+
+    /** 設定限時。 */
+    public void adminSetTime(final Player admin, final int seconds) {
+        final String dungeonId = this.editingSessions.get(admin.getUniqueId());
+        if (dungeonId == null) {
+            admin.sendMessage(this.msg("§c你不在編輯模式中。"));
+            return;
+        }
+        this.replaceDungeonField(dungeonId, def -> new DungeonDefinition(
+                def.id(), def.displayName(), def.description(), def.templateWorld(),
+                def.minPlayers(), def.maxPlayers(), seconds, def.cooldownSeconds(), def.dailyLimit(),
+                def.spawnPoint(), def.exitPoint(), def.waves(), def.bosses(), def.rewards(), def.scripts(),
+                def.requiredPermission(), def.techThemed(), def.category()
+        ));
+        admin.sendMessage(this.msg("§a限時已設定為 §e" + seconds + " 秒 (" + seconds / 60 + " 分鐘)"));
+    }
+
+    /** 設定人數限制。 */
+    public void adminSetPlayers(final Player admin, final int min, final int max) {
+        final String dungeonId = this.editingSessions.get(admin.getUniqueId());
+        if (dungeonId == null) {
+            admin.sendMessage(this.msg("§c你不在編輯模式中。"));
+            return;
+        }
+        this.replaceDungeonField(dungeonId, def -> new DungeonDefinition(
+                def.id(), def.displayName(), def.description(), def.templateWorld(),
+                min, max, def.timeLimitSeconds(), def.cooldownSeconds(), def.dailyLimit(),
+                def.spawnPoint(), def.exitPoint(), def.waves(), def.bosses(), def.rewards(), def.scripts(),
+                def.requiredPermission(), def.techThemed(), def.category()
+        ));
+        admin.sendMessage(this.msg("§a人數已設定為 §e" + min + " ~ " + max));
+    }
+
+    /** 設定冷卻時間。 */
+    public void adminSetCooldown(final Player admin, final int seconds) {
+        final String dungeonId = this.editingSessions.get(admin.getUniqueId());
+        if (dungeonId == null) {
+            admin.sendMessage(this.msg("§c你不在編輯模式中。"));
+            return;
+        }
+        this.replaceDungeonField(dungeonId, def -> new DungeonDefinition(
+                def.id(), def.displayName(), def.description(), def.templateWorld(),
+                def.minPlayers(), def.maxPlayers(), def.timeLimitSeconds(), seconds, def.dailyLimit(),
+                def.spawnPoint(), def.exitPoint(), def.waves(), def.bosses(), def.rewards(), def.scripts(),
+                def.requiredPermission(), def.techThemed(), def.category()
+        ));
+        admin.sendMessage(this.msg("§a冷卻時間已設定為 §e" + seconds + " 秒"));
+    }
+
+    /**
+     * 儲存編輯世界回模板目錄、寫入 YAML 設定、卸載編輯世界、傳送管理員回去。
+     * 等同於 MythicDungeons 的 {@code /md save}。
+     */
+    public void adminSave(final Player admin) {
+        final String dungeonId = this.editingSessions.get(admin.getUniqueId());
+        if (dungeonId == null) {
+            admin.sendMessage(this.msg("§c你不在編輯模式中。"));
+            return;
+        }
+        final DungeonDefinition def = this.definitions.get(dungeonId);
+        if (def == null) {
+            admin.sendMessage(this.msg("§c定義遺失！"));
+            return;
+        }
+
+        final String worldName = "dungeon_edit_" + dungeonId;
+        final World editWorld = Bukkit.getWorld(worldName);
+
+        // 先把管理員傳回原位
+        this.teleportBackFromEdit(admin);
+
+        // 儲存 YAML 設定
+        this.saveDungeonDefinition(dungeonId, def);
+
+        // 儲存並卸載編輯世界，複製回模板目錄
+        if (editWorld != null) {
+            editWorld.save();
+            // 確保所有玩家離開
+            final World fallback = Bukkit.getWorlds().get(0);
+            for (final Player p : editWorld.getPlayers()) {
+                p.teleport(fallback.getSpawnLocation());
+            }
+            Bukkit.unloadWorld(editWorld, true);
+
+            // 複製回模板
+            final File editDir = new File(Bukkit.getWorldContainer(), worldName);
+            final File templateDir = new File(this.plugin.getDataFolder(),
+                    TEMPLATE_DIR + File.separator + def.templateWorld());
+            try {
+                // 先清空舊模板
+                if (templateDir.exists()) this.deleteWorldFolder(templateDir);
+                this.copyFolder(editDir.toPath(), templateDir.toPath());
+                // 清理編輯世界
+                this.deleteWorldFolder(editDir);
+            } catch (final IOException e) {
+                admin.sendMessage(this.msg("§c儲存模板失敗：" + e.getMessage()));
+                this.plugin.getLogger().log(Level.WARNING, "[副本] 儲存模板失敗", e);
+            }
+        }
+
+        this.editingSessions.remove(admin.getUniqueId());
+        this.editReturnLocations.remove(admin.getUniqueId());
+        admin.sendMessage(this.msg("§a副本 §e" + dungeonId + " §a已儲存！"));
+    }
+
+    /** 放棄修改並退出編輯模式。 */
+    public void adminCancel(final Player admin) {
+        final String dungeonId = this.editingSessions.get(admin.getUniqueId());
+        if (dungeonId == null) {
+            admin.sendMessage(this.msg("§c你不在編輯模式中。"));
+            return;
+        }
+
+        final String worldName = "dungeon_edit_" + dungeonId;
+        final World editWorld = Bukkit.getWorld(worldName);
+
+        // 傳回
+        this.teleportBackFromEdit(admin);
+
+        // 卸載並刪除編輯世界（不儲存）
+        if (editWorld != null) {
+            final World fallback = Bukkit.getWorlds().get(0);
+            for (final Player p : editWorld.getPlayers()) {
+                p.teleport(fallback.getSpawnLocation());
+            }
+            Bukkit.unloadWorld(editWorld, false);
+            final File editDir = new File(Bukkit.getWorldContainer(), worldName);
+            this.deleteWorldFolder(editDir);
+        }
+
+        this.editingSessions.remove(admin.getUniqueId());
+        this.editReturnLocations.remove(admin.getUniqueId());
+        admin.sendMessage(this.msg("§e已取消編輯 §c" + dungeonId + " §e（修改未儲存）。"));
+    }
+
+    /** 刪除副本定義（含模板目錄）。 */
+    public void adminDelete(final Player admin, final String dungeonId) {
+        final DungeonDefinition def = this.definitions.remove(dungeonId);
+        if (def == null) {
+            admin.sendMessage(this.msg("§c找不到副本：" + dungeonId));
+            return;
+        }
+        // 刪除 YAML 條目
+        final File file = new File(this.plugin.getDataFolder(), "tech-dungeons.yml");
+        if (file.isFile()) {
+            final YamlConfiguration yaml = YamlConfiguration.loadConfiguration(file);
+            yaml.set(dungeonId, null);
+            try { yaml.save(file); } catch (final IOException ignored) {}
+        }
+        // 刪除模板
+        final File templateDir = new File(this.plugin.getDataFolder(),
+                TEMPLATE_DIR + File.separator + def.templateWorld());
+        if (templateDir.exists()) this.deleteWorldFolder(templateDir);
+
+        admin.sendMessage(this.msg("§a副本 §e" + dungeonId + " §a已刪除。"));
+    }
+
+    /** 列出所有已定義的副本（管理員視角，顯示更多資訊）。 */
+    public void adminList(final Player admin) {
+        admin.sendMessage(this.msg("§6=== 副本管理列表 ==="));
+        if (this.definitions.isEmpty()) {
+            admin.sendMessage(this.msg("§7（無副本定義）"));
+            return;
+        }
+        for (final DungeonDefinition def : this.definitions.values()) {
+            final boolean hasTemplate = new File(this.plugin.getDataFolder(),
+                    TEMPLATE_DIR + File.separator + def.templateWorld()).isDirectory();
+            final String templateIcon = hasTemplate ? "§a✔" : "§c✖";
+            admin.sendMessage(this.msg("§e" + def.id() + " §7- " + def.displayName()
+                    + " §7[" + def.minPlayers() + "-" + def.maxPlayers() + "人]"
+                    + " §7模板:" + templateIcon
+                    + " §7波次:" + def.waves().size()
+                    + " §7Boss:" + def.bosses().size()));
+        }
+    }
+
+    // ── 編輯輔助 ──
+
+    private void teleportBackFromEdit(final Player admin) {
+        final Location ret = this.editReturnLocations.get(admin.getUniqueId());
+        if (ret != null && ret.getWorld() != null) {
+            admin.teleport(ret);
+        } else {
+            admin.teleport(Bukkit.getWorlds().get(0).getSpawnLocation());
+        }
+    }
+
+    @FunctionalInterface
+    private interface DungeonTransformer {
+        DungeonDefinition apply(DungeonDefinition def);
+    }
+
+    private void replaceDungeonField(final String dungeonId, final DungeonTransformer transformer) {
+        final DungeonDefinition old = this.definitions.get(dungeonId);
+        if (old == null) return;
+        this.definitions.put(dungeonId, transformer.apply(old));
+    }
+
+    private void saveDungeonDefinition(final String dungeonId, final DungeonDefinition def) {
+        final File file = new File(this.plugin.getDataFolder(), "tech-dungeons.yml");
+        YamlConfiguration yaml;
+        if (file.isFile()) {
+            yaml = YamlConfiguration.loadConfiguration(file);
+        } else {
+            yaml = new YamlConfiguration();
+        }
+        final ConfigurationSection section = yaml.createSection(dungeonId);
+        section.set("display-name", def.displayName());
+        section.set("description", def.description());
+        section.set("template-world", def.templateWorld());
+        section.set("category", def.category());
+        section.set("tech-themed", def.techThemed());
+        section.set("min-players", def.minPlayers());
+        section.set("max-players", def.maxPlayers());
+        section.set("time-limit", def.timeLimitSeconds());
+        section.set("cooldown", def.cooldownSeconds());
+        section.set("daily-limit", def.dailyLimit());
+        section.set("spawn-point", this.doubleArrayToList(def.spawnPoint()));
+        if (def.exitPoint() != null) {
+            section.set("exit-point", this.doubleArrayToList(def.exitPoint()));
+        }
+        if (def.requiredPermission() != null) {
+            section.set("required-permission", def.requiredPermission());
+        }
+        // waves / bosses / rewards / scripts 保留原有 YAML（不覆蓋已手動編輯的部分）
+        // 只有不存在時才寫空列表
+        if (!yaml.contains(dungeonId + ".waves") && def.waves().isEmpty()) {
+            section.set("waves", List.of());
+        }
+        if (!yaml.contains(dungeonId + ".bosses") && def.bosses().isEmpty()) {
+            section.set("bosses", List.of());
+        }
+        if (!yaml.contains(dungeonId + ".rewards") && def.rewards().isEmpty()) {
+            section.set("rewards", List.of());
+        }
+        if (!yaml.contains(dungeonId + ".scripts") && def.scripts().isEmpty()) {
+            section.set("scripts", List.of());
+        }
+        try {
+            yaml.save(file);
+        } catch (final IOException e) {
+            this.plugin.getLogger().warning("[副本] 儲存 tech-dungeons.yml 失敗：" + e.getMessage());
+        }
+    }
+
+    private List<Double> doubleArrayToList(final double[] arr) {
+        if (arr == null) return List.of();
+        final List<Double> list = new ArrayList<>(arr.length);
+        for (final double v : arr) list.add(v);
+        return list;
+    }
+
+    private static String formatLoc(final Location loc) {
+        return String.format("%.1f, %.1f, %.1f (yaw=%.0f)", loc.getX(), loc.getY(), loc.getZ(), loc.getYaw());
     }
 
     public void reload() {

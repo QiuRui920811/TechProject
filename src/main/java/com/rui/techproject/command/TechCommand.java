@@ -455,14 +455,28 @@ public final class TechCommand implements CommandExecutor, TabCompleter {
             }
             if (args.length < 2) {
                 player.sendMessage(Component.text("=== 副本系統 ===", NamedTextColor.GOLD));
-                player.sendMessage(Component.text("/tech dungeon list - 瀏覽可用副本", NamedTextColor.YELLOW));
-                player.sendMessage(Component.text("/tech dungeon join <副本ID> - 進入副本", NamedTextColor.YELLOW));
-                player.sendMessage(Component.text("/tech dungeon leave - 離開副本", NamedTextColor.YELLOW));
-                player.sendMessage(Component.text("/tech dungeon party - 建立隊伍", NamedTextColor.YELLOW));
-                player.sendMessage(Component.text("/tech dungeon invite <玩家> - 邀請隊友", NamedTextColor.YELLOW));
-                player.sendMessage(Component.text("/tech dungeon accept - 接受邀請", NamedTextColor.YELLOW));
-                player.sendMessage(Component.text("/tech dungeon info <副本ID> - 副本資訊", NamedTextColor.YELLOW));
-                player.sendMessage(Component.text("/tech dungeon top <副本ID> - 排行榜", NamedTextColor.YELLOW));
+                player.sendMessage(Component.text("/tech dg list - 瀏覽可用副本", NamedTextColor.YELLOW));
+                player.sendMessage(Component.text("/tech dg join <副本ID> - 進入副本", NamedTextColor.YELLOW));
+                player.sendMessage(Component.text("/tech dg leave - 離開副本", NamedTextColor.YELLOW));
+                player.sendMessage(Component.text("/tech dg party - 建立隊伍", NamedTextColor.YELLOW));
+                player.sendMessage(Component.text("/tech dg invite <玩家> - 邀請隊友", NamedTextColor.YELLOW));
+                player.sendMessage(Component.text("/tech dg accept - 接受邀請", NamedTextColor.YELLOW));
+                player.sendMessage(Component.text("/tech dg info <副本ID> - 副本資訊", NamedTextColor.YELLOW));
+                player.sendMessage(Component.text("/tech dg top <副本ID> - 排行榜", NamedTextColor.YELLOW));
+                if (player.hasPermission("techproject.admin")) {
+                    player.sendMessage(Component.text("§6--- 管理員 ---"));
+                    player.sendMessage(Component.text("/tech dg create <ID> - 建立副本", NamedTextColor.GREEN));
+                    player.sendMessage(Component.text("/tech dg edit <ID> - 進入編輯模式", NamedTextColor.GREEN));
+                    player.sendMessage(Component.text("/tech dg setspawn / setexit / setlobby - 設定座標", NamedTextColor.GREEN));
+                    player.sendMessage(Component.text("/tech dg setname <名稱> - 設定顯示名稱", NamedTextColor.GREEN));
+                    player.sendMessage(Component.text("/tech dg settime <秒> - 設定限時", NamedTextColor.GREEN));
+                    player.sendMessage(Component.text("/tech dg setplayers <最少> <最多> - 設定人數", NamedTextColor.GREEN));
+                    player.sendMessage(Component.text("/tech dg setcooldown <秒> - 設定冷卻", NamedTextColor.GREEN));
+                    player.sendMessage(Component.text("/tech dg save - 儲存並退出編輯", NamedTextColor.GREEN));
+                    player.sendMessage(Component.text("/tech dg cancel - 放棄並退出編輯", NamedTextColor.GREEN));
+                    player.sendMessage(Component.text("/tech dg delete <ID> - 刪除副本", NamedTextColor.GREEN));
+                    player.sendMessage(Component.text("/tech dg adminlist - 管理員列表", NamedTextColor.GREEN));
+                }
                 return true;
             }
             final String sub = args[1].toLowerCase(Locale.ROOT);
@@ -488,7 +502,7 @@ public final class TechCommand implements CommandExecutor, TabCompleter {
                     dungeonService.startDungeon(player, args[2].toLowerCase(Locale.ROOT));
                 }
                 case "leave", "quit" -> dungeonService.leaveDungeon(player);
-                case "party", "create" -> dungeonService.createParty(player);
+                case "party" -> dungeonService.createParty(player);
                 case "invite" -> {
                     if (args.length < 3) {
                         player.sendMessage(Component.text("用法：/tech dungeon invite <玩家>", NamedTextColor.RED));
@@ -567,6 +581,139 @@ public final class TechCommand implements CommandExecutor, TabCompleter {
                     dungeonService.shutdown();
                     sender.sendMessage(Component.text("所有副本已關閉。", NamedTextColor.GREEN));
                 }
+                // ── 管理員編輯指令（類 MythicDungeons） ──
+                case "create" -> {
+                    if (!sender.hasPermission("techproject.admin")) {
+                        sender.sendMessage(Component.text("缺少權限。", NamedTextColor.RED));
+                        return true;
+                    }
+                    if (args.length < 3) {
+                        player.sendMessage(Component.text("用法：/tech dg create <副本ID>", NamedTextColor.RED));
+                        return true;
+                    }
+                    dungeonService.adminCreate(player, args[2].toLowerCase(Locale.ROOT));
+                }
+                case "edit" -> {
+                    if (!sender.hasPermission("techproject.admin")) {
+                        sender.sendMessage(Component.text("缺少權限。", NamedTextColor.RED));
+                        return true;
+                    }
+                    if (args.length < 3) {
+                        player.sendMessage(Component.text("用法：/tech dg edit <副本ID>", NamedTextColor.RED));
+                        return true;
+                    }
+                    dungeonService.adminEdit(player, args[2].toLowerCase(Locale.ROOT));
+                }
+                case "setspawn" -> {
+                    if (!sender.hasPermission("techproject.admin")) {
+                        sender.sendMessage(Component.text("缺少權限。", NamedTextColor.RED));
+                        return true;
+                    }
+                    dungeonService.adminSetSpawn(player);
+                }
+                case "setexit" -> {
+                    if (!sender.hasPermission("techproject.admin")) {
+                        sender.sendMessage(Component.text("缺少權限。", NamedTextColor.RED));
+                        return true;
+                    }
+                    dungeonService.adminSetExit(player);
+                }
+                case "setlobby" -> {
+                    if (!sender.hasPermission("techproject.admin")) {
+                        sender.sendMessage(Component.text("缺少權限。", NamedTextColor.RED));
+                        return true;
+                    }
+                    dungeonService.adminSetLobby(player);
+                }
+                case "setname" -> {
+                    if (!sender.hasPermission("techproject.admin")) {
+                        sender.sendMessage(Component.text("缺少權限。", NamedTextColor.RED));
+                        return true;
+                    }
+                    if (args.length < 3) {
+                        player.sendMessage(Component.text("用法：/tech dg setname <顯示名稱>", NamedTextColor.RED));
+                        return true;
+                    }
+                    final String name = String.join(" ", java.util.Arrays.copyOfRange(args, 2, args.length));
+                    dungeonService.adminSetName(player, name);
+                }
+                case "settime" -> {
+                    if (!sender.hasPermission("techproject.admin")) {
+                        sender.sendMessage(Component.text("缺少權限。", NamedTextColor.RED));
+                        return true;
+                    }
+                    if (args.length < 3) {
+                        player.sendMessage(Component.text("用法：/tech dg settime <秒數>", NamedTextColor.RED));
+                        return true;
+                    }
+                    try {
+                        dungeonService.adminSetTime(player, Integer.parseInt(args[2]));
+                    } catch (final NumberFormatException e) {
+                        player.sendMessage(Component.text("請輸入有效的秒數。", NamedTextColor.RED));
+                    }
+                }
+                case "setplayers" -> {
+                    if (!sender.hasPermission("techproject.admin")) {
+                        sender.sendMessage(Component.text("缺少權限。", NamedTextColor.RED));
+                        return true;
+                    }
+                    if (args.length < 4) {
+                        player.sendMessage(Component.text("用法：/tech dg setplayers <最少> <最多>", NamedTextColor.RED));
+                        return true;
+                    }
+                    try {
+                        dungeonService.adminSetPlayers(player, Integer.parseInt(args[2]), Integer.parseInt(args[3]));
+                    } catch (final NumberFormatException e) {
+                        player.sendMessage(Component.text("請輸入有效的數字。", NamedTextColor.RED));
+                    }
+                }
+                case "setcooldown" -> {
+                    if (!sender.hasPermission("techproject.admin")) {
+                        sender.sendMessage(Component.text("缺少權限。", NamedTextColor.RED));
+                        return true;
+                    }
+                    if (args.length < 3) {
+                        player.sendMessage(Component.text("用法：/tech dg setcooldown <秒數>", NamedTextColor.RED));
+                        return true;
+                    }
+                    try {
+                        dungeonService.adminSetCooldown(player, Integer.parseInt(args[2]));
+                    } catch (final NumberFormatException e) {
+                        player.sendMessage(Component.text("請輸入有效的秒數。", NamedTextColor.RED));
+                    }
+                }
+                case "save" -> {
+                    if (!sender.hasPermission("techproject.admin")) {
+                        sender.sendMessage(Component.text("缺少權限。", NamedTextColor.RED));
+                        return true;
+                    }
+                    dungeonService.adminSave(player);
+                }
+                case "cancel" -> {
+                    if (!sender.hasPermission("techproject.admin")) {
+                        sender.sendMessage(Component.text("缺少權限。", NamedTextColor.RED));
+                        return true;
+                    }
+                    dungeonService.adminCancel(player);
+                }
+                case "delete" -> {
+                    if (!sender.hasPermission("techproject.admin")) {
+                        sender.sendMessage(Component.text("缺少權限。", NamedTextColor.RED));
+                        return true;
+                    }
+                    if (args.length < 3) {
+                        player.sendMessage(Component.text("用法：/tech dg delete <副本ID>", NamedTextColor.RED));
+                        return true;
+                    }
+                    dungeonService.adminDelete(player, args[2].toLowerCase(Locale.ROOT));
+                }
+                case "adminlist" -> {
+                    if (!sender.hasPermission("techproject.admin")) {
+                        sender.sendMessage(Component.text("缺少權限。", NamedTextColor.RED));
+                        return true;
+                    }
+                    dungeonService.adminList(player);
+                }
                 default -> player.sendMessage(Component.text("未知副本子命令：" + sub, NamedTextColor.RED));
             }
             return true;
@@ -638,11 +785,18 @@ public final class TechCommand implements CommandExecutor, TabCompleter {
             return names;
         }
         if (args.length == 2 && (args[0].equalsIgnoreCase("dungeon") || args[0].equalsIgnoreCase("dg"))) {
-            return List.of("list", "join", "leave", "party", "invite", "accept", "info", "top", "reload", "forceclose");
+            final List<String> options = new ArrayList<>(List.of("list", "join", "leave", "party", "invite", "accept", "info", "top"));
+            if (sender.hasPermission("techproject.admin")) {
+                options.addAll(List.of("create", "edit", "setspawn", "setexit", "setlobby",
+                        "setname", "settime", "setplayers", "setcooldown",
+                        "save", "cancel", "delete", "adminlist", "reload", "forceclose"));
+            }
+            return options;
         }
         if (args.length == 3 && (args[0].equalsIgnoreCase("dungeon") || args[0].equalsIgnoreCase("dg"))) {
             final String sub = args[1].toLowerCase(Locale.ROOT);
-            if (sub.equals("join") || sub.equals("start") || sub.equals("info") || sub.equals("top")) {
+            if (sub.equals("join") || sub.equals("start") || sub.equals("info") || sub.equals("top")
+                    || sub.equals("edit") || sub.equals("delete")) {
                 final var ds = this.plugin.getDungeonService();
                 if (ds != null) {
                     return new ArrayList<>(ds.definitions().keySet());
