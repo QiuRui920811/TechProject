@@ -116,7 +116,9 @@ public final class DungeonService {
             this.forceCloseInstance(instance, "伺服器關閉");
         }
         this.bossBars.values().forEach(bar -> {
-            for (final var viewer : new ArrayList<>(bar.viewers())) {
+            final List<Object> snap = new ArrayList<>();
+            bar.viewers().forEach(snap::add);
+            for (final var viewer : snap) {
                 if (viewer instanceof net.kyori.adventure.audience.Audience a) bar.removeViewer(a);
             }
         });
@@ -1074,7 +1076,9 @@ public final class DungeonService {
         // 移除 BossBar
         final BossBar bar = this.bossBars.remove(instance.instanceId());
         if (bar != null) {
-            for (final var viewer : new ArrayList<>(bar.viewers())) {
+            final List<Object> snap = new ArrayList<>();
+            bar.viewers().forEach(snap::add);
+            for (final var viewer : snap) {
                 if (viewer instanceof net.kyori.adventure.audience.Audience a) bar.removeViewer(a);
             }
         }
@@ -1237,7 +1241,9 @@ public final class DungeonService {
         // 移除 BossBar
         final BossBar bar = this.bossBars.remove(instanceId);
         if (bar != null) {
-            for (final var viewer : new ArrayList<>(bar.viewers())) {
+            final List<Object> snap = new ArrayList<>();
+            bar.viewers().forEach(snap::add);
+            for (final var viewer : snap) {
                 if (viewer instanceof net.kyori.adventure.audience.Audience a) bar.removeViewer(a);
             }
         }
