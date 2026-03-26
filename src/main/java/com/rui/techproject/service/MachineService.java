@@ -1497,6 +1497,7 @@ public final class MachineService {
             entry.put("upgrades", ItemStackSerializer.toBase64(machine.upgradeInventory()));
             machineMap.put(String.valueOf(index++), entry);
         }
+        if (this.storageBackend == null) return;
         this.storageBackend.saveAllMachines(machineMap);
         this.saveGlobalTrust();
     }

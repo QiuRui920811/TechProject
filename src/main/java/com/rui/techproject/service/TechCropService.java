@@ -164,6 +164,7 @@ public final class TechCropService {
             data.put("crop-id", entry.getValue());
             crops.put(String.valueOf(index++), data);
         }
+        if (this.storageBackend == null) return;
         this.storageBackend.saveAllCrops(crops);
     }
 

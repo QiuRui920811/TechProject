@@ -92,6 +92,7 @@ public final class PlacedTechBlockService {
             data.put("item-id", entry.getValue());
             blocks.put(String.valueOf(index++), data);
         }
+        if (this.storageBackend == null) return;
         this.storageBackend.saveAllTechBlocks(blocks);
     }
 

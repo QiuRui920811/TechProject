@@ -251,6 +251,7 @@ public final class PlayerProgressService {
         data.put("tech-xp.total", progress.techXpTotal);
         data.put("tech-xp.spent", progress.techXpSpent);
         data.put("selected-title", progress.selectedTitle);
+        if (this.storageBackend == null) return;
         this.storageBackend.savePlayerProgress(uuid, data);
     }
 

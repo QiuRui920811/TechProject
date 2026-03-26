@@ -1170,6 +1170,7 @@ public final class PlanetService {
             data.put(path + ".item-id", entry.getValue().fruitItemId());
             data.put(path + ".ready-at", entry.getValue().readyAt());
         }
+        if (this.storageBackend == null) return;
         this.storageBackend.savePlanetState(data);
     }
 
