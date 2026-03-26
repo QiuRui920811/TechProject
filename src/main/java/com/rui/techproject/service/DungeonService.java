@@ -622,13 +622,18 @@ public final class DungeonService {
         final DungeonDefinition def = instance.definition();
         final String worldName = instance.instanceId();
 
-        // 載入世界
-        final WorldCreator creator = new WorldCreator(worldName);
-        creator.environment(World.Environment.NORMAL);
-        creator.generateStructures(false);
-        final World world = Bukkit.createWorld(creator);
+        // 載入世界 — Folia 不支援 createWorld，捕獲異常
+        World world = null;
+        try {
+            final WorldCreator creator = new WorldCreator(worldName);
+            creator.environment(World.Environment.NORMAL);
+            creator.generateStructures(false);
+            world = Bukkit.createWorld(creator);
+        } catch (final UnsupportedOperationException e) {
+            this.plugin.getLogger().warning("[副本] 此伺服器不支援動態世界建立（Folia），副本實例無法啟動。");
+        }
         if (world == null) {
-            this.broadcastToInstance(instance, "§c載入副本世界失敗！");
+            this.broadcastToInstance(instance, "§c載入副本世界失敗！此伺服器可能不支援動態世界建立。");
             this.cleanupInstance(instance);
             return;
         }
@@ -1273,14 +1278,55 @@ public final class DungeonService {
         for (final UUID uuid : instance.members()) {
             this.playerInstanceMap.remove(uuid);
         }
-        // 卸載並刪除世界（需在 Global Region 上執行）
+        // 卸載並刪除世界（Folia 不支援時安靜跳過）
         final World world = instance.instanceWorld();
         if (world != null) {
-            this.scheduler.runGlobal(task -> {
+            try {
                 Bukkit.unloadWorld(world, false);
-                this.scheduler.runAsync(() -> this.deleteWorldFolder(new File(Bukkit.getWorldContainer(), instanceId)));
-            });
+            } catch (final UnsupportedOperationException ignored) {
+                this.plugin.getLogger().fine("[副本] unloadWorld 不受此伺服器支援，跳過。");
+            }
+            this.scheduler.runAsync(() -> this.deleteWorldFolder(new File(Bukkit.getWorldContainer(), instanceId)));
         }
+    }
+
+    /**
+     * 安全地嘗試卸載編輯世界。
+     * 若 {@code save} 為 {@code true} 且 {@code templateWorldName} 不為 null，
+     * 會在卸載後將世界複製回模板目錄。
+     * Folia / Luminol 不支援 unloadWorld 時會安靜跳過。
+     */
+    private void tryUnloadEditWorld(final String worldName, final boolean save, final String templateWorldName) {
+        final World editWorld = Bukkit.getWorld(worldName);
+        if (editWorld == null) return;
+
+        try {
+            if (save) editWorld.save();
+            final World fallback = Bukkit.getWorlds().get(0);
+            for (final Player p : editWorld.getPlayers()) {
+                p.teleport(fallback.getSpawnLocation());
+            }
+            Bukkit.unloadWorld(editWorld, save);
+        } catch (final UnsupportedOperationException e) {
+            this.plugin.getLogger().warning("[副本] 此伺服器不支援 unloadWorld，編輯世界無法自動卸載。");
+            return; // 不做後續的複製/刪除
+        }
+
+        // 非同步複製回模板 & 清理
+        this.scheduler.runAsync(() -> {
+            final File editDir = new File(Bukkit.getWorldContainer(), worldName);
+            if (save && templateWorldName != null && editDir.isDirectory()) {
+                final File templateDir = new File(this.plugin.getDataFolder(),
+                        TEMPLATE_DIR + File.separator + templateWorldName);
+                try {
+                    if (templateDir.exists()) this.deleteWorldFolder(templateDir);
+                    this.copyFolder(editDir.toPath(), templateDir.toPath());
+                } catch (final IOException ex) {
+                    this.plugin.getLogger().log(Level.WARNING, "[副本] 儲存模板失敗", ex);
+                }
+            }
+            this.deleteWorldFolder(editDir);
+        });
     }
 
     // ──────────────────────────────────────────────
@@ -1829,7 +1875,8 @@ public final class DungeonService {
     }
 
     /**
-     * 進入編輯模式 — 載入模板世界並傳送管理員進去。
+     * 進入編輯模式 — 嘗試載入模板世界並傳送管理員進去。
+     * 若伺服器不支援動態世界建立（Folia / Luminol），則以純 GUI 模式編輯。
      * 等同於 MythicDungeons 的 {@code /md edit <name>}。
      */
     public void adminEdit(final Player admin, final String dungeonId) {
@@ -1843,12 +1890,18 @@ public final class DungeonService {
             return;
         }
 
+        // 嘗試使用已載入的世界
         final String worldName = "dungeon_edit_" + dungeonId;
         final World existing = Bukkit.getWorld(worldName);
-
         if (existing != null) {
-            // 世界已載入，直接進入
             this.enterEditWorld(admin, existing, def, dungeonId);
+            return;
+        }
+
+        // 測試伺服器是否支援 createWorld（Folia / Luminol 不支援）
+        if (!this.isCreateWorldSupported()) {
+            // 純 GUI 模式 — 不需要世界，直接進入設定編輯
+            this.enterGuiOnlyEditMode(admin, def, dungeonId);
             return;
         }
 
@@ -1874,17 +1927,21 @@ public final class DungeonService {
                     return;
                 }
             }
-            // 切回 Global Region 建立世界（Folia 要求）
+            // 回主線程建立世界
             this.scheduler.runGlobal(task -> {
-                final WorldCreator creator = new WorldCreator(worldName);
-                creator.environment(World.Environment.NORMAL);
-                creator.generateStructures(false);
-                final World world = Bukkit.createWorld(creator);
+                World world = null;
+                try {
+                    final WorldCreator creator = new WorldCreator(worldName);
+                    creator.environment(World.Environment.NORMAL);
+                    creator.generateStructures(false);
+                    world = Bukkit.createWorld(creator);
+                } catch (final UnsupportedOperationException ignored) {
+                    // Folia: fallback handled below
+                }
                 if (world == null) {
-                    this.scheduler.runEntity(admin, () -> {
-                        admin.sendMessage(this.msg("§c載入編輯世界失敗！如果是新副本，模板世界目錄可能是空的。"));
-                        admin.sendMessage(this.msg("§7請先將地圖檔案放入：§f" + templateDir.getAbsolutePath()));
-                    });
+                    // createWorld 失敗或不支援 → 純 GUI 模式
+                    this.scheduler.runEntity(admin, () ->
+                            this.enterGuiOnlyEditMode(admin, def, dungeonId));
                     return;
                 }
                 world.setAutoSave(true);
@@ -1895,18 +1952,58 @@ public final class DungeonService {
                 world.setGameRule(GameRule.DO_WEATHER_CYCLE, false);
                 world.setTime(6000L);
 
-                // 切回玩家的 Entity Scheduler 做傳送
                 this.editReturnLocations.put(admin.getUniqueId(), returnLoc);
+                final World finalWorld = world;
                 this.scheduler.runEntity(admin, () ->
-                        this.enterEditWorld(admin, world, def, dungeonId));
+                        this.enterEditWorld(admin, finalWorld, def, dungeonId));
             });
         });
     }
 
-    /** 在玩家的 Entity Scheduler 上完成進入編輯模式的最後步驟。 */
+    /** 測試伺服器是否支援動態世界建立。結果快取。 */
+    private Boolean createWorldSupported;
+    private boolean isCreateWorldSupported() {
+        if (this.createWorldSupported != null) return this.createWorldSupported;
+        try {
+            // 檢查 CraftServer.createWorld 是否為 throw UnsupportedOperationException（Folia）
+            final var method = Bukkit.getServer().getClass().getMethod("createWorld", WorldCreator.class);
+            // 如果方法存在且未被 Folia override 去掉，就認為支援
+            // 但最保險的做法是看是否有 Folia scheduler
+            final boolean isFolia = classExists("io.papermc.paper.threadedregions.RegionizedServer");
+            this.createWorldSupported = !isFolia;
+        } catch (final Exception e) {
+            this.createWorldSupported = true; // 預設支援
+        }
+        return this.createWorldSupported;
+    }
+
+    private static boolean classExists(final String className) {
+        try { Class.forName(className); return true; }
+        catch (final ClassNotFoundException e) { return false; }
+    }
+
+    /** 純 GUI 編輯模式 — 不傳送、不建立世界，留在原地使用 GUI 工具。 */
+    private void enterGuiOnlyEditMode(final Player admin, final DungeonDefinition def, final String dungeonId) {
+        this.editReturnLocations.putIfAbsent(admin.getUniqueId(), admin.getLocation().clone());
+        this.editingSessions.put(admin.getUniqueId(), dungeonId);
+
+        // 只在快捷欄給 GUI 工具，不清空背包
+        this.giveEditorTools(admin);
+
+        admin.sendMessage(this.msg("§6§l⚠ 純 GUI 編輯模式"));
+        admin.sendMessage(this.msg("§7此伺服器不支援動態世界建立（Folia / Luminol），"));
+        admin.sendMessage(this.msg("§7你可以透過 GUI 編輯所有副本設定（波次、Boss、獎勵、腳本等）。"));
+        admin.sendMessage(this.msg("§7出生點 / 離開點請使用 GUI 中的「§e基本設定§7」頁面手動輸入座標。"));
+        admin.sendMessage(this.msg("§7地圖建築請直接編輯模板目錄中的世界檔案："));
+        admin.sendMessage(this.msg("§f  " + new File(this.plugin.getDataFolder(),
+                TEMPLATE_DIR + File.separator + def.templateWorld()).getAbsolutePath()));
+        admin.sendMessage(this.msg("§a已進入副本 §e" + dungeonId + " §a的編輯模式（§6純 GUI§a）。"));
+        admin.sendMessage(this.msg("§7完成後使用 §e/tech dg save §7或 §e/tech dg cancel §7退出。"));
+    }
+
+    /** 完整編輯模式 — 傳送進編輯世界。 */
     private void enterEditWorld(final Player admin, final World world,
                                 final DungeonDefinition def, final String dungeonId) {
-        // 如果是從已載入的世界進入，returnLoc 還沒記錄
         this.editReturnLocations.putIfAbsent(admin.getUniqueId(), admin.getLocation().clone());
         this.editingSessions.put(admin.getUniqueId(), dungeonId);
 
@@ -1916,7 +2013,6 @@ public final class DungeonService {
         admin.teleport(spawn);
         admin.setGameMode(GameMode.CREATIVE);
 
-        // ── 給予編輯工具 ──
         this.giveEditorTools(admin);
 
         admin.sendMessage(this.msg("§a已進入副本 §e" + dungeonId + " §a的編輯模式。"));
@@ -2103,7 +2199,7 @@ public final class DungeonService {
 
         final String worldName = "dungeon_edit_" + dungeonId;
 
-        // 先把管理員傳回原位 & 清理狀態（在 entity thread 上安全）
+        // 傳回原位 & 清理狀態
         this.teleportBackFromEdit(admin);
         this.editingSessions.remove(admin.getUniqueId());
         this.editReturnLocations.remove(admin.getUniqueId());
@@ -2112,39 +2208,11 @@ public final class DungeonService {
 
         // 儲存 YAML 設定
         this.saveDungeonDefinition(dungeonId, def);
-        admin.sendMessage(this.msg("§e正在儲存副本世界..."));
 
-        // 在 Global Region 上卸載世界（Folia 要求）
-        this.scheduler.runGlobal(task -> {
-            final World editWorld = Bukkit.getWorld(worldName);
-            if (editWorld != null) {
-                editWorld.save();
-                final World fallback = Bukkit.getWorlds().get(0);
-                for (final Player p : editWorld.getPlayers()) {
-                    p.teleport(fallback.getSpawnLocation());
-                }
-                Bukkit.unloadWorld(editWorld, true);
-            }
-            // 非同步複製回模板 & 清理
-            this.scheduler.runAsync(() -> {
-                if (Bukkit.getWorld(worldName) == null) {
-                    final File editDir = new File(Bukkit.getWorldContainer(), worldName);
-                    final File templateDir = new File(this.plugin.getDataFolder(),
-                            TEMPLATE_DIR + File.separator + def.templateWorld());
-                    try {
-                        if (templateDir.exists()) this.deleteWorldFolder(templateDir);
-                        this.copyFolder(editDir.toPath(), templateDir.toPath());
-                        this.deleteWorldFolder(editDir);
-                    } catch (final IOException e) {
-                        this.plugin.getLogger().log(Level.WARNING, "[副本] 儲存模板失敗", e);
-                        this.scheduler.runEntity(admin, () ->
-                                admin.sendMessage(this.msg("§c儲存模板失敗：" + e.getMessage())));
-                    }
-                }
-                this.scheduler.runEntity(admin, () ->
-                        admin.sendMessage(this.msg("§a副本 §e" + dungeonId + " §a已儲存！")));
-            });
-        });
+        // 嘗試卸載編輯世界（Folia 不支援時直接跳過）
+        this.tryUnloadEditWorld(worldName, true, def.templateWorld());
+
+        admin.sendMessage(this.msg("§a副本 §e" + dungeonId + " §a已儲存！"));
     }
 
     /** 放棄修改並退出編輯模式。 */
@@ -2157,26 +2225,15 @@ public final class DungeonService {
 
         final String worldName = "dungeon_edit_" + dungeonId;
 
-        // 傳回 & 清理狀態（entity thread）
+        // 傳回 & 清理狀態
         this.teleportBackFromEdit(admin);
         this.editingSessions.remove(admin.getUniqueId());
         this.editReturnLocations.remove(admin.getUniqueId());
         this.cleanupEditorState(admin.getUniqueId());
         admin.getInventory().clear();
 
-        // 在 Global Region 上卸載世界（Folia 要求）
-        this.scheduler.runGlobal(task -> {
-            final World editWorld = Bukkit.getWorld(worldName);
-            if (editWorld != null) {
-                final World fallback = Bukkit.getWorlds().get(0);
-                for (final Player p : editWorld.getPlayers()) {
-                    p.teleport(fallback.getSpawnLocation());
-                }
-                Bukkit.unloadWorld(editWorld, false);
-                this.scheduler.runAsync(() ->
-                        this.deleteWorldFolder(new File(Bukkit.getWorldContainer(), worldName)));
-            }
-        });
+        // 嘗試卸載編輯世界（Folia 不支援時跳過）
+        this.tryUnloadEditWorld(worldName, false, null);
 
         admin.sendMessage(this.msg("§e已取消編輯 §c" + dungeonId + " §e（修改未儲存）。"));
     }
