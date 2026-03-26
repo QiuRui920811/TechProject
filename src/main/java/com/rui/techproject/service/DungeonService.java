@@ -2316,22 +2316,14 @@ public final class DungeonService {
             case "editor:menu" -> this.openEditorMainMenu(player, dungeonId);
             case "editor:setspawn" -> {
                 final Location loc = player.getLocation();
-                this.replaceDungeonField(dungeonId, d -> new DungeonDefinition(
-                        d.id(), d.displayName(), d.description(), d.templateWorld(), d.category(),
-                        d.techThemed(), d.minPlayers(), d.maxPlayers(), d.timeLimitSeconds(),
-                        d.cooldownSeconds(), d.dailyLimit(),
-                        new double[]{loc.getX(), loc.getY(), loc.getZ(), loc.getYaw(), loc.getPitch()},
-                        d.exitPoint(), d.requiredPermission(), d.waves(), d.bosses(), d.rewards(), d.scripts()));
+                this.replaceDungeonField(dungeonId, d -> d.withSpawnPoint(
+                        new double[]{loc.getX(), loc.getY(), loc.getZ(), loc.getYaw(), loc.getPitch()}));
                 player.sendMessage(this.msg("§a出生點已設定為 §e" + formatLoc(loc)));
             }
             case "editor:setexit" -> {
                 final Location loc = player.getLocation();
-                this.replaceDungeonField(dungeonId, d -> new DungeonDefinition(
-                        d.id(), d.displayName(), d.description(), d.templateWorld(), d.category(),
-                        d.techThemed(), d.minPlayers(), d.maxPlayers(), d.timeLimitSeconds(),
-                        d.cooldownSeconds(), d.dailyLimit(), d.spawnPoint(),
-                        new double[]{loc.getX(), loc.getY(), loc.getZ(), loc.getYaw(), loc.getPitch()},
-                        d.requiredPermission(), d.waves(), d.bosses(), d.rewards(), d.scripts()));
+                this.replaceDungeonField(dungeonId, d -> d.withExitPoint(
+                        new double[]{loc.getX(), loc.getY(), loc.getZ(), loc.getYaw(), loc.getPitch()}));
                 player.sendMessage(this.msg("§a離開點已設定為 §e" + formatLoc(loc)));
             }
             case "editor:mob_spawner" -> this.openEditorGui(player, new EditorGuiState(dungeonId, EditorPage.WAVES, 0, 0));
@@ -2485,11 +2477,11 @@ public final class DungeonService {
 
         for (int i = 0; i < def.waves().size() && i < 45; i++) {
             final WaveDefinition w = def.waves().get(i);
-            final int totalMobs = w.mobs().stream().mapToInt(MobEntry::count).sum();
+            final int totalMobs = w.mobEntries().stream().mapToInt(MobEntry::count).sum();
             gui.setItem(i, this.editorIcon(Material.SPAWNER, "§6§l波次 " + (i + 1),
-                    "§7怪物種類: §f" + w.mobs().size(),
+                    "§7怪物種類: §f" + w.mobEntries().size(),
                     "§7怪物總數: §f" + totalMobs,
-                    "§7延遲: §f" + w.delaySeconds() + " 秒",
+                    "§7延遲: §f" + w.spawnDelay() + " 秒",
                     "§e左鍵 編輯  §c右鍵 刪除"));
         }
 
@@ -2515,12 +2507,8 @@ public final class DungeonService {
         // 新增波次
         if (slot == Math.min(def.waves().size(), 44)) {
             final List<WaveDefinition> newWaves = new ArrayList<>(def.waves());
-            newWaves.add(new WaveDefinition(5, List.of(new MobEntry("ZOMBIE", 5, null, null))));
-            this.replaceDungeonField(state.dungeonId(), d -> new DungeonDefinition(
-                    d.id(), d.displayName(), d.description(), d.templateWorld(), d.category(),
-                    d.techThemed(), d.minPlayers(), d.maxPlayers(), d.timeLimitSeconds(),
-                    d.cooldownSeconds(), d.dailyLimit(), d.spawnPoint(), d.exitPoint(),
-                    d.requiredPermission(), newWaves, d.bosses(), d.rewards(), d.scripts()));
+            newWaves.add(new WaveDefinition(newWaves.size(), List.of(new MobEntry("ZOMBIE", null, 5, 1, new double[]{0, 1, 0}, null, Map.of())), 5, "", true));
+            this.replaceDungeonField(state.dungeonId(), d -> d.withWaves(newWaves));
             player.sendMessage(this.msg("§a已新增波次 " + newWaves.size()));
             this.openEditorGui(player, state); // 重新打開
             return;
@@ -2542,11 +2530,11 @@ public final class DungeonService {
                 Component.text(EDITOR_GUI_PREFIX + "波次 " + (state.subIndex() + 1)));
 
         gui.setItem(4, this.editorIcon(Material.CLOCK, "§e§l延遲秒數",
-                "§7目前: §f" + wave.delaySeconds() + " 秒", "§a點擊修改"));
+                "§7目前: §f" + wave.spawnDelay() + " 秒", "§a點擊修改"));
 
         // 列出此波次的怪物
-        for (int i = 0; i < wave.mobs().size() && i < 18; i++) {
-            final MobEntry mob = wave.mobs().get(i);
+        for (int i = 0; i < wave.mobEntries().size() && i < 18; i++) {
+            final MobEntry mob = wave.mobEntries().get(i);
             gui.setItem(9 + i, this.editorIcon(this.getMobIcon(mob.entityType()),
                     "§6" + mob.entityType(),
                     "§7數量: §f" + mob.count(),
@@ -2555,8 +2543,8 @@ public final class DungeonService {
         }
 
         // 新增怪物按鈕
-        if (wave.mobs().size() < 18) {
-            gui.setItem(9 + wave.mobs().size(), this.editorIcon(Material.LIME_DYE, "§a§l+ 新增怪物", "§7點擊選擇怪物類型"));
+        if (wave.mobEntries().size() < 18) {
+            gui.setItem(9 + wave.mobEntries().size(), this.editorIcon(Material.LIME_DYE, "§a§l+ 新增怪物", "§7點擊選擇怪物類型"));
         }
 
         // 刪除此波次
@@ -2583,27 +2571,23 @@ public final class DungeonService {
         if (slot == 27) {
             final List<WaveDefinition> newWaves = new ArrayList<>(def.waves());
             newWaves.remove(state.subIndex());
-            this.replaceDungeonField(state.dungeonId(), d -> new DungeonDefinition(
-                    d.id(), d.displayName(), d.description(), d.templateWorld(), d.category(),
-                    d.techThemed(), d.minPlayers(), d.maxPlayers(), d.timeLimitSeconds(),
-                    d.cooldownSeconds(), d.dailyLimit(), d.spawnPoint(), d.exitPoint(),
-                    d.requiredPermission(), newWaves, d.bosses(), d.rewards(), d.scripts()));
+            this.replaceDungeonField(state.dungeonId(), d -> d.withWaves(newWaves));
             player.sendMessage(this.msg("§c已刪除波次 " + (state.subIndex() + 1)));
             this.openEditorGui(player, new EditorGuiState(state.dungeonId(), EditorPage.WAVES, 0, 0));
             return;
         }
         // 新增怪物 → 打開怪物選擇器
-        if (slot == 9 + wave.mobs().size() && wave.mobs().size() < 18) {
+        if (slot == 9 + wave.mobEntries().size() && wave.mobEntries().size() < 18) {
             this.openEditorGui(player, new EditorGuiState(state.dungeonId(), EditorPage.MOB_SELECT, state.subIndex(), -1));
             return;
         }
         // 已有怪物 slot
         final int mobIndex = slot - 9;
-        if (mobIndex >= 0 && mobIndex < wave.mobs().size()) {
+        if (mobIndex >= 0 && mobIndex < wave.mobEntries().size()) {
             // 左鍵修改數量，右鍵刪除 — 但這裡拿不到 clickType，走 prompt
             this.promptInput(player,
                     new EditorGuiState(state.dungeonId(), EditorPage.WAVE_DETAIL, state.subIndex(), mobIndex),
-                    "mob-count", "§e請輸入 §6" + wave.mobs().get(mobIndex).entityType() + " §e的生成數量：§7（數字，輸入 0 刪除）");
+                    "mob-count", "§e請輸入 §6" + wave.mobEntries().get(mobIndex).entityType() + " §e的生成數量：§7（數字，輸入 0 刪除）");
         }
     }
 
@@ -2660,7 +2644,7 @@ public final class DungeonService {
             final BossDefinition boss = def.bosses().get(i);
             gui.setItem(i, this.editorIcon(Material.DRAGON_HEAD, "§c§l" + boss.displayName(),
                     "§7實體: §f" + boss.entityType(),
-                    "§7血量: §f" + boss.maxHealth(),
+                    "§7血量: §f" + boss.health(),
                     "§7傷害: §f" + boss.damage(),
                     "§7技能: §f" + boss.skills().size(),
                     "§e點擊編輯"));
@@ -2710,7 +2694,7 @@ public final class DungeonService {
         gui.setItem(11, this.editorIcon(Material.ZOMBIE_SPAWN_EGG, "§6§l實體類型",
                 "§7目前: §f" + boss.entityType(), "§a點擊修改"));
         gui.setItem(12, this.editorIcon(Material.GOLDEN_APPLE, "§c§l血量",
-                "§7目前: §f" + boss.maxHealth(), "§a點擊修改"));
+                "§7目前: §f" + boss.health(), "§a點擊修改"));
         gui.setItem(13, this.editorIcon(Material.DIAMOND_SWORD, "§4§l傷害",
                 "§7目前: §f" + boss.damage(), "§a點擊修改"));
         gui.setItem(14, this.editorIcon(Material.BLAZE_POWDER, "§d§l技能",
@@ -2742,11 +2726,7 @@ public final class DungeonService {
             case 27 -> {
                 final List<BossDefinition> newBosses = new ArrayList<>(def.bosses());
                 newBosses.remove(state.subIndex());
-                this.replaceDungeonField(state.dungeonId(), d -> new DungeonDefinition(
-                        d.id(), d.displayName(), d.description(), d.templateWorld(), d.category(),
-                        d.techThemed(), d.minPlayers(), d.maxPlayers(), d.timeLimitSeconds(),
-                        d.cooldownSeconds(), d.dailyLimit(), d.spawnPoint(), d.exitPoint(),
-                        d.requiredPermission(), d.waves(), newBosses, d.rewards(), d.scripts()));
+                this.replaceDungeonField(state.dungeonId(), d -> d.withBosses(newBosses));
                 player.sendMessage(this.msg("§c已刪除 Boss"));
                 this.openEditorGui(player, new EditorGuiState(state.dungeonId(), EditorPage.BOSSES, 0, 0));
             }
@@ -2800,11 +2780,7 @@ public final class DungeonService {
         if (slot >= 0 && slot < def.rewards().size()) {
             final List<RewardDefinition> newRewards = new ArrayList<>(def.rewards());
             newRewards.remove(slot);
-            this.replaceDungeonField(state.dungeonId(), d -> new DungeonDefinition(
-                    d.id(), d.displayName(), d.description(), d.templateWorld(), d.category(),
-                    d.techThemed(), d.minPlayers(), d.maxPlayers(), d.timeLimitSeconds(),
-                    d.cooldownSeconds(), d.dailyLimit(), d.spawnPoint(), d.exitPoint(),
-                    d.requiredPermission(), d.waves(), d.bosses(), newRewards, d.scripts()));
+            this.replaceDungeonField(state.dungeonId(), d -> d.withRewards(newRewards));
             player.sendMessage(this.msg("§c已刪除獎勵 " + (slot + 1)));
             this.openEditorGui(player, state);
         }
@@ -2858,11 +2834,7 @@ public final class DungeonService {
         if (slot >= 0 && slot < def.scripts().size()) {
             final List<ScriptDefinition> newScripts = new ArrayList<>(def.scripts());
             newScripts.remove(slot);
-            this.replaceDungeonField(state.dungeonId(), d -> new DungeonDefinition(
-                    d.id(), d.displayName(), d.description(), d.templateWorld(), d.category(),
-                    d.techThemed(), d.minPlayers(), d.maxPlayers(), d.timeLimitSeconds(),
-                    d.cooldownSeconds(), d.dailyLimit(), d.spawnPoint(), d.exitPoint(),
-                    d.requiredPermission(), d.waves(), d.bosses(), d.rewards(), newScripts));
+            this.replaceDungeonField(state.dungeonId(), d -> d.withScripts(newScripts));
             player.sendMessage(this.msg("§c已刪除腳本 " + (slot + 1)));
             this.openEditorGui(player, state);
         }
@@ -2889,66 +2861,38 @@ public final class DungeonService {
         boolean success = true;
 
         switch (field) {
-            case "display-name" -> this.replaceDungeonField(did, d -> new DungeonDefinition(
-                    d.id(), text, d.description(), d.templateWorld(), d.category(),
-                    d.techThemed(), d.minPlayers(), d.maxPlayers(), d.timeLimitSeconds(),
-                    d.cooldownSeconds(), d.dailyLimit(), d.spawnPoint(), d.exitPoint(),
-                    d.requiredPermission(), d.waves(), d.bosses(), d.rewards(), d.scripts()));
-            case "description" -> this.replaceDungeonField(did, d -> new DungeonDefinition(
-                    d.id(), d.displayName(), text, d.templateWorld(), d.category(),
-                    d.techThemed(), d.minPlayers(), d.maxPlayers(), d.timeLimitSeconds(),
-                    d.cooldownSeconds(), d.dailyLimit(), d.spawnPoint(), d.exitPoint(),
-                    d.requiredPermission(), d.waves(), d.bosses(), d.rewards(), d.scripts()));
+            case "display-name" -> this.replaceDungeonField(did, d -> d.withDisplayName(text));
+            case "description" -> this.replaceDungeonField(did, d -> d.withDescription(text));
             case "time-limit" -> {
                 final int val = this.parseIntOrZero(text);
                 if (val <= 0) { player.sendMessage(this.msg("§c無效數字。")); success = false; break; }
-                this.replaceDungeonField(did, d -> new DungeonDefinition(
-                        d.id(), d.displayName(), d.description(), d.templateWorld(), d.category(),
-                        d.techThemed(), d.minPlayers(), d.maxPlayers(), val,
-                        d.cooldownSeconds(), d.dailyLimit(), d.spawnPoint(), d.exitPoint(),
-                        d.requiredPermission(), d.waves(), d.bosses(), d.rewards(), d.scripts()));
+                this.replaceDungeonField(did, d -> d.withTimeLimitSeconds(val));
             }
             case "min-players" -> {
                 final int val = this.parseIntOrZero(text);
                 if (val <= 0) { player.sendMessage(this.msg("§c無效數字。")); success = false; break; }
-                this.replaceDungeonField(did, d -> new DungeonDefinition(
-                        d.id(), d.displayName(), d.description(), d.templateWorld(), d.category(),
-                        d.techThemed(), val, d.maxPlayers(), d.timeLimitSeconds(),
-                        d.cooldownSeconds(), d.dailyLimit(), d.spawnPoint(), d.exitPoint(),
-                        d.requiredPermission(), d.waves(), d.bosses(), d.rewards(), d.scripts()));
+                this.replaceDungeonField(did, d -> d.withMinPlayers(val));
             }
             case "max-players" -> {
                 final int val = this.parseIntOrZero(text);
                 if (val <= 0) { player.sendMessage(this.msg("§c無效數字。")); success = false; break; }
-                this.replaceDungeonField(did, d -> new DungeonDefinition(
-                        d.id(), d.displayName(), d.description(), d.templateWorld(), d.category(),
-                        d.techThemed(), d.minPlayers(), val, d.timeLimitSeconds(),
-                        d.cooldownSeconds(), d.dailyLimit(), d.spawnPoint(), d.exitPoint(),
-                        d.requiredPermission(), d.waves(), d.bosses(), d.rewards(), d.scripts()));
+                this.replaceDungeonField(did, d -> d.withMaxPlayers(val));
             }
             case "cooldown" -> {
                 final int val = this.parseIntOrZero(text);
                 if (val < 0) { player.sendMessage(this.msg("§c無效數字。")); success = false; break; }
-                this.replaceDungeonField(did, d -> new DungeonDefinition(
-                        d.id(), d.displayName(), d.description(), d.templateWorld(), d.category(),
-                        d.techThemed(), d.minPlayers(), d.maxPlayers(), d.timeLimitSeconds(),
-                        val, d.dailyLimit(), d.spawnPoint(), d.exitPoint(),
-                        d.requiredPermission(), d.waves(), d.bosses(), d.rewards(), d.scripts()));
+                this.replaceDungeonField(did, d -> d.withCooldownSeconds(val));
             }
             case "daily-limit" -> {
                 final int val = this.parseIntOrZero(text);
                 if (val < 0) { player.sendMessage(this.msg("§c無效數字。")); success = false; break; }
-                this.replaceDungeonField(did, d -> new DungeonDefinition(
-                        d.id(), d.displayName(), d.description(), d.templateWorld(), d.category(),
-                        d.techThemed(), d.minPlayers(), d.maxPlayers(), d.timeLimitSeconds(),
-                        d.cooldownSeconds(), val, d.spawnPoint(), d.exitPoint(),
-                        d.requiredPermission(), d.waves(), d.bosses(), d.rewards(), d.scripts()));
+                this.replaceDungeonField(did, d -> d.withDailyLimit(val));
             }
             case "wave-delay" -> {
                 final int val = this.parseIntOrZero(text);
                 if (val < 0) { player.sendMessage(this.msg("§c無效數字。")); success = false; break; }
                 this.replaceWave(did, pending.returnState().subIndex(), w ->
-                        new WaveDefinition(val, w.mobs()));
+                        new WaveDefinition(w.waveIndex(), w.mobEntries(), val, w.message(), w.requireClear()));
             }
             case "mob-count" -> {
                 final int val = this.parseIntOrZero(text);
@@ -2957,44 +2901,40 @@ public final class DungeonService {
                 final DungeonDefinition d2 = this.definitions.get(did);
                 if (d2 == null || waveIdx >= d2.waves().size()) break;
                 final WaveDefinition wave = d2.waves().get(waveIdx);
-                if (mobIdx >= wave.mobs().size()) break;
-                final List<MobEntry> newMobs = new ArrayList<>(wave.mobs());
+                if (mobIdx >= wave.mobEntries().size()) break;
+                final List<MobEntry> newMobs = new ArrayList<>(wave.mobEntries());
                 if (val <= 0) {
                     newMobs.remove(mobIdx);
                     player.sendMessage(this.msg("§c已移除怪物。"));
                 } else {
                     final MobEntry old = newMobs.get(mobIdx);
-                    newMobs.set(mobIdx, new MobEntry(old.entityType(), val, old.customName(), old.equipmentSet()));
+                    newMobs.set(mobIdx, new MobEntry(old.entityType(), old.mythicMobId(), val, old.level(), old.spawnOffset(), old.customName(), old.equipment()));
                 }
-                this.replaceWave(did, waveIdx, w -> new WaveDefinition(w.delaySeconds(), newMobs));
+                this.replaceWave(did, waveIdx, w -> new WaveDefinition(w.waveIndex(), newMobs, w.spawnDelay(), w.message(), w.requireClear()));
             }
             case "boss-add" -> {
                 final List<BossDefinition> newBosses = new ArrayList<>(def.bosses());
-                newBosses.add(new BossDefinition(text, "WITHER_SKELETON", 200, 15.0,
-                        List.of(), List.of()));
-                this.replaceDungeonField(did, d -> new DungeonDefinition(
-                        d.id(), d.displayName(), d.description(), d.templateWorld(), d.category(),
-                        d.techThemed(), d.minPlayers(), d.maxPlayers(), d.timeLimitSeconds(),
-                        d.cooldownSeconds(), d.dailyLimit(), d.spawnPoint(), d.exitPoint(),
-                        d.requiredPermission(), d.waves(), newBosses, d.rewards(), d.scripts()));
+                newBosses.add(new BossDefinition("boss_" + newBosses.size(), text, "WITHER_SKELETON", null, 200, 15.0,
+                        new double[]{0, 65, 0}, List.of(), List.of(), -1, true, List.of()));
+                this.replaceDungeonField(did, d -> d.withBosses(newBosses));
                 player.sendMessage(this.msg("§a已新增 Boss: §e" + text));
             }
             case "boss-name" -> {
                 this.replaceBoss(did, pending.returnState().subIndex(), b ->
-                        new BossDefinition(text, b.entityType(), b.maxHealth(), b.damage(), b.skills(), b.phases()));
+                        new BossDefinition(b.id(), text, b.entityType(), b.mythicMobId(), b.health(), b.damage(), b.spawnPoint(), b.skills(), b.phases(), b.afterWave(), b.bossBar(), b.lootTable()));
             }
             case "boss-type" -> {
                 try { EntityType.valueOf(text.toUpperCase()); } catch (final Exception e) {
                     player.sendMessage(this.msg("§c無效實體類型。")); success = false; break;
                 }
                 this.replaceBoss(did, pending.returnState().subIndex(), b ->
-                        new BossDefinition(b.displayName(), text.toUpperCase(), b.maxHealth(), b.damage(), b.skills(), b.phases()));
+                        new BossDefinition(b.id(), b.displayName(), text.toUpperCase(), b.mythicMobId(), b.health(), b.damage(), b.spawnPoint(), b.skills(), b.phases(), b.afterWave(), b.bossBar(), b.lootTable()));
             }
             case "boss-health" -> {
                 final int val = this.parseIntOrZero(text);
                 if (val <= 0) { player.sendMessage(this.msg("§c無效數字。")); success = false; break; }
                 this.replaceBoss(did, pending.returnState().subIndex(), b ->
-                        new BossDefinition(b.displayName(), b.entityType(), val, b.damage(), b.skills(), b.phases()));
+                        new BossDefinition(b.id(), b.displayName(), b.entityType(), b.mythicMobId(), val, b.damage(), b.spawnPoint(), b.skills(), b.phases(), b.afterWave(), b.bossBar(), b.lootTable()));
             }
             case "boss-damage" -> {
                 final double val;
@@ -3002,7 +2942,7 @@ public final class DungeonService {
                     player.sendMessage(this.msg("§c無效數字。")); success = false; break;
                 }
                 this.replaceBoss(did, pending.returnState().subIndex(), b ->
-                        new BossDefinition(b.displayName(), b.entityType(), b.maxHealth(), val, b.skills(), b.phases()));
+                        new BossDefinition(b.id(), b.displayName(), b.entityType(), b.mythicMobId(), b.health(), val, b.spawnPoint(), b.skills(), b.phases(), b.afterWave(), b.bossBar(), b.lootTable()));
             }
             case "reward-add" -> {
                 // 格式: 類型 值 機率
@@ -3012,12 +2952,8 @@ public final class DungeonService {
                 final String value = parts.length >= 3 ? parts[1] : parts[1];
                 final double chance = parts.length >= 3 ? this.parseDoubleOrOne(parts[2]) : 1.0;
                 final List<RewardDefinition> newRewards = new ArrayList<>(def.rewards());
-                newRewards.add(new RewardDefinition(type, parts.length >= 3 ? parts[1] + " " + text.substring(text.indexOf(parts[1]) + parts[1].length()).trim() : parts[1], chance));
-                this.replaceDungeonField(did, d -> new DungeonDefinition(
-                        d.id(), d.displayName(), d.description(), d.templateWorld(), d.category(),
-                        d.techThemed(), d.minPlayers(), d.maxPlayers(), d.timeLimitSeconds(),
-                        d.cooldownSeconds(), d.dailyLimit(), d.spawnPoint(), d.exitPoint(),
-                        d.requiredPermission(), d.waves(), d.bosses(), newRewards, d.scripts()));
+                newRewards.add(new RewardDefinition(type, parts.length >= 3 ? parts[1] + " " + text.substring(text.indexOf(parts[1]) + parts[1].length()).trim() : parts[1], 1, chance, false));
+                this.replaceDungeonField(did, d -> d.withRewards(newRewards));
                 player.sendMessage(this.msg("§a已新增獎勵: §e" + type + " " + value));
             }
             case "script-add" -> {
@@ -3025,12 +2961,8 @@ public final class DungeonService {
                 if (parts.length < 2) { player.sendMessage(this.msg("§c格式: ID 觸發事件")); success = false; break; }
                 final List<ScriptDefinition> newScripts = new ArrayList<>(def.scripts());
                 newScripts.add(new ScriptDefinition(parts[0], parts[1].toUpperCase(),
-                        List.of(), List.of(), false));
-                this.replaceDungeonField(did, d -> new DungeonDefinition(
-                        d.id(), d.displayName(), d.description(), d.templateWorld(), d.category(),
-                        d.techThemed(), d.minPlayers(), d.maxPlayers(), d.timeLimitSeconds(),
-                        d.cooldownSeconds(), d.dailyLimit(), d.spawnPoint(), d.exitPoint(),
-                        d.requiredPermission(), d.waves(), d.bosses(), d.rewards(), newScripts));
+                        List.of(), List.of(), false, 0));
+                this.replaceDungeonField(did, d -> d.withScripts(newScripts));
                 player.sendMessage(this.msg("§a已新增腳本: §e" + parts[0] + " §7[" + parts[1] + "]"));
             }
             default -> {
@@ -3042,9 +2974,9 @@ public final class DungeonService {
                     final int waveIdx = pending.returnState().subIndex();
                     final DungeonDefinition d2 = this.definitions.get(did);
                     if (d2 == null || waveIdx >= d2.waves().size()) break;
-                    final List<MobEntry> newMobs = new ArrayList<>(d2.waves().get(waveIdx).mobs());
-                    newMobs.add(new MobEntry(mobType, count, null, null));
-                    this.replaceWave(did, waveIdx, w -> new WaveDefinition(w.delaySeconds(), newMobs));
+                    final List<MobEntry> newMobs = new ArrayList<>(d2.waves().get(waveIdx).mobEntries());
+                    newMobs.add(new MobEntry(mobType, null, count, 1, new double[]{0, 1, 0}, null, Map.of()));
+                    this.replaceWave(did, waveIdx, w -> new WaveDefinition(w.waveIndex(), newMobs, w.spawnDelay(), w.message(), w.requireClear()));
                     player.sendMessage(this.msg("§a已新增 §6" + mobType + " §ax" + count));
                 } else {
                     player.sendMessage(this.msg("§c未知欄位: " + field));
@@ -3144,11 +3076,7 @@ public final class DungeonService {
         if (d == null || waveIndex >= d.waves().size()) return;
         final List<WaveDefinition> newWaves = new ArrayList<>(d.waves());
         newWaves.set(waveIndex, transformer.apply(newWaves.get(waveIndex)));
-        this.replaceDungeonField(dungeonId, old -> new DungeonDefinition(
-                old.id(), old.displayName(), old.description(), old.templateWorld(), old.category(),
-                old.techThemed(), old.minPlayers(), old.maxPlayers(), old.timeLimitSeconds(),
-                old.cooldownSeconds(), old.dailyLimit(), old.spawnPoint(), old.exitPoint(),
-                old.requiredPermission(), newWaves, old.bosses(), old.rewards(), old.scripts()));
+        this.replaceDungeonField(dungeonId, old -> old.withWaves(newWaves));
     }
 
     private void replaceBoss(final String dungeonId, final int bossIndex, final BossTransformer transformer) {
@@ -3156,11 +3084,7 @@ public final class DungeonService {
         if (d == null || bossIndex >= d.bosses().size()) return;
         final List<BossDefinition> newBosses = new ArrayList<>(d.bosses());
         newBosses.set(bossIndex, transformer.apply(newBosses.get(bossIndex)));
-        this.replaceDungeonField(dungeonId, old -> new DungeonDefinition(
-                old.id(), old.displayName(), old.description(), old.templateWorld(), old.category(),
-                old.techThemed(), old.minPlayers(), old.maxPlayers(), old.timeLimitSeconds(),
-                old.cooldownSeconds(), old.dailyLimit(), old.spawnPoint(), old.exitPoint(),
-                old.requiredPermission(), old.waves(), newBosses, old.rewards(), old.scripts()));
+        this.replaceDungeonField(dungeonId, old -> old.withBosses(newBosses));
     }
 
     /** 清理玩家的編輯器 GUI 狀態。 */

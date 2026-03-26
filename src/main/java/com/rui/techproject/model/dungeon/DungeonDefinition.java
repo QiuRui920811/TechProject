@@ -45,6 +45,48 @@ public record DungeonDefinition(
         boolean techThemed,
         String category
 ) {
+
+    // ── with* 複製方法（修改單一欄位並回傳新實例）──
+
+    public DungeonDefinition withDisplayName(String v) {
+        return new DungeonDefinition(id, v, description, templateWorld, minPlayers, maxPlayers, timeLimitSeconds, cooldownSeconds, dailyLimit, spawnPoint, exitPoint, waves, bosses, rewards, scripts, requiredPermission, techThemed, category);
+    }
+    public DungeonDefinition withDescription(String v) {
+        return new DungeonDefinition(id, displayName, v, templateWorld, minPlayers, maxPlayers, timeLimitSeconds, cooldownSeconds, dailyLimit, spawnPoint, exitPoint, waves, bosses, rewards, scripts, requiredPermission, techThemed, category);
+    }
+    public DungeonDefinition withMinPlayers(int v) {
+        return new DungeonDefinition(id, displayName, description, templateWorld, v, maxPlayers, timeLimitSeconds, cooldownSeconds, dailyLimit, spawnPoint, exitPoint, waves, bosses, rewards, scripts, requiredPermission, techThemed, category);
+    }
+    public DungeonDefinition withMaxPlayers(int v) {
+        return new DungeonDefinition(id, displayName, description, templateWorld, minPlayers, v, timeLimitSeconds, cooldownSeconds, dailyLimit, spawnPoint, exitPoint, waves, bosses, rewards, scripts, requiredPermission, techThemed, category);
+    }
+    public DungeonDefinition withTimeLimitSeconds(int v) {
+        return new DungeonDefinition(id, displayName, description, templateWorld, minPlayers, maxPlayers, v, cooldownSeconds, dailyLimit, spawnPoint, exitPoint, waves, bosses, rewards, scripts, requiredPermission, techThemed, category);
+    }
+    public DungeonDefinition withCooldownSeconds(int v) {
+        return new DungeonDefinition(id, displayName, description, templateWorld, minPlayers, maxPlayers, timeLimitSeconds, v, dailyLimit, spawnPoint, exitPoint, waves, bosses, rewards, scripts, requiredPermission, techThemed, category);
+    }
+    public DungeonDefinition withDailyLimit(int v) {
+        return new DungeonDefinition(id, displayName, description, templateWorld, minPlayers, maxPlayers, timeLimitSeconds, cooldownSeconds, v, spawnPoint, exitPoint, waves, bosses, rewards, scripts, requiredPermission, techThemed, category);
+    }
+    public DungeonDefinition withSpawnPoint(double[] v) {
+        return new DungeonDefinition(id, displayName, description, templateWorld, minPlayers, maxPlayers, timeLimitSeconds, cooldownSeconds, dailyLimit, v, exitPoint, waves, bosses, rewards, scripts, requiredPermission, techThemed, category);
+    }
+    public DungeonDefinition withExitPoint(double[] v) {
+        return new DungeonDefinition(id, displayName, description, templateWorld, minPlayers, maxPlayers, timeLimitSeconds, cooldownSeconds, dailyLimit, spawnPoint, v, waves, bosses, rewards, scripts, requiredPermission, techThemed, category);
+    }
+    public DungeonDefinition withWaves(List<WaveDefinition> v) {
+        return new DungeonDefinition(id, displayName, description, templateWorld, minPlayers, maxPlayers, timeLimitSeconds, cooldownSeconds, dailyLimit, spawnPoint, exitPoint, v, bosses, rewards, scripts, requiredPermission, techThemed, category);
+    }
+    public DungeonDefinition withBosses(List<BossDefinition> v) {
+        return new DungeonDefinition(id, displayName, description, templateWorld, minPlayers, maxPlayers, timeLimitSeconds, cooldownSeconds, dailyLimit, spawnPoint, exitPoint, waves, v, rewards, scripts, requiredPermission, techThemed, category);
+    }
+    public DungeonDefinition withRewards(List<RewardDefinition> v) {
+        return new DungeonDefinition(id, displayName, description, templateWorld, minPlayers, maxPlayers, timeLimitSeconds, cooldownSeconds, dailyLimit, spawnPoint, exitPoint, waves, bosses, v, scripts, requiredPermission, techThemed, category);
+    }
+    public DungeonDefinition withScripts(List<ScriptDefinition> v) {
+        return new DungeonDefinition(id, displayName, description, templateWorld, minPlayers, maxPlayers, timeLimitSeconds, cooldownSeconds, dailyLimit, spawnPoint, exitPoint, waves, bosses, rewards, v, requiredPermission, techThemed, category);
+    }
     /**
      * 波次定義。
      *
