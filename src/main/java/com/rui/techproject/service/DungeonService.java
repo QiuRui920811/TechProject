@@ -22,7 +22,10 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.FileUtil;
@@ -86,6 +89,19 @@ public final class DungeonService {
     private final Map<UUID, String> editingSessions = new ConcurrentHashMap<>();
     /** 玩家 UUID → 進入編輯模式前的位置 */
     private final Map<UUID, Location> editReturnLocations = new ConcurrentHashMap<>();
+
+    // ── 編輯器 GUI / 聊天輸入 ──
+    private static final String EDITOR_GUI_PREFIX = "§1§l副本編輯 §8» §r";
+    /** 編輯器 GUI 頁面列舉 */
+    public enum EditorPage { MAIN, SETTINGS, WAVES, WAVE_DETAIL, MOB_SELECT, BOSSES, BOSS_DETAIL, BOSS_SKILL, REWARDS, SCRIPTS }
+    /** 編輯器 GUI 狀態 */
+    public record EditorGuiState(String dungeonId, EditorPage page, int subIndex, int subIndex2) {}
+    /** 等待聊天輸入的類型 */
+    public record PendingEditorInput(String dungeonId, String field, EditorGuiState returnState) {}
+    /** 玩家 UUID → 目前 GUI 狀態 */
+    private final Map<UUID, EditorGuiState> editorGuiStates = new ConcurrentHashMap<>();
+    /** 玩家 UUID → 等待的聊天輸入 */
+    private final Map<UUID, PendingEditorInput> pendingEditorInput = new ConcurrentHashMap<>();
 
     public record LeaderboardEntry(UUID uuid, String name, int seconds) implements Comparable<LeaderboardEntry> {
         @Override public int compareTo(final LeaderboardEntry o) { return Integer.compare(this.seconds, o.seconds); }
@@ -1875,16 +1891,54 @@ public final class DungeonService {
         admin.teleport(spawn);
         admin.setGameMode(GameMode.CREATIVE);
 
+        // ── 給予編輯工具 ──
+        this.giveEditorTools(admin);
+
         admin.sendMessage(this.msg("§a已進入副本 §e" + dungeonId + " §a的編輯模式。"));
-        admin.sendMessage(this.msg("§7可用指令："));
-        admin.sendMessage(this.msg("§e  /tech dg setspawn §7- 設定玩家出生點"));
-        admin.sendMessage(this.msg("§e  /tech dg setexit §7- 設定離開傳送點（世界座標）"));
-        admin.sendMessage(this.msg("§e  /tech dg setlobby §7- 設定等候大廳位置"));
-        admin.sendMessage(this.msg("§e  /tech dg setname <名稱> §7- 設定顯示名稱"));
-        admin.sendMessage(this.msg("§e  /tech dg settime <秒> §7- 設定限時"));
-        admin.sendMessage(this.msg("§e  /tech dg setplayers <最少> <最多> §7- 設定人數"));
-        admin.sendMessage(this.msg("§e  /tech dg save §7- 儲存並退出編輯模式"));
-        admin.sendMessage(this.msg("§e  /tech dg cancel §7- 放棄修改並退出"));
+        admin.sendMessage(this.msg("§7快捷鍵盤上的工具可以右鍵使用："));
+        admin.sendMessage(this.msg("§e  [1] §b主選單 §7— 右鍵打開副本編輯 GUI"));
+        admin.sendMessage(this.msg("§e  [2] §a設定出生點 §7— 右鍵設定玩家出生位置"));
+        admin.sendMessage(this.msg("§e  [3] §d設定離開點 §7— 右鍵設定離開傳送位置"));
+        admin.sendMessage(this.msg("§e  [4] §6怪物生成器 §7— 右鍵方塊設定怪物生成點"));
+        admin.sendMessage(this.msg("§e  [5] §c事件觸發器 §7— 右鍵方塊設定腳本觸發"));
+        admin.sendMessage(this.msg("§e  [9] §4儲存並退出 §7— 右鍵儲存所有修改"));
+    }
+
+    /** 給予玩家編輯器工具組。 */
+    private void giveEditorTools(final Player admin) {
+        admin.getInventory().clear();
+        admin.getInventory().setItem(0, this.buildEditorTool(Material.NETHER_STAR,       "§b§l主選單",         "§7右鍵打開副本編輯 GUI",     "editor:menu"));
+        admin.getInventory().setItem(1, this.buildEditorTool(Material.ENDER_PEARL,       "§a§l設定出生點",     "§7右鍵：設定此位置為出生點", "editor:setspawn"));
+        admin.getInventory().setItem(2, this.buildEditorTool(Material.CHORUS_FRUIT,      "§d§l設定離開點",     "§7右鍵：設定此位置為離開點", "editor:setexit"));
+        admin.getInventory().setItem(3, this.buildEditorTool(Material.ZOMBIE_SPAWN_EGG,  "§6§l怪物生成器",     "§7右鍵方塊：設定怪物生成點", "editor:mob_spawner"));
+        admin.getInventory().setItem(4, this.buildEditorTool(Material.REDSTONE_TORCH,    "§c§l事件觸發器",     "§7右鍵方塊：設定腳本事件",   "editor:event_trigger"));
+        admin.getInventory().setItem(5, this.buildEditorTool(Material.CHEST,             "§e§l獎勵編輯",       "§7右鍵：編輯通關獎勵",       "editor:rewards"));
+        admin.getInventory().setItem(6, this.buildEditorTool(Material.CLOCK,             "§f§l基本設定",       "§7右鍵：設定限時/人數等",    "editor:settings"));
+        admin.getInventory().setItem(8, this.buildEditorTool(Material.BARRIER,           "§4§l儲存並退出",     "§7右鍵：儲存所有修改並退出", "editor:save"));
+    }
+
+    private ItemStack buildEditorTool(final Material material, final String name, final String lore, final String action) {
+        final ItemStack item = new ItemStack(material);
+        final var meta = item.getItemMeta();
+        meta.displayName(Component.text(name).decoration(TextDecoration.ITALIC, false));
+        meta.lore(List.of(
+                Component.text(lore).decoration(TextDecoration.ITALIC, false),
+                Component.text(""),
+                Component.text("§8[副本編輯器]").decoration(TextDecoration.ITALIC, false)
+        ));
+        meta.getPersistentDataContainer().set(
+                new NamespacedKey(this.plugin, "dungeon_editor_action"),
+                PersistentDataType.STRING, action);
+        item.setItemMeta(meta);
+        return item;
+    }
+
+    /** 檢查一個 ItemStack 是否是編輯器工具，回傳 action 或 null。 */
+    public String getEditorToolAction(final ItemStack stack) {
+        if (stack == null || !stack.hasItemMeta()) return null;
+        return stack.getItemMeta().getPersistentDataContainer().get(
+                new NamespacedKey(this.plugin, "dungeon_editor_action"),
+                PersistentDataType.STRING);
     }
 
     /** 設定出生點為管理員目前站立的位置。 */
@@ -2059,6 +2113,8 @@ public final class DungeonService {
 
         this.editingSessions.remove(admin.getUniqueId());
         this.editReturnLocations.remove(admin.getUniqueId());
+        this.cleanupEditorState(admin.getUniqueId());
+        admin.getInventory().clear();
         admin.sendMessage(this.msg("§a副本 §e" + dungeonId + " §a已儲存！"));
     }
 
@@ -2089,6 +2145,8 @@ public final class DungeonService {
 
         this.editingSessions.remove(admin.getUniqueId());
         this.editReturnLocations.remove(admin.getUniqueId());
+        this.cleanupEditorState(admin.getUniqueId());
+        admin.getInventory().clear();
         admin.sendMessage(this.msg("§e已取消編輯 §c" + dungeonId + " §e（修改未儲存）。"));
     }
 
@@ -2211,6 +2269,904 @@ public final class DungeonService {
 
     private static String formatLoc(final Location loc) {
         return String.format("%.1f, %.1f, %.1f (yaw=%.0f)", loc.getX(), loc.getY(), loc.getZ(), loc.getYaw());
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    //  編輯器 GUI 系統（MythicDungeons 風格）
+    // ═══════════════════════════════════════════════════════════
+
+    /** 檢查標題是否為副本編輯器 GUI。 */
+    public boolean isDungeonEditorGui(final String title) {
+        return title.startsWith("副本編輯");
+    }
+
+    /** 檢查玩家是否正在等待編輯器聊天輸入。 */
+    public boolean isAwaitingEditorInput(final UUID uuid) {
+        return this.pendingEditorInput.containsKey(uuid);
+    }
+
+    /** 處理編輯器的聊天輸入。回傳 true 表示已消費。 */
+    public boolean handleEditorChatInput(final Player player, final String text) {
+        final PendingEditorInput pending = this.pendingEditorInput.remove(player.getUniqueId());
+        if (pending == null) return false;
+
+        if (text.equalsIgnoreCase("cancel") || text.equalsIgnoreCase("取消")) {
+            player.sendMessage(this.msg("§e已取消輸入。"));
+            // 重新打開上一個 GUI
+            this.scheduler.runEntity(player, () -> this.openEditorGui(player, pending.returnState()));
+            return true;
+        }
+
+        final DungeonDefinition def = this.definitions.get(pending.dungeonId());
+        if (def == null) {
+            player.sendMessage(this.msg("§c副本定義遺失。"));
+            return true;
+        }
+
+        this.applyEditorInput(player, pending, def, text);
+        return true;
+    }
+
+    /** 處理編輯器工具的右鍵使用。 */
+    public void handleEditorToolUse(final Player player, final String action, final Block clickedBlock) {
+        final String dungeonId = this.editingSessions.get(player.getUniqueId());
+        if (dungeonId == null) return;
+
+        switch (action) {
+            case "editor:menu" -> this.openEditorMainMenu(player, dungeonId);
+            case "editor:setspawn" -> {
+                final Location loc = player.getLocation();
+                this.replaceDungeonField(dungeonId, d -> new DungeonDefinition(
+                        d.id(), d.displayName(), d.description(), d.templateWorld(), d.category(),
+                        d.techThemed(), d.minPlayers(), d.maxPlayers(), d.timeLimitSeconds(),
+                        d.cooldownSeconds(), d.dailyLimit(),
+                        new double[]{loc.getX(), loc.getY(), loc.getZ(), loc.getYaw(), loc.getPitch()},
+                        d.exitPoint(), d.requiredPermission(), d.waves(), d.bosses(), d.rewards(), d.scripts()));
+                player.sendMessage(this.msg("§a出生點已設定為 §e" + formatLoc(loc)));
+            }
+            case "editor:setexit" -> {
+                final Location loc = player.getLocation();
+                this.replaceDungeonField(dungeonId, d -> new DungeonDefinition(
+                        d.id(), d.displayName(), d.description(), d.templateWorld(), d.category(),
+                        d.techThemed(), d.minPlayers(), d.maxPlayers(), d.timeLimitSeconds(),
+                        d.cooldownSeconds(), d.dailyLimit(), d.spawnPoint(),
+                        new double[]{loc.getX(), loc.getY(), loc.getZ(), loc.getYaw(), loc.getPitch()},
+                        d.requiredPermission(), d.waves(), d.bosses(), d.rewards(), d.scripts()));
+                player.sendMessage(this.msg("§a離開點已設定為 §e" + formatLoc(loc)));
+            }
+            case "editor:mob_spawner" -> this.openEditorGui(player, new EditorGuiState(dungeonId, EditorPage.WAVES, 0, 0));
+            case "editor:event_trigger" -> this.openEditorGui(player, new EditorGuiState(dungeonId, EditorPage.SCRIPTS, 0, 0));
+            case "editor:rewards" -> this.openEditorGui(player, new EditorGuiState(dungeonId, EditorPage.REWARDS, 0, 0));
+            case "editor:settings" -> this.openEditorGui(player, new EditorGuiState(dungeonId, EditorPage.SETTINGS, 0, 0));
+            case "editor:save" -> this.adminSave(player);
+        }
+    }
+
+    /** 處理編輯器 GUI 的點擊。 */
+    public void handleEditorGuiClick(final Player player, final int rawSlot) {
+        final EditorGuiState state = this.editorGuiStates.get(player.getUniqueId());
+        if (state == null) return;
+
+        switch (state.page()) {
+            case MAIN -> this.handleMainMenuClick(player, state, rawSlot);
+            case SETTINGS -> this.handleSettingsClick(player, state, rawSlot);
+            case WAVES -> this.handleWavesClick(player, state, rawSlot);
+            case WAVE_DETAIL -> this.handleWaveDetailClick(player, state, rawSlot);
+            case MOB_SELECT -> this.handleMobSelectClick(player, state, rawSlot);
+            case BOSSES -> this.handleBossesClick(player, state, rawSlot);
+            case BOSS_DETAIL -> this.handleBossDetailClick(player, state, rawSlot);
+            case REWARDS -> this.handleRewardsClick(player, state, rawSlot);
+            case SCRIPTS -> this.handleScriptsClick(player, state, rawSlot);
+        }
+    }
+
+    /** 打開編輯器 GUI。 */
+    public void openEditorGui(final Player player, final EditorGuiState state) {
+        this.editorGuiStates.put(player.getUniqueId(), state);
+        switch (state.page()) {
+            case MAIN -> this.openEditorMainMenu(player, state.dungeonId());
+            case SETTINGS -> this.buildSettingsGui(player, state);
+            case WAVES -> this.buildWavesGui(player, state);
+            case WAVE_DETAIL -> this.buildWaveDetailGui(player, state);
+            case MOB_SELECT -> this.buildMobSelectGui(player, state);
+            case BOSSES -> this.buildBossesGui(player, state);
+            case BOSS_DETAIL -> this.buildBossDetailGui(player, state);
+            case REWARDS -> this.buildRewardsGui(player, state);
+            case SCRIPTS -> this.buildScriptsGui(player, state);
+        }
+    }
+
+    // ── 主選單 ──
+
+    private void openEditorMainMenu(final Player player, final String dungeonId) {
+        final DungeonDefinition def = this.definitions.get(dungeonId);
+        if (def == null) {
+            player.sendMessage(this.msg("§c副本定義遺失。"));
+            return;
+        }
+        final EditorGuiState state = new EditorGuiState(dungeonId, EditorPage.MAIN, 0, 0);
+        this.editorGuiStates.put(player.getUniqueId(), state);
+
+        final Inventory gui = Bukkit.createInventory(null, 27,
+                Component.text(EDITOR_GUI_PREFIX + def.displayName()));
+
+        // Row 1: Info banner
+        gui.setItem(4, this.editorIcon(Material.NETHER_STAR, "§b§l" + def.displayName(),
+                "§7ID: " + def.id(),
+                "§7模板: " + def.templateWorld(),
+                "§7分類: " + def.category(),
+                "§7人數: " + def.minPlayers() + "-" + def.maxPlayers()));
+
+        // Row 2: Main buttons
+        gui.setItem(10, this.editorIcon(Material.CLOCK, "§f§l基本設定",
+                "§7限時 / 人數 / 冷卻 / 名稱", "§e點擊編輯"));
+        gui.setItem(11, this.editorIcon(Material.ZOMBIE_HEAD, "§6§l波次管理",
+                "§7目前 " + def.waves().size() + " 個波次", "§e點擊編輯"));
+        gui.setItem(12, this.editorIcon(Material.DRAGON_HEAD, "§c§lBoss 管理",
+                "§7目前 " + def.bosses().size() + " 個 Boss", "§e點擊編輯"));
+        gui.setItem(14, this.editorIcon(Material.CHEST, "§e§l獎勵管理",
+                "§7目前 " + def.rewards().size() + " 個獎勵", "§e點擊編輯"));
+        gui.setItem(15, this.editorIcon(Material.REDSTONE_TORCH, "§d§l腳本事件",
+                "§7目前 " + def.scripts().size() + " 個腳本", "§e點擊編輯"));
+        gui.setItem(16, this.editorIcon(Material.ENDER_PEARL, "§a§l傳送點",
+                "§7出生: " + this.formatDoubleArray(def.spawnPoint()),
+                "§7離開: " + (def.exitPoint() != null ? this.formatDoubleArray(def.exitPoint()) : "§c未設定")));
+
+        // Row 3: Save / Cancel
+        gui.setItem(22, this.editorIcon(Material.LIME_WOOL, "§a§l儲存並退出", "§7儲存所有修改並退出編輯模式"));
+        gui.setItem(18, this.editorIcon(Material.RED_WOOL, "§c§l放棄修改", "§7放棄所有修改並退出"));
+
+        this.fillEmpty(gui);
+        player.openInventory(gui);
+    }
+
+    private void handleMainMenuClick(final Player player, final EditorGuiState state, final int slot) {
+        switch (slot) {
+            case 10 -> this.openEditorGui(player, new EditorGuiState(state.dungeonId(), EditorPage.SETTINGS, 0, 0));
+            case 11 -> this.openEditorGui(player, new EditorGuiState(state.dungeonId(), EditorPage.WAVES, 0, 0));
+            case 12 -> this.openEditorGui(player, new EditorGuiState(state.dungeonId(), EditorPage.BOSSES, 0, 0));
+            case 14 -> this.openEditorGui(player, new EditorGuiState(state.dungeonId(), EditorPage.REWARDS, 0, 0));
+            case 15 -> this.openEditorGui(player, new EditorGuiState(state.dungeonId(), EditorPage.SCRIPTS, 0, 0));
+            case 22 -> { player.closeInventory(); this.adminSave(player); }
+            case 18 -> { player.closeInventory(); this.adminCancel(player); }
+        }
+    }
+
+    // ── 基本設定 ──
+
+    private void buildSettingsGui(final Player player, final EditorGuiState state) {
+        final DungeonDefinition def = this.definitions.get(state.dungeonId());
+        if (def == null) return;
+        final Inventory gui = Bukkit.createInventory(null, 27,
+                Component.text(EDITOR_GUI_PREFIX + "基本設定"));
+
+        gui.setItem(10, this.editorIcon(Material.NAME_TAG, "§e§l顯示名稱",
+                "§7目前: §f" + def.displayName(), "§a點擊修改（聊天輸入）"));
+        gui.setItem(11, this.editorIcon(Material.CLOCK, "§6§l限時（秒）",
+                "§7目前: §f" + def.timeLimitSeconds() + " 秒", "§a點擊修改"));
+        gui.setItem(12, this.editorIcon(Material.PLAYER_HEAD, "§b§l最少人數",
+                "§7目前: §f" + def.minPlayers(), "§a點擊修改"));
+        gui.setItem(13, this.editorIcon(Material.PLAYER_HEAD, "§b§l最多人數",
+                "§7目前: §f" + def.maxPlayers(), "§a點擊修改"));
+        gui.setItem(14, this.editorIcon(Material.SNOWBALL, "§d§l冷卻（秒）",
+                "§7目前: §f" + def.cooldownSeconds() + " 秒", "§a點擊修改"));
+        gui.setItem(15, this.editorIcon(Material.BOOK, "§f§l說明文字",
+                "§7目前: §f" + (def.description().length() > 30 ? def.description().substring(0, 30) + "..." : def.description()),
+                "§a點擊修改（聊天輸入）"));
+        gui.setItem(16, this.editorIcon(Material.EMERALD, "§2§l每日限制",
+                "§7目前: §f" + def.dailyLimit() + " 次", "§a點擊修改"));
+
+        gui.setItem(22, this.backButton());
+        this.fillEmpty(gui);
+        player.openInventory(gui);
+    }
+
+    private void handleSettingsClick(final Player player, final EditorGuiState state, final int slot) {
+        switch (slot) {
+            case 10 -> this.promptInput(player, state, "display-name", "§e請在聊天中輸入新的顯示名稱：§7（輸入 '取消' 取消）");
+            case 11 -> this.promptInput(player, state, "time-limit", "§e請在聊天中輸入限時秒數：§7（數字，輸入 '取消' 取消）");
+            case 12 -> this.promptInput(player, state, "min-players", "§e請在聊天中輸入最少人數：§7（數字）");
+            case 13 -> this.promptInput(player, state, "max-players", "§e請在聊天中輸入最多人數：§7（數字）");
+            case 14 -> this.promptInput(player, state, "cooldown", "§e請在聊天中輸入冷卻秒數：§7（數字）");
+            case 15 -> this.promptInput(player, state, "description", "§e請在聊天中輸入副本說明：");
+            case 16 -> this.promptInput(player, state, "daily-limit", "§e請在聊天中輸入每日限制次數：§7（數字）");
+            case 22 -> this.openEditorGui(player, new EditorGuiState(state.dungeonId(), EditorPage.MAIN, 0, 0));
+        }
+    }
+
+    // ── 波次管理 ──
+
+    private void buildWavesGui(final Player player, final EditorGuiState state) {
+        final DungeonDefinition def = this.definitions.get(state.dungeonId());
+        if (def == null) return;
+        final int size = Math.max(27, ((def.waves().size() / 9) + 1) * 9 + 9);
+        final Inventory gui = Bukkit.createInventory(null, Math.min(size, 54),
+                Component.text(EDITOR_GUI_PREFIX + "波次管理"));
+
+        for (int i = 0; i < def.waves().size() && i < 45; i++) {
+            final WaveDefinition w = def.waves().get(i);
+            final int totalMobs = w.mobs().stream().mapToInt(MobEntry::count).sum();
+            gui.setItem(i, this.editorIcon(Material.SPAWNER, "§6§l波次 " + (i + 1),
+                    "§7怪物種類: §f" + w.mobs().size(),
+                    "§7怪物總數: §f" + totalMobs,
+                    "§7延遲: §f" + w.delaySeconds() + " 秒",
+                    "§e左鍵 編輯  §c右鍵 刪除"));
+        }
+
+        // 新增波次按鈕
+        final int addSlot = Math.min(def.waves().size(), 44);
+        gui.setItem(addSlot, this.editorIcon(Material.LIME_DYE, "§a§l+ 新增波次", "§7點擊新增一個空波次"));
+
+        gui.setItem(size > 27 ? size - 5 : 22, this.backButton());
+        this.fillEmpty(gui);
+        player.openInventory(gui);
+    }
+
+    private void handleWavesClick(final Player player, final EditorGuiState state, final int slot) {
+        final DungeonDefinition def = this.definitions.get(state.dungeonId());
+        if (def == null) return;
+
+        final int backSlot = this.getBackSlot(player);
+        if (slot == backSlot) {
+            this.openEditorGui(player, new EditorGuiState(state.dungeonId(), EditorPage.MAIN, 0, 0));
+            return;
+        }
+
+        // 新增波次
+        if (slot == Math.min(def.waves().size(), 44)) {
+            final List<WaveDefinition> newWaves = new ArrayList<>(def.waves());
+            newWaves.add(new WaveDefinition(5, List.of(new MobEntry("ZOMBIE", 5, null, null))));
+            this.replaceDungeonField(state.dungeonId(), d -> new DungeonDefinition(
+                    d.id(), d.displayName(), d.description(), d.templateWorld(), d.category(),
+                    d.techThemed(), d.minPlayers(), d.maxPlayers(), d.timeLimitSeconds(),
+                    d.cooldownSeconds(), d.dailyLimit(), d.spawnPoint(), d.exitPoint(),
+                    d.requiredPermission(), newWaves, d.bosses(), d.rewards(), d.scripts()));
+            player.sendMessage(this.msg("§a已新增波次 " + newWaves.size()));
+            this.openEditorGui(player, state); // 重新打開
+            return;
+        }
+
+        // 波次詳情
+        if (slot >= 0 && slot < def.waves().size()) {
+            this.openEditorGui(player, new EditorGuiState(state.dungeonId(), EditorPage.WAVE_DETAIL, slot, 0));
+        }
+    }
+
+    // ── 波次詳情 ──
+
+    private void buildWaveDetailGui(final Player player, final EditorGuiState state) {
+        final DungeonDefinition def = this.definitions.get(state.dungeonId());
+        if (def == null || state.subIndex() >= def.waves().size()) return;
+        final WaveDefinition wave = def.waves().get(state.subIndex());
+        final Inventory gui = Bukkit.createInventory(null, 36,
+                Component.text(EDITOR_GUI_PREFIX + "波次 " + (state.subIndex() + 1)));
+
+        gui.setItem(4, this.editorIcon(Material.CLOCK, "§e§l延遲秒數",
+                "§7目前: §f" + wave.delaySeconds() + " 秒", "§a點擊修改"));
+
+        // 列出此波次的怪物
+        for (int i = 0; i < wave.mobs().size() && i < 18; i++) {
+            final MobEntry mob = wave.mobs().get(i);
+            gui.setItem(9 + i, this.editorIcon(this.getMobIcon(mob.entityType()),
+                    "§6" + mob.entityType(),
+                    "§7數量: §f" + mob.count(),
+                    "§7自訂名稱: §f" + (mob.customName() != null ? mob.customName() : "無"),
+                    "§e左鍵 修改數量  §c右鍵 刪除"));
+        }
+
+        // 新增怪物按鈕
+        if (wave.mobs().size() < 18) {
+            gui.setItem(9 + wave.mobs().size(), this.editorIcon(Material.LIME_DYE, "§a§l+ 新增怪物", "§7點擊選擇怪物類型"));
+        }
+
+        // 刪除此波次
+        gui.setItem(27, this.editorIcon(Material.RED_DYE, "§c§l刪除此波次", "§7移除波次 " + (state.subIndex() + 1)));
+        gui.setItem(31, this.backButton());
+        this.fillEmpty(gui);
+        player.openInventory(gui);
+    }
+
+    private void handleWaveDetailClick(final Player player, final EditorGuiState state, final int slot) {
+        final DungeonDefinition def = this.definitions.get(state.dungeonId());
+        if (def == null || state.subIndex() >= def.waves().size()) return;
+        final WaveDefinition wave = def.waves().get(state.subIndex());
+
+        if (slot == 31) {
+            this.openEditorGui(player, new EditorGuiState(state.dungeonId(), EditorPage.WAVES, 0, 0));
+            return;
+        }
+        if (slot == 4) {
+            this.promptInput(player, state, "wave-delay", "§e請輸入波次延遲秒數：§7（數字）");
+            return;
+        }
+        // 刪除波次
+        if (slot == 27) {
+            final List<WaveDefinition> newWaves = new ArrayList<>(def.waves());
+            newWaves.remove(state.subIndex());
+            this.replaceDungeonField(state.dungeonId(), d -> new DungeonDefinition(
+                    d.id(), d.displayName(), d.description(), d.templateWorld(), d.category(),
+                    d.techThemed(), d.minPlayers(), d.maxPlayers(), d.timeLimitSeconds(),
+                    d.cooldownSeconds(), d.dailyLimit(), d.spawnPoint(), d.exitPoint(),
+                    d.requiredPermission(), newWaves, d.bosses(), d.rewards(), d.scripts()));
+            player.sendMessage(this.msg("§c已刪除波次 " + (state.subIndex() + 1)));
+            this.openEditorGui(player, new EditorGuiState(state.dungeonId(), EditorPage.WAVES, 0, 0));
+            return;
+        }
+        // 新增怪物 → 打開怪物選擇器
+        if (slot == 9 + wave.mobs().size() && wave.mobs().size() < 18) {
+            this.openEditorGui(player, new EditorGuiState(state.dungeonId(), EditorPage.MOB_SELECT, state.subIndex(), -1));
+            return;
+        }
+        // 已有怪物 slot
+        final int mobIndex = slot - 9;
+        if (mobIndex >= 0 && mobIndex < wave.mobs().size()) {
+            // 左鍵修改數量，右鍵刪除 — 但這裡拿不到 clickType，走 prompt
+            this.promptInput(player,
+                    new EditorGuiState(state.dungeonId(), EditorPage.WAVE_DETAIL, state.subIndex(), mobIndex),
+                    "mob-count", "§e請輸入 §6" + wave.mobs().get(mobIndex).entityType() + " §e的生成數量：§7（數字，輸入 0 刪除）");
+        }
+    }
+
+    // ── 怪物類型選擇器 ──
+
+    private static final EntityType[] MOB_TYPES = {
+            EntityType.ZOMBIE, EntityType.SKELETON, EntityType.SPIDER, EntityType.CREEPER,
+            EntityType.ENDERMAN, EntityType.WITCH, EntityType.BLAZE, EntityType.WITHER_SKELETON,
+            EntityType.PILLAGER, EntityType.VINDICATOR, EntityType.RAVAGER, EntityType.PHANTOM,
+            EntityType.HOGLIN, EntityType.PIGLIN_BRUTE, EntityType.WARDEN, EntityType.BREEZE,
+            EntityType.CAVE_SPIDER, EntityType.SILVERFISH, EntityType.SLIME, EntityType.MAGMA_CUBE,
+            EntityType.GHAST, EntityType.GUARDIAN, EntityType.ELDER_GUARDIAN, EntityType.SHULKER,
+            EntityType.VEX, EntityType.EVOKER, EntityType.HUSK, EntityType.DROWNED,
+            EntityType.STRAY, EntityType.BOGGED
+    };
+
+    private void buildMobSelectGui(final Player player, final EditorGuiState state) {
+        final int size = ((MOB_TYPES.length / 9) + 1) * 9 + 9;
+        final Inventory gui = Bukkit.createInventory(null, Math.min(size, 54),
+                Component.text(EDITOR_GUI_PREFIX + "選擇怪物類型"));
+        for (int i = 0; i < MOB_TYPES.length; i++) {
+            gui.setItem(i, this.editorIcon(this.getMobIcon(MOB_TYPES[i].name()),
+                    "§6" + MOB_TYPES[i].name(), "§7點擊選擇"));
+        }
+        gui.setItem(Math.min(size, 54) - 5, this.backButton());
+        this.fillEmpty(gui);
+        player.openInventory(gui);
+    }
+
+    private void handleMobSelectClick(final Player player, final EditorGuiState state, final int slot) {
+        final int backSlot = this.getBackSlot(player);
+        if (slot == backSlot) {
+            this.openEditorGui(player, new EditorGuiState(state.dungeonId(), EditorPage.WAVE_DETAIL, state.subIndex(), 0));
+            return;
+        }
+        if (slot < 0 || slot >= MOB_TYPES.length) return;
+        final EntityType selected = MOB_TYPES[slot];
+
+        // 提示輸入數量
+        this.promptInput(player,
+                new EditorGuiState(state.dungeonId(), EditorPage.WAVE_DETAIL, state.subIndex(), 0),
+                "mob-add:" + selected.name(), "§e已選擇 §6" + selected.name() + "§e，請輸入生成數量：§7（數字）");
+    }
+
+    // ── Boss 管理 ──
+
+    private void buildBossesGui(final Player player, final EditorGuiState state) {
+        final DungeonDefinition def = this.definitions.get(state.dungeonId());
+        if (def == null) return;
+        final Inventory gui = Bukkit.createInventory(null, 27,
+                Component.text(EDITOR_GUI_PREFIX + "Boss 管理"));
+
+        for (int i = 0; i < def.bosses().size() && i < 18; i++) {
+            final BossDefinition boss = def.bosses().get(i);
+            gui.setItem(i, this.editorIcon(Material.DRAGON_HEAD, "§c§l" + boss.displayName(),
+                    "§7實體: §f" + boss.entityType(),
+                    "§7血量: §f" + boss.maxHealth(),
+                    "§7傷害: §f" + boss.damage(),
+                    "§7技能: §f" + boss.skills().size(),
+                    "§e點擊編輯"));
+        }
+
+        if (def.bosses().size() < 18) {
+            gui.setItem(def.bosses().size(), this.editorIcon(Material.LIME_DYE, "§a§l+ 新增 Boss", "§7點擊新增"));
+        }
+
+        gui.setItem(22, this.backButton());
+        this.fillEmpty(gui);
+        player.openInventory(gui);
+    }
+
+    private void handleBossesClick(final Player player, final EditorGuiState state, final int slot) {
+        final DungeonDefinition def = this.definitions.get(state.dungeonId());
+        if (def == null) return;
+
+        if (slot == 22) {
+            this.openEditorGui(player, new EditorGuiState(state.dungeonId(), EditorPage.MAIN, 0, 0));
+            return;
+        }
+
+        // 新增 Boss
+        if (slot == def.bosses().size() && def.bosses().size() < 18) {
+            this.promptInput(player, state, "boss-add",
+                    "§e請輸入新 Boss 的顯示名稱：§7（例如: 機械守衛）");
+            return;
+        }
+
+        if (slot >= 0 && slot < def.bosses().size()) {
+            this.openEditorGui(player, new EditorGuiState(state.dungeonId(), EditorPage.BOSS_DETAIL, slot, 0));
+        }
+    }
+
+    // ── Boss 詳情 ──
+
+    private void buildBossDetailGui(final Player player, final EditorGuiState state) {
+        final DungeonDefinition def = this.definitions.get(state.dungeonId());
+        if (def == null || state.subIndex() >= def.bosses().size()) return;
+        final BossDefinition boss = def.bosses().get(state.subIndex());
+        final Inventory gui = Bukkit.createInventory(null, 36,
+                Component.text(EDITOR_GUI_PREFIX + "Boss: " + boss.displayName()));
+
+        gui.setItem(10, this.editorIcon(Material.NAME_TAG, "§e§l顯示名稱",
+                "§7目前: §f" + boss.displayName(), "§a點擊修改"));
+        gui.setItem(11, this.editorIcon(Material.ZOMBIE_SPAWN_EGG, "§6§l實體類型",
+                "§7目前: §f" + boss.entityType(), "§a點擊修改"));
+        gui.setItem(12, this.editorIcon(Material.GOLDEN_APPLE, "§c§l血量",
+                "§7目前: §f" + boss.maxHealth(), "§a點擊修改"));
+        gui.setItem(13, this.editorIcon(Material.DIAMOND_SWORD, "§4§l傷害",
+                "§7目前: §f" + boss.damage(), "§a點擊修改"));
+        gui.setItem(14, this.editorIcon(Material.BLAZE_POWDER, "§d§l技能",
+                "§7目前 " + boss.skills().size() + " 個技能",
+                "§e（技能需在 YAML 中手動編輯）"));
+        gui.setItem(15, this.editorIcon(Material.EXPERIENCE_BOTTLE, "§a§l階段",
+                "§7目前 " + boss.phases().size() + " 個階段",
+                "§e（階段需在 YAML 中手動編輯）"));
+
+        gui.setItem(27, this.editorIcon(Material.RED_DYE, "§c§l刪除此 Boss", "§7§l小心！不可復原"));
+        gui.setItem(31, this.backButton());
+        this.fillEmpty(gui);
+        player.openInventory(gui);
+    }
+
+    private void handleBossDetailClick(final Player player, final EditorGuiState state, final int slot) {
+        final DungeonDefinition def = this.definitions.get(state.dungeonId());
+        if (def == null || state.subIndex() >= def.bosses().size()) return;
+
+        if (slot == 31) {
+            this.openEditorGui(player, new EditorGuiState(state.dungeonId(), EditorPage.BOSSES, 0, 0));
+            return;
+        }
+        switch (slot) {
+            case 10 -> this.promptInput(player, state, "boss-name", "§e請輸入 Boss 顯示名稱：");
+            case 11 -> this.promptInput(player, state, "boss-type", "§e請輸入實體類型：§7（例如: WITHER_SKELETON）");
+            case 12 -> this.promptInput(player, state, "boss-health", "§e請輸入 Boss 血量：§7（數字）");
+            case 13 -> this.promptInput(player, state, "boss-damage", "§e請輸入 Boss 傷害：§7（數字）");
+            case 27 -> {
+                final List<BossDefinition> newBosses = new ArrayList<>(def.bosses());
+                newBosses.remove(state.subIndex());
+                this.replaceDungeonField(state.dungeonId(), d -> new DungeonDefinition(
+                        d.id(), d.displayName(), d.description(), d.templateWorld(), d.category(),
+                        d.techThemed(), d.minPlayers(), d.maxPlayers(), d.timeLimitSeconds(),
+                        d.cooldownSeconds(), d.dailyLimit(), d.spawnPoint(), d.exitPoint(),
+                        d.requiredPermission(), d.waves(), newBosses, d.rewards(), d.scripts()));
+                player.sendMessage(this.msg("§c已刪除 Boss"));
+                this.openEditorGui(player, new EditorGuiState(state.dungeonId(), EditorPage.BOSSES, 0, 0));
+            }
+        }
+    }
+
+    // ── 獎勵管理 ──
+
+    private void buildRewardsGui(final Player player, final EditorGuiState state) {
+        final DungeonDefinition def = this.definitions.get(state.dungeonId());
+        if (def == null) return;
+        final Inventory gui = Bukkit.createInventory(null, 27,
+                Component.text(EDITOR_GUI_PREFIX + "獎勵管理"));
+
+        for (int i = 0; i < def.rewards().size() && i < 18; i++) {
+            final RewardDefinition r = def.rewards().get(i);
+            gui.setItem(i, this.editorIcon(Material.CHEST, "§e§l獎勵 " + (i + 1),
+                    "§7類型: §f" + r.type(),
+                    "§7值: §f" + r.value(),
+                    "§7機率: §f" + (int) (r.chance() * 100) + "%",
+                    "§c右鍵 刪除"));
+        }
+
+        if (def.rewards().size() < 18) {
+            gui.setItem(def.rewards().size(), this.editorIcon(Material.LIME_DYE, "§a§l+ 新增獎勵",
+                    "§7可用類型: command / item / exp / money"));
+        }
+
+        gui.setItem(22, this.backButton());
+        this.fillEmpty(gui);
+        player.openInventory(gui);
+    }
+
+    private void handleRewardsClick(final Player player, final EditorGuiState state, final int slot) {
+        final DungeonDefinition def = this.definitions.get(state.dungeonId());
+        if (def == null) return;
+
+        if (slot == 22) {
+            this.openEditorGui(player, new EditorGuiState(state.dungeonId(), EditorPage.MAIN, 0, 0));
+            return;
+        }
+
+        // 新增獎勵
+        if (slot == def.rewards().size() && def.rewards().size() < 18) {
+            this.promptInput(player, state, "reward-add",
+                    "§e請輸入獎勵（格式: 類型 值 機率）\n§7範例: §fcommand give {player} diamond 5 1.0\n§7範例: §fexp 500 0.5");
+            return;
+        }
+
+        // 刪除已有獎勵
+        if (slot >= 0 && slot < def.rewards().size()) {
+            final List<RewardDefinition> newRewards = new ArrayList<>(def.rewards());
+            newRewards.remove(slot);
+            this.replaceDungeonField(state.dungeonId(), d -> new DungeonDefinition(
+                    d.id(), d.displayName(), d.description(), d.templateWorld(), d.category(),
+                    d.techThemed(), d.minPlayers(), d.maxPlayers(), d.timeLimitSeconds(),
+                    d.cooldownSeconds(), d.dailyLimit(), d.spawnPoint(), d.exitPoint(),
+                    d.requiredPermission(), d.waves(), d.bosses(), newRewards, d.scripts()));
+            player.sendMessage(this.msg("§c已刪除獎勵 " + (slot + 1)));
+            this.openEditorGui(player, state);
+        }
+    }
+
+    // ── 腳本事件 ──
+
+    private void buildScriptsGui(final Player player, final EditorGuiState state) {
+        final DungeonDefinition def = this.definitions.get(state.dungeonId());
+        if (def == null) return;
+        final Inventory gui = Bukkit.createInventory(null, 27,
+                Component.text(EDITOR_GUI_PREFIX + "腳本事件"));
+
+        for (int i = 0; i < def.scripts().size() && i < 18; i++) {
+            final ScriptDefinition s = def.scripts().get(i);
+            gui.setItem(i, this.editorIcon(Material.REDSTONE_TORCH, "§d§l" + s.id(),
+                    "§7觸發: §f" + s.trigger(),
+                    "§7條件: §f" + s.conditions().size(),
+                    "§7動作: §f" + s.actions().size(),
+                    "§e（腳本詳情需在 YAML 中編輯）",
+                    "§c點擊刪除"));
+        }
+
+        if (def.scripts().size() < 18) {
+            gui.setItem(def.scripts().size(), this.editorIcon(Material.LIME_DYE, "§a§l+ 新增腳本",
+                    "§7點擊輸入腳本 ID 和觸發事件"));
+        }
+
+        gui.setItem(22, this.backButton());
+        this.fillEmpty(gui);
+        player.openInventory(gui);
+    }
+
+    private void handleScriptsClick(final Player player, final EditorGuiState state, final int slot) {
+        final DungeonDefinition def = this.definitions.get(state.dungeonId());
+        if (def == null) return;
+
+        if (slot == 22) {
+            this.openEditorGui(player, new EditorGuiState(state.dungeonId(), EditorPage.MAIN, 0, 0));
+            return;
+        }
+
+        // 新增腳本
+        if (slot == def.scripts().size() && def.scripts().size() < 18) {
+            this.promptInput(player, state, "script-add",
+                    "§e請輸入腳本（格式: ID 觸發事件）\n§7範例: §fopen_door PASSWORD_MATCH\n§7可用觸發: WAVE_CLEAR, BOSS_DEATH, TIMER, PASSWORD_MATCH, INTERACT_BLOCK");
+            return;
+        }
+
+        // 刪除腳本
+        if (slot >= 0 && slot < def.scripts().size()) {
+            final List<ScriptDefinition> newScripts = new ArrayList<>(def.scripts());
+            newScripts.remove(slot);
+            this.replaceDungeonField(state.dungeonId(), d -> new DungeonDefinition(
+                    d.id(), d.displayName(), d.description(), d.templateWorld(), d.category(),
+                    d.techThemed(), d.minPlayers(), d.maxPlayers(), d.timeLimitSeconds(),
+                    d.cooldownSeconds(), d.dailyLimit(), d.spawnPoint(), d.exitPoint(),
+                    d.requiredPermission(), d.waves(), d.bosses(), d.rewards(), newScripts));
+            player.sendMessage(this.msg("§c已刪除腳本 " + (slot + 1)));
+            this.openEditorGui(player, state);
+        }
+    }
+
+    // ── 聊天輸入提示 ──
+
+    private void promptInput(final Player player, final EditorGuiState returnState, final String field, final String message) {
+        final String dungeonId = this.editingSessions.get(player.getUniqueId());
+        if (dungeonId == null) return;
+        this.pendingEditorInput.put(player.getUniqueId(),
+                new PendingEditorInput(dungeonId, field, returnState));
+        player.closeInventory();
+        player.sendMessage(this.msg(""));
+        player.sendMessage(this.msg(message));
+        player.sendMessage(this.msg("§8輸入 '取消' 以取消操作"));
+        player.sendMessage(this.msg(""));
+    }
+
+    private void applyEditorInput(final Player player, final PendingEditorInput pending,
+                                  final DungeonDefinition def, final String text) {
+        final String field = pending.field();
+        final String did = pending.dungeonId();
+        boolean success = true;
+
+        switch (field) {
+            case "display-name" -> this.replaceDungeonField(did, d -> new DungeonDefinition(
+                    d.id(), text, d.description(), d.templateWorld(), d.category(),
+                    d.techThemed(), d.minPlayers(), d.maxPlayers(), d.timeLimitSeconds(),
+                    d.cooldownSeconds(), d.dailyLimit(), d.spawnPoint(), d.exitPoint(),
+                    d.requiredPermission(), d.waves(), d.bosses(), d.rewards(), d.scripts()));
+            case "description" -> this.replaceDungeonField(did, d -> new DungeonDefinition(
+                    d.id(), d.displayName(), text, d.templateWorld(), d.category(),
+                    d.techThemed(), d.minPlayers(), d.maxPlayers(), d.timeLimitSeconds(),
+                    d.cooldownSeconds(), d.dailyLimit(), d.spawnPoint(), d.exitPoint(),
+                    d.requiredPermission(), d.waves(), d.bosses(), d.rewards(), d.scripts()));
+            case "time-limit" -> {
+                final int val = this.parseIntOrZero(text);
+                if (val <= 0) { player.sendMessage(this.msg("§c無效數字。")); success = false; break; }
+                this.replaceDungeonField(did, d -> new DungeonDefinition(
+                        d.id(), d.displayName(), d.description(), d.templateWorld(), d.category(),
+                        d.techThemed(), d.minPlayers(), d.maxPlayers(), val,
+                        d.cooldownSeconds(), d.dailyLimit(), d.spawnPoint(), d.exitPoint(),
+                        d.requiredPermission(), d.waves(), d.bosses(), d.rewards(), d.scripts()));
+            }
+            case "min-players" -> {
+                final int val = this.parseIntOrZero(text);
+                if (val <= 0) { player.sendMessage(this.msg("§c無效數字。")); success = false; break; }
+                this.replaceDungeonField(did, d -> new DungeonDefinition(
+                        d.id(), d.displayName(), d.description(), d.templateWorld(), d.category(),
+                        d.techThemed(), val, d.maxPlayers(), d.timeLimitSeconds(),
+                        d.cooldownSeconds(), d.dailyLimit(), d.spawnPoint(), d.exitPoint(),
+                        d.requiredPermission(), d.waves(), d.bosses(), d.rewards(), d.scripts()));
+            }
+            case "max-players" -> {
+                final int val = this.parseIntOrZero(text);
+                if (val <= 0) { player.sendMessage(this.msg("§c無效數字。")); success = false; break; }
+                this.replaceDungeonField(did, d -> new DungeonDefinition(
+                        d.id(), d.displayName(), d.description(), d.templateWorld(), d.category(),
+                        d.techThemed(), d.minPlayers(), val, d.timeLimitSeconds(),
+                        d.cooldownSeconds(), d.dailyLimit(), d.spawnPoint(), d.exitPoint(),
+                        d.requiredPermission(), d.waves(), d.bosses(), d.rewards(), d.scripts()));
+            }
+            case "cooldown" -> {
+                final int val = this.parseIntOrZero(text);
+                if (val < 0) { player.sendMessage(this.msg("§c無效數字。")); success = false; break; }
+                this.replaceDungeonField(did, d -> new DungeonDefinition(
+                        d.id(), d.displayName(), d.description(), d.templateWorld(), d.category(),
+                        d.techThemed(), d.minPlayers(), d.maxPlayers(), d.timeLimitSeconds(),
+                        val, d.dailyLimit(), d.spawnPoint(), d.exitPoint(),
+                        d.requiredPermission(), d.waves(), d.bosses(), d.rewards(), d.scripts()));
+            }
+            case "daily-limit" -> {
+                final int val = this.parseIntOrZero(text);
+                if (val < 0) { player.sendMessage(this.msg("§c無效數字。")); success = false; break; }
+                this.replaceDungeonField(did, d -> new DungeonDefinition(
+                        d.id(), d.displayName(), d.description(), d.templateWorld(), d.category(),
+                        d.techThemed(), d.minPlayers(), d.maxPlayers(), d.timeLimitSeconds(),
+                        d.cooldownSeconds(), val, d.spawnPoint(), d.exitPoint(),
+                        d.requiredPermission(), d.waves(), d.bosses(), d.rewards(), d.scripts()));
+            }
+            case "wave-delay" -> {
+                final int val = this.parseIntOrZero(text);
+                if (val < 0) { player.sendMessage(this.msg("§c無效數字。")); success = false; break; }
+                this.replaceWave(did, pending.returnState().subIndex(), w ->
+                        new WaveDefinition(val, w.mobs()));
+            }
+            case "mob-count" -> {
+                final int val = this.parseIntOrZero(text);
+                final int waveIdx = pending.returnState().subIndex();
+                final int mobIdx = pending.returnState().subIndex2();
+                final DungeonDefinition d2 = this.definitions.get(did);
+                if (d2 == null || waveIdx >= d2.waves().size()) break;
+                final WaveDefinition wave = d2.waves().get(waveIdx);
+                if (mobIdx >= wave.mobs().size()) break;
+                final List<MobEntry> newMobs = new ArrayList<>(wave.mobs());
+                if (val <= 0) {
+                    newMobs.remove(mobIdx);
+                    player.sendMessage(this.msg("§c已移除怪物。"));
+                } else {
+                    final MobEntry old = newMobs.get(mobIdx);
+                    newMobs.set(mobIdx, new MobEntry(old.entityType(), val, old.customName(), old.equipmentSet()));
+                }
+                this.replaceWave(did, waveIdx, w -> new WaveDefinition(w.delaySeconds(), newMobs));
+            }
+            case "boss-add" -> {
+                final List<BossDefinition> newBosses = new ArrayList<>(def.bosses());
+                newBosses.add(new BossDefinition(text, "WITHER_SKELETON", 200, 15.0,
+                        List.of(), List.of()));
+                this.replaceDungeonField(did, d -> new DungeonDefinition(
+                        d.id(), d.displayName(), d.description(), d.templateWorld(), d.category(),
+                        d.techThemed(), d.minPlayers(), d.maxPlayers(), d.timeLimitSeconds(),
+                        d.cooldownSeconds(), d.dailyLimit(), d.spawnPoint(), d.exitPoint(),
+                        d.requiredPermission(), d.waves(), newBosses, d.rewards(), d.scripts()));
+                player.sendMessage(this.msg("§a已新增 Boss: §e" + text));
+            }
+            case "boss-name" -> {
+                this.replaceBoss(did, pending.returnState().subIndex(), b ->
+                        new BossDefinition(text, b.entityType(), b.maxHealth(), b.damage(), b.skills(), b.phases()));
+            }
+            case "boss-type" -> {
+                try { EntityType.valueOf(text.toUpperCase()); } catch (final Exception e) {
+                    player.sendMessage(this.msg("§c無效實體類型。")); success = false; break;
+                }
+                this.replaceBoss(did, pending.returnState().subIndex(), b ->
+                        new BossDefinition(b.displayName(), text.toUpperCase(), b.maxHealth(), b.damage(), b.skills(), b.phases()));
+            }
+            case "boss-health" -> {
+                final int val = this.parseIntOrZero(text);
+                if (val <= 0) { player.sendMessage(this.msg("§c無效數字。")); success = false; break; }
+                this.replaceBoss(did, pending.returnState().subIndex(), b ->
+                        new BossDefinition(b.displayName(), b.entityType(), val, b.damage(), b.skills(), b.phases()));
+            }
+            case "boss-damage" -> {
+                final double val;
+                try { val = Double.parseDouble(text); } catch (final NumberFormatException e) {
+                    player.sendMessage(this.msg("§c無效數字。")); success = false; break;
+                }
+                this.replaceBoss(did, pending.returnState().subIndex(), b ->
+                        new BossDefinition(b.displayName(), b.entityType(), b.maxHealth(), val, b.skills(), b.phases()));
+            }
+            case "reward-add" -> {
+                // 格式: 類型 值 機率
+                final String[] parts = text.split("\\s+", 3);
+                if (parts.length < 2) { player.sendMessage(this.msg("§c格式錯誤，需要至少: 類型 值")); success = false; break; }
+                final String type = parts[0];
+                final String value = parts.length >= 3 ? parts[1] : parts[1];
+                final double chance = parts.length >= 3 ? this.parseDoubleOrOne(parts[2]) : 1.0;
+                final List<RewardDefinition> newRewards = new ArrayList<>(def.rewards());
+                newRewards.add(new RewardDefinition(type, parts.length >= 3 ? parts[1] + " " + text.substring(text.indexOf(parts[1]) + parts[1].length()).trim() : parts[1], chance));
+                this.replaceDungeonField(did, d -> new DungeonDefinition(
+                        d.id(), d.displayName(), d.description(), d.templateWorld(), d.category(),
+                        d.techThemed(), d.minPlayers(), d.maxPlayers(), d.timeLimitSeconds(),
+                        d.cooldownSeconds(), d.dailyLimit(), d.spawnPoint(), d.exitPoint(),
+                        d.requiredPermission(), d.waves(), d.bosses(), newRewards, d.scripts()));
+                player.sendMessage(this.msg("§a已新增獎勵: §e" + type + " " + value));
+            }
+            case "script-add" -> {
+                final String[] parts = text.split("\\s+", 2);
+                if (parts.length < 2) { player.sendMessage(this.msg("§c格式: ID 觸發事件")); success = false; break; }
+                final List<ScriptDefinition> newScripts = new ArrayList<>(def.scripts());
+                newScripts.add(new ScriptDefinition(parts[0], parts[1].toUpperCase(),
+                        List.of(), List.of(), false));
+                this.replaceDungeonField(did, d -> new DungeonDefinition(
+                        d.id(), d.displayName(), d.description(), d.templateWorld(), d.category(),
+                        d.techThemed(), d.minPlayers(), d.maxPlayers(), d.timeLimitSeconds(),
+                        d.cooldownSeconds(), d.dailyLimit(), d.spawnPoint(), d.exitPoint(),
+                        d.requiredPermission(), d.waves(), d.bosses(), d.rewards(), newScripts));
+                player.sendMessage(this.msg("§a已新增腳本: §e" + parts[0] + " §7[" + parts[1] + "]"));
+            }
+            default -> {
+                // mob-add:TYPE 格式
+                if (field.startsWith("mob-add:")) {
+                    final String mobType = field.substring("mob-add:".length());
+                    final int count = this.parseIntOrZero(text);
+                    if (count <= 0) { player.sendMessage(this.msg("§c無效數字。")); success = false; break; }
+                    final int waveIdx = pending.returnState().subIndex();
+                    final DungeonDefinition d2 = this.definitions.get(did);
+                    if (d2 == null || waveIdx >= d2.waves().size()) break;
+                    final List<MobEntry> newMobs = new ArrayList<>(d2.waves().get(waveIdx).mobs());
+                    newMobs.add(new MobEntry(mobType, count, null, null));
+                    this.replaceWave(did, waveIdx, w -> new WaveDefinition(w.delaySeconds(), newMobs));
+                    player.sendMessage(this.msg("§a已新增 §6" + mobType + " §ax" + count));
+                } else {
+                    player.sendMessage(this.msg("§c未知欄位: " + field));
+                    success = false;
+                }
+            }
+        }
+
+        if (success) {
+            player.sendMessage(this.msg("§a設定已更新。"));
+        }
+        // 1 tick 後重新打開 GUI
+        this.scheduler.runEntityDelayed(player, () ->
+                this.openEditorGui(player, pending.returnState()), 1L);
+    }
+
+    // ── GUI 建構輔助 ──
+
+    private ItemStack editorIcon(final Material material, final String name, final String... loreLines) {
+        final ItemStack item = new ItemStack(material);
+        final var meta = item.getItemMeta();
+        meta.displayName(Component.text(name).decoration(TextDecoration.ITALIC, false));
+        final List<Component> lore = new ArrayList<>();
+        for (final String line : loreLines) {
+            lore.add(Component.text(line).decoration(TextDecoration.ITALIC, false));
+        }
+        meta.lore(lore);
+        item.setItemMeta(meta);
+        return item;
+    }
+
+    private ItemStack backButton() {
+        return this.editorIcon(Material.ARROW, "§7§l← 返回", "§7回到上一頁");
+    }
+
+    private void fillEmpty(final Inventory gui) {
+        final ItemStack filler = new ItemStack(Material.GRAY_STAINED_GLASS_PANE);
+        final var meta = filler.getItemMeta();
+        meta.displayName(Component.text(" "));
+        filler.setItemMeta(meta);
+        for (int i = 0; i < gui.getSize(); i++) {
+            if (gui.getItem(i) == null) gui.setItem(i, filler);
+        }
+    }
+
+    private int getBackSlot(final Player player) {
+        final var inv = player.getOpenInventory().getTopInventory();
+        return inv.getSize() - 5;
+    }
+
+    private Material getMobIcon(final String entityType) {
+        return switch (entityType.toUpperCase()) {
+            case "ZOMBIE" -> Material.ZOMBIE_HEAD;
+            case "SKELETON" -> Material.SKELETON_SKULL;
+            case "CREEPER" -> Material.CREEPER_HEAD;
+            case "SPIDER", "CAVE_SPIDER" -> Material.SPIDER_EYE;
+            case "ENDERMAN" -> Material.ENDER_PEARL;
+            case "BLAZE" -> Material.BLAZE_ROD;
+            case "WITHER_SKELETON" -> Material.WITHER_SKELETON_SKULL;
+            case "WITCH" -> Material.POTION;
+            case "PILLAGER" -> Material.CROSSBOW;
+            case "PHANTOM" -> Material.PHANTOM_MEMBRANE;
+            case "SLIME", "MAGMA_CUBE" -> Material.SLIME_BALL;
+            case "GHAST" -> Material.GHAST_TEAR;
+            case "GUARDIAN", "ELDER_GUARDIAN" -> Material.PRISMARINE_SHARD;
+            case "WARDEN" -> Material.SCULK_CATALYST;
+            case "BREEZE" -> Material.WIND_CHARGE;
+            default -> Material.SPAWNER;
+        };
+    }
+
+    private String formatDoubleArray(final double[] arr) {
+        if (arr == null || arr.length == 0) return "§c未設定";
+        return String.format("%.1f, %.1f, %.1f", arr[0], arr.length > 1 ? arr[1] : 0, arr.length > 2 ? arr[2] : 0);
+    }
+
+    private int parseIntOrZero(final String text) {
+        try { return Integer.parseInt(text.trim()); } catch (final NumberFormatException e) { return 0; }
+    }
+
+    private double parseDoubleOrOne(final String text) {
+        try { return Double.parseDouble(text.trim()); } catch (final NumberFormatException e) { return 1.0; }
+    }
+
+    @FunctionalInterface
+    private interface WaveTransformer {
+        WaveDefinition apply(WaveDefinition wave);
+    }
+
+    @FunctionalInterface
+    private interface BossTransformer {
+        BossDefinition apply(BossDefinition boss);
+    }
+
+    private void replaceWave(final String dungeonId, final int waveIndex, final WaveTransformer transformer) {
+        final DungeonDefinition d = this.definitions.get(dungeonId);
+        if (d == null || waveIndex >= d.waves().size()) return;
+        final List<WaveDefinition> newWaves = new ArrayList<>(d.waves());
+        newWaves.set(waveIndex, transformer.apply(newWaves.get(waveIndex)));
+        this.replaceDungeonField(dungeonId, old -> new DungeonDefinition(
+                old.id(), old.displayName(), old.description(), old.templateWorld(), old.category(),
+                old.techThemed(), old.minPlayers(), old.maxPlayers(), old.timeLimitSeconds(),
+                old.cooldownSeconds(), old.dailyLimit(), old.spawnPoint(), old.exitPoint(),
+                old.requiredPermission(), newWaves, old.bosses(), old.rewards(), old.scripts()));
+    }
+
+    private void replaceBoss(final String dungeonId, final int bossIndex, final BossTransformer transformer) {
+        final DungeonDefinition d = this.definitions.get(dungeonId);
+        if (d == null || bossIndex >= d.bosses().size()) return;
+        final List<BossDefinition> newBosses = new ArrayList<>(d.bosses());
+        newBosses.set(bossIndex, transformer.apply(newBosses.get(bossIndex)));
+        this.replaceDungeonField(dungeonId, old -> new DungeonDefinition(
+                old.id(), old.displayName(), old.description(), old.templateWorld(), old.category(),
+                old.techThemed(), old.minPlayers(), old.maxPlayers(), old.timeLimitSeconds(),
+                old.cooldownSeconds(), old.dailyLimit(), old.spawnPoint(), old.exitPoint(),
+                old.requiredPermission(), old.waves(), newBosses, old.rewards(), old.scripts()));
+    }
+
+    /** 清理玩家的編輯器 GUI 狀態。 */
+    public void cleanupEditorState(final UUID uuid) {
+        this.editorGuiStates.remove(uuid);
+        this.pendingEditorInput.remove(uuid);
     }
 
     public void reload() {

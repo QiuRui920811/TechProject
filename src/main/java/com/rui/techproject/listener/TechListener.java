@@ -276,6 +276,15 @@ public final class TechListener implements Listener {
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onBookSearchChat(final AsyncChatEvent event) {
         final String plainText = PlainTextComponentSerializer.plainText().serialize(event.message());
+        // 副本編輯器聊天輸入攔截
+        if (this.plugin.getDungeonService() != null
+                && this.plugin.getDungeonService().isAwaitingEditorInput(event.getPlayer().getUniqueId())) {
+            event.setCancelled(true);
+            final Player edp = event.getPlayer();
+            this.plugin.getSafeScheduler().runEntity(edp, () ->
+                    this.plugin.getDungeonService().handleEditorChatInput(edp, plainText));
+            return;
+        }
         // 副本聊天密碼攔截
         if (this.plugin.getDungeonService() != null) {
             final Player dp = event.getPlayer();
@@ -406,6 +415,20 @@ public final class TechListener implements Listener {
         }
         if (event.getHand() == EquipmentSlot.OFF_HAND) {
             return;
+        }
+        // 副本編輯器工具右鍵
+        if (this.plugin.getDungeonService() != null) {
+            final String editorAction = this.plugin.getDungeonService().getEditorToolAction(event.getItem());
+            if (editorAction != null) {
+                event.setUseInteractedBlock(Result.DENY);
+                event.setUseItemInHand(Result.DENY);
+                event.setCancelled(true);
+                final Player ep = event.getPlayer();
+                final Block eb = event.getClickedBlock();
+                this.plugin.getSafeScheduler().runEntity(ep, () ->
+                        this.plugin.getDungeonService().handleEditorToolUse(ep, editorAction, eb));
+                return;
+            }
         }
         // 副本方塊互動
         if (event.getAction() == Action.RIGHT_CLICK_BLOCK && event.getClickedBlock() != null
@@ -599,6 +622,14 @@ public final class TechListener implements Listener {
         final boolean bookViewOpen = this.plugin.getTechBookService().isBookInventory(event.getView().getTopInventory());
         final String title = PlainTextComponentSerializer.plainText().serialize(event.getView().title());
         if (!bookViewOpen && !this.plugin.getTechBookService().isBookView(title)) {
+            // 副本編輯器 GUI
+            if (this.plugin.getDungeonService() != null && this.plugin.getDungeonService().isDungeonEditorGui(title)) {
+                event.setCancelled(true);
+                if (event.getWhoClicked() instanceof Player player) {
+                    this.plugin.getDungeonService().handleEditorGuiClick(player, event.getRawSlot());
+                }
+                return;
+            }
             if (this.plugin.getAchievementGuiService().isAchievementGui(title)) {
                 event.setCancelled(true);
                 if (event.getWhoClicked() instanceof Player player) {
@@ -640,6 +671,10 @@ public final class TechListener implements Listener {
         final String title = PlainTextComponentSerializer.plainText().serialize(event.getView().title());
         final boolean bookViewOpen = this.plugin.getTechBookService().isBookInventory(event.getView().getTopInventory());
         if (this.plugin.getPlanetService().isPlanetaryGateView(title)) {
+            event.setCancelled(true);
+            return;
+        }
+        if (this.plugin.getDungeonService() != null && this.plugin.getDungeonService().isDungeonEditorGui(title)) {
             event.setCancelled(true);
             return;
         }
