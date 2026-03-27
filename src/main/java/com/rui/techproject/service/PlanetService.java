@@ -904,7 +904,7 @@ public final class PlanetService {
             behind.setY(victim.getLocation().getY());
             if (behind.getBlock().isPassable() && behind.clone().add(0, 1, 0).getBlock().isPassable()) {
                 world.spawnParticle(Particle.REVERSE_PORTAL, loc.clone().add(0, 1, 0), 30, 0.4, 0.8, 0.4, 0.05);
-                attacker.teleport(behind);
+                attacker.teleportAsync(behind);
                 world.spawnParticle(Particle.REVERSE_PORTAL, behind.clone().add(0, 1, 0), 30, 0.4, 0.8, 0.4, 0.05);
                 world.playSound(behind, Sound.ENTITY_ENDERMAN_TELEPORT, SoundCategory.HOSTILE, 1.0f, 1.2f);
             }

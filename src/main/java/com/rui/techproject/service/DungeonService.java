@@ -671,7 +671,7 @@ public final class DungeonService {
             final Player player = Bukkit.getPlayer(uuid);
             if (player != null && player.isOnline()) {
                 instance.setReturnLocation(uuid, player.getLocation());
-                this.scheduler.runEntity(player, () -> player.teleport(spawn));
+                player.teleportAsync(spawn);
             }
         }
 
@@ -709,10 +709,9 @@ public final class DungeonService {
         // 傳回原位
         final Location returnLoc = instance.getReturnLocation(uuid);
         if (returnLoc != null && returnLoc.getWorld() != null) {
-            this.scheduler.runEntity(player, () -> player.teleport(returnLoc));
+            player.teleportAsync(returnLoc);
         } else {
-            final World mainWorld = Bukkit.getWorlds().get(0);
-            this.scheduler.runEntity(player, () -> player.teleport(mainWorld.getSpawnLocation()));
+            player.teleportAsync(Bukkit.getWorlds().get(0).getSpawnLocation());
         }
     }
 
@@ -1304,7 +1303,7 @@ public final class DungeonService {
             if (save) editWorld.save();
             final World fallback = Bukkit.getWorlds().get(0);
             for (final Player p : editWorld.getPlayers()) {
-                p.teleport(fallback.getSpawnLocation());
+                p.teleportAsync(fallback.getSpawnLocation());
             }
             Bukkit.unloadWorld(editWorld, save);
         } catch (final UnsupportedOperationException e) {
@@ -1527,7 +1526,7 @@ public final class DungeonService {
                 final Location loc = new Location(world, x, y, z);
                 for (final UUID uuid : instance.members()) {
                     final Player p = Bukkit.getPlayer(uuid);
-                    if (p != null) this.scheduler.runEntity(p, () -> p.teleport(loc));
+                    if (p != null) p.teleportAsync(loc);
                 }
             }
             case "spawn_mob" -> {
@@ -2010,7 +2009,7 @@ public final class DungeonService {
         final double[] sp = def.spawnPoint();
         final Location spawn = new Location(world, sp[0], sp[1], sp[2],
                 sp.length > 3 ? (float) sp[3] : 0f, sp.length > 4 ? (float) sp[4] : 0f);
-        admin.teleport(spawn);
+        admin.teleportAsync(spawn);
         admin.setGameMode(GameMode.CREATIVE);
 
         this.giveEditorTools(admin);
@@ -2284,9 +2283,9 @@ public final class DungeonService {
     private void teleportBackFromEdit(final Player admin) {
         final Location ret = this.editReturnLocations.get(admin.getUniqueId());
         if (ret != null && ret.getWorld() != null) {
-            admin.teleport(ret);
+            admin.teleportAsync(ret);
         } else {
-            admin.teleport(Bukkit.getWorlds().get(0).getSpawnLocation());
+            admin.teleportAsync(Bukkit.getWorlds().get(0).getSpawnLocation());
         }
     }
 
