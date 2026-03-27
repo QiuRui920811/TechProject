@@ -516,6 +516,8 @@ public final class TechCommand implements CommandExecutor, TabCompleter {
                     dungeonService.inviteToParty(player, target);
                 }
                 case "accept" -> dungeonService.acceptInvite(player);
+                case "ready" -> dungeonService.handleReady(player);
+                case "stuck" -> dungeonService.handleStuck(player);
                 case "info" -> {
                     if (args.length < 3) {
                         player.sendMessage(Component.text("用法：/tech dungeon info <副本ID>", NamedTextColor.RED));
@@ -785,7 +787,7 @@ public final class TechCommand implements CommandExecutor, TabCompleter {
             return names;
         }
         if (args.length == 2 && (args[0].equalsIgnoreCase("dungeon") || args[0].equalsIgnoreCase("dg"))) {
-            final List<String> options = new ArrayList<>(List.of("list", "join", "leave", "party", "invite", "accept", "info", "top"));
+            final List<String> options = new ArrayList<>(List.of("list", "join", "leave", "party", "invite", "accept", "ready", "stuck", "info", "top"));
             if (sender.hasPermission("techproject.admin")) {
                 options.addAll(List.of("create", "edit", "setspawn", "setexit", "setlobby",
                         "setname", "settime", "setplayers", "setcooldown",

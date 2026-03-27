@@ -2,6 +2,9 @@ package com.rui.techproject.listener;
 
 import com.rui.techproject.TechProjectPlugin;
 import com.rui.techproject.model.PlacedMachine;
+import com.rui.techproject.model.dungeon.DungeonConfig;
+import com.rui.techproject.model.dungeon.DungeonInstance;
+import com.rui.techproject.service.DungeonService;
 import io.papermc.paper.event.player.AsyncChatEvent;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.Bukkit;
@@ -35,6 +38,7 @@ import org.bukkit.event.block.LeavesDecayEvent;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
+import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.entity.ProjectileHitEvent;
 import org.bukkit.event.hanging.HangingPlaceEvent;
 import org.bukkit.event.inventory.ClickType;
@@ -49,6 +53,7 @@ import org.bukkit.event.inventory.PrepareItemCraftEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerBucketEmptyEvent;
+import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerItemConsumeEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
@@ -334,6 +339,240 @@ public final class TechListener implements Listener {
     public void onPlayerDeathDungeon(final org.bukkit.event.entity.PlayerDeathEvent event) {
         if (this.plugin.getDungeonService() != null) {
             this.plugin.getDungeonService().handlePlayerDeath(event.getEntity());
+        }
+    }
+
+    // ════════════════════════════════════════════════════════════════════════════
+    //  副本規則引擎（Dungeon Rules Engine） — MythicDungeons 式規則檢查
+    // ════════════════════════════════════════════════════════════════════════════
+
+    /** 取得玩家所在副本的 Config，若不在副本內則回傳 null。 */
+    private DungeonConfig getDungeonConfigFor(final Player player) {
+        final DungeonService ds = this.plugin.getDungeonService();
+        if (ds == null) return null;
+        return ds.getPlayerDungeonConfig(player.getUniqueId());
+    }
+
+    /** 取得玩家所在副本的 Instance，若不在副本內則回傳 null。 */
+    private DungeonInstance getDungeonInstanceFor(final Player player) {
+        final DungeonService ds = this.plugin.getDungeonService();
+        if (ds == null) return null;
+        return ds.getPlayerDungeonInstance(player.getUniqueId());
+    }
+
+    /** 方塊破壞規則。回傳 true 表示已取消事件。 */
+    private boolean checkDungeonBlockBreak(final BlockBreakEvent event) {
+        final DungeonConfig cfg = this.getDungeonConfigFor(event.getPlayer());
+        if (cfg == null) return false;
+        final DungeonConfig.DungeonRules rules = cfg.rules();
+        final String blockName = event.getBlock().getType().name();
+
+        // 白名單 / 黑名單
+        if (!rules.blockBreakWhitelist().isEmpty()) {
+            if (!rules.blockBreakWhitelist().contains(blockName)) {
+                event.setCancelled(true);
+                return true;
+            }
+            return false; // 在白名單 → 允許
+        }
+        if (!rules.blockBreakBlacklist().isEmpty() && rules.blockBreakBlacklist().contains(blockName)) {
+            event.setCancelled(true);
+            return true;
+        }
+
+        // 允許破壞自己放的方塊
+        if (rules.allowBreakPlacedBlocks()) {
+            final DungeonInstance inst = this.getDungeonInstanceFor(event.getPlayer());
+            if (inst != null && inst.isPlacedBlock(event.getBlock().getX(), event.getBlock().getY(), event.getBlock().getZ())) {
+                return false;
+            }
+        }
+
+        if (!rules.allowBreakBlocks()) {
+            event.setCancelled(true);
+            return true;
+        }
+        return false;
+    }
+
+    /** 方塊放置規則。回傳 true 表示已取消事件。 */
+    private boolean checkDungeonBlockPlace(final BlockPlaceEvent event) {
+        final DungeonConfig cfg = this.getDungeonConfigFor(event.getPlayer());
+        if (cfg == null) return false;
+        final DungeonConfig.DungeonRules rules = cfg.rules();
+        final String blockName = event.getBlock().getType().name();
+
+        if (!rules.blockPlaceWhitelist().isEmpty()) {
+            if (!rules.blockPlaceWhitelist().contains(blockName)) {
+                event.setCancelled(true);
+                return true;
+            }
+        } else if (!rules.blockPlaceBlacklist().isEmpty() && rules.blockPlaceBlacklist().contains(blockName)) {
+            event.setCancelled(true);
+            return true;
+        }
+
+        if (!rules.allowPlaceBlocks()) {
+            event.setCancelled(true);
+            return true;
+        }
+
+        // 追蹤放置的方塊
+        final DungeonInstance inst = this.getDungeonInstanceFor(event.getPlayer());
+        if (inst != null) {
+            inst.trackPlacedBlock(event.getBlock().getX(), event.getBlock().getY(), event.getBlock().getZ());
+        }
+        return false;
+    }
+
+    /** PvP 規則：若副本禁止 PvP，取消玩家間傷害。回傳 true 表示已取消。 */
+    private boolean checkDungeonPvP(final EntityDamageByEntityEvent event) {
+        if (!(event.getEntity() instanceof Player victim)) return false;
+        Player attacker = null;
+        if (event.getDamager() instanceof Player p) {
+            attacker = p;
+        } else if (event.getDamager() instanceof org.bukkit.entity.Projectile proj
+                && proj.getShooter() instanceof Player p) {
+            attacker = p;
+        }
+        if (attacker == null) return false;
+        final DungeonConfig cfg = this.getDungeonConfigFor(attacker);
+        if (cfg == null) return false;
+        if (!cfg.rules().pvp()) {
+            event.setCancelled(true);
+            return true;
+        }
+        return false;
+    }
+
+    /** 耐久規則。回傳 true 表示已取消事件。 */
+    private boolean checkDungeonDurability(final PlayerItemDamageEvent event) {
+        final DungeonConfig cfg = this.getDungeonConfigFor(event.getPlayer());
+        if (cfg == null) return false;
+        if (cfg.rules().preventDurabilityLoss()) {
+            event.setCancelled(true);
+            return true;
+        }
+        return false;
+    }
+
+    /** 桶規則。回傳 true 表示已取消事件。 */
+    private boolean checkDungeonBucket(final PlayerBucketEmptyEvent event) {
+        final DungeonConfig cfg = this.getDungeonConfigFor(event.getPlayer());
+        if (cfg == null) return false;
+        if (!cfg.rules().allowBucket()) {
+            event.setCancelled(true);
+            return true;
+        }
+        return false;
+    }
+
+    /** 副本指令限制。 */
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    public void onDungeonCommand(final PlayerCommandPreprocessEvent event) {
+        final DungeonConfig cfg = this.getDungeonConfigFor(event.getPlayer());
+        if (cfg == null) return;
+        final DungeonConfig.DungeonRules rules = cfg.rules();
+
+        final String cmd = event.getMessage().toLowerCase().split("\\s+")[0].substring(1); // 去掉 /
+
+        // 永遠允許副本相關自身指令
+        if (cmd.startsWith("tech") || cmd.equals("ready") || cmd.equals("stuck")) return;
+
+        if (!rules.allowCommands()) {
+            // 檢查允許清單
+            for (final String allowed : rules.allowedCommands()) {
+                if (cmd.equalsIgnoreCase(allowed) || cmd.startsWith(allowed.toLowerCase() + " ")) return;
+            }
+            event.setCancelled(true);
+            event.getPlayer().sendMessage(this.plugin.getItemFactory().warning("副本中禁止使用此指令。"));
+            return;
+        }
+
+        // 檢查禁止清單
+        for (final String disallowed : rules.disallowedCommands()) {
+            if (cmd.equalsIgnoreCase(disallowed) || cmd.startsWith(disallowed.toLowerCase() + " ")) {
+                event.setCancelled(true);
+                event.getPlayer().sendMessage(this.plugin.getItemFactory().warning("副本中禁止使用此指令。"));
+                return;
+            }
+        }
+    }
+
+    /** 副本爆炸方塊保護。 */
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    public void onDungeonExplosion(final EntityExplodeEvent event) {
+        final DungeonService ds = this.plugin.getDungeonService();
+        if (ds == null) return;
+        if (!ds.isInDungeonWorld(event.getLocation().getWorld())) return;
+        // 嘗試從附近的副本實例取得設定（所有副本實例世界通用）
+        // 簡化：只要是副本世界就清空方塊列表
+        event.blockList().clear();
+    }
+
+    /** 副本生物生成規則。 */
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    public void onDungeonCreatureSpawn(final CreatureSpawnEvent event) {
+        if (event.getSpawnReason() != CreatureSpawnEvent.SpawnReason.NATURAL
+                && event.getSpawnReason() != CreatureSpawnEvent.SpawnReason.REINFORCEMENTS) {
+            return;
+        }
+        final DungeonService ds = this.plugin.getDungeonService();
+        if (ds == null) return;
+        if (!ds.isInDungeonWorld(event.getLocation().getWorld())) return;
+        // 副本世界中自然生成一律取消（怪物由腳本控制）
+        event.setCancelled(true);
+    }
+
+    /** 副本末影珍珠 / 合唱果限制。 */
+    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+    public void onDungeonEnderpearl(final org.bukkit.event.player.PlayerTeleportEvent event) {
+        if (event.getCause() != org.bukkit.event.player.PlayerTeleportEvent.TeleportCause.ENDER_PEARL
+                && event.getCause() != org.bukkit.event.player.PlayerTeleportEvent.TeleportCause.CHORUS_FRUIT) {
+            return;
+        }
+        final DungeonConfig cfg = this.getDungeonConfigFor(event.getPlayer());
+        if (cfg == null) return;
+        final DungeonConfig.DungeonRules rules = cfg.rules();
+        if (event.getCause() == org.bukkit.event.player.PlayerTeleportEvent.TeleportCause.ENDER_PEARL && !rules.allowEnderpearl()) {
+            event.setCancelled(true);
+            event.getPlayer().sendMessage(this.plugin.getItemFactory().warning("副本中禁止使用末影珍珠。"));
+        } else if (event.getCause() == org.bukkit.event.player.PlayerTeleportEvent.TeleportCause.CHORUS_FRUIT && !rules.allowChorusFruit()) {
+            event.setCancelled(true);
+            event.getPlayer().sendMessage(this.plugin.getItemFactory().warning("副本中禁止使用合唱果。"));
+        }
+    }
+
+    /** 副本死亡訊息隱藏。 */
+    @EventHandler(priority = EventPriority.HIGHEST)
+    public void onDungeonDeathMessage(final org.bukkit.event.entity.PlayerDeathEvent event) {
+        final DungeonConfig cfg = this.getDungeonConfigFor(event.getEntity());
+        if (cfg == null) return;
+        if (cfg.rules().hideDeathMessages()) {
+            event.deathMessage(null);
+        }
+    }
+
+    /** 副本禁用物品檢查（互動時）。 */
+    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+    public void onDungeonBannedItem(final PlayerInteractEvent event) {
+        if (event.getAction() == Action.PHYSICAL) return;
+        final Player player = event.getPlayer();
+        final DungeonConfig cfg = this.getDungeonConfigFor(player);
+        if (cfg == null) return;
+        final ItemStack item = event.getItem();
+        if (item == null || item.getType() == Material.AIR) return;
+        final DungeonConfig.DungeonRules rules = cfg.rules();
+        final String materialName = item.getType().name();
+        if (rules.bannedItems().contains(materialName)) {
+            event.setCancelled(true);
+            player.sendMessage(this.plugin.getItemFactory().warning("此物品在副本中禁止使用。"));
+            return;
+        }
+        final String techId = this.plugin.getItemFactory().getTechItemId(item);
+        if (techId != null && rules.customBannedItems().contains(techId)) {
+            event.setCancelled(true);
+            player.sendMessage(this.plugin.getItemFactory().warning("此物品在副本中禁止使用。"));
         }
     }
 
@@ -777,6 +1016,8 @@ public final class TechListener implements Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onBlockPlace(final BlockPlaceEvent event) {
+        // ── 副本規則 ──
+        if (this.checkDungeonBlockPlace(event)) return;
         final String techItemId = this.plugin.getItemFactory().getTechItemId(event.getItemInHand());
         final String machineId = this.plugin.getItemFactory().getMachineId(event.getItemInHand());
         if (this.plugin.getPlanetService().isPlanetWorld(event.getBlockPlaced().getWorld())
@@ -812,6 +1053,8 @@ public final class TechListener implements Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onBucketEmpty(final PlayerBucketEmptyEvent event) {
+        // ── 副本規則 ──
+        if (this.checkDungeonBucket(event)) return;
         if (!this.plugin.getPlanetService().isPlanetWorld(event.getBlock().getWorld())) {
             return;
         }
@@ -834,6 +1077,8 @@ public final class TechListener implements Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onBlockBreak(final BlockBreakEvent event) {
+        // ── 副本規則 ──
+        if (this.checkDungeonBlockBreak(event)) return;
         // 互動烹調：破壞烹調中的方塊會中斷烹調
         this.plugin.getCookingService().interruptByBlockBreak(event.getBlock());
         final Block managedMachine = this.plugin.getMachineService().resolveManagedMachineBlock(event.getBlock());
@@ -2350,6 +2595,8 @@ public final class TechListener implements Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onEntityDamageByEntity(final EntityDamageByEntityEvent event) {
+        // ── 副本 PvP 規則 ──
+        if (this.checkDungeonPvP(event)) return;
         if (event.getDamager() instanceof Player attacker) {
             this.handleTalismanOnAttack(attacker, event);
         }
@@ -2388,6 +2635,8 @@ public final class TechListener implements Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onItemDamageForAnvil(final PlayerItemDamageEvent event) {
+        // ── 副本規則：禁止耐久損失 ──
+        if (this.checkDungeonDurability(event)) return;
         final Player player = event.getPlayer();
         final ItemStack item = event.getItem();
         if (item.getType().getMaxDurability() <= 0) {

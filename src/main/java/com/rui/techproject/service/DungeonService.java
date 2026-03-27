@@ -269,8 +269,161 @@ public final class DungeonService {
             this.parseScripts(section.getMapList("scripts")),
             section.getString("required-permission"),
             section.getBoolean("tech-themed", false),
-            section.getString("category", "冒險")
+            section.getString("category", "冒險"),
+            this.parseDungeonConfig(section.getConfigurationSection("config"))
         );
+    }
+
+    /** 解析完整副本組態（MythicDungeons 式設定）。 */
+    @SuppressWarnings("unchecked")
+    private DungeonConfig parseDungeonConfig(final ConfigurationSection cs) {
+        final DungeonConfig cfg = DungeonConfig.defaults();
+        if (cs == null) return cfg;
+
+        // 基本
+        cfg.dungeonType(cs.getString("dungeon-type", "INSTANCED"));
+        cfg.showTitleOnStart(cs.getBoolean("show-title-on-start", true));
+
+        // 大廳 / 出口
+        if (cs.contains("lobby-point")) cfg.lobbyPoint(this.parseDoubleArray(cs, "lobby-point", null));
+        if (cs.contains("exit-location")) cfg.exitLocation(this.parseDoubleArray(cs, "exit-location", null));
+        cfg.alwaysUseExit(cs.getBoolean("always-use-exit", false));
+
+        // 遊戲模式
+        cfg.gamemode(cs.getString("gamemode", "SURVIVAL"));
+
+        // 生命 & 死亡
+        cfg.playerLives(cs.getInt("player-lives", -1));
+        cfg.instantRespawn(cs.getBoolean("instant-respawn", false));
+        cfg.deadPlayersSpectate(cs.getBoolean("dead-players-spectate", true));
+        cfg.closeDungeonWhenAllSpectating(cs.getBoolean("close-when-all-spectating", true));
+        if (cs.contains("respawn-point")) cfg.respawnPoint(this.parseDoubleArray(cs, "respawn-point", null));
+
+        // 進入時保留
+        cfg.keepInventoryOnEnter(cs.getBoolean("keep-inventory-on-enter", true));
+        cfg.keepHealthOnEnter(cs.getBoolean("keep-health-on-enter", true));
+        cfg.keepFoodOnEnter(cs.getBoolean("keep-food-on-enter", true));
+        cfg.keepPotionEffectsOnEnter(cs.getBoolean("keep-potion-effects-on-enter", false));
+        cfg.keepExpOnEnter(cs.getBoolean("keep-exp-on-enter", true));
+
+        // 斷線
+        cfg.kickOfflinePlayers(cs.getBoolean("kick-offline-players", true));
+        cfg.kickOfflinePlayersDelay(cs.getInt("kick-offline-delay", 60));
+
+        // 實例管理
+        cfg.maxBackups(cs.getInt("max-backups", 3));
+        cfg.maxInstances(cs.getInt("max-instances", 5));
+        cfg.cleanupDelay(cs.getInt("cleanup-delay", 10));
+
+        // 獎勵冷卻
+        final ConfigurationSection lootCd = cs.getConfigurationSection("loot-cooldown");
+        if (lootCd != null) {
+            cfg.lootCooldownEnabled(lootCd.getBoolean("enabled", false));
+            cfg.lootCooldownPerReward(lootCd.getBoolean("per-reward", false));
+            cfg.lootCooldownType(lootCd.getString("type", "PLAYER"));
+            cfg.lootCooldownTime(lootCd.getInt("time", 86400));
+            cfg.lootCooldownResetDay(lootCd.getString("reset-day", "MONDAY"));
+        }
+
+        // 進入冷卻
+        final ConfigurationSection accessCd = cs.getConfigurationSection("access-cooldown");
+        if (accessCd != null) {
+            cfg.accessCooldownEnabled(accessCd.getBoolean("enabled", false));
+            cfg.accessCooldownOnFinish(accessCd.getBoolean("on-finish", true));
+            cfg.accessCooldownOnLeave(accessCd.getBoolean("on-leave", false));
+            cfg.accessCooldownOnLoseLives(accessCd.getBoolean("on-lose-lives", false));
+            cfg.accessCooldownOnStart(accessCd.getBoolean("on-start", false));
+            cfg.accessCooldownType(accessCd.getString("type", "PLAYER"));
+            cfg.accessCooldownTime(accessCd.getInt("time", 3600));
+            cfg.accessCooldownResetDay(accessCd.getString("reset-day", "MONDAY"));
+        }
+
+        // 進入要求
+        final ConfigurationSection req = cs.getConfigurationSection("requirements");
+        if (req != null) {
+            cfg.requiredPermissions(req.getStringList("permissions"));
+            cfg.minPartySize(req.getInt("min-party-size", 1));
+            cfg.maxPartySize(req.getInt("max-party-size", 4));
+            cfg.requiredDungeons(req.getStringList("dungeons-complete"));
+            cfg.cost(req.getDouble("cost", 0));
+            cfg.leaderOnlyCost(req.getBoolean("leader-only-cost", true));
+        }
+
+        // 鑰匙
+        final ConfigurationSection keys = cs.getConfigurationSection("access-keys");
+        if (keys != null) {
+            cfg.accessKeysConsume(keys.getBoolean("consume", true));
+            cfg.accessKeysLeaderOnly(keys.getBoolean("leader-only", true));
+            cfg.accessKeyItems(keys.getStringList("items"));
+        }
+
+        // 難度
+        final ConfigurationSection diff = cs.getConfigurationSection("difficulty");
+        if (diff != null) {
+            cfg.enableDifficultyLevels(diff.getBoolean("enable-levels", false));
+            cfg.enableDifficultyMenu(diff.getBoolean("enable-menu", false));
+            final ConfigurationSection levels = diff.getConfigurationSection("levels");
+            if (levels != null) {
+                final List<DungeonConfig.DifficultyLevel> diffList = new ArrayList<>();
+                for (final String key : levels.getKeys(false)) {
+                    final ConfigurationSection lvl = levels.getConfigurationSection(key);
+                    if (lvl == null) continue;
+                    diffList.add(new DungeonConfig.DifficultyLevel(key, lvl.getString("display-name", key))
+                        .mobHealth(lvl.getDouble("mob-health", 1.0))
+                        .mobAmounts(lvl.getDouble("mob-amounts", 1.0))
+                        .mobDamage(lvl.getDouble("mob-damage", 1.0))
+                        .bonusMythicLevels(lvl.getInt("bonus-mythic-levels", 0))
+                        .bonusLoot(lvl.getDouble("bonus-loot", 1.0)));
+                }
+                cfg.difficultyLevels(diffList);
+            }
+        }
+
+        // 地圖
+        final ConfigurationSection map = cs.getConfigurationSection("map");
+        if (map != null) {
+            cfg.mapGiveOnJoin(map.getBoolean("give-on-join", false));
+            cfg.mapMaxRenderDepth(map.getInt("max-render-depth", 5));
+            cfg.mapDisplayFloors(map.getBoolean("display-floors", true));
+            cfg.mapFloorDepth(map.getInt("floor-depth", 10));
+            cfg.mapShowAllPlayers(map.getBoolean("show-all-players", true));
+        }
+
+        // 規則
+        final ConfigurationSection rules = cs.getConfigurationSection("rules");
+        if (rules != null) {
+            final DungeonConfig.DungeonRules r = cfg.rules();
+            r.spawnMobs(rules.getBoolean("spawn-mobs", false));
+            r.spawnAnimals(rules.getBoolean("spawn-animals", false));
+            r.spawnMonsters(rules.getBoolean("spawn-monsters", false));
+            r.allowBreakBlocks(rules.getBoolean("allow-break-blocks", false));
+            r.allowPlaceBlocks(rules.getBoolean("allow-place-blocks", false));
+            r.allowEnderpearl(rules.getBoolean("allow-enderpearl", false));
+            r.allowChorusFruit(rules.getBoolean("allow-chorus-fruit", false));
+            r.allowBucket(rules.getBoolean("allow-bucket", false));
+            r.allowPlaceEntities(rules.getBoolean("allow-place-entities", false));
+            r.disableRandomTick(rules.getBoolean("disable-random-tick", true));
+            r.preventPlantGrowth(rules.getBoolean("prevent-plant-growth", true));
+            r.preventExplosionBlockDamage(rules.getBoolean("prevent-explosion-block-damage", true));
+            r.pvp(rules.getBoolean("pvp", false));
+            r.hideDeathMessages(rules.getBoolean("hide-death-messages", true));
+            r.preventTeleportIn(rules.getBoolean("prevent-teleport-in", true));
+            r.allowCommands(rules.getBoolean("allow-commands", false));
+            r.allowedCommands(rules.getStringList("allowed-commands"));
+            r.disallowedCommands(rules.getStringList("disallowed-commands"));
+            r.bannedItems(rules.getStringList("banned-items"));
+            r.customBannedItems(rules.getStringList("custom-banned-items"));
+            r.blockPlaceWhitelist(rules.getStringList("block-place-whitelist"));
+            r.blockPlaceBlacklist(rules.getStringList("block-place-blacklist"));
+            r.blockBreakWhitelist(rules.getStringList("block-break-whitelist"));
+            r.blockBreakBlacklist(rules.getStringList("block-break-blacklist"));
+            r.allowBreakPlacedBlocks(rules.getBoolean("allow-break-placed-blocks", false));
+            r.damageProtectedEntities(rules.getStringList("damage-protected-entities"));
+            r.interactProtectedEntities(rules.getStringList("interact-protected-entities"));
+            r.preventDurabilityLoss(rules.getBoolean("prevent-durability-loss", false));
+        }
+
+        return cfg;
     }
 
     private double[] parseDoubleArray(final ConfigurationSection section, final String key, final double[] defaults) {
@@ -546,14 +699,28 @@ public final class DungeonService {
             leader.sendMessage(this.msg("§c找不到副本定義：" + dungeonId));
             return;
         }
-        // 權限檢查
+        final DungeonConfig cfg = def.config();
+        // 權限檢查（傳統 + config）
         if (def.requiredPermission() != null && !leader.hasPermission(def.requiredPermission())) {
             leader.sendMessage(this.msg("§c你沒有進入此副本的權限。"));
             return;
         }
+        for (final String perm : cfg.requiredPermissions()) {
+            if (!perm.isBlank() && !leader.hasPermission(perm)) {
+                leader.sendMessage(this.msg("§c你缺少權限：" + perm));
+                return;
+            }
+        }
         // 是否已在副本中
         if (this.playerInstanceMap.containsKey(leader.getUniqueId())) {
             leader.sendMessage(this.msg("§c你已經在一個副本中了。"));
+            return;
+        }
+        // 最大實例數檢查
+        final long activeCount = this.instances.values().stream()
+                .filter(i -> i.definition().id().equals(dungeonId) && i.isActive()).count();
+        if (cfg.maxInstances() > 0 && activeCount >= cfg.maxInstances()) {
+            leader.sendMessage(this.msg("§c此副本已達最大實例數量（" + cfg.maxInstances() + "）。"));
             return;
         }
 
@@ -567,21 +734,45 @@ public final class DungeonService {
             members.add(leader.getUniqueId());
         }
 
-        // 人數檢查
-        if (members.size() < def.minPlayers()) {
-            leader.sendMessage(this.msg("§c人數不足！需要至少 " + def.minPlayers() + " 人。"));
+        // 人數檢查（config 優先，定義次之）
+        final int minP = cfg.minPartySize() > 0 ? cfg.minPartySize() : def.minPlayers();
+        final int maxP = cfg.maxPartySize() > 0 ? cfg.maxPartySize() : def.maxPlayers();
+        if (members.size() < minP) {
+            leader.sendMessage(this.msg("§c人數不足！需要至少 " + minP + " 人。"));
             return;
         }
-        if (members.size() > def.maxPlayers()) {
-            leader.sendMessage(this.msg("§c人數超出！最多 " + def.maxPlayers() + " 人。"));
+        if (members.size() > maxP) {
+            leader.sendMessage(this.msg("§c人數超出！最多 " + maxP + " 人。"));
             return;
         }
 
-        // 冷卻 + 每日次數檢查
+        // 前置副本通關檢查
+        if (!cfg.requiredDungeons().isEmpty()) {
+            for (final UUID uuid : members) {
+                final DungeonPlayerData pd = this.getOrCreatePlayerData(uuid);
+                for (final String reqDungeon : cfg.requiredDungeons()) {
+                    if (!pd.hasCleared(reqDungeon)) {
+                        final Player p = Bukkit.getPlayer(uuid);
+                        final String name = p != null ? p.getName() : uuid.toString();
+                        leader.sendMessage(this.msg("§c" + name + " 尚未通關：" + reqDungeon));
+                        return;
+                    }
+                }
+            }
+        }
+
+        // 進入冷卻檢查（config 優先）
         final String todayKey = LocalDate.now().format(DateTimeFormatter.ISO_DATE);
         for (final UUID uuid : members) {
             final DungeonPlayerData pd = this.getOrCreatePlayerData(uuid);
             pd.resetDailyIfNeeded(todayKey);
+            // 進入冷卻（Config 版）
+            if (cfg.accessCooldownEnabled() && pd.isAccessOnCooldown(dungeonId, cfg.accessCooldownTime())) {
+                final int remaining = pd.remainingAccessCooldownSeconds(dungeonId, cfg.accessCooldownTime());
+                leader.sendMessage(this.msg("§c隊員進入冷卻中，剩餘 " + this.formatTime(remaining) + "。"));
+                return;
+            }
+            // 傳統冷卻
             if (pd.isOnCooldown(dungeonId, def.cooldownSeconds())) {
                 final int remaining = pd.remainingCooldownSeconds(dungeonId, def.cooldownSeconds());
                 leader.sendMessage(this.msg("§c隊員冷卻中，剩餘 " + this.formatTime(remaining) + "。"));
@@ -593,6 +784,34 @@ public final class DungeonService {
             }
         }
 
+        // 鑰匙檢查
+        if (!cfg.accessKeyItems().isEmpty()) {
+            final Set<UUID> toCheck = cfg.accessKeysLeaderOnly() ? Set.of(leader.getUniqueId()) : members;
+            for (final UUID uuid : toCheck) {
+                final Player p = Bukkit.getPlayer(uuid);
+                if (p == null) continue;
+                for (final String keyItem : cfg.accessKeyItems()) {
+                    if (!this.playerHasKeyItem(p, keyItem)) {
+                        leader.sendMessage(this.msg("§c缺少鑰匙物品：" + keyItem));
+                        return;
+                    }
+                }
+            }
+            // 消耗鑰匙
+            if (cfg.accessKeysConsume()) {
+                for (final UUID uuid : toCheck) {
+                    final Player p = Bukkit.getPlayer(uuid);
+                    if (p == null) continue;
+                    for (final String keyItem : cfg.accessKeyItems()) {
+                        this.consumeKeyItem(p, keyItem);
+                    }
+                }
+            }
+        }
+
+        // 費用檢查（簡化—須整合經濟系統）
+        // cost > 0 的檢查會在此處完成如果有 Vault 整合
+
         // 建立實例
         final String instanceId = INSTANCE_PREFIX + this.instanceCounter.incrementAndGet();
         final DungeonInstance instance = new DungeonInstance(instanceId, def, leader.getUniqueId());
@@ -601,6 +820,13 @@ public final class DungeonService {
             this.playerInstanceMap.put(uuid, instanceId);
         }
         this.instances.put(instanceId, instance);
+
+        // 設定進入冷卻（on-start 模式）
+        if (cfg.accessCooldownEnabled() && cfg.accessCooldownOnStart()) {
+            for (final UUID uuid : members) {
+                this.getOrCreatePlayerData(uuid).setAccessCooldown(dungeonId, System.currentTimeMillis());
+            }
+        }
 
         // 非同步複製世界
         leader.sendMessage(this.msg("§e正在準備副本世界..."));
@@ -619,8 +845,54 @@ public final class DungeonService {
         });
     }
 
+    /** 檢查玩家是否持有指定鑰匙物品。 */
+    private boolean playerHasKeyItem(final Player player, final String keyItem) {
+        // 嘗試依 Material 名稱匹配
+        try {
+            final Material mat = Material.valueOf(keyItem.toUpperCase());
+            return player.getInventory().contains(mat);
+        } catch (final Exception ignored) {}
+        // 嘗試依科技材料 ID 匹配
+        for (final ItemStack item : player.getInventory().getContents()) {
+            if (item == null) continue;
+            final ItemMeta meta = item.getItemMeta();
+            if (meta == null) continue;
+            if (meta.getPersistentDataContainer().has(
+                    new NamespacedKey(this.plugin, "tech_item_id"), PersistentDataType.STRING)) {
+                final String id = meta.getPersistentDataContainer().get(
+                        new NamespacedKey(this.plugin, "tech_item_id"), PersistentDataType.STRING);
+                if (keyItem.equals(id)) return true;
+            }
+        }
+        return false;
+    }
+
+    /** 消耗玩家身上一個指定鑰匙物品。 */
+    private void consumeKeyItem(final Player player, final String keyItem) {
+        try {
+            final Material mat = Material.valueOf(keyItem.toUpperCase());
+            player.getInventory().removeItem(new ItemStack(mat, 1));
+            return;
+        } catch (final Exception ignored) {}
+        for (final ItemStack item : player.getInventory().getContents()) {
+            if (item == null) continue;
+            final ItemMeta meta = item.getItemMeta();
+            if (meta == null) continue;
+            if (meta.getPersistentDataContainer().has(
+                    new NamespacedKey(this.plugin, "tech_item_id"), PersistentDataType.STRING)) {
+                final String id = meta.getPersistentDataContainer().get(
+                        new NamespacedKey(this.plugin, "tech_item_id"), PersistentDataType.STRING);
+                if (keyItem.equals(id)) {
+                    item.setAmount(item.getAmount() - 1);
+                    return;
+                }
+            }
+        }
+    }
+
     private void onWorldCopied(final DungeonInstance instance) {
         final DungeonDefinition def = instance.definition();
+        final DungeonConfig cfg = def.config();
         final String worldName = instance.instanceId();
 
         // 載入世界 — Folia 不支援 createWorld，捕獲異常
@@ -641,18 +913,40 @@ public final class DungeonService {
 
         world.setAutoSave(false);
         world.setDifficulty(Difficulty.HARD);
-        world.setGameRule(GameRule.DO_MOB_SPAWNING, false);
-        world.setGameRule(GameRule.MOB_GRIEFING, false);
+
+        // 依照 Config 規則設定 GameRule
+        final DungeonConfig.DungeonRules rules = cfg.rules();
+        world.setGameRule(GameRule.DO_MOB_SPAWNING, rules.spawnMobs());
+        world.setGameRule(GameRule.MOB_GRIEFING, !rules.preventExplosionBlockDamage());
         world.setGameRule(GameRule.DO_DAYLIGHT_CYCLE, false);
         world.setGameRule(GameRule.DO_WEATHER_CYCLE, false);
-        world.setGameRule(GameRule.KEEP_INVENTORY, true);
+        world.setGameRule(GameRule.KEEP_INVENTORY, true); // 我們自己處理物品邏輯
         world.setGameRule(GameRule.ANNOUNCE_ADVANCEMENTS, false);
-        world.setGameRule(GameRule.SHOW_DEATH_MESSAGES, false);
+        world.setGameRule(GameRule.SHOW_DEATH_MESSAGES, !rules.hideDeathMessages());
+        world.setGameRule(GameRule.RANDOM_TICK_SPEED, rules.disableRandomTick() ? 0 : 3);
+        world.setGameRule(GameRule.DO_FIRE_TICK, false);
+        world.setGameRule(GameRule.NATURAL_REGENERATION, true);
+        world.setGameRule(GameRule.DO_ENTITY_DROPS, true);
         world.setTime(6000L); // 正午
 
         instance.setInstanceWorld(world);
-        instance.setState(State.COUNTDOWN);
-        instance.setCountdownSeconds(COUNTDOWN_SECONDS);
+
+        // 初始化生命系統
+        final int lives = cfg.playerLives();
+        if (lives > 0) {
+            for (final UUID uuid : instance.members()) {
+                instance.initPlayerLives(uuid, lives);
+            }
+        }
+
+        // 開始倒數或大廳等待
+        if (cfg.lobbyPoint() != null) {
+            instance.setState(State.PREPARING);
+            instance.setInLobby(true);
+        } else {
+            instance.setState(State.COUNTDOWN);
+            instance.setCountdownSeconds(COUNTDOWN_SECONDS);
+        }
 
         // 記錄進入時間 + 每日次數
         final String todayKey = LocalDate.now().format(DateTimeFormatter.ISO_DATE);
@@ -664,7 +958,12 @@ public final class DungeonService {
         }
 
         // 傳送玩家
-        final double[] sp = def.spawnPoint();
+        final double[] sp;
+        if (instance.isInLobby() && cfg.lobbyPoint() != null) {
+            sp = cfg.lobbyPoint();
+        } else {
+            sp = def.spawnPoint();
+        }
         final Location spawn = new Location(world, sp[0], sp[1], sp[2],
                 sp.length > 3 ? (float) sp[3] : 0f, sp.length > 4 ? (float) sp[4] : 0f);
 
@@ -672,11 +971,50 @@ public final class DungeonService {
             final Player player = Bukkit.getPlayer(uuid);
             if (player != null && player.isOnline()) {
                 instance.setReturnLocation(uuid, player.getLocation());
+                // 保存 / 清除物品欄
+                if (!cfg.keepInventoryOnEnter()) {
+                    player.getInventory().clear();
+                }
+                if (!cfg.keepHealthOnEnter()) {
+                    final var maxHealth = player.getAttribute(Attribute.MAX_HEALTH);
+                    if (maxHealth != null) player.setHealth(maxHealth.getValue());
+                }
+                if (!cfg.keepFoodOnEnter()) {
+                    player.setFoodLevel(20);
+                    player.setSaturation(20f);
+                }
+                if (!cfg.keepPotionEffectsOnEnter()) {
+                    for (final PotionEffect effect : player.getActivePotionEffects()) {
+                        player.removePotionEffect(effect.getType());
+                    }
+                }
+                if (!cfg.keepExpOnEnter()) {
+                    player.setLevel(0);
+                    player.setExp(0f);
+                }
+                // 設定遊戲模式
+                try {
+                    player.setGameMode(GameMode.valueOf(cfg.gamemode().toUpperCase()));
+                } catch (final Exception ignored) {
+                    player.setGameMode(GameMode.SURVIVAL);
+                }
                 player.teleportAsync(spawn);
             }
         }
 
-        this.broadcastToInstance(instance, "§a副本已準備完成！倒數開始...");
+        // 大廳提示 or 倒數提示
+        if (instance.isInLobby()) {
+            this.broadcastToInstance(instance, "§a副本已準備完成！請在大廳準備就緒。使用 §f/tech dungeon ready §a確認準備。");
+        } else {
+            this.broadcastToInstance(instance, "§a副本已準備完成！倒數開始...");
+        }
+        // 開始 title
+        if (cfg.showTitleOnStart()) {
+            this.broadcastTitle(instance,
+                Component.text(def.displayName(), NamedTextColor.GOLD).decoration(TextDecoration.BOLD, true),
+                Component.text(def.description(), NamedTextColor.GRAY),
+                10, 40, 10);
+        }
     }
 
     /**
@@ -693,8 +1031,16 @@ public final class DungeonService {
             this.playerInstanceMap.remove(player.getUniqueId());
             return;
         }
+        // 設定進入冷卻（on-leave 模式）
+        final DungeonConfig cfg = instance.definition().config();
+        if (cfg.accessCooldownEnabled() && cfg.accessCooldownOnLeave()) {
+            this.getOrCreatePlayerData(player.getUniqueId()).setAccessCooldown(
+                    instance.definition().id(), System.currentTimeMillis());
+        }
         this.removePlayerFromInstance(player, instance);
         player.sendMessage(this.msg("§e你已離開副本。"));
+        // 觸發腳本
+        this.triggerScripts(instance, "leave_dungeon", Map.of("player", player.getUniqueId()));
         if (instance.members().isEmpty()) {
             this.forceCloseInstance(instance, "所有玩家離開");
         }
@@ -732,12 +1078,26 @@ public final class DungeonService {
 
     private void tickInstance(final DungeonInstance instance) {
         switch (instance.state()) {
+            case PREPARING -> this.tickLobby(instance);
             case COUNTDOWN -> this.tickCountdown(instance);
             case RUNNING, BOSS_FIGHT -> this.tickRunning(instance);
             case COMPLETED -> this.tickCompleted(instance);
             case FAILED -> this.tickFailed(instance);
             case CLOSING -> {} // 等待排程清理
             default -> {}
+        }
+    }
+
+    /** Tick 大廳等待（PREPARING + inLobby）。 */
+    private void tickLobby(final DungeonInstance instance) {
+        if (!instance.isInLobby()) return;
+        instance.incrementTicks();
+        // 每 5 秒顯示準備狀態
+        if (instance.elapsedTicks() % 100 == 0) {
+            final int total = instance.members().size();
+            final int ready = (int) instance.readyState().values().stream().filter(Boolean.TRUE::equals).count();
+            this.broadcastToInstance(instance, "§e準備狀態：§a" + ready + "§7/" + total
+                    + "  §f使用 §a/tech dungeon ready §f確認準備");
         }
     }
 
@@ -1141,15 +1501,27 @@ public final class DungeonService {
         if (instance.state() == State.COMPLETED || instance.state() == State.CLOSING) return;
         instance.setState(State.COMPLETED);
         instance.setCleared(false); // 會在 tickCompleted 中設為 true 並發獎勵
-        // 記錄清除 tick 用於延遲關閉
-        final long savedTicks = instance.elapsedTicks();
-        // 重置 ticks 用於延遲計時
-        // 不重置 — 用現有計時
         this.broadcastTitle(instance,
             Component.text("通關！", NamedTextColor.GREEN).decoration(TextDecoration.BOLD, true),
             Component.text(instance.definition().displayName(), NamedTextColor.GOLD),
             10, 60, 20);
         instance.killAllEntities();
+
+        // 設定進入冷卻（on-finish 模式）
+        final DungeonConfig cfg = instance.definition().config();
+        if (cfg.accessCooldownEnabled() && cfg.accessCooldownOnFinish()) {
+            for (final UUID uuid : instance.members()) {
+                this.getOrCreatePlayerData(uuid).setAccessCooldown(
+                        instance.definition().id(), System.currentTimeMillis());
+            }
+        }
+        // 恢復觀戰者為生存模式
+        for (final UUID uuid : instance.spectators()) {
+            final Player p = Bukkit.getPlayer(uuid);
+            if (p != null && p.isOnline()) {
+                p.setGameMode(GameMode.SURVIVAL);
+            }
+        }
     }
 
     public void failDungeon(final DungeonInstance instance) {
@@ -1459,12 +1831,11 @@ public final class DungeonService {
     private boolean evaluateCondition(final DungeonInstance instance, final ScriptCondition condition,
                                        final Map<String, Object> context) {
         return switch (condition.type().toLowerCase()) {
-            case "state" -> {
+            case "state", "dungeon_status" -> {
                 final String expected = toString(condition.params().get("state"), "RUNNING");
                 yield instance.state().name().equalsIgnoreCase(expected);
             }
             case "password" -> {
-                // 密碼檢查在 chat handler 中處理，條件在此只是提取密碼供比對
                 yield true; // 條件成立由 trigger handler 保證
             }
             case "block_location" -> {
@@ -1477,11 +1848,12 @@ public final class DungeonService {
                 }
                 yield false;
             }
-            case "variable" -> {
+            case "variable", "variable_comparison" -> {
                 final String key = toString(condition.params().get("key"), "");
                 final Object expected = condition.params().get("value");
-                yield Objects.equals(instance.getVariable(key), expected)
-                    || String.valueOf(instance.getVariable(key)).equals(String.valueOf(expected));
+                final String op = toString(condition.params().get("operator"), "equals");
+                final Object actual = instance.getVariable(key);
+                yield this.compareValues(actual, expected, op);
             }
             case "wave" -> {
                 final int wave = toInt(condition.params().get("wave"), 0);
@@ -1496,11 +1868,130 @@ public final class DungeonService {
                 boolean anyAlive = false;
                 for (final UUID uuid : instance.members()) {
                     final Player p = Bukkit.getPlayer(uuid);
-                    if (p != null && p.isOnline() && !p.isDead()) { anyAlive = true; break; }
+                    if (p != null && p.isOnline() && !p.isDead() && !instance.isSpectator(uuid)) {
+                        anyAlive = true; break;
+                    }
                 }
                 yield !anyAlive;
             }
+            // ── MythicDungeons 式新條件 ──
+            case "players_within" -> {
+                // 檢查指定範圍內的玩家數量
+                final double x = toDouble(condition.params().get("x"), 0);
+                final double y = toDouble(condition.params().get("y"), 65);
+                final double z = toDouble(condition.params().get("z"), 0);
+                final double radius = toDouble(condition.params().get("radius"), 5);
+                final int minCount = toInt(condition.params().get("min"), 1);
+                final World world = instance.instanceWorld();
+                if (world == null) yield false;
+                final Location center = new Location(world, x, y, z);
+                int count = 0;
+                for (final UUID uuid : instance.members()) {
+                    final Player p = Bukkit.getPlayer(uuid);
+                    if (p != null && !p.isDead() && p.getWorld().equals(world)
+                            && p.getLocation().distance(center) <= radius) {
+                        count++;
+                    }
+                }
+                yield count >= minCount;
+            }
+            case "mobs_within" -> {
+                // 檢查指定範圍內的怪物數量
+                final double x = toDouble(condition.params().get("x"), 0);
+                final double y = toDouble(condition.params().get("y"), 65);
+                final double z = toDouble(condition.params().get("z"), 0);
+                final double radius = toDouble(condition.params().get("radius"), 5);
+                final int minCount = toInt(condition.params().get("min"), 0);
+                final int maxCount = toInt(condition.params().get("max"), Integer.MAX_VALUE);
+                final World world = instance.instanceWorld();
+                if (world == null) yield false;
+                final Location center = new Location(world, x, y, z);
+                int count = 0;
+                for (final Entity e : instance.spawnedEntities()) {
+                    if (e != null && e.isValid() && !e.isDead()
+                            && e.getLocation().distance(center) <= radius) {
+                        count++;
+                    }
+                }
+                yield count >= minCount && count <= maxCount;
+            }
+            case "player_count" -> {
+                final int min = toInt(condition.params().get("min"), 0);
+                final int max = toInt(condition.params().get("max"), Integer.MAX_VALUE);
+                final int online = (int) instance.members().stream()
+                        .map(Bukkit::getPlayer)
+                        .filter(p -> p != null && p.isOnline() && !p.isDead())
+                        .count();
+                yield online >= min && online <= max;
+            }
+            case "trigger_chance" -> {
+                final double chance = toDouble(condition.params().get("chance"), 1.0);
+                yield ThreadLocalRandom.current().nextDouble() <= chance;
+            }
+            case "time_elapsed" -> {
+                final int minTime = toInt(condition.params().get("min"), 0);
+                final int maxTime = toInt(condition.params().get("max"), Integer.MAX_VALUE);
+                final int elapsed = instance.elapsedSeconds();
+                yield elapsed >= minTime && elapsed <= maxTime;
+            }
+            case "dungeon_difficulty" -> {
+                final String expected = toString(condition.params().get("difficulty"), "");
+                yield expected.equalsIgnoreCase(instance.selectedDifficulty() != null
+                        ? instance.selectedDifficulty() : "normal");
+            }
+            case "signal" -> {
+                final String signal = toString(condition.params().get("signal"), "");
+                yield instance.hasSignal(signal);
+            }
+            case "mob_death_count" -> {
+                final String counter = toString(condition.params().get("counter"), "default");
+                final int required = toInt(condition.params().get("count"), 1);
+                yield instance.getMobDeathCount(counter) >= required;
+            }
+            case "player_death_count" -> {
+                final int required = toInt(condition.params().get("count"), 1);
+                yield instance.playerDeathCount() >= required;
+            }
             default -> true;
+        };
+    }
+
+    /** 比較兩個值（支援 equals, greater, less, greater_equals, less_equals, not_equals）。 */
+    private boolean compareValues(final Object actual, final Object expected, final String operator) {
+        if (actual == null && expected == null) return "equals".equals(operator);
+        if (actual == null || expected == null) return "not_equals".equals(operator);
+        // 嘗試數字比較
+        if (actual instanceof Number na && expected instanceof Number ne) {
+            final double a = na.doubleValue(), b = ne.doubleValue();
+            return switch (operator.toLowerCase()) {
+                case "equals" -> a == b;
+                case "not_equals" -> a != b;
+                case "greater", ">" -> a > b;
+                case "less", "<" -> a < b;
+                case "greater_equals", ">=" -> a >= b;
+                case "less_equals", "<=" -> a <= b;
+                default -> a == b;
+            };
+        }
+        // 字串比較
+        try {
+            final double a = Double.parseDouble(String.valueOf(actual));
+            final double b = Double.parseDouble(String.valueOf(expected));
+            return switch (operator.toLowerCase()) {
+                case "equals" -> a == b;
+                case "not_equals" -> a != b;
+                case "greater", ">" -> a > b;
+                case "less", "<" -> a < b;
+                case "greater_equals", ">=" -> a >= b;
+                case "less_equals", "<=" -> a <= b;
+                default -> a == b;
+            };
+        } catch (final NumberFormatException ignored) {}
+        final String sa = String.valueOf(actual), sb = String.valueOf(expected);
+        return switch (operator.toLowerCase()) {
+            case "equals" -> sa.equals(sb);
+            case "not_equals" -> !sa.equals(sb);
+            default -> sa.equals(sb);
         };
     }
 
@@ -1672,9 +2163,346 @@ public final class DungeonService {
             }
             case "wait" -> {
                 // wait 只在排程裡有意義——此處暫不實作異步等待
-                // 可改用 delay-ticks 在腳本層面處理
+            }
+            // ── MythicDungeons 式新動作 ──
+            case "checkpoint" -> {
+                // 為所有玩家設定檢查點
+                final double x = toDouble(action.params().get("x"), 0);
+                final double y = toDouble(action.params().get("y"), 65);
+                final double z = toDouble(action.params().get("z"), 0);
+                final World world = instance.instanceWorld();
+                if (world != null) {
+                    final Location loc = new Location(world, x, y, z);
+                    instance.setCheckpointAll(loc);
+                    this.broadcastToInstance(instance, "§a§l✦ 檢查點已更新！");
+                    this.broadcastSound(instance, Sound.BLOCK_BEACON_ACTIVATE, 1.0f, 1.2f);
+                }
+            }
+            case "signal", "send_signal" -> {
+                final String signal = toString(action.params().get("signal"), "");
+                if (!signal.isBlank()) {
+                    instance.sendSignal(signal);
+                    // 觸發 signal_receiver 腳本
+                    this.triggerScripts(instance, "signal_receiver", Map.of("signal", signal));
+                }
+            }
+            case "clear_signal" -> {
+                final String signal = toString(action.params().get("signal"), "");
+                if (!signal.isBlank()) instance.clearSignal(signal);
+            }
+            case "lives_edit", "edit_lives" -> {
+                final String op = toString(action.params().get("operation"), "set"); // set, add, remove
+                final int value = toInt(action.params().get("value"), 1);
+                final boolean allPlayers = toBool(action.params().get("all"), true);
+                if (allPlayers) {
+                    for (final UUID uuid : instance.members()) {
+                        this.modifyPlayerLives(instance, uuid, op, value);
+                    }
+                } else {
+                    final Object ctx = action.params().get("player");
+                    if (ctx instanceof UUID uuid) this.modifyPlayerLives(instance, uuid, op, value);
+                }
+            }
+            case "revive" -> {
+                // 復活所有觀戰者
+                for (final UUID uuid : new ArrayList<>(instance.spectators())) {
+                    final Player p = Bukkit.getPlayer(uuid);
+                    if (p != null && p.isOnline()) {
+                        instance.removeSpectator(uuid);
+                        instance.initPlayerLives(uuid, toInt(action.params().get("lives"), 1));
+                        p.setGameMode(GameMode.SURVIVAL);
+                        this.respawnPlayerInDungeon(p, instance);
+                        p.sendMessage(this.msg("§a你已被復活！"));
+                    }
+                }
+            }
+            case "teleporter" -> {
+                final double x = toDouble(action.params().get("x"), 0);
+                final double y = toDouble(action.params().get("y"), 65);
+                final double z = toDouble(action.params().get("z"), 0);
+                final float yaw = (float) toDouble(action.params().get("yaw"), 0);
+                final float pitch = (float) toDouble(action.params().get("pitch"), 0);
+                final World world = instance.instanceWorld();
+                if (world != null) {
+                    final Location loc = new Location(world, x, y, z, yaw, pitch);
+                    final double radius = toDouble(action.params().get("radius"), 0);
+                    if (radius > 0) {
+                        // 只傳送範圍內的玩家
+                        final double sx = toDouble(action.params().get("source-x"), x);
+                        final double sy = toDouble(action.params().get("source-y"), y);
+                        final double sz = toDouble(action.params().get("source-z"), z);
+                        final Location source = new Location(world, sx, sy, sz);
+                        for (final UUID uuid : instance.members()) {
+                            final Player p = Bukkit.getPlayer(uuid);
+                            if (p != null && !p.isDead() && p.getWorld().equals(world)
+                                    && p.getLocation().distance(source) <= radius) {
+                                p.teleportAsync(loc);
+                            }
+                        }
+                    } else {
+                        for (final UUID uuid : instance.members()) {
+                            final Player p = Bukkit.getPlayer(uuid);
+                            if (p != null) p.teleportAsync(loc);
+                        }
+                    }
+                }
+            }
+            case "item_dispenser", "give_key" -> {
+                final String itemId = toString(action.params().get("item"), "TRIPWIRE_HOOK");
+                final int amount = toInt(action.params().get("amount"), 1);
+                final String itemName = toString(action.params().get("name"), null);
+                for (final UUID uuid : instance.members()) {
+                    final Player p = Bukkit.getPlayer(uuid);
+                    if (p == null) continue;
+                    try {
+                        final Material mat = Material.valueOf(itemId.toUpperCase());
+                        final ItemStack stack = new ItemStack(mat, amount);
+                        if (itemName != null) {
+                            final ItemMeta meta = stack.getItemMeta();
+                            if (meta != null) {
+                                meta.displayName(Component.text(itemName, NamedTextColor.GOLD));
+                                meta.getPersistentDataContainer().set(
+                                    new NamespacedKey(this.plugin, "dungeon_key"), PersistentDataType.STRING, itemId);
+                                stack.setItemMeta(meta);
+                            }
+                        }
+                        p.getInventory().addItem(stack);
+                    } catch (final Exception ignored) {}
+                }
+            }
+            case "door_controller" -> {
+                // 開啟或關閉門（將指定區域的方塊設為 AIR 或恢復）
+                final String doorId = toString(action.params().get("door-id"), "door");
+                final boolean open = toBool(action.params().get("open"), true);
+                final String material = toString(action.params().get("material"), "AIR");
+                final int x1 = toInt(action.params().get("x1"), 0);
+                final int y1 = toInt(action.params().get("y1"), 0);
+                final int z1 = toInt(action.params().get("z1"), 0);
+                final int x2 = toInt(action.params().get("x2"), 0);
+                final int y2 = toInt(action.params().get("y2"), 0);
+                final int z2 = toInt(action.params().get("z2"), 0);
+                final World world = instance.instanceWorld();
+                if (world != null) {
+                    final Material mat = open ? Material.AIR :
+                            this.parseMaterial(material, Material.STONE);
+                    final Location loc = new Location(world, x1, y1, z1);
+                    this.scheduler.runRegion(loc, task -> {
+                        for (int bx = Math.min(x1, x2); bx <= Math.max(x1, x2); bx++) {
+                            for (int by = Math.min(y1, y2); by <= Math.max(y1, y2); by++) {
+                                for (int bz = Math.min(z1, z2); bz <= Math.max(z1, z2); bz++) {
+                                    world.getBlockAt(bx, by, bz).setType(mat);
+                                }
+                            }
+                        }
+                    });
+                }
+            }
+            case "block_controller" -> {
+                // 將指定位置的方塊設為指定材質
+                final int x = toInt(action.params().get("x"), 0);
+                final int y = toInt(action.params().get("y"), 65);
+                final int z = toInt(action.params().get("z"), 0);
+                final String material = toString(action.params().get("material"), "REDSTONE_BLOCK");
+                final World world = instance.instanceWorld();
+                if (world != null) {
+                    final Location loc = new Location(world, x, y, z);
+                    this.scheduler.runRegion(loc, task -> {
+                        world.getBlockAt(x, y, z).setType(this.parseMaterial(material, Material.STONE));
+                    });
+                }
+            }
+            case "command_sender" -> {
+                final String command = toString(action.params().get("command"), "");
+                final boolean asConsole = toBool(action.params().get("console"), true);
+                final boolean perPlayer = toBool(action.params().get("per-player"), true);
+                if (!command.isBlank()) {
+                    if (perPlayer) {
+                        for (final UUID uuid : instance.members()) {
+                            final Player p = Bukkit.getPlayer(uuid);
+                            if (p == null) continue;
+                            final String cmd = command.replace("{player}", p.getName())
+                                    .replace("{dungeon}", instance.definition().id())
+                                    .replace("{instance}", instance.instanceId());
+                            if (asConsole) {
+                                Bukkit.dispatchCommand(Bukkit.getConsoleSender(), cmd);
+                            } else {
+                                p.performCommand(cmd);
+                            }
+                        }
+                    } else {
+                        Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command);
+                    }
+                }
+            }
+            case "multi_function" -> {
+                // 依序執行多個腳本動作
+                final Object funcs = action.params().get("functions");
+                if (funcs instanceof List<?> list) {
+                    for (final Object funcId : list) {
+                        this.triggerScripts(instance, "function_call", Map.of("function_id", String.valueOf(funcId)));
+                    }
+                }
+            }
+            case "delayed_function" -> {
+                final String funcId = toString(action.params().get("id"), "");
+                final int delay = toInt(action.params().get("delay"), 20);
+                this.scheduler.runGlobalDelayed(task ->
+                    this.triggerScripts(instance, "function_call", Map.of("function_id", funcId)), delay);
+            }
+            case "function_repeater" -> {
+                final String funcId = toString(action.params().get("id"), "");
+                final int interval = toInt(action.params().get("interval"), 20);
+                final int times = toInt(action.params().get("times"), 3);
+                for (int i = 0; i < times; i++) {
+                    final int delay = interval * (i + 1);
+                    this.scheduler.runGlobalDelayed(task -> {
+                        if (!instance.isActive()) return;
+                        this.triggerScripts(instance, "function_call", Map.of("function_id", funcId));
+                    }, delay);
+                }
+            }
+            case "function_randomizer" -> {
+                final Object funcs = action.params().get("functions");
+                if (funcs instanceof List<?> list && !list.isEmpty()) {
+                    final String chosen = String.valueOf(list.get(ThreadLocalRandom.current().nextInt(list.size())));
+                    this.triggerScripts(instance, "function_call", Map.of("function_id", chosen));
+                }
+            }
+            case "function_sequencer" -> {
+                // 依序以延遲執行多個 function
+                final Object funcs = action.params().get("functions");
+                final int interval = toInt(action.params().get("interval"), 20);
+                if (funcs instanceof List<?> list) {
+                    for (int i = 0; i < list.size(); i++) {
+                        final String funcId = String.valueOf(list.get(i));
+                        final int delay = interval * (i + 1);
+                        this.scheduler.runGlobalDelayed(task -> {
+                            if (!instance.isActive()) return;
+                            this.triggerScripts(instance, "function_call", Map.of("function_id", funcId));
+                        }, delay);
+                    }
+                }
+            }
+            case "set_difficulty" -> {
+                final String diff = toString(action.params().get("difficulty"), "normal");
+                this.applyDifficultyToInstance(instance, diff);
+            }
+            case "finish_dungeon" -> this.completeDungeon(instance);
+            case "leave_all" -> {
+                for (final UUID uuid : new ArrayList<>(instance.members())) {
+                    final Player p = Bukkit.getPlayer(uuid);
+                    if (p != null) this.removePlayerFromInstance(p, instance);
+                }
             }
         }
+    }
+
+    /** 修改玩家生命。 */
+    private void modifyPlayerLives(final DungeonInstance instance, final UUID uuid, final String op, final int value) {
+        switch (op.toLowerCase()) {
+            case "set" -> instance.initPlayerLives(uuid, value);
+            case "add" -> instance.initPlayerLives(uuid, instance.getPlayerLives(uuid) + value);
+            case "remove" -> instance.initPlayerLives(uuid, Math.max(0, instance.getPlayerLives(uuid) - value));
+        }
+    }
+
+    /** 解析 Material，失敗回傳 fallback。 */
+    private Material parseMaterial(final String name, final Material fallback) {
+        try { return Material.valueOf(name.toUpperCase()); } catch (final Exception e) { return fallback; }
+    }
+
+    /** 套用難度等級到實例。 */
+    private void applyDifficultyToInstance(final DungeonInstance instance, final String difficultyId) {
+        instance.setSelectedDifficulty(difficultyId);
+        final DungeonConfig cfg = instance.definition().config();
+        for (final DungeonConfig.DifficultyLevel level : cfg.difficultyLevels()) {
+            if (level.id().equalsIgnoreCase(difficultyId)) {
+                instance.applyDifficulty(level.mobHealth(), level.mobDamage(), level.mobAmounts(),
+                        level.bonusLoot(), level.bonusMythicLevels());
+                this.broadcastToInstance(instance, "§6難度已設定為：§e" + level.displayName());
+                return;
+            }
+        }
+    }
+
+    // ── 隊列/準備系統 ──
+
+    /** 玩家按下 Ready。 */
+    public void handleReady(final Player player) {
+        final String instanceId = this.playerInstanceMap.get(player.getUniqueId());
+        if (instanceId == null) {
+            player.sendMessage(this.msg("§c你不在任何副本中。"));
+            return;
+        }
+        final DungeonInstance instance = this.instances.get(instanceId);
+        if (instance == null || !instance.isInLobby()) {
+            player.sendMessage(this.msg("§c副本不在大廳等待階段。"));
+            return;
+        }
+        instance.setReady(player.getUniqueId(), true);
+        this.broadcastToInstance(instance, "§a" + player.getName() + " §f已準備就緒！");
+        player.playSound(player.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1f, 1.2f);
+
+        if (instance.checkAllReady()) {
+            this.broadcastToInstance(instance, "§a全員準備就緒！副本即將開始...");
+            instance.setInLobby(false);
+            instance.setState(State.COUNTDOWN);
+            instance.setCountdownSeconds(COUNTDOWN_SECONDS);
+            // 傳送到正式出生點
+            final double[] sp = instance.definition().spawnPoint();
+            final World world = instance.instanceWorld();
+            if (world != null) {
+                final Location spawn = new Location(world, sp[0], sp[1], sp[2],
+                        sp.length > 3 ? (float) sp[3] : 0f, sp.length > 4 ? (float) sp[4] : 0f);
+                for (final UUID uuid : instance.members()) {
+                    final Player p = Bukkit.getPlayer(uuid);
+                    if (p != null) p.teleportAsync(spawn);
+                }
+            }
+        }
+    }
+
+    /** /tech dungeon stuck — 傳回最近的檢查點或出生點。 */
+    public void handleStuck(final Player player) {
+        final String instanceId = this.playerInstanceMap.get(player.getUniqueId());
+        if (instanceId == null) {
+            player.sendMessage(this.msg("§c你不在任何副本中。"));
+            return;
+        }
+        final DungeonInstance instance = this.instances.get(instanceId);
+        if (instance == null) return;
+        this.respawnPlayerInDungeon(player, instance);
+        player.sendMessage(this.msg("§e已傳送至最近的安全位置。"));
+    }
+
+    /** 取得玩家所在副本的 Config（供 TechListener 規則引擎使用）。 */
+    public DungeonConfig getPlayerDungeonConfig(final UUID uuid) {
+        final String instanceId = this.playerInstanceMap.get(uuid);
+        if (instanceId == null) return null;
+        final DungeonInstance instance = this.instances.get(instanceId);
+        if (instance == null) return null;
+        return instance.definition().config();
+    }
+
+    /** 取得玩家所在副本的 Instance（供 TechListener 規則引擎使用）。 */
+    public DungeonInstance getPlayerDungeonInstance(final UUID uuid) {
+        final String instanceId = this.playerInstanceMap.get(uuid);
+        if (instanceId == null) return null;
+        return this.instances.get(instanceId);
+    }
+
+    /** 檢查玩家是否在副本世界中。 */
+    public boolean isInDungeonWorld(final Player player) {
+        return this.playerInstanceMap.containsKey(player.getUniqueId());
+    }
+
+    /** 檢查指定世界是否為副本實例世界。 */
+    public boolean isInDungeonWorld(final org.bukkit.World world) {
+        if (world == null) return false;
+        for (final DungeonInstance inst : this.instances.values()) {
+            if (world.equals(inst.instanceWorld())) return true;
+        }
+        return false;
     }
 
     // ──────────────────────────────────────────────
@@ -1726,22 +2554,119 @@ public final class DungeonService {
             if (!instance.isActive()) continue;
             if (instance.spawnedEntities().contains(entity)) {
                 instance.decrementAliveMobs();
+                // 計入怪物死亡計數器
+                final String mobType = entity.getType().name().toLowerCase();
+                instance.incrementMobDeathCounter(mobType);
+                instance.incrementMobDeathCounter("_total");
+                // 觸發怪物死亡腳本
+                this.triggerScripts(instance, "mob_kill", Map.of("mob_type", mobType, "mob_deaths", instance.getMobDeathCount(mobType)));
                 // 檢查是否是 Boss
                 if (entity.equals(instance.activeBoss())) {
                     // Boss 死亡在 tickBoss 中自然檢測
+                    this.triggerScripts(instance, "boss_death", Map.of("mob_type", mobType));
                 }
                 break;
             }
         }
     }
 
-    /** 處理玩家死亡。 */
+    /** 處理玩家死亡 — 完整生命/重生/觀戰系統。 */
     public void handlePlayerDeath(final Player player) {
         final String instanceId = this.playerInstanceMap.get(player.getUniqueId());
         if (instanceId == null) return;
         final DungeonInstance instance = this.instances.get(instanceId);
         if (instance == null || !instance.isActive()) return;
-        this.triggerScripts(instance, "player_death", Map.of("player", player.getUniqueId()));
+
+        final UUID uuid = player.getUniqueId();
+        final DungeonConfig cfg = instance.definition().config();
+        instance.incrementPlayerDeathCount();
+        this.triggerScripts(instance, "player_death", Map.of("player", uuid));
+
+        // 扣除生命
+        final int livesRemaining;
+        if (cfg.playerLives() > 0) {
+            livesRemaining = instance.decrementPlayerLives(uuid);
+            this.broadcastToInstance(instance, "§c" + player.getName() + " §7死亡！剩餘生命：§e" + Math.max(0, livesRemaining));
+        } else {
+            livesRemaining = -1; // 無限
+        }
+
+        // 即時重生
+        if (cfg.instantRespawn()) {
+            this.scheduler.runGlobalDelayed(task -> {
+                if (!player.isOnline()) return;
+                player.spigot().respawn();
+                this.respawnPlayerInDungeon(player, instance);
+            }, 1L);
+        } else if (livesRemaining > 0 || livesRemaining == -1) {
+            // 有生命→等待重生→傳送回 checkpoint 或 spawn
+            this.scheduler.runGlobalDelayed(task -> {
+                if (!player.isOnline()) return;
+                // 玩家可能已自行RESPAWN
+                if (!player.isDead()) {
+                    this.respawnPlayerInDungeon(player, instance);
+                }
+            }, 40L); // 2 秒後自動嘗試重生
+        }
+
+        // 生命耗盡 → 觀戰模式或離開
+        if (livesRemaining != -1 && livesRemaining <= 0) {
+            if (cfg.deadPlayersSpectate()) {
+                instance.addSpectator(uuid);
+                this.scheduler.runGlobalDelayed(task -> {
+                    if (!player.isOnline()) return;
+                    player.spigot().respawn();
+                    player.setGameMode(GameMode.SPECTATOR);
+                    player.sendMessage(this.msg("§c你的生命已耗盡！進入觀戰模式。"));
+                    player.playSound(player.getLocation(), Sound.ENTITY_WITHER_DEATH, 0.5f, 0.8f);
+                }, 1L);
+
+                // 設定進入冷卻（on-lose-lives 模式）
+                if (cfg.accessCooldownEnabled() && cfg.accessCooldownOnLoseLives()) {
+                    this.getOrCreatePlayerData(uuid).setAccessCooldown(
+                            instance.definition().id(), System.currentTimeMillis());
+                }
+
+                // 全員觀戰 → 失敗
+                if (cfg.closeDungeonWhenAllSpectating() && instance.allMembersSpectating()) {
+                    this.scheduler.runGlobalDelayed(task -> this.failDungeon(instance), 60L); // 3 秒後失敗
+                }
+            } else {
+                // 直接離開副本
+                this.scheduler.runGlobalDelayed(task -> {
+                    if (!player.isOnline()) return;
+                    player.spigot().respawn();
+                    this.removePlayerFromInstance(player, instance);
+                    player.sendMessage(this.msg("§c你的生命已耗盡，已被移出副本。"));
+                }, 1L);
+                if (instance.members().size() <= 1) {
+                    this.scheduler.runGlobalDelayed(task -> this.failDungeon(instance), 40L);
+                }
+            }
+        }
+    }
+
+    /** 將死亡後重生的玩家傳送回副本中。 */
+    private void respawnPlayerInDungeon(final Player player, final DungeonInstance instance) {
+        final UUID uuid = player.getUniqueId();
+        final DungeonConfig cfg = instance.definition().config();
+        final World world = instance.instanceWorld();
+        if (world == null) return;
+
+        // 優先使用 checkpoint → config respawnPoint → definition spawnPoint
+        Location respawnLoc = instance.getCheckpoint(uuid);
+        if (respawnLoc == null && cfg.respawnPoint() != null) {
+            final double[] rp = cfg.respawnPoint();
+            respawnLoc = new Location(world, rp[0], rp[1], rp[2],
+                    rp.length > 3 ? (float) rp[3] : 0f, rp.length > 4 ? (float) rp[4] : 0f);
+        }
+        if (respawnLoc == null) {
+            final double[] sp = instance.definition().spawnPoint();
+            respawnLoc = new Location(world, sp[0], sp[1], sp[2],
+                    sp.length > 3 ? (float) sp[3] : 0f, sp.length > 4 ? (float) sp[4] : 0f);
+        }
+        player.teleportAsync(respawnLoc);
+        player.playSound(player.getLocation(), Sound.BLOCK_BEACON_ACTIVATE, 0.8f, 1.2f);
     }
 
     /** 處理玩家退出伺服器。 */
@@ -1753,8 +2678,33 @@ public final class DungeonService {
             this.playerInstanceMap.remove(player.getUniqueId());
             return;
         }
-        instance.removeMember(player.getUniqueId());
-        this.playerInstanceMap.remove(player.getUniqueId());
+        final DungeonConfig cfg = instance.definition().config();
+        // 設定進入冷卻（on-leave 模式）
+        if (cfg.accessCooldownEnabled() && cfg.accessCooldownOnLeave()) {
+            this.getOrCreatePlayerData(player.getUniqueId()).setAccessCooldown(
+                    instance.definition().id(), System.currentTimeMillis());
+        }
+        // 踢出離線玩家
+        if (cfg.kickOfflinePlayers()) {
+            if (cfg.kickOfflinePlayersDelay() <= 0) {
+                instance.removeMember(player.getUniqueId());
+                this.playerInstanceMap.remove(player.getUniqueId());
+            } else {
+                // 延遲踢出
+                this.scheduler.runGlobalDelayed(task -> {
+                    if (Bukkit.getPlayer(player.getUniqueId()) != null) return; // 已重新上線
+                    instance.removeMember(player.getUniqueId());
+                    this.playerInstanceMap.remove(player.getUniqueId());
+                    if (instance.members().isEmpty()) {
+                        this.forceCloseInstance(instance, "所有玩家離開");
+                    }
+                }, cfg.kickOfflinePlayersDelay() * 20L);
+                return;
+            }
+        } else {
+            instance.removeMember(player.getUniqueId());
+            this.playerInstanceMap.remove(player.getUniqueId());
+        }
         if (instance.members().isEmpty()) {
             this.forceCloseInstance(instance, "所有玩家離開");
         }
@@ -1825,6 +2775,7 @@ public final class DungeonService {
 
     private void updateActionBar(final DungeonInstance instance) {
         final DungeonDefinition def = instance.definition();
+        final DungeonConfig cfg = def.config();
         final int elapsed = instance.elapsedSeconds();
         final String timeStr;
         if (def.timeLimitSeconds() > 0) {
@@ -1839,10 +2790,21 @@ public final class DungeonService {
         final String mobStr = instance.aliveMobCount() > 0
             ? " §7| §f怪物 §c" + instance.aliveMobCount()
             : "";
-        final Component actionBar = Component.text(timeStr + waveStr + mobStr);
         for (final UUID uuid : instance.members()) {
             final Player player = Bukkit.getPlayer(uuid);
-            if (player != null) player.sendActionBar(actionBar);
+            if (player == null) continue;
+            // 每個玩家的生命狀態
+            final String livesStr;
+            if (cfg.playerLives() > 0) {
+                final int lives = instance.getPlayerLives(uuid);
+                livesStr = " §7| §f❤ §c" + Math.max(0, lives);
+            } else {
+                livesStr = "";
+            }
+            final String diffStr = instance.selectedDifficulty() != null
+                ? " §7| §6✦ " + instance.selectedDifficulty() : "";
+            final Component actionBar = Component.text(timeStr + waveStr + mobStr + livesStr + diffStr);
+            player.sendActionBar(actionBar);
         }
     }
 
@@ -1889,7 +2851,8 @@ public final class DungeonService {
                 new double[]{0.5, 65, 0.5, 0, 0},
                 null,
                 List.of(), List.of(), List.of(), List.of(),
-                null, false, "冒險"
+                null, false, "冒險",
+                DungeonConfig.defaults()
         );
         this.definitions.put(dungeonId, stub);
         this.saveDungeonDefinition(dungeonId, stub);
@@ -2076,7 +3039,7 @@ public final class DungeonService {
                 def.id(), def.displayName(), def.description(), def.templateWorld(),
                 def.minPlayers(), def.maxPlayers(), def.timeLimitSeconds(), def.cooldownSeconds(), def.dailyLimit(),
                 sp, def.exitPoint(), def.waves(), def.bosses(), def.rewards(), def.scripts(),
-                def.requiredPermission(), def.techThemed(), def.category()
+                def.requiredPermission(), def.techThemed(), def.category(), def.config()
         ));
         admin.sendMessage(this.msg("§a出生點已設定為 §e" + formatLoc(loc)));
     }
@@ -2094,7 +3057,7 @@ public final class DungeonService {
                 def.id(), def.displayName(), def.description(), def.templateWorld(),
                 def.minPlayers(), def.maxPlayers(), def.timeLimitSeconds(), def.cooldownSeconds(), def.dailyLimit(),
                 def.spawnPoint(), ep, def.waves(), def.bosses(), def.rewards(), def.scripts(),
-                def.requiredPermission(), def.techThemed(), def.category()
+                def.requiredPermission(), def.techThemed(), def.category(), def.config()
         ));
         admin.sendMessage(this.msg("§a離開傳送點已設定為 §e" + formatLoc(loc)));
     }
@@ -2113,7 +3076,7 @@ public final class DungeonService {
                 def.id(), def.displayName(), def.description(), def.templateWorld(),
                 def.minPlayers(), def.maxPlayers(), def.timeLimitSeconds(), def.cooldownSeconds(), def.dailyLimit(),
                 lobby, def.exitPoint(), def.waves(), def.bosses(), def.rewards(), def.scripts(),
-                def.requiredPermission(), def.techThemed(), def.category()
+                def.requiredPermission(), def.techThemed(), def.category(), def.config()
         ));
         admin.sendMessage(this.msg("§a大廳 / 出生點已設定為 §e" + formatLoc(loc)));
     }
@@ -2129,7 +3092,7 @@ public final class DungeonService {
                 def.id(), displayName, def.description(), def.templateWorld(),
                 def.minPlayers(), def.maxPlayers(), def.timeLimitSeconds(), def.cooldownSeconds(), def.dailyLimit(),
                 def.spawnPoint(), def.exitPoint(), def.waves(), def.bosses(), def.rewards(), def.scripts(),
-                def.requiredPermission(), def.techThemed(), def.category()
+                def.requiredPermission(), def.techThemed(), def.category(), def.config()
         ));
         admin.sendMessage(this.msg("§a顯示名稱已設定為 §e" + displayName));
     }
@@ -2145,7 +3108,7 @@ public final class DungeonService {
                 def.id(), def.displayName(), def.description(), def.templateWorld(),
                 def.minPlayers(), def.maxPlayers(), seconds, def.cooldownSeconds(), def.dailyLimit(),
                 def.spawnPoint(), def.exitPoint(), def.waves(), def.bosses(), def.rewards(), def.scripts(),
-                def.requiredPermission(), def.techThemed(), def.category()
+                def.requiredPermission(), def.techThemed(), def.category(), def.config()
         ));
         admin.sendMessage(this.msg("§a限時已設定為 §e" + seconds + " 秒 (" + seconds / 60 + " 分鐘)"));
     }
@@ -2161,7 +3124,7 @@ public final class DungeonService {
                 def.id(), def.displayName(), def.description(), def.templateWorld(),
                 min, max, def.timeLimitSeconds(), def.cooldownSeconds(), def.dailyLimit(),
                 def.spawnPoint(), def.exitPoint(), def.waves(), def.bosses(), def.rewards(), def.scripts(),
-                def.requiredPermission(), def.techThemed(), def.category()
+                def.requiredPermission(), def.techThemed(), def.category(), def.config()
         ));
         admin.sendMessage(this.msg("§a人數已設定為 §e" + min + " ~ " + max));
     }
@@ -2177,7 +3140,7 @@ public final class DungeonService {
                 def.id(), def.displayName(), def.description(), def.templateWorld(),
                 def.minPlayers(), def.maxPlayers(), def.timeLimitSeconds(), seconds, def.dailyLimit(),
                 def.spawnPoint(), def.exitPoint(), def.waves(), def.bosses(), def.rewards(), def.scripts(),
-                def.requiredPermission(), def.techThemed(), def.category()
+                def.requiredPermission(), def.techThemed(), def.category(), def.config()
         ));
         admin.sendMessage(this.msg("§a冷卻時間已設定為 §e" + seconds + " 秒"));
     }
@@ -2344,7 +3307,6 @@ public final class DungeonService {
             section.set("required-permission", def.requiredPermission());
         }
         // waves / bosses / rewards / scripts 保留原有 YAML（不覆蓋已手動編輯的部分）
-        // 只有不存在時才寫空列表
         if (!yaml.contains(dungeonId + ".waves") && def.waves().isEmpty()) {
             section.set("waves", List.of());
         }
@@ -2357,11 +3319,133 @@ public final class DungeonService {
         if (!yaml.contains(dungeonId + ".scripts") && def.scripts().isEmpty()) {
             section.set("scripts", List.of());
         }
+        // ── 儲存 Config ──
+        this.saveDungeonConfig(section, def.config());
+
         try {
             yaml.save(file);
         } catch (final IOException e) {
             this.plugin.getLogger().warning("[副本] 儲存 tech-dungeons.yml 失敗：" + e.getMessage());
         }
+    }
+
+    /** 將 DungeonConfig 寫入 YAML section。 */
+    private void saveDungeonConfig(final ConfigurationSection parent, final DungeonConfig cfg) {
+        if (cfg == null) return;
+        final ConfigurationSection cs = parent.createSection("config");
+
+        cs.set("dungeon-type", cfg.dungeonType());
+        cs.set("show-title-on-start", cfg.showTitleOnStart());
+        if (cfg.lobbyPoint() != null) cs.set("lobby-point", this.doubleArrayToList(cfg.lobbyPoint()));
+        if (cfg.exitLocation() != null) cs.set("exit-location", this.doubleArrayToList(cfg.exitLocation()));
+        cs.set("always-use-exit", cfg.alwaysUseExit());
+        cs.set("gamemode", cfg.gamemode());
+        cs.set("player-lives", cfg.playerLives());
+        cs.set("instant-respawn", cfg.instantRespawn());
+        cs.set("dead-players-spectate", cfg.deadPlayersSpectate());
+        cs.set("close-when-all-spectating", cfg.closeDungeonWhenAllSpectating());
+        if (cfg.respawnPoint() != null) cs.set("respawn-point", this.doubleArrayToList(cfg.respawnPoint()));
+        cs.set("keep-inventory-on-enter", cfg.keepInventoryOnEnter());
+        cs.set("keep-health-on-enter", cfg.keepHealthOnEnter());
+        cs.set("keep-food-on-enter", cfg.keepFoodOnEnter());
+        cs.set("keep-potion-effects-on-enter", cfg.keepPotionEffectsOnEnter());
+        cs.set("keep-exp-on-enter", cfg.keepExpOnEnter());
+        cs.set("kick-offline-players", cfg.kickOfflinePlayers());
+        cs.set("kick-offline-delay", cfg.kickOfflinePlayersDelay());
+        cs.set("max-backups", cfg.maxBackups());
+        cs.set("max-instances", cfg.maxInstances());
+        cs.set("cleanup-delay", cfg.cleanupDelay());
+
+        // 獎勵冷卻
+        final ConfigurationSection lootCd = cs.createSection("loot-cooldown");
+        lootCd.set("enabled", cfg.lootCooldownEnabled());
+        lootCd.set("per-reward", cfg.lootCooldownPerReward());
+        lootCd.set("type", cfg.lootCooldownType());
+        lootCd.set("time", cfg.lootCooldownTime());
+        lootCd.set("reset-day", cfg.lootCooldownResetDay());
+
+        // 進入冷卻
+        final ConfigurationSection accessCd = cs.createSection("access-cooldown");
+        accessCd.set("enabled", cfg.accessCooldownEnabled());
+        accessCd.set("on-finish", cfg.accessCooldownOnFinish());
+        accessCd.set("on-leave", cfg.accessCooldownOnLeave());
+        accessCd.set("on-lose-lives", cfg.accessCooldownOnLoseLives());
+        accessCd.set("on-start", cfg.accessCooldownOnStart());
+        accessCd.set("type", cfg.accessCooldownType());
+        accessCd.set("time", cfg.accessCooldownTime());
+        accessCd.set("reset-day", cfg.accessCooldownResetDay());
+
+        // 要求
+        final ConfigurationSection req = cs.createSection("requirements");
+        req.set("permissions", cfg.requiredPermissions());
+        req.set("min-party-size", cfg.minPartySize());
+        req.set("max-party-size", cfg.maxPartySize());
+        req.set("dungeons-complete", cfg.requiredDungeons());
+        req.set("cost", cfg.cost());
+        req.set("leader-only-cost", cfg.leaderOnlyCost());
+
+        // 鑰匙
+        final ConfigurationSection keys = cs.createSection("access-keys");
+        keys.set("consume", cfg.accessKeysConsume());
+        keys.set("leader-only", cfg.accessKeysLeaderOnly());
+        keys.set("items", cfg.accessKeyItems());
+
+        // 難度
+        final ConfigurationSection diff = cs.createSection("difficulty");
+        diff.set("enable-levels", cfg.enableDifficultyLevels());
+        diff.set("enable-menu", cfg.enableDifficultyMenu());
+        if (!cfg.difficultyLevels().isEmpty()) {
+            final ConfigurationSection levels = diff.createSection("levels");
+            for (final DungeonConfig.DifficultyLevel lvl : cfg.difficultyLevels()) {
+                final ConfigurationSection lvlSec = levels.createSection(lvl.id());
+                lvlSec.set("display-name", lvl.displayName());
+                lvlSec.set("mob-health", lvl.mobHealth());
+                lvlSec.set("mob-amounts", lvl.mobAmounts());
+                lvlSec.set("mob-damage", lvl.mobDamage());
+                lvlSec.set("bonus-mythic-levels", lvl.bonusMythicLevels());
+                lvlSec.set("bonus-loot", lvl.bonusLoot());
+            }
+        }
+
+        // 地圖
+        final ConfigurationSection map = cs.createSection("map");
+        map.set("give-on-join", cfg.mapGiveOnJoin());
+        map.set("max-render-depth", cfg.mapMaxRenderDepth());
+        map.set("display-floors", cfg.mapDisplayFloors());
+        map.set("floor-depth", cfg.mapFloorDepth());
+        map.set("show-all-players", cfg.mapShowAllPlayers());
+
+        // 規則
+        final DungeonConfig.DungeonRules r = cfg.rules();
+        final ConfigurationSection rules = cs.createSection("rules");
+        rules.set("spawn-mobs", r.spawnMobs());
+        rules.set("spawn-animals", r.spawnAnimals());
+        rules.set("spawn-monsters", r.spawnMonsters());
+        rules.set("allow-break-blocks", r.allowBreakBlocks());
+        rules.set("allow-place-blocks", r.allowPlaceBlocks());
+        rules.set("allow-enderpearl", r.allowEnderpearl());
+        rules.set("allow-chorus-fruit", r.allowChorusFruit());
+        rules.set("allow-bucket", r.allowBucket());
+        rules.set("allow-place-entities", r.allowPlaceEntities());
+        rules.set("disable-random-tick", r.disableRandomTick());
+        rules.set("prevent-plant-growth", r.preventPlantGrowth());
+        rules.set("prevent-explosion-block-damage", r.preventExplosionBlockDamage());
+        rules.set("pvp", r.pvp());
+        rules.set("hide-death-messages", r.hideDeathMessages());
+        rules.set("prevent-teleport-in", r.preventTeleportIn());
+        rules.set("allow-commands", r.allowCommands());
+        rules.set("allowed-commands", r.allowedCommands());
+        rules.set("disallowed-commands", r.disallowedCommands());
+        rules.set("banned-items", r.bannedItems());
+        rules.set("custom-banned-items", r.customBannedItems());
+        rules.set("block-place-whitelist", r.blockPlaceWhitelist());
+        rules.set("block-place-blacklist", r.blockPlaceBlacklist());
+        rules.set("block-break-whitelist", r.blockBreakWhitelist());
+        rules.set("block-break-blacklist", r.blockBreakBlacklist());
+        rules.set("allow-break-placed-blocks", r.allowBreakPlacedBlocks());
+        rules.set("damage-protected-entities", r.damageProtectedEntities());
+        rules.set("interact-protected-entities", r.interactProtectedEntities());
+        rules.set("prevent-durability-loss", r.preventDurabilityLoss());
     }
 
     private List<Double> doubleArrayToList(final double[] arr) {

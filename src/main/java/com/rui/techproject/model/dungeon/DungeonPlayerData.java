@@ -20,6 +20,12 @@ public final class DungeonPlayerData {
     private final Map<String, Integer> dailyEntryCounts = new ConcurrentHashMap<>();
     /** 今日日期 key（用於日重置） */
     private String dailyDateKey = "";
+    /** 每個副本 ID → 上次獎勵領取 epoch millis */
+    private final Map<String, Long> lootCooldownTimes = new ConcurrentHashMap<>();
+    /** 每個 (dungeonId + ":" + rewardIndex) → 上次領取 epoch millis （per-reward 模式）*/
+    private final Map<String, Long> perRewardCooldowns = new ConcurrentHashMap<>();
+    /** 每個副本 ID → 上次進入冷卻起始 epoch millis */
+    private final Map<String, Long> accessCooldownTimes = new ConcurrentHashMap<>();
 
     public DungeonPlayerData(final UUID uuid) {
         this.uuid = uuid;
@@ -84,6 +90,41 @@ public final class DungeonPlayerData {
         return this.getDailyEntryCount(dungeonId) >= limit;
     }
 
+    // ── 獎勵冷卻 ──
+
+    public void setLootCooldown(final String dungeonId, final long millis) {
+        this.lootCooldownTimes.put(dungeonId, millis);
+    }
+    public boolean isLootOnCooldown(final String dungeonId, final int cooldownSeconds) {
+        if (cooldownSeconds <= 0) return false;
+        final long last = this.lootCooldownTimes.getOrDefault(dungeonId, 0L);
+        return System.currentTimeMillis() - last < cooldownSeconds * 1000L;
+    }
+    public void setPerRewardCooldown(final String key, final long millis) {
+        this.perRewardCooldowns.put(key, millis);
+    }
+    public boolean isPerRewardOnCooldown(final String key, final int cooldownSeconds) {
+        if (cooldownSeconds <= 0) return false;
+        final long last = this.perRewardCooldowns.getOrDefault(key, 0L);
+        return System.currentTimeMillis() - last < cooldownSeconds * 1000L;
+    }
+
+    // ── 進入冷卻 ──
+
+    public void setAccessCooldown(final String dungeonId, final long millis) {
+        this.accessCooldownTimes.put(dungeonId, millis);
+    }
+    public boolean isAccessOnCooldown(final String dungeonId, final int cooldownSeconds) {
+        if (cooldownSeconds <= 0) return false;
+        final long last = this.accessCooldownTimes.getOrDefault(dungeonId, 0L);
+        return System.currentTimeMillis() - last < cooldownSeconds * 1000L;
+    }
+    public int remainingAccessCooldownSeconds(final String dungeonId, final int cooldownSeconds) {
+        if (cooldownSeconds <= 0) return 0;
+        final long elapsed = System.currentTimeMillis() - this.accessCooldownTimes.getOrDefault(dungeonId, 0L);
+        return Math.max(0, cooldownSeconds - (int) (elapsed / 1000L));
+    }
+
     // ── 序列化 ──
 
     public Map<String, Object> serialize() {
@@ -93,6 +134,9 @@ public final class DungeonPlayerData {
         data.put("last-entry", new ConcurrentHashMap<>(this.lastEntryTime));
         data.put("daily-date", this.dailyDateKey);
         data.put("daily-counts", new ConcurrentHashMap<>(this.dailyEntryCounts));
+        data.put("loot-cooldowns", new ConcurrentHashMap<>(this.lootCooldownTimes));
+        data.put("per-reward-cooldowns", new ConcurrentHashMap<>(this.perRewardCooldowns));
+        data.put("access-cooldowns", new ConcurrentHashMap<>(this.accessCooldownTimes));
         return data;
     }
 
@@ -111,6 +155,15 @@ public final class DungeonPlayerData {
         if (data.get("daily-date") instanceof String s) this.dailyDateKey = s;
         if (data.get("daily-counts") instanceof Map<?, ?> map) {
             map.forEach((k, v) -> { if (k instanceof String s && v instanceof Number n) this.dailyEntryCounts.put(s, n.intValue()); });
+        }
+        if (data.get("loot-cooldowns") instanceof Map<?, ?> map) {
+            map.forEach((k, v) -> { if (k instanceof String s && v instanceof Number n) this.lootCooldownTimes.put(s, n.longValue()); });
+        }
+        if (data.get("per-reward-cooldowns") instanceof Map<?, ?> map) {
+            map.forEach((k, v) -> { if (k instanceof String s && v instanceof Number n) this.perRewardCooldowns.put(s, n.longValue()); });
+        }
+        if (data.get("access-cooldowns") instanceof Map<?, ?> map) {
+            map.forEach((k, v) -> { if (k instanceof String s && v instanceof Number n) this.accessCooldownTimes.put(s, n.longValue()); });
         }
     }
 }
