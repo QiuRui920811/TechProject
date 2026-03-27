@@ -39,6 +39,7 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -1277,15 +1278,24 @@ public final class DungeonService {
         for (final UUID uuid : instance.members()) {
             this.playerInstanceMap.remove(uuid);
         }
-        // 卸載並刪除世界（Folia 不支援時安靜跳過）
+        // 疏散殘留玩家 → 卸載並刪除世界
         final World world = instance.instanceWorld();
         if (world != null) {
-            try {
-                Bukkit.unloadWorld(world, false);
-            } catch (final UnsupportedOperationException ignored) {
-                this.plugin.getLogger().fine("[副本] unloadWorld 不受此伺服器支援，跳過。");
+            final World fb = Bukkit.getWorlds().get(0);
+            final List<CompletableFuture<Boolean>> tp = new ArrayList<>();
+            for (final Player p : world.getPlayers()) {
+                tp.add(p.teleportAsync(fb.getSpawnLocation()));
             }
-            this.scheduler.runAsync(() -> this.deleteWorldFolder(new File(Bukkit.getWorldContainer(), instanceId)));
+            final Runnable doClean = () -> this.scheduler.runGlobal(task -> {
+                try {
+                    Bukkit.unloadWorld(world, false);
+                } catch (final UnsupportedOperationException ignored) {
+                    this.plugin.getLogger().fine("[副本] unloadWorld 不受此伺服器支援，跳過。");
+                }
+                this.scheduler.runAsync(() -> this.deleteWorldFolder(new File(Bukkit.getWorldContainer(), instanceId)));
+            });
+            if (tp.isEmpty()) doClean.run();
+            else CompletableFuture.allOf(tp.toArray(new CompletableFuture[0])).thenRun(doClean);
         }
     }
 
@@ -1301,31 +1311,47 @@ public final class DungeonService {
 
         try {
             if (save) editWorld.save();
-            final World fallback = Bukkit.getWorlds().get(0);
-            for (final Player p : editWorld.getPlayers()) {
-                p.teleportAsync(fallback.getSpawnLocation());
-            }
-            Bukkit.unloadWorld(editWorld, save);
-        } catch (final UnsupportedOperationException e) {
-            this.plugin.getLogger().warning("[副本] 此伺服器不支援 unloadWorld，編輯世界無法自動卸載。");
-            return; // 不做後續的複製/刪除
+        } catch (final Exception e) {
+            this.plugin.getLogger().warning("[副本] 儲存編輯世界失敗：" + e.getMessage());
         }
 
-        // 非同步複製回模板 & 清理
-        this.scheduler.runAsync(() -> {
-            final File editDir = new File(Bukkit.getWorldContainer(), worldName);
-            if (save && templateWorldName != null && editDir.isDirectory()) {
-                final File templateDir = new File(this.plugin.getDataFolder(),
-                        TEMPLATE_DIR + File.separator + templateWorldName);
-                try {
-                    if (templateDir.exists()) this.deleteWorldFolder(templateDir);
-                    this.copyFolder(editDir.toPath(), templateDir.toPath());
-                } catch (final IOException ex) {
-                    this.plugin.getLogger().log(Level.WARNING, "[副本] 儲存模板失敗", ex);
-                }
+        // 先傳送所有殘留玩家出去
+        final World fallback = Bukkit.getWorlds().get(0);
+        final List<CompletableFuture<Boolean>> teleports = new ArrayList<>();
+        for (final Player p : editWorld.getPlayers()) {
+            teleports.add(p.teleportAsync(fallback.getSpawnLocation()));
+        }
+
+        // 等所有傳送完成 → 卸載世界 → 非同步清理
+        final Runnable doUnload = () -> this.scheduler.runGlobal(task -> {
+            try {
+                Bukkit.unloadWorld(editWorld, save);
+            } catch (final UnsupportedOperationException e) {
+                this.plugin.getLogger().warning("[副本] 此伺服器不支援 unloadWorld，跳過卸載。");
+                return;
             }
-            this.deleteWorldFolder(editDir);
+            this.scheduler.runAsync(() -> {
+                final File editDir = new File(Bukkit.getWorldContainer(), worldName);
+                if (save && templateWorldName != null && editDir.isDirectory()) {
+                    final File templateDir = new File(this.plugin.getDataFolder(),
+                            TEMPLATE_DIR + File.separator + templateWorldName);
+                    try {
+                        if (templateDir.exists()) this.deleteWorldFolder(templateDir);
+                        this.copyFolder(editDir.toPath(), templateDir.toPath());
+                    } catch (final IOException ex) {
+                        this.plugin.getLogger().log(Level.WARNING, "[副本] 儲存模板失敗", ex);
+                    }
+                }
+                this.deleteWorldFolder(editDir);
+            });
         });
+
+        if (teleports.isEmpty()) {
+            doUnload.run();
+        } else {
+            CompletableFuture.allOf(teleports.toArray(new CompletableFuture[0]))
+                    .thenRun(doUnload);
+        }
     }
 
     // ──────────────────────────────────────────────
@@ -1897,13 +1923,6 @@ public final class DungeonService {
             return;
         }
 
-        // 測試伺服器是否支援 createWorld（Folia / Luminol 不支援）
-        if (!this.isCreateWorldSupported()) {
-            // 純 GUI 模式 — 不需要世界，直接進入設定編輯
-            this.enterGuiOnlyEditMode(admin, def, dungeonId);
-            return;
-        }
-
         // 需要建立世界 — 先記錄返回位置（在指令執行緒上安全取得）
         final Location returnLoc = admin.getLocation().clone();
         admin.sendMessage(this.msg("§e正在準備編輯世界..."));
@@ -1959,28 +1978,6 @@ public final class DungeonService {
         });
     }
 
-    /** 測試伺服器是否支援動態世界建立。結果快取。 */
-    private Boolean createWorldSupported;
-    private boolean isCreateWorldSupported() {
-        if (this.createWorldSupported != null) return this.createWorldSupported;
-        try {
-            // 檢查 CraftServer.createWorld 是否為 throw UnsupportedOperationException（Folia）
-            final var method = Bukkit.getServer().getClass().getMethod("createWorld", WorldCreator.class);
-            // 如果方法存在且未被 Folia override 去掉，就認為支援
-            // 但最保險的做法是看是否有 Folia scheduler
-            final boolean isFolia = classExists("io.papermc.paper.threadedregions.RegionizedServer");
-            this.createWorldSupported = !isFolia;
-        } catch (final Exception e) {
-            this.createWorldSupported = true; // 預設支援
-        }
-        return this.createWorldSupported;
-    }
-
-    private static boolean classExists(final String className) {
-        try { Class.forName(className); return true; }
-        catch (final ClassNotFoundException e) { return false; }
-    }
-
     /** 純 GUI 編輯模式 — 不傳送、不建立世界，留在原地使用 GUI 工具。 */
     private void enterGuiOnlyEditMode(final Player admin, final DungeonDefinition def, final String dungeonId) {
         this.editReturnLocations.putIfAbsent(admin.getUniqueId(), admin.getLocation().clone());
@@ -2009,19 +2006,24 @@ public final class DungeonService {
         final double[] sp = def.spawnPoint();
         final Location spawn = new Location(world, sp[0], sp[1], sp[2],
                 sp.length > 3 ? (float) sp[3] : 0f, sp.length > 4 ? (float) sp[4] : 0f);
-        admin.teleportAsync(spawn);
-        admin.setGameMode(GameMode.CREATIVE);
-
-        this.giveEditorTools(admin);
-
-        admin.sendMessage(this.msg("§a已進入副本 §e" + dungeonId + " §a的編輯模式。"));
-        admin.sendMessage(this.msg("§7快捷鍵盤上的工具可以右鍵使用："));
-        admin.sendMessage(this.msg("§e  [1] §b主選單 §7— 右鍵打開副本編輯 GUI"));
-        admin.sendMessage(this.msg("§e  [2] §a設定出生點 §7— 右鍵設定玩家出生位置"));
-        admin.sendMessage(this.msg("§e  [3] §d設定離開點 §7— 右鍵設定離開傳送位置"));
-        admin.sendMessage(this.msg("§e  [4] §6怪物生成器 §7— 右鍵方塊設定怪物生成點"));
-        admin.sendMessage(this.msg("§e  [5] §c事件觸發器 §7— 右鍵方塊設定腳本觸發"));
-        admin.sendMessage(this.msg("§e  [9] §4儲存並退出 §7— 右鍵儲存所有修改"));
+        admin.teleportAsync(spawn).thenAccept(success -> {
+            if (!success) {
+                admin.sendMessage(this.msg("§c傳送到編輯世界失敗，改用純 GUI 模式。"));
+                this.enterGuiOnlyEditMode(admin, def, dungeonId);
+                return;
+            }
+            admin.setGameMode(GameMode.CREATIVE);
+            this.giveEditorTools(admin);
+            admin.sendMessage(this.msg("§a已進入副本 §e" + dungeonId + " §a的編輯模式。"));
+            admin.sendMessage(this.msg("§7快捷鍵盤上的工具可以右鍵使用："));
+            admin.sendMessage(this.msg("§e  [1] §b主選單 §7— 右鍵打開副本編輯 GUI"));
+            admin.sendMessage(this.msg("§e  [2] §a設定出生點 §7— 右鍵設定玩家出生位置"));
+            admin.sendMessage(this.msg("§e  [3] §d設定離開點 §7— 右鍵設定離開傳送位置"));
+            admin.sendMessage(this.msg("§e  [4] §6怪物生成器 §7— 右鍵方塊設定怪物生成點"));
+            admin.sendMessage(this.msg("§e  [5] §c事件觸發器 §7— 右鍵方塊設定腳本觸發"));
+            admin.sendMessage(this.msg("§e  [9] §4儲存並退出 §7— 右鍵儲存所有修改"));
+            admin.playSound(admin.getLocation(), Sound.BLOCK_NOTE_BLOCK_PLING, 1.0f, 2.0f);
+        });
     }
 
     /** 給予玩家編輯器工具組。 */
@@ -2198,20 +2200,26 @@ public final class DungeonService {
 
         final String worldName = "dungeon_edit_" + dungeonId;
 
-        // 傳回原位 & 清理狀態
-        this.teleportBackFromEdit(admin);
+        // 清理狀態
+        final Location returnLoc = this.editReturnLocations.remove(admin.getUniqueId());
         this.editingSessions.remove(admin.getUniqueId());
-        this.editReturnLocations.remove(admin.getUniqueId());
         this.cleanupEditorState(admin.getUniqueId());
         admin.getInventory().clear();
 
         // 儲存 YAML 設定
         this.saveDungeonDefinition(dungeonId, def);
 
-        // 嘗試卸載編輯世界（Folia 不支援時直接跳過）
-        this.tryUnloadEditWorld(worldName, true, def.templateWorld());
+        // 傳回原位
+        final Location target = (returnLoc != null && returnLoc.getWorld() != null)
+                ? returnLoc : Bukkit.getWorlds().get(0).getSpawnLocation();
+        admin.teleportAsync(target).thenAccept(ok -> {
+            admin.sendMessage(this.msg("§a副本 §e" + dungeonId + " §a已儲存！"));
+            admin.playSound(admin.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1.0f, 1.0f);
+        });
 
-        admin.sendMessage(this.msg("§a副本 §e" + dungeonId + " §a已儲存！"));
+        // 延遲卸載編輯世界（確保傳送完成）
+        this.scheduler.runGlobalDelayed(task ->
+                this.tryUnloadEditWorld(worldName, true, def.templateWorld()), 20L);
     }
 
     /** 放棄修改並退出編輯模式。 */
@@ -2224,17 +2232,21 @@ public final class DungeonService {
 
         final String worldName = "dungeon_edit_" + dungeonId;
 
-        // 傳回 & 清理狀態
-        this.teleportBackFromEdit(admin);
+        // 清理狀態
+        final Location returnLoc = this.editReturnLocations.remove(admin.getUniqueId());
         this.editingSessions.remove(admin.getUniqueId());
-        this.editReturnLocations.remove(admin.getUniqueId());
         this.cleanupEditorState(admin.getUniqueId());
         admin.getInventory().clear();
 
-        // 嘗試卸載編輯世界（Folia 不支援時跳過）
-        this.tryUnloadEditWorld(worldName, false, null);
+        // 傳回原位
+        final Location target = (returnLoc != null && returnLoc.getWorld() != null)
+                ? returnLoc : Bukkit.getWorlds().get(0).getSpawnLocation();
+        admin.teleportAsync(target).thenAccept(ok ->
+                admin.sendMessage(this.msg("§e已取消編輯 §c" + dungeonId + " §e（修改未儲存）。")));
 
-        admin.sendMessage(this.msg("§e已取消編輯 §c" + dungeonId + " §e（修改未儲存）。"));
+        // 延遲卸載編輯世界
+        this.scheduler.runGlobalDelayed(task ->
+                this.tryUnloadEditWorld(worldName, false, null), 20L);
     }
 
     /** 刪除副本定義（含模板目錄）。 */
@@ -2279,6 +2291,11 @@ public final class DungeonService {
     }
 
     // ── 編輯輔助 ──
+
+    /** GUI 點擊音效。 */
+    private void clickSound(final Player player) {
+        player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 0.5f, 1.0f);
+    }
 
     private void teleportBackFromEdit(final Player admin) {
         final Location ret = this.editReturnLocations.get(admin.getUniqueId());
@@ -2364,7 +2381,7 @@ public final class DungeonService {
 
     /** 檢查標題是否為副本編輯器 GUI。 */
     public boolean isDungeonEditorGui(final String title) {
-        return title.startsWith("副本編輯");
+        return title.contains("副本編輯");
     }
 
     /** 檢查玩家是否正在等待編輯器聊天輸入。 */
@@ -2400,23 +2417,25 @@ public final class DungeonService {
         if (dungeonId == null) return;
 
         switch (action) {
-            case "editor:menu" -> this.openEditorMainMenu(player, dungeonId);
+            case "editor:menu" -> { this.clickSound(player); this.openEditorMainMenu(player, dungeonId); }
             case "editor:setspawn" -> {
                 final Location loc = player.getLocation();
                 this.replaceDungeonField(dungeonId, d -> d.withSpawnPoint(
                         new double[]{loc.getX(), loc.getY(), loc.getZ(), loc.getYaw(), loc.getPitch()}));
                 player.sendMessage(this.msg("§a出生點已設定為 §e" + formatLoc(loc)));
+                player.playSound(loc, Sound.BLOCK_NOTE_BLOCK_PLING, 1.0f, 2.0f);
             }
             case "editor:setexit" -> {
                 final Location loc = player.getLocation();
                 this.replaceDungeonField(dungeonId, d -> d.withExitPoint(
                         new double[]{loc.getX(), loc.getY(), loc.getZ(), loc.getYaw(), loc.getPitch()}));
                 player.sendMessage(this.msg("§a離開點已設定為 §e" + formatLoc(loc)));
+                player.playSound(loc, Sound.BLOCK_NOTE_BLOCK_PLING, 1.0f, 2.0f);
             }
-            case "editor:mob_spawner" -> this.openEditorGui(player, new EditorGuiState(dungeonId, EditorPage.WAVES, 0, 0));
-            case "editor:event_trigger" -> this.openEditorGui(player, new EditorGuiState(dungeonId, EditorPage.SCRIPTS, 0, 0));
-            case "editor:rewards" -> this.openEditorGui(player, new EditorGuiState(dungeonId, EditorPage.REWARDS, 0, 0));
-            case "editor:settings" -> this.openEditorGui(player, new EditorGuiState(dungeonId, EditorPage.SETTINGS, 0, 0));
+            case "editor:mob_spawner" -> { this.clickSound(player); this.openEditorGui(player, new EditorGuiState(dungeonId, EditorPage.WAVES, 0, 0)); }
+            case "editor:event_trigger" -> { this.clickSound(player); this.openEditorGui(player, new EditorGuiState(dungeonId, EditorPage.SCRIPTS, 0, 0)); }
+            case "editor:rewards" -> { this.clickSound(player); this.openEditorGui(player, new EditorGuiState(dungeonId, EditorPage.REWARDS, 0, 0)); }
+            case "editor:settings" -> { this.clickSound(player); this.openEditorGui(player, new EditorGuiState(dungeonId, EditorPage.SETTINGS, 0, 0)); }
             case "editor:save" -> this.adminSave(player);
         }
     }
@@ -2501,11 +2520,11 @@ public final class DungeonService {
 
     private void handleMainMenuClick(final Player player, final EditorGuiState state, final int slot) {
         switch (slot) {
-            case 10 -> this.openEditorGui(player, new EditorGuiState(state.dungeonId(), EditorPage.SETTINGS, 0, 0));
-            case 11 -> this.openEditorGui(player, new EditorGuiState(state.dungeonId(), EditorPage.WAVES, 0, 0));
-            case 12 -> this.openEditorGui(player, new EditorGuiState(state.dungeonId(), EditorPage.BOSSES, 0, 0));
-            case 14 -> this.openEditorGui(player, new EditorGuiState(state.dungeonId(), EditorPage.REWARDS, 0, 0));
-            case 15 -> this.openEditorGui(player, new EditorGuiState(state.dungeonId(), EditorPage.SCRIPTS, 0, 0));
+            case 10 -> { this.clickSound(player); this.openEditorGui(player, new EditorGuiState(state.dungeonId(), EditorPage.SETTINGS, 0, 0)); }
+            case 11 -> { this.clickSound(player); this.openEditorGui(player, new EditorGuiState(state.dungeonId(), EditorPage.WAVES, 0, 0)); }
+            case 12 -> { this.clickSound(player); this.openEditorGui(player, new EditorGuiState(state.dungeonId(), EditorPage.BOSSES, 0, 0)); }
+            case 14 -> { this.clickSound(player); this.openEditorGui(player, new EditorGuiState(state.dungeonId(), EditorPage.REWARDS, 0, 0)); }
+            case 15 -> { this.clickSound(player); this.openEditorGui(player, new EditorGuiState(state.dungeonId(), EditorPage.SCRIPTS, 0, 0)); }
             case 22 -> { player.closeInventory(); this.adminSave(player); }
             case 18 -> { player.closeInventory(); this.adminCancel(player); }
         }
