@@ -343,6 +343,9 @@ public final class ItemFactoryUtil {
         if (stack.getType() == Material.PLAYER_HEAD) {
             meta.setMaxStackSize(64);
         }
+        if (definition.id() != null && definition.id().endsWith("_upgrade")) {
+            meta.setMaxStackSize(1);
+        }
         this.applyConfiguredItemModel(meta, definition.itemModel());
         meta.getPersistentDataContainer().set(this.techItemKey, PersistentDataType.STRING, definition.id());
         meta.getPersistentDataContainer().set(this.dataVersionKey, PersistentDataType.INTEGER, this.currentItemDataVersion());

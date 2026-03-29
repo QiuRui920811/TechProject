@@ -38,6 +38,7 @@ guides:
     preview: Learn why items do not move by magic and how to route them correctly.
     lines:
       - Logistics sends materials only toward machines that can actually use them.
+      - Gathering machines can push into adjacent machines directly, but processor-to-processor transfer still needs a Logistics Node, Item Tube, or logistics terminal in between.
       - The source machine follows its output side, and the destination follows its input side.
       - Logistics Node and Item Tube extend transport beyond direct adjacency.
       - Build main lines and branches instead of letting every route overlap.

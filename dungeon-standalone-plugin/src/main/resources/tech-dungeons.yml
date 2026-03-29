@@ -1,0 +1,23 @@
+# ============================================================
+#  TechProject 副本系統設定檔  —  tech-dungeons.yml
+# ============================================================
+#
+#  每個頂層 key 就是一個副本的唯一 ID。
+#  模板世界放在 server/dungeon_templates/<template-world>/ 目錄下。
+#  系統會自動複製模板世界來建立實例，通關或超時後自動刪除。
+#
+#  已移除預設基礎副本範本。
+#  請依照需求自行新增副本定義，例如：
+#
+#  my_dungeon_id:
+#    display-name: "<#22D3EE>我的副本"
+#    description: "副本描述"
+#    template-world: "my_template_world"
+#    min-players: 1
+#    max-players: 4
+#    time-limit: 600
+#    cooldown: 1800
+#    waves: []
+#    bosses: []
+#    rewards: []
+#    scripts: []

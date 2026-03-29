@@ -1,0 +1,16 @@
+name: TechDungeon
+main: com.rui.techproject.TechProjectPlugin
+version: 1.0.0
+api-version: '1.21'
+folia-supported: true
+author: _RuCat
+softdepend: [MythicMobs]
+commands:
+  dungeon:
+    description: 副本系統指令
+    usage: /dungeon <list|join|leave|party|invite|accept|ready|stuck|info|top>
+    aliases: [dg]
+permissions:
+  techdungeon.admin:
+    description: 管理獨立副本插件
+    default: op

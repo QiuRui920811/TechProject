@@ -11,7 +11,6 @@ import com.rui.techproject.service.AchievementGuiService;
 import com.rui.techproject.service.AchievementService;
 import com.rui.techproject.service.BlueprintService;
 import com.rui.techproject.service.CookingService;
-import com.rui.techproject.service.DungeonService;
 import com.rui.techproject.service.MeteorService;
 import com.rui.techproject.service.ItemSearchService;
 import com.rui.techproject.service.MachineService;
@@ -75,8 +74,7 @@ public final class TechProjectPlugin extends JavaPlugin {
             "tech-guides.yml",
             "tech-guides_zh_tw.yml",
             "tech-guides_en_us.yml",
-            "tech-titles.yml",
-            "tech-dungeons.yml"
+            "tech-titles.yml"
     };
 
     private TechRegistry techRegistry;
@@ -95,7 +93,6 @@ public final class TechProjectPlugin extends JavaPlugin {
     private AchievementGuiService achievementGuiService;
     private ItemSearchService itemSearchService;
     private MeteorService meteorService;
-    private DungeonService dungeonService;
     private StorageManager storageManager;
     private TitleService titleService;
     private com.rui.techproject.listener.DiscordSrvHook discordSrvHook;
@@ -135,7 +132,6 @@ public final class TechProjectPlugin extends JavaPlugin {
         this.achievementGuiService.setTitleService(this.titleService);
         this.itemSearchService = new ItemSearchService(this);
         this.meteorService = new MeteorService(this, this.safeScheduler, this.itemFactory);
-        this.dungeonService = new DungeonService(this, this.safeScheduler, this.itemFactory, this.techRegistry, this.playerProgressService);
 
         final com.rui.techproject.storage.StorageBackend backend = this.storageManager.getBackend();
         this.playerProgressService.setStorageBackend(backend);
@@ -155,8 +151,6 @@ public final class TechProjectPlugin extends JavaPlugin {
         this.machineService.purgeOrphanDisplays();
         this.planetService.start();
         this.meteorService.start();
-        this.dungeonService.loadPlayerData();
-        this.dungeonService.start();
 
         if (this.getServer().getPluginManager().getPlugin("PlaceholderAPI") != null) {
             new com.rui.techproject.service.TechPlaceholderExpansion(this).register();
@@ -285,9 +279,6 @@ public final class TechProjectPlugin extends JavaPlugin {
         if (this.titleService != null) {
             this.titleService.reload();
         }
-        if (this.dungeonService != null) {
-            this.dungeonService.reload();
-        }
         // 補註冊 PlaceholderAPI（若熱載順序導致 onEnable 時尚未載入 PAPI）
         if (this.getServer().getPluginManager().getPlugin("PlaceholderAPI") != null) {
             new com.rui.techproject.service.TechPlaceholderExpansion(this).register();
@@ -302,10 +293,6 @@ public final class TechProjectPlugin extends JavaPlugin {
         }
         if (this.discordSrvHook != null) {
             this.discordSrvHook.tryUnregister();
-        }
-        if (this.dungeonService != null) {
-            this.dungeonService.shutdown();
-            this.dungeonService.saveAll();
         }
         if (this.meteorService != null) {
             this.meteorService.shutdown();
@@ -346,7 +333,6 @@ public final class TechProjectPlugin extends JavaPlugin {
                 if (this.techCropService != null) this.techCropService.saveAll();
                 if (this.planetService != null) this.planetService.saveAll();
                 if (this.playerProgressService != null) this.playerProgressService.saveAll();
-                if (this.dungeonService != null) this.dungeonService.saveAll();
             } catch (final Exception exception) {
                 this.getLogger().log(java.util.logging.Level.WARNING, "自動存檔時發生錯誤", exception);
             }
@@ -419,10 +405,6 @@ public final class TechProjectPlugin extends JavaPlugin {
 
     public MeteorService getMeteorService() {
         return this.meteorService;
-    }
-
-    public DungeonService getDungeonService() {
-        return this.dungeonService;
     }
 
     public StorageManager getStorageManager() {

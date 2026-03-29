@@ -2181,7 +2181,7 @@ public final class TechBookService {
 
     private List<String> baseItemAcquisitionHints(final TechItemDefinition item) {
         return switch (item.id()) {
-            case "copper_ingot" -> List.of("先做出粉碎機與科技熔爐。", "把原版銅礦丟進粉碎機變成銅粉，再進科技熔爐。", "原版銅錠不能直接當科技銅錠使用，兩條材料線已分流。");
+            case "copper_ingot" -> List.of("先做出粉碎機與科技熔爐。", "把原版銅礦丟進粉碎機變成銅粉，再進科技熔爐。", "原版銅錠可直接替代科技銅錠使用。若未生效，請先確認插件版本已更新。");
             case "copper_dust" -> List.of("先取得粉碎機。", "把原版銅礦丟進粉碎機後才會得到銅粉。");
             case "iron_dust" -> List.of("先取得粉碎機。", "把原版鐵礦丟進粉碎機後才會得到鐵粉。");
             default -> List.of();

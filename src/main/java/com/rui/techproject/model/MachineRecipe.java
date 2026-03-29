@@ -9,6 +9,7 @@ public record MachineRecipe(
         String outputId,
         int outputCount,
         int energyCost,
-        String guideText
+        String guideText,
+        boolean allowStackBonus
 ) {
 }

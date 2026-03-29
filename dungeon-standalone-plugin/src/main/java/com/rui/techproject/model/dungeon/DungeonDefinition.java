@@ -97,16 +97,18 @@ public record DungeonDefinition(
      *
      * @param waveIndex   波次序號 (0-based)
      * @param mobEntries  本波要生成的怪物列表
-     * @param spawnDelay  開始生怪前的延遲（秒）
-     * @param message     波次開始時的提示訊息
-     * @param requireClear 是否要求清完所有上一波才推進
+     * @param spawnDelay    開始生怪前的延遲（秒）
+     * @param message       波次開始時的提示訊息
+     * @param requireClear  是否要求清完所有上一波才推進
+     * @param spawnLocation 自訂生成位置 [x, y, z]（null=使用副本出生點）
      */
     public record WaveDefinition(
             int waveIndex,
             List<MobEntry> mobEntries,
             int spawnDelay,
             String message,
-            boolean requireClear
+            boolean requireClear,
+            double[] spawnLocation
     ) {}
 
     /**

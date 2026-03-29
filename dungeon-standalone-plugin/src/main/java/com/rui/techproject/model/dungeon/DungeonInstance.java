@@ -152,7 +152,12 @@ public final class DungeonInstance {
     public int aliveMobCount() { return this.aliveMobCount; }
     public void setAliveMobCount(final int count) { this.aliveMobCount = count; }
     public void decrementAliveMobs() { if (this.aliveMobCount > 0) this.aliveMobCount--; }
-    public boolean isWaveCleared() { return this.aliveMobCount <= 0; }
+    public boolean isWaveCleared() { return this.aliveMobCount == 0 && !this.waveSpawning; }
+
+    /** 波次生成中標記（防止非同步生怪期間誤判波次已清空） */
+    private volatile boolean waveSpawning;
+    public boolean isWaveSpawning() { return this.waveSpawning; }
+    public void setWaveSpawning(final boolean v) { this.waveSpawning = v; }
 
     // ── 生成的實體追蹤 ──
 

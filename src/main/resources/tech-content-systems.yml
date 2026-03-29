@@ -340,7 +340,7 @@ machines:
     block: SPAWNER
     item-model: "-1"
     inputs: [net_launcher, field_processor]
-    outputs: [leather, beef, white_wool, mutton, porkchop, chicken, feather, rotten_flesh, bone, gunpowder, string, spider_eye, slime_ball]
+    outputs: [leather, beef, white_wool, mutton, porkchop, chicken, feather, rotten_flesh, bone, gunpowder, string, spider_eye, slime_ball, blaze_rod, magma_cream, ghast_tear, coal, gold_nugget]
     energy-per-tick: 14
     effect: 收集附近生物並轉化為掉落物
     unlock: machine:advanced_assembler&item:net_launcher&item:field_processor
@@ -598,10 +598,10 @@ recipes:
     guide: 捕網發射器 + 戶外處理器 → 進階製造機 → 生物收集器
   storage_crate_recipe:
     machine: assembler
-    inputs: [machine_casing, treated_plastic, wiring_bundle]
+    inputs: [machine_casing, plastic, wiring_bundle]
     output: storage_crate
     energy: 15
-    guide: 機械外殼 + 處理塑膠 + 工業線束 → 製造機 → 儲物箱
+    guide: 機械外殼 + 塑膠 + 工業線束 → 製造機 → 儲物箱
   storage_hub_recipe:
     machine: assembler
     inputs: [storage_crate, machine_casing, wiring_bundle]

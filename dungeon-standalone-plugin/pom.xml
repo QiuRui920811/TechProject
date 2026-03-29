@@ -4,12 +4,12 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.rui</groupId>
-    <artifactId>techproject</artifactId>
-    <version>0.1.0</version>
+    <artifactId>techdungeon</artifactId>
+    <version>1.0.0</version>
     <packaging>jar</packaging>
 
-    <name>TechProject</name>
-    <description>Medium-sized technology framework plugin for Paper/Folia-safe scheduling.</description>
+    <name>TechDungeon</name>
+    <description>Standalone dungeon system extracted from TechProject.</description>
 
     <properties>
         <maven.compiler.release>21</maven.compiler.release>
@@ -22,10 +22,6 @@
             <id>papermc</id>
             <url>https://repo.papermc.io/repository/maven-public/</url>
         </repository>
-        <repository>
-            <id>placeholderapi</id>
-            <url>https://repo.extendedclip.com/content/repositories/placeholderapi/</url>
-        </repository>
     </repositories>
 
     <dependencies>
@@ -36,27 +32,12 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>me.clip</groupId>
-            <artifactId>placeholderapi</artifactId>
-            <version>2.11.6</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.discordsrv</groupId>
-            <artifactId>discordsrv</artifactId>
-            <version>1.30.4</version>
-            <scope>system</scope>
-            <systemPath>/media/ruiouo/d5339ede-13e7-49e2-8d9b-b6abc85649eb2/tech/plugins/DiscordSRV-Build-1.30.4.jar</systemPath>
-        </dependency>
-        <!-- Luminol 伺服器 JAR — NMS 世界建立（繞過 Folia Bukkit.createWorld 限制） -->
-        <dependency>
             <groupId>me.luminol</groupId>
             <artifactId>luminol-server</artifactId>
             <version>1.21.11</version>
             <scope>system</scope>
             <systemPath>/media/ruiouo/d5339ede-13e7-49e2-8d9b-b6abc85649eb2/tech/versions/1.21.11/luminol-1.21.11.jar</systemPath>
         </dependency>
-        <!-- Mojang DataFixerUpper — com.mojang.serialization（NMS 依賴） -->
         <dependency>
             <groupId>com.mojang</groupId>
             <artifactId>datafixerupper</artifactId>

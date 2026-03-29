@@ -289,8 +289,9 @@ public final class TechRegistry {
                                 final String outputId,
                                 final int outputCount,
                                 final int energyCost,
-                                final String guideText) {
-        this.recipes.put(this.normalize(id), new MachineRecipe(id, machineId, List.copyOf(inputIds), outputId, Math.max(1, outputCount), energyCost, guideText));
+                                final String guideText,
+                                final boolean allowStackBonus) {
+        this.recipes.put(this.normalize(id), new MachineRecipe(id, machineId, List.copyOf(inputIds), outputId, Math.max(1, outputCount), energyCost, guideText, allowStackBonus));
     }
 
     private void registerAchievement(final String id,
@@ -412,7 +413,8 @@ public final class TechRegistry {
                     section.getString(path + "output", ""),
                     section.getInt(path + "count", 1),
                     section.getInt(path + "energy", 1),
-                    section.getString(path + "guide", "")
+                    section.getString(path + "guide", ""),
+                    section.getBoolean(path + "allow-stack-bonus", true)
             );
         }
     }

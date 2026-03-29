@@ -1845,6 +1845,15 @@ items:
       - "銅粉 + 錫粉 → 熔爐 → 青銅錠（基礎）"
       - "銅粉 + 錫粉 → 合金熔煉爐 → 青銅錠（更省電）"
       - "青銅齒輪、機械零件"
+  bronze_dust:
+    display-name: "青銅粉"
+    category: INTERMEDIATE
+    icon: BROWN_DYE
+    description: "青銅錠粉碎後得到的合金粉末。"
+    unlock: "crusher"
+    use-cases:
+      - "青銅錠 → 粉碎機 → 青銅粉"
+      - "青銅粉 → 熔爐 → 青銅錠"
   solder_alloy:
     display-name: "焊錫合金"
     category: INTERMEDIATE
@@ -1854,6 +1863,15 @@ items:
     use-cases:
       - "鉛粉 + 鋅粉 → 合金熔煉爐 → 焊錫合金"
       - "電路板、電子零件"
+  solder_alloy_dust:
+    display-name: "焊錫合金粉"
+    category: INTERMEDIATE
+    icon: LIGHT_GRAY_DYE
+    description: "焊錫合金粉碎後得到的細緻粉末。"
+    unlock: "crusher"
+    use-cases:
+      - "焊錫合金 → 粉碎機 → 焊錫合金粉"
+      - "焊錫合金粉 → 熔爐 → 焊錫合金"
   brass_ingot:
     display-name: "黃銅錠"
     category: INTERMEDIATE
@@ -1863,6 +1881,15 @@ items:
     use-cases:
       - "銅粉 + 鋅粉 → 合金熔煉爐 → 黃銅錠"
       - "進階電路、導線"
+  brass_dust:
+    display-name: "黃銅粉"
+    category: INTERMEDIATE
+    icon: YELLOW_DYE
+    description: "黃銅錠粉碎後得到的合金粉末。"
+    unlock: "crusher"
+    use-cases:
+      - "黃銅錠 → 粉碎機 → 黃銅粉"
+      - "黃銅粉 → 熔爐 → 黃銅錠"
 machines:
   research_desk:
     display-name: 研究台
@@ -2468,13 +2495,31 @@ recipes:
     inputs: ["iron_dust"]
     output: "iron_ingot"
     energy: 16
+    allow-stack-bonus: false
     guide: "鐵粉 → 熔爐 → 鐵錠"
   furnace_copper_dust:
     machine: "furnace"
     inputs: ["copper_dust"]
-    output: "copper_ingot"
+    output: "COPPER_INGOT"
     energy: 16
+    allow-stack-bonus: false
     guide: "銅粉 → 熔爐 → 銅錠"
+  crusher_iron_ingot:
+    machine: "crusher"
+    inputs: ["iron_ingot"]
+    output: "iron_dust"
+    count: 1
+    energy: 8
+    allow-stack-bonus: false
+    guide: "鐵錠 → 粉碎機 → 鐵粉"
+  crusher_copper_ingot:
+    machine: "crusher"
+    inputs: ["copper_ingot"]
+    output: "copper_dust"
+    count: 1
+    energy: 8
+    allow-stack-bonus: false
+    guide: "銅錠 → 粉碎機 → 銅粉"
   furnace_glass:
     machine: "furnace"
     inputs: ["glass"]
@@ -3145,58 +3190,58 @@ recipes:
   # ═══ 純電力版機器合成 ═══
   assembler_electric_crusher:
     machine: "advanced_assembler"
-    inputs: ["crusher", "auto_processing_card", "wiring_bundle"]
+    inputs: ["crusher", "auto_processing_card", "wiring_bundle", "servo_motor", "steel_plate"]
     output: "electric_crusher"
-    energy: 30
-    guide: "粉碎機 + 自動化模組 + 工業線束 → 進階製造機 → 電動粉碎機"
+    energy: 55
+    guide: "粉碎機 + 自動化模組 + 工業線束 + 伺服馬達 + 鋼板 → 進階製造機 → 電動粉碎機"
   assembler_electric_compressor:
     machine: "advanced_assembler"
-    inputs: ["compressor", "auto_processing_card", "servo_motor"]
+    inputs: ["compressor", "auto_processing_card", "servo_motor", "pressure_tube", "steel_plate"]
     output: "electric_compressor"
-    energy: 32
-    guide: "壓縮機 + 自動化模組 + 伺服馬達 → 進階製造機 → 電動壓縮機"
+    energy: 58
+    guide: "壓縮機 + 自動化模組 + 伺服馬達 + 壓力導管 + 鋼板 → 進階製造機 → 電動壓縮機"
   assembler_electric_ore_washer:
     machine: "advanced_assembler"
-    inputs: ["ore_washer", "auto_processing_card", "pressure_tube"]
+    inputs: ["ore_washer", "auto_processing_card", "pressure_tube", "coolant_cell", "alloy_frame"]
     output: "electric_ore_washer"
-    energy: 30
-    guide: "洗礦機 + 自動化模組 + 壓力導管 → 進階製造機 → 電動洗礦機"
+    energy: 55
+    guide: "洗礦機 + 自動化模組 + 壓力導管 + 冷卻電池 + 合金框架 → 進階製造機 → 電動洗礦機"
   assembler_electric_wire_mill:
     machine: "advanced_assembler"
-    inputs: ["wire_mill", "auto_processing_card", "servo_motor"]
+    inputs: ["wire_mill", "auto_processing_card", "servo_motor", "wiring_bundle", "bronze_gear"]
     output: "electric_wire_mill"
-    energy: 34
-    guide: "拉線機 + 自動化模組 + 伺服馬達 → 進階製造機 → 電動拉線機"
+    energy: 60
+    guide: "拉線機 + 自動化模組 + 伺服馬達 + 工業線束 + 青銅齒輪 → 進階製造機 → 電動拉線機"
   assembler_electric_purifier:
     machine: "advanced_assembler"
-    inputs: ["purifier", "auto_processing_card", "coolant_cell"]
+    inputs: ["purifier", "auto_processing_card", "coolant_cell", "precision_nozzle", "alloy_frame"]
     output: "electric_purifier"
-    energy: 34
-    guide: "淨化器 + 自動化模組 + 冷卻電池 → 進階製造機 → 電動淨化器"
+    energy: 62
+    guide: "淨化器 + 自動化模組 + 冷卻電池 + 精密噴嘴 + 合金框架 → 進階製造機 → 電動淨化器"
   assembler_electric_centrifuge:
     machine: "advanced_assembler"
-    inputs: ["centrifuge", "auto_processing_card", "magnetic_ring"]
+    inputs: ["centrifuge", "auto_processing_card", "magnetic_ring", "servo_motor", "energy_cell"]
     output: "electric_centrifuge"
-    energy: 40
-    guide: "離心機 + 自動化模組 + 磁環 → 進階製造機 → 電動離心機"
+    energy: 70
+    guide: "離心機 + 自動化模組 + 磁環 + 伺服馬達 + 能量電池 → 進階製造機 → 電動離心機"
   assembler_electric_bio_lab:
     machine: "advanced_assembler"
-    inputs: ["bio_lab", "auto_processing_card", "bio_fiber"]
+    inputs: ["bio_lab", "auto_processing_card", "bio_fiber", "coolant_cell", "circuit_board"]
     output: "electric_bio_lab"
-    energy: 34
-    guide: "生質實驗室 + 自動化模組 + 生質纖維 → 進階製造機 → 電動生質實驗室"
+    energy: 60
+    guide: "生質實驗室 + 自動化模組 + 生質纖維 + 冷卻電池 + 電路板 → 進階製造機 → 電動生質實驗室"
   assembler_electric_chemical_reactor:
     machine: "advanced_assembler"
-    inputs: ["chemical_reactor", "auto_processing_card", "precision_nozzle"]
+    inputs: ["chemical_reactor", "auto_processing_card", "precision_nozzle", "coolant_cell", "energy_cell"]
     output: "electric_chemical_reactor"
-    energy: 40
-    guide: "化學反應器 + 自動化模組 + 精密噴嘴 → 進階製造機 → 電動化學反應器"
+    energy: 72
+    guide: "化學反應器 + 自動化模組 + 精密噴嘴 + 冷卻電池 + 能量電池 → 進階製造機 → 電動化學反應器"
   assembler_electric_sifter:
     machine: "advanced_assembler"
-    inputs: ["gold_pan", "auto_processing_card", "bronze_gear"]
+    inputs: ["gold_pan", "auto_processing_card", "bronze_gear", "wiring_bundle", "alloy_frame"]
     output: "electric_sifter"
-    energy: 30
-    guide: "淘金盤 + 自動化模組 + 青銅齒輪 → 進階製造機 → 電動篩礦機"
+    energy: 52
+    guide: "淘金盤 + 自動化模組 + 青銅齒輪 + 工業線束 + 合金框架 → 進階製造機 → 電動篩礦機"
   # ═══ 純電力版加工配方（複製手動版配方，能源翻倍） ═══
   electric_crusher_iron_ore:
     machine: "electric_crusher"
@@ -3464,18 +3509,21 @@ recipes:
     inputs: ["copper_dust", "tin_dust"]
     output: "bronze_ingot"
     energy: 16
+    allow-stack-bonus: false
     guide: "銅粉 + 錫粉 → 合金熔煉爐 → 青銅錠"
   smeltery_solder:
     machine: "smeltery"
     inputs: ["lead_dust", "zinc_dust"]
     output: "solder_alloy"
     energy: 16
+    allow-stack-bonus: false
     guide: "鉛粉 + 鋅粉 → 合金熔煉爐 → 焊錫合金"
   smeltery_brass:
     machine: "smeltery"
     inputs: ["copper_dust", "zinc_dust"]
     output: "brass_ingot"
     energy: 16
+    allow-stack-bonus: false
     guide: "銅粉 + 鋅粉 → 合金熔煉爐 → 黃銅錠"
   # ═══ 新金屬熔爐配方 ═══
   furnace_tin_dust:
@@ -3483,19 +3531,91 @@ recipes:
     inputs: ["tin_dust"]
     output: "tin_ingot"
     energy: 12
+    allow-stack-bonus: false
     guide: "錫粉 → 熔爐 → 錫錠"
   furnace_lead_dust:
     machine: "furnace"
     inputs: ["lead_dust"]
     output: "lead_ingot"
     energy: 12
+    allow-stack-bonus: false
     guide: "鉛粉 → 熔爐 → 鉛錠"
   furnace_zinc_dust:
     machine: "furnace"
     inputs: ["zinc_dust"]
     output: "zinc_ingot"
     energy: 12
+    allow-stack-bonus: false
     guide: "鋅粉 → 熔爐 → 鋅錠"
+  furnace_bronze_dust:
+    machine: "furnace"
+    inputs: ["bronze_dust"]
+    output: "bronze_ingot"
+    energy: 14
+    allow-stack-bonus: false
+    guide: "青銅粉 → 熔爐 → 青銅錠"
+  furnace_solder_alloy_dust:
+    machine: "furnace"
+    inputs: ["solder_alloy_dust"]
+    output: "solder_alloy"
+    energy: 14
+    allow-stack-bonus: false
+    guide: "焊錫合金粉 → 熔爐 → 焊錫合金"
+  furnace_brass_dust:
+    machine: "furnace"
+    inputs: ["brass_dust"]
+    output: "brass_ingot"
+    energy: 14
+    allow-stack-bonus: false
+    guide: "黃銅粉 → 熔爐 → 黃銅錠"
+  crusher_tin_ingot:
+    machine: "crusher"
+    inputs: ["tin_ingot"]
+    output: "tin_dust"
+    count: 1
+    energy: 8
+    allow-stack-bonus: false
+    guide: "錫錠 → 粉碎機 → 錫粉"
+  crusher_lead_ingot:
+    machine: "crusher"
+    inputs: ["lead_ingot"]
+    output: "lead_dust"
+    count: 1
+    energy: 8
+    allow-stack-bonus: false
+    guide: "鉛錠 → 粉碎機 → 鉛粉"
+  crusher_zinc_ingot:
+    machine: "crusher"
+    inputs: ["zinc_ingot"]
+    output: "zinc_dust"
+    count: 1
+    energy: 8
+    allow-stack-bonus: false
+    guide: "鋅錠 → 粉碎機 → 鋅粉"
+  crusher_bronze_ingot:
+    machine: "crusher"
+    inputs: ["bronze_ingot"]
+    output: "bronze_dust"
+    count: 1
+    energy: 8
+    allow-stack-bonus: false
+    guide: "青銅錠 → 粉碎機 → 青銅粉"
+  crusher_solder_alloy:
+    machine: "crusher"
+    inputs: ["solder_alloy"]
+    output: "solder_alloy_dust"
+    count: 1
+    energy: 8
+    allow-stack-bonus: false
+    guide: "焊錫合金 → 粉碎機 → 焊錫合金粉"
+  crusher_brass_ingot:
+    machine: "crusher"
+    inputs: ["brass_ingot"]
+    output: "brass_dust"
+    count: 1
+    energy: 8
+    allow-stack-bonus: false
+    guide: "黃銅錠 → 粉碎機 → 黃銅粉"
   furnace_bronze:
     machine: "furnace"
     inputs: ["copper_dust", "tin_dust"]

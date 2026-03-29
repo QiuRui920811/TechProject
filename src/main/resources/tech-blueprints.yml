@@ -148,13 +148,14 @@ blueprints:
     ingredients:
       S: tech:steel_plate
       C: COPPER_INGOT
-      G: tech:bronze_gear
+      G: tech:bronze_ingot
       B: CRAFTER
       I: IRON_INGOT
       P: PISTON
     tutorial:
       - 先用壓縮機把鐵板壓成鋼板。
       - 準備原版合成器（不是工作台！需要鐵錠+紅石+工作台+投擲器合成）、活塞、銅錠與鐵錠。
+      - 用合金熔煉爐做出青銅錠（銅粉+錘粉）。
       - 先在地上放鐵方塊，再把工作台放在上方形成進階工作台。
       - 用進階工作台照配方擺出製造機，中央放合成器。
       - 製造機能做出電路板、邏輯閘、機械零件等中階材料。
@@ -169,11 +170,12 @@ blueprints:
     ingredients:
       A: tech:advanced_circuit
       C: tech:circuit_board
-      N: tech:nano_coating
+      N: tech:composite_panel
       M: LOOM
       P: tech:precision_frame
     tutorial:
       - 先用製造機做好高階電路與精密框架。
+      - 用壓縮機做出複合面板（鋼板+塑膠）。
       - 先在地上放鐵方塊，再把工作台放在上方形成進階工作台。
       - 用進階工作台照配方擺出進階製造機。
       - 進階製造機能做出奈米塗層、反應堆核心等高階材料。

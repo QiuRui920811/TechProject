@@ -3607,6 +3607,12 @@ recipes:
     output: synthetic_shulker_shell
     energy: 16
     guide: 魔法結晶 II + 鐵錠 + 末影結晶 I → 力場鍛造台 → 合成潛影殼
+  craft_shulker_box:
+    machine: field_forge
+    inputs: [synthetic_shulker_shell, synthetic_shulker_shell, chest]
+    output: SHULKER_BOX
+    energy: 18
+    guide: 合成潛影殼×2 + 儲物箱 → 力場鍛造台 → 界伏盒
   craft_ancient_rune_fire:
     machine: laser_engraver
     inputs: [magic_lump_2, ender_lump_2, blaze_powder, lava_bucket]
