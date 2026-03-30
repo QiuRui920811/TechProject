@@ -580,7 +580,7 @@ public final class DungeonEditorManager {
     private ItemStack buildOptionItem(final String key, final Object value, final String source) {
         final Material icon = FunctionType.getOptionIcon(key);
         final String displayName = FunctionType.getOptionDisplayName(key);
-        final String valueStr = value != null ? value.toString() : "§c未設定";
+        final String valueStr = this.summarizeOptionValue(key, value);
 
         final ItemStack item = new ItemStack(icon);
         final var meta = item.getItemMeta();
@@ -615,6 +615,20 @@ public final class DungeonEditorManager {
                 PersistentDataType.STRING, source + ":" + key);
         item.setItemMeta(meta);
         return item;
+    }
+
+    private String summarizeOptionValue(final String key, final Object value) {
+        if (value == null) {
+            return "§c未設定";
+        }
+        if ("key-item-type".equals(key)) {
+            final String raw = value.toString();
+            if (raw.startsWith("item:")) {
+                return "§a自訂 NBT 鑰匙";
+            }
+        }
+        final String text = value.toString();
+        return text.length() > 48 ? text.substring(0, 45) + "..." : text;
     }
 
     /** 取得選項物品的 key。 */
@@ -980,6 +994,7 @@ public final class DungeonEditorManager {
                     func.functionType().display() + " §8[" + func.id() + "]",
                     "§7觸發器: " + func.triggerType().display(),
                     "§7位置: §f" + func.locationString(),
+                    this.buildFunctionSummaryLine(func),
                     "§7目標: " + func.targetType().display(),
                     "§7條件: §f" + func.conditions().size() + " 個",
                     "§7重複觸發: " + (func.allowRetrigger() ? "§a是" : "§c否"),
@@ -1470,6 +1485,10 @@ public final class DungeonEditorManager {
                 final StringBuilder text = new StringBuilder();
                 text.append(categoryColor).append("§l").append(func.functionType().display().replaceAll("§.", "")).append("\n");
                 text.append("§7觸發: §f").append(func.triggerType().display().replaceAll("§.", "")).append("\n");
+                final String summary = this.markerSummary(func);
+                if (!summary.isBlank()) {
+                    text.append(summary).append("\n");
+                }
                 text.append("§8[").append(func.id()).append("]");
 
                 if (!func.conditions().isEmpty()) {
@@ -1751,6 +1770,47 @@ public final class DungeonEditorManager {
         }
     }
 
+    /**
+     * 將副本功能直接寫入既有 YAML 物件，避免被其他 save 流程覆蓋。
+     */
+    public void saveFunctions(final YamlConfiguration yaml, final String dungeonId) {
+        if (yaml == null) {
+            return;
+        }
+
+        yaml.set(dungeonId + ".functions", null);
+
+        final List<DungeonFunction> funcs = this.dungeonFunctions.getOrDefault(dungeonId, List.of());
+        for (final DungeonFunction func : funcs) {
+            final String path = dungeonId + ".functions." + func.id();
+
+            yaml.set(path + ".type", func.functionType().name());
+            yaml.set(path + ".trigger-type", func.triggerType().name());
+            yaml.set(path + ".target-type", func.targetType().name());
+            yaml.set(path + ".location", List.of(func.blockX(), func.blockY(), func.blockZ()));
+            yaml.set(path + ".allow-retrigger", func.allowRetrigger());
+
+            for (final Map.Entry<String, Object> entry : func.functionOptions().entrySet()) {
+                yaml.set(path + ".options." + entry.getKey(), entry.getValue());
+            }
+
+            for (final Map.Entry<String, Object> entry : func.triggerOptions().entrySet()) {
+                yaml.set(path + ".trigger-options." + entry.getKey(), entry.getValue());
+            }
+
+            final List<Map<String, Object>> conditionMaps = new ArrayList<>();
+            for (final FunctionCondition cond : func.conditions()) {
+                final Map<String, Object> condMap = new LinkedHashMap<>();
+                condMap.put("type", cond.type().name());
+                condMap.put("options", cond.options());
+                conditionMaps.add(condMap);
+            }
+            if (!conditionMaps.isEmpty()) {
+                yaml.set(path + ".conditions", conditionMaps);
+            }
+        }
+    }
+
     // ══════════════════════════════════════════════════
     //  清理
     // ══════════════════════════════════════════════════
@@ -1793,6 +1853,48 @@ public final class DungeonEditorManager {
             sb.append("§f").append(entry.getKey()).append("§7=§e").append(entry.getValue()).append(" ");
         }
         return sb.length() > 0 ? sb.toString().trim() : "§7無選項";
+    }
+
+    private String buildFunctionSummaryLine(final DungeonFunction func) {
+        final String summary = this.markerSummary(func).replaceAll("§.", "").trim();
+        return summary.isEmpty() ? "§7摘要: §8-" : "§7摘要: §f" + summary;
+    }
+
+    private String markerSummary(final DungeonFunction func) {
+        if (func == null) {
+            return "";
+        }
+        final Map<String, Object> opts = func.functionOptions();
+        final String summary = switch (func.functionType()) {
+            case HOLOGRAM -> toSummaryText(opts.get("hologram-text"));
+            case MESSAGE_SENDER -> toSummaryText(opts.get("message"));
+            case TITLE_SENDER -> toSummaryText(opts.get("title"));
+            case SOUND_PLAYER -> toSummaryText(opts.get("sound-name"));
+            case COMMAND_SENDER -> toSummaryText(opts.get("command"));
+            case MYTHIC_SKILL -> toSummaryText(opts.get("skill-name"));
+            case MYTHIC_SIGNAL, SIGNAL_SENDER -> toSummaryText(opts.get("signal-name"));
+            case MOB_SPAWNER -> {
+                final String mythicId = toSummaryText(opts.get("mythic-mob-id"));
+                final String mobType = toSummaryText(opts.get("mob-type"));
+                yield mythicId.isBlank() ? mobType : mythicId;
+            }
+            default -> "";
+        };
+        if (summary.isBlank()) {
+            return "";
+        }
+        return "§f" + summary;
+    }
+
+    private static String toSummaryText(final Object value) {
+        if (value == null) {
+            return "";
+        }
+        final String text = String.valueOf(value).replace('&', '§').replaceAll("§.", "").trim();
+        if (text.isEmpty()) {
+            return "";
+        }
+        return text.length() > 24 ? text.substring(0, 21) + "..." : text;
     }
 
     private ItemStack guiIcon(final Material material, final String name, final String... loreLines) {

@@ -273,14 +273,14 @@ gui-buttons:
       - "回到第 {page} 頁"
   machine-dir-input:
     icon: HOPPER
-    display-name: "收電方向"
+    display-name: "物流輸入方向"
     lore:
       - "目前：{current}"
       - "點一下切換方向"
       - "順序：ALL → 北 → 東 → 南 → 西 → 上 → 下"
   machine-dir-output:
     icon: DROPPER
-    display-name: "送電方向"
+    display-name: "物流輸出方向"
     lore:
       - "目前：{current}"
       - "點一下切換方向"
@@ -1483,7 +1483,7 @@ items:
     # item-model: techproject:item/polymer_resin
     # nexo-id: polymer_resin
     description: "化工聚合原液。"
-    unlock: "chemical_reactor"
+    unlock: "polymer_press"
     use-cases:
       - "科技書詳細頁"
       - "可用於後續科技線"
@@ -1748,6 +1748,16 @@ items:
       - "科技書詳細頁"
       - "可用於後續科技線"
       - "支援配方與解鎖鏈"
+  redstone_control:
+    display-name: "紅石集成電路"
+    category: INTERMEDIATE
+    icon: COMPARATOR
+    description: "安裝至升級槽，使機器可受紅石訊號控制啟停。"
+    unlock: "assembler"
+    use-cases:
+      - "升級模組：安裝後機器可受紅石控制"
+      - "模式：忽略 / 正常 / 反轉 / 高功率(15)"
+      - "靈感來源：Thermal Expansion"
   auto_processing_card:
     display-name: "自動化模組"
     category: ADVANCED
@@ -1901,7 +1911,7 @@ machines:
     inputs: [tech_book, copper_ingot]
     outputs: []
     energy-per-tick: 0
-    effect: 奧術研究光環
+    effect: 研究場（8 格內 +1 科技經驗/秒）
     unlock: initial
   crusher:
     display-name: "粉碎機"
@@ -2144,7 +2154,7 @@ machines:
     block: HONEY_BLOCK
     head-texture: 8d5cf92bc79ec19f4106441affff1406a1367010dcafb197dd94cfca1a6de0fc
     inputs: ["rubber_sheet", "polymer_resin"]
-    outputs: ["treated_plastic"]
+    outputs: ["rubber_sheet", "polymer_resin", "treated_plastic"]
     energy-per-tick: 10
     effect: "黏性壓製"
     unlock: "bio_lab"
@@ -2893,11 +2903,11 @@ recipes:
     energy: 12
     guide: "銅線 + 鋼線 → 拉線機 → 工業線束"
   chemical_polymer:
-    machine: "chemical_reactor"
+    machine: "polymer_press"
     inputs: ["bio_resin", "coal_dust"]
     output: "polymer_resin"
-    energy: 16
-    guide: "生質樹脂 + 煤粉 → 化學反應器 → 聚合樹脂"
+    energy: 15
+    guide: "生質樹脂 + 煤粉 → 聚合壓床 → 聚合樹脂"
   chemical_synthetic:
     machine: "chemical_reactor"
     inputs: ["polymer_resin", "bio_fiber"]
@@ -3156,6 +3166,12 @@ recipes:
     output: "range_upgrade"
     energy: 30
     guide: "通量連結 + 感測陣列 → 量子處理器 → 範圍升級"
+  assembler_redstone_control:
+    machine: "assembler"
+    inputs: ["basic_circuit", "redstone"]
+    output: "redstone_control"
+    energy: 10
+    guide: "基礎電路 + 紅石 → 製造機 → 紅石集成電路"
   assembler_energy_node:
     machine: "assembler"
     inputs: ["emitter_node", "machine_casing"]

@@ -77,6 +77,7 @@ public final class MachineService {
     private static final int[] INPUT_SLOTS = {0, 1, 2, 3, 4, 5, 6, 7, 8};
     private static final int[] OUTPUT_SLOTS = {27, 28, 29, 30, 31, 32, 33, 34, 35};
     private static final int[] UPGRADE_SLOTS = {39, 40, 41};
+    private static final int STACK_UPGRADE_SLOT = 41;
     private static final String[] DIRECTION_ORDER = {"ALL", "NORTH", "EAST", "SOUTH", "WEST", "UP", "DOWN"};
     private static final int ANDROID_SCRIPT_SLOT = 1;
     private static final int ANDROID_FILTER_SLOT = 0;
@@ -163,6 +164,8 @@ public final class MachineService {
     private final Map<UUID, BossBar> machineBossBars = new ConcurrentHashMap<>();
     private final Map<UUID, LocationKey> playerLookingAt = new ConcurrentHashMap<>();
     private final Map<UUID, Set<UUID>> globalTrust = new ConcurrentHashMap<>();
+    /** 排電二次確認：儲存玩家 UUID → 確認到期時間（System.currentTimeMillis）。 */
+    private final Map<UUID, Long> drainConfirmations = new ConcurrentHashMap<>();
     /**
      * BFS 鄰居快取：事件驅動失效。
      * 只在拓撲變更（放置/移除/方向/信任/升級）時清空，而非每 tick cycle。
@@ -356,6 +359,11 @@ public final class MachineService {
 
     public boolean isManagedMachine(final Block block) {
         return this.machines.containsKey(LocationKey.from(block.getLocation()));
+    }
+
+    public boolean hasRedstoneControlModule(final Block block) {
+        final PlacedMachine machine = this.machines.get(LocationKey.from(block.getLocation()));
+        return machine != null && this.hasRedstoneControl(machine);
     }
 
     public Block resolveManagedMachineBlock(final Block block) {
@@ -1226,6 +1234,7 @@ public final class MachineService {
         machine.replaceInputInventory(input);
         machine.replaceOutputInventory(output);
         machine.replaceUpgradeInventory(upgrades);
+        this.normalizeUpgradeLayout(machine);
         this.invalidateNetworkCache();
     }
 
@@ -1291,6 +1300,7 @@ public final class MachineService {
             event.setCancelled(true);
             return;
         }
+        this.normalizeUpgradeLayout(machine);
 
         final int rawSlot = event.getRawSlot();
         final int topSize = event.getView().getTopInventory().getSize();
@@ -1370,6 +1380,7 @@ public final class MachineService {
             event.setCancelled(true);
             return;
         }
+        this.normalizeUpgradeLayout(machine);
         boolean touchesTop = false;
         for (final int rawSlot : event.getRawSlots()) {
             if (rawSlot >= topSize) {
@@ -1494,6 +1505,7 @@ public final class MachineService {
             entry.put("energy-input-direction", machine.energyInputDirection());
             entry.put("energy-output-direction", machine.energyOutputDirection());
             entry.put("filter-mode", machine.filterMode());
+            entry.put("redstone-mode", machine.redstoneMode());
             entry.put("chicken-progress", machine.chickenProgress());
             entry.put("input", ItemStackSerializer.toBase64(machine.inputInventory()));
             entry.put("output", ItemStackSerializer.toBase64(machine.outputInventory()));
@@ -1591,6 +1603,7 @@ public final class MachineService {
                 machine.setEnergyInputDirection(this.restoreEnergyDirection(data.get("energy-input-direction"), inputDirection, machineId));
                 machine.setEnergyOutputDirection(this.restoreEnergyDirection(data.get("energy-output-direction"), outputDirection, machineId));
                 machine.setFilterMode(data.get("filter-mode") instanceof String s ? s : "WHITELIST");
+                machine.setRedstoneMode(data.get("redstone-mode") instanceof String s ? s : "NONE");
                 machine.restoreChickenProgress(data.get("chicken-progress") instanceof Number n ? n.doubleValue() : 0.0);
                 // 舊版逐台信任 → 自動遷移到全域信任
                 final String trustedRaw = data.get("trusted-players") instanceof String s ? s : "";
@@ -1860,6 +1873,17 @@ public final class MachineService {
         if (!machine.enabled()) {
             this.setRuntimeState(machine, MachineRuntimeState.STANDBY, "待機");
         }
+        // 紅石集成電路控制：紅石模式不允許運行時跳過加工，但仍允許物流/顯示更新
+        if (this.hasRedstoneControl(machine) && !"NONE".equalsIgnoreCase(machine.redstoneMode())) {
+            final Block rsBlock = world.getBlockAt(location);
+            if (!this.isRedstoneAllowed(machine, rsBlock)) {
+                this.setRuntimeState(machine, MachineRuntimeState.STANDBY, "紅石控制 — 暫停");
+                this.transferOutputs(machine, location);
+                this.pushOpenViewState(machine.locationKey(), machine);
+                this.updateMachineDisplay(machine, definition, location);
+                return;
+            }
+        }
         switch (definition.id()) {
             case "research_desk" -> this.tickResearchDesk(machine, location);
             case "solar_generator" -> this.tickSolarGenerator(machine, location);
@@ -1941,6 +1965,17 @@ public final class MachineService {
             return;
         }
         this.setRuntimeState(machine, MachineRuntimeState.RUNNING, "研究脈衝");
+
+        // 被動效果：每 20 tick 獎勵附近 8 格內玩家 1 點科技經驗
+        for (final Player nearby : location.getNearbyPlayers(8.0)) {
+            this.plugin.getPlayerProgressService().addTechXp(nearby.getUniqueId(), 1L);
+            if (machine.ticksActive() % 100L == 0L) {
+                nearby.sendActionBar(net.kyori.adventure.text.Component.text(
+                        "📚 研究場效應 — 持續獲得科技經驗",
+                        net.kyori.adventure.text.format.TextColor.color(0xA488E0)));
+            }
+        }
+
         if (this.isChunkViewable(machine.locationKey())) {
             world.spawnParticle(Particle.ENCHANT, location.getX() + 0.5, location.getY() + 1.08, location.getZ() + 0.5, 10, 0.28, 0.18, 0.28, 0.0);
             world.spawnParticle(Particle.WAX_ON, location.getX() + 0.5, location.getY() + 1.0, location.getZ() + 0.5, 4, 0.18, 0.1, 0.18, 0.0);
@@ -2119,6 +2154,52 @@ public final class MachineService {
             return;
         }
         final int radius = 2 + this.countUpgrade(machine, "range_upgrade");
+
+        // ── 竿狀作物 (甘蔗/竹子)：掃描 Y+1 平面，從頂端往下砍到只剩 Y+1 ──
+        for (int dx = -radius; dx <= radius; dx++) {
+            for (int dz = -radius; dz <= radius; dz++) {
+                final Block base = world.getBlockAt(location.getBlockX() + dx, location.getBlockY() + 1, location.getBlockZ() + dz);
+                final Material baseMat = base.getType();
+                if (baseMat != Material.SUGAR_CANE && baseMat != Material.BAMBOO) {
+                    continue;
+                }
+                // 找到最高的同類方塊
+                int topY = base.getY();
+                while (world.getBlockAt(base.getX(), topY + 1, base.getZ()).getType() == baseMat) {
+                    topY++;
+                }
+                if (topY <= base.getY()) {
+                    continue; // 只有 1 格高，保留
+                }
+                // 從頂端往下破壞到 Y+1（保留最底層）
+                int harvested = 0;
+                for (int y = topY; y > base.getY(); y--) {
+                    final Block target = world.getBlockAt(base.getX(), y, base.getZ());
+                    final long energy = this.effectiveEnergyCost(machine, 4L);
+                    this.absorbNearbyEnergy(machine, location, energy);
+                    if (!machine.consumeEnergy(energy)) {
+                        break;
+                    }
+                    final Material vanillaDrop = baseMat == Material.BAMBOO ? Material.BAMBOO : Material.SUGAR_CANE;
+                    final ItemStack drop = new ItemStack(vanillaDrop, 1);
+                    if (!this.canStoreAllOutputs(machine, List.of(drop))) {
+                        break;
+                    }
+                    target.setType(Material.AIR, true);
+                    this.storeOutputs(machine, List.of(drop));
+                    harvested++;
+                }
+                if (harvested > 0) {
+                    this.progressService.incrementStat(machine.owner(), "farm_harvested", harvested);
+                    this.progressService.unlockByRequirement(machine.owner(), "machine:crop_harvester");
+                    world.spawnParticle(Particle.HAPPY_VILLAGER, base.getLocation().add(0.5, 0.8, 0.5), 8, 0.2, 0.2, 0.2, 0.01);
+                    world.playSound(base.getLocation(), Sound.ITEM_BONE_MEAL_USE, 0.4f, 1.15f);
+                    return;
+                }
+            }
+        }
+
+        // ── 一般農作物 (小麥/胡蘿蔔/馬鈴薯/甜菜/地獄疣) ──
         for (int dx = -radius; dx <= radius; dx++) {
             for (int dz = -radius; dz <= radius; dz++) {
                 final Block crop = world.getBlockAt(location.getBlockX() + dx, location.getBlockY(), location.getBlockZ() + dz);
@@ -3099,6 +3180,10 @@ public final class MachineService {
         final long requiredEnergy = 2L;
         this.absorbNearbyEnergy(machine, location, requiredEnergy);
         this.distributeBatteryEnergy(machine, location, 4L);
+
+        // ── 充放電：處理輸入槽中的機器物品 / 科技裝備 ──
+        this.tickBatteryChargeDischarge(machine);
+
         if (this.processMachineRecipes(machine, location, "battery_bank_cycles", Particle.GLOW, Sound.BLOCK_AMETHYST_BLOCK_STEP)) {
             this.setRuntimeState(machine, MachineRuntimeState.RUNNING, "加工中");
             return;
@@ -3107,6 +3192,75 @@ public final class MachineService {
         this.setRuntimeState(machine, snapshot.state(), snapshot.detail());
         if (this.isChunkViewable(machine.locationKey())) {
             world.spawnParticle(Particle.GLOW, location.getX() + 0.5, location.getY() + 1.0, location.getZ() + 0.5, 6, 0.25, 0.25, 0.25, 0.01);
+        }
+    }
+
+    /**
+     * 電池站充放電邏輯：
+     * ・輸入槽的機器物品（有 machine_energy PDC）→ 吸收其電量到電池
+     * ・輸入槽的科技裝備（有 tech_item_energy）→ 從電池充電至滿
+     * 處理完的物品移到輸出槽。
+     */
+    private void tickBatteryChargeDischarge(final PlacedMachine machine) {
+        if (machine.ticksActive() % 4L != 0L) {
+            return;
+        }
+        for (int slot = 0; slot < 9; slot++) {
+            final ItemStack stack = machine.inputAt(slot);
+            if (stack == null || stack.getType() == Material.AIR) {
+                continue;
+            }
+            // 1) 機器物品 → 吸收儲能到電池
+            final String machineId = this.itemFactory.getMachineId(stack);
+            if (machineId != null) {
+                final long stored = this.itemFactory.getStoredMachineEnergy(stack);
+                if (stored > 0L) {
+                    // 把機器的電量吸入電池，產出 0 電的同型機器
+                    final MachineDefinition def = this.registry.getMachine(machineId);
+                    if (def != null) {
+                        final ItemStack drained = this.itemFactory.buildMachineItem(def, 0L);
+                        if (this.canStoreOutput(machine, drained)) {
+                            this.addEnergyCapped(machine, stored);
+                            this.storeOutput(machine, drained);
+                            machine.setInputAt(slot, null);
+                        }
+                    }
+                }
+                continue;
+            }
+            // 2) 科技裝備 → 從電池充電
+            final String itemId = this.itemFactory.getTechItemId(stack);
+            if (itemId == null) {
+                continue;
+            }
+            final long maxEnergy = this.itemFactory.maxItemEnergy(itemId);
+            if (maxEnergy <= 0L) {
+                continue;
+            }
+            final long currentEnergy = this.itemFactory.getItemStoredEnergy(stack);
+            if (currentEnergy >= maxEnergy) {
+                // 已滿 → 移到輸出
+                if (this.canStoreOutput(machine, stack)) {
+                    this.storeOutput(machine, stack.clone());
+                    machine.setInputAt(slot, null);
+                }
+                continue;
+            }
+            final long needed = maxEnergy - currentEnergy;
+            final long charged = Math.min(needed, machine.storedEnergy());
+            if (charged <= 0L) {
+                continue;
+            }
+            machine.consumeEnergy(charged);
+            this.itemFactory.setItemStoredEnergy(stack, currentEnergy + charged);
+            machine.setInputAt(slot, stack);
+            if (currentEnergy + charged >= maxEnergy) {
+                // 充滿 → 移到輸出
+                if (this.canStoreOutput(machine, stack)) {
+                    this.storeOutput(machine, stack.clone());
+                    machine.setInputAt(slot, null);
+                }
+            }
         }
     }
 
@@ -6291,6 +6445,37 @@ public final class MachineService {
                 player.sendMessage(this.itemFactory.secondary("配方鎖定已解除，恢復自動匹配。"));
                 this.openMachineMenuNextTick(player, key);
             }
+            case "drain-energy" -> {
+                if (machine.storedEnergy() <= 0L) {
+                    player.sendMessage(this.itemFactory.secondary("§7此機器沒有儲存任何能量。"));
+                    break;
+                }
+                final long now = System.currentTimeMillis();
+                final Long deadline = this.drainConfirmations.get(player.getUniqueId());
+                if (deadline != null && now <= deadline) {
+                    // 二次確認通過 → 排空
+                    final long drained = machine.storedEnergy();
+                    machine.setStoredEnergy(0L);
+                    this.drainConfirmations.remove(player.getUniqueId());
+                    player.sendMessage(this.itemFactory.secondary("§a已排空 §f" + drained + " EU§a 的儲存能量。拆下後可與空機器堆疊。"));
+                    this.openMachineMenuNextTick(player, key);
+                } else {
+                    // 第一次點擊 → 要求確認（5 秒內再點一次）
+                    this.drainConfirmations.put(player.getUniqueId(), now + 5000L);
+                    player.sendMessage(this.itemFactory.secondary("§e⚠ 即將排空 §f" + machine.storedEnergy() + " EU§e 的儲存能量（不可恢復）！"));
+                    player.sendMessage(this.itemFactory.secondary("§e⚠ 5 秒內再次點擊確認排電。"));
+                    this.openMachineMenuNextTick(player, key);
+                }
+            }
+            case "redstone-mode" -> {
+                if (!this.hasRedstoneControl(machine)) {
+                    player.sendMessage(this.itemFactory.secondary("§7需要安裝紅石集成電路才能切換。"));
+                    break;
+                }
+                machine.setRedstoneMode(this.nextRedstoneMode(machine.redstoneMode()));
+                player.sendMessage(this.itemFactory.secondary("紅石控制模式已切換為：" + this.redstoneModeName(machine.redstoneMode())));
+                this.openMachineMenuNextTick(player, key);
+            }
             case "back-main" -> this.openMachineMenuNextTick(player, key);
             default -> {
                 if (action.startsWith("recipes:")) {
@@ -7641,7 +7826,95 @@ public final class MachineService {
         return total;
     }
 
-    private static final double STACK_UPGRADE_CHANCE = 0.5;
+    // ── 紅石集成電路 helpers ──
+    private boolean hasRedstoneControl(final PlacedMachine machine) {
+        return this.countUpgrade(machine, "redstone_control") > 0;
+    }
+
+    /**
+     * 紅石模式：NONE(忽略) → NORMAL(有訊號才運行) → INVERTED(無訊號才運行) → HIGH(訊號=15才運行)
+     */
+    private String nextRedstoneMode(final String current) {
+        return switch (current == null ? "NONE" : current.toUpperCase()) {
+            case "NONE" -> "NORMAL";
+            case "NORMAL" -> "INVERTED";
+            case "INVERTED" -> "HIGH";
+            default -> "NONE";
+        };
+    }
+
+    private String redstoneModeName(final String mode) {
+        return switch (mode == null ? "NONE" : mode.toUpperCase()) {
+            case "NORMAL" -> "§e正常 (有訊號才運行)";
+            case "INVERTED" -> "§6反轉 (無訊號才運行)";
+            case "HIGH" -> "§c高功率 (訊號=15才運行)";
+            default -> "§7忽略 (不受紅石控制)";
+        };
+    }
+
+    /**
+     * 根據紅石控制模式判斷機器是否應該運作。
+     * 由 tick 呼叫以決定是否跳過加工。
+     */
+    public boolean isRedstoneAllowed(final PlacedMachine machine, final org.bukkit.block.Block block) {
+        if (!this.hasRedstoneControl(machine)) {
+            return true; // 沒裝模組 → 永遠允許
+        }
+        final String mode = machine.redstoneMode() == null ? "NONE" : machine.redstoneMode().toUpperCase();
+        if ("NONE".equals(mode)) {
+            return true;
+        }
+        final int power = block.getBlockPower();
+        return switch (mode) {
+            case "NORMAL" -> power > 0;
+            case "INVERTED" -> power == 0;
+            case "HIGH" -> power >= 15;
+            default -> true;
+        };
+    }
+
+    private boolean isStackUpgradeItem(final ItemStack stack) {
+        return "stack_upgrade".equalsIgnoreCase(this.resolveStackId(stack));
+    }
+
+    private boolean isStackUpgradeSlot(final int rawSlot) {
+        return rawSlot == STACK_UPGRADE_SLOT;
+    }
+
+    private boolean canPlaceUpgradeInSlot(final int rawSlot, final ItemStack stack) {
+        if (!this.isUpgradeItem(stack)) {
+            return false;
+        }
+        if (this.isStackUpgradeItem(stack)) {
+            return this.isStackUpgradeSlot(rawSlot);
+        }
+        return this.isUpgradeSlot(rawSlot) && !this.isStackUpgradeSlot(rawSlot);
+    }
+
+    private void normalizeUpgradeLayout(final PlacedMachine machine) {
+        if (machine == null) {
+            return;
+        }
+        final int dedicatedIndex = UPGRADE_SLOTS.length - 1;
+        final ItemStack dedicated = machine.upgradeAt(dedicatedIndex);
+        if (this.isStackUpgradeItem(dedicated)) {
+            return;
+        }
+        for (int slot = 0; slot < UPGRADE_SLOTS.length; slot++) {
+            if (slot == dedicatedIndex) {
+                continue;
+            }
+            final ItemStack candidate = machine.upgradeAt(slot);
+            if (!this.isStackUpgradeItem(candidate)) {
+                continue;
+            }
+            machine.setUpgradeAt(slot, dedicated);
+            machine.setUpgradeAt(dedicatedIndex, candidate);
+            return;
+        }
+    }
+
+    private static final double STACK_UPGRADE_CHANCE = 0.35;
 
     private int rollStackBonus(final PlacedMachine machine) {
         final int count = this.countUpgrade(machine, "stack_upgrade");
@@ -7661,7 +7934,8 @@ public final class MachineService {
 
     private boolean isUpgradeItem(final ItemStack stack) {
         final String id = this.resolveStackId(stack);
-        return id != null && (id.equals("speed_upgrade") || id.equals("efficiency_upgrade") || id.equals("stack_upgrade") || id.equals("range_upgrade"));
+        return id != null && (id.equals("speed_upgrade") || id.equals("efficiency_upgrade") || id.equals("stack_upgrade") || id.equals("range_upgrade")
+                || id.equals("redstone_control") || id.equals("advanced_speed_upgrade") || id.equals("advanced_efficiency_upgrade") || id.equals("advanced_stack_upgrade") || id.equals("quantum_range_upgrade"));
     }
 
     private void handleManualMachineStorageClick(final Player player,
@@ -7673,7 +7947,7 @@ public final class MachineService {
             return;
         }
         final boolean upgradeSlot = this.isUpgradeSlot(rawSlot);
-        if (upgradeSlot && !this.isUpgradeItem(player.getItemOnCursor())) {
+        if (upgradeSlot && !this.canPlaceUpgradeInSlot(rawSlot, player.getItemOnCursor())) {
             return;
         }
         this.placeCursorIntoMachineSlot(player, machine, rawSlot, rightClick);
@@ -7734,7 +8008,12 @@ public final class MachineService {
         final ItemStack slotStack = this.machineSlotItem(machine, rawSlot);
         if (slotStack == null || slotStack.getType() == Material.AIR) {
             final ItemStack placed = cursor.clone();
-            if (rightClick) {
+            if (this.isUpgradeSlot(rawSlot)) {
+                // 升級槽每格只放 1 張
+                placed.setAmount(1);
+                cursor.setAmount(cursor.getAmount() - 1);
+                this.setPlayerCursor(player, cursor.getAmount() <= 0 ? null : cursor);
+            } else if (rightClick) {
                 placed.setAmount(1);
                 cursor.setAmount(cursor.getAmount() - 1);
                 this.setPlayerCursor(player, cursor.getAmount() <= 0 ? null : cursor);
@@ -7746,6 +8025,10 @@ public final class MachineService {
             return;
         }
         if (slotStack.isSimilar(cursor)) {
+            // 升級槽已有物品時不允許堆疊
+            if (this.isUpgradeSlot(rawSlot)) {
+                return;
+            }
             final int room = slotStack.getMaxStackSize() - slotStack.getAmount();
             if (room <= 0) {
                 return;
@@ -7758,7 +8041,7 @@ public final class MachineService {
             this.pushOpenViewState(machine.locationKey(), machine);
             return;
         }
-        if (this.isUpgradeSlot(rawSlot) && !this.isUpgradeItem(cursor)) {
+        if (this.isUpgradeSlot(rawSlot) && !this.canPlaceUpgradeInSlot(rawSlot, cursor)) {
             return;
         }
         this.setMachineSlotItem(machine, rawSlot, cursor);
@@ -7796,20 +8079,30 @@ public final class MachineService {
             if (!this.isInputSlot(rawSlot) && !this.isUpgradeSlot(rawSlot)) {
                 continue;
             }
-            if (this.isUpgradeSlot(rawSlot) && !this.isUpgradeItem(cursor)) {
+            if (this.isUpgradeSlot(rawSlot) && !this.canPlaceUpgradeInSlot(rawSlot, cursor)) {
                 continue;
+            }
+            // 升級槽最多只能放 1 張
+            if (this.isUpgradeSlot(rawSlot)) {
+                final ItemStack existing = this.machineSlotItem(machine, rawSlot);
+                if (existing != null && existing.getType() != Material.AIR) {
+                    continue;
+                }
             }
             final ItemStack before = this.machineSlotItem(machine, rawSlot);
             final ItemStack after = entry.getValue();
             final int beforeAmount = before == null || before.getType() == Material.AIR ? 0 : before.getAmount();
             final int afterAmount = after == null || after.getType() == Material.AIR ? 0 : after.getAmount();
-            final int placed = Math.max(0, afterAmount - beforeAmount);
+            int placed = Math.max(0, afterAmount - beforeAmount);
             if (placed <= 0) {
                 continue;
             }
+            if (this.isUpgradeSlot(rawSlot)) {
+                placed = 1;
+            }
             if (before == null || before.getType() == Material.AIR) {
                 final ItemStack placedStack = cursor.clone();
-                placedStack.setAmount(Math.min(placed, cursor.getAmount()));
+                placedStack.setAmount(this.isUpgradeSlot(rawSlot) ? 1 : Math.min(placed, cursor.getAmount()));
                 this.setMachineSlotItem(machine, rawSlot, placedStack);
             } else if (before.isSimilar(cursor)) {
                 final ItemStack updated = before.clone();
@@ -7851,8 +8144,14 @@ public final class MachineService {
                 return stack;
             }
             ItemStack remaining = stack.clone();
-            for (int slot = 0; slot < UPGRADE_SLOTS.length; slot++) {
+            final int[] targetSlots = this.isStackUpgradeItem(remaining)
+                    ? new int[]{UPGRADE_SLOTS.length - 1}
+                    : new int[]{0, 1};
+            for (final int slot : targetSlots) {
                 final ItemStack current = machine.upgradeAt(slot);
+                if (current != null && current.getType() != Material.AIR && !this.canPlaceUpgradeInSlot(UPGRADE_SLOTS[slot], current)) {
+                    continue;
+                }
                 if (current == null || current.getType() == Material.AIR) {
                     machine.setUpgradeAt(slot, remaining);
                     return new ItemStack(Material.AIR);
@@ -8848,7 +9147,7 @@ public final class MachineService {
             final List<String> energyInputLore = new ArrayList<>();
             energyInputLore.add("§f目前：§a" + this.directionDisplayName(machine.energyInputDirection()));
             energyInputLore.add("§7用途：設定電力從哪一面進來");
-            energyInputLore.add("§7物流方向與收電方向現在可分開設定");
+            energyInputLore.add("§7物流方向與電力方向現在可分開設定");
             energyInputLore.add("§7全部 = 六面都可收電");
             energyInputLore.add(this.directionCycleDisplay());
             energyInputLore.addAll(neighbors);
@@ -8856,7 +9155,16 @@ public final class MachineService {
                 this.placeholders("current", String.valueOf(machine.energyInputDirection()))), "dir-energy-input"));
         }
         if (showPowerInput && showPowerOutput) {
-            inventory.setItem(37, this.sectionPane(centerPane, "⚡", List.of()));
+            // 排電按鈕 – 有電量時顯示互動按鈕，無電時顯示裝飾
+            if (machine.storedEnergy() > 0L) {
+                final List<String> drainLore = new ArrayList<>();
+                drainLore.add("§f目前儲能：§e" + machine.storedEnergy() + " EU");
+                drainLore.add("§7排空後拆下可與 0 電機器堆疊");
+                drainLore.add("§c需點擊兩次確認");
+                inventory.setItem(37, this.itemFactory.tagGuiAction(this.guiButton("machine-drain-energy", Material.CAULDRON, "§c排空儲存能量", drainLore), "drain-energy"));
+            } else {
+                inventory.setItem(37, this.sectionPane(centerPane, "⚡", List.of()));
+            }
         }
         if (showPowerOutput) {
             final List<String> energyOutputLore = new ArrayList<>();
@@ -8868,6 +9176,17 @@ public final class MachineService {
             energyOutputLore.addAll(neighbors);
             inventory.setItem(38, this.itemFactory.tagGuiAction(this.guiButton("machine-energy-dir-output", Material.REDSTONE, "送電方向", energyOutputLore,
                 this.placeholders("current", String.valueOf(machine.energyOutputDirection()))), "dir-energy-output"));
+        }
+        // 紅石集成電路模式按鈕
+        if (this.hasRedstoneControl(machine)) {
+            final List<String> rsLore = new ArrayList<>();
+            rsLore.add("§f目前：" + this.redstoneModeName(machine.redstoneMode()));
+            rsLore.add("§7忽略：不受紅石訊號控制");
+            rsLore.add("§7正常：有紅石訊號才運行");
+            rsLore.add("§7反轉：無紅石訊號才運行");
+            rsLore.add("§7高功率：訊號強度 15 才運行");
+            rsLore.add("§7左鍵切換模式");
+            inventory.setItem(17, this.itemFactory.tagGuiAction(this.guiButton("machine-redstone-mode", Material.COMPARATOR, "紅石控制模式", rsLore), "redstone-mode"));
         }
     }
 

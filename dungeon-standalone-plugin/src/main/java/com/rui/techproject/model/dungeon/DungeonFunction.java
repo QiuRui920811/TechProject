@@ -431,6 +431,9 @@ public record DungeonFunction(
         DUNGEON_START(Material.LIME_DYE,
                 "§a副本開始", "副本開始時觸發。",
                 new String[]{}),
+        DUNGEON_COMPLETE(Material.GOLD_BLOCK,
+                "§6副本完成", "副本通關時觸發。",
+                new String[]{}),
         SIGNAL_RECEIVER(Material.SCULK_SENSOR,
                 "§d信號接收器", "收到匹配信號時觸發。",
                 new String[]{"signal-name"}),
@@ -446,7 +449,7 @@ public record DungeonFunction(
                 "§b玩家偵測器", "預設偵測玩家；設定 mob-type 後改為偵測怪物。",
                 new String[]{"distance", "player-count", "mob-type"}),
         KEY_ITEM_DETECTOR(Material.TRIPWIRE_HOOK,
-                "§e鑰匙偵測", "玩家使用鑰匙物品時觸發。",
+                "§e鑰匙偵測", "玩家使用鑰匙物品時觸發。支援材質、科技物品 ID，或 item: 匯入字串。",
                 new String[]{"key-item-type"}),
         CHAT_MESSAGE(Material.WRITABLE_BOOK,
                 "§f聊天訊息", "玩家發送匹配訊息時觸發。",
@@ -460,8 +463,8 @@ public record DungeonFunction(
 
         // ── 通用觸發 ──
         MOB_DEATH_COUNTER(Material.ZOMBIE_HEAD,
-                "§6怪物死亡計數", "指定數量的怪物死亡時觸發。",
-                new String[]{"mob-type", "kill-count"}),
+                "§6怪物死亡計數", "指定數量的怪物死亡時觸發，可限制為特定生怪功能方塊。",
+                new String[]{"mob-type", "kill-count", "source-function-id"}),
         REDSTONE_RECEIVER(Material.REDSTONE,
                 "§c紅石接收", "此位置收到紅石訊號時觸發。",
                 new String[]{}),
@@ -495,7 +498,7 @@ public record DungeonFunction(
         public Map<String, Object> defaultOptions() {
             final Map<String, Object> opts = new LinkedHashMap<>();
             switch (this) {
-                case DUNGEON_START, LEAVE_DUNGEON_LISTENER, RIGHT_CLICK, REDSTONE_RECEIVER -> {}
+                                case DUNGEON_START, DUNGEON_COMPLETE, LEAVE_DUNGEON_LISTENER, RIGHT_CLICK, REDSTONE_RECEIVER -> {}
                 case SIGNAL_RECEIVER -> opts.put("signal-name", "預設信號");
                                 case PLAYER_DETECTOR -> {
                                         opts.put("distance", 10.0);
@@ -506,7 +509,7 @@ public record DungeonFunction(
                 case CHAT_MESSAGE -> opts.put("chat-pattern", "開啟");
                 case BLOCK_DETECTOR -> { opts.put("detect-block-type", ""); opts.put("detect-place", true); opts.put("detect-break", true); }
                 case PLAYER_DEATH_COUNTER -> opts.put("death-count", 1);
-                case MOB_DEATH_COUNTER -> { opts.put("mob-type", ""); opts.put("kill-count", 5); }
+                                case MOB_DEATH_COUNTER -> { opts.put("mob-type", ""); opts.put("kill-count", 5); opts.put("source-function-id", ""); }
                 case AND_GATE, OR_GATE -> opts.put("trigger-ids", List.of());
             }
             return opts;
@@ -518,7 +521,7 @@ public record DungeonFunction(
                 case "signal-name" -> "§e信號名稱";
                 case "distance" -> "§e偵測距離";
                 case "player-count" -> "§e所需玩家數";
-                case "key-item-type" -> "§e鑰匙物品類型";
+                case "key-item-type" -> "§e鑰匙條件";
                 case "chat-pattern" -> "§e匹配文字";
                 case "detect-block-type" -> "§e偵測方塊類型";
                 case "detect-place" -> "§e偵測放置";
@@ -526,6 +529,7 @@ public record DungeonFunction(
                 case "death-count" -> "§e死亡次數";
                 case "mob-type" -> "§e怪物類型";
                 case "kill-count" -> "§e擊殺數量";
+                                case "source-function-id" -> "§e來源功能 ID";
                 case "trigger-ids" -> "§e觸發器 ID 列表";
                 default -> "§e" + optionKey;
             };

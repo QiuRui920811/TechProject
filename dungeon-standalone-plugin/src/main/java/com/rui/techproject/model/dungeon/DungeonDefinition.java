@@ -1,5 +1,7 @@
 package com.rui.techproject.model.dungeon;
 
+import org.bukkit.inventory.ItemStack;
+
 import java.util.List;
 import java.util.Map;
 
@@ -187,19 +189,31 @@ public record DungeonDefinition(
     /**
      * 通關獎勵。
      *
-     * @param type     獎勵類型：item / command / tech_material / tech_blueprint / money / exp
+     * @param type     獎勵類型：item / command / tech_material / tech_blueprint / money / exp / custom_items
      * @param value    值（物品ID / 指令 / 金額等）
      * @param amount   數量
      * @param chance   掉落機率 0.0~1.0
      * @param firstClearOnly 是否僅首次通關才給
+     * @param deliveryMode 發放方式：inventory / claim_gui
+     * @param items    自訂物品獎勵內容（支援完整 ItemMeta）
      */
     public record RewardDefinition(
             String type,
             String value,
             int amount,
             double chance,
-            boolean firstClearOnly
-    ) {}
+            boolean firstClearOnly,
+            String deliveryMode,
+            List<ItemStack> items
+    ) {
+        public boolean usesClaimGui() {
+            return "claim_gui".equalsIgnoreCase(this.deliveryMode);
+        }
+
+        public boolean hasCustomItems() {
+            return this.items != null && !this.items.isEmpty();
+        }
+    }
 
     /**
      * 腳本事件定義 — 副本中的互動 / 機關 / 觸發器。

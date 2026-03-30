@@ -17,6 +17,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.loot.LootContext;
 import org.bukkit.loot.LootTable;
+import org.bukkit.persistence.PersistentDataType;
 
 import java.lang.reflect.Method;
 import java.time.Duration;
@@ -43,6 +44,7 @@ public final class DungeonFunctionEngine {
     private final TechProjectPlugin plugin;
     private final SafeScheduler scheduler;
     private final DungeonService dungeonService;
+    private final NamespacedKey spawnedByFunctionKey;
 
     // ══════════════════════════════════════════════════
     //  每個副本實例的運行時上下文
@@ -106,6 +108,7 @@ public final class DungeonFunctionEngine {
         this.plugin = plugin;
         this.scheduler = scheduler;
         this.dungeonService = dungeonService;
+        this.spawnedByFunctionKey = new NamespacedKey(plugin, "dungeon_spawn_source_function");
     }
 
     // ══════════════════════════════════════════════════
@@ -251,6 +254,18 @@ public final class DungeonFunctionEngine {
         }
     }
 
+    /** 副本完成時觸發所有 DUNGEON_COMPLETE 觸發器。 */
+    public void onDungeonComplete(final DungeonInstance instance) {
+        final FunctionRuntimeContext ctx = this.contexts.get(instance.instanceId());
+        if (ctx == null) return;
+
+        for (final DungeonFunction func : ctx.functions) {
+            if (func.triggerType() == TriggerType.DUNGEON_COMPLETE) {
+                this.tryExecute(ctx, func, null);
+            }
+        }
+    }
+
     /** 玩家右鍵/左鍵方塊時。 */
     public void onPlayerInteract(final DungeonInstance instance, final Player player,
                                   final Block block, final Action action) {
@@ -279,7 +294,7 @@ public final class DungeonFunctionEngine {
             if (func.blockX() == bx && func.blockY() == by && func.blockZ() == bz
                     && func.triggerType() == TriggerType.KEY_ITEM_DETECTOR) {
                 final String requiredType = toString(func.triggerOptions().get("key-item-type"), "TRIPWIRE_HOOK");
-                if (item.getType().name().equalsIgnoreCase(requiredType)) {
+                if (this.dungeonService.matchesKeyItem(item, requiredType)) {
                     this.tryExecute(ctx, func, player);
                 }
             }
@@ -351,12 +366,20 @@ public final class DungeonFunctionEngine {
         if (ctx == null) return;
 
         final String mobType = entity.getType().name();
+        final String sourceFunctionId = entity.getPersistentDataContainer()
+                .getOrDefault(this.spawnedByFunctionKey, PersistentDataType.STRING, "");
         for (final DungeonFunction func : ctx.functions) {
             if (func.triggerType() == TriggerType.MOB_DEATH_COUNTER) {
                 final String requiredType = toString(func.triggerOptions().get("mob-type"), "");
                 final int requiredCount = toInt(func.triggerOptions().get("kill-count"), 5);
+                final String requiredSourceFunctionId = toString(
+                        func.triggerOptions().get("source-function-id"), "").trim();
 
-                if (requiredType.isEmpty() || requiredType.equalsIgnoreCase(mobType)) {
+                final boolean typeMatches = requiredType.isEmpty() || requiredType.equalsIgnoreCase(mobType);
+                final boolean sourceMatches = requiredSourceFunctionId.isEmpty()
+                        || requiredSourceFunctionId.equalsIgnoreCase(sourceFunctionId);
+
+                if (typeMatches && sourceMatches) {
                     final int current = ctx.mobDeathCounts.merge(func.id(), 1, Integer::sum);
                     if (current >= requiredCount) {
                         this.tryExecute(ctx, func, null);
@@ -1080,6 +1103,7 @@ public final class DungeonFunctionEngine {
                 if (!mythicMobId.isEmpty()) {
                     final Entity mythicEntity = this.spawnMythicMobEntity(mythicMobId, spawnLoc, level);
                     if (mythicEntity != null) {
+                        this.tagSpawnedMob(mythicEntity, func);
                         ctx.instance.trackEntity(mythicEntity);
                         return; // MythicMobs 生成成功
                     }
@@ -1105,12 +1129,25 @@ public final class DungeonFunctionEngine {
                         living.setRemoveWhenFarAway(false);
                         living.setPersistent(true);
                     }
+                    this.tagSpawnedMob(entity, func);
                     ctx.instance.trackEntity(entity);
                 } catch (final Exception e) {
                     this.plugin.getLogger().warning("[功能引擎] MOB_SPAWNER 生怪失敗: " + e.getMessage());
                 }
             });
         }
+    }
+
+    private void tagSpawnedMob(final Entity entity, final DungeonFunction func) {
+        if (entity == null || func == null) {
+            return;
+        }
+        entity.getPersistentDataContainer().set(
+                this.spawnedByFunctionKey,
+                PersistentDataType.STRING,
+                func.id());
+        entity.addScoreboardTag("tech_dungeon_spawned");
+        entity.addScoreboardTag("tech_dungeon_func:" + func.id().toLowerCase(Locale.ROOT));
     }
 
     private void execNpcSpawner(final FunctionRuntimeContext ctx, final DungeonFunction func) {

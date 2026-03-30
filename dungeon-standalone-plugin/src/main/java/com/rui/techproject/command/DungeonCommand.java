@@ -256,6 +256,24 @@ public final class DungeonCommand implements CommandExecutor, TabCompleter {
                     this.tell(player, "<#F87171>請輸入有效的秒數。</#F87171>");
                 }
             }
+            case "keyimport" -> {
+                if (!sender.hasPermission(ADMIN_PERMISSION)) {
+                    this.tell(sender, "<#F87171>缺少權限。</#F87171>");
+                    return true;
+                }
+                if (args.length < 2) {
+                    this.tell(player, "<#F87171>用法：/dungeon keyimport [副本ID]</#F87171>");
+                    return true;
+                }
+                dungeonService.adminImportHeldAccessKey(player, args[1].toLowerCase(Locale.ROOT));
+            }
+            case "keyexport" -> {
+                if (!sender.hasPermission(ADMIN_PERMISSION)) {
+                    this.tell(sender, "<#F87171>缺少權限。</#F87171>");
+                    return true;
+                }
+                dungeonService.adminExportHeldAccessKey(player);
+            }
             case "save" -> {
                 if (!sender.hasPermission(ADMIN_PERMISSION)) {
                     this.tell(sender, "<#F87171>缺少權限。</#F87171>");
@@ -316,7 +334,7 @@ public final class DungeonCommand implements CommandExecutor, TabCompleter {
             if (sender.hasPermission(ADMIN_PERMISSION)) {
                 options.addAll(List.of(
                         "create", "edit", "setspawn", "setexit", "setlobby", "setname",
-                        "settime", "setplayers", "setcooldown", "save", "cancel", "delete",
+                    "settime", "setplayers", "setcooldown", "keyimport", "keyexport", "save", "cancel", "delete",
                         "import", "adminlist", "reload", "forceclose"
                 ));
             }
@@ -331,7 +349,7 @@ public final class DungeonCommand implements CommandExecutor, TabCompleter {
             }
 
             if (sub.equals("join") || sub.equals("start") || sub.equals("info") || sub.equals("top")
-                    || sub.equals("edit") || sub.equals("delete")) {
+                    || sub.equals("edit") || sub.equals("delete") || sub.equals("keyimport")) {
                 return new ArrayList<>(ds.definitions().keySet());
             }
 
@@ -373,6 +391,8 @@ public final class DungeonCommand implements CommandExecutor, TabCompleter {
             this.tell(player, "<#86EFAC>/dungeon create [ID]</#86EFAC>");
             this.tell(player, "<#86EFAC>/dungeon edit [ID]</#86EFAC>");
             this.tell(player, "<#86EFAC>/dungeon setspawn | setexit | setlobby</#86EFAC>");
+            this.tell(player, "<#86EFAC>/dungeon keyimport [ID]</#86EFAC> <#94A3B8>- 匯入手上物品為進場鑰匙</#94A3B8>");
+            this.tell(player, "<#86EFAC>/dungeon keyexport</#86EFAC> <#94A3B8>- 輸出手上物品的 item: 匯入字串</#94A3B8>");
             this.tell(player, "<#86EFAC>/dungeon save | cancel | adminlist</#86EFAC>");
         }
     }

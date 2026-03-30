@@ -93,10 +93,20 @@ public final class CookingService {
     };
     private static final String[] INTERACTION_SUCCESS = {"翻面成功！", "攪拌完成！", "調味完美！"};
 
+    // ── 食材追加 ──
+    private static final int INGREDIENT_WINDOW_TICKS = 80; // 4 秒加料窗口
+
+    private static final String[] INGREDIENT_PROMPTS_ICON = {"🧂", "🫧", "✦"};
+
     // ── 記錄類 ──
+    private record IngredientAddition(float progressThreshold, String requiredItemId,
+                                      Material requiredMaterial, String prompt) {}
+
     private record CookingRecipe(String id, String inputId, Material inputMaterial,
                                  String outputId, int cookTimeTicks,
-                                 String stationType, String displayName) {}
+                                 String stationType, String displayName,
+                                 boolean advanced, int perfectOutputCount,
+                                 List<IngredientAddition> ingredientAdditions) {}
 
     private static final class CookingSession {
         final UUID playerId;
@@ -114,6 +124,11 @@ public final class CookingService {
         int interactionsCompleted;
         int interactionPromptTick;  // 互動提示出現的 tick
         int bonusTicks;             // 互動成功累計加速
+        // ── 食材追加系統 ──
+        int nextIngredientIndex;
+        boolean awaitingIngredient;
+        int ingredientPromptTick;
+        int ingredientsAdded;
 
         CookingSession(UUID playerId, LocationKey location, CookingRecipe recipe,
                        long startTick, int totalTicks) {
@@ -179,8 +194,19 @@ public final class CookingService {
         // 互動烹飪：檢查待處理的翻面/攪拌/調味互動
         final LocationKey activeKey = LocationKey.from(block.getLocation());
         final CookingSession active = this.activeSessions.get(activeKey);
-        if (active != null && active.awaitingInteraction && active.playerId.equals(player.getUniqueId())) {
-            this.handleInteraction(player, active, block.getLocation());
+        if (active != null && active.playerId.equals(player.getUniqueId())) {
+            // QTE 互動窗口
+            if (active.awaitingInteraction) {
+                this.handleInteraction(player, active, block.getLocation());
+                return true;
+            }
+            // 食材追加窗口
+            if (active.awaitingIngredient) {
+                this.handleIngredientAddition(player, active, handItem, block.getLocation());
+                return true;
+            }
+            // 非互動時間點擊 → 烹調失敗（防止按住右鍵完美烹飪）
+            this.failCooking(player, active, activeKey, block.getLocation());
             return true;
         }
 
@@ -385,9 +411,61 @@ public final class CookingService {
             }
         }
 
+        // ── 食材追加提示系統（僅進階配方） ──
+        if (!session.awaitingInteraction && session.recipe.advanced
+                && session.recipe.ingredientAdditions != null) {
+            final List<IngredientAddition> additions = session.recipe.ingredientAdditions;
+            if (session.awaitingIngredient) {
+                // 檢查食材追加窗口是否過期
+                if (session.ticksElapsed - session.ingredientPromptTick >= INGREDIENT_WINDOW_TICKS) {
+                    session.awaitingIngredient = false;
+                    if (player != null) {
+                        player.sendActionBar(Component.text("⏳ 加料超時", TextColor.color(0x888888)));
+                        player.playSound(player.getLocation(), Sound.BLOCK_FIRE_EXTINGUISH, 0.3f, 0.8f);
+                    }
+                } else if (player != null && !session.awaitingInteraction) {
+                    // 閃爍食材追加提示
+                    final int idx = session.nextIngredientIndex - 1;
+                    if (idx >= 0 && idx < additions.size()) {
+                        final boolean flash = (session.ticksElapsed / 4) % 2 == 0;
+                        final TextColor promptColor = flash ? TextColor.color(0x88EEFF) : TextColor.color(0x44BBDD);
+                        final String icon = idx < INGREDIENT_PROMPTS_ICON.length ? INGREDIENT_PROMPTS_ICON[idx] : "🧂";
+                        player.sendActionBar(Component.text("▶ " + icon + " " + additions.get(idx).prompt + " ◀", promptColor)
+                                .decoration(TextDecoration.BOLD, true));
+                    }
+                }
+            } else if (session.nextIngredientIndex < additions.size()) {
+                // 檢查是否到達下一個食材追加觸發點
+                if (progress >= additions.get(session.nextIngredientIndex).progressThreshold) {
+                    session.awaitingIngredient = true;
+                    session.ingredientPromptTick = session.ticksElapsed;
+                    final IngredientAddition addition = additions.get(session.nextIngredientIndex);
+                    session.nextIngredientIndex++;
+                    if (player != null) {
+                        player.showTitle(Title.title(
+                                Component.text("🧂", TextColor.color(0x88EEFF)).decoration(TextDecoration.BOLD, true),
+                                Component.text(addition.prompt, TextColor.color(0xCCF0FF)),
+                                Title.Times.times(Duration.ofMillis(50), Duration.ofMillis(800), Duration.ofMillis(200))
+                        ));
+                        player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_HARP, 0.8f, 1.4f);
+                        player.playSound(player.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 0.3f, 1.8f);
+                    }
+                    // 食材追加粒子環
+                    if (world != null) {
+                        final Location ringLoc = new Location(world, key.x() + 0.5, key.y() + 1.3, key.z() + 0.5);
+                        for (int i = 0; i < 12; i++) {
+                            final double angle = Math.toRadians(i * 30);
+                            final Location pt = ringLoc.clone().add(Math.cos(angle) * 0.4, 0, Math.sin(angle) * 0.4);
+                            world.spawnParticle(Particle.SOUL_FIRE_FLAME, pt, 1, 0, 0.05, 0, 0.01);
+                        }
+                    }
+                }
+            }
+        }
+
         // ── 更新 BossBar ──
         final TextColor barColor = progress < 0.5f ? HEAT_COLOR : (progress < 0.9f ? COOK_COLOR : DONE_COLOR);
-        final String interactHint = session.awaitingInteraction ? " ⚡" : "";
+        final String interactHint = session.awaitingInteraction ? " ⚡" : (session.awaitingIngredient ? " 🧂" : "");
         session.bossBar.name(Component.text(
                 this.buildProgressBar(progress) + " " + PHASE_LABELS[phaseIndex] + " " +
                         session.recipe.displayName + " " + (int) (progress * 100) + "%" + interactHint,
@@ -486,26 +564,47 @@ public final class CookingService {
         // 建立產物
         final ItemStack output = this.buildOutputItem(session.recipe);
         final boolean perfect = session.interactionsCompleted >= 3;
-        final String bonusText = session.interactionsCompleted > 0
-                ? " (互動 " + session.interactionsCompleted + "/3)"
-                : "";
+        // 進階配方：完美烹飪需要 QTE 全過 + 食材全加
+        final int totalIngredients = session.recipe.ingredientAdditions != null
+                ? session.recipe.ingredientAdditions.size() : 0;
+        final boolean perfectAdvanced = session.recipe.advanced && perfect
+                && session.ingredientsAdded >= totalIngredients;
+
+        final int outputCount;
+        if (perfectAdvanced && session.recipe.perfectOutputCount > 1) {
+            outputCount = session.recipe.perfectOutputCount;
+        } else {
+            outputCount = 1;
+        }
+
+        final String bonusText;
+        if (session.recipe.advanced) {
+            bonusText = " (互動 " + session.interactionsCompleted + "/3, 加料 "
+                    + session.ingredientsAdded + "/" + totalIngredients + ")";
+        } else {
+            bonusText = session.interactionsCompleted > 0
+                    ? " (互動 " + session.interactionsCompleted + "/3)" : "";
+        }
 
         // 掉落物品
         if (loc != null && world != null) {
-            world.dropItemNaturally(loc, output);
+            for (int i = 0; i < outputCount; i++) {
+                world.dropItemNaturally(loc, this.buildOutputItem(session.recipe));
+            }
 
             // 完成特效 — 根據互動完成數增強
-            world.spawnParticle(Particle.TOTEM_OF_UNDYING, loc, perfect ? 40 : 25, 0.3, 0.5, 0.3, 0.1);
-            world.spawnParticle(Particle.HAPPY_VILLAGER, loc, perfect ? 20 : 12, 0.3, 0.35, 0.3, 0.0);
-            world.spawnParticle(Particle.END_ROD, loc, perfect ? 15 : 6, 0.2, 0.4, 0.2, 0.05);
+            final boolean showPerfect = perfectAdvanced || (!session.recipe.advanced && perfect);
+            world.spawnParticle(Particle.TOTEM_OF_UNDYING, loc, showPerfect ? 40 : 25, 0.3, 0.5, 0.3, 0.1);
+            world.spawnParticle(Particle.HAPPY_VILLAGER, loc, showPerfect ? 20 : 12, 0.3, 0.35, 0.3, 0.0);
+            world.spawnParticle(Particle.END_ROD, loc, showPerfect ? 15 : 6, 0.2, 0.4, 0.2, 0.05);
             world.spawnParticle(Particle.WAX_ON, loc, 10, 0.25, 0.3, 0.25, 0.0);
-            if (perfect) {
+            if (showPerfect) {
                 world.spawnParticle(Particle.ELECTRIC_SPARK, loc, 20, 0.3, 0.4, 0.3, 0.08);
             }
             world.playSound(loc, Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 0.8f, 1.3f);
             world.playSound(loc, Sound.BLOCK_AMETHYST_BLOCK_CHIME, 0.6f, 1.5f);
             world.playSound(loc, Sound.UI_TOAST_CHALLENGE_COMPLETE, 0.5f, 1.2f);
-            if (perfect) {
+            if (showPerfect) {
                 world.playSound(loc, Sound.ENTITY_PLAYER_LEVELUP, 0.6f, 1.4f);
             }
         }
@@ -513,12 +612,21 @@ public final class CookingService {
         // 玩家通知
         final Player player = Bukkit.getPlayer(session.playerId);
         if (player != null) {
-            final Component titleText = perfect
+            final boolean showPerfect = perfectAdvanced || (!session.recipe.advanced && perfect);
+            final Component titleText = showPerfect
                     ? Component.text("\uD83C\uDF1F", TextColor.color(0xFFD700)).decoration(TextDecoration.BOLD, true)
                     : Component.text("✅", DONE_COLOR).decoration(TextDecoration.BOLD, true);
-            final Component subtitleText = perfect
-                    ? Component.text("完美烹調！ " + session.recipe.displayName, TextColor.color(0xFFD700))
-                    : Component.text(session.recipe.displayName + " 烹調完成！" + bonusText, DONE_COLOR);
+            final String subtitleMsg;
+            if (perfectAdvanced) {
+                subtitleMsg = "完美烹調！ " + session.recipe.displayName + " ×" + outputCount;
+            } else if (showPerfect) {
+                subtitleMsg = "完美烹調！ " + session.recipe.displayName;
+            } else {
+                subtitleMsg = session.recipe.displayName + " 烹調完成！" + bonusText;
+            }
+            final Component subtitleText = showPerfect
+                    ? Component.text(subtitleMsg, TextColor.color(0xFFD700))
+                    : Component.text(subtitleMsg, DONE_COLOR);
 
             player.showTitle(Title.title(
                     titleText, subtitleText,
@@ -593,6 +701,98 @@ public final class CookingService {
         ));
         display.setInterpolationDuration(5);
         display.setInterpolationDelay(0);
+    }
+
+    // ══════════════════════ 烹調失敗（非互動時間點擊） ══════════════════════
+
+    private void failCooking(final Player player, final CookingSession session,
+                             final LocationKey key, final Location blockLoc) {
+        this.activeSessions.remove(key);
+        if (session.tickTask != null) {
+            session.tickTask.cancel();
+        }
+        if (session.bossBar != null) {
+            player.hideBossBar(session.bossBar);
+        }
+        this.removeDisplayEntity(session);
+
+        // 失敗 Title
+        player.showTitle(Title.title(
+                Component.text("✖", TextColor.color(0xFF4444)).decoration(TextDecoration.BOLD, true),
+                Component.text("烹調失敗！非互動時間請勿操作烹飪台", TextColor.color(0xFF7B7B)),
+                Title.Times.times(Duration.ofMillis(100), Duration.ofMillis(1500), Duration.ofMillis(600))
+        ));
+        player.sendActionBar(Component.text("❌ " + session.recipe.displayName + " 燒焦了…", TextColor.color(0xFF4444)));
+        player.playSound(blockLoc, Sound.BLOCK_FIRE_EXTINGUISH, 0.8f, 0.6f);
+        player.playSound(blockLoc, Sound.ENTITY_VILLAGER_NO, 0.5f, 1.0f);
+
+        // 燒焦粒子
+        final World world = blockLoc.getWorld();
+        if (world != null) {
+            final Location loc = blockLoc.clone().add(0.5, 1.2, 0.5);
+            world.spawnParticle(Particle.LARGE_SMOKE, loc, 20, 0.3, 0.4, 0.3, 0.05);
+            world.spawnParticle(Particle.CAMPFIRE_COSY_SMOKE, loc, 8, 0.2, 0.3, 0.2, 0.02);
+        }
+    }
+
+    // ══════════════════════ 食材追加處理 ══════════════════════
+
+    private void handleIngredientAddition(final Player player, final CookingSession session,
+                                          final ItemStack handItem, final Location blockLoc) {
+        final List<IngredientAddition> additions = session.recipe.ingredientAdditions;
+        if (session.nextIngredientIndex <= 0 || session.nextIngredientIndex > additions.size()) {
+            session.awaitingIngredient = false;
+            return;
+        }
+        final IngredientAddition required = additions.get(session.nextIngredientIndex - 1);
+
+        // 檢查玩家手持物品是否匹配
+        boolean match = false;
+        if (required.requiredItemId != null && !required.requiredItemId.isEmpty()) {
+            final String techId = this.itemFactory.getTechItemId(handItem);
+            match = required.requiredItemId.equalsIgnoreCase(techId);
+        }
+        if (!match && required.requiredMaterial != null && handItem != null
+                && handItem.getType() == required.requiredMaterial) {
+            match = true;
+        }
+
+        if (!match) {
+            // 錯誤的材料
+            player.sendActionBar(Component.text("❌ 需要的材料不對！" + required.prompt, TextColor.color(0xFF7B7B)));
+            player.playSound(blockLoc, Sound.ENTITY_VILLAGER_NO, 0.5f, 1.2f);
+            return;
+        }
+
+        // 消耗材料
+        if (handItem.getAmount() > 1) {
+            handItem.setAmount(handItem.getAmount() - 1);
+        } else {
+            player.getInventory().setItemInMainHand(null);
+        }
+
+        session.awaitingIngredient = false;
+        session.ingredientsAdded++;
+        session.bonusTicks += INTERACTION_SPEED_BONUS;
+
+        // 成功提示
+        player.showTitle(Title.title(
+                Component.text("✓", DONE_COLOR).decoration(TextDecoration.BOLD, true),
+                Component.text("加料成功！" + required.prompt, COOK_COLOR),
+                Title.Times.times(Duration.ofMillis(50), Duration.ofMillis(500), Duration.ofMillis(200))
+        ));
+        player.playSound(blockLoc, Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 0.7f, 1.5f);
+        player.playSound(blockLoc, Sound.ITEM_BOTTLE_FILL, 0.5f, 1.3f);
+
+        // 食材追加粒子
+        final World world = blockLoc.getWorld();
+        if (world != null) {
+            final Location loc = blockLoc.clone().add(0.5, 1.3, 0.5);
+            world.spawnParticle(Particle.HAPPY_VILLAGER, loc, 12, 0.2, 0.15, 0.2, 0.0);
+            world.spawnParticle(Particle.WAX_ON, loc, 8, 0.15, 0.1, 0.15, 0.0);
+        }
+
+        player.sendActionBar(Component.text("🧂 " + required.prompt + " 烹調加速！", DONE_COLOR));
     }
 
     // ══════════════════════ 食物展示實體 ══════════════════════
@@ -808,9 +1008,42 @@ public final class CookingService {
                     final List<String> stations = rs.getStringList("stations");
                     final String stationType = stations.isEmpty() ? "any" : String.join(",", stations);
 
+                    // 進階配方欄位
+                    final boolean advanced = rs.getBoolean("advanced", false);
+                    final int perfectOutputCount = rs.getInt("perfect-output-count", 1);
+
+                    // 食材追加
+                    final List<IngredientAddition> ingredientAdditions = new ArrayList<>();
+                    final var additionsList = rs.getMapList("ingredient-additions");
+                    for (final var addMap : additionsList) {
+                        final Object progObj = addMap.get("progress");
+                        final float threshold = progObj instanceof Number n ? n.floatValue() : 0.5f;
+                        final Object itemObj = addMap.get("item");
+                        final String itemStr = itemObj != null ? String.valueOf(itemObj) : "";
+                        final Object promptObj = addMap.get("prompt");
+                        final String prompt = promptObj != null ? String.valueOf(promptObj) : "加入材料！";
+                        final Object typeObj = addMap.get("item-type");
+                        final boolean isTechIngredient = "TECH_ITEM".equalsIgnoreCase(
+                                typeObj != null ? String.valueOf(typeObj) : "");
+                        Material ingredientMat = null;
+                        String ingredientId = "";
+                        if (isTechIngredient) {
+                            ingredientId = itemStr;
+                        } else {
+                            try {
+                                ingredientMat = Material.valueOf(itemStr.toUpperCase(Locale.ROOT));
+                            } catch (final IllegalArgumentException ignored) {
+                                ingredientId = itemStr;
+                            }
+                        }
+                        ingredientAdditions.add(new IngredientAddition(threshold,
+                                ingredientId.isEmpty() ? null : ingredientId, ingredientMat, prompt));
+                    }
+
                     this.recipes.add(new CookingRecipe(
                             key, inputId, inputMat, rawOutput,
-                            cookTime, stationType, displayName
+                            cookTime, stationType, displayName,
+                            advanced, perfectOutputCount, ingredientAdditions
                     ));
                 }
             }
@@ -825,14 +1058,15 @@ public final class CookingService {
     }
 
     private void addDefaultRecipes() {
-        this.recipes.add(new CookingRecipe("cook_beef", "", Material.BEEF, "COOKED_BEEF", 160, "any", "烤牛排"));
-        this.recipes.add(new CookingRecipe("cook_porkchop", "", Material.PORKCHOP, "COOKED_PORKCHOP", 160, "any", "烤豬排"));
-        this.recipes.add(new CookingRecipe("cook_chicken", "", Material.CHICKEN, "COOKED_CHICKEN", 140, "any", "烤雞腿"));
-        this.recipes.add(new CookingRecipe("cook_mutton", "", Material.MUTTON, "COOKED_MUTTON", 150, "any", "烤羊排"));
-        this.recipes.add(new CookingRecipe("cook_rabbit", "", Material.RABBIT, "COOKED_RABBIT", 120, "any", "烤兔肉"));
-        this.recipes.add(new CookingRecipe("cook_cod", "", Material.COD, "COOKED_COD", 100, "any", "烤鱈魚"));
-        this.recipes.add(new CookingRecipe("cook_salmon", "", Material.SALMON, "COOKED_SALMON", 100, "any", "烤鮭魚"));
-        this.recipes.add(new CookingRecipe("cook_potato", "", Material.POTATO, "BAKED_POTATO", 120, "any", "烤馬鈴薯"));
-        this.recipes.add(new CookingRecipe("cook_kelp", "", Material.KELP, "DRIED_KELP", 80, "any", "烤乾海帶"));
+        final List<IngredientAddition> none = List.of();
+        this.recipes.add(new CookingRecipe("cook_beef", "", Material.BEEF, "COOKED_BEEF", 160, "any", "烤牛排", false, 1, none));
+        this.recipes.add(new CookingRecipe("cook_porkchop", "", Material.PORKCHOP, "COOKED_PORKCHOP", 160, "any", "烤豬排", false, 1, none));
+        this.recipes.add(new CookingRecipe("cook_chicken", "", Material.CHICKEN, "COOKED_CHICKEN", 140, "any", "烤雞腿", false, 1, none));
+        this.recipes.add(new CookingRecipe("cook_mutton", "", Material.MUTTON, "COOKED_MUTTON", 150, "any", "烤羊排", false, 1, none));
+        this.recipes.add(new CookingRecipe("cook_rabbit", "", Material.RABBIT, "COOKED_RABBIT", 120, "any", "烤兔肉", false, 1, none));
+        this.recipes.add(new CookingRecipe("cook_cod", "", Material.COD, "COOKED_COD", 100, "any", "烤鱈魚", false, 1, none));
+        this.recipes.add(new CookingRecipe("cook_salmon", "", Material.SALMON, "COOKED_SALMON", 100, "any", "烤鮭魚", false, 1, none));
+        this.recipes.add(new CookingRecipe("cook_potato", "", Material.POTATO, "BAKED_POTATO", 120, "any", "烤馬鈴薯", false, 1, none));
+        this.recipes.add(new CookingRecipe("cook_kelp", "", Material.KELP, "DRIED_KELP", 80, "any", "烤乾海帶", false, 1, none));
     }
 }

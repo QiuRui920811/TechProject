@@ -29,6 +29,7 @@ import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.event.player.PlayerBedEnterEvent;
 import org.bukkit.event.player.PlayerBucketEmptyEvent;
@@ -235,6 +236,14 @@ public final class DungeonListener implements Listener {
             return;
         }
         final String title = PlainTextComponentSerializer.plainText().serialize(event.getView().title());
+        if (ds.isRewardEditorGui(title)) {
+            ds.handleRewardEditorInventoryClick(event);
+            return;
+        }
+        if (ds.isRewardClaimGui(title)) {
+            ds.handleRewardClaimInventoryClick(event);
+            return;
+        }
         if (!ds.isDungeonEditorGui(title)) {
             return;
         }
@@ -251,8 +260,32 @@ public final class DungeonListener implements Listener {
             return;
         }
         final String title = PlainTextComponentSerializer.plainText().serialize(event.getView().title());
+        if (ds.isRewardEditorGui(title)) {
+            ds.handleRewardEditorInventoryDrag(event);
+            return;
+        }
+        if (ds.isRewardClaimGui(title)) {
+            ds.handleRewardClaimInventoryDrag(event);
+            return;
+        }
         if (ds.isDungeonEditorGui(title)) {
             event.setCancelled(true);
+        }
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST)
+    public void onInventoryClose(final InventoryCloseEvent event) {
+        final DungeonService ds = this.plugin.getDungeonService();
+        if (ds == null || !(event.getPlayer() instanceof Player player)) {
+            return;
+        }
+        final String title = PlainTextComponentSerializer.plainText().serialize(event.getView().title());
+        if (ds.isRewardEditorGui(title)) {
+            ds.handleRewardEditorInventoryClose(player, event.getInventory());
+            return;
+        }
+        if (ds.isRewardClaimGui(title)) {
+            ds.handleRewardClaimInventoryClose(player, event.getInventory());
         }
     }
 

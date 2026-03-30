@@ -340,11 +340,9 @@ public final class ItemFactoryUtil {
         lore.add(this.colored("└─────────────────────────┘", MUTED));
         meta.lore(lore);
         meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
-        if (stack.getType() == Material.PLAYER_HEAD) {
+        // 所有科技素材強制可堆疊 64（覆蓋 SHIELD, PLAYER_HEAD 等原版限制）
+        if (stack.getMaxStackSize() < 64) {
             meta.setMaxStackSize(64);
-        }
-        if (definition.id() != null && definition.id().endsWith("_upgrade")) {
-            meta.setMaxStackSize(1);
         }
         this.applyConfiguredItemModel(meta, definition.itemModel());
         meta.getPersistentDataContainer().set(this.techItemKey, PersistentDataType.STRING, definition.id());

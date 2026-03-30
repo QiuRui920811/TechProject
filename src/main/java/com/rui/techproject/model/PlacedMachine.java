@@ -40,6 +40,7 @@ public final class PlacedMachine {
     private int manualOperationTicks;
     private String manualOperationRecipeId;
     private String lockedRecipeId;
+    private String redstoneMode = "NONE";
 
     public PlacedMachine(final LocationKey locationKey, final String machineId, final UUID owner) {
         this.locationKey = locationKey;
@@ -144,6 +145,14 @@ public final class PlacedMachine {
 
     public void setFilterMode(final String filterMode) {
         this.filterMode = filterMode == null || filterMode.isBlank() ? "WHITELIST" : filterMode;
+    }
+
+    public String redstoneMode() {
+        return this.redstoneMode;
+    }
+
+    public void setRedstoneMode(final String redstoneMode) {
+        this.redstoneMode = redstoneMode == null || redstoneMode.isBlank() ? "NONE" : redstoneMode;
     }
 
     public MachineRuntimeState runtimeState() {

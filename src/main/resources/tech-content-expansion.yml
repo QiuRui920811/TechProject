@@ -2578,6 +2578,58 @@ items:
     use-cases:
       - 古代符文 [村民] 材料
       - 下界特殊合成
+  # ── 高階料理（進階烹飪系統） ──
+  dragon_steak:
+    display-name: 龍炎牛排
+    category: ADVANCED
+    tier: TIER3
+    icon: COOKED_BEEF
+    description: 以烈焰粉與金錠精煉的極品牛排，食用後短時間內大幅提升戰鬥力與防禦力。效果僅持續 10 秒，冷卻 5 分鐘。
+    unlock: item:synth_meat
+    use-cases:
+      - 高階戰鬥補給
+      - Boss 戰前食物
+  void_ramen:
+    display-name: 虛空拉麵
+    category: ADVANCED
+    tier: TIER3
+    icon: MUSHROOM_STEW
+    description: 以乾海帶與乾海帶、末影珍珠和乾海帶浸泡的神秘拉麵，食用後短暫獲得極致移動力。效果僅持續 8-15 秒，冷卻 4 分鐘。
+    unlock: item:noodle_soup
+    use-cases:
+      - 高速移動戰術
+      - 深淵探索補給
+  stellar_risotto:
+    display-name: 星輝燉飯
+    category: ADVANCED
+    tier: TIER4
+    icon: RABBIT_STEW
+    description: 以鑽石與綠寶石融入的頂級燉飯，食用後短暫獲得極強吸收盾與回復力。效果僅持續 8-10 秒，冷卻 6 分鐘。
+    unlock: item:mushroom_risotto
+    use-cases:
+      - 極限防禦補給
+      - 危機應急食物
+  phoenix_soup:
+    display-name: 鳳凰湯
+    category: ADVANCED
+    tier: TIER3
+    icon: MUSHROOM_STEW
+    description: 以烈焰粉與地獄乳草燉煮的火熱濃湯，食用後短暫獲得火焰免疫與強力回復。效果僅持續 6-15 秒，冷卻 4.5 分鐘。
+    unlock: item:fish_stew
+    use-cases:
+      - 地獄探索補給
+      - 高階回復食物
+  arcane_tea:
+    display-name: 奧術茶
+    category: ADVANCED
+    tier: TIER3
+    icon: PAPER
+    item-model: "nexo:green_tea"
+    description: 以紅石與螢光粉注入的魔力茶飲，食用後短暫獲得極速採集與移動力。效果僅持續 10-20 秒，冷卻 3.5 分鐘。
+    unlock: item:green_tea
+    use-cases:
+      - 高效採集飲品
+      - 工程加速飲料
 
 machines:
   kiln:
@@ -4017,4 +4069,83 @@ cooking-recipes:
     input-type: TECH_ITEM
     cook-time: 80
     display-name: 鬆糕
+    stations: [CAMPFIRE, SMOKER]
+  # ── 高階進階烹飪配方（需食材追加） ──
+  dragon_steak_recipe:
+    input: synth_meat
+    output: dragon_steak
+    input-type: TECH_ITEM
+    cook-time: 240
+    display-name: 龍炎牛排
+    stations: [CAMPFIRE, SMOKER, BLAST_FURNACE]
+    advanced: true
+    perfect-output-count: 4
+    ingredient-additions:
+      - progress: 0.40
+        item: BLAZE_POWDER
+        prompt: 加入烈焰粉！
+      - progress: 0.70
+        item: GOLD_INGOT
+        prompt: 加入金錠！
+  void_ramen_recipe:
+    input: WHEAT
+    output: void_ramen
+    cook-time: 200
+    display-name: 虛空拉麵
+    stations: [CAMPFIRE, SMOKER]
+    advanced: true
+    perfect-output-count: 3
+    ingredient-additions:
+      - progress: 0.45
+        item: ENDER_PEARL
+        prompt: 加入末影珍珠！
+      - progress: 0.75
+        item: CHORUS_FRUIT
+        prompt: 加入乾海帶！
+  stellar_risotto_recipe:
+    input: RED_MUSHROOM
+    output: stellar_risotto
+    cook-time: 260
+    display-name: 星輝燉飯
+    stations: [CAMPFIRE, SMOKER]
+    advanced: true
+    perfect-output-count: 4
+    ingredient-additions:
+      - progress: 0.35
+        item: DIAMOND
+        prompt: 加入鑽石！
+      - progress: 0.65
+        item: EMERALD
+        prompt: 加入綠寶石！
+  phoenix_soup_recipe:
+    input: COD
+    output: phoenix_soup
+    cook-time: 220
+    display-name: 鳳凰湯
+    stations: [CAMPFIRE, SMOKER]
+    advanced: true
+    perfect-output-count: 3
+    ingredient-additions:
+      - progress: 0.40
+        item: BLAZE_POWDER
+        prompt: 加入烈焰粉！
+      - progress: 0.70
+        item: NETHER_WART
+        prompt: 加入乳草！
+  arcane_tea_recipe:
+    input: tea_leaf
+    output: arcane_tea
+    input-type: TECH_ITEM
+    cook-time: 200
+    display-name: 奧術茶
+    stations: [CAMPFIRE, SMOKER]
+    advanced: true
+    perfect-output-count: 3
+    ingredient-additions:
+      - progress: 0.35
+        item: REDSTONE
+        prompt: 加入紅石！
+      - progress: 0.65
+        item: GLOWSTONE_DUST
+        prompt: 加入螢光粉！
     stations: [CAMPFIRE, SMOKER]

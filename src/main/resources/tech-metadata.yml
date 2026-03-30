@@ -1680,7 +1680,7 @@ machines:
     visual-tier: TECH
     acquisition-mode: ADVANCED_WORKBENCH
     family: research
-    role: research-gateway
+    role: passive-xp-research-gateway
   crusher:
     guide-category: MACHINES
     system-group: BOOTSTRAP

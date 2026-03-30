@@ -481,6 +481,10 @@ public final class TechListener implements Listener {
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onBlockRedstone(final BlockRedstoneEvent event) {
         if (this.isProtectedTechBlock(event.getBlock())) {
+            // 安裝紅石集成電路的機器允許紅石訊號通過
+            if (this.plugin.getMachineService().hasRedstoneControlModule(event.getBlock())) {
+                return;
+            }
             event.setNewCurrent(0);
         }
     }
@@ -852,7 +856,7 @@ public final class TechListener implements Listener {
 
         this.restoreFood(player, hunger, this.manualFoodSaturation(techItemId));
         this.applyCustomFoodEffects(player, techItemId);
-        player.setCooldown(event.getItem().getType(), 12);
+        player.setCooldown(event.getItem().getType(), this.foodCooldownTicks(techItemId));
         this.playCustomFoodConsumeSound(player, techItemId);
         player.getWorld().spawnParticle(Particle.HAPPY_VILLAGER, player.getLocation().add(0.0, 1.0, 0.0), 6, 0.25, 0.2, 0.25, 0.01);
         player.sendActionBar(this.plugin.getItemFactory().success("已食用「" + this.plugin.getItemFactory().displayNameForId(techItemId) + "」。"));
@@ -1024,6 +1028,8 @@ public final class TechListener implements Listener {
 
     private int manualFoodHunger(final String techItemId) {
         return switch (techItemId.toLowerCase()) {
+            case "dragon_steak", "stellar_risotto" -> 10;
+            case "void_ramen", "phoenix_soup" -> 9;
             case "sunrise_pie", "stuffed_cabbage", "orchard_ration", "cryon_hotpot",
                 "ramen", "cheese_pizza", "chocolate_cake", "cheesecake", "vegetable_curry" -> 8;
             case "peach_cobbler", "aurelia_glaze", "nyx_phase_gel", "helion_sorbet",
@@ -1031,7 +1037,7 @@ public final class TechListener implements Listener {
             case "orchard_salad", "cornbread", "fruit_puree", "nutrition_bar", "protein_ration",
                 "citrus_salad", "tomato_stew", "pear_crisp", "tempest_fizz",
                 "fried_rice", "noodle_soup", "grilled_vegetables", "dumpling",
-                "fish_stew", "veggie_wrap", "potato_soup", "fruit_parfait" -> 6;
+                "fish_stew", "veggie_wrap", "potato_soup", "fruit_parfait", "arcane_tea" -> 6;
             case "lumenfruit", "frost_apple", "sunflare_fig", "soybean_pods", "emberroot",
                 "tomato", "cabbage", "corn", "lemon", "peach", "pear", "orange", "orchard_smoothie",
                 "mango", "banana", "pineapple", "coconut", "garlic_bread", "roasted_corn",
@@ -1051,6 +1057,8 @@ public final class TechListener implements Listener {
 
     private float manualFoodSaturation(final String techItemId) {
         return switch (techItemId.toLowerCase()) {
+            case "dragon_steak", "stellar_risotto" -> 12.0f;
+            case "void_ramen", "phoenix_soup" -> 10.0f;
             case "sunrise_pie", "stuffed_cabbage", "orchard_ration", "cryon_hotpot",
                 "ramen", "cheese_pizza", "chocolate_cake", "cheesecake", "vegetable_curry" -> 9.0f;
             case "peach_cobbler", "aurelia_glaze", "nyx_phase_gel", "helion_sorbet",
@@ -1058,7 +1066,7 @@ public final class TechListener implements Listener {
             case "orchard_salad", "cornbread", "fruit_puree", "nutrition_bar", "protein_ration",
                 "citrus_salad", "tomato_stew", "pear_crisp", "tempest_fizz",
                 "fried_rice", "noodle_soup", "grilled_vegetables", "dumpling",
-                "fish_stew", "veggie_wrap", "potato_soup", "fruit_parfait" -> 7.0f;
+                "fish_stew", "veggie_wrap", "potato_soup", "fruit_parfait", "arcane_tea" -> 7.0f;
             case "sunflare_fig", "emberroot", "peach", "orange",
                 "mango", "banana", "pineapple", "coconut", "garlic_bread",
                 "sushi_roll", "roasted_corn", "pancakes", "vanilla_ice_cream" -> 6.0f;
@@ -1082,6 +1090,18 @@ public final class TechListener implements Listener {
         }
         player.setFoodLevel(Math.min(20, player.getFoodLevel() + hunger));
         player.setSaturation(Math.min(player.getFoodLevel(), player.getSaturation() + Math.max(0.0f, saturation)));
+    }
+
+    /** 高階料理有較長的食用冷卻（ticks）。 */
+    private int foodCooldownTicks(final String techItemId) {
+        return switch (techItemId.toLowerCase()) {
+            case "stellar_risotto" -> 7200;     // 6 分鐘
+            case "dragon_steak" -> 6000;         // 5 分鐘
+            case "phoenix_soup" -> 5400;         // 4.5 分鐘
+            case "void_ramen" -> 4800;           // 4 分鐘
+            case "arcane_tea" -> 4200;           // 3.5 分鐘
+            default -> 12;
+        };
     }
 
     private boolean applyCustomFoodEffects(final Player player, final String techItemId) {
@@ -1478,6 +1498,32 @@ public final class TechListener implements Listener {
                 player.addPotionEffect(new PotionEffect(PotionEffectType.SATURATION, 20 * 10, 0, false, true, true));
                 player.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE, 20 * 40, 0, false, true, true));
                 player.addPotionEffect(new PotionEffect(PotionEffectType.HASTE, 20 * 25, 0, false, true, true));
+            }
+            // ── 高階料理：效果強力但時間極短 + 長食用 CD ──
+            case "dragon_steak" -> {
+                player.addPotionEffect(new PotionEffect(PotionEffectType.STRENGTH, 20 * 10, 1, false, true, true));
+                player.addPotionEffect(new PotionEffect(PotionEffectType.FIRE_RESISTANCE, 20 * 10, 0, false, true, true));
+                player.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE, 20 * 10, 1, false, true, true));
+            }
+            case "void_ramen" -> {
+                player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 20 * 8, 2, false, true, true));
+                player.addPotionEffect(new PotionEffect(PotionEffectType.NIGHT_VISION, 20 * 15, 0, false, true, true));
+                player.addPotionEffect(new PotionEffect(PotionEffectType.SLOW_FALLING, 20 * 10, 0, false, true, true));
+            }
+            case "stellar_risotto" -> {
+                player.addPotionEffect(new PotionEffect(PotionEffectType.ABSORPTION, 20 * 10, 3, false, true, true));
+                player.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, 20 * 8, 2, false, true, true));
+                player.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE, 20 * 10, 1, false, true, true));
+            }
+            case "phoenix_soup" -> {
+                player.addPotionEffect(new PotionEffect(PotionEffectType.FIRE_RESISTANCE, 20 * 15, 0, false, true, true));
+                player.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, 20 * 6, 2, false, true, true));
+                player.addPotionEffect(new PotionEffect(PotionEffectType.STRENGTH, 20 * 10, 0, false, true, true));
+            }
+            case "arcane_tea" -> {
+                player.addPotionEffect(new PotionEffect(PotionEffectType.HASTE, 20 * 10, 2, false, true, true));
+                player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 20 * 10, 1, false, true, true));
+                player.addPotionEffect(new PotionEffect(PotionEffectType.NIGHT_VISION, 20 * 20, 0, false, true, true));
             }
             default -> {
                 return false;

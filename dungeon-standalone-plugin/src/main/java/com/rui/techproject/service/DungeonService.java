@@ -16,12 +16,15 @@ import net.kyori.adventure.title.Title;
 import org.bukkit.*;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.block.Block;
+import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.*;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
+import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.Inventory;
@@ -69,6 +72,13 @@ public final class DungeonService {
     private static final String INSTANCE_PREFIX = "dungeon_instance_";
     private static final String EDIT_PREFIX = "dungeon_edit_";
     private static final String TEMPLATE_DIR = "dungeon_templates";
+    private static final String REWARD_TYPE_CUSTOM_ITEMS = "custom_items";
+    private static final String REWARD_DELIVERY_INVENTORY = "inventory";
+    private static final String REWARD_DELIVERY_CLAIM_GUI = "claim_gui";
+    private static final String REWARD_EDITOR_GUI_PREFIX = "§1§l獎勵內容 §8» §r";
+    private static final String REWARD_CLAIM_GUI_PREFIX = "§6§l通關獎勵 §8» §r";
+    private static final int REWARD_EDITOR_ITEM_SLOTS = 45;
+    private static final String SERIALIZED_KEY_ITEM_PREFIX = "item:";
 
     // ── 注入 ──
     private final TechProjectPlugin plugin;
@@ -100,15 +110,23 @@ public final class DungeonService {
     // ── 編輯器 GUI / 聊天輸入 ──
     private static final String EDITOR_GUI_PREFIX = "§1§l副本編輯 §8» §r";
     /** 編輯器 GUI 頁面列舉 */
-    public enum EditorPage { MAIN, SETTINGS, WAVES, WAVE_DETAIL, MOB_SELECT, BOSSES, BOSS_DETAIL, BOSS_SKILL, REWARDS, SCRIPTS }
+    public enum EditorPage { MAIN, SETTINGS, ACCESS_KEYS, WAVES, WAVE_DETAIL, MOB_SELECT, BOSSES, BOSS_DETAIL, BOSS_SKILL, REWARDS, REWARD_ITEMS, SCRIPTS }
     /** 編輯器 GUI 狀態 */
     public record EditorGuiState(String dungeonId, EditorPage page, int subIndex, int subIndex2) {}
     /** 等待聊天輸入的類型 */
     public record PendingEditorInput(String dungeonId, String field, EditorGuiState returnState) {}
+    /** 獎勵內容編輯中的暫存狀態。 */
+    private record RewardEditorSession(String dungeonId, int rewardIndex, Inventory inventory) {}
+    /** 玩家待領取的通關獎勵。 */
+    private record PendingRewardClaim(String instanceId, Inventory inventory) {}
     /** 玩家 UUID → 目前 GUI 狀態 */
     private final Map<UUID, EditorGuiState> editorGuiStates = new ConcurrentHashMap<>();
     /** 玩家 UUID → 等待的聊天輸入 */
     private final Map<UUID, PendingEditorInput> pendingEditorInput = new ConcurrentHashMap<>();
+    /** 玩家 UUID → 獎勵內容編輯狀態 */
+    private final Map<UUID, RewardEditorSession> rewardEditorSessions = new ConcurrentHashMap<>();
+    /** 玩家 UUID → 待領取通關獎勵 */
+    private final Map<UUID, PendingRewardClaim> pendingRewardClaims = new ConcurrentHashMap<>();
 
     public record LeaderboardEntry(UUID uuid, String name, int seconds) implements Comparable<LeaderboardEntry> {
         @Override public int compareTo(final LeaderboardEntry o) { return Integer.compare(this.seconds, o.seconds); }
@@ -588,12 +606,28 @@ public final class DungeonService {
         if (list == null) return List.of();
         final List<RewardDefinition> rewards = new ArrayList<>();
         for (final Map<?, ?> map : list) {
+            final List<ItemStack> items = new ArrayList<>();
+            if (map.get("items") instanceof List<?> rawItems) {
+                for (final Object raw : rawItems) {
+                    if (raw instanceof ItemStack item) {
+                        items.add(item.clone());
+                    } else if (raw instanceof Map<?, ?> serialized) {
+                        try {
+                            @SuppressWarnings("unchecked")
+                            final Map<String, Object> itemMap = (Map<String, Object>) serialized;
+                            items.add(ItemStack.deserialize(itemMap));
+                        } catch (final Exception ignored) {}
+                    }
+                }
+            }
             rewards.add(new RewardDefinition(
                 toString(map.get("type"), "item"),
                 toString(map.get("value"), "DIAMOND"),
                 toInt(map.get("amount"), 1),
                 toDouble(map.get("chance"), 1.0),
-                toBool(map.get("first-clear-only"), false)
+                toBool(map.get("first-clear-only"), false),
+                toString(map.get("delivery-mode"), REWARD_DELIVERY_INVENTORY),
+                List.copyOf(items)
             ));
         }
         return rewards;
@@ -906,21 +940,9 @@ public final class DungeonService {
 
     /** 檢查玩家是否持有指定鑰匙物品。 */
     private boolean playerHasKeyItem(final Player player, final String keyItem) {
-        // 嘗試依 Material 名稱匹配
-        try {
-            final Material mat = Material.valueOf(keyItem.toUpperCase());
-            return player.getInventory().contains(mat);
-        } catch (final Exception ignored) {}
-        // 嘗試依科技材料 ID 匹配
         for (final ItemStack item : player.getInventory().getContents()) {
-            if (item == null) continue;
-            final ItemMeta meta = item.getItemMeta();
-            if (meta == null) continue;
-            if (meta.getPersistentDataContainer().has(
-                    new NamespacedKey(this.plugin, "tech_item_id"), PersistentDataType.STRING)) {
-                final String id = meta.getPersistentDataContainer().get(
-                        new NamespacedKey(this.plugin, "tech_item_id"), PersistentDataType.STRING);
-                if (keyItem.equals(id)) return true;
+            if (this.matchesKeyItem(item, keyItem)) {
+                return true;
             }
         }
         return false;
@@ -928,25 +950,98 @@ public final class DungeonService {
 
     /** 消耗玩家身上一個指定鑰匙物品。 */
     private void consumeKeyItem(final Player player, final String keyItem) {
-        try {
-            final Material mat = Material.valueOf(keyItem.toUpperCase());
-            player.getInventory().removeItem(new ItemStack(mat, 1));
-            return;
-        } catch (final Exception ignored) {}
-        for (final ItemStack item : player.getInventory().getContents()) {
-            if (item == null) continue;
-            final ItemMeta meta = item.getItemMeta();
-            if (meta == null) continue;
-            if (meta.getPersistentDataContainer().has(
-                    new NamespacedKey(this.plugin, "tech_item_id"), PersistentDataType.STRING)) {
-                final String id = meta.getPersistentDataContainer().get(
-                        new NamespacedKey(this.plugin, "tech_item_id"), PersistentDataType.STRING);
-                if (keyItem.equals(id)) {
-                    item.setAmount(item.getAmount() - 1);
-                    return;
-                }
+        final ItemStack[] contents = player.getInventory().getContents();
+        for (int slot = 0; slot < contents.length; slot++) {
+            final ItemStack item = contents[slot];
+            if (!this.matchesKeyItem(item, keyItem)) {
+                continue;
             }
+            if (item.getAmount() <= 1) {
+                player.getInventory().setItem(slot, null);
+            } else {
+                item.setAmount(item.getAmount() - 1);
+            }
+            return;
         }
+    }
+
+    public boolean matchesKeyItem(final ItemStack item, final String keyItem) {
+        if (item == null || item.getType() == Material.AIR || keyItem == null || keyItem.isBlank()) {
+            return false;
+        }
+        final ItemStack expected = this.deserializeKeyItem(keyItem);
+        if (expected != null) {
+            return item.isSimilar(expected);
+        }
+        try {
+            final Material mat = Material.valueOf(keyItem.toUpperCase(Locale.ROOT));
+            return item.getType() == mat;
+        } catch (final Exception ignored) {}
+
+        final ItemMeta meta = item.getItemMeta();
+        if (meta == null) {
+            return false;
+        }
+        if (meta.getPersistentDataContainer().has(
+                new NamespacedKey(this.plugin, "tech_item_id"), PersistentDataType.STRING)) {
+            final String id = meta.getPersistentDataContainer().get(
+                    new NamespacedKey(this.plugin, "tech_item_id"), PersistentDataType.STRING);
+            return keyItem.equals(id);
+        }
+        return false;
+    }
+
+    public String exportKeyItemToken(final ItemStack item) {
+        if (item == null || item.getType() == Material.AIR) {
+            return "";
+        }
+        final YamlConfiguration yaml = new YamlConfiguration();
+        yaml.set("item", item.clone());
+        final String encoded = Base64.getEncoder().encodeToString(
+                yaml.saveToString().getBytes(StandardCharsets.UTF_8));
+        return SERIALIZED_KEY_ITEM_PREFIX + encoded;
+    }
+
+    public ItemStack deserializeKeyItem(final String keyItem) {
+        if (keyItem == null || !keyItem.startsWith(SERIALIZED_KEY_ITEM_PREFIX)) {
+            return null;
+        }
+        final String encoded = keyItem.substring(SERIALIZED_KEY_ITEM_PREFIX.length());
+        if (encoded.isBlank()) {
+            return null;
+        }
+        try {
+            final String yamlText = new String(Base64.getDecoder().decode(encoded), StandardCharsets.UTF_8);
+            final YamlConfiguration yaml = new YamlConfiguration();
+            yaml.loadFromString(yamlText);
+            final ItemStack stack = yaml.getItemStack("item");
+            return stack == null ? null : stack.clone();
+        } catch (final IllegalArgumentException | InvalidConfigurationException ex) {
+            this.plugin.getLogger().warning("[副本] 解析自訂鑰匙失敗: " + ex.getMessage());
+            return null;
+        }
+    }
+
+    public String describeKeyItem(final String keyItem) {
+        final ItemStack stack = this.deserializeKeyItem(keyItem);
+        if (stack != null) {
+            final ItemMeta meta = stack.getItemMeta();
+            final String name = meta != null && meta.hasDisplayName()
+                    ? PlainTextComponentSerializer.plainText().serialize(meta.displayName())
+                    : this.prettyMaterialName(stack.getType());
+            return name + " §7(" + stack.getType().name() + ")";
+        }
+        try {
+            return this.prettyMaterialName(Material.valueOf(keyItem.toUpperCase(Locale.ROOT)));
+        } catch (final Exception ignored) {}
+        return "科技物品/自訂鍵 §f" + keyItem;
+    }
+
+    private String prettyMaterialName(final Material material) {
+        return Arrays.stream(material.name().split("_"))
+                .filter(part -> !part.isBlank())
+                .map(part -> part.substring(0, 1) + part.substring(1).toLowerCase(Locale.ROOT))
+                .collect(Collectors.joining(" "));
     }
 
     private void onWorldCopied(final DungeonInstance instance) {
@@ -1117,6 +1212,7 @@ public final class DungeonService {
         instance.removeMember(uuid);
         this.playerInstanceMap.remove(uuid);
         this.clearRegionState(instance.instanceId(), uuid);
+        this.pendingRewardClaims.remove(uuid);
         // 移除 BossBar
         final BossBar bar = this.bossBars.get(instance.instanceId());
         if (bar != null) bar.removeViewer(player);
@@ -1357,6 +1453,9 @@ public final class DungeonService {
                 task -> this.removeDetachedModelArtifacts(instance, deathLoc, sourceTags));
         cleanupTask.run();
         this.scheduler.runGlobalDelayed(task -> cleanupTask.run(), 10L);
+        this.scheduler.runGlobalDelayed(task -> cleanupTask.run(), 20L);
+        this.scheduler.runGlobalDelayed(task -> cleanupTask.run(), 40L);
+        this.scheduler.runGlobalDelayed(task -> cleanupTask.run(), 80L);
     }
 
     private void removePassengersRecursive(final Entity root) {
@@ -1404,7 +1503,7 @@ public final class DungeonService {
                 || "INTERACTION".equals(type)
                 || type.endsWith("_DISPLAY");
         if (helperType) {
-            return sharesRootTag || hasModelKeyword;
+            return sharesRootTag || hasModelKeyword || entity.isInvulnerable() || entity.isPersistent();
         }
 
         if (entity instanceof LivingEntity living) {
@@ -1535,22 +1634,44 @@ public final class DungeonService {
     }
 
     private void tickCompleted(final DungeonInstance instance) {
-        // 通關後等待幾秒再關閉
         instance.incrementTicks();
-        if (instance.elapsedTicks() % 20 == 0 && !instance.isCleared()) {
+        if (!instance.isCleared()) {
             instance.setCleared(true);
             this.distributeRewards(instance);
         }
-        if (instance.elapsedTicks() >= CLOSE_DELAY_TICKS) {
+        if (this.hasPendingRewardClaims(instance)) {
+            return;
+        }
+        if (instance.elapsedTicks() >= this.resolveCloseTick(instance)) {
             this.beginClose(instance);
         }
     }
 
     private void tickFailed(final DungeonInstance instance) {
         instance.incrementTicks();
-        if (instance.elapsedTicks() >= CLOSE_DELAY_TICKS) {
+        if (instance.elapsedTicks() >= this.resolveCloseTick(instance)) {
             this.beginClose(instance);
         }
+    }
+
+    private long resolveCloseTick(final DungeonInstance instance) {
+        final Object value = instance.getVariable("_close_tick");
+        if (value instanceof Number number) {
+            return number.longValue();
+        }
+        return instance.elapsedTicks() + CLOSE_DELAY_TICKS;
+    }
+
+    private boolean hasPendingRewardClaims(final DungeonInstance instance) {
+        for (final UUID uuid : instance.members()) {
+            final PendingRewardClaim claim = this.pendingRewardClaims.get(uuid);
+            if (claim != null
+                    && instance.instanceId().equals(claim.instanceId())
+                    && !this.isInventoryEmpty(claim.inventory(), claim.inventory().getSize())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     // ──────────────────────────────────────────────
@@ -1944,10 +2065,13 @@ public final class DungeonService {
         if (instance.state() == State.COMPLETED || instance.state() == State.CLOSING) return;
         instance.setState(State.COMPLETED);
         instance.setCleared(false); // 會在 tickCompleted 中設為 true 並發獎勵
+        instance.setVariable("_close_tick", instance.elapsedTicks() + CLOSE_DELAY_TICKS);
         this.broadcastTitle(instance,
             RichText.mini("<gradient:#A7F3D0:#22C55E><bold>通關！</bold></gradient>"),
             RichText.parse(instance.definition().displayName()),
             10, 60, 20);
+        this.triggerScripts(instance, "dungeon_complete", Map.of());
+        this.functionEngine.onDungeonComplete(instance);
         this.killInstanceEntities(instance);
 
         // 設定進入冷卻（on-finish 模式）
@@ -1970,7 +2094,7 @@ public final class DungeonService {
     public void failDungeon(final DungeonInstance instance) {
         if (instance.state() == State.FAILED || instance.state() == State.CLOSING) return;
         instance.setState(State.FAILED);
-        final long savedTicks = instance.elapsedTicks();
+        instance.setVariable("_close_tick", instance.elapsedTicks() + CLOSE_DELAY_TICKS);
         this.broadcastTitle(instance,
             RichText.mini("<gradient:#FCA5A5:#EF4444><bold>失敗</bold></gradient>"),
             RichText.parse(instance.definition().displayName()),
@@ -2000,39 +2124,58 @@ public final class DungeonService {
                 player.sendMessage(this.msg("§6★ 首次通關！"));
             }
 
+            final List<ItemStack> claimItems = new ArrayList<>();
+
             for (final RewardDefinition reward : def.rewards()) {
                 if (reward.firstClearOnly() && !firstClear) continue;
                 if (rng.nextDouble() > reward.chance()) continue;
-                this.giveReward(player, reward);
+                this.giveReward(player, reward, claimItems);
+            }
+            if (!claimItems.isEmpty()) {
+                this.openRewardClaimGui(player, instance, claimItems);
             }
             player.sendMessage(this.msg("§a§l═══════════════════"));
         }
     }
 
-    private void giveReward(final Player player, final RewardDefinition reward) {
+    private void giveReward(final Player player, final RewardDefinition reward, final List<ItemStack> claimItems) {
+        if (reward.hasCustomItems()) {
+            if (reward.usesClaimGui()) {
+                claimItems.addAll(this.cloneItemStacks(reward.items()));
+                player.sendMessage(this.msg("§7 + §f待領取物品 §ex" + reward.items().size()));
+            } else {
+                this.giveItemStacks(player, reward.items());
+                player.sendMessage(this.msg("§7 + §f自訂物品獎勵 §ex" + reward.items().size()));
+            }
+            return;
+        }
+
         switch (reward.type().toLowerCase()) {
             case "item" -> {
-                try {
-                    final Material mat = Material.valueOf(reward.value().toUpperCase());
-                    final ItemStack stack = new ItemStack(mat, reward.amount());
-                    player.getInventory().addItem(stack).values().forEach(overflow ->
-                        player.getWorld().dropItemNaturally(player.getLocation(), overflow));
+                final ItemStack stack = this.createLegacyRewardStack(reward);
+                if (stack == null) {
+                    return;
+                }
+                if (reward.usesClaimGui()) {
+                    claimItems.add(stack);
+                    player.sendMessage(this.msg("§7 + §f待領取 §e" + reward.value() + " x" + reward.amount()));
+                } else {
+                    this.giveItemStacks(player, List.of(stack));
                     player.sendMessage(this.msg("§7 + §f" + reward.value() + " x" + reward.amount()));
-                } catch (final Exception ignored) {}
+                }
             }
             case "tech_material", "tech_blueprint" -> {
-                try {
-                    String materialName = reward.value();
-                    if (materialName.contains(":")) {
-                        materialName = materialName.substring(materialName.indexOf(':') + 1);
-                    }
-                    final Material mat = Material.valueOf(materialName.toUpperCase(Locale.ROOT));
-                    final ItemStack stack = new ItemStack(mat, reward.amount());
-                    player.getInventory().addItem(stack).values().forEach(overflow ->
-                            player.getWorld().dropItemNaturally(player.getLocation(), overflow));
-                    player.sendMessage(this.msg("§7 + §f" + reward.value() + " x" + reward.amount()));
-                } catch (final Exception ignored) {
+                final ItemStack stack = this.createLegacyRewardStack(reward);
+                if (stack == null) {
                     this.plugin.getLogger().warning("[副本] 無法發放獎勵物品: " + reward.value());
+                    return;
+                }
+                if (reward.usesClaimGui()) {
+                    claimItems.add(stack);
+                    player.sendMessage(this.msg("§7 + §f待領取 §e" + reward.value() + " x" + reward.amount()));
+                } else {
+                    this.giveItemStacks(player, List.of(stack));
+                    player.sendMessage(this.msg("§7 + §f" + reward.value() + " x" + reward.amount()));
                 }
             }
             case "command" -> {
@@ -2051,6 +2194,61 @@ public final class DungeonService {
                 player.sendMessage(this.msg("§7 + §f$" + reward.value()));
             }
         }
+    }
+
+    private ItemStack createLegacyRewardStack(final RewardDefinition reward) {
+        try {
+            String materialName = reward.value();
+            if (("tech_material".equalsIgnoreCase(reward.type())
+                    || "tech_blueprint".equalsIgnoreCase(reward.type()))
+                    && materialName.contains(":")) {
+                materialName = materialName.substring(materialName.indexOf(':') + 1);
+            }
+            final Material mat = Material.valueOf(materialName.toUpperCase(Locale.ROOT));
+            return new ItemStack(mat, Math.max(1, reward.amount()));
+        } catch (final Exception ignored) {
+            return null;
+        }
+    }
+
+    private void giveItemStacks(final Player player, final List<ItemStack> items) {
+        for (final ItemStack item : this.cloneItemStacks(items)) {
+            player.getInventory().addItem(item).values().forEach(overflow ->
+                    player.getWorld().dropItemNaturally(player.getLocation(), overflow));
+        }
+    }
+
+    private List<ItemStack> cloneItemStacks(final List<ItemStack> items) {
+        final List<ItemStack> clones = new ArrayList<>();
+        if (items == null) {
+            return clones;
+        }
+        for (final ItemStack item : items) {
+            if (item == null || item.getType() == Material.AIR) {
+                continue;
+            }
+            clones.add(item.clone());
+        }
+        return clones;
+    }
+
+    private void openRewardClaimGui(final Player player, final DungeonInstance instance, final List<ItemStack> rewardItems) {
+        final List<ItemStack> mergedItems = new ArrayList<>();
+        final PendingRewardClaim existing = this.pendingRewardClaims.get(player.getUniqueId());
+        if (existing != null && instance.instanceId().equals(existing.instanceId())) {
+            mergedItems.addAll(this.readInventoryItems(existing.inventory(), existing.inventory().getSize()));
+        }
+        mergedItems.addAll(this.cloneItemStacks(rewardItems));
+
+        final int size = Math.max(9, Math.min(54, ((mergedItems.size() - 1) / 9 + 1) * 9));
+        final Inventory gui = Bukkit.createInventory(player, size,
+                Component.text(REWARD_CLAIM_GUI_PREFIX + instance.definition().displayName()));
+        for (int i = 0; i < mergedItems.size() && i < size; i++) {
+            gui.setItem(i, mergedItems.get(i));
+        }
+        this.pendingRewardClaims.put(player.getUniqueId(), new PendingRewardClaim(instance.instanceId(), gui));
+        player.openInventory(gui);
+        player.sendMessage(this.msg("§e請把通關獎勵全部領走後，副本才會關閉。"));
     }
 
     private void beginClose(final DungeonInstance instance) {
@@ -4069,6 +4267,33 @@ public final class DungeonService {
         admin.sendMessage(this.msg("§a冷卻時間已設定為 §e" + seconds + " 秒"));
     }
 
+    public void adminImportHeldAccessKey(final Player admin, final String dungeonId) {
+        final DungeonDefinition def = this.definitions.get(dungeonId);
+        if (def == null) {
+            admin.sendMessage(this.msg("§c找不到副本：" + dungeonId));
+            return;
+        }
+        final ItemStack held = admin.getInventory().getItemInMainHand();
+        if (held == null || held.getType() == Material.AIR) {
+            admin.sendMessage(this.msg("§c請先把要當成副本鑰匙的物品拿在手上。"));
+            return;
+        }
+        final String token = this.exportKeyItemToken(held);
+        this.addAccessKeyToken(dungeonId, token);
+        admin.sendMessage(this.msg("§a已匯入副本鑰匙：§f" + this.describeKeyItem(token)));
+    }
+
+    public void adminExportHeldAccessKey(final Player admin) {
+        final ItemStack held = admin.getInventory().getItemInMainHand();
+        if (held == null || held.getType() == Material.AIR) {
+            admin.sendMessage(this.msg("§c請先把要匯出的鑰匙物品拿在手上。"));
+            return;
+        }
+        final String token = this.exportKeyItemToken(held);
+        admin.sendMessage(this.msg("§e以下是可重用的副本鑰匙匯入字串："));
+        admin.sendMessage(Component.text(token));
+    }
+
     /**
      * 儲存編輯世界回模板目錄、寫入 YAML 設定、卸載編輯世界、傳送管理員回去。
      * 等同於 MythicDungeons 的 {@code /md save}。
@@ -4096,9 +4321,8 @@ public final class DungeonService {
         // 清除指向編輯世界的重生點，避免離開後死亡被帶回編輯世界
         this.clearDungeonRespawnPoint(admin);
 
-        // 儲存 Function Builder 功能
+        // 清掉編輯世界中的功能標記
         if (this.editorManager != null) {
-            this.editorManager.saveFunctions(dungeonId);
             this.editorManager.removeMarkers(dungeonId);
         }
 
@@ -4225,6 +4449,27 @@ public final class DungeonService {
         }
     }
 
+    private void updateDungeonConfig(final String dungeonId, final java.util.function.Consumer<DungeonConfig> mutator) {
+        this.replaceDungeonField(dungeonId, def -> {
+            final DungeonConfig cfg = def.config() != null ? def.config() : DungeonConfig.defaults();
+            mutator.accept(cfg);
+            return def.withConfig(cfg);
+        });
+    }
+
+    private void addAccessKeyToken(final String dungeonId, final String token) {
+        if (token == null || token.isBlank()) {
+            return;
+        }
+        this.updateDungeonConfig(dungeonId, cfg -> {
+            final List<String> keys = new ArrayList<>(cfg.accessKeyItems());
+            if (!keys.contains(token)) {
+                keys.add(token);
+                cfg.accessKeyItems(List.copyOf(keys));
+            }
+        });
+    }
+
     private void saveDungeonDefinition(final String dungeonId, final DungeonDefinition def) {
         final File file = new File(this.plugin.getDataFolder(), "tech-dungeons.yml");
         YamlConfiguration yaml;
@@ -4233,6 +4478,7 @@ public final class DungeonService {
         } else {
             yaml = new YamlConfiguration();
         }
+        yaml.set(dungeonId, null);
         final ConfigurationSection section = yaml.createSection(dungeonId);
         section.set("display-name", def.displayName());
         section.set("description", def.description());
@@ -4261,7 +4507,7 @@ public final class DungeonService {
 
         // ── 儲存 Function Builder 功能 ──
         if (this.editorManager != null) {
-            this.editorManager.saveFunctions(dungeonId);
+            this.editorManager.saveFunctions(yaml, dungeonId);
         }
 
         try {
@@ -4372,6 +4618,19 @@ public final class DungeonService {
             if (r.amount() > 0) rMap.put("amount", r.amount());
             if (r.chance() < 1.0) rMap.put("chance", r.chance());
             rMap.put("first-clear-only", r.firstClearOnly());
+            if (r.deliveryMode() != null && !r.deliveryMode().isBlank()) {
+                rMap.put("delivery-mode", r.deliveryMode());
+            }
+            if (r.items() != null && !r.items().isEmpty()) {
+                final List<Map<String, Object>> items = new ArrayList<>();
+                for (final ItemStack item : r.items()) {
+                    if (item == null || item.getType() == Material.AIR) {
+                        continue;
+                    }
+                    items.add(item.serialize());
+                }
+                rMap.put("items", items);
+            }
             list.add(rMap);
         }
         parent.set("rewards", list);
@@ -4575,6 +4834,14 @@ public final class DungeonService {
         return title.contains("副本編輯") || title.contains("功能編輯");
     }
 
+    public boolean isRewardEditorGui(final String title) {
+        return title.contains("獎勵內容");
+    }
+
+    public boolean isRewardClaimGui(final String title) {
+        return title.contains("通關獎勵");
+    }
+
     /** 檢查玩家是否正在等待編輯器聊天輸入。 */
     public boolean isAwaitingEditorInput(final UUID uuid) {
         return this.pendingEditorInput.containsKey(uuid)
@@ -4657,13 +4924,14 @@ public final class DungeonService {
 
         switch (state.page()) {
             case MAIN -> this.handleMainMenuClick(player, state, rawSlot);
-            case SETTINGS -> this.handleSettingsClick(player, state, rawSlot);
+            case SETTINGS -> this.handleSettingsClick(player, state, rawSlot, clickType);
+            case ACCESS_KEYS -> this.handleAccessKeysClick(player, state, rawSlot, clickType);
             case WAVES -> this.handleWavesClick(player, state, rawSlot);
             case WAVE_DETAIL -> this.handleWaveDetailClick(player, state, rawSlot, clickType);
             case MOB_SELECT -> this.handleMobSelectClick(player, state, rawSlot);
             case BOSSES -> this.handleBossesClick(player, state, rawSlot);
             case BOSS_DETAIL -> this.handleBossDetailClick(player, state, rawSlot);
-            case REWARDS -> this.handleRewardsClick(player, state, rawSlot);
+            case REWARDS -> this.handleRewardsClick(player, state, rawSlot, clickType);
             case SCRIPTS -> this.handleScriptsClick(player, state, rawSlot);
         }
     }
@@ -4674,12 +4942,14 @@ public final class DungeonService {
         switch (state.page()) {
             case MAIN -> this.openEditorMainMenu(player, state.dungeonId());
             case SETTINGS -> this.buildSettingsGui(player, state);
+            case ACCESS_KEYS -> this.buildAccessKeysGui(player, state);
             case WAVES -> this.buildWavesGui(player, state);
             case WAVE_DETAIL -> this.buildWaveDetailGui(player, state);
             case MOB_SELECT -> this.buildMobSelectGui(player, state);
             case BOSSES -> this.buildBossesGui(player, state);
             case BOSS_DETAIL -> this.buildBossDetailGui(player, state);
             case REWARDS -> this.buildRewardsGui(player, state);
+            case REWARD_ITEMS -> this.openRewardItemsEditor(player, state.dungeonId(), state.subIndex());
             case SCRIPTS -> this.buildScriptsGui(player, state);
         }
     }
@@ -4712,6 +4982,8 @@ public final class DungeonService {
                 "§7目前 " + def.waves().size() + " 個波次", "§e點擊編輯"));
         gui.setItem(12, this.editorIcon(Material.DRAGON_HEAD, "§c§lBoss 管理",
                 "§7目前 " + def.bosses().size() + " 個 Boss", "§e點擊編輯"));
+        gui.setItem(13, this.editorIcon(Material.TRIPWIRE_HOOK, "§e§l鑰匙設定",
+            "§7設定進場門票、NBT 鑰匙與消耗規則", "§e點擊編輯"));
         gui.setItem(14, this.editorIcon(Material.CHEST, "§e§l獎勵管理",
                 "§7目前 " + def.rewards().size() + " 個獎勵", "§e點擊編輯"));
         gui.setItem(15, this.editorIcon(Material.REDSTONE_TORCH, "§d§l腳本事件",
@@ -4733,6 +5005,7 @@ public final class DungeonService {
             case 10 -> { this.clickSound(player); this.openEditorGui(player, new EditorGuiState(state.dungeonId(), EditorPage.SETTINGS, 0, 0)); }
             case 11 -> { this.clickSound(player); this.openEditorGui(player, new EditorGuiState(state.dungeonId(), EditorPage.WAVES, 0, 0)); }
             case 12 -> { this.clickSound(player); this.openEditorGui(player, new EditorGuiState(state.dungeonId(), EditorPage.BOSSES, 0, 0)); }
+            case 13 -> { this.clickSound(player); this.openEditorGui(player, new EditorGuiState(state.dungeonId(), EditorPage.ACCESS_KEYS, 0, 0)); }
             case 14 -> { this.clickSound(player); this.openEditorGui(player, new EditorGuiState(state.dungeonId(), EditorPage.REWARDS, 0, 0)); }
             case 15 -> { this.clickSound(player); this.openEditorGui(player, new EditorGuiState(state.dungeonId(), EditorPage.SCRIPTS, 0, 0)); }
             case 22 -> { player.closeInventory(); this.adminSave(player); }
@@ -4745,7 +5018,8 @@ public final class DungeonService {
     private void buildSettingsGui(final Player player, final EditorGuiState state) {
         final DungeonDefinition def = this.definitions.get(state.dungeonId());
         if (def == null) return;
-        final Inventory gui = Bukkit.createInventory(null, 27,
+        final DungeonConfig cfg = def.config() != null ? def.config() : DungeonConfig.defaults();
+        final Inventory gui = Bukkit.createInventory(null, 36,
                 Component.text(EDITOR_GUI_PREFIX + "基本設定"));
 
         gui.setItem(10, this.editorIcon(Material.NAME_TAG, "§e§l顯示名稱",
@@ -4764,12 +5038,34 @@ public final class DungeonService {
         gui.setItem(16, this.editorIcon(Material.EMERALD, "§2§l每日限制",
                 "§7目前: §f" + def.dailyLimit() + " 次", "§a點擊修改"));
 
-        gui.setItem(22, this.backButton());
+        gui.setItem(19, this.editorIcon(Material.TOTEM_OF_UNDYING, "§c§l玩家生命數",
+                "§7目前: §f" + this.describePlayerLives(cfg.playerLives()),
+                "§7輸入 §f-1 §7代表無限生命",
+                "§a點擊修改（聊天輸入）"));
+        gui.setItem(20, this.editorIcon(cfg.instantRespawn() ? Material.LIME_DYE : Material.GRAY_DYE, "§6§l即時復活",
+                cfg.instantRespawn() ? "§a目前：開啟" : "§7目前：關閉",
+                "§e點擊切換"));
+        gui.setItem(21, this.editorIcon(cfg.deadPlayersSpectate() ? Material.ENDER_EYE : Material.BARRIER, "§b§l死亡後轉觀戰",
+                cfg.deadPlayersSpectate() ? "§a目前：會進入觀戰模式" : "§7目前：生命用盡直接離開副本",
+                "§e點擊切換"));
+        gui.setItem(22, this.editorIcon(cfg.closeDungeonWhenAllSpectating() ? Material.REDSTONE_TORCH : Material.LEVER, "§d§l全員觀戰判定失敗",
+                cfg.closeDungeonWhenAllSpectating() ? "§a目前：全員觀戰時副本失敗" : "§7目前：不因全員觀戰自動失敗",
+                "§e點擊切換"));
+        gui.setItem(23, this.editorIcon(Material.RESPAWN_ANCHOR, "§e§l副本重生點",
+                "§7目前: §f" + this.describeRespawnPoint(cfg),
+                "§a左鍵：設成你目前站的位置",
+                "§c右鍵：清除，改回 checkpoint / 出生點"));
+
+        gui.setItem(31, this.backButton());
         this.fillEmpty(gui);
         player.openInventory(gui);
     }
 
-    private void handleSettingsClick(final Player player, final EditorGuiState state, final int slot) {
+    private void handleSettingsClick(final Player player, final EditorGuiState state, final int slot,
+                                     final org.bukkit.event.inventory.ClickType clickType) {
+        final DungeonDefinition def = this.definitions.get(state.dungeonId());
+        if (def == null) return;
+        final DungeonConfig cfg = def.config() != null ? def.config() : DungeonConfig.defaults();
         switch (slot) {
             case 10 -> this.promptInput(player, state, "display-name", "§e請在聊天中輸入新的顯示名稱：§7（輸入 '取消' 取消）");
             case 11 -> this.promptInput(player, state, "time-limit", "§e請在聊天中輸入限時秒數：§7（數字，輸入 '取消' 取消）");
@@ -4778,7 +5074,115 @@ public final class DungeonService {
             case 14 -> this.promptInput(player, state, "cooldown", "§e請在聊天中輸入冷卻秒數：§7（數字）");
             case 15 -> this.promptInput(player, state, "description", "§e請在聊天中輸入副本說明：");
             case 16 -> this.promptInput(player, state, "daily-limit", "§e請在聊天中輸入每日限制次數：§7（數字）");
-            case 22 -> this.openEditorGui(player, new EditorGuiState(state.dungeonId(), EditorPage.MAIN, 0, 0));
+            case 19 -> this.promptInput(player, state, "player-lives", "§e請輸入玩家生命數：§7（輸入 -1 代表無限生命）");
+            case 20 -> {
+                this.updateDungeonConfig(state.dungeonId(), current -> current.instantRespawn(!cfg.instantRespawn()));
+                this.openEditorGui(player, state);
+            }
+            case 21 -> {
+                this.updateDungeonConfig(state.dungeonId(), current -> current.deadPlayersSpectate(!cfg.deadPlayersSpectate()));
+                this.openEditorGui(player, state);
+            }
+            case 22 -> {
+                this.updateDungeonConfig(state.dungeonId(), current -> current.closeDungeonWhenAllSpectating(!cfg.closeDungeonWhenAllSpectating()));
+                this.openEditorGui(player, state);
+            }
+            case 23 -> {
+                if (clickType.isRightClick()) {
+                    this.updateDungeonConfig(state.dungeonId(), current -> current.respawnPoint(null));
+                    player.sendMessage(this.msg("§e已清除副本重生點，之後會改用 checkpoint 或副本出生點。"));
+                } else {
+                    final Location loc = player.getLocation();
+                    this.updateDungeonConfig(state.dungeonId(), current -> current.respawnPoint(new double[]{
+                            loc.getX(), loc.getY(), loc.getZ(), loc.getYaw(), loc.getPitch()
+                    }));
+                    player.sendMessage(this.msg("§a已將你目前位置設為副本重生點。"));
+                }
+                this.openEditorGui(player, state);
+            }
+            case 31 -> this.openEditorGui(player, new EditorGuiState(state.dungeonId(), EditorPage.MAIN, 0, 0));
+        }
+    }
+
+    private void buildAccessKeysGui(final Player player, final EditorGuiState state) {
+        final DungeonDefinition def = this.definitions.get(state.dungeonId());
+        if (def == null) return;
+        final DungeonConfig cfg = def.config() != null ? def.config() : DungeonConfig.defaults();
+        final Inventory gui = Bukkit.createInventory(null, 36,
+                Component.text(EDITOR_GUI_PREFIX + "鑰匙設定"));
+
+        final List<String> keys = cfg.accessKeyItems();
+        for (int i = 0; i < keys.size() && i < 18; i++) {
+            final String token = keys.get(i);
+            final ItemStack preview = this.deserializeKeyItem(token);
+            final Material icon = preview != null ? preview.getType() : Material.TRIPWIRE_HOOK;
+            gui.setItem(i, this.editorIcon(icon, "§e§l鑰匙 " + (i + 1),
+                    "§7內容: §f" + this.describeKeyItem(token),
+                    token.startsWith(SERIALIZED_KEY_ITEM_PREFIX) ? "§7類型: §a完整物品/NBT" : "§7類型: §f傳統字串",
+                    "§c右鍵 刪除"));
+        }
+
+        gui.setItem(18, this.editorIcon(Material.ITEM_FRAME, "§a§l匯入手上物品",
+                "§7把手中的物品完整寫成副本門票",
+                "§7保留名稱、Lore、附魔、PDC/NBT"));
+        gui.setItem(19, this.editorIcon(Material.WRITABLE_BOOK, "§f§l手動新增字串",
+                "§7支援材質名稱、科技物品 ID",
+                "§7或 item: 開頭的匯入字串"));
+        gui.setItem(20, this.editorIcon(cfg.accessKeysConsume() ? Material.LIME_DYE : Material.GRAY_DYE, "§6§l進場消耗",
+                cfg.accessKeysConsume() ? "§a目前：會消耗鑰匙" : "§7目前：不消耗鑰匙",
+                "§e點擊切換"));
+        gui.setItem(21, this.editorIcon(cfg.accessKeysLeaderOnly() ? Material.PLAYER_HEAD : Material.TOTEM_OF_UNDYING, "§b§l鑰匙持有者",
+                cfg.accessKeysLeaderOnly() ? "§a目前：只檢查隊長" : "§7目前：檢查所有隊員",
+                "§e點擊切換"));
+        gui.setItem(22, this.editorIcon(Material.PAPER, "§d§l輸出手上物品代碼",
+                "§7把手中物品輸出成 item: 匯入字串",
+                "§7可貼到 KEY_ITEM_DETECTOR 或手動新增"));
+
+        gui.setItem(31, this.backButton());
+        this.fillEmpty(gui);
+        player.openInventory(gui);
+    }
+
+    private void handleAccessKeysClick(final Player player, final EditorGuiState state, final int slot,
+                                       final org.bukkit.event.inventory.ClickType clickType) {
+        final DungeonDefinition def = this.definitions.get(state.dungeonId());
+        if (def == null) return;
+        final DungeonConfig cfg = def.config() != null ? def.config() : DungeonConfig.defaults();
+
+        if (slot == 31) {
+            this.openEditorGui(player, new EditorGuiState(state.dungeonId(), EditorPage.MAIN, 0, 0));
+            return;
+        }
+        if (slot == 18) {
+            this.adminImportHeldAccessKey(player, state.dungeonId());
+            this.openEditorGui(player, state);
+            return;
+        }
+        if (slot == 19) {
+            this.promptInput(player, state, "access-key-add",
+                    "§e請輸入鑰匙條件：§7材質名稱 / 科技物品 ID / item: 匯入字串");
+            return;
+        }
+        if (slot == 20) {
+            this.updateDungeonConfig(state.dungeonId(), current -> current.accessKeysConsume(!cfg.accessKeysConsume()));
+            this.openEditorGui(player, state);
+            return;
+        }
+        if (slot == 21) {
+            this.updateDungeonConfig(state.dungeonId(), current -> current.accessKeysLeaderOnly(!cfg.accessKeysLeaderOnly()));
+            this.openEditorGui(player, state);
+            return;
+        }
+        if (slot == 22) {
+            this.adminExportHeldAccessKey(player);
+            return;
+        }
+        if (slot >= 0 && slot < cfg.accessKeyItems().size() && clickType.isRightClick()) {
+            final List<String> keys = new ArrayList<>(cfg.accessKeyItems());
+            final String removed = keys.remove(slot);
+            this.updateDungeonConfig(state.dungeonId(), current -> current.accessKeyItems(List.copyOf(keys)));
+            player.sendMessage(this.msg("§c已移除副本鑰匙：§f" + this.describeKeyItem(removed)));
+            this.openEditorGui(player, state);
         }
     }
 
@@ -5023,6 +5427,7 @@ public final class DungeonService {
             final BossDefinition boss = def.bosses().get(i);
             gui.setItem(i, this.editorIcon(Material.DRAGON_HEAD, "§c§l" + boss.displayName(),
                     "§7實體: §f" + boss.entityType(),
+                    "§7Mythic: §f" + (boss.mythicMobId() == null || boss.mythicMobId().isBlank() ? "無" : boss.mythicMobId()),
                     "§7血量: §f" + boss.health(),
                     "§7傷害: §f" + boss.damage(),
                     "§7技能: §f" + boss.skills().size(),
@@ -5082,6 +5487,10 @@ public final class DungeonService {
         gui.setItem(15, this.editorIcon(Material.EXPERIENCE_BOTTLE, "§a§l階段",
                 "§7目前 " + boss.phases().size() + " 個階段",
                 "§e（階段需在 YAML 中手動編輯）"));
+        gui.setItem(16, this.editorIcon(Material.BLAZE_POWDER, "§5§lMythicMobs ID",
+            "§7目前: §f" + (boss.mythicMobId() == null || boss.mythicMobId().isBlank() ? "未設定" : boss.mythicMobId()),
+            "§7有設定時會優先生成 MythicMobs Boss",
+            "§a點擊修改，輸入 none 可清除"));
 
         gui.setItem(27, this.editorIcon(Material.RED_DYE, "§c§l刪除此 Boss", "§7§l小心！不可復原"));
         gui.setItem(31, this.backButton());
@@ -5102,6 +5511,7 @@ public final class DungeonService {
             case 11 -> this.promptInput(player, state, "boss-type", "§e請輸入實體類型：§7（例如: WITHER_SKELETON）");
             case 12 -> this.promptInput(player, state, "boss-health", "§e請輸入 Boss 血量：§7（數字）");
             case 13 -> this.promptInput(player, state, "boss-damage", "§e請輸入 Boss 傷害：§7（數字）");
+            case 16 -> this.promptInput(player, state, "boss-mythic-id", "§e請輸入 Boss 的 MythicMobs ID：§7（輸入 none 清除）");
             case 27 -> {
                 final List<BossDefinition> newBosses = new ArrayList<>(def.bosses());
                 newBosses.remove(state.subIndex());
@@ -5117,52 +5527,244 @@ public final class DungeonService {
     private void buildRewardsGui(final Player player, final EditorGuiState state) {
         final DungeonDefinition def = this.definitions.get(state.dungeonId());
         if (def == null) return;
-        final Inventory gui = Bukkit.createInventory(null, 27,
+        final Inventory gui = Bukkit.createInventory(null, 36,
                 Component.text(EDITOR_GUI_PREFIX + "獎勵管理"));
 
         for (int i = 0; i < def.rewards().size() && i < 18; i++) {
             final RewardDefinition r = def.rewards().get(i);
-            gui.setItem(i, this.editorIcon(Material.CHEST, "§e§l獎勵 " + (i + 1),
-                    "§7類型: §f" + r.type(),
-                    "§7值: §f" + r.value(),
+            gui.setItem(i, this.editorIcon(this.rewardIcon(r), "§e§l獎勵 " + (i + 1),
+                    "§7類型: §f" + this.rewardTypeLabel(r),
+                    "§7發放: §f" + this.rewardDeliveryLabel(r.deliveryMode()),
+                    "§7內容: §f" + this.rewardSummary(r),
                     "§7機率: §f" + (int) (r.chance() * 100) + "%",
-                    "§c右鍵 刪除"));
+                    r.firstClearOnly() ? "§6首次通關限定" : "§7所有通關可領",
+                    "§e左鍵 編輯  §c右鍵 刪除"));
         }
 
-        if (def.rewards().size() < 18) {
-            gui.setItem(def.rewards().size(), this.editorIcon(Material.LIME_DYE, "§a§l+ 新增獎勵",
-                    "§7可用類型: command / item / exp / money"));
-        }
+        gui.setItem(18, this.editorIcon(Material.HOPPER, "§a§l手上物品 -> 直接發放",
+                "§7把你手上的物品複製成通關獎勵",
+                "§7保留名稱、Lore、NBT、附魔"));
+        gui.setItem(19, this.editorIcon(Material.CHEST, "§6§l手上物品 -> 領獎 GUI",
+                "§7通關後打開不可關閉的領獎視窗",
+                "§7直到裡面的物品被領完"));
+        gui.setItem(20, this.editorIcon(Material.BUNDLE, "§b§l新增空白直接發放組",
+                "§7打開獎勵編輯箱後可一次放多個物品"));
+        gui.setItem(21, this.editorIcon(Material.BARREL, "§d§l新增空白領獎 GUI 組",
+                "§7玩家通關後會打開不可關閉的領獎箱"));
+        gui.setItem(23, this.editorIcon(Material.COMMAND_BLOCK, "§f§l新增文字獎勵",
+                "§7保留 command / exp / money / 舊 item 輸入方式"));
 
-        gui.setItem(22, this.backButton());
+        gui.setItem(31, this.backButton());
         this.fillEmpty(gui);
         player.openInventory(gui);
     }
 
-    private void handleRewardsClick(final Player player, final EditorGuiState state, final int slot) {
+    private void handleRewardsClick(final Player player, final EditorGuiState state, final int slot,
+                                    final org.bukkit.event.inventory.ClickType clickType) {
         final DungeonDefinition def = this.definitions.get(state.dungeonId());
         if (def == null) return;
 
-        if (slot == 22) {
+        if (slot == 31) {
             this.openEditorGui(player, new EditorGuiState(state.dungeonId(), EditorPage.MAIN, 0, 0));
             return;
         }
 
-        // 新增獎勵
-        if (slot == def.rewards().size() && def.rewards().size() < 18) {
+        if (slot == 18) {
+            this.addHeldItemReward(player, state.dungeonId(), REWARD_DELIVERY_INVENTORY);
+            this.openEditorGui(player, state);
+            return;
+        }
+        if (slot == 19) {
+            this.addHeldItemReward(player, state.dungeonId(), REWARD_DELIVERY_CLAIM_GUI);
+            this.openEditorGui(player, state);
+            return;
+        }
+        if (slot == 20) {
+            final int rewardIndex = this.addEmptyCustomReward(state.dungeonId(), REWARD_DELIVERY_INVENTORY);
+            if (rewardIndex >= 0) {
+                this.openEditorGui(player, new EditorGuiState(state.dungeonId(), EditorPage.REWARD_ITEMS, rewardIndex, 0));
+            }
+            return;
+        }
+        if (slot == 21) {
+            final int rewardIndex = this.addEmptyCustomReward(state.dungeonId(), REWARD_DELIVERY_CLAIM_GUI);
+            if (rewardIndex >= 0) {
+                this.openEditorGui(player, new EditorGuiState(state.dungeonId(), EditorPage.REWARD_ITEMS, rewardIndex, 0));
+            }
+            return;
+        }
+        if (slot == 23) {
             this.promptInput(player, state, "reward-add",
                     "§e請輸入獎勵（格式: 類型 值 機率）\n§7範例: §fcommand give {player} diamond 5 1.0\n§7範例: §fexp 500 0.5");
             return;
         }
 
-        // 刪除已有獎勵
         if (slot >= 0 && slot < def.rewards().size()) {
-            final List<RewardDefinition> newRewards = new ArrayList<>(def.rewards());
-            newRewards.remove(slot);
-            this.replaceDungeonField(state.dungeonId(), d -> d.withRewards(newRewards));
-            player.sendMessage(this.msg("§c已刪除獎勵 " + (slot + 1)));
-            this.openEditorGui(player, state);
+            if (clickType.isRightClick()) {
+                final List<RewardDefinition> newRewards = new ArrayList<>(def.rewards());
+                newRewards.remove(slot);
+                this.replaceDungeonField(state.dungeonId(), d -> d.withRewards(newRewards));
+                player.sendMessage(this.msg("§c已刪除獎勵 " + (slot + 1)));
+                this.openEditorGui(player, state);
+                return;
+            }
+            if (this.isEditableItemReward(def.rewards().get(slot))) {
+                this.openEditorGui(player, new EditorGuiState(state.dungeonId(), EditorPage.REWARD_ITEMS, slot, 0));
+                return;
+            }
+            player.sendMessage(this.msg("§e這個獎勵目前不是物品組，左鍵不支援編輯；請右鍵刪除後重建。"));
         }
+    }
+
+    private void openRewardItemsEditor(final Player player, final String dungeonId, final int rewardIndex) {
+        final DungeonDefinition def = this.definitions.get(dungeonId);
+        if (def == null || rewardIndex < 0 || rewardIndex >= def.rewards().size()) {
+            return;
+        }
+        RewardDefinition reward = def.rewards().get(rewardIndex);
+        final RewardDefinition normalized = this.normalizeRewardForItemEditor(reward);
+        if (normalized != reward) {
+            this.replaceReward(dungeonId, rewardIndex, old -> normalized);
+            reward = normalized;
+        }
+
+        final Inventory gui = Bukkit.createInventory(null, 54,
+                Component.text(REWARD_EDITOR_GUI_PREFIX + "獎勵 " + (rewardIndex + 1)));
+        final List<ItemStack> items = this.cloneItemStacks(reward.items());
+        for (int i = 0; i < items.size() && i < REWARD_EDITOR_ITEM_SLOTS; i++) {
+            gui.setItem(i, items.get(i));
+        }
+        this.decorateRewardEditor(gui, reward);
+        this.rewardEditorSessions.put(player.getUniqueId(), new RewardEditorSession(dungeonId, rewardIndex, gui));
+        player.openInventory(gui);
+    }
+
+    private void decorateRewardEditor(final Inventory gui, final RewardDefinition reward) {
+        gui.setItem(45, this.editorIcon(Material.HOPPER, "§a§l發放模式",
+                "§7目前: §f" + this.rewardDeliveryLabel(reward.deliveryMode()),
+                "§e點擊切換直接發放 / 領獎 GUI"));
+        gui.setItem(46, this.editorIcon(Material.CLOCK, "§e§l機率",
+                "§7目前: §f" + (int) (reward.chance() * 100) + "%",
+                "§a點擊後用聊天輸入"));
+        gui.setItem(47, this.editorIcon(Material.NETHER_STAR, "§6§l首次通關限定",
+                reward.firstClearOnly() ? "§a目前: 開啟" : "§7目前: 關閉",
+                "§e點擊切換"));
+        gui.setItem(48, this.editorIcon(Material.ITEM_FRAME, "§b§l加入手上物品",
+                "§7把手上的物品複製進這個獎勵箱"));
+        gui.setItem(49, this.editorIcon(Material.BARRIER, "§c§l清空內容",
+                "§7移除這個獎勵裡的全部物品"));
+        gui.setItem(53, this.editorIcon(Material.LIME_WOOL, "§a§l儲存返回",
+                "§7保存內容並回到獎勵列表"));
+        for (int slot = REWARD_EDITOR_ITEM_SLOTS; slot < 54; slot++) {
+            if (gui.getItem(slot) == null || gui.getItem(slot).getType() == Material.AIR) {
+                gui.setItem(slot, this.editorIcon(Material.GRAY_STAINED_GLASS_PANE, " "));
+            }
+        }
+    }
+
+    private RewardDefinition normalizeRewardForItemEditor(final RewardDefinition reward) {
+        if (reward == null || reward.hasCustomItems()) {
+            return reward;
+        }
+        if (!this.isLegacyItemRewardType(reward.type())) {
+            return reward;
+        }
+        final ItemStack stack = this.createLegacyRewardStack(reward);
+        if (stack == null) {
+            return reward;
+        }
+        return new RewardDefinition(
+                REWARD_TYPE_CUSTOM_ITEMS,
+                reward.value(),
+                1,
+                reward.chance(),
+                reward.firstClearOnly(),
+                reward.deliveryMode() == null || reward.deliveryMode().isBlank() ? REWARD_DELIVERY_INVENTORY : reward.deliveryMode(),
+                List.of(stack)
+        );
+    }
+
+    private boolean isEditableItemReward(final RewardDefinition reward) {
+        return reward != null && (reward.hasCustomItems() || this.isLegacyItemRewardType(reward.type()));
+    }
+
+    private boolean isLegacyItemRewardType(final String type) {
+        return "item".equalsIgnoreCase(type)
+                || "tech_material".equalsIgnoreCase(type)
+                || "tech_blueprint".equalsIgnoreCase(type)
+                || REWARD_TYPE_CUSTOM_ITEMS.equalsIgnoreCase(type);
+    }
+
+    private int addEmptyCustomReward(final String dungeonId, final String deliveryMode) {
+        final DungeonDefinition def = this.definitions.get(dungeonId);
+        if (def == null) {
+            return -1;
+        }
+        final List<RewardDefinition> newRewards = new ArrayList<>(def.rewards());
+        newRewards.add(new RewardDefinition(
+                REWARD_TYPE_CUSTOM_ITEMS,
+                null,
+                1,
+                1.0,
+                false,
+                deliveryMode,
+                List.of()
+        ));
+        this.replaceDungeonField(dungeonId, d -> d.withRewards(newRewards));
+        return newRewards.size() - 1;
+    }
+
+    private void addHeldItemReward(final Player player, final String dungeonId, final String deliveryMode) {
+        final ItemStack held = player.getInventory().getItemInMainHand();
+        if (held == null || held.getType() == Material.AIR) {
+            player.sendMessage(this.msg("§c請先把要當成獎勵的物品拿在手上。"));
+            return;
+        }
+        final DungeonDefinition def = this.definitions.get(dungeonId);
+        if (def == null) {
+            return;
+        }
+        final List<RewardDefinition> newRewards = new ArrayList<>(def.rewards());
+        newRewards.add(new RewardDefinition(
+                REWARD_TYPE_CUSTOM_ITEMS,
+                null,
+                1,
+                1.0,
+                false,
+                deliveryMode,
+                List.of(held.clone())
+        ));
+        this.replaceDungeonField(dungeonId, d -> d.withRewards(newRewards));
+        player.sendMessage(this.msg("§a已把手上物品加入通關獎勵。"));
+    }
+
+    private Material rewardIcon(final RewardDefinition reward) {
+        if (reward.hasCustomItems()) {
+            return reward.usesClaimGui() ? Material.BARREL : Material.BUNDLE;
+        }
+        return switch (reward.type().toLowerCase(Locale.ROOT)) {
+            case "command" -> Material.COMMAND_BLOCK;
+            case "exp" -> Material.EXPERIENCE_BOTTLE;
+            case "money" -> Material.EMERALD;
+            default -> Material.CHEST;
+        };
+    }
+
+    private String rewardTypeLabel(final RewardDefinition reward) {
+        return reward.hasCustomItems() ? "自訂物品組" : reward.type();
+    }
+
+    private String rewardSummary(final RewardDefinition reward) {
+        return reward.hasCustomItems()
+                ? reward.items().size() + " 個物品"
+                : (reward.value() != null ? reward.value() : "-");
+    }
+
+    private String rewardDeliveryLabel(final String deliveryMode) {
+        if (REWARD_DELIVERY_CLAIM_GUI.equalsIgnoreCase(deliveryMode)) {
+            return "領獎 GUI";
+        }
+        return "直接發放";
     }
 
     // ── 腳本事件 ──
@@ -5268,6 +5870,21 @@ public final class DungeonService {
                 if (val < 0) { player.sendMessage(this.msg("§c無效數字。")); success = false; break; }
                 this.replaceDungeonField(did, d -> d.withDailyLimit(val));
             }
+            case "player-lives" -> {
+                final String normalized = text.trim();
+                final int val;
+                if (normalized.equalsIgnoreCase("infinite") || normalized.equalsIgnoreCase("inf")) {
+                    val = -1;
+                } else {
+                    val = this.parseIntOrZero(normalized);
+                }
+                if (val == 0 || val < -1) {
+                    player.sendMessage(this.msg("§c請輸入 -1 或大於 0 的整數。"));
+                    success = false;
+                    break;
+                }
+                this.updateDungeonConfig(did, cfg -> cfg.playerLives(val));
+            }
             case "wave-delay" -> {
                 final int val = this.parseIntOrZero(text);
                 if (val < 0) { player.sendMessage(this.msg("§c無效數字。")); success = false; break; }
@@ -5338,6 +5955,26 @@ public final class DungeonService {
                 this.replaceBoss(did, pending.returnState().subIndex(), b ->
                         new BossDefinition(b.id(), b.displayName(), b.entityType(), b.mythicMobId(), b.health(), val, b.spawnPoint(), b.skills(), b.phases(), b.afterWave(), b.bossBar(), b.lootTable()));
             }
+            case "boss-mythic-id" -> {
+                final String mythicId = text.equalsIgnoreCase("none") || text.equalsIgnoreCase("null") ? null : text.trim();
+                this.replaceBoss(did, pending.returnState().subIndex(), b ->
+                        new BossDefinition(b.id(), b.displayName(), b.entityType(), mythicId, b.health(), b.damage(), b.spawnPoint(), b.skills(), b.phases(), b.afterWave(), b.bossBar(), b.lootTable()));
+            }
+            case "access-key-add" -> {
+                final String token = text.trim();
+                if (token.isEmpty()) {
+                    player.sendMessage(this.msg("§c請輸入有效的鑰匙條件。"));
+                    success = false;
+                    break;
+                }
+                if (token.startsWith(SERIALIZED_KEY_ITEM_PREFIX) && this.deserializeKeyItem(token) == null) {
+                    player.sendMessage(this.msg("§c這個 item: 匯入字串無法解析。"));
+                    success = false;
+                    break;
+                }
+                this.addAccessKeyToken(did, token);
+                player.sendMessage(this.msg("§a已新增副本鑰匙：§f" + this.describeKeyItem(token)));
+            }
             case "reward-add" -> {
                 // 格式: 類型 值 機率
                 final String[] parts = text.split("\\s+", 3);
@@ -5346,9 +5983,41 @@ public final class DungeonService {
                 final String value = parts.length >= 3 ? parts[1] : parts[1];
                 final double chance = parts.length >= 3 ? this.parseDoubleOrOne(parts[2]) : 1.0;
                 final List<RewardDefinition> newRewards = new ArrayList<>(def.rewards());
-                newRewards.add(new RewardDefinition(type, parts.length >= 3 ? parts[1] + " " + text.substring(text.indexOf(parts[1]) + parts[1].length()).trim() : parts[1], 1, chance, false));
+                newRewards.add(new RewardDefinition(
+                        type,
+                        parts.length >= 3 ? parts[1] + " " + text.substring(text.indexOf(parts[1]) + parts[1].length()).trim() : parts[1],
+                        1,
+                        chance,
+                        false,
+                        REWARD_DELIVERY_INVENTORY,
+                        List.of()
+                ));
                 this.replaceDungeonField(did, d -> d.withRewards(newRewards));
                 player.sendMessage(this.msg("§a已新增獎勵: §e" + type + " " + value));
+            }
+            case "reward-chance" -> {
+                final double chance;
+                try {
+                    chance = Double.parseDouble(text.trim());
+                } catch (final NumberFormatException e) {
+                    player.sendMessage(this.msg("§c請輸入 0.0 到 1.0 的數字。"));
+                    success = false;
+                    break;
+                }
+                if (chance < 0.0 || chance > 1.0) {
+                    player.sendMessage(this.msg("§c機率必須介於 0.0 到 1.0 之間。"));
+                    success = false;
+                    break;
+                }
+                this.replaceReward(did, pending.returnState().subIndex(), reward -> new RewardDefinition(
+                        reward.type(),
+                        reward.value(),
+                        reward.amount(),
+                        chance,
+                        reward.firstClearOnly(),
+                        reward.deliveryMode(),
+                        reward.items()
+                ));
             }
             case "script-add" -> {
                 final String[] parts = text.split("\\s+", 2);
@@ -5438,6 +6107,234 @@ public final class DungeonService {
         return this.editorIcon(Material.ARROW, "§7§l← 返回", "§7回到上一頁");
     }
 
+    public void handleRewardEditorInventoryClick(final InventoryClickEvent event) {
+        if (!(event.getWhoClicked() instanceof Player player)) {
+            return;
+        }
+        final RewardEditorSession session = this.rewardEditorSessions.get(player.getUniqueId());
+        if (session == null || !event.getView().getTopInventory().equals(session.inventory())) {
+            return;
+        }
+        final int rawSlot = event.getRawSlot();
+        final int topSize = event.getView().getTopInventory().getSize();
+        if (rawSlot < 0) {
+            return;
+        }
+        if (rawSlot >= topSize) {
+            if (event.isShiftClick()) {
+                event.setCancelled(true);
+            }
+            return;
+        }
+        if (rawSlot < REWARD_EDITOR_ITEM_SLOTS) {
+            return;
+        }
+
+        event.setCancelled(true);
+        switch (rawSlot) {
+            case 45 -> {
+                this.saveRewardEditorContents(session);
+                this.replaceReward(session.dungeonId(), session.rewardIndex(), reward -> new RewardDefinition(
+                        reward.type(),
+                        reward.value(),
+                        reward.amount(),
+                        reward.chance(),
+                        reward.firstClearOnly(),
+                        reward.usesClaimGui() ? REWARD_DELIVERY_INVENTORY : REWARD_DELIVERY_CLAIM_GUI,
+                        reward.items()
+                ));
+                this.openRewardItemsEditor(player, session.dungeonId(), session.rewardIndex());
+            }
+            case 46 -> this.promptInput(player,
+                    new EditorGuiState(session.dungeonId(), EditorPage.REWARD_ITEMS, session.rewardIndex(), 0),
+                    "reward-chance", "§e請輸入這組獎勵的機率：§7（0.0 ~ 1.0）");
+            case 47 -> {
+                this.saveRewardEditorContents(session);
+                this.replaceReward(session.dungeonId(), session.rewardIndex(), reward -> new RewardDefinition(
+                        reward.type(),
+                        reward.value(),
+                        reward.amount(),
+                        reward.chance(),
+                        !reward.firstClearOnly(),
+                        reward.deliveryMode(),
+                        reward.items()
+                ));
+                this.openRewardItemsEditor(player, session.dungeonId(), session.rewardIndex());
+            }
+            case 48 -> {
+                final ItemStack held = player.getInventory().getItemInMainHand();
+                if (held == null || held.getType() == Material.AIR) {
+                    player.sendMessage(this.msg("§c請先把物品拿在手上。"));
+                    return;
+                }
+                final int emptySlot = this.firstEmptyRewardEditorSlot(session.inventory());
+                if (emptySlot < 0) {
+                    player.sendMessage(this.msg("§c獎勵箱已滿。"));
+                    return;
+                }
+                session.inventory().setItem(emptySlot, held.clone());
+            }
+            case 49 -> {
+                for (int i = 0; i < REWARD_EDITOR_ITEM_SLOTS; i++) {
+                    session.inventory().setItem(i, null);
+                }
+            }
+            case 53 -> {
+                this.saveRewardEditorContents(session);
+                this.rewardEditorSessions.remove(player.getUniqueId());
+                this.openEditorGui(player, new EditorGuiState(session.dungeonId(), EditorPage.REWARDS, 0, 0));
+            }
+            default -> {}
+        }
+    }
+
+    public void handleRewardEditorInventoryDrag(final InventoryDragEvent event) {
+        if (!(event.getWhoClicked() instanceof Player player)) {
+            return;
+        }
+        final RewardEditorSession session = this.rewardEditorSessions.get(player.getUniqueId());
+        if (session == null || !event.getView().getTopInventory().equals(session.inventory())) {
+            return;
+        }
+        for (final int rawSlot : event.getRawSlots()) {
+            if (rawSlot >= REWARD_EDITOR_ITEM_SLOTS) {
+                event.setCancelled(true);
+                return;
+            }
+        }
+    }
+
+    public void handleRewardEditorInventoryClose(final Player player, final Inventory topInventory) {
+        final RewardEditorSession session = this.rewardEditorSessions.get(player.getUniqueId());
+        if (session == null || !session.inventory().equals(topInventory)) {
+            return;
+        }
+        this.saveRewardEditorContents(session);
+        this.rewardEditorSessions.remove(player.getUniqueId());
+        if (this.pendingEditorInput.containsKey(player.getUniqueId())) {
+            return;
+        }
+        if (this.editingSessions.containsKey(player.getUniqueId())) {
+            this.scheduler.runEntityDelayed(player, () -> {
+                if (player.isOnline() && player.getOpenInventory().getTopInventory().getType() == org.bukkit.event.inventory.InventoryType.CRAFTING) {
+                    this.openEditorGui(player, new EditorGuiState(session.dungeonId(), EditorPage.REWARDS, 0, 0));
+                }
+            }, 1L);
+        }
+    }
+
+    public void handleRewardClaimInventoryClick(final InventoryClickEvent event) {
+        if (!(event.getWhoClicked() instanceof Player player)) {
+            return;
+        }
+        final PendingRewardClaim claim = this.pendingRewardClaims.get(player.getUniqueId());
+        if (claim == null || !event.getView().getTopInventory().equals(claim.inventory())) {
+            return;
+        }
+        event.setCancelled(true);
+        final int rawSlot = event.getRawSlot();
+        if (rawSlot < 0 || rawSlot >= claim.inventory().getSize()) {
+            return;
+        }
+        final ItemStack stack = claim.inventory().getItem(rawSlot);
+        if (stack == null || stack.getType() == Material.AIR) {
+            return;
+        }
+        this.giveItemStacks(player, List.of(stack));
+        claim.inventory().setItem(rawSlot, null);
+        player.playSound(player.getLocation(), Sound.ENTITY_ITEM_PICKUP, 0.8f, 1.1f);
+        if (this.isInventoryEmpty(claim.inventory(), claim.inventory().getSize())) {
+            this.pendingRewardClaims.remove(player.getUniqueId());
+            this.scheduler.runEntityDelayed(player, () -> {
+                player.closeInventory();
+                player.sendMessage(this.msg("§a通關獎勵已全部領取。"));
+            }, 1L);
+        }
+    }
+
+    public void handleRewardClaimInventoryDrag(final InventoryDragEvent event) {
+        if (!(event.getWhoClicked() instanceof Player player)) {
+            return;
+        }
+        final PendingRewardClaim claim = this.pendingRewardClaims.get(player.getUniqueId());
+        if (claim != null && event.getView().getTopInventory().equals(claim.inventory())) {
+            event.setCancelled(true);
+        }
+    }
+
+    public void handleRewardClaimInventoryClose(final Player player, final Inventory topInventory) {
+        final PendingRewardClaim claim = this.pendingRewardClaims.get(player.getUniqueId());
+        if (claim == null || !claim.inventory().equals(topInventory)) {
+            return;
+        }
+        if (this.isInventoryEmpty(claim.inventory(), claim.inventory().getSize())) {
+            this.pendingRewardClaims.remove(player.getUniqueId());
+            return;
+        }
+        this.scheduler.runEntityDelayed(player, () -> {
+            if (!player.isOnline()) {
+                return;
+            }
+            player.openInventory(claim.inventory());
+            player.sendMessage(this.msg("§e請先把通關獎勵全部領走。"));
+        }, 1L);
+    }
+
+    private void saveRewardEditorContents(final RewardEditorSession session) {
+        final List<ItemStack> items = this.readInventoryItems(session.inventory(), REWARD_EDITOR_ITEM_SLOTS);
+        final DungeonDefinition definition = this.definitions.get(session.dungeonId());
+        if (definition == null || session.rewardIndex() < 0 || session.rewardIndex() >= definition.rewards().size()) {
+            return;
+        }
+        if (items.isEmpty()) {
+            final List<RewardDefinition> newRewards = new ArrayList<>(definition.rewards());
+            newRewards.remove(session.rewardIndex());
+            this.replaceDungeonField(session.dungeonId(), d -> d.withRewards(newRewards));
+            return;
+        }
+        this.replaceReward(session.dungeonId(), session.rewardIndex(), reward -> new RewardDefinition(
+                REWARD_TYPE_CUSTOM_ITEMS,
+                reward.value(),
+                1,
+                reward.chance(),
+                reward.firstClearOnly(),
+                reward.deliveryMode() == null || reward.deliveryMode().isBlank() ? REWARD_DELIVERY_INVENTORY : reward.deliveryMode(),
+                List.copyOf(items)
+        ));
+    }
+
+    private List<ItemStack> readInventoryItems(final Inventory inventory, final int limit) {
+        final List<ItemStack> items = new ArrayList<>();
+        for (int i = 0; i < Math.min(limit, inventory.getSize()); i++) {
+            final ItemStack item = inventory.getItem(i);
+            if (item == null || item.getType() == Material.AIR) {
+                continue;
+            }
+            items.add(item.clone());
+        }
+        return items;
+    }
+
+    private boolean isInventoryEmpty(final Inventory inventory, final int limit) {
+        for (int i = 0; i < Math.min(limit, inventory.getSize()); i++) {
+            final ItemStack item = inventory.getItem(i);
+            if (item != null && item.getType() != Material.AIR) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private int firstEmptyRewardEditorSlot(final Inventory inventory) {
+        for (int i = 0; i < REWARD_EDITOR_ITEM_SLOTS; i++) {
+            final ItemStack item = inventory.getItem(i);
+            if (item == null || item.getType() == Material.AIR) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
     private void fillEmpty(final Inventory gui) {
         final ItemStack filler = new ItemStack(Material.GRAY_STAINED_GLASS_PANE);
         final var meta = filler.getItemMeta();
@@ -5479,6 +6376,16 @@ public final class DungeonService {
         return String.format("%.1f, %.1f, %.1f", arr[0], arr.length > 1 ? arr[1] : 0, arr.length > 2 ? arr[2] : 0);
     }
 
+    private String describePlayerLives(final int lives) {
+        return lives < 0 ? "無限" : String.valueOf(lives);
+    }
+
+    private String describeRespawnPoint(final DungeonConfig cfg) {
+        return cfg != null && cfg.respawnPoint() != null
+                ? this.formatDoubleArray(cfg.respawnPoint())
+                : "§c未設定（使用 checkpoint / 出生點）";
+    }
+
     private int parseIntOrZero(final String text) {
         try { return Integer.parseInt(text.trim()); } catch (final NumberFormatException e) { return 0; }
     }
@@ -5497,6 +6404,11 @@ public final class DungeonService {
         BossDefinition apply(BossDefinition boss);
     }
 
+    @FunctionalInterface
+    private interface RewardTransformer {
+        RewardDefinition apply(RewardDefinition reward);
+    }
+
     private void replaceWave(final String dungeonId, final int waveIndex, final WaveTransformer transformer) {
         final DungeonDefinition d = this.definitions.get(dungeonId);
         if (d == null || waveIndex >= d.waves().size()) return;
@@ -5513,10 +6425,19 @@ public final class DungeonService {
         this.replaceDungeonField(dungeonId, old -> old.withBosses(newBosses));
     }
 
+    private void replaceReward(final String dungeonId, final int rewardIndex, final RewardTransformer transformer) {
+        final DungeonDefinition d = this.definitions.get(dungeonId);
+        if (d == null || rewardIndex < 0 || rewardIndex >= d.rewards().size()) return;
+        final List<RewardDefinition> newRewards = new ArrayList<>(d.rewards());
+        newRewards.set(rewardIndex, transformer.apply(newRewards.get(rewardIndex)));
+        this.replaceDungeonField(dungeonId, old -> old.withRewards(newRewards));
+    }
+
     /** 清理玩家的編輯器 GUI 狀態。 */
     public void cleanupEditorState(final UUID uuid) {
         this.editorGuiStates.remove(uuid);
         this.pendingEditorInput.remove(uuid);
+        this.rewardEditorSessions.remove(uuid);
         if (this.editorManager != null) {
             this.editorManager.cleanupPlayer(uuid);
         }
