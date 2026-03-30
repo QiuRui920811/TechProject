@@ -18,6 +18,8 @@ public final class PlacedMachine {
     private final ItemStack[] upgradeInventory = new ItemStack[3];
     private String inputDirection = "ALL";
     private String outputDirection = "ALL";
+    private String energyInputDirection = "ALL";
+    private String energyOutputDirection = "ALL";
     private boolean enabled = true;
     private long storedEnergy;
     private long totalGenerated;
@@ -176,6 +178,14 @@ public final class PlacedMachine {
         return this.outputDirection;
     }
 
+    public String energyInputDirection() {
+        return this.energyInputDirection;
+    }
+
+    public String energyOutputDirection() {
+        return this.energyOutputDirection;
+    }
+
     public boolean enabled() {
         return this.enabled;
     }
@@ -186,6 +196,14 @@ public final class PlacedMachine {
 
     public void setOutputDirection(final String outputDirection) {
         this.outputDirection = outputDirection == null || outputDirection.isBlank() ? "ALL" : outputDirection;
+    }
+
+    public void setEnergyInputDirection(final String energyInputDirection) {
+        this.energyInputDirection = energyInputDirection == null || energyInputDirection.isBlank() ? "ALL" : energyInputDirection;
+    }
+
+    public void setEnergyOutputDirection(final String energyOutputDirection) {
+        this.energyOutputDirection = energyOutputDirection == null || energyOutputDirection.isBlank() ? "ALL" : energyOutputDirection;
     }
 
     public void setEnabled(final boolean enabled) {

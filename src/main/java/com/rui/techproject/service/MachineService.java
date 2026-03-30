@@ -45,6 +45,7 @@ import org.bukkit.entity.TextDisplay;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
+import org.bukkit.inventory.FurnaceInventory;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -449,11 +450,11 @@ public final class MachineService {
 
     /**
      * 兩位玩家的機器是否可以互連電網 / 物流。
-     * 條件：同一人，或任一方信任對方。
+     * 條件：同一人，或雙方互相信任。
      */
     public boolean isNetworkAllied(final UUID ownerA, final UUID ownerB) {
         if (ownerA.equals(ownerB)) return true;
-        return this.isGloballyTrusted(ownerA, ownerB) || this.isGloballyTrusted(ownerB, ownerA);
+        return this.isGloballyTrusted(ownerA, ownerB) && this.isGloballyTrusted(ownerB, ownerA);
     }
 
     public Set<UUID> getGlobalTrustedPlayers(final UUID owner) {
@@ -1490,6 +1491,8 @@ public final class MachineService {
             entry.put("locked-recipe", machine.lockedRecipeId());
             entry.put("input-direction", machine.inputDirection());
             entry.put("output-direction", machine.outputDirection());
+            entry.put("energy-input-direction", machine.energyInputDirection());
+            entry.put("energy-output-direction", machine.energyOutputDirection());
             entry.put("filter-mode", machine.filterMode());
             entry.put("chicken-progress", machine.chickenProgress());
             entry.put("input", ItemStackSerializer.toBase64(machine.inputInventory()));
@@ -1581,8 +1584,12 @@ public final class MachineService {
                 }
                 machine.setEnabled(data.get("enabled") instanceof Boolean b ? b : !this.isQuarryLike(machineId));
                 this.clampMachineEnergy(machine);
-                machine.setInputDirection(data.get("input-direction") instanceof String s ? s : "ALL");
-                machine.setOutputDirection(data.get("output-direction") instanceof String s ? s : "ALL");
+                final String inputDirection = data.get("input-direction") instanceof String s ? s : "ALL";
+                final String outputDirection = data.get("output-direction") instanceof String s ? s : "ALL";
+                machine.setInputDirection(inputDirection);
+                machine.setOutputDirection(outputDirection);
+                machine.setEnergyInputDirection(this.restoreEnergyDirection(data.get("energy-input-direction"), inputDirection, machineId));
+                machine.setEnergyOutputDirection(this.restoreEnergyDirection(data.get("energy-output-direction"), outputDirection, machineId));
                 machine.setFilterMode(data.get("filter-mode") instanceof String s ? s : "WHITELIST");
                 machine.restoreChickenProgress(data.get("chicken-progress") instanceof Number n ? n.doubleValue() : 0.0);
                 // 舊版逐台信任 → 自動遷移到全域信任
@@ -3815,6 +3822,9 @@ public final class MachineService {
         if (inventory == null || stack == null || stack.getType() == Material.AIR) {
             return false;
         }
+        if (inventory instanceof FurnaceInventory furnaceInventory) {
+            return this.canStoreInFurnaceInventory(furnaceInventory, stack);
+        }
         for (int slot = 0; slot < inventory.getSize(); slot++) {
             final ItemStack current = inventory.getItem(slot);
             if (current == null || current.getType() == Material.AIR) {
@@ -3831,6 +3841,9 @@ public final class MachineService {
         if (!this.canStoreInInventory(inventory, stack)) {
             return false;
         }
+        if (inventory instanceof FurnaceInventory furnaceInventory) {
+            return this.storeInFurnaceInventory(furnaceInventory, stack);
+        }
         for (int slot = 0; slot < inventory.getSize(); slot++) {
             final ItemStack current = inventory.getItem(slot);
             if (current == null || current.getType() == Material.AIR) {
@@ -3842,6 +3855,103 @@ public final class MachineService {
                 inventory.setItem(slot, current);
                 return true;
             }
+        }
+        return false;
+    }
+
+    private boolean canStoreInFurnaceInventory(final FurnaceInventory inventory, final ItemStack stack) {
+        final ItemStack smelting = inventory.getSmelting();
+        if (smelting == null || smelting.getType() == Material.AIR) {
+            return true;
+        }
+        if (smelting.isSimilar(stack) && smelting.getAmount() + stack.getAmount() <= smelting.getMaxStackSize()) {
+            return true;
+        }
+        if (!stack.getType().isFuel()) {
+            return false;
+        }
+        final ItemStack fuel = inventory.getFuel();
+        if (fuel == null || fuel.getType() == Material.AIR) {
+            return true;
+        }
+        return fuel.isSimilar(stack) && fuel.getAmount() + stack.getAmount() <= fuel.getMaxStackSize();
+    }
+
+    private boolean storeInFurnaceInventory(final FurnaceInventory inventory, final ItemStack stack) {
+        final ItemStack smelting = inventory.getSmelting();
+        if (smelting == null || smelting.getType() == Material.AIR) {
+            inventory.setSmelting(stack.clone());
+            return true;
+        }
+        if (smelting.isSimilar(stack) && smelting.getAmount() + stack.getAmount() <= smelting.getMaxStackSize()) {
+            final ItemStack merged = smelting.clone();
+            merged.setAmount(merged.getAmount() + stack.getAmount());
+            inventory.setSmelting(merged);
+            return true;
+        }
+        if (!stack.getType().isFuel()) {
+            return false;
+        }
+        final ItemStack fuel = inventory.getFuel();
+        if (fuel == null || fuel.getType() == Material.AIR) {
+            inventory.setFuel(stack.clone());
+            return true;
+        }
+        if (!fuel.isSimilar(stack) || fuel.getAmount() + stack.getAmount() > fuel.getMaxStackSize()) {
+            return false;
+        }
+        final ItemStack mergedFuel = fuel.clone();
+        mergedFuel.setAmount(mergedFuel.getAmount() + stack.getAmount());
+        inventory.setFuel(mergedFuel);
+        return true;
+    }
+
+    private ItemStack peekExtractableItem(final Inventory inventory) {
+        if (inventory == null) {
+            return null;
+        }
+        if (inventory instanceof FurnaceInventory furnaceInventory) {
+            final ItemStack result = furnaceInventory.getResult();
+            if (result == null || result.getType() == Material.AIR) {
+                return null;
+            }
+            final ItemStack oneItem = result.clone();
+            oneItem.setAmount(1);
+            return oneItem;
+        }
+        for (int slot = 0; slot < inventory.getSize(); slot++) {
+            final ItemStack current = inventory.getItem(slot);
+            if (current == null || current.getType() == Material.AIR) {
+                continue;
+            }
+            final ItemStack oneItem = current.clone();
+            oneItem.setAmount(1);
+            return oneItem;
+        }
+        return null;
+    }
+
+    private boolean removeOneExtractableItem(final Inventory inventory) {
+        if (inventory == null) {
+            return false;
+        }
+        if (inventory instanceof FurnaceInventory furnaceInventory) {
+            final ItemStack result = furnaceInventory.getResult();
+            if (result == null || result.getType() == Material.AIR) {
+                return false;
+            }
+            result.setAmount(result.getAmount() - 1);
+            furnaceInventory.setResult(result.getAmount() <= 0 ? null : result);
+            return true;
+        }
+        for (int slot = 0; slot < inventory.getSize(); slot++) {
+            final ItemStack current = inventory.getItem(slot);
+            if (current == null || current.getType() == Material.AIR) {
+                continue;
+            }
+            current.setAmount(current.getAmount() - 1);
+            inventory.setItem(slot, current.getAmount() <= 0 ? null : current);
+            return true;
         }
         return false;
     }
@@ -4374,21 +4484,18 @@ public final class MachineService {
             if (inventory == null) {
                 continue;
             }
-            for (int slot = 0; slot < inventory.getSize() && pulled < 4; slot++) {
-                final ItemStack item = inventory.getItem(slot);
-                if (item == null || item.getType() == Material.AIR) {
-                    continue;
+            while (pulled < 4) {
+                final ItemStack oneItem = this.peekExtractableItem(inventory);
+                if (oneItem == null || oneItem.getType() == Material.AIR) {
+                    break;
                 }
-                final ItemStack oneItem = item.clone();
-                oneItem.setAmount(1);
                 if (!this.canStoreOutput(machine, oneItem)) {
                     break;
                 }
-                this.storeOutput(machine, oneItem);
-                item.setAmount(item.getAmount() - 1);
-                if (item.getAmount() <= 0) {
-                    inventory.setItem(slot, null);
+                if (!this.removeOneExtractableItem(inventory)) {
+                    break;
                 }
+                this.storeOutput(machine, oneItem);
                 pulled++;
             }
         }
@@ -4445,7 +4552,9 @@ public final class MachineService {
                 if (!this.canStoreInInventory(inventory, oneItem)) {
                     continue;
                 }
-                inventory.addItem(oneItem);
+                if (!this.storeInInventory(inventory, oneItem)) {
+                    continue;
+                }
                 outStack.setAmount(outStack.getAmount() - 1);
                 if (outStack.getAmount() <= 0) {
                     machine.setOutputAt(slot, null);
@@ -5824,7 +5933,7 @@ public final class MachineService {
      * 電池庫專用配電：跳過純發電機，避免把能量送回去形成回流迴路。
      */
     private void distributeBatteryEnergy(final PlacedMachine machine, final Location location, final long amountPerTarget) {
-        for (final PlacedMachine neighbor : this.findConnectedMachines(machine, location, null, machine.outputDirection(), false)) {
+        for (final PlacedMachine neighbor : this.findConnectedMachines(machine, location, null, machine.energyOutputDirection(), false)) {
             if (machine.storedEnergy() <= 0L) {
                 return;
             }
@@ -5849,7 +5958,7 @@ public final class MachineService {
     }
 
     private void absorbNearbyEnergy(final PlacedMachine machine, final Location location, final long amountPerSource) {
-        for (final PlacedMachine neighbor : this.findConnectedMachines(machine, location, machine.inputDirection(), null, false)) {
+        for (final PlacedMachine neighbor : this.findConnectedMachines(machine, location, machine.energyInputDirection(), null, false)) {
             final long transfer = Math.min(Math.min(amountPerSource, neighbor.storedEnergy()), this.remainingEnergyCapacity(machine));
             if (transfer <= 0L || !neighbor.consumeEnergy(transfer)) {
                 continue;
@@ -5859,7 +5968,7 @@ public final class MachineService {
     }
 
     private void distributeNearbyEnergy(final PlacedMachine machine, final Location location, final long amountPerTarget) {
-        for (final PlacedMachine neighbor : this.findConnectedMachines(machine, location, null, machine.outputDirection(), false)) {
+        for (final PlacedMachine neighbor : this.findConnectedMachines(machine, location, null, machine.energyOutputDirection(), false)) {
             if (machine.storedEnergy() <= 0L) {
                 return;
             }
@@ -5892,6 +6001,54 @@ public final class MachineService {
             return;
         }
         machine.setStoredEnergy(Math.min(machine.storedEnergy(), this.maxEnergyCapacity(machine)));
+    }
+
+    private String restoreEnergyDirection(final Object rawValue, final String legacyDirection, final String machineId) {
+        if (rawValue instanceof String value && !value.isBlank()) {
+            return value;
+        }
+        return this.keepLegacyEnergyDirection(machineId) ? legacyDirection : "ALL";
+    }
+
+    private boolean keepLegacyEnergyDirection(final String machineId) {
+        return switch (this.normalizeId(machineId)) {
+            case "solar_generator", "coal_generator", "solar_array", "storm_turbine",
+                 "fusion_reactor", "battery_bank", "chrono_engine", "entropy_chamber",
+                 "energy_node", "energy_cable" -> true;
+            default -> false;
+        };
+    }
+
+    private String machineInputDirection(final PlacedMachine machine, final boolean logisticsMode) {
+        return logisticsMode ? machine.inputDirection() : machine.energyInputDirection();
+    }
+
+    private String machineOutputDirection(final PlacedMachine machine, final boolean logisticsMode) {
+        return logisticsMode ? machine.outputDirection() : machine.energyOutputDirection();
+    }
+
+    private boolean showsPowerInputDirectionControl(final MachineDefinition definition) {
+        if (definition == null) {
+            return false;
+        }
+        if (definition.energyPerTick() > 0L) {
+            return true;
+        }
+        return switch (this.normalizeId(definition.id())) {
+            case "battery_bank", "energy_node", "energy_cable", "solar_array", "fusion_reactor" -> true;
+            default -> false;
+        };
+    }
+
+    private boolean showsPowerOutputDirectionControl(final MachineDefinition definition) {
+        if (definition == null) {
+            return false;
+        }
+        return switch (this.normalizeId(definition.id())) {
+            case "battery_bank", "energy_node", "energy_cable", "solar_generator", "coal_generator",
+                 "solar_array", "storm_turbine", "fusion_reactor", "chrono_engine", "entropy_chamber" -> true;
+            default -> false;
+        };
     }
 
     private long maxEnergyCapacity(final PlacedMachine machine) {
@@ -5964,11 +6121,11 @@ public final class MachineService {
                     } else if (currentMachine != null && this.isRelayMachine(currentMachine.machineId(), logisticsMode)) {
                         /* 中繼管道用自己的方向設定；ALL 就是全方向，不繼承來源限制 */
                         if (inputDirection != null
-                                && !this.matchesDirection(currentMachine.inputDirection(), direction)) {
+                                && !this.matchesDirection(this.machineInputDirection(currentMachine, logisticsMode), direction)) {
                             continue;
                         }
                         if (outputDirection != null
-                                && !this.matchesDirection(currentMachine.outputDirection(), direction)) {
+                                && !this.matchesDirection(this.machineOutputDirection(currentMachine, logisticsMode), direction)) {
                             continue;
                         }
                     }
@@ -5981,19 +6138,19 @@ public final class MachineService {
                         continue;
                     }
                     if (this.isRelayMachine(neighbor.machineId(), logisticsMode)) {
-                        if (outputDirection != null && !this.matchesDirection(neighbor.inputDirection(), this.oppositeDirection(direction))) {
+                        if (outputDirection != null && !this.matchesDirection(this.machineInputDirection(neighbor, logisticsMode), this.oppositeDirection(direction))) {
                             continue;
                         }
-                        if (inputDirection != null && !this.matchesDirection(neighbor.outputDirection(), this.oppositeDirection(direction))) {
+                        if (inputDirection != null && !this.matchesDirection(this.machineOutputDirection(neighbor, logisticsMode), this.oppositeDirection(direction))) {
                             continue;
                         }
                         next.add(key);
                         continue;
                     }
-                    if (outputDirection != null && !this.matchesDirection(neighbor.inputDirection(), this.oppositeDirection(direction))) {
+                    if (outputDirection != null && !this.matchesDirection(this.machineInputDirection(neighbor, logisticsMode), this.oppositeDirection(direction))) {
                         continue;
                     }
-                    if (inputDirection != null && !this.matchesDirection(neighbor.outputDirection(), this.oppositeDirection(direction))) {
+                    if (inputDirection != null && !this.matchesDirection(this.machineOutputDirection(neighbor, logisticsMode), this.oppositeDirection(direction))) {
                         continue;
                     }
                     /* 加工機器在 depth==0（直接相鄰）只能推給物流終端，不能推給其他加工機器 */
@@ -6077,13 +6234,25 @@ public final class MachineService {
             case "dir-input" -> {
                 machine.setInputDirection(rightClick ? this.prevDirection(machine.inputDirection()) : this.nextDirection(machine.inputDirection()));
                 this.invalidateNetworkCache();
-                player.sendMessage(this.itemFactory.secondary("輸入方向已切換為：" + this.directionDisplayName(machine.inputDirection())));
+                player.sendMessage(this.itemFactory.secondary("物流輸入方向已切換為：" + this.directionDisplayName(machine.inputDirection())));
                 this.openMachineMenuNextTick(player, key);
             }
             case "dir-output" -> {
                 machine.setOutputDirection(rightClick ? this.prevDirection(machine.outputDirection()) : this.nextDirection(machine.outputDirection()));
                 this.invalidateNetworkCache();
-                player.sendMessage(this.itemFactory.secondary("輸出方向已切換為：" + this.directionDisplayName(machine.outputDirection())));
+                player.sendMessage(this.itemFactory.secondary("物流輸出方向已切換為：" + this.directionDisplayName(machine.outputDirection())));
+                this.openMachineMenuNextTick(player, key);
+            }
+            case "dir-energy-input" -> {
+                machine.setEnergyInputDirection(rightClick ? this.prevDirection(machine.energyInputDirection()) : this.nextDirection(machine.energyInputDirection()));
+                this.invalidateNetworkCache();
+                player.sendMessage(this.itemFactory.secondary("電力輸入方向已切換為：" + this.directionDisplayName(machine.energyInputDirection())));
+                this.openMachineMenuNextTick(player, key);
+            }
+            case "dir-energy-output" -> {
+                machine.setEnergyOutputDirection(rightClick ? this.prevDirection(machine.energyOutputDirection()) : this.nextDirection(machine.energyOutputDirection()));
+                this.invalidateNetworkCache();
+                player.sendMessage(this.itemFactory.secondary("電力輸出方向已切換為：" + this.directionDisplayName(machine.energyOutputDirection())));
                 this.openMachineMenuNextTick(player, key);
             }
             case "filter-mode" -> {
@@ -7466,6 +7635,9 @@ public final class MachineService {
                 total++;
             }
         }
+        if ("stack_upgrade".equalsIgnoreCase(upgradeId)) {
+            return Math.min(1, total);
+        }
         return total;
     }
 
@@ -8477,23 +8649,23 @@ public final class MachineService {
         this.applyIdentityBand(inventory, Material.ORANGE_STAINED_GLASS_PANE, "⚡", "⚡", "匯入", "→", "節點", "→", "匯出");
         final List<String> neighbors = this.neighborDirectionSummary(machine);
         final List<String> enInputLore = new ArrayList<>();
-        enInputLore.add("§f目前：§a" + this.directionDisplayName(machine.inputDirection()));
+        enInputLore.add("§f目前：§a" + this.directionDisplayName(machine.energyInputDirection()));
         enInputLore.add("§7用途：設定電力從哪一面進來");
         enInputLore.add("§7此節點會從這一側的機器/節點拉電");
         enInputLore.add("§7全部 = 六面都可拉電");
         enInputLore.add(this.directionCycleDisplay());
         enInputLore.addAll(neighbors);
-        inventory.setItem(11, this.itemFactory.tagGuiAction(this.guiButton("machine-dir-input", Material.HOPPER, "輸入方向（收電）", enInputLore,
-            this.placeholders("current", String.valueOf(machine.inputDirection()))), "dir-input"));
+        inventory.setItem(11, this.itemFactory.tagGuiAction(this.guiButton("machine-dir-input", Material.LIGHTNING_ROD, "輸入方向（收電）", enInputLore,
+            this.placeholders("current", String.valueOf(machine.energyInputDirection()))), "dir-energy-input"));
         final List<String> enOutputLore = new ArrayList<>();
-        enOutputLore.add("§f目前：§a" + this.directionDisplayName(machine.outputDirection()));
+        enOutputLore.add("§f目前：§a" + this.directionDisplayName(machine.energyOutputDirection()));
         enOutputLore.add("§7用途：設定電力往哪一面送出");
         enOutputLore.add("§7此節點會往這一側的機器/節點送電");
         enOutputLore.add("§7全部 = 六面都可送電");
         enOutputLore.add(this.directionCycleDisplay());
         enOutputLore.addAll(neighbors);
-        inventory.setItem(16, this.itemFactory.tagGuiAction(this.guiButton("machine-dir-output", Material.DROPPER, "輸出方向（送電）", enOutputLore,
-            this.placeholders("current", String.valueOf(machine.outputDirection()))), "dir-output"));
+        inventory.setItem(16, this.itemFactory.tagGuiAction(this.guiButton("machine-dir-output", Material.REDSTONE, "輸出方向（送電）", enOutputLore,
+            this.placeholders("current", String.valueOf(machine.energyOutputDirection()))), "dir-energy-output"));
         inventory.setItem(14, this.itemFactory.tagGuiAction(this.guiButton("energy-node-usage", Material.LIGHTNING_ROD, "節點用法", List.of(
             "至少成對放置最容易看懂",
             "A 節點收電，B 節點送電",
@@ -8647,26 +8819,56 @@ public final class MachineService {
         // HUD 已提供背景，只放功能性按鈕，不再填充裝飾玻璃片
         final List<String> inputLore = new ArrayList<>();
         inputLore.add("§f目前：§a" + this.directionDisplayName(machine.inputDirection()));
-        inputLore.add("§7用途：設定物品/能量從哪一面進來");
+        inputLore.add("§7用途：設定物品從哪一面進來");
         inputLore.add("§7對應：" + spec.inputDirectionTitle());
-        inputLore.add("§7限制此機器只從某一面接收物品/能量");
+        inputLore.add("§7限制此機器只從某一面接收物品");
         inputLore.add("§7全部 = 六面都可接收");
         inputLore.add(this.directionCycleDisplay());
         inputLore.addAll(neighbors);
-        inventory.setItem(11, this.itemFactory.tagGuiAction(this.guiButton("machine-dir-input", Material.HOPPER, "輸入方向", inputLore,
+        inventory.setItem(11, this.itemFactory.tagGuiAction(this.guiButton("machine-dir-input", Material.HOPPER, "物流輸入方向", inputLore,
             this.placeholders("current", String.valueOf(machine.inputDirection()))), "dir-input"));
         inventory.setItem(13, this.itemFactory.buildMachineGuiIcon(definition));
         inventory.setItem(14, this.itemFactory.tagGuiAction(this.guiButton("machine-open-recipes", recipeMaterial, spec.recipeTitle(), List.of("點擊查看此機器配方列表")), "recipes:0"));
         final List<String> outputLore = new ArrayList<>();
         outputLore.add("§f目前：§a" + this.directionDisplayName(machine.outputDirection()));
-        outputLore.add("§7用途：設定物品/能量往哪一面送出");
+        outputLore.add("§7用途：設定物品往哪一面送出");
         outputLore.add("§7對應：" + spec.outputDirectionTitle());
-        outputLore.add("§7限制此機器只往某一面送出物品/能量");
+        outputLore.add("§7限制此機器只往某一面送出物品");
         outputLore.add("§7全部 = 六面都可送出");
         outputLore.add(this.directionCycleDisplay());
         outputLore.addAll(neighbors);
-        inventory.setItem(16, this.itemFactory.tagGuiAction(this.guiButton("machine-dir-output", Material.DROPPER, "輸出方向", outputLore,
+        inventory.setItem(16, this.itemFactory.tagGuiAction(this.guiButton("machine-dir-output", Material.DROPPER, "物流輸出方向", outputLore,
             this.placeholders("current", String.valueOf(machine.outputDirection()))), "dir-output"));
+        final boolean showPowerInput = this.showsPowerInputDirectionControl(definition);
+        final boolean showPowerOutput = this.showsPowerOutputDirectionControl(definition);
+        if (!showPowerInput && !showPowerOutput) {
+            return;
+        }
+        if (showPowerInput) {
+            final List<String> energyInputLore = new ArrayList<>();
+            energyInputLore.add("§f目前：§a" + this.directionDisplayName(machine.energyInputDirection()));
+            energyInputLore.add("§7用途：設定電力從哪一面進來");
+            energyInputLore.add("§7物流方向與收電方向現在可分開設定");
+            energyInputLore.add("§7全部 = 六面都可收電");
+            energyInputLore.add(this.directionCycleDisplay());
+            energyInputLore.addAll(neighbors);
+            inventory.setItem(36, this.itemFactory.tagGuiAction(this.guiButton("machine-energy-dir-input", Material.LIGHTNING_ROD, "收電方向", energyInputLore,
+                this.placeholders("current", String.valueOf(machine.energyInputDirection()))), "dir-energy-input"));
+        }
+        if (showPowerInput && showPowerOutput) {
+            inventory.setItem(37, this.sectionPane(centerPane, "⚡", List.of()));
+        }
+        if (showPowerOutput) {
+            final List<String> energyOutputLore = new ArrayList<>();
+            energyOutputLore.add("§f目前：§a" + this.directionDisplayName(machine.energyOutputDirection()));
+            energyOutputLore.add("§7用途：設定電力往哪一面送出");
+            energyOutputLore.add("§7發電機、電池與節點會依這個方向送電");
+            energyOutputLore.add("§7全部 = 六面都可送電");
+            energyOutputLore.add(this.directionCycleDisplay());
+            energyOutputLore.addAll(neighbors);
+            inventory.setItem(38, this.itemFactory.tagGuiAction(this.guiButton("machine-energy-dir-output", Material.REDSTONE, "送電方向", energyOutputLore,
+                this.placeholders("current", String.valueOf(machine.energyOutputDirection()))), "dir-energy-output"));
+        }
     }
 
     private MachineLayoutSpec resolveMachineLayoutSpec(final String machineId) {

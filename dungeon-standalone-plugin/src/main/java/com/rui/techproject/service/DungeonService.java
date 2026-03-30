@@ -1207,49 +1207,58 @@ public final class DungeonService {
         if (player == null || preferred == null || preferred.getWorld() == null) {
             return;
         }
-        final Location safeTarget = this.findNearestSafeLocation(preferred);
-        final World world = safeTarget.getWorld();
+        final World world = preferred.getWorld();
         if (world == null) {
             return;
         }
 
-        world.getChunkAtAsync(safeTarget).thenAccept(chunk -> {
-            if (!player.isOnline()) {
-                return;
-            }
-            player.teleportAsync(safeTarget).thenAccept(success -> {
-                if (!player.isOnline()) {
-                    return;
-                }
-                if (!success) {
-                    player.sendMessage(this.msg("§c傳送到副本失敗，正在重試..."));
-                    player.teleportAsync(safeTarget).thenAccept(retry -> {
-                        if (!retry || !player.isOnline()) {
-                            return;
-                        }
-                        if (targetGameMode != null) {
-                            player.setGameMode(targetGameMode);
-                        }
-                        this.scheduleTeleportSafetyCheck(player, safeTarget);
-                    });
-                    return;
-                }
+        world.getChunkAtAsync(preferred).thenAccept(chunk -> {
+            this.scheduler.runRegion(preferred, task -> {
+                final Location safeTarget = this.findNearestSafeLocation(preferred);
+                this.scheduler.runEntity(player, () -> {
+                    if (!player.isOnline()) {
+                        return;
+                    }
+                    player.teleportAsync(safeTarget).thenAccept(success -> {
+                        this.scheduler.runEntity(player, () -> {
+                            if (!player.isOnline()) {
+                                return;
+                            }
+                            if (!success) {
+                                player.sendMessage(this.msg("§c傳送到副本失敗，正在重試..."));
+                                player.teleportAsync(safeTarget).thenAccept(retry -> {
+                                    this.scheduler.runEntity(player, () -> {
+                                        if (!retry || !player.isOnline()) {
+                                            return;
+                                        }
+                                        if (targetGameMode != null) {
+                                            player.setGameMode(targetGameMode);
+                                        }
+                                        this.scheduleTeleportSafetyCheck(player);
+                                    });
+                                });
+                                return;
+                            }
 
-                if (targetGameMode != null) {
-                    player.setGameMode(targetGameMode);
-                }
-                this.scheduleTeleportSafetyCheck(player, safeTarget);
+                            if (targetGameMode != null) {
+                                player.setGameMode(targetGameMode);
+                            }
+                            this.scheduleTeleportSafetyCheck(player);
+                        });
+                    });
+                });
             });
         });
     }
 
-    private void scheduleTeleportSafetyCheck(final Player player, final Location preferred) {
+    private void scheduleTeleportSafetyCheck(final Player player) {
         this.scheduler.runEntityDelayed(player, () -> {
             if (!player.isOnline() || player.isDead()) {
                 return;
             }
-            if (this.isLocationUnsafe(player.getLocation())) {
-                final Location safe = this.findNearestSafeLocation(preferred);
+            final Location current = player.getLocation();
+            if (this.isLocationUnsafe(current)) {
+                final Location safe = this.findNearestSafeLocation(current);
                 player.teleportAsync(safe);
             }
         }, 2L);
