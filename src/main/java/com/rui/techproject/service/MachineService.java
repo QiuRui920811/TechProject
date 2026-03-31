@@ -1211,7 +1211,10 @@ public final class MachineService {
             return;
         }
         if (session.mode() != ViewMode.MAIN) {
-            this.trackViewClose(player.getUniqueId());
+            // 只在真正關閉配方頁 inventory 時清理；頁面切換時舊 inventory 不等於新 session 的 inventory
+            if (session.inventory() == inventory) {
+                this.trackViewClose(player.getUniqueId());
+            }
             return;
         }
         if (session.inventory() != inventory) {
