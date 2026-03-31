@@ -885,6 +885,7 @@ public final class ItemFactoryUtil {
             case "battery_bank" -> 24000L;
             case "solar_array", "storm_turbine", "fusion_reactor" -> 12000L;
             case "energy_node", "energy_cable" -> 6000L;
+            case "item_tube", "logistics_node" -> 0L;
             case "quarry_drill", "quarry_drill_mk2", "quarry_drill_mk3" -> 6400L;
             case "solar_generator", "coal_generator" -> 3200L;
             default -> switch (definition.tier()) {
