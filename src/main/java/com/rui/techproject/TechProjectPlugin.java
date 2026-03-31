@@ -363,37 +363,62 @@ public final class TechProjectPlugin extends JavaPlugin {
         // 2. 取消事件註冊
         HandlerList.unregisterAll((Plugin) this);
 
-        // 3. 從 PluginManager 內部集合移除舊引用
-        try {
-            final Field pluginsField = pm.getClass().getDeclaredField("plugins");
-            pluginsField.setAccessible(true);
-            ((java.util.List<Plugin>) pluginsField.get(pm)).remove(this);
+        // 3. 取消排程任務（Folia 相容）
+        try { this.getServer().getGlobalRegionScheduler().cancelTasks(this); } catch (final Throwable ignored) { }
+        try { this.getServer().getAsyncScheduler().cancelTasks(this); } catch (final Throwable ignored) { }
 
-            final Field lookupField = pm.getClass().getDeclaredField("lookupNames");
+        // 4. 從 Paper 的 PaperPluginInstanceManager 移除舊插件引用
+        //    路徑：SimplePluginManager → paperPluginManager → instanceManager → plugins/lookupNames
+        try {
+            final Field paperField = pm.getClass().getDeclaredField("paperPluginManager");
+            paperField.setAccessible(true);
+            final Object paperManager = paperField.get(pm);
+
+            final Field imField = paperManager.getClass().getDeclaredField("instanceManager");
+            imField.setAccessible(true);
+            final Object instanceManager = imField.get(paperManager);
+
+            final Field pluginsField = instanceManager.getClass().getDeclaredField("plugins");
+            pluginsField.setAccessible(true);
+            ((java.util.List<Plugin>) pluginsField.get(instanceManager)).remove(this);
+
+            final Field lookupField = instanceManager.getClass().getDeclaredField("lookupNames");
             lookupField.setAccessible(true);
-            ((java.util.Map<String, Plugin>) lookupField.get(pm)).remove(pluginName.toLowerCase(java.util.Locale.ROOT));
+            ((java.util.Map<String, Plugin>) lookupField.get(instanceManager))
+                    .remove(pluginName.toLowerCase(java.util.Locale.ROOT));
         } catch (final Exception exception) {
             sender.sendMessage(net.kyori.adventure.text.Component.text(
-                    "⚠ 移除舊插件引用失敗：" + exception.getMessage(),
+                    "⚠ Paper 內部移除失敗：" + exception.getMessage(),
                     net.kyori.adventure.text.format.NamedTextColor.YELLOW));
         }
 
-        // 4. 移除舊指令
+        // 備用：也清理 SimplePluginManager 自身的 legacy 欄位
         try {
-            final Field cmdMapField = pm.getClass().getDeclaredField("commandMap");
-            cmdMapField.setAccessible(true);
-            final SimpleCommandMap commandMap = (SimpleCommandMap) cmdMapField.get(pm);
-            final java.util.Map<String, Command> known = commandMap.getKnownCommands();
-            known.entrySet().removeIf(entry ->
-                    entry.getValue() instanceof PluginCommand pc
-                            && pc.getPlugin().getName().equals(pluginName));
+            final Field f1 = pm.getClass().getDeclaredField("plugins");
+            f1.setAccessible(true);
+            ((java.util.List<Plugin>) f1.get(pm)).remove(this);
+            final Field f2 = pm.getClass().getDeclaredField("lookupNames");
+            f2.setAccessible(true);
+            ((java.util.Map<String, Plugin>) f2.get(pm)).remove(pluginName.toLowerCase(java.util.Locale.ROOT));
+        } catch (final Exception ignored) { }
+
+        // 5. 移除舊指令（透過 CraftServer.getCommandMap()）
+        try {
+            final java.lang.reflect.Method getCommandMap = this.getServer().getClass().getMethod("getCommandMap");
+            final Object cmdMapObj = getCommandMap.invoke(this.getServer());
+            if (cmdMapObj instanceof SimpleCommandMap scm) {
+                final java.util.Map<String, Command> known = scm.getKnownCommands();
+                known.entrySet().removeIf(entry ->
+                        entry.getValue() instanceof PluginCommand pc
+                                && pc.getPlugin().getName().equals(pluginName));
+            }
         } catch (final Exception exception) {
             sender.sendMessage(net.kyori.adventure.text.Component.text(
                     "⚠ 移除舊指令失敗：" + exception.getMessage(),
                     net.kyori.adventure.text.format.NamedTextColor.YELLOW));
         }
 
-        // 5. 關閉舊 ClassLoader 釋放 JAR 檔案控制
+        // 6. 關閉舊 ClassLoader 釋放 JAR 檔案控制
         try {
             final ClassLoader cl = this.getClass().getClassLoader();
             if (cl instanceof java.io.Closeable closeable) {
@@ -401,7 +426,7 @@ public final class TechProjectPlugin extends JavaPlugin {
             }
         } catch (final Exception ignored) { }
 
-        // 6. 載入並啟用新版本
+        // 7. 載入並啟用新版本
         try {
             final Plugin newPlugin = pm.loadPlugin(jarFile);
             if (newPlugin == null) {
@@ -419,6 +444,7 @@ public final class TechProjectPlugin extends JavaPlugin {
             sender.sendMessage(net.kyori.adventure.text.Component.text(
                     "載入新版本失敗：" + exception.getMessage(),
                     net.kyori.adventure.text.format.NamedTextColor.RED));
+            this.getLogger().log(java.util.logging.Level.SEVERE, "熱載失敗", exception);
         }
     }
 
