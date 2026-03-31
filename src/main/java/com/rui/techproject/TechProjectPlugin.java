@@ -25,17 +25,29 @@ import com.rui.techproject.storage.MigrationManager;
 import com.rui.techproject.storage.StorageManager;
 import com.rui.techproject.util.ItemFactoryUtil;
 import com.rui.techproject.util.SafeScheduler;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandSender;
+import org.bukkit.command.PluginCommand;
+import org.bukkit.command.SimpleCommandMap;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.event.HandlerList;
 import org.bukkit.generator.ChunkGenerator;
+import org.bukkit.plugin.Plugin;
+import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.lang.reflect.Field;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 
 public final class TechProjectPlugin extends JavaPlugin {
     private static final String[] BUNDLED_DATAPACK_RESOURCES = {
@@ -290,25 +302,123 @@ public final class TechProjectPlugin extends JavaPlugin {
     }
 
     /**
-     * 熱插拔：將開發環境產出的 JAR 複製到伺服器 plugins 資料夾。
-     * @return 成功訊息或 null（未設定路徑時回傳 null）
+     * 執行完整熱重載：複製新 JAR → 停用舊插件 → 清除註冊 → 載入新版本。
+     * 若 hot-swap-jar 未設定，回退成僅重載設定檔。
      */
-    public String hotSwapJar() {
+    @SuppressWarnings("unchecked")
+    public void performHotReload(final CommandSender sender) {
         final String jarPath = this.getConfig().getString("hot-swap-jar", "");
         if (jarPath == null || jarPath.isBlank()) {
-            return null;
+            this.reloadConfig();
+            this.reloadProjectData();
+            if (this.planetService != null) this.planetService.reloadRuntimeConfig();
+            sender.sendMessage(net.kyori.adventure.text.Component.text(
+                    "科技專案設定已重新載入（未設定 hot-swap-jar，僅重載設定）。",
+                    net.kyori.adventure.text.format.NamedTextColor.GREEN));
+            return;
         }
+
         final Path source = Path.of(jarPath);
         if (!Files.isRegularFile(source)) {
-            return "\u00a7c找不到 JAR：" + jarPath;
+            sender.sendMessage(net.kyori.adventure.text.Component.text(
+                    "找不到 JAR：" + jarPath,
+                    net.kyori.adventure.text.format.NamedTextColor.RED));
+            return;
         }
-        final Path pluginsFolder = this.getDataFolder().toPath().getParent();
-        final Path target = pluginsFolder.resolve(source.getFileName());
+
+        // 取得目前插件的 JAR 檔案
+        File currentJar;
         try {
-            Files.copy(source, target, StandardCopyOption.REPLACE_EXISTING);
-            return "\u00a7a已複製 JAR → " + target.getFileName() + "（程式碼變更需重啟生效）";
+            final java.lang.reflect.Method m = JavaPlugin.class.getDeclaredMethod("getFile");
+            m.setAccessible(true);
+            currentJar = (File) m.invoke(this);
+        } catch (final Exception exception) {
+            sender.sendMessage(net.kyori.adventure.text.Component.text(
+                    "無法取得插件 JAR 路徑：" + exception.getMessage(),
+                    net.kyori.adventure.text.format.NamedTextColor.RED));
+            return;
+        }
+
+        // 複製新 JAR 覆蓋舊 JAR
+        try {
+            Files.copy(source, currentJar.toPath(), StandardCopyOption.REPLACE_EXISTING);
         } catch (final IOException exception) {
-            return "\u00a7c複製 JAR 失敗：" + exception.getMessage();
+            sender.sendMessage(net.kyori.adventure.text.Component.text(
+                    "複製 JAR 失敗：" + exception.getMessage(),
+                    net.kyori.adventure.text.format.NamedTextColor.RED));
+            return;
+        }
+
+        sender.sendMessage(net.kyori.adventure.text.Component.text(
+                "已更新 JAR，正在重載插件…",
+                net.kyori.adventure.text.format.NamedTextColor.YELLOW));
+
+        final String pluginName = this.getName();
+        final File jarFile = currentJar;
+        final PluginManager pm = this.getServer().getPluginManager();
+
+        // 1. 停用舊插件（觸發 onDisable → 存檔、清除顯示實體）
+        pm.disablePlugin(this);
+
+        // 2. 取消事件註冊
+        HandlerList.unregisterAll((Plugin) this);
+
+        // 3. 從 PluginManager 內部集合移除舊引用
+        try {
+            final Field pluginsField = pm.getClass().getDeclaredField("plugins");
+            pluginsField.setAccessible(true);
+            ((java.util.List<Plugin>) pluginsField.get(pm)).remove(this);
+
+            final Field lookupField = pm.getClass().getDeclaredField("lookupNames");
+            lookupField.setAccessible(true);
+            ((java.util.Map<String, Plugin>) lookupField.get(pm)).remove(pluginName.toLowerCase(java.util.Locale.ROOT));
+        } catch (final Exception exception) {
+            sender.sendMessage(net.kyori.adventure.text.Component.text(
+                    "⚠ 移除舊插件引用失敗：" + exception.getMessage(),
+                    net.kyori.adventure.text.format.NamedTextColor.YELLOW));
+        }
+
+        // 4. 移除舊指令
+        try {
+            final Field cmdMapField = pm.getClass().getDeclaredField("commandMap");
+            cmdMapField.setAccessible(true);
+            final SimpleCommandMap commandMap = (SimpleCommandMap) cmdMapField.get(pm);
+            final java.util.Map<String, Command> known = commandMap.getKnownCommands();
+            known.entrySet().removeIf(entry ->
+                    entry.getValue() instanceof PluginCommand pc
+                            && pc.getPlugin().getName().equals(pluginName));
+        } catch (final Exception exception) {
+            sender.sendMessage(net.kyori.adventure.text.Component.text(
+                    "⚠ 移除舊指令失敗：" + exception.getMessage(),
+                    net.kyori.adventure.text.format.NamedTextColor.YELLOW));
+        }
+
+        // 5. 關閉舊 ClassLoader 釋放 JAR 檔案控制
+        try {
+            final ClassLoader cl = this.getClass().getClassLoader();
+            if (cl instanceof java.io.Closeable closeable) {
+                closeable.close();
+            }
+        } catch (final Exception ignored) { }
+
+        // 6. 載入並啟用新版本
+        try {
+            final Plugin newPlugin = pm.loadPlugin(jarFile);
+            if (newPlugin == null) {
+                sender.sendMessage(net.kyori.adventure.text.Component.text(
+                        "載入新插件失敗（loadPlugin 回傳 null）",
+                        net.kyori.adventure.text.format.NamedTextColor.RED));
+                return;
+            }
+            newPlugin.onLoad();
+            pm.enablePlugin(newPlugin);
+            sender.sendMessage(net.kyori.adventure.text.Component.text(
+                    "熱載完成！插件已使用新版本代碼。",
+                    net.kyori.adventure.text.format.NamedTextColor.GREEN));
+        } catch (final Exception exception) {
+            sender.sendMessage(net.kyori.adventure.text.Component.text(
+                    "載入新版本失敗：" + exception.getMessage(),
+                    net.kyori.adventure.text.format.NamedTextColor.RED));
         }
     }
 
