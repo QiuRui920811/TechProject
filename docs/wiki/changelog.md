@@ -8,55 +8,30 @@
 
 ### 🎨 新增 20 項自訂材質
 
-以下科技材料新增 Nexo 自訂材質（item-model），不再借用原版外觀：
+以下科技材料新增專屬圖示，不再借用原版外觀：
 
 伺服馬達、工業線束、淨化膜、隔熱外殼、鈦合金、合成纖維、強化玻璃、加熱線圈、高分子樹脂、耐熱塑膠、合金框架、機器外殼、生長燈、精密框架、複合面板、壓縮鐵束、精煉碎片、緻密碳塊、銅線、鋼線
 
-### 🔧 Folia 執行緒安全 — 生產級全面審計
+### 🛡️ 穩定性大幅提升
 
-針對 Folia 多區域執行緒模型進行三輪深度審計：
+針對多人同時在線場景進行全面優化，大幅減少卡頓、報錯與資料異常：
 
-- **entity.remove()** — 全部改為 `safeRemoveEntity()`，透過 `scheduler.runEntity()` 確保在持有區域執行
-- **跨區域玩家存取** — `pullOpenViewState` / `pushOpenViewState` 改用 session 快取，不再跨執行緒呼叫 `Bukkit.getPlayer()`
-- **BossBar 清除** — `removeAllDisplays` 中的 `player.hideBossBar()` 改用 `scheduler.runEntity(player, ...)`
-- **孤兒實體清理** — `purgeOrphanDisplays` 實體屬性讀取放入 `scheduler.runEntity()`
-- **輸入/輸出槽位保護** — `inputAt()` / `outputAt()` 直接修改改為 clone-before-modify 模式
-- **安卓巡邏偏移** — 快取至 `ConcurrentHashMap` 避免重複解析
-
-### ⚡ 能源系統改用原子操作
-
-- `storedEnergy` / `totalGenerated` 改為 `AtomicLong`
-- `consumeEnergy()` 改為 CAS 迴圈（lock-free 原子扣減）
-- `ticksActive` / `chickenProgress` 改為 `volatile`
-- 消除跨區域能源競態條件
-
-### 🔒 跨區域庫存鎖
-
-- `PlacedMachine` 新增 `ReentrantLock inventoryLock`
-- 物流導管 `transferSingleOutput` — 鄰居機器 `tryLock` 保護
-- 貨物管理員 `tickCargoManager` — 上游機器 `tryLock` 保護
-- 安卓搬運 `tickAndroidItemInterface` — 站台機器 `tryLock` 保護
-- 儲存集線器 `pullFromConnectedOutputs` — 來源機器 `tryLock` 保護
-
-### 📦 庫存系統重寫
-
-- **P0 物品複製漏洞修復** — `canStoreAllOutputs` 模擬用陣列改為深拷貝
-- **二階段合併演算法** — 所有 store/canStore 方法統一為「先合併既有堆疊 → 再填空格」
-- 新增 `availableOutputSpace()` 輔助方法
-- 真空入口支援部分拾取
+- 修復多人同時操作機器時偶爾出現的物品消失或重複問題
+- 修復多人環境下機器能源偶爾計算錯誤的問題
+- 修復物流導管、貨物管理員、安卓機器人搬運物品時的衝突問題
+- 修復機器顯示模型偶爾殘留在世界中無法消失的問題
+- 修復開啟機器介面時偶爾閃退或報錯的問題
+- 修復離線後機器介面狀態未正確清理的問題
 
 ### 🐛 修復
 
-- 修復 `dispatchCommand` 在 Folia 上的非同步錯誤 — 改用 `safeScheduler.runGlobal()`
-- 修復方塊型材質（IRON_BLOCK、COAL_BLOCK 等）可被玩家放置的問題 — 改映射為非方塊物品
-- 修復暴風渦輪 `storm_turbine` 誤報「非露天」警告
-- 修復 PlugManX 熱載入 `CraftScheduler` 相容性問題
-- 修復儲存集線器 `storage_hub` 距離升級無效 — 新增 BFS 拉取機制 + 升級槽變更時清除快取
-- 修復怪物收集器 `mob_collector` 無法收集幼年殭屍化豬布林 — 嬰兒過濾改為僅限被動生物
-- 修復科技物品（如緻密碳塊 / 煤炭型）可被熔爐當燃料使用的問題
-- 修復 `cleanupPlayer` 遺漏觀察者清理與排水確認清理
-- 修復 `unregisterMachine` 遺漏觀察者地圖與開啟視圖清理
-- 修復 `drainConfirmations` 記憶體洩漏 — 加入定期清理
+- 修復科技物品（如壓縮鐵束、緻密碳塊等）可以被放置在地上的問題
+- 修復暴風渦輪誤報「需要露天」的警告（暴風渦輪只需要下雨，不需要露天）
+- 修復儲存集線器的距離升級無效的問題 — 現在升級後能正確拉取更遠範圍的機器產物
+- 修復怪物收集器無法收集幼年殭屍化豬布林等幼年敵對生物的問題
+- 修復科技物品可以被熔爐當作燃料燒掉的問題
+- 修復 `/tech reload` 指令偶爾報錯的問題
+- 修復真空入口無法拾取超過容量上限的掉落物（現在會盡量裝滿）
 
 ---
 
