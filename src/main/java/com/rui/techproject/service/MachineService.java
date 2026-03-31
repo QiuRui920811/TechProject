@@ -1207,7 +1207,11 @@ public final class MachineService {
 
     public void closeMachineView(final Player player, final Inventory inventory) {
         final MachineViewSession session = this.openViews.get(player.getUniqueId());
-        if (session == null || session.mode() != ViewMode.MAIN) {
+        if (session == null) {
+            return;
+        }
+        if (session.mode() != ViewMode.MAIN) {
+            this.trackViewClose(player.getUniqueId());
             return;
         }
         if (session.inventory() != inventory) {

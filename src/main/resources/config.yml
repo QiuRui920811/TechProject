@@ -108,3 +108,8 @@ machine-safety:
     - HORSE
     - DONKEY
     - MULE
+
+# 熱插拔：指向 mvn package 產出的 JAR 路徑
+# tech reload 時會自動複製此 JAR 到伺服器 plugins 資料夾
+# 留空或移除則只重載設定檔，不複製 JAR
+hot-swap-jar: ""

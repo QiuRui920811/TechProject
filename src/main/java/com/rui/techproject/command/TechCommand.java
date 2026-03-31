@@ -288,6 +288,10 @@ public final class TechCommand implements CommandExecutor, TabCompleter {
                 sender.sendMessage(Component.text("缺少權限。", NamedTextColor.RED));
                 return true;
             }
+            final String swapResult = this.plugin.hotSwapJar();
+            if (swapResult != null) {
+                sender.sendMessage(Component.text(swapResult));
+            }
             this.plugin.reloadConfig();
             this.plugin.reloadProjectData();
             this.plugin.getPlanetService().reloadRuntimeConfig();

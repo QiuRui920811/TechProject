@@ -159,6 +159,10 @@ public final class CookingService {
         this.loadRecipes(plugin);
     }
 
+    public void reloadRecipes() {
+        this.loadRecipes(this.plugin);
+    }
+
     // ══════════════════════ 公開 API ══════════════════════
 
     /**

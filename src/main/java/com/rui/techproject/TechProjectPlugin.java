@@ -264,6 +264,7 @@ public final class TechProjectPlugin extends JavaPlugin {
         if (this.techBookService != null) {
             this.techBookService.closeAllBookViews();
         }
+        this.syncManagedDataFiles();
         if (this.techRegistry != null) {
             this.techRegistry.reload(this);
         }
@@ -276,12 +277,38 @@ public final class TechProjectPlugin extends JavaPlugin {
         if (this.techBookService != null) {
             this.techBookService.reload(this);
         }
+        if (this.cookingService != null) {
+            this.cookingService.reloadRecipes();
+        }
         if (this.titleService != null) {
             this.titleService.reload();
         }
         // 補註冊 PlaceholderAPI（若熱載順序導致 onEnable 時尚未載入 PAPI）
         if (this.getServer().getPluginManager().getPlugin("PlaceholderAPI") != null) {
             new com.rui.techproject.service.TechPlaceholderExpansion(this).register();
+        }
+    }
+
+    /**
+     * 熱插拔：將開發環境產出的 JAR 複製到伺服器 plugins 資料夾。
+     * @return 成功訊息或 null（未設定路徑時回傳 null）
+     */
+    public String hotSwapJar() {
+        final String jarPath = this.getConfig().getString("hot-swap-jar", "");
+        if (jarPath == null || jarPath.isBlank()) {
+            return null;
+        }
+        final Path source = Path.of(jarPath);
+        if (!Files.isRegularFile(source)) {
+            return "\u00a7c找不到 JAR：" + jarPath;
+        }
+        final Path pluginsFolder = this.getDataFolder().toPath().getParent();
+        final Path target = pluginsFolder.resolve(source.getFileName());
+        try {
+            Files.copy(source, target, StandardCopyOption.REPLACE_EXISTING);
+            return "\u00a7a已複製 JAR → " + target.getFileName() + "（程式碼變更需重啟生效）";
+        } catch (final IOException exception) {
+            return "\u00a7c複製 JAR 失敗：" + exception.getMessage();
         }
     }
 
