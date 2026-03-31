@@ -342,11 +342,18 @@ public final class TechProjectPlugin extends JavaPlugin {
                 "已更新 JAR，正在透過 PlugManX 重載…",
                 net.kyori.adventure.text.format.NamedTextColor.YELLOW));
 
-        // 委託 PlugManX 執行卸載+重載
-        this.getServer().dispatchCommand(
-                this.getServer().getConsoleSender(),
-                "plugman reload TechProject"
-        );
+        // 委託 PlugManX 執行卸載+重載（必須在 global tick thread 上跑）
+        this.safeScheduler.runGlobal(task -> {
+            try {
+                this.getServer().dispatchCommand(
+                        this.getServer().getConsoleSender(),
+                        "plugman reload TechProject"
+                );
+            } catch (final Exception exception) {
+                // PlugManX 內部的 CraftScheduler 呼叫在 Folia 上會拋例外，但重載本身已完成
+                this.getLogger().fine("PlugManX reload 附帶排程警告（可忽略）：" + exception.getMessage());
+            }
+        });
     }
 
     @Override

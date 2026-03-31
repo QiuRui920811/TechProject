@@ -173,6 +173,11 @@ public final class MachineService {
     private record BfsCacheKey(LocationKey origin, String inputDir, String outputDir, boolean logistics) {}
     private final Map<BfsCacheKey, List<PlacedMachine>> bfsCache = new ConcurrentHashMap<>();
     /**
+     * 巡邏路徑快取：以 "radius:height:mode" 為 key，避免每 tick 重複建立 ~200 int[] 陣列。
+     * 結果為不可變 List，可安全跨執行緒共享。
+     */
+    private final Map<String, List<int[]>> patrolOffsetCache = new ConcurrentHashMap<>();
+    /**
      * 每 tick cycle 預先計算「有玩家在附近的 chunk」集合。
      * 用於跳過無人觀看的粒子 / 音效，大幅降低無效 I/O。
      */
@@ -345,6 +350,13 @@ public final class MachineService {
                 this.quarryWarmedUp.remove(removed.locationKey());
             }
             this.removeMachineDisplay(key);
+            // 關閉所有正在觀看此機器的玩家 session，防止 viewersByMachine 洩漏
+            final java.util.Set<UUID> viewers = this.viewersByMachine.remove(key);
+            if (viewers != null) {
+                for (final UUID uid : viewers) {
+                    this.openViews.remove(uid);
+                }
+            }
             this.dropStoredItems(block.getLocation(), removed.inputInventory());
             this.dropStoredItems(block.getLocation(), removed.outputInventory());
             this.dropStoredItems(block.getLocation(), removed.upgradeInventory());
@@ -638,7 +650,7 @@ public final class MachineService {
             player.sendMessage(this.itemFactory.warning("自動釣台旁邊至少要有 3 格水面，否則不會運作。"));
             return false;
         }
-        if (("solar_generator".equalsIgnoreCase(machineId) || "storm_turbine".equalsIgnoreCase(machineId))
+        if ("solar_generator".equalsIgnoreCase(machineId)
                 && block.getWorld().getHighestBlockYAt(block.getX(), block.getZ()) > block.getY()) {
             player.sendMessage(this.itemFactory.warning("這台最好放在露天，否則發電效率會很差。"));
         }
@@ -1327,6 +1339,9 @@ public final class MachineService {
                 } else {
                     this.handleManualMachineStorageClick(player, machine, rawSlot, event.isRightClick());
                 }
+                if (this.isUpgradeSlot(rawSlot)) {
+                    this.invalidateNetworkCache();
+                }
                 this.refreshManualMachineInteraction(player, machine);
                 return;
             }
@@ -1348,12 +1363,16 @@ public final class MachineService {
         if (rawSlot >= topSize && event.getClickedInventory() != null) {
             if (event.isShiftClick() && event.getCurrentItem() != null && event.getCurrentItem().getType() != Material.AIR) {
                 event.setCancelled(true);
-                final ItemStack remaining = this.pushIntoMachineStorage(machine, event.getCurrentItem().clone());
+                final ItemStack clickedItem = event.getCurrentItem().clone();
+                final ItemStack remaining = this.pushIntoMachineStorage(machine, clickedItem);
                 if (remaining.getAmount() != event.getCurrentItem().getAmount()) {
                     if (remaining.getType() == Material.AIR || remaining.getAmount() <= 0) {
                         event.getClickedInventory().setItem(event.getSlot(), null);
                     } else {
                         event.getClickedInventory().setItem(event.getSlot(), remaining);
+                    }
+                    if (this.isUpgradeItem(clickedItem)) {
+                        this.invalidateNetworkCache();
                     }
                     this.refreshManualMachineInteraction(player, machine);
                 }
@@ -1437,7 +1456,12 @@ public final class MachineService {
         for (final Map.Entry<UUID, BossBar> entry : this.machineBossBars.entrySet()) {
             final Player player = Bukkit.getPlayer(entry.getKey());
             if (player != null) {
-                player.hideBossBar(entry.getValue());
+                final BossBar bar = entry.getValue();
+                try {
+                    this.scheduler.runEntity(player, () -> player.hideBossBar(bar));
+                } catch (final Exception ignored) {
+                    player.hideBossBar(bar);
+                }
             }
         }
         this.machineBossBars.clear();
@@ -1446,17 +1470,18 @@ public final class MachineService {
 
     public void purgeOrphanDisplays() {
         final Set<UUID> trackedIds = new HashSet<>(this.machineDisplays.values());
+        trackedIds.addAll(this.machineVisualDisplays.values());
         for (final World world : Bukkit.getWorlds()) {
             for (final Entity entity : world.getEntities()) {
-                if (!(entity instanceof TextDisplay)) {
+                if (!(entity instanceof Display)) {
                     continue;
                 }
                 if (trackedIds.contains(entity.getUniqueId())) {
                     continue; // 仍在追蹤中，不要移除
                 }
                 this.scheduler.runEntity(entity, () -> {
-                    final TextDisplay display = (TextDisplay) entity;
                     try {
+                        final Display display = (Display) entity;
                         if (display.isPersistent() || !display.isInvulnerable()) {
                             return;
                         }
@@ -1479,6 +1504,14 @@ public final class MachineService {
         }
     }
 
+    /**
+     * 序列化所有機器並寫入 storage。
+     * <p>
+     * 執行緒安全備註：autoSave 從 async 呼叫此方法。
+     * PlacedMachine 的 long 欄位已標註 volatile（無 torn-read），
+     * ItemStack 陣列元素以 clone-and-replace 語義更新（舊參照不被修改），
+     * 因此 async 讀取最多看到稍舊值，不會損壞。
+     */
     public void saveAll() {
         final Map<String, Map<String, Object>> machineMap = new LinkedHashMap<>();
         int index = 0;
@@ -1700,6 +1733,9 @@ public final class MachineService {
     }
 
     public void cleanupPlayer(final UUID playerId) {
+        // Safety net: 確保 viewer 狀態被清除（InventoryCloseEvent 通常先處理，這裡防止 edge case 殘留）
+        this.trackViewClose(playerId);
+        this.drainConfirmations.remove(playerId);
         final Player player = Bukkit.getPlayer(playerId);
         this.clearMachineBossBar(playerId, player);
     }
@@ -1795,6 +1831,12 @@ public final class MachineService {
     }
 
     private void tickAllMachines() {
+        // 清理過期的排電確認快取，防止記憶體洩漏
+        if (!this.drainConfirmations.isEmpty()) {
+            final long now = System.currentTimeMillis();
+            this.drainConfirmations.values().removeIf(expiry -> expiry <= now);
+        }
+
         // 預先計算哪些 chunk 有附近玩家（用於跳過無人觀看的粒子/音效）
         final Set<Long> playerChunks = new HashSet<>();
         for (final Player player : Bukkit.getOnlinePlayers()) {
@@ -2152,6 +2194,8 @@ public final class MachineService {
         }
     }
 
+    // cropHarvester: radius 最大 ~6，每 8 tick 執行一次，且找到第一個成熟作物後即 return。
+    // 總 getBlockAt 呼叫 ≤ (2r+1)² ≈ 169，可接受。
     private void tickCropHarvester(final PlacedMachine machine, final Location location) {
         final World world = location.getWorld();
         if (world == null || machine.ticksActive() % 8L != 0L) {
@@ -2404,7 +2448,7 @@ public final class MachineService {
             if (!machine.consumeEnergy(energy)) {
                 return;
             }
-            living.remove();
+            this.safeRemoveEntity(living);
             this.storeOutputs(machine, outputs);
             this.progressService.incrementStat(machine.owner(), "mobs_collected", 1L);
             this.progressService.unlockByRequirement(machine.owner(), "machine:mob_collector");
@@ -2594,7 +2638,7 @@ public final class MachineService {
                 return false;
             }
             this.storeOutput(machine, stack.clone());
-            item.remove();
+            this.safeRemoveEntity(item);
             this.progressService.incrementStat(machine.owner(), "android_salvaged", stack.getAmount());
             this.progressService.unlockItem(machine.owner(), "android_salvage_script");
             world.spawnParticle(Particle.WITCH, entity.getLocation().add(0.0, 0.2, 0.0), 8, 0.15, 0.15, 0.15, 0.0);
@@ -2625,7 +2669,7 @@ public final class MachineService {
                 return false;
             }
             final Location entityLocation = living.getLocation();
-            living.remove();
+            this.safeRemoveEntity(living);
             this.storeOutputs(machine, outputs);
             this.progressService.incrementStat(machine.owner(), "android_mobs_hunted", 1L);
             world.spawnParticle(Particle.SOUL, entityLocation.getX() + 0.0, entityLocation.getY() + 0.7, entityLocation.getZ() + 0.0, 12, 0.22, 0.28, 0.22, 0.02);
@@ -2685,36 +2729,44 @@ public final class MachineService {
         final ItemStack filter = machine.upgradeAt(ANDROID_FILTER_SLOT);
         final String filterId = this.resolveStackId(filter);
         final Inventory targetInventory = this.interfaceTargetInventory(location);
-        for (int slot = 0; slot < OUTPUT_SLOTS.length; slot++) {
-            final ItemStack current = station.outputAt(slot);
-            if (current == null || current.getType() == Material.AIR) {
-                continue;
-            }
-            final String currentId = this.resolveStackId(current);
-            if (filterId != null && !filterId.equalsIgnoreCase(currentId)) {
-                continue;
-            }
-            final boolean canMove = targetInventory != null
-                    ? this.canStoreInInventory(targetInventory, current)
-                    : this.canStoreOutput(machine, current);
-            if (!canMove) {
-                continue;
-            }
-            final long energy = this.effectiveEnergyCost(machine, 4L);
-            this.absorbNearbyEnergy(machine, location, energy);
-            if (!machine.consumeEnergy(energy)) {
+        // 跨 region 防護：station 可能在不同 region
+        if (!station.tryLockInventory()) {
+            return;
+        }
+        try {
+            for (int slot = 0; slot < OUTPUT_SLOTS.length; slot++) {
+                final ItemStack current = station.outputAt(slot);
+                if (current == null || current.getType() == Material.AIR) {
+                    continue;
+                }
+                final String currentId = this.resolveStackId(current);
+                if (filterId != null && !filterId.equalsIgnoreCase(currentId)) {
+                    continue;
+                }
+                final boolean canMove = targetInventory != null
+                        ? this.canStoreInInventory(targetInventory, current)
+                        : this.canStoreOutput(machine, current);
+                if (!canMove) {
+                    continue;
+                }
+                final long energy = this.effectiveEnergyCost(machine, 4L);
+                this.absorbNearbyEnergy(machine, location, energy);
+                if (!machine.consumeEnergy(energy)) {
+                    return;
+                }
+                if (targetInventory != null) {
+                    this.storeInInventory(targetInventory, current);
+                } else {
+                    this.storeOutput(machine, current);
+                }
+                station.setOutputAt(slot, null);
+                this.progressService.incrementStat(machine.owner(), "android_interface_exports", current.getAmount());
+                world.spawnParticle(Particle.WAX_OFF, location.getX() + 0.5, location.getY() + 0.8, location.getZ() + 0.5, 6, 0.18, 0.18, 0.18, 0.0);
+                world.playSound(location, Sound.BLOCK_CHAIN_PLACE, 0.2f, 1.4f);
                 return;
             }
-            if (targetInventory != null) {
-                this.storeInInventory(targetInventory, current);
-            } else {
-                this.storeOutput(machine, current);
-            }
-            station.setOutputAt(slot, null);
-            this.progressService.incrementStat(machine.owner(), "android_interface_exports", current.getAmount());
-            world.spawnParticle(Particle.WAX_OFF, location.getX() + 0.5, location.getY() + 0.8, location.getZ() + 0.5, 6, 0.18, 0.18, 0.18, 0.0);
-            world.playSound(location, Sound.BLOCK_CHAIN_PLACE, 0.2f, 1.4f);
-            return;
+        } finally {
+            station.unlockInventory();
         }
     }
 
@@ -2745,11 +2797,13 @@ public final class MachineService {
             if (!machine.consumeEnergy(energy)) {
                 return;
             }
-            stack.setAmount(stack.getAmount() - 1);
-            if (stack.getAmount() <= 0) {
+            final int newFuelAmount = stack.getAmount() - 1;
+            if (newFuelAmount <= 0) {
                 machine.setInputAt(slot, null);
             } else {
-                machine.setInputAt(slot, stack);
+                final ItemStack updatedFuel = stack.clone();
+                updatedFuel.setAmount(newFuelAmount);
+                machine.setInputAt(slot, updatedFuel);
             }
             station.setAndroidFuel(Math.min(ANDROID_MAX_FUEL, station.androidFuel() + acceptedFuel));
             if (profile.remainder() != null) {
@@ -2975,6 +3029,11 @@ public final class MachineService {
         final int radius = this.effectiveAndroidPatrolRadius(machine);
         final int height = this.effectiveAndroidPatrolHeight(machine);
         final String mode = this.normalizeAndroidRouteMode(machine == null ? null : machine.androidRouteMode());
+        final String key = radius + ":" + height + ":" + mode;
+        return this.patrolOffsetCache.computeIfAbsent(key, k -> this.computePatrolOffsets(radius, height, mode));
+    }
+
+    private List<int[]> computePatrolOffsets(final int radius, final int height, final String mode) {
         final List<int[]> offsets = new ArrayList<>();
         switch (mode) {
             case "SPIRAL" -> {
@@ -3027,7 +3086,7 @@ public final class MachineService {
                 }
             }
         }
-        return offsets;
+        return Collections.unmodifiableList(offsets);
     }
 
     private String normalizeAndroidRouteMode(final String mode) {
@@ -3076,6 +3135,12 @@ public final class MachineService {
         return lines;
     }
 
+    /**
+     * O(n) 全機器掛描：可接受。
+     * android_item_interface / android_fuel_interface 爲稀有的後期機器，
+     * 且內迴圈已通過 owner / machineId / world 過濾，每次只做比較運算。
+     * 建立次級索引（例如 owner→List）的維護成本高於偶爾的 O(n) 掛描。
+     */
     private PlacedMachine findLinkedAndroidStation(final PlacedMachine machine, final Location location) {
         PlacedMachine closest = null;
         int closestDistance = Integer.MAX_VALUE;
@@ -3161,16 +3226,29 @@ public final class MachineService {
             }
             final ItemStack stack = itemEntity.getItemStack();
             final long energy = this.effectiveEnergyCost(machine, 3L);
-            if (stack.getType() == Material.AIR || !this.canStoreOutput(machine, stack)) {
+            if (stack.getType() == Material.AIR) {
+                continue;
+            }
+            final int space = this.availableOutputSpace(machine, stack);
+            if (space <= 0) {
                 continue;
             }
             this.absorbNearbyEnergy(machine, location, energy);
             if (!machine.consumeEnergy(energy)) {
                 return;
             }
-            this.storeOutput(machine, stack.clone());
-            itemEntity.remove();
-            this.progressService.incrementStat(machine.owner(), "vacuum_collected", stack.getAmount());
+            final int pickup = Math.min(space, stack.getAmount());
+            final ItemStack toStore = stack.clone();
+            toStore.setAmount(pickup);
+            this.storeOutput(machine, toStore);
+            if (pickup >= stack.getAmount()) {
+                this.safeRemoveEntity(itemEntity);
+            } else {
+                final ItemStack leftover = stack.clone();
+                leftover.setAmount(stack.getAmount() - pickup);
+                itemEntity.setItemStack(leftover);
+            }
+            this.progressService.incrementStat(machine.owner(), "vacuum_collected", pickup);
             this.progressService.unlockByRequirement(machine.owner(), "machine:vacuum_inlet");
             world.spawnParticle(Particle.PORTAL, location.getX() + 0.5, location.getY() + 0.8, location.getZ() + 0.5, 12, 0.25, 0.25, 0.25, 0.2);
             world.playSound(location, Sound.ENTITY_ENDERMAN_TELEPORT, 0.15f, 1.6f);
@@ -3310,9 +3388,13 @@ public final class MachineService {
                 return;
             }
             // 消耗輸入，存入輸出
-            input.setAmount(input.getAmount() - 1);
-            if (input.getAmount() <= 0) {
+            final int newInputAmount = input.getAmount() - 1;
+            if (newInputAmount <= 0) {
                 machine.setInputAt(slot, null);
+            } else {
+                final ItemStack updatedInput = input.clone();
+                updatedInput.setAmount(newInputAmount);
+                machine.setInputAt(slot, updatedInput);
             }
             this.storeOutput(machine, sequenced);
             this.progressService.incrementStat(machine.owner(), "chickens_sequenced", 1);
@@ -3927,17 +4009,20 @@ public final class MachineService {
         if (inventory == null) {
             return false;
         }
+        int remaining = stack.getAmount();
         final int outputStart = this.quarryChestOutputStart(inventory);
         for (int slot = outputStart; slot < inventory.getSize(); slot++) {
             final ItemStack current = inventory.getItem(slot);
             if (current == null || current.getType() == Material.AIR) {
-                return true;
+                remaining -= stack.getMaxStackSize();
+            } else if (!this.isQuarryFuel(current) && current.isSimilar(stack)) {
+                remaining -= (current.getMaxStackSize() - current.getAmount());
             }
-            if (!this.isQuarryFuel(current) && current.isSimilar(stack) && current.getAmount() + stack.getAmount() <= current.getMaxStackSize()) {
+            if (remaining <= 0) {
                 return true;
             }
         }
-        return false;
+        return remaining <= 0;
     }
 
     private boolean storeInQuarryChest(final Block block, final ItemStack stack) {
@@ -3945,20 +4030,31 @@ public final class MachineService {
         if (inventory == null) {
             return false;
         }
+        int remaining = stack.getAmount();
         final int outputStart = this.quarryChestOutputStart(inventory);
-        for (int slot = outputStart; slot < inventory.getSize(); slot++) {
+        for (int slot = outputStart; slot < inventory.getSize() && remaining > 0; slot++) {
             final ItemStack current = inventory.getItem(slot);
-            if (current == null || current.getType() == Material.AIR) {
-                inventory.setItem(slot, stack.clone());
-                return true;
-            }
-            if (!this.isQuarryFuel(current) && current.isSimilar(stack) && current.getAmount() + stack.getAmount() <= current.getMaxStackSize()) {
-                current.setAmount(current.getAmount() + stack.getAmount());
-                inventory.setItem(slot, current);
-                return true;
+            if (current != null && current.getType() != Material.AIR
+                    && !this.isQuarryFuel(current) && current.isSimilar(stack)
+                    && current.getAmount() < current.getMaxStackSize()) {
+                final int room = current.getMaxStackSize() - current.getAmount();
+                final int move = Math.min(room, remaining);
+                final ItemStack merged = current.clone();
+                merged.setAmount(current.getAmount() + move);
+                inventory.setItem(slot, merged);
+                remaining -= move;
             }
         }
-        return false;
+        for (int slot = outputStart; slot < inventory.getSize() && remaining > 0; slot++) {
+            final ItemStack current = inventory.getItem(slot);
+            if (current == null || current.getType() == Material.AIR) {
+                final ItemStack placed = stack.clone();
+                placed.setAmount(Math.min(remaining, stack.getMaxStackSize()));
+                inventory.setItem(slot, placed);
+                remaining -= placed.getAmount();
+            }
+        }
+        return remaining <= 0;
     }
 
     private Inventory quarryChestInventory(final Block block) {
@@ -3986,16 +4082,19 @@ public final class MachineService {
         if (inventory instanceof FurnaceInventory furnaceInventory) {
             return this.canStoreInFurnaceInventory(furnaceInventory, stack);
         }
+        int remaining = stack.getAmount();
         for (int slot = 0; slot < inventory.getSize(); slot++) {
             final ItemStack current = inventory.getItem(slot);
             if (current == null || current.getType() == Material.AIR) {
-                return true;
+                remaining -= stack.getMaxStackSize();
+            } else if (current.isSimilar(stack)) {
+                remaining -= (current.getMaxStackSize() - current.getAmount());
             }
-            if (current.isSimilar(stack) && current.getAmount() + stack.getAmount() <= current.getMaxStackSize()) {
+            if (remaining <= 0) {
                 return true;
             }
         }
-        return false;
+        return remaining <= 0;
     }
 
     private boolean storeInInventory(final Inventory inventory, final ItemStack stack) {
@@ -4005,19 +4104,29 @@ public final class MachineService {
         if (inventory instanceof FurnaceInventory furnaceInventory) {
             return this.storeInFurnaceInventory(furnaceInventory, stack);
         }
-        for (int slot = 0; slot < inventory.getSize(); slot++) {
+        int remaining = stack.getAmount();
+        for (int slot = 0; slot < inventory.getSize() && remaining > 0; slot++) {
             final ItemStack current = inventory.getItem(slot);
-            if (current == null || current.getType() == Material.AIR) {
-                inventory.setItem(slot, stack.clone());
-                return true;
-            }
-            if (current.isSimilar(stack) && current.getAmount() + stack.getAmount() <= current.getMaxStackSize()) {
-                current.setAmount(current.getAmount() + stack.getAmount());
-                inventory.setItem(slot, current);
-                return true;
+            if (current != null && current.getType() != Material.AIR
+                    && current.isSimilar(stack) && current.getAmount() < current.getMaxStackSize()) {
+                final int room = current.getMaxStackSize() - current.getAmount();
+                final int move = Math.min(room, remaining);
+                final ItemStack merged = current.clone();
+                merged.setAmount(current.getAmount() + move);
+                inventory.setItem(slot, merged);
+                remaining -= move;
             }
         }
-        return false;
+        for (int slot = 0; slot < inventory.getSize() && remaining > 0; slot++) {
+            final ItemStack current = inventory.getItem(slot);
+            if (current == null || current.getType() == Material.AIR) {
+                final ItemStack placed = stack.clone();
+                placed.setAmount(Math.min(remaining, stack.getMaxStackSize()));
+                inventory.setItem(slot, placed);
+                remaining -= placed.getAmount();
+            }
+        }
+        return remaining <= 0;
     }
 
     private boolean canStoreInFurnaceInventory(final FurnaceInventory inventory, final ItemStack stack) {
@@ -4188,7 +4297,7 @@ public final class MachineService {
         }
         final Entity entity = Bukkit.getEntity(displayId);
         if (entity != null) {
-            entity.remove();
+            this.safeRemoveEntity(entity);
         }
         this.removeMachineVisualDisplay(key);
     }
@@ -4200,7 +4309,7 @@ public final class MachineService {
         }
         final Entity entity = Bukkit.getEntity(displayId);
         if (entity != null) {
-            entity.remove();
+            this.safeRemoveEntity(entity);
         }
     }
 
@@ -4275,7 +4384,7 @@ public final class MachineService {
         }
         final Entity entity = Bukkit.getEntity(displayId);
         if (entity != null) {
-            entity.remove();
+            this.safeRemoveEntity(entity);
         }
     }
 
@@ -4309,7 +4418,7 @@ public final class MachineService {
                 return display;
             }
             if (entity != null) {
-                entity.remove();
+                this.safeRemoveEntity(entity);
             }
             this.machineDisplays.remove(key);
         }
@@ -4359,7 +4468,7 @@ public final class MachineService {
             if (display.isPersistent() || !display.isInvulnerable() || display.hasGravity()) {
                 continue;
             }
-            entity.remove();
+            this.safeRemoveEntity(entity);
         }
     }
 
@@ -4514,18 +4623,71 @@ public final class MachineService {
     }
 
     private void tickStorageHub(final PlacedMachine machine, final Location location) {
-        final int moved = this.moveInputToOutput(machine, 0, null, false, 9);
-        if (moved > 0) {
-            this.setRuntimeState(machine, MachineRuntimeState.RUNNING, "匯流中 x" + moved);
+        // 主動從上游拉取：使用 storage_hub 自身的 networkDepth，range_upgrade 可擴展拉取範圍
+        final int pulled = this.pullFromConnectedOutputs(machine, location);
+        final int throughput = 9 + this.countUpgrade(machine, "stack_upgrade") * 6 + this.countUpgrade(machine, "speed_upgrade") * 3;
+        final int depth = this.networkDepth(machine, true);
+        final int moved = this.moveInputToOutput(machine, 0, null, false, throughput);
+        final int total = moved + pulled;
+        if (total > 0) {
+            this.setRuntimeState(machine, MachineRuntimeState.RUNNING, "匯流中 x" + total + " §8深度:" + depth);
         } else if (this.hasTransferableInput(machine, null, false)) {
-            this.setRuntimeState(machine, MachineRuntimeState.OUTPUT_BLOCKED, "輸出緩衝已滿");
+            this.setRuntimeState(machine, MachineRuntimeState.OUTPUT_BLOCKED, "輸出緩衝已滿 §8深度:" + depth);
         } else {
-            this.setRuntimeState(machine, MachineRuntimeState.NO_INPUT, "等待上游物流");
+            this.setRuntimeState(machine, MachineRuntimeState.NO_INPUT, "等待上游物流 §8深度:" + depth);
         }
         final World world = location.getWorld();
         if (world != null && this.isChunkViewable(machine.locationKey())) {
             world.spawnParticle(Particle.WAX_OFF, location.getX() + 0.5, location.getY() + 0.8, location.getZ() + 0.5, 3, 0.2, 0.2, 0.2, 0.01);
         }
+    }
+
+    /**
+     * 倉儲匯流站主動從上游機器的輸出欄拉取物品到自己的輸入欄。
+     * 使用 storage_hub 自身的 networkDepth，因此 range_upgrade 可擴展拉取範圍。
+     */
+    private int pullFromConnectedOutputs(final PlacedMachine machine, final Location location) {
+        final List<PlacedMachine> upstreams = this.findConnectedMachines(
+                machine, location, machine.inputDirection(), null, true);
+        if (upstreams.isEmpty()) {
+            return 0;
+        }
+        int pulled = 0;
+        final int maxPulls = 3 + this.countUpgrade(machine, "stack_upgrade") * 2;
+        for (final PlacedMachine source : upstreams) {
+            if (pulled >= maxPulls) break;
+            // 跨 region 防護：source 可能在不同 region 被 tick
+            if (!source.tryLockInventory()) {
+                continue;
+            }
+            try {
+                for (int slot = 0; slot < OUTPUT_SLOTS.length && pulled < maxPulls; slot++) {
+                    final ItemStack outStack = source.outputAt(slot);
+                    if (outStack == null || outStack.getType() == Material.AIR) {
+                        continue;
+                    }
+                    final ItemStack oneItem = outStack.clone();
+                    oneItem.setAmount(1);
+                    final ItemStack remainder = this.insertIntoMachineInputs(machine, oneItem);
+                    if (remainder.getType() != Material.AIR && remainder.getAmount() > 0) {
+                        break;
+                    }
+                    final int newPullAmount = outStack.getAmount() - 1;
+                    if (newPullAmount <= 0) {
+                        source.setOutputAt(slot, null);
+                    } else {
+                        final ItemStack updatedPull = outStack.clone();
+                        updatedPull.setAmount(newPullAmount);
+                        source.setOutputAt(slot, updatedPull);
+                    }
+                    this.pushOpenViewState(source.locationKey(), source);
+                    pulled++;
+                }
+            } finally {
+                source.unlockInventory();
+            }
+        }
+        return pulled;
     }
 
     private void tickFilterRouter(final PlacedMachine machine, final Location location) {
@@ -4561,11 +4723,13 @@ public final class MachineService {
                 break;
             }
             this.storeOutput(machine, oneItem);
-            current.setAmount(current.getAmount() - 1);
-            if (current.getAmount() <= 0) {
+            final int newFilterAmount = current.getAmount() - 1;
+            if (newFilterAmount <= 0) {
                 machine.setInputAt(slot, null);
             } else {
-                machine.setInputAt(slot, current);
+                final ItemStack updatedFilter = current.clone();
+                updatedFilter.setAmount(newFilterAmount);
+                machine.setInputAt(slot, updatedFilter);
             }
             moved++;
         }
@@ -4716,11 +4880,13 @@ public final class MachineService {
                 if (!this.storeInInventory(inventory, oneItem)) {
                     continue;
                 }
-                outStack.setAmount(outStack.getAmount() - 1);
-                if (outStack.getAmount() <= 0) {
+                final int newCargoOutAmount = outStack.getAmount() - 1;
+                if (newCargoOutAmount <= 0) {
                     machine.setOutputAt(slot, null);
                 } else {
-                    machine.setOutputAt(slot, outStack);
+                    final ItemStack updatedCargoOut = outStack.clone();
+                    updatedCargoOut.setAmount(newCargoOutAmount);
+                    machine.setOutputAt(slot, updatedCargoOut);
                 }
                 pushed++;
             }
@@ -4773,6 +4939,7 @@ public final class MachineService {
         final int my = location.getBlockY();
         final int mz = location.getBlockZ();
         final String worldName = machine.locationKey().worldName();
+        // O(n) scan — cargo_manager 是稀有晚期機器，且下方距離過濾和 pulled>=8 早退使實際遍歷極少
         for (final PlacedMachine upstream : this.machines.values()) {
             if (pulled >= 8) {
                 break;
@@ -4790,24 +4957,34 @@ public final class MachineService {
             if (Math.abs(dy) > 4 || dx * dx + dz * dz > scanRadiusSq) {
                 continue;
             }
-            for (int slot = 0; slot < OUTPUT_SLOTS.length && pulled < 8; slot++) {
-                final ItemStack outStack = upstream.outputAt(slot);
-                if (outStack == null || outStack.getType() == Material.AIR) {
-                    continue;
+            // 跨 region 防護：upstream 可能在不同 region 被 tick，tryLock 失敗就跳過
+            if (!upstream.tryLockInventory()) {
+                continue;
+            }
+            try {
+                for (int slot = 0; slot < OUTPUT_SLOTS.length && pulled < 8; slot++) {
+                    final ItemStack outStack = upstream.outputAt(slot);
+                    if (outStack == null || outStack.getType() == Material.AIR) {
+                        continue;
+                    }
+                    final ItemStack oneItem = outStack.clone();
+                    oneItem.setAmount(1);
+                    if (!this.canStoreOutput(machine, oneItem)) {
+                        break;
+                    }
+                    this.storeOutput(machine, oneItem);
+                    final int newManagerAmount = outStack.getAmount() - 1;
+                    if (newManagerAmount <= 0) {
+                        upstream.setOutputAt(slot, null);
+                    } else {
+                        final ItemStack updatedManager = outStack.clone();
+                        updatedManager.setAmount(newManagerAmount);
+                        upstream.setOutputAt(slot, updatedManager);
+                    }
+                    pulled++;
                 }
-                final ItemStack oneItem = outStack.clone();
-                oneItem.setAmount(1);
-                if (!this.canStoreOutput(machine, oneItem)) {
-                    break;
-                }
-                this.storeOutput(machine, oneItem);
-                outStack.setAmount(outStack.getAmount() - 1);
-                if (outStack.getAmount() <= 0) {
-                    upstream.setOutputAt(slot, null);
-                } else {
-                    upstream.setOutputAt(slot, outStack);
-                }
-                pulled++;
+            } finally {
+                upstream.unlockInventory();
             }
         }
         final int total = moved + pulled;
@@ -5259,8 +5436,14 @@ public final class MachineService {
 
             // 消耗一個來源方塊
             final ItemStack source = machine.inputAt(slot);
-            source.setAmount(source.getAmount() - 1);
-            machine.setInputAt(slot, source.getAmount() <= 0 ? null : source);
+            final int newSourceAmount = source.getAmount() - 1;
+            if (newSourceAmount <= 0) {
+                machine.setInputAt(slot, null);
+            } else {
+                final ItemStack updatedSource = source.clone();
+                updatedSource.setAmount(newSourceAmount);
+                machine.setInputAt(slot, updatedSource);
+            }
 
             // 存入產出
             this.storeOutput(machine, output);
@@ -5828,66 +6011,91 @@ public final class MachineService {
                 continue;
             }
             final int consume = Math.min(needed, stack.getAmount());
-            stack.setAmount(stack.getAmount() - consume);
-            if (stack.getAmount() <= 0) {
+            final int newAmount = stack.getAmount() - consume;
+            if (newAmount <= 0) {
                 machine.setInputAt(slot, null);
             } else {
-                machine.setInputAt(slot, stack);
+                final ItemStack updated = stack.clone();
+                updated.setAmount(newAmount);
+                machine.setInputAt(slot, updated);
             }
             remaining.put(id, needed - consume);
         }
     }
 
     private boolean canStoreOutput(final PlacedMachine machine, final ItemStack output) {
+        return this.availableOutputSpace(machine, output) >= output.getAmount();
+    }
+
+    private int availableOutputSpace(final PlacedMachine machine, final ItemStack output) {
+        int space = 0;
         for (int slot = 0; slot < OUTPUT_SLOTS.length; slot++) {
             final ItemStack current = machine.outputAt(slot);
             if (current == null || current.getType() == Material.AIR) {
-                return true;
-            }
-            if (current.isSimilar(output) && current.getAmount() + output.getAmount() <= current.getMaxStackSize()) {
-                return true;
+                space += output.getMaxStackSize();
+            } else if (current.isSimilar(output)) {
+                space += (current.getMaxStackSize() - current.getAmount());
             }
         }
-        return false;
+        return space;
     }
 
     private void storeOutput(final PlacedMachine machine, final ItemStack output) {
-        for (int slot = 0; slot < OUTPUT_SLOTS.length; slot++) {
+        int remaining = output.getAmount();
+        for (int slot = 0; slot < OUTPUT_SLOTS.length && remaining > 0; slot++) {
+            final ItemStack current = machine.outputAt(slot);
+            if (current != null && current.getType() != Material.AIR
+                    && current.isSimilar(output) && current.getAmount() < current.getMaxStackSize()) {
+                final int room = current.getMaxStackSize() - current.getAmount();
+                final int move = Math.min(room, remaining);
+                final ItemStack merged = current.clone();
+                merged.setAmount(current.getAmount() + move);
+                machine.setOutputAt(slot, merged);
+                remaining -= move;
+            }
+        }
+        for (int slot = 0; slot < OUTPUT_SLOTS.length && remaining > 0; slot++) {
             final ItemStack current = machine.outputAt(slot);
             if (current == null || current.getType() == Material.AIR) {
-                machine.setOutputAt(slot, output);
-                return;
-            }
-            if (current.isSimilar(output) && current.getAmount() + output.getAmount() <= current.getMaxStackSize()) {
-                current.setAmount(current.getAmount() + output.getAmount());
-                machine.setOutputAt(slot, current);
-                return;
+                final ItemStack placed = output.clone();
+                placed.setAmount(Math.min(remaining, output.getMaxStackSize()));
+                machine.setOutputAt(slot, placed);
+                remaining -= placed.getAmount();
             }
         }
     }
 
     private boolean canStoreAllOutputs(final PlacedMachine machine, final List<ItemStack> outputs) {
-        final ItemStack[] simulated = machine.outputInventory();
+        final ItemStack[] snapshot = machine.outputInventory();
+        final ItemStack[] simulated = new ItemStack[snapshot.length];
+        for (int i = 0; i < snapshot.length; i++) {
+            simulated[i] = snapshot[i] != null ? snapshot[i].clone() : null;
+        }
         for (final ItemStack output : outputs) {
             if (output == null || output.getType() == Material.AIR) {
                 continue;
             }
-            boolean stored = false;
-            for (int slot = 0; slot < simulated.length; slot++) {
+            int remaining = output.getAmount();
+            for (int slot = 0; slot < simulated.length && remaining > 0; slot++) {
                 final ItemStack current = simulated[slot];
-                if (current == null || current.getType() == Material.AIR) {
-                    simulated[slot] = output.clone();
-                    stored = true;
-                    break;
-                }
-                if (current.isSimilar(output) && current.getAmount() + output.getAmount() <= current.getMaxStackSize()) {
-                    current.setAmount(current.getAmount() + output.getAmount());
-                    simulated[slot] = current;
-                    stored = true;
-                    break;
+                if (current != null && current.getType() != Material.AIR
+                        && current.isSimilar(output) && current.getAmount() < current.getMaxStackSize()) {
+                    final int room = current.getMaxStackSize() - current.getAmount();
+                    final int move = Math.min(room, remaining);
+                    current.setAmount(current.getAmount() + move);
+                    remaining -= move;
                 }
             }
-            if (!stored) {
+            for (int slot = 0; slot < simulated.length && remaining > 0; slot++) {
+                final ItemStack current = simulated[slot];
+                if (current == null || current.getType() == Material.AIR) {
+                    final ItemStack placed = output.clone();
+                    placed.setAmount(Math.min(remaining, output.getMaxStackSize()));
+                    simulated[slot] = placed;
+                    remaining -= placed.getAmount();
+                }
+            }
+            if (remaining > 0) {
                 return false;
             }
         }
@@ -5927,11 +6135,13 @@ public final class MachineService {
                 return moved;
             }
             this.storeOutput(machine, movedStack);
-            current.setAmount(current.getAmount() - 1);
-            if (current.getAmount() <= 0) {
+            final int newAmount = current.getAmount() - 1;
+            if (newAmount <= 0) {
                 machine.setInputAt(slot, null);
             } else {
-                machine.setInputAt(slot, current);
+                final ItemStack updated = current.clone();
+                updated.setAmount(newAmount);
+                machine.setInputAt(slot, updated);
             }
             moved++;
         }
@@ -5976,12 +6186,14 @@ public final class MachineService {
                 continue;
             }
             final int consume = Math.min(remaining, stack.getAmount());
-            stack.setAmount(stack.getAmount() - consume);
+            final int newAmount = stack.getAmount() - consume;
             remaining -= consume;
-            if (stack.getAmount() <= 0) {
+            if (newAmount <= 0) {
                 machine.setInputAt(slot, null);
             } else {
-                machine.setInputAt(slot, stack);
+                final ItemStack updated = stack.clone();
+                updated.setAmount(newAmount);
+                machine.setInputAt(slot, updated);
             }
             if (remaining <= 0) {
                 return true;
@@ -6340,7 +6552,7 @@ public final class MachineService {
             case "industrial_bus", "cargo_manager" -> 16;
             case "cargo_motor" -> 8;
             case "splitter_node" -> 4;
-            case "storage_hub", "filter_router" -> 3;
+            case "storage_hub", "filter_router" -> 3 + this.countUpgrade(machine, "stack_upgrade") * 2;
             default -> 1 + this.countUpgrade(machine, "stack_upgrade");
         };
         for (int pass = 0; pass < maxTransfers; pass++) {
@@ -6359,29 +6571,39 @@ public final class MachineService {
             if (neighbor == machine) {
                 continue;
             }
-            for (int slot = 0; slot < OUTPUT_SLOTS.length; slot++) {
-                final ItemStack stack = machine.outputAt(slot);
-                if (stack == null || stack.getType() == Material.AIR) {
-                    continue;
+            // 跨 region 防護：tryLock 避免死鎖，取不到鎖就跳過（下 tick 重試）
+            if (!neighbor.tryLockInventory()) {
+                continue;
+            }
+            try {
+                for (int slot = 0; slot < OUTPUT_SLOTS.length; slot++) {
+                    final ItemStack stack = machine.outputAt(slot);
+                    if (stack == null || stack.getType() == Material.AIR) {
+                        continue;
+                    }
+                    if (!this.machineAcceptsInput(neighbor, stack)) {
+                        continue;
+                    }
+                    final ItemStack oneItem = stack.clone();
+                    oneItem.setAmount(1);
+                    final ItemStack remainder = this.insertIntoMachineInputs(neighbor, oneItem);
+                    if (remainder.getType() != Material.AIR && remainder.getAmount() > 0) {
+                        continue;
+                    }
+                    final int newTransferAmount = stack.getAmount() - 1;
+                    if (newTransferAmount <= 0) {
+                        machine.setOutputAt(slot, null);
+                    } else {
+                        final ItemStack updatedTransfer = stack.clone();
+                        updatedTransfer.setAmount(newTransferAmount);
+                        machine.setOutputAt(slot, updatedTransfer);
+                    }
+                    this.progressService.incrementStat(machine.owner(), "items_transferred", 1L);
+                    this.pushOpenViewState(neighbor.locationKey(), neighbor);
+                    return true;
                 }
-                if (!this.machineAcceptsInput(neighbor, stack)) {
-                    continue;
-                }
-                final ItemStack oneItem = stack.clone();
-                oneItem.setAmount(1);
-                final ItemStack remainder = this.insertIntoMachineInputs(neighbor, oneItem);
-                if (remainder.getType() != Material.AIR && remainder.getAmount() > 0) {
-                    continue;
-                }
-                stack.setAmount(stack.getAmount() - 1);
-                if (stack.getAmount() <= 0) {
-                    machine.setOutputAt(slot, null);
-                } else {
-                    machine.setOutputAt(slot, stack);
-                }
-                this.progressService.incrementStat(machine.owner(), "items_transferred", 1L);
-                this.pushOpenViewState(neighbor.locationKey(), neighbor);
-                return true;
+            } finally {
+                neighbor.unlockInventory();
             }
         }
         return false;
@@ -6672,7 +6894,7 @@ public final class MachineService {
             return false;
         }
         return !(this.plugin.getConfig().getBoolean("machine-safety.mob-collector-ignore-babies", true)
-                && living instanceof org.bukkit.entity.Ageable ageable && !ageable.isAdult());
+                && living instanceof org.bukkit.entity.Animals animals && !animals.isAdult());
     }
 
     private boolean isSafeVacuumItem(final Item item) {
@@ -7334,8 +7556,9 @@ public final class MachineService {
             }
             final int room = current.getMaxStackSize() - current.getAmount();
             final int move = Math.min(room, remaining.getAmount());
-            current.setAmount(current.getAmount() + move);
-            machine.setInputAt(slot, current);
+            final ItemStack merged = current.clone();
+            merged.setAmount(current.getAmount() + move);
+            machine.setInputAt(slot, merged);
             remaining.setAmount(remaining.getAmount() - move);
             if (remaining.getAmount() <= 0) {
                 return new ItemStack(Material.AIR);
@@ -7344,6 +7567,12 @@ public final class MachineService {
         return remaining;
     }
 
+    /**
+     * BFS 原木搜集：每個節點最多 18 個 getBlockAt 調用（dx×dy×dz = 3×2×3 - 1）。
+     * 總節點數由 maxLogs 限制（預設 64），且 tree_feller 已每 12 tick 只執行一次。
+     * Folia 安全性：runRegion 已確保在機器所屬 chunk 區域執行，
+     * 樹木通常不跨 region 邊界（半徑 < 16）。
+     */
     private List<Block> collectConnectedLogs(final Block origin, final int maxLogs) {
         final List<Block> result = new ArrayList<>();
         final List<Block> frontier = new ArrayList<>();
@@ -8243,15 +8472,8 @@ public final class MachineService {
             if (session == null || session.mode() != ViewMode.MAIN || !key.equals(session.locationKey())) {
                 continue;
             }
-            final Player online = Bukkit.getPlayer(uuid);
-            if (online == null) {
-                continue;
-            }
-            final Inventory top = online.getOpenInventory().getTopInventory();
-            final String title = net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer.plainText().serialize(online.getOpenInventory().title());
-            if (!this.isMachineView(title)) {
-                continue;
-            }
+            // 使用 session 持有的 Inventory 物件，避免跨 region 存取 Player entity（Folia 安全）
+            final Inventory top = session.inventory();
             final ItemStack[] input = new ItemStack[INPUT_SLOTS.length];
             final ItemStack[] output = new ItemStack[OUTPUT_SLOTS.length];
             final ItemStack[] upgrades = new ItemStack[UPGRADE_SLOTS.length];
@@ -8280,15 +8502,8 @@ public final class MachineService {
             if (session == null || session.mode() != ViewMode.MAIN || !key.equals(session.locationKey())) {
                 continue;
             }
-            final Player online = Bukkit.getPlayer(uuid);
-            if (online == null) {
-                continue;
-            }
-            final String title = net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer.plainText().serialize(online.getOpenInventory().title());
-            if (!this.isMachineView(title)) {
-                continue;
-            }
-            final Inventory top = online.getOpenInventory().getTopInventory();
+            // 使用 session 持有的 Inventory 物件，避免跨 region 存取 Player entity（Folia 安全）
+            final Inventory top = session.inventory();
             final MachineDefinition definition = this.registry.getMachine(machine.machineId());
             if (definition != null) {
                 this.decorateMachineMenu(top, machine, definition);
@@ -9152,6 +9367,27 @@ public final class MachineService {
         final boolean showPowerInput = this.showsPowerInputDirectionControl(definition);
         final boolean showPowerOutput = this.showsPowerOutputDirectionControl(definition);
         if (!showPowerInput && !showPowerOutput) {
+            // 沒有電力控制按鈕時，填充底部排空槽作為視覺分隔
+            final MachineLayoutSpec upgradeSpec = this.resolveMachineLayoutSpec(definition.id());
+            if (!this.machineDisablesUpgradeSlots(this.normalizeId(definition.id()))) {
+                inventory.setItem(36, this.sectionPane(upgradePane, " ", List.of()));
+                inventory.setItem(37, this.sectionPane(upgradePane, " ", List.of()));
+                inventory.setItem(38, this.sectionPane(upgradePane, upgradeSpec.upgradeZone(), List.of("右側 3 格可放升級模組")));
+            }
+            inventory.setItem(42, this.sectionPane(upgradePane, " ", List.of()));
+            inventory.setItem(43, this.sectionPane(upgradePane, " ", List.of()));
+            inventory.setItem(44, this.sectionPane(upgradePane, " ", List.of()));
+            // 紅石集成電路模式按鈕（無電力控制時仍可能有）
+            if (this.hasRedstoneControl(machine)) {
+                final List<String> rsLore = new ArrayList<>();
+                rsLore.add("§f目前：" + this.redstoneModeName(machine.redstoneMode()));
+                rsLore.add("§7忽略：不受紅石訊號控制");
+                rsLore.add("§7正常：有紅石訊號才運行");
+                rsLore.add("§7反轉：無紅石訊號才運行");
+                rsLore.add("§7高功率：訊號強度 15 才運行");
+                rsLore.add("§7左鍵切換模式");
+                inventory.setItem(17, this.itemFactory.tagGuiAction(this.guiButton("machine-redstone-mode", Material.COMPARATOR, "紅石控制模式", rsLore), "redstone-mode"));
+            }
             return;
         }
         if (showPowerInput) {

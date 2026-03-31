@@ -706,6 +706,15 @@ public final class TechListener implements Listener {
         }
     }
 
+    /** 禁止科技物品被當作熔爐燃料消耗。 */
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    public void onFurnaceBurn(final FurnaceBurnEvent event) {
+        if (this.plugin.getItemFactory().getTechItemId(event.getFuel()) != null
+                || this.plugin.getItemFactory().getMachineId(event.getFuel()) != null) {
+            event.setCancelled(true);
+        }
+    }
+
     @EventHandler
     public void onInventoryClose(final InventoryCloseEvent event) {
         if (event.getPlayer() instanceof Player player) {

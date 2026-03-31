@@ -530,11 +530,12 @@ public final class ItemFactoryUtil {
         if (definition.headTexture() != null && !definition.headTexture().isBlank()) {
             return Material.PLAYER_HEAD;
         }
+        final Material material = this.safeItemMaterial(definition.icon());
         if ((definition.nexoId() != null && !definition.nexoId().isBlank())
                 || (definition.itemModel() != null && !definition.itemModel().isBlank() && !definition.itemModel().trim().equals("-1"))) {
-            return this.safeItemMaterial(definition.icon());
+            // 有 item-model 時外觀由模型決定，底層材質若是方塊要重映射防止玩家放置
+            return material.isBlock() ? this.remapTechBlockDisplayMaterial(material) : material;
         }
-        final Material material = this.safeItemMaterial(definition.icon());
         if (!material.isBlock()) {
             return material;
         }
@@ -552,10 +553,18 @@ public final class ItemFactoryUtil {
             case CHISELED_BOOKSHELF -> Material.WRITABLE_BOOK;
             case CHEST -> Material.CHEST_MINECART;
             case COBWEB, WHITE_WOOL, LOOM -> Material.STRING;
+            case COAL_BLOCK -> Material.COAL;
             case DRAGON_EGG -> Material.DRAGON_BREATH;
             case END_CRYSTAL -> Material.SPYGLASS;
             case END_STONE_BRICKS, TERRACOTTA -> Material.BRICK;
+            case IRON_BLOCK -> Material.IRON_INGOT;
             case IRON_BARS -> Material.IRON_NUGGET;
+            case GOLD_BLOCK -> Material.GOLD_INGOT;
+            case DIAMOND_BLOCK -> Material.DIAMOND;
+            case EMERALD_BLOCK -> Material.EMERALD;
+            case LAPIS_BLOCK -> Material.LAPIS_LAZULI;
+            case REDSTONE_BLOCK -> Material.REDSTONE;
+            case COPPER_BLOCK -> Material.COPPER_INGOT;
             case NETHERITE_BLOCK -> Material.NETHERITE_INGOT;
             case OAK_FENCE, OAK_SLAB -> Material.STICK;
             case OBSERVER -> Material.COMPARATOR;
@@ -590,7 +599,8 @@ public final class ItemFactoryUtil {
                 if (name.contains("CHEST")) {
                     yield Material.CHEST_MINECART;
                 }
-                yield material;
+                // 未識別的方塊一律改為 PAPER，防止玩家放置取得原版物品
+                yield Material.PAPER;
             }
         };
     }

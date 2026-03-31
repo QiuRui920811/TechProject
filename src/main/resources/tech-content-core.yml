@@ -666,6 +666,7 @@ items:
     display-name: "壓實鐵胚"
     category: INTERMEDIATE
     icon: IRON_BLOCK
+    item-model: "nexo:compressed_iron_bundle"
     description: "把鐵板再壓一次得到的厚重壓坯。"
     unlock: "compressor"
     use-cases:
@@ -726,6 +727,7 @@ items:
     display-name: "精密框架"
     category: INTERMEDIATE
     icon: HEAVY_WEIGHTED_PRESSURE_PLATE
+    item-model: "nexo:precision_frame"
     description: "壓實鐵胚與高密碳材做出的機械骨架。"
     unlock: "assembler"
     use-cases:
@@ -747,6 +749,7 @@ items:
     display-name: "高密碳塊"
     category: INTERMEDIATE
     icon: COAL_BLOCK
+    item-model: "nexo:dense_carbon_block"
     description: "把碳纖網再次壓實後得到的重質碳材。"
     unlock: "compressor"
     use-cases:
@@ -780,7 +783,7 @@ items:
     display-name: "強化玻璃"
     category: INTERMEDIATE
     icon: GLASS_BOTTLE
-    # item-model: techproject:item/reinforced_glass
+    item-model: "nexo:reinforced_glass"
     # nexo-id: reinforced_glass
     description: "耐壓透明結構。"
     unlock: "furnace"
@@ -793,7 +796,7 @@ items:
     category: ADVANCED
     tier: TIER2
     icon: NETHERITE_SCRAP
-    # item-model: techproject:item/titanium_alloy
+    item-model: "nexo:titanium_alloy"
     # nexo-id: titanium_alloy
     description: "高強度輕量合金。"
     unlock: "smeltery"
@@ -875,7 +878,7 @@ items:
     display-name: "合金框架"
     category: INTERMEDIATE
     icon: LEAD
-    # item-model: techproject:item/alloy_frame
+    item-model: "nexo:alloy_frame"
     # nexo-id: alloy_frame
     description: "合金機架。"
     unlock: "smeltery"
@@ -947,7 +950,7 @@ items:
     display-name: "伺服馬達"
     category: INTERMEDIATE
     icon: REDSTONE
-    # item-model: techproject:item/servo_motor
+    item-model: "nexo:servo_motor"
     # nexo-id: servo_motor
     description: "自動化執行元件。"
     unlock: "assembler"
@@ -959,7 +962,7 @@ items:
     display-name: "熱線圈"
     category: INTERMEDIATE
     icon: BLAZE_POWDER
-    # item-model: techproject:item/heat_coil
+    item-model: "nexo:heat_coil"
     # nexo-id: heat_coil
     description: "高溫線圈。"
     unlock: "furnace"
@@ -1205,7 +1208,7 @@ items:
     display-name: "複合面板"
     category: INTERMEDIATE
     icon: BRICK
-    # item-model: techproject:item/composite_panel
+    item-model: "nexo:composite_panel"
     # nexo-id: composite_panel
     description: "複合外裝板。"
     unlock: "compressor"
@@ -1240,7 +1243,7 @@ items:
     display-name: "淨化碎晶"
     category: INTERMEDIATE
     icon: PRISMARINE_CRYSTALS
-    # item-model: techproject:item/purified_shard
+    item-model: "nexo:purified_shard"
     # nexo-id: purified_shard
     description: "淨化礦物結晶。"
     unlock: "purifier"
@@ -1252,6 +1255,7 @@ items:
     display-name: "淨化膜片"
     category: INTERMEDIATE
     icon: PAPER
+    item-model: "nexo:purifier_membrane"
     description: "高壓淨化後得到的精密過濾膜。"
     unlock: "purifier"
     use-cases:
@@ -1308,7 +1312,7 @@ items:
     display-name: "機械外殼"
     category: INTERMEDIATE
     icon: SHIELD
-    # item-model: techproject:item/machine_casing
+    item-model: "nexo:machine_casing"
     # nexo-id: machine_casing
     description: "標準機器外殼。"
     unlock: "assembler"
@@ -1366,7 +1370,7 @@ items:
     display-name: "隔熱外殼"
     category: INTERMEDIATE
     icon: BRICK
-    # item-model: techproject:item/thermal_shell
+    item-model: "nexo:thermal_shell"
     # nexo-id: thermal_shell
     description: "耐熱保護殼。"
     unlock: "smeltery"
@@ -1412,7 +1416,7 @@ items:
     display-name: "生長燈"
     category: INTERMEDIATE
     icon: GLOW_INK_SAC
-    # item-model: techproject:item/growth_lamp
+    item-model: "nexo:growth_lamp"
     # nexo-id: growth_lamp
     description: "生長照明模組。"
     unlock: "greenhouse"
@@ -1447,7 +1451,7 @@ items:
     display-name: "銅線"
     category: INTERMEDIATE
     icon: LEAD
-    # item-model: techproject:item/copper_wire
+    item-model: "nexo:copper_wire"
     # nexo-id: copper_wire
     description: "電力與訊號傳輸線材。"
     unlock: "wire_mill"
@@ -1459,7 +1463,7 @@ items:
     display-name: "鋼線"
     category: INTERMEDIATE
     icon: LEAD
-    # item-model: techproject:item/steel_wire
+    item-model: "nexo:steel_wire"
     # nexo-id: steel_wire
     description: "耐熱高張力線材。"
     unlock: "wire_mill"
@@ -1471,6 +1475,7 @@ items:
     display-name: "工業線束"
     category: INTERMEDIATE
     icon: STRING
+    item-model: "nexo:wiring_bundle"
     description: "把銅線與鋼線綁成可上機的工業線束。"
     unlock: "wire_mill"
     use-cases:
@@ -1480,7 +1485,7 @@ items:
     display-name: "聚合樹脂"
     category: INTERMEDIATE
     icon: HONEY_BOTTLE
-    # item-model: techproject:item/polymer_resin
+    item-model: "nexo:polymer_resin"
     # nexo-id: polymer_resin
     description: "化工聚合原液。"
     unlock: "polymer_press"
@@ -1492,7 +1497,7 @@ items:
     display-name: "處理塑膠"
     category: INTERMEDIATE
     icon: SLIME_BALL
-    # item-model: techproject:item/treated_plastic
+    item-model: "nexo:treated_plastic"
     # nexo-id: treated_plastic
     description: "強化塑膠結構件。"
     unlock: "polymer_press"
@@ -1504,7 +1509,7 @@ items:
     display-name: "合成纖維"
     category: INTERMEDIATE
     icon: WHITE_WOOL
-    # item-model: techproject:item/synthetic_fiber
+    item-model: "nexo:synthetic_fiber"
     # nexo-id: synthetic_fiber
     description: "合成纖維材料。"
     unlock: "chemical_reactor"

@@ -8,6 +8,8 @@ import java.util.Collections;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.locks.ReentrantLock;
 
 public final class PlacedMachine {
     private final LocationKey locationKey;
@@ -21,10 +23,12 @@ public final class PlacedMachine {
     private String energyInputDirection = "ALL";
     private String energyOutputDirection = "ALL";
     private boolean enabled = true;
-    private long storedEnergy;
-    private long totalGenerated;
-    private long ticksActive;
-    private double chickenProgress;
+    private final AtomicLong storedEnergy = new AtomicLong();
+    private final AtomicLong totalGenerated = new AtomicLong();
+    private volatile long ticksActive;
+    /** 跨 region 存取防護鎖。用 tryLock() 避免死鎖。 */
+    private final ReentrantLock inventoryLock = new ReentrantLock();
+    private volatile double chickenProgress;
     private int quarryFuel;
     private int quarryCursorX;
     private int quarryCursorZ;
@@ -35,10 +39,10 @@ public final class PlacedMachine {
     private String androidRouteMode = "SERPENTINE";
     private String filterMode = "WHITELIST";
     private final Set<UUID> trustedPlayers = ConcurrentHashMap.newKeySet();
-    private MachineRuntimeState runtimeState = MachineRuntimeState.IDLE;
-    private String runtimeDetail = "待命";
-    private int manualOperationTicks;
-    private String manualOperationRecipeId;
+    private volatile MachineRuntimeState runtimeState = MachineRuntimeState.IDLE;
+    private volatile String runtimeDetail = "待命";
+    private volatile int manualOperationTicks;
+    private volatile String manualOperationRecipeId;
     private String lockedRecipeId;
     private String redstoneMode = "NONE";
 
@@ -84,11 +88,11 @@ public final class PlacedMachine {
     }
 
     public long storedEnergy() {
-        return this.storedEnergy;
+        return this.storedEnergy.get();
     }
 
     public long totalGenerated() {
-        return this.totalGenerated;
+        return this.totalGenerated.get();
     }
 
     public long ticksActive() {
@@ -288,22 +292,29 @@ public final class PlacedMachine {
     }
 
     public void addEnergy(final long amount) {
-        this.storedEnergy += amount;
+        this.storedEnergy.addAndGet(amount);
         if (amount > 0L) {
-            this.totalGenerated += amount;
+            this.totalGenerated.addAndGet(amount);
         }
     }
 
     public void setStoredEnergy(final long amount) {
-        this.storedEnergy = Math.max(0L, amount);
+        this.storedEnergy.set(Math.max(0L, amount));
     }
 
+    /**
+     * 原子扣除能量。跨 region 安全（CAS 迴圈）。
+     */
     public boolean consumeEnergy(final long amount) {
-        if (this.storedEnergy < amount) {
-            return false;
+        while (true) {
+            final long current = this.storedEnergy.get();
+            if (current < amount) {
+                return false;
+            }
+            if (this.storedEnergy.compareAndSet(current, current - amount)) {
+                return true;
+            }
         }
-        this.storedEnergy -= amount;
-        return true;
     }
 
     public void tick() {
@@ -404,9 +415,18 @@ public final class PlacedMachine {
     }
 
     public void restoreState(final long storedEnergy, final long totalGenerated, final long ticksActive) {
-        this.storedEnergy = Math.max(0L, storedEnergy);
-        this.totalGenerated = Math.max(0L, totalGenerated);
+        this.storedEnergy.set(Math.max(0L, storedEnergy));
+        this.totalGenerated.set(Math.max(0L, totalGenerated));
         this.ticksActive = Math.max(0L, ticksActive);
+    }
+
+    /** 嘗試取得 inventory 鎖。回傳 false 表示其他 region 正在操作，應跳過本次傳輸。 */
+    public boolean tryLockInventory() {
+        return this.inventoryLock.tryLock();
+    }
+
+    public void unlockInventory() {
+        this.inventoryLock.unlock();
     }
 
     public void restoreChickenProgress(final double progress) {
