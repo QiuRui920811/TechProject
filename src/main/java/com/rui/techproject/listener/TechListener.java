@@ -26,6 +26,7 @@ import org.bukkit.event.Event.Result;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockDispenseEvent;
+import org.bukkit.event.block.BlockFromToEvent;
 import org.bukkit.event.block.BlockPhysicsEvent;
 import org.bukkit.event.block.BlockPistonExtendEvent;
 import org.bukkit.event.block.BlockPistonRetractEvent;
@@ -521,6 +522,13 @@ public final class TechListener implements Listener {
     public void onBlockPhysics(final BlockPhysicsEvent event) {
         if (this.plugin.getMachineService().isManagedMachine(event.getBlock())
                 || this.plugin.getPlacedTechBlockService().isTrackedBlock(event.getBlock())) {
+            event.setCancelled(true);
+        }
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    public void onBlockFromTo(final BlockFromToEvent event) {
+        if (this.isProtectedTechBlock(event.getToBlock())) {
             event.setCancelled(true);
         }
     }
@@ -2083,11 +2091,45 @@ public final class TechListener implements Listener {
                 : this.plugin.getItemFactory().buildMachineItem(match.machine());
         event.setCancelled(true);
         if (event.isShiftClick()) {
-            if (!this.canStoreCraftResult(player, result)) {
-                player.sendMessage(this.plugin.getItemFactory().warning("背包滿了，無法從進階工作台取出成品。"));
-                return true;
+            // Shift-click：持續合成直到材料不足或背包滿
+            int crafted = 0;
+            while (true) {
+                final ItemStack batchResult = match.isItemBlueprint()
+                        ? this.plugin.getItemFactory().buildTechItem(match.item())
+                        : this.plugin.getItemFactory().buildMachineItem(match.machine());
+                if (!this.canStoreCraftResult(player, batchResult)) {
+                    if (crafted == 0) {
+                        player.sendMessage(this.plugin.getItemFactory().warning("背包滿了，無法從進階工作台取出成品。"));
+                    }
+                    break;
+                }
+                player.getInventory().addItem(batchResult);
+                crafted++;
+                // 消耗材料
+                final ItemStack[] mat = craftingInventory.getMatrix();
+                for (int i = 0; i < mat.length; i++) {
+                    final ItemStack ing = mat[i];
+                    if (ing == null || ing.getType() == Material.AIR) continue;
+                    if (ing.getAmount() <= 1) { mat[i] = null; }
+                    else { ing.setAmount(ing.getAmount() - 1); mat[i] = ing; }
+                }
+                craftingInventory.setMatrix(mat);
+                // 檢查剩餘材料是否還能匹配配方
+                final var next = this.plugin.getBlueprintService().matchCraftingMatrix(craftingInventory.getMatrix());
+                if (next == null || !this.plugin.getBlueprintService().isAdvancedWorkbench(craftingInventory.getLocation())) {
+                    break;
+                }
             }
-            player.getInventory().addItem(result);
+            // 更新結果欄
+            final var afterMatch = this.plugin.getBlueprintService().matchCraftingMatrix(craftingInventory.getMatrix());
+            if (afterMatch != null && this.plugin.getBlueprintService().isAdvancedWorkbench(craftingInventory.getLocation())) {
+                craftingInventory.setResult(afterMatch.isItemBlueprint()
+                        ? this.plugin.getItemFactory().buildTechItem(afterMatch.item())
+                        : this.plugin.getItemFactory().buildMachineItem(afterMatch.machine()));
+            } else {
+                craftingInventory.setResult(null);
+            }
+            return true;
         } else {
             final ItemStack cursor = player.getItemOnCursor();
             if (cursor != null && cursor.getType() != Material.AIR) {

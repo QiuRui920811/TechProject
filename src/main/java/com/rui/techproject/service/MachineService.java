@@ -7427,6 +7427,9 @@ public final class MachineService {
             case WITHER_SKELETON -> {
                 drops.add(this.buildStackForId("coal", 1));
                 drops.add(this.buildStackForId("bone", 1));
+                if (ThreadLocalRandom.current().nextDouble() < 0.025) {
+                    drops.add(new ItemStack(Material.WITHER_SKELETON_SKULL));
+                }
             }
             case ZOMBIFIED_PIGLIN -> {
                 drops.add(this.buildStackForId("rotten_flesh", 1));
