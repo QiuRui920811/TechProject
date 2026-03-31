@@ -3854,7 +3854,7 @@ public final class MachineService {
 
     private boolean hasOpenMainView(final LocationKey key) {
         for (final MachineViewSession session : this.openViews.values()) {
-            if (session != null && session.mode() == ViewMode.MAIN && key.equals(session.locationKey())) {
+            if (session != null && key.equals(session.locationKey())) {
                 return true;
             }
         }
