@@ -378,6 +378,12 @@ public final class TechListener implements Listener {
             return;
         }
         if (event.getHand() == EquipmentSlot.OFF_HAND) {
+            if (event.getAction() == Action.RIGHT_CLICK_BLOCK && event.getClickedBlock() != null
+                    && this.plugin.getMachineService().resolveManagedMachineBlock(event.getClickedBlock()) != null) {
+                event.setUseInteractedBlock(Result.DENY);
+                event.setUseItemInHand(Result.DENY);
+                event.setCancelled(true);
+            }
             return;
         }
         ItemStack stack = event.getItem();
