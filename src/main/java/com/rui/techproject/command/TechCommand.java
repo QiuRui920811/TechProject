@@ -7,7 +7,12 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.World;
+import org.bukkit.block.Block;
 import org.bukkit.command.Command;
+import org.bukkit.entity.Display;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.ItemDisplay;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
@@ -297,6 +302,35 @@ public final class TechCommand implements CommandExecutor, TabCompleter {
                 sender.sendMessage(Component.text("只有玩家可以使用星球傳送。", NamedTextColor.RED));
                 return true;
             }
+            if (args.length >= 2 && args[1].equalsIgnoreCase("locateruin")) {
+                final org.bukkit.Location ruinLoc = this.plugin.getPlanetService().locateRuinCore(player);
+                if (ruinLoc == null) {
+                    player.sendMessage(Component.text("你目前不在星球世界，無法定位遺跡。", NamedTextColor.RED));
+                    return true;
+                }
+                final int x = ruinLoc.getBlockX();
+                final int y = ruinLoc.getBlockY();
+                final int z = ruinLoc.getBlockZ();
+                final double distance = player.getLocation().distance(ruinLoc);
+                player.sendMessage(Component.text("▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂", NamedTextColor.DARK_AQUA));
+                player.sendMessage(Component.text("🗺 遺跡核心位置：" + x + ", " + y + ", " + z, NamedTextColor.AQUA));
+                player.sendMessage(Component.text("📏 距離你約 " + String.format("%.0f", distance) + " 格", NamedTextColor.YELLOW));
+                player.sendMessage(Component.text("💡 遺跡核心周圍有海燈籠發光標示，非常好認。", NamedTextColor.GRAY));
+                player.sendMessage(Component.text("▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂", NamedTextColor.DARK_AQUA));
+                return true;
+            }
+            if (args.length >= 2 && args[1].equalsIgnoreCase("regenerate")) {
+                if (!sender.hasPermission("techproject.admin")) {
+                    sender.sendMessage(Component.text("沒有權限。", NamedTextColor.RED));
+                    return true;
+                }
+                if (this.plugin.getPlanetService().regenerateSpawnStructures(player)) {
+                    player.sendMessage(Component.text("✔ 已重新生成此星球的出生點結構（降落台 + 遺跡核心 + 尖塔等）。", NamedTextColor.GREEN));
+                } else {
+                    player.sendMessage(Component.text("你目前不在星球世界。", NamedTextColor.RED));
+                }
+                return true;
+            }
             if (args.length >= 2 && args[1].equalsIgnoreCase("info")) {
                 sender.sendMessage(Component.text("=== 星球資訊 ===", NamedTextColor.AQUA));
                 for (final String line : this.plugin.getPlanetService().planetInfoLines()) {
@@ -440,6 +474,52 @@ public final class TechCommand implements CommandExecutor, TabCompleter {
             return true;
         }
 
+        if (args[0].equalsIgnoreCase("cleandisplay")) {
+            if (!sender.hasPermission("techproject.admin")) {
+                sender.sendMessage(Component.text("缺少權限。", NamedTextColor.RED));
+                return true;
+            }
+            if (!(sender instanceof Player player)) {
+                sender.sendMessage(Component.text("只有玩家可以使用此指令。", NamedTextColor.RED));
+                return true;
+            }
+            final int radius = args.length >= 2 ? Math.max(1, Math.min(200, Integer.parseInt(args[1]))) : 16;
+            final World world = player.getWorld();
+            int removed = 0;
+            for (final Entity entity : world.getNearbyEntities(player.getLocation(), radius, radius, radius)) {
+                if (entity instanceof ItemDisplay || entity instanceof org.bukkit.entity.TextDisplay) {
+                    entity.remove();
+                    removed++;
+                }
+            }
+            sender.sendMessage(Component.text("已清除半徑 " + radius + " 內 " + removed + " 個展示實體。", NamedTextColor.GREEN));
+            return true;
+        }
+
+        if (args[0].equalsIgnoreCase("debugtree")) {
+            if (!sender.hasPermission("techproject.admin")) {
+                sender.sendMessage(Component.text("缺少權限。", NamedTextColor.RED));
+                return true;
+            }
+            if (!(sender instanceof Player player)) {
+                sender.sendMessage(Component.text("只有玩家可以使用此指令。", NamedTextColor.RED));
+                return true;
+            }
+            final Block target = player.getTargetBlockExact(8);
+            if (target == null) {
+                sender.sendMessage(Component.text("請對準一個方塊（距離 8 格以內）", NamedTextColor.RED));
+                return true;
+            }
+            sender.sendMessage(Component.text("=== 樹木偵測 Debug ===", NamedTextColor.GOLD));
+            sender.sendMessage(Component.text("目標方塊: " + target.getType() + " @" + target.getX() + "," + target.getY() + "," + target.getZ(), NamedTextColor.GRAY));
+            final var lines = this.plugin.getMachineService().debugTreeDetection(target);
+            for (final String line : lines) {
+                sender.sendMessage(Component.text(line.replace("§a", "").replace("§c", "").replace("§7", ""),
+                        line.startsWith("§a") ? NamedTextColor.GREEN : line.startsWith("§c") ? NamedTextColor.RED : NamedTextColor.GRAY));
+            }
+            return true;
+        }
+
         sender.sendMessage(Component.text("未知子命令。", NamedTextColor.RED));
         return true;
     }
@@ -450,7 +530,7 @@ public final class TechCommand implements CommandExecutor, TabCompleter {
                                                 @NotNull final String alias,
                                                 @NotNull final String[] args) {
         if (args.length == 1) {
-                                                    return List.of("book", "wrench", "research", "planet", "list", "stats", "xp", "achievements", "title", "search", "give", "trust", "untrust", "trustlist", "reload");
+                                                    return List.of("book", "wrench", "research", "planet", "list", "stats", "xp", "achievements", "title", "search", "give", "trust", "untrust", "trustlist", "reload", "cleandisplay", "debugtree");
         }
         if (args.length == 2 && args[0].equalsIgnoreCase("wrench")) {
             return List.of("get");
@@ -489,6 +569,8 @@ public final class TechCommand implements CommandExecutor, TabCompleter {
             options.add("info");
             options.add("debug");
             options.add("spawntest");
+            options.add("locateruin");
+            options.add("regenerate");
             return options;
         }
         if (args.length == 3 && args[0].equalsIgnoreCase("give")) {
@@ -504,6 +586,9 @@ public final class TechCommand implements CommandExecutor, TabCompleter {
                 names.add(player.getName());
             }
             return names;
+        }
+        if (args.length == 2 && args[0].equalsIgnoreCase("cleandisplay")) {
+            return List.of("8", "16", "32", "64");
         }
         return List.of();
     }

@@ -272,7 +272,7 @@ public final class TechBookService {
     }
 
     public void openMainBook(final Player player, final GuideCategory category, final TechTier tier, final SystemGroup systemGroup, final int page) {
-        if (tier != null && !this.isTierUnlocked(player.getUniqueId(), tier)) {
+        if (tier != null && !this.isTierUnlocked(player.getUniqueId(), tier, category)) {
             player.sendMessage(this.itemFactory.warning("這個階級尚未解鎖，請先完成前一階內容。"));
             this.openTierHub(player, category);
             return;
@@ -316,7 +316,7 @@ public final class TechBookService {
         ), browseAction + ":ALL:0"));
         int tierIndex = 0;
         for (final TechTier current : TechTier.values()) {
-            final boolean unlocked = this.isTierUnlocked(player.getUniqueId(), current);
+            final boolean unlocked = this.isTierUnlocked(player.getUniqueId(), current, category);
             final ItemStack icon = this.itemFactory.tagGuiAction(this.buildConfiguredIcon(
                 this.mainTierKey(current),
                 current.icon(),
@@ -359,7 +359,7 @@ public final class TechBookService {
                 "分類：" + category.displayName(),
                 systemGroup != null ? "子分類：" + systemGroup.displayName() : "子分類：全部",
                 tier == null ? this.categoryProgressLine(player.getUniqueId(), category) : this.categoryTierProgressLine(player.getUniqueId(), category, tier),
-                tier == null ? "顯示全部內容" : (this.isTierUnlocked(player.getUniqueId(), tier) ? "已可正式推進" : "前一個階級尚未完成")
+                tier == null ? "顯示全部內容" : (this.isTierUnlocked(player.getUniqueId(), tier, category) ? "已可正式推進" : "前一個階級尚未完成")
         )));
         inventory.setItem(52, this.researchOverviewIcon(player.getUniqueId(), category, tier, false));
         inventory.setItem(53, this.itemFactory.tagGuiAction(this.guiButton("main-page-next", Material.SPECTRAL_ARROW, "下一頁", List.of("頁數 {page}/{max-page}"), this.placeholders("page", String.valueOf(safePage + 1), "max-page", String.valueOf(maxPage + 1))), pageAction + ":" + Math.min(maxPage, safePage + 1)));
@@ -545,6 +545,7 @@ public final class TechBookService {
                     "共有 1 種配方圖",
                     "{hint}"
                 ), this.placeholders(
+                    "count", "1",
                     "hint", "點擊後直接顯示九宮格 / 製程格"
                 )), "recipe-view:" + machine.id() + ":0"));
             } else {
@@ -564,7 +565,7 @@ public final class TechBookService {
                 inventory.setItem(49, this.itemFactory.tagGuiAction(this.guiButton("machine-detail-view-recipe", Material.KNOWLEDGE_BOOK, "查看製作配方", List.of(
                     "共有 1 種配方圖",
                     "{hint}"
-                ), this.placeholders("hint", "點擊查看完整配方頁")), "recipe-view:" + machine.id() + ":0"));
+                ), this.placeholders("count", "1", "hint", "點擊查看完整配方頁")), "recipe-view:" + machine.id() + ":0"));
             }
             inventory.setItem(50, this.itemFactory.tagGuiAction(this.guiButton("detail-tech-tree", Material.MANGROVE_PROPAGULE, "科技樹前置線", this.buildTechTreeSummaryLines(machine.id(), machine.unlockRequirement()), this.indexedPlaceholders("line", this.buildTechTreeSummaryLines(machine.id(), machine.unlockRequirement()), 6)), "tree:machine:" + machine.id()));
             if (relatedInteraction != null) {
@@ -621,8 +622,8 @@ public final class TechBookService {
                 inventory.setItem(selectorSlots[index], current ? selectorIcon : this.itemFactory.tagGuiAction(selectorIcon, "recipe-view:" + targetId + ":" + index));
             }
         }
-        inventory.setItem(45, this.itemFactory.tagGuiAction(this.guiButton("recipe-view-prev", Material.LIME_DYE, "◀ 上一種配方", List.of("目前第 {page} / {max-page} 種", "{hint}"), this.placeholders("page", String.valueOf(safePage + 1), "max-page", String.valueOf(maxPage + 1), "hint", safePage <= 0 ? "已經是第一種" : "點擊查看上一種")), "recipe-view:" + targetId + ":" + Math.max(0, safePage - 1)));
-        inventory.setItem(49, this.itemFactory.tagGuiAction(this.guiButton("recipe-view-back-detail", Material.ARROW, "返回詳情", List.of("{name}"), this.placeholders("name", view.resultName())), (this.registry.getMachine(targetId) != null ? "machine:" : "item:") + targetId));
+        inventory.setItem(35, this.itemFactory.tagGuiAction(this.guiButton("recipe-view-prev", Material.LIME_DYE, "◀ 上一種配方", List.of("目前第 {page} / {max-page} 種", "{hint}"), this.placeholders("page", String.valueOf(safePage + 1), "max-page", String.valueOf(maxPage + 1), "hint", safePage <= 0 ? "已經是第一種" : "點擊查看上一種")), "recipe-view:" + targetId + ":" + Math.max(0, safePage - 1)));
+        inventory.setItem(44, this.itemFactory.tagGuiAction(this.guiButton("recipe-view-back-detail", Material.ARROW, "返回詳情", List.of("{name}"), this.placeholders("name", view.resultName())), (this.registry.getMachine(targetId) != null ? "machine:" : "item:") + targetId));
         inventory.setItem(53, this.itemFactory.tagGuiAction(this.guiButton("recipe-view-next", Material.MAGENTA_DYE, "下一種配方 ▶", List.of("目前第 {page} / {max-page} 種", "{hint}"), this.placeholders("page", String.valueOf(safePage + 1), "max-page", String.valueOf(maxPage + 1), "hint", safePage >= maxPage ? "已經是最後一種" : "點擊查看下一種")), "recipe-view:" + targetId + ":" + Math.min(maxPage, safePage + 1)));
         this.openBookInventory(player, inventory);
     }
@@ -644,7 +645,7 @@ public final class TechBookService {
         for (int index = 0; index < recipes.size(); index++) {
             final MachineRecipe recipe = recipes.get(index);
             final String outputName = this.itemFactory.displayNameForId(recipe.outputId());
-            final String inputSummary = this.itemFactory.joinDisplayNames(recipe.inputIds(), " + ");
+            final String inputSummary = this.joinInputDisplayNames(recipe);
             final ItemStack icon = this.clickableReference(recipe.outputId(), false);
             final ItemMeta meta = icon.getItemMeta();
             if (meta != null) {
@@ -915,7 +916,7 @@ public final class TechBookService {
                 }
                 final GuideCategory category = GuideCategory.valueOf(detail[0]);
                 final TechTier selectedTier = TechTier.valueOf(detail[1]);
-                if (!this.isTierUnlocked(player.getUniqueId(), selectedTier)) {
+                if (!this.isTierUnlocked(player.getUniqueId(), selectedTier, category)) {
                     player.sendMessage(this.itemFactory.warning("這個階級尚未解鎖，請先完成前一階內容。"));
                     this.openTierHub(player, category);
                     return;
@@ -1135,7 +1136,7 @@ public final class TechBookService {
     }
 
     private ItemStack renderTierCard(final UUID uuid, final GuideCategory category, final TechTier tier) {
-        final boolean unlocked = this.isTierUnlocked(uuid, tier);
+        final boolean unlocked = this.isTierUnlocked(uuid, tier, category);
         final int total = this.categoryTierContentCount(category, tier);
         final int unlockedCount = this.unlockedCount(uuid, this.registry.getItemsByGuideCategoryAndTier(category, tier), this.registry.getMachinesByGuideCategoryAndTier(category, tier));
         final boolean completed = total > 0 && unlockedCount >= total;
@@ -1214,9 +1215,33 @@ public final class TechBookService {
         return previous == null || this.isTierCompleted(uuid, previous);
     }
 
+    private boolean isTierUnlocked(final UUID uuid, final TechTier tier, final GuideCategory category) {
+        final TechTier previous = this.previousTier(tier);
+        return previous == null || this.isTierCompleted(uuid, previous, category);
+    }
+
     private boolean isTierCompleted(final UUID uuid, final TechTier tier) {
         final List<TechItemDefinition> items = this.registry.getItemsByTier(tier);
         final List<MachineDefinition> machines = this.registry.getMachinesByTier(tier);
+        if (items.isEmpty() && machines.isEmpty()) {
+            return true;
+        }
+        for (final TechItemDefinition item : items) {
+            if (!this.progressService.hasItemUnlocked(uuid, item.id())) {
+                return false;
+            }
+        }
+        for (final MachineDefinition machine : machines) {
+            if (!this.progressService.hasMachineUnlocked(uuid, machine.id())) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private boolean isTierCompleted(final UUID uuid, final TechTier tier, final GuideCategory category) {
+        final List<TechItemDefinition> items = this.registry.getItemsByGuideCategoryAndTier(category, tier);
+        final List<MachineDefinition> machines = this.registry.getMachinesByGuideCategoryAndTier(category, tier);
         if (items.isEmpty() && machines.isEmpty()) {
             return true;
         }
@@ -1283,7 +1308,7 @@ public final class TechBookService {
         if (requirement == null || requirement.isBlank() || requirement.equalsIgnoreCase("initial")) {
             return lines;
         }
-        final String[] tokens = requirement.split("[&|]");
+        final String[] tokens = requirement.replaceAll("[()]", "").split("[&|]");
         for (final String rawToken : tokens) {
             final String token = rawToken.trim();
             if (token.isBlank()) {
@@ -1311,7 +1336,12 @@ public final class TechBookService {
             return "先完成互動「" + this.itemFactory.displayNameForId(token.substring(12)) + "」";
         }
         if (token.regionMatches(true, 0, "stat:", 0, 5)) {
-            return "先達成統計條件「" + token.substring(5) + "」";
+            final String raw = token.substring(5);
+            final int comparatorIndex = raw.indexOf(">=");
+            if (comparatorIndex > 0) {
+                return this.itemFactory.describeStatRequirement(raw.substring(0, comparatorIndex).trim(), raw.substring(comparatorIndex + 2).trim());
+            }
+            return this.itemFactory.displayStatName(raw.trim());
         }
         return "先完成「" + this.itemFactory.displayNameForId(token) + "」";
     }
@@ -2199,6 +2229,11 @@ public final class TechBookService {
         if (this.registry.getItem(id) != null) {
             return this.itemFactory.tagPreviewClaim(this.itemFactory.tagGuiAction(stack, "item:" + id), "item:" + id);
         }
+        if (!this.registry.getRecipesForOutput(id).isEmpty() || this.blueprintService.get(id) != null) {
+            return this.itemFactory.tagPreviewClaim(
+                this.itemFactory.tagGuiAction(stack, "recipe-view:" + id + ":0"),
+                "material:" + id);
+        }
         return this.itemFactory.tagPreviewClaim(stack, "material:" + id);
     }
 
@@ -2328,11 +2363,13 @@ public final class TechBookService {
 
     private RecipeView machineRecipeView(final MachineRecipe recipe) {
         final List<ItemStack> inputs = new ArrayList<>();
-        for (final String inputId : recipe.inputIds()) {
+        for (int i = 0; i < recipe.inputIds().size(); i++) {
             if (inputs.size() >= 9) {
                 break;
             }
-            inputs.add(this.clickableReference(inputId, true));
+            final ItemStack stack = this.clickableReference(recipe.inputIds().get(i), true);
+            stack.setAmount(recipe.inputAmount(i));
+            inputs.add(stack);
         }
         while (inputs.size() < 9) {
             inputs.add(null);
@@ -2354,7 +2391,7 @@ public final class TechBookService {
                 this.itemFactory.displayNameForId(recipe.machineId()) + " • " + recipe.energyCost() + " EU",
                 List.of(
                         "製作站：" + this.itemFactory.displayNameForId(recipe.machineId()),
-                        "輸入：" + this.itemFactory.joinDisplayNames(recipe.inputIds(), " + "),
+                        "輸入：" + this.joinInputDisplayNames(recipe),
                     "耗能：" + recipe.energyCost() + " EU",
                     this.describeRecipeFlow(recipe)
                 )
@@ -2362,10 +2399,21 @@ public final class TechBookService {
     }
 
             private String describeRecipeFlow(final MachineRecipe recipe) {
-            return this.itemFactory.joinDisplayNames(recipe.inputIds(), " + ") + " → "
+            return this.joinInputDisplayNames(recipe) + " → "
                 + this.itemFactory.displayNameForId(recipe.machineId()) + " → "
                 + this.itemFactory.displayNameForId(recipe.outputId());
             }
+
+    private String joinInputDisplayNames(final MachineRecipe recipe) {
+        final StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < recipe.inputIds().size(); i++) {
+            if (i > 0) sb.append(" + ");
+            final int amount = recipe.inputAmount(i);
+            if (amount > 1) sb.append(amount).append("× ");
+            sb.append(this.itemFactory.displayNameForId(recipe.inputIds().get(i)));
+        }
+        return sb.toString();
+    }
 
     private ItemStack displayStack(final String id) {
         if (id == null || id.isBlank()) {

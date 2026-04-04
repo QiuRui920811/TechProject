@@ -68,6 +68,7 @@ recipes:
   assembler_chicken_net:
     machine: "assembler"
     inputs: ["string", "string", "stick"]
+    input-amounts: [1, 1, 1]
     output: "chicken_net"
     count: 4
     energy: 3
@@ -77,6 +78,7 @@ recipes:
   assembler_genetic_sequencer:
     machine: "assembler"
     inputs: ["glass", "iron_ingot", "redstone"]
+    input-amounts: [1, 1, 1]
     output: "genetic_sequencer"
     count: 1
     energy: 8
@@ -86,6 +88,7 @@ recipes:
   assembler_private_coop:
     machine: "assembler"
     inputs: ["oak_planks", "hay_block"]
+    input-amounts: [1, 1]
     output: "private_coop"
     count: 1
     energy: 5
@@ -95,6 +98,7 @@ recipes:
   assembler_excitation_chamber:
     machine: "assembler"
     inputs: ["iron_ingot", "glass", "circuit_board"]
+    input-amounts: [1, 1, 1]
     output: "excitation_chamber"
     count: 1
     energy: 10

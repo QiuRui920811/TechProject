@@ -139,9 +139,12 @@ public final class DungeonListener implements Listener {
 
         ds.handlePlayerRespawn(event);
 
-        final Location safe = ds.sanitizeRespawnLocation(event.getRespawnLocation());
-        if (safe != null) {
-            event.setRespawnLocation(safe);
+        // 只有不在副本中的玩家才需要 sanitize（避免覆蓋 handlePlayerRespawn 設定的副本重生點）
+        if (ds.getPlayerInstanceId(event.getPlayer().getUniqueId()) == null) {
+            final Location safe = ds.sanitizeRespawnLocation(event.getRespawnLocation());
+            if (safe != null) {
+                event.setRespawnLocation(safe);
+            }
         }
 
         final Location target = event.getRespawnLocation().clone();

@@ -88,10 +88,12 @@ public final class AchievementService {
         this.tryUnlock(uuid, unlocked, "first_planet_visit", this.progressService.getStat(uuid, "planets_visited") >= 1
             || this.progressService.getStat(uuid, "planet_ruins_activated") >= 1
             || this.progressService.getStat(uuid, "planetary_samples_collected") >= 1);
-        this.tryUnlock(uuid, unlocked, "planet_explorer_3", this.progressService.getStat(uuid, "planets_visited") >= 3);
-        this.tryUnlock(uuid, unlocked, "planet_explorer_all", this.progressService.getStat(uuid, "planets_visited") >= 5);
-        this.tryUnlock(uuid, unlocked, "gate_builder", this.progressService.hasMachineUnlocked(uuid, "stargate")
-            || this.progressService.hasItemUnlocked(uuid, "stargate_frame"));
+        final long uniquePlanets = java.util.stream.Stream.of("aurelia", "cryon", "nyx", "helion", "tempest")
+                .filter(p -> this.progressService.getStat(uuid, "planet_visited_" + p) > 0).count();
+        this.tryUnlock(uuid, unlocked, "planet_explorer_3", uniquePlanets >= 3);
+        this.tryUnlock(uuid, unlocked, "planet_explorer_all", uniquePlanets >= 5);
+        this.tryUnlock(uuid, unlocked, "gate_builder", this.progressService.hasMachineUnlocked(uuid, "planetary_gate")
+            || this.progressService.hasItemUnlocked(uuid, "gravitic_bearing"));
         this.tryUnlock(uuid, unlocked, "discover_ruins", this.progressService.getStat(uuid, "planet_ruins_activated") >= 1);
         this.tryUnlock(uuid, unlocked, "planet_sample_collector", this.progressService.getStat(uuid, "planetary_samples_collected") >= 20);
 
@@ -100,6 +102,11 @@ public final class AchievementService {
             && this.progressService.hasMachineUnlocked(uuid, "filter_router")
             && this.progressService.hasMachineUnlocked(uuid, "splitter_node")
             && this.progressService.hasMachineUnlocked(uuid, "industrial_bus"));
+        this.tryUnlock(uuid, unlocked, "cargo_architect", this.progressService.hasMachineUnlocked(uuid, "cargo_input_node")
+            && this.progressService.hasMachineUnlocked(uuid, "cargo_output_node")
+            && this.progressService.hasMachineUnlocked(uuid, "cargo_manager")
+            && this.progressService.hasMachineUnlocked(uuid, "cargo_motor")
+            && this.progressService.hasMachineUnlocked(uuid, "trash_node"));
 
         // ═══ 收集 ═══
         this.tryUnlock(uuid, unlocked, "tech_collector", this.progressService.unlockedItems(uuid).stream()
@@ -117,13 +124,14 @@ public final class AchievementService {
         // ═══ 終局 ═══
         this.tryUnlock(uuid, unlocked, "quantum_engineer", this.progressService.hasItemUnlocked(uuid, "quantum_chip"));
         this.tryUnlock(uuid, unlocked, "fusion_overlord", this.progressService.hasItemUnlocked(uuid, "fusion_core"));
-        this.tryUnlock(uuid, unlocked, "void_pioneer", this.progressService.hasItemUnlocked(uuid, "void_shard"));
-        this.tryUnlock(uuid, unlocked, "singularity_breaker", this.progressService.hasItemUnlocked(uuid, "singularity_core"));
-        this.tryUnlock(uuid, unlocked, "stellar_founder", this.progressService.hasItemUnlocked(uuid, "stellar_alloy"));
-        this.tryUnlock(uuid, unlocked, "omega_theory", this.progressService.hasItemUnlocked(uuid, "cosmic_matrix"));
-        this.tryUnlock(uuid, unlocked, "apex_of_tech", this.progressService.hasItemUnlocked(uuid, "omega_core"));
-        this.tryUnlock(uuid, unlocked, "plasma_forge_master", this.progressService.hasMachineUnlocked(uuid, "plasma_refinery"));
-        this.tryUnlock(uuid, unlocked, "cosmic_assembler", this.progressService.hasMachineUnlocked(uuid, "celestial_assembler"));
+        this.tryUnlock(uuid, unlocked, "void_pioneer", this.progressService.hasItemUnlocked(uuid, "voidglass_fragment")
+            || this.progressService.hasItemUnlocked(uuid, "void_mirror"));
+        this.tryUnlock(uuid, unlocked, "singularity_breaker", this.progressService.hasItemUnlocked(uuid, "singularity_casing"));
+        this.tryUnlock(uuid, unlocked, "stellar_founder", this.progressService.hasItemUnlocked(uuid, "starsteel_ingot"));
+        this.tryUnlock(uuid, unlocked, "omega_theory", this.progressService.hasItemUnlocked(uuid, "omega_matrix"));
+        this.tryUnlock(uuid, unlocked, "apex_of_tech", this.progressService.hasItemUnlocked(uuid, "apex_core"));
+        this.tryUnlock(uuid, unlocked, "plasma_forge_master", this.progressService.hasMachineUnlocked(uuid, "plasma_refiner"));
+        this.tryUnlock(uuid, unlocked, "cosmic_assembler", this.progressService.hasMachineUnlocked(uuid, "warp_assembler"));
         this.tryUnlock(uuid, unlocked, "mega_builder", this.progressService.getStat(uuid, "megastructures_built") >= 1);
 
         // ═══ 通用 ═══

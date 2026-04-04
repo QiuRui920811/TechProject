@@ -814,6 +814,14 @@ items:
     acquisition-mode: MACHINE_ASSEMBLY
     family: industrial_tools
     role: utility-tool
+  logistics_wrench:
+    guide-category: TOOLS
+    system-group: FIELD_AUTOMATION
+    item-class: CORE_COMPONENT
+    visual-tier: TECH
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: industrial_tools
+    role: utility-tool
   field_sickle:
     guide-category: TOOLS
     system-group: AGRI_BIO

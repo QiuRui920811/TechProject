@@ -589,7 +589,7 @@ blueprints:
     ingredients:
       G: GLASS
       S: tech:steel_plate
-      P: POWDER_SNOW_CAULDRON
+      P: POWDER_SNOW_BUCKET
       I: IRON_INGOT
       R: REDSTONE
     tutorial:
@@ -918,3 +918,57 @@ blueprints:
     placement:
       - 建議放在需要冷卻的高耗能設備附近。
       - 產出的冷卻液是中後期機器的重要原料。
+  android_bay:
+    shape:
+      - "SAS"
+      - "CMC"
+      - "SRS"
+    ingredients:
+      S: tech:steel_plate
+      A: tech:android_core
+      C: tech:control_unit
+      M: tech:machine_casing
+      R: REDSTONE
+    tutorial:
+      - 安卓艙是安卓自動化體系的起點，負責將安卓核心與外殼裝配成可部署的安卓元件。
+      - 產出安卓外殼、安卓框架與安卓記憶矩陣，這些都是建造安卓工作站的關鍵前置。
+      - 若想推安卓自動化農場或伐木，先把這台穩定運轉再說。
+    placement:
+      - 建議放在進階製造機旁邊，方便安卓框架直接流入安卓工作站的配方線。
+      - 後續會需要大量安卓核心與機械外殼，提前備料很重要。
+  data_archive:
+    shape:
+      - "QDQ"
+      - "NEN"
+      - "QGQ"
+    ingredients:
+      Q: tech:quantum_chip
+      D: tech:data_core
+      N: tech:nano_coating
+      E: CHISELED_BOOKSHELF
+      G: tech:gravitic_bearing
+    tutorial:
+      - 資料封存庫承接觀測站的數據核心與重力軸承，將它們壓縮封存為檔案板。
+      - 檔案板是終局科技線（巨構系列）的核心前置材料，早點穩定產量非常關鍵。
+      - 若進度卡在資料封存庫，通常表示觀測站的數據核心供應不足，先回頭補強。
+    placement:
+      - 建議放在觀測站旁邊，形成觀測資料 → 封存資料 → 終局科技的完整產線。
+      - 產出的檔案板接獨立倉儲，避免跟一般中間件混線。
+  anchor_forge:
+    shape:
+      - "WGW"
+      - "SMS"
+      - "WCW"
+    ingredients:
+      W: tech:warp_coil
+      G: tech:graviton_core
+      S: tech:singularity_casing
+      M: RESPAWN_ANCHOR
+      C: tech:void_beacon_core
+    tutorial:
+      - 錨定鍛造台是巨構科技線的核心設備，專門鍛造維度錨與叢集歧管。
+      - 需要先完成虛空信標產線來取得虛空信標核心與曲速線圈。
+      - 確保持續供應奇點外殼與重力子核心，才能維持穩定產出。
+    placement:
+      - 建議與虛空信標和奇點壓縮機組成一條完整產線。
+      - 此機器耗能極高，務必確保充足的電力來源。

@@ -306,126 +306,147 @@ recipes:
   starsteel_ingot_recipe:
     machine: starsteel_foundry
     inputs: [stellar_alloy, neutronium_ingot]
+    input-amounts: [2, 2]
     output: starsteel_ingot
     energy: 38
     guide: 恆星合金 + 中子錠 → 星鋼鑄造廠 → 星鋼錠
   starsteel_frame_recipe:
     machine: starsteel_foundry
     inputs: [starsteel_ingot, orbit_frame]
+    input-amounts: [3, 2]
     output: starsteel_frame
     energy: 40
     guide: 星鋼錠 + 軌道框架 → 星鋼鑄造廠 → 星鋼框架
   vacuum_glass_recipe:
     machine: vacuum_chamber
     inputs: [stellar_glass, void_crystal]
+    input-amounts: [2, 2]
     output: vacuum_glass
     energy: 34
     guide: 恆星玻璃 + 虛空晶體 → 真空艙 → 真空玻璃
   harmonic_crystal_recipe:
     machine: vacuum_chamber
     inputs: [vacuum_glass, void_crystal]
+    input-amounts: [2, 3]
     output: harmonic_crystal
     energy: 35
     guide: 真空玻璃 + 虛空晶體 → 真空艙 → 諧振晶體
   celestial_lens_recipe:
     machine: vacuum_chamber
     inputs: [graviton_lens, vacuum_glass]
+    input-amounts: [2, 2]
     output: celestial_lens
     energy: 36
     guide: 重力子透鏡 + 真空玻璃 → 真空艙 → 天穹透鏡
   nebula_fiber_recipe:
     machine: vacuum_chamber
     inputs: [quantum_fabric, dark_matter_sheet]
+    input-amounts: [2, 2]
     output: nebula_fiber
     energy: 37
     guide: 量子布料 + 暗物質片材 → 真空艙 → 星雲纖維
   warp_cell_recipe:
     machine: warp_assembler
     inputs: [antimatter_cell, chrono_thread]
+    input-amounts: [3, 2]
     output: warp_cell
     energy: 42
     guide: 反物質電池 + 時序線 → 曲躍裝配機 → 曲躍電池
   warp_coil_recipe:
     machine: warp_assembler
     inputs: [warp_cell, magnetic_ring]
+    input-amounts: [2, 3]
     output: warp_coil
     energy: 43
     guide: 曲躍電池 + 磁環 → 曲躍裝配機 → 曲躍線圈
   astral_circuit_recipe:
     machine: warp_assembler
     inputs: [orbit_processor, celestial_lens]
+    input-amounts: [2, 2]
     output: astral_circuit
     energy: 41
     guide: 軌道處理器 + 天穹透鏡 → 曲躍裝配機 → 星界電路
   event_horizon_plate_recipe:
     machine: event_horizon_smith
     inputs: [singularity_core, entropy_plate]
+    input-amounts: [3, 3]
     output: event_horizon_plate
     energy: 44
     guide: 奇點核心 + 熵板 → 事件視界鍛台 → 事件視界板
   singularity_casing_recipe:
     machine: event_horizon_smith
     inputs: [dark_matter_sheet, neutronium_plate]
+    input-amounts: [3, 2]
     output: singularity_casing
     energy: 45
     guide: 暗物質片材 + 中子板 → 事件視界鍛台 → 奇點外殼
   chrono_lattice_recipe:
     machine: continuum_lathe
     inputs: [chrono_core, reactor_lattice]
+    input-amounts: [3, 2]
     output: chrono_lattice
     energy: 40
     guide: 時序核心 + 反應格架 → 連續體車床 → 時序晶格
   continuum_shell_recipe:
     machine: continuum_lathe
     inputs: [chrono_lattice, vacuum_glass]
+    input-amounts: [2, 3]
     output: continuum_shell
     energy: 41
     guide: 時序晶格 + 真空玻璃 → 連續體車床 → 連續體外殼
   aurora_plate_recipe:
     machine: continuum_lathe
     inputs: [harmonic_crystal, photon_plate]
+    input-amounts: [3, 2]
     output: aurora_plate
     energy: 39
     guide: 諧振晶體 + 光子板 → 連續體車床 → 極光板
   relic_data_recipe:
     machine: relic_scanner
     inputs: [star_chart, void_beacon_core]
+    input-amounts: [2, 2]
     output: relic_data
     energy: 30
     guide: 星圖 + 虛空信標核心 → 遺物掃描儀 → 遺物資料
   archive_core_recipe:
     machine: relic_scanner
     inputs: [data_core, archive_plate]
+    input-amounts: [2, 2]
     output: archive_core
     energy: 32
     guide: 數據核心 + 檔案板 → 遺物掃描儀 → 檔案核心
   dimension_anchor_recipe:
     machine: anchor_forge
     inputs: [singularity_casing, void_beacon_core]
+    input-amounts: [3, 2]
     output: dimension_anchor
     energy: 46
     guide: 奇點外殼 + 虛空信標核心 → 錨定鍛台 → 維度錨
   cluster_manifold_recipe:
     machine: anchor_forge
     inputs: [dimension_anchor, graviton_core]
+    input-amounts: [2, 3]
     output: cluster_manifold
     energy: 47
     guide: 維度錨 + 重力子核心 → 錨定鍛台 → 叢集歧管
   omega_matrix_recipe:
     machine: apex_forge
     inputs: [cosmic_matrix, archive_core]
+    input-amounts: [2, 2]
     output: omega_matrix
     energy: 50
     guide: 宇宙矩陣 + 檔案核心 → 巔峰鍛台 → 歐米伽矩陣
   apex_core_recipe:
     machine: apex_forge
     inputs: [omega_matrix, continuum_shell]
+    input-amounts: [2, 2]
     output: apex_core
     energy: 52
     guide: 歐米伽矩陣 + 連續體外殼 → 巔峰鍛台 → 巔峰核心
   omega_archive_recipe:
     machine: apex_forge
     inputs: [apex_core, relic_data]
+    input-amounts: [2, 3]
     output: omega_archive
     energy: 54
     guide: 巔峰核心 + 遺物資料 → 巔峰鍛台 → 歐米伽檔案

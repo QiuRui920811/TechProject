@@ -77,6 +77,8 @@ public final class CookingService {
             Material.SMOKER, Material.BLAST_FURNACE, Material.FURNACE
     );
 
+    private static final String COOKING_DISPLAY_TAG = "techproject_cooking_display";
+
     // ── 互動烹飪 ──
     private static final String[] INTERACTION_LABELS = {
             "\uD83D\uDD14 點擊翻面！",
@@ -306,6 +308,31 @@ public final class CookingService {
             }
         }
         this.activeSessions.clear();
+        this.removeOrphanedCookingDisplays();
+    }
+
+    /**
+     * 啟動時清理前次熱插拔遺留的孤兒 ItemDisplay。
+     */
+    public void purgeOrphanedDisplays() {
+        this.removeOrphanedCookingDisplays();
+    }
+
+    private void removeOrphanedCookingDisplays() {
+        for (final World world : Bukkit.getWorlds()) {
+            for (final Entity entity : world.getEntities()) {
+                if (entity instanceof ItemDisplay) {
+                    this.scheduler.runEntity(entity, () -> {
+                        try {
+                            if (entity.getScoreboardTags().contains(COOKING_DISPLAY_TAG)) {
+                                entity.remove();
+                            }
+                        } catch (final Exception ignored) {
+                        }
+                    });
+                }
+            }
+        }
     }
 
     // ══════════════════════ 烹調邏輯 ══════════════════════
@@ -361,7 +388,16 @@ public final class CookingService {
 
         session.ticksElapsed += 4;
         final int effectiveTotalTicks = Math.max(1, session.totalTicks - session.bonusTicks);
-        final float progress = Math.min(1.0f, (float) session.ticksElapsed / effectiveTotalTicks);
+        float progress = Math.min(1.0f, (float) session.ticksElapsed / effectiveTotalTicks);
+        // 若還有未觸發的互動步驟，將進度條限制在下一個觸發閾值之前，
+        // 避免加速後進度直接跳過互動點
+        if (session.nextInteractionIndex < INTERACTION_THRESHOLDS.length) {
+            progress = Math.min(progress, INTERACTION_THRESHOLDS[session.nextInteractionIndex] + 0.02f);
+        }
+        // 互動或加料等待中時，進度鎖在 99% 以內，防止看起來已完成
+        if (session.awaitingInteraction || session.awaitingIngredient) {
+            progress = Math.min(progress, 0.99f);
+        }
         final int phaseIndex = Math.min(PHASE_LABELS.length - 1,
                 (int) (progress * PHASE_LABELS.length));
 
@@ -548,7 +584,9 @@ public final class CookingService {
         }
 
         // ── 完成 ──
-        if (session.ticksElapsed >= effectiveTotalTicks) {
+        // 若有待處理的互動或食材追加，暫緩完成（讓玩家有機會完成第3次互動）
+        if (session.ticksElapsed >= effectiveTotalTicks
+                && !session.awaitingInteraction && !session.awaitingIngredient) {
             task.cancel();
             this.completeCooking(key);
         }
@@ -825,6 +863,8 @@ public final class CookingService {
             ));
             display.setGlowing(true);
             display.setGlowColorOverride(Color.fromRGB(0xFF6B35));
+            display.setPersistent(false);
+            display.addScoreboardTag(COOKING_DISPLAY_TAG);
             session.displayEntityId = display.getUniqueId();
         });
     }
@@ -884,7 +924,11 @@ public final class CookingService {
         }
         final Entity entity = Bukkit.getEntity(session.displayEntityId);
         if (entity != null) {
-            entity.remove();
+            try {
+                this.scheduler.runEntity(entity, entity::remove);
+            } catch (final Exception ignored) {
+                entity.remove();
+            }
         }
     }
 

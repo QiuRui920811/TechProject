@@ -59,7 +59,7 @@ public final class TechCropService {
         this.registerCrop(new TechCropDefinition("cabbage", "cabbage_seeds", "cabbage", Material.WHEAT, 2, 1));
         this.registerCrop(new TechCropDefinition("corn", "corn_seeds", "corn", Material.CARROTS, 2, 1));
         this.registerCrop(new TechCropDefinition("onion", "onion_bulbs", "onion", Material.POTATOES, 2, 1));
-        this.registerCrop(new TechCropDefinition("void_bloom", "void_bloom_seeds", "void_bloom", Material.NETHER_WART, 2, 1));
+        this.registerCrop(new TechCropDefinition("void_bloom", "void_bloom_seeds", "void_bloom", Material.BEETROOTS, 2, 1));
         this.registerCrop(new TechCropDefinition("frostbloom", "frostbloom_seeds", "frostbloom", Material.WHEAT, 2, 1));
         this.registerCrop(new TechCropDefinition("echo_spore", "echo_spore_seeds", "echo_spore", Material.BEETROOTS, 2, 1));
         this.registerCrop(new TechCropDefinition("emberroot", "emberroot_seeds", "emberroot", Material.CARROTS, 2, 1));
@@ -78,7 +78,13 @@ public final class TechCropService {
             return false;
         }
         final TechCropDefinition definition = this.definitionBySeed(this.itemFactory.getTechItemId(stack));
-        if (definition == null || clickedBlock.getType() != Material.FARMLAND) {
+        if (definition == null) {
+            return false;
+        }
+        final boolean validSoil = definition.plantMaterial() == Material.NETHER_WART
+                ? clickedBlock.getType() == Material.SOUL_SAND || clickedBlock.getType() == Material.SOUL_SOIL
+                : clickedBlock.getType() == Material.FARMLAND;
+        if (!validSoil) {
             return false;
         }
         final Block cropBlock = clickedBlock.getRelative(BlockFace.UP);

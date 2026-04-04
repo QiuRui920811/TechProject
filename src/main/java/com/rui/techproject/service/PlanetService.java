@@ -25,6 +25,8 @@ import org.bukkit.World;
 import org.bukkit.WorldCreator;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.block.Biome;
+import org.bukkit.NamespacedKey;
+import org.bukkit.block.Barrel;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.Skull;
@@ -44,6 +46,8 @@ import org.bukkit.generator.ChunkGenerator;
 import org.bukkit.generator.WorldInfo;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.persistence.PersistentDataContainer;
+import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.profile.PlayerProfile;
 import com.rui.techproject.storage.StorageBackend;
 import org.bukkit.potion.PotionEffect;
@@ -66,6 +70,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
+import java.util.StringJoiner;
 import java.util.concurrent.ConcurrentHashMap;
 
 public final class PlanetService {
@@ -96,8 +101,8 @@ public final class PlanetService {
     private static final long FRUIT_REGROWTH_TICK_INTERVAL = 40L;
     private static final double PLANET_DECORATION_DENSITY = 0.5D;
     private static final double PLANET_HARVEST_NODE_DENSITY = 0.5D;
-    private static final int PLANET_FRUIT_TREE_BURST_CHANCE = 36;
-    private static final int PLANET_FRUIT_TREE_EXTRA_BURST_CHANCE = 8;
+    private static final int PLANET_FRUIT_TREE_BURST_CHANCE = 10;
+    private static final int PLANET_FRUIT_TREE_EXTRA_BURST_CHANCE = 4;
     private static final int MAX_FRUIT_PER_TREE = 2;
     private static final int PERSONAL_NODE_SCAN_RADIUS = 8;
     private static final int PERSONAL_NODE_SCAN_Y_RADIUS = 3;
@@ -114,6 +119,7 @@ public final class PlanetService {
     private static final String PLANETARY_GATE_MENU_TITLE = PLANETARY_GATE_MENU_SHIFT + PLANETARY_GATE_MENU_GLYPH;
     private static final String EARTH_DESTINATION_ID = "earth";
     private static final String EARTH_WORLD_NAME = "world";
+    private static final long LOOT_BARREL_REFILL_MS = 12L * 60L * 60L * 1000L;
 
     private final TechProjectPlugin plugin;
     private final SafeScheduler scheduler;
@@ -141,6 +147,15 @@ public final class PlanetService {
     /** 精英技能冷卻：entityUUID → 下次可施放時間 (ms) */
     private final Map<java.util.UUID, Long> eliteSkillCooldowns = new ConcurrentHashMap<>();
     private final Random ambientRandom = new Random();
+    private final NamespacedKey lootBarrelPlanetKey;
+    private final NamespacedKey lootBarrelTierKey;
+    private final NamespacedKey lootBarrelTimeKey;
+    private final Map<java.util.UUID, RuinChallenge> activeRuinChallenges = new ConcurrentHashMap<>();
+    private static final String RUIN_CHALLENGE_MOB_TAG = "techproject:ruin_challenge_mob";
+    private static final int[] RUIN_WAVE_COUNTS = { 3, 5, 7 };
+    private static final long RUIN_WAVE_TIMEOUT_TICKS = 20L * 90;
+    private static final long RUIN_WAVE_DELAY_TICKS = 20L * 4;
+    private static final long RUIN_CHALLENGE_COOLDOWN_MS = 30L * 60L * 1000L;
     private StorageBackend storageBackend;
     private volatile boolean worldCreationUnsupported;
 
@@ -150,6 +165,26 @@ public final class PlanetService {
         VACUUM,
         SOLAR,
         STORM
+    }
+
+    private static final class RuinChallenge {
+        final java.util.UUID playerId;
+        final PlanetDefinition definition;
+        final Location coreLocation;
+        final Set<java.util.UUID> aliveMobs = ConcurrentHashMap.newKeySet();
+        int currentWave;
+        long waveStartTick;
+        boolean completed;
+        boolean failed;
+
+        RuinChallenge(final java.util.UUID playerId, final PlanetDefinition definition, final Location coreLocation) {
+            this.playerId = playerId;
+            this.definition = definition;
+            this.coreLocation = coreLocation;
+            this.currentWave = 0;
+            this.completed = false;
+            this.failed = false;
+        }
     }
 
     private record PlanetDefinition(String id,
@@ -258,6 +293,9 @@ public final class PlanetService {
         this.scheduler = scheduler;
         this.itemFactory = itemFactory;
         this.registry = registry;
+        this.lootBarrelPlanetKey = new NamespacedKey(plugin, "loot_barrel_planet");
+        this.lootBarrelTierKey = new NamespacedKey(plugin, "loot_barrel_tier");
+        this.lootBarrelTimeKey = new NamespacedKey(plugin, "loot_barrel_fill_time");
         this.registerPlanets();
     }
 
@@ -320,6 +358,10 @@ public final class PlanetService {
             this.cleanupTravelVessel(playerId);
         }
         this.travelPlayerStates.remove(playerId);
+        final RuinChallenge challenge = this.activeRuinChallenges.get(playerId);
+        if (challenge != null) {
+            this.cleanupRuinChallenge(challenge, true);
+        }
     }
 
     public void shutdown() {
@@ -384,12 +426,22 @@ public final class PlanetService {
         if (definition == null) {
             return false;
         }
+        // 戰利品桶自動刷新（不攔截互動，讓玩家正常打開桶）
+        if (block.getType() == Material.BARREL) {
+            this.refillLootBarrel(block);
+            return false;
+        }
         if (block.getType() != definition.ruinCoreMaterial()) {
             return this.collectPlanetSurfaceNode(player, block, definition);
         }
         final LocationKey key = LocationKey.from(block.getLocation());
         final boolean globallyActivated = this.activatedRuins.contains(key);
         final boolean playerActivated = this.hasPlayerActivatedRuin(player.getUniqueId(), key);
+        // 正在進行中的挑戰
+        if (this.activeRuinChallenges.containsKey(player.getUniqueId())) {
+            player.sendMessage(this.itemFactory.warning("遺跡挑戰進行中，先擊退所有敵人！"));
+            return true;
+        }
         if (globallyActivated && playerActivated) {
             player.sendMessage(this.itemFactory.warning(definition.displayName() + " 的遺跡核心已經完成同步。"));
             block.getWorld().spawnParticle(Particle.ENCHANT, block.getLocation().add(0.5, 0.8, 0.5), 10, 0.25, 0.2, 0.25, 0.02);
@@ -404,19 +456,12 @@ public final class PlanetService {
         this.consumeHeldItem(player, heldItem);
         this.activatedRuins.add(key);
         this.markPlayerActivatedRuin(player.getUniqueId(), key);
-        final List<ItemStack> rewards = this.buildRewardStacks(definition.ruinRewardIds());
-        for (final ItemStack reward : rewards) {
-            block.getWorld().dropItemNaturally(block.getLocation().add(0.5, 1.0, 0.5), reward);
-            final String rewardId = this.itemFactory.getTechItemId(reward);
-            if (rewardId != null) {
-                this.unlockPlanetItem(player, rewardId);
-            }
-        }
-        this.plugin.getPlayerProgressService().incrementStat(player.getUniqueId(), "planet_ruins_activated", 1);
-        block.getWorld().spawnParticle(Particle.END_ROD, block.getLocation().add(0.5, 1.0, 0.5), 18, 0.35, 0.35, 0.35, 0.02);
-        block.getWorld().spawnParticle(Particle.TRIAL_SPAWNER_DETECTION, block.getLocation().add(0.5, 1.1, 0.5), 10, 0.4, 0.4, 0.4, 0.01);
-        block.getWorld().playSound(block.getLocation(), Sound.BLOCK_BEACON_ACTIVATE, 0.6f, 1.05f);
-        player.sendMessage(this.itemFactory.success((globallyActivated ? "已重新同步 " : "已啟動 ") + definition.displayName() + " 遺跡核心，取得新的研究樣本。"));
+        // 啟動遺跡挑戰（波次戰鬥）
+        block.getWorld().spawnParticle(Particle.END_ROD, block.getLocation().add(0.5, 1.0, 0.5), 30, 0.5, 0.5, 0.5, 0.04);
+        block.getWorld().spawnParticle(Particle.TRIAL_SPAWNER_DETECTION, block.getLocation().add(0.5, 1.1, 0.5), 15, 0.6, 0.6, 0.6, 0.01);
+        block.getWorld().spawnParticle(Particle.ENCHANT, block.getLocation().add(0.5, 1.5, 0.5), 25, 0.3, 0.4, 0.3, 1.0);
+        block.getWorld().playSound(block.getLocation(), Sound.BLOCK_BEACON_ACTIVATE, 0.8f, 1.05f);
+        this.startRuinChallenge(player, definition, block.getLocation());
         return true;
     }
 
@@ -578,6 +623,61 @@ public final class PlanetService {
         return this.planets.keySet();
     }
 
+    public org.bukkit.Location locateRuinCore(final Player player) {
+        final World world = player.getWorld();
+        final PlanetDefinition definition = this.planetByWorld(world);
+        if (definition == null) {
+            return null;
+        }
+        final int baseY = this.terrainPlateauY(world, 0, 0, definition.id().equals("nyx") ? 7 : 8) + 2;
+        final int[] offset = switch (definition.id()) {
+            case "aurelia"  -> new int[]{0, 7};
+            case "cryon"    -> new int[]{3, 8};
+            case "nyx"      -> new int[]{2, 7};
+            case "helion"   -> new int[]{-1, 8};
+            case "tempest"  -> new int[]{1, 7};
+            default -> null;
+        };
+        if (offset == null) {
+            return null;
+        }
+        final int coreX = offset[0];
+        final int coreY = baseY + 2;
+        final int coreZ = offset[1];
+        // 自動修復：如果遺跡核心方塊不在，重新放置
+        final Block coreBlock = world.getBlockAt(coreX, coreY, coreZ);
+        if (coreBlock.getType() != definition.ruinCoreMaterial()) {
+            coreBlock.setType(definition.ruinCoreMaterial(), false);
+            this.highlightRuinCore(world, coreX, coreY, coreZ);
+            // 同時確保降落台標記也在
+            final Block markerBlock = world.getBlockAt(0, baseY + 1, 0);
+            if (markerBlock.getType() != definition.markerMaterial()) {
+                markerBlock.setType(definition.markerMaterial(), false);
+            }
+        }
+        return new org.bukkit.Location(world, coreX + 0.5, coreY, coreZ + 0.5);
+    }
+
+    /**
+     * 強制重新生成指定星球的出生點結構（降落台、遺跡環、尖塔、遺跡核心等）。
+     */
+    public boolean regenerateSpawnStructures(final Player player) {
+        final World world = player.getWorld();
+        final PlanetDefinition definition = this.planetByWorld(world);
+        if (definition == null) {
+            return false;
+        }
+        switch (definition.id()) {
+            case "aurelia" -> this.generateAurelia(world, definition.markerMaterial(), definition.ruinCoreMaterial());
+            case "cryon" -> this.generateCryon(world, definition.markerMaterial(), definition.ruinCoreMaterial());
+            case "nyx" -> this.generateNyx(world, definition.markerMaterial(), definition.ruinCoreMaterial());
+            case "helion" -> this.generateHelion(world, definition.markerMaterial(), definition.ruinCoreMaterial());
+            case "tempest" -> this.generateTempest(world, definition.markerMaterial(), definition.ruinCoreMaterial());
+            default -> { return false; }
+        }
+        return true;
+    }
+
     public String planetDisplayName(final String planetId) {
         final PlanetDefinition definition = this.planets.get(planetId == null ? "" : planetId.toLowerCase(Locale.ROOT));
         return definition == null ? planetId : definition.displayName();
@@ -698,6 +798,10 @@ public final class PlanetService {
         return switch (techItemId.toLowerCase(Locale.ROOT)) {
             case "aurelia_glaze" -> {
                 this.grantCuisineWard(player, HazardType.RADIATION, 20L * 180L, "輻晶灼蝕");
+                yield true;
+            }
+            case "rad_filter_pill" -> {
+                this.grantCuisineWard(player, HazardType.RADIATION, 20L * 90L, "輻射濾除");
                 yield true;
             }
             case "cryon_hotpot" -> {
@@ -1347,19 +1451,123 @@ public final class PlanetService {
 
     private void ensurePlanetGenerated(final PlanetDefinition definition, final World world) {
         if (!this.generatedPlanetWorlds.add(world.getName().toLowerCase(Locale.ROOT))) {
+            // 即使已標記為「已生成」，也驗證遺跡核心是否存在；不存在就排程修復
+            this.scheduleRuinCoreVerification(definition, world);
             return;
         }
-        final Location anchor = new Location(world, 0.5, Math.max(world.getMinHeight() + 8, 80), 0.5);
-        this.scheduler.runRegion(anchor, task -> {
-            switch (definition.id()) {
-                case "aurelia" -> this.generateAurelia(world, definition.markerMaterial(), definition.ruinCoreMaterial());
-                case "cryon" -> this.generateCryon(world, definition.markerMaterial(), definition.ruinCoreMaterial());
-                case "nyx" -> this.generateNyx(world, definition.markerMaterial(), definition.ruinCoreMaterial());
-                case "helion" -> this.generateHelion(world, definition.markerMaterial(), definition.ruinCoreMaterial());
-                case "tempest" -> this.generateTempest(world, definition.markerMaterial(), definition.ruinCoreMaterial());
-                default -> {
-                }
+        // 強制載入 chunk(0,0) 確保地形資料可用
+        final boolean wasLoaded = world.isChunkLoaded(0, 0);
+        if (!wasLoaded) {
+            world.getChunkAtAsync(0, 0).thenAccept(chunk -> {
+                final Location anchor = new Location(world, 0.5, Math.max(world.getMinHeight() + 8, 80), 0.5);
+                this.scheduler.runRegion(anchor, task -> {
+                    this.doGeneratePlanetSpawn(definition, world);
+                });
+            });
+        } else {
+            final Location anchor = new Location(world, 0.5, Math.max(world.getMinHeight() + 8, 80), 0.5);
+            this.scheduler.runRegion(anchor, task -> {
+                this.doGeneratePlanetSpawn(definition, world);
+            });
+        }
+    }
+
+    private void doGeneratePlanetSpawn(final PlanetDefinition definition, final World world) {
+        // 驗證地形資料有效（不是 minHeight+1 的回退值）
+        final int plateauY = this.terrainPlateauY(world, 0, 0, definition.id().equals("nyx") ? 7 : 8);
+        if (plateauY <= world.getMinHeight() + 2) {
+            // 地形尚未就緒，延遲 2 秒重試（最多 10 次）
+            this.retryPlanetGeneration(definition, world, 0);
+            return;
+        }
+        switch (definition.id()) {
+            case "aurelia" -> this.generateAurelia(world, definition.markerMaterial(), definition.ruinCoreMaterial());
+            case "cryon" -> this.generateCryon(world, definition.markerMaterial(), definition.ruinCoreMaterial());
+            case "nyx" -> this.generateNyx(world, definition.markerMaterial(), definition.ruinCoreMaterial());
+            case "helion" -> this.generateHelion(world, definition.markerMaterial(), definition.ruinCoreMaterial());
+            case "tempest" -> this.generateTempest(world, definition.markerMaterial(), definition.ruinCoreMaterial());
+            default -> {
             }
+        }
+        this.plantSpawnFruitTrees(definition, world);
+    }
+
+    private void plantSpawnFruitTrees(final PlanetDefinition definition, final World world) {
+        final FruitTreeProfile profile = this.fruitTreeProfileForPlanet(definition.id());
+        if (profile == null) {
+            return;
+        }
+        final Random random = new Random(world.getSeed() ^ definition.id().hashCode());
+        final int[][] offsets = {
+            { 18, 5 }, { -16, 8 }, { 10, -20 }, { -20, -10 },
+            { 22, -14 }, { -8, 22 }, { 25, 10 }, { -24, -6 }
+        };
+        for (final int[] offset : offsets) {
+            this.placePlanetMiniTree(definition, world, offset[0], offset[1], random);
+        }
+    }
+
+    private void retryPlanetGeneration(final PlanetDefinition definition, final World world, final int attempt) {
+        if (attempt >= 10) {
+            this.plugin.getLogger().warning("星球 " + definition.displayName() + " 出生區域生成失敗（地形資料始終無效），請使用 /tech planet regenerate 手動修復。");
+            return;
+        }
+        this.scheduler.runGlobalDelayed(task -> {
+            // 確保 chunk 載入
+            if (!world.isChunkLoaded(0, 0)) {
+                world.getChunkAtAsync(0, 0).thenAccept(chunk -> {
+                    final Location anchor = new Location(world, 0.5, Math.max(world.getMinHeight() + 8, 80), 0.5);
+                    this.scheduler.runRegion(anchor, regionTask -> {
+                        final int plateauY = this.terrainPlateauY(world, 0, 0, definition.id().equals("nyx") ? 7 : 8);
+                        if (plateauY <= world.getMinHeight() + 2) {
+                            this.retryPlanetGeneration(definition, world, attempt + 1);
+                        } else {
+                            this.doGeneratePlanetSpawn(definition, world);
+                        }
+                    });
+                });
+            } else {
+                final Location anchor = new Location(world, 0.5, Math.max(world.getMinHeight() + 8, 80), 0.5);
+                this.scheduler.runRegion(anchor, regionTask -> {
+                    final int plateauY = this.terrainPlateauY(world, 0, 0, definition.id().equals("nyx") ? 7 : 8);
+                    if (plateauY <= world.getMinHeight() + 2) {
+                        this.retryPlanetGeneration(definition, world, attempt + 1);
+                    } else {
+                        this.doGeneratePlanetSpawn(definition, world);
+                    }
+                });
+            }
+        }, 40L);
+    }
+
+    /**
+     * 驗證已標記為「已生成」的星球是否真的有遺跡核心方塊存在，不存在就修復。
+     * 注意：不能用 terrainPlateauY 計算 Y，因為降落台已改變地表高度。
+     * 改為在已知 XZ 柱體內搜尋核心方塊。
+     */
+    private void scheduleRuinCoreVerification(final PlanetDefinition definition, final World world) {
+        world.getChunkAtAsync(0, 0).thenAccept(chunk -> {
+            final Location anchor = new Location(world, 0.5, Math.max(world.getMinHeight() + 8, 80), 0.5);
+            this.scheduler.runRegion(anchor, task -> {
+                final int[] offset = switch (definition.id()) {
+                    case "aurelia"  -> new int[]{0, 7};
+                    case "cryon"    -> new int[]{3, 8};
+                    case "nyx"      -> new int[]{2, 7};
+                    case "helion"   -> new int[]{-1, 8};
+                    case "tempest"  -> new int[]{1, 7};
+                    default -> null;
+                };
+                if (offset == null) return;
+                final int minY = Math.max(world.getMinHeight(), 40);
+                final int maxY = Math.min(world.getMaxHeight(), 200);
+                for (int y = minY; y <= maxY; y++) {
+                    if (world.getBlockAt(offset[0], y, offset[1]).getType() == definition.ruinCoreMaterial()) {
+                        return; // 核心存在，無需修復
+                    }
+                }
+                this.plugin.getLogger().info("偵測到 " + definition.displayName() + " 遺跡核心遺失，自動修復中…");
+                this.doGeneratePlanetSpawn(definition, world);
+            });
         });
     }
 
@@ -1369,10 +1577,24 @@ public final class PlanetService {
         this.buildRuinRing(world, 0, baseY + 1, 0, Material.PURPUR_PILLAR, Material.AMETHYST_BLOCK, 7);
         this.buildSpire(world, 11, this.surfaceY(world, 11, -6) + 1, -6, Material.AMETHYST_BLOCK, 6);
         this.buildSpire(world, -12, this.surfaceY(world, -12, 8) + 1, 8, Material.SCULK, 5);
+        this.buildSpire(world, -8, this.surfaceY(world, -8, -10) + 1, -10, Material.PURPUR_PILLAR, 8);
+        this.buildSpire(world, 14, this.surfaceY(world, 14, 4) + 1, 4, Material.AMETHYST_BLOCK, 4);
         this.scatterSurfacePatch(world, 8, -9, Material.AMETHYST_CLUSTER, 8, 6);
         this.scatterSurfacePatch(world, -10, 10, Material.SCULK_CATALYST, 6, 5);
+        this.scatterSurfacePatch(world, -14, -5, Material.AMETHYST_BLOCK, 5, 4);
+        this.scatterSurfacePatch(world, 6, 14, Material.SCULK_SENSOR, 4, 3);
+        // 紫晶弧 — 半圓排列的紫水晶簇
+        for (int i = 0; i < 6; i++) {
+            final double angle = Math.toRadians(180 + i * 30);
+            final int ax = (int) Math.round(Math.cos(angle) * 15);
+            final int az = (int) Math.round(Math.sin(angle) * 15);
+            final int ay = this.surfaceY(world, ax, az);
+            world.getBlockAt(ax, ay + 1, az).setType(Material.AMETHYST_BLOCK, false);
+            world.getBlockAt(ax, ay + 2, az).setType(Material.AMETHYST_CLUSTER, false);
+        }
         world.getBlockAt(0, baseY + 1, 0).setType(markerMaterial, false);
         world.getBlockAt(0, baseY + 2, 7).setType(ruinCoreMaterial, false);
+        this.highlightRuinCore(world, 0, baseY + 2, 7);
     }
 
     private void generateCryon(final World world, final Material markerMaterial, final Material ruinCoreMaterial) {
@@ -1381,10 +1603,22 @@ public final class PlanetService {
         this.buildRuinRing(world, 3, baseY + 1, 2, Material.PACKED_ICE, Material.BLUE_ICE, 6);
         this.buildSpire(world, -9, this.surfaceY(world, -9, -8) + 1, -8, Material.BLUE_ICE, 7);
         this.buildSpire(world, 12, this.surfaceY(world, 12, 6) + 1, 6, Material.PACKED_ICE, 6);
+        this.buildSpire(world, 6, this.surfaceY(world, 6, -12) + 1, -12, Material.BLUE_ICE, 9);
+        this.buildSpire(world, -14, this.surfaceY(world, -14, 3) + 1, 3, Material.PACKED_ICE, 5);
         this.scatterSurfacePatch(world, -8, 7, Material.SNOW_BLOCK, 12, 7);
         this.scatterSurfacePatch(world, 10, -10, Material.BLUE_ICE, 8, 6);
+        this.scatterSurfacePatch(world, -5, -14, Material.ICE, 10, 5);
+        this.scatterSurfacePatch(world, 13, 2, Material.POWDER_SNOW_CAULDRON, 4, 3);
+        // 冰柱陣列 — 散布的尖冰柱
+        for (int i = 0; i < 5; i++) {
+            final int ix = -6 + i * 4 + (i % 2 == 0 ? 1 : -1);
+            final int iz = 12 + (i % 2 == 0 ? 2 : -2);
+            final int iy = this.surfaceY(world, ix, iz);
+            this.buildSpire(world, ix, iy + 1, iz, Material.BLUE_ICE, 3 + (i % 3));
+        }
         world.getBlockAt(0, baseY + 1, 0).setType(markerMaterial, false);
         world.getBlockAt(3, baseY + 2, 8).setType(ruinCoreMaterial, false);
+        this.highlightRuinCore(world, 3, baseY + 2, 8);
     }
 
     private void generateNyx(final World world, final Material markerMaterial, final Material ruinCoreMaterial) {
@@ -1392,10 +1626,22 @@ public final class PlanetService {
         this.buildLandingPad(world, 0, baseY, 0, 6, Material.END_STONE_BRICKS, Material.CRYING_OBSIDIAN);
         this.buildRuinRing(world, 2, baseY + 1, 1, Material.END_STONE_BRICKS, Material.CRYING_OBSIDIAN, 6);
         this.buildSpire(world, -11, this.surfaceY(world, -11, 5) + 1, 5, Material.END_STONE_BRICKS, 7);
+        this.buildSpire(world, 10, this.surfaceY(world, 10, -9) + 1, -9, Material.OBSIDIAN, 6);
+        this.buildSpire(world, -5, this.surfaceY(world, -5, -13) + 1, -13, Material.END_STONE_BRICKS, 8);
         this.scatterSurfacePatch(world, 9, 9, Material.CRYING_OBSIDIAN, 10, 6);
         this.scatterSurfacePatch(world, -8, -7, Material.CHORUS_FLOWER, 6, 5);
+        this.scatterSurfacePatch(world, 14, -3, Material.END_ROD, 5, 4);
+        this.scatterSurfacePatch(world, -12, -10, Material.TINTED_GLASS, 4, 3);
+        // 虛空裂隙 — 末地棒排成的裂縫形光帶
+        for (int step = -8; step <= 8; step++) {
+            final int rx = 4 + step;
+            final int rz = -2 + step / 2;
+            final int ry = this.surfaceY(world, rx, rz);
+            world.getBlockAt(rx, ry + 1, rz).setType(Material.END_ROD, false);
+        }
         world.getBlockAt(0, baseY + 1, 0).setType(markerMaterial, false);
         world.getBlockAt(2, baseY + 2, 7).setType(ruinCoreMaterial, false);
+        this.highlightRuinCore(world, 2, baseY + 2, 7);
     }
 
     private void generateHelion(final World world, final Material markerMaterial, final Material ruinCoreMaterial) {
@@ -1404,10 +1650,23 @@ public final class PlanetService {
         this.buildRuinRing(world, -1, baseY + 1, 2, Material.POLISHED_BLACKSTONE_BRICKS, Material.MAGMA_BLOCK, 6);
         this.buildSpire(world, 10, this.surfaceY(world, 10, -7) + 1, -7, Material.BASALT, 7);
         this.buildSpire(world, -12, this.surfaceY(world, -12, 8) + 1, 8, Material.BLACKSTONE, 6);
+        this.buildSpire(world, 7, this.surfaceY(world, 7, 12) + 1, 12, Material.BASALT, 5);
+        this.buildSpire(world, -8, this.surfaceY(world, -8, -10) + 1, -10, Material.POLISHED_BLACKSTONE, 8);
         this.scatterSurfacePatch(world, -8, 6, Material.SHROOMLIGHT, 8, 5);
         this.scatterSurfacePatch(world, 10, 8, Material.GILDED_BLACKSTONE, 7, 5);
+        this.scatterSurfacePatch(world, -13, -6, Material.MAGMA_BLOCK, 6, 4);
+        this.scatterSurfacePatch(world, 5, -13, Material.BASALT, 8, 5);
+        // 熔岩裂縫 — 岩漿塊排成的地面裂紋
+        for (int step = -6; step <= 6; step++) {
+            final int lx = -3 + step;
+            final int lz = 14 + (step % 2 == 0 ? 1 : 0);
+            final int ly = this.surfaceY(world, lx, lz);
+            world.getBlockAt(lx, ly, lz).setType(Material.MAGMA_BLOCK, false);
+            world.getBlockAt(lx, ly + 1, lz).setType(Material.FIRE, false);
+        }
         world.getBlockAt(0, baseY + 1, 0).setType(markerMaterial, false);
         world.getBlockAt(-1, baseY + 2, 8).setType(ruinCoreMaterial, false);
+        this.highlightRuinCore(world, -1, baseY + 2, 8);
     }
 
     private void generateTempest(final World world, final Material markerMaterial, final Material ruinCoreMaterial) {
@@ -1416,10 +1675,24 @@ public final class PlanetService {
         this.buildRuinRing(world, 1, baseY + 1, 0, Material.WEATHERED_CUT_COPPER, Material.COPPER_BULB, 6);
         this.buildSpire(world, -9, this.surfaceY(world, -9, 7) + 1, 7, Material.WEATHERED_CUT_COPPER, 7);
         this.buildSpire(world, 11, this.surfaceY(world, 11, -6) + 1, -6, Material.OXIDIZED_CUT_COPPER, 6);
+        this.buildSpire(world, -13, this.surfaceY(world, -13, -4) + 1, -4, Material.CUT_COPPER, 9);
+        this.buildSpire(world, 8, this.surfaceY(world, 8, 11) + 1, 11, Material.WEATHERED_CUT_COPPER, 5);
         this.scatterSurfacePatch(world, -7, 6, Material.LIGHTNING_ROD, 8, 5);
         this.scatterSurfacePatch(world, 8, 8, Material.SEA_LANTERN, 6, 5);
+        this.scatterSurfacePatch(world, 13, -8, Material.COPPER_BULB, 5, 4);
+        this.scatterSurfacePatch(world, -10, -12, Material.OXIDIZED_CUT_COPPER, 6, 4);
+        // 引雷陣 — 避雷針圍成的六邊形
+        for (int i = 0; i < 6; i++) {
+            final double angle = Math.toRadians(i * 60);
+            final int tx = (int) Math.round(Math.cos(angle) * 10) - 5;
+            final int tz = (int) Math.round(Math.sin(angle) * 10) + 8;
+            final int ty = this.surfaceY(world, tx, tz);
+            world.getBlockAt(tx, ty + 1, tz).setType(Material.COPPER_BLOCK, false);
+            world.getBlockAt(tx, ty + 2, tz).setType(Material.LIGHTNING_ROD, false);
+        }
         world.getBlockAt(0, baseY + 1, 0).setType(markerMaterial, false);
         world.getBlockAt(1, baseY + 2, 7).setType(ruinCoreMaterial, false);
+        this.highlightRuinCore(world, 1, baseY + 2, 7);
     }
 
     private void applyPlanetWorldSettings(final PlanetDefinition definition, final World world) {
@@ -1504,6 +1777,10 @@ public final class PlanetService {
         final String orchardKey = this.chunkKey(chunk) + ":orchard-v2";
         if (this.decoratedPlanetChunks.add(orchardKey)) {
             this.scheduler.runRegion(anchor, task -> this.enrichPlanetBiologyChunk(definition, chunk));
+        }
+        final String structKey = this.chunkKey(chunk) + ":structures-v1";
+        if (this.decoratedPlanetChunks.add(structKey)) {
+            this.scheduler.runRegion(anchor, task -> this.generatePlanetStructures(definition, chunk));
         }
         if (includeFruitRetrofit) {
             final String fruitRetrofitKey = this.chunkKey(chunk) + ":fruit-retrofit-v2";
@@ -2324,6 +2601,487 @@ public final class PlanetService {
         }
     }
 
+    // ═══ 星球探險結構（前哨站 / 瞭望塔 / 地下密室 / 墜毀殘骸）═══
+
+    private void generatePlanetStructures(final PlanetDefinition definition, final Chunk chunk) {
+        final World world = chunk.getWorld();
+        final Random random = new Random(world.getSeed() ^ ((long) definition.id().hashCode() << 31)
+                ^ (chunk.getX() * 482716293781L) ^ (chunk.getZ() * 782913648173L));
+        final int bx = chunk.getX() << 4;
+        final int bz = chunk.getZ() << 4;
+        if (Math.max(Math.abs(bx + 8), Math.abs(bz + 8)) < 64) {
+            return;
+        }
+        if (random.nextInt(12) == 0) {
+            this.buildPlanetOutpost(definition, world, bx + 3 + random.nextInt(8), bz + 3 + random.nextInt(8), random);
+        }
+        if (random.nextInt(18) == 0) {
+            this.buildPlanetWatchtower(definition, world, bx + 4 + random.nextInt(8), bz + 4 + random.nextInt(8), random);
+        }
+        if (random.nextInt(20) == 0) {
+            this.buildPlanetVault(definition, world, bx + 3 + random.nextInt(8), bz + 3 + random.nextInt(8), random);
+        }
+        if (random.nextInt(30) == 0) {
+            this.buildPlanetCrashSite(definition, world, bx + 2 + random.nextInt(10), bz + 2 + random.nextInt(10), random);
+        }
+        if (random.nextInt(14) == 0) {
+            this.buildBuriedRuin(definition, world, bx + 3 + random.nextInt(8), bz + 3 + random.nextInt(8), random);
+        }
+        if (random.nextInt(22) == 0) {
+            this.buildFloatingPlatform(definition, world, bx + 3 + random.nextInt(8), bz + 3 + random.nextInt(8), random);
+        }
+        if (random.nextInt(16) == 0) {
+            this.buildCliffShelter(definition, world, bx + 4 + random.nextInt(8), bz + 4 + random.nextInt(8), random);
+        }
+        if (random.nextInt(25) == 0) {
+            this.buildAncientArchway(definition, world, bx + 3 + random.nextInt(10), bz + 3 + random.nextInt(10), random);
+        }
+    }
+
+    private Material[] planetStructurePalette(final String planetId) {
+        return switch (planetId) {
+            case "aurelia" -> new Material[] { Material.PURPUR_BLOCK, Material.QUARTZ_BLOCK, Material.PURPUR_SLAB, Material.AMETHYST_BLOCK };
+            case "cryon" -> new Material[] { Material.PACKED_ICE, Material.POLISHED_DIORITE, Material.SNOW_BLOCK, Material.BLUE_ICE };
+            case "nyx" -> new Material[] { Material.END_STONE_BRICKS, Material.OBSIDIAN, Material.PURPUR_SLAB, Material.TINTED_GLASS };
+            case "helion" -> new Material[] { Material.POLISHED_BLACKSTONE_BRICKS, Material.BLACKSTONE, Material.POLISHED_BLACKSTONE, Material.MAGMA_BLOCK };
+            case "tempest" -> new Material[] { Material.WEATHERED_CUT_COPPER, Material.CUT_COPPER, Material.OXIDIZED_CUT_COPPER, Material.COPPER_BLOCK };
+            default -> new Material[] { Material.STONE_BRICKS, Material.STONE, Material.STONE_BRICK_SLAB, Material.COBBLESTONE };
+        };
+    }
+
+    /**
+     * 前哨站 — 5×5 牆壁建築，門口開放，內含 1 個戰利品桶。
+     */
+    private void buildPlanetOutpost(final PlanetDefinition definition, final World world,
+                                    final int cx, final int cz, final Random random) {
+        final int sy = this.surfaceY(world, cx, cz);
+        if (!world.getBlockAt(cx, sy, cz).isSolid()) return;
+        final Material[] pal = this.planetStructurePalette(definition.id());
+        final Material wall = pal[0], floor = pal[1], roof = pal[2], accent = pal[3];
+        for (int dx = -2; dx <= 2; dx++) {
+            for (int dz = -2; dz <= 2; dz++) {
+                world.getBlockAt(cx + dx, sy + 1, cz + dz).setType(floor, false);
+                final boolean edge = Math.abs(dx) == 2 || Math.abs(dz) == 2;
+                for (int dy = 2; dy <= 4; dy++) {
+                    if (edge) {
+                        if (dx == 0 && dz == -2 && dy <= 3) {
+                            world.getBlockAt(cx + dx, sy + dy, cz + dz).setType(Material.AIR, false);
+                        } else {
+                            world.getBlockAt(cx + dx, sy + dy, cz + dz).setType(wall, false);
+                        }
+                    } else {
+                        world.getBlockAt(cx + dx, sy + dy, cz + dz).setType(Material.AIR, false);
+                    }
+                }
+                world.getBlockAt(cx + dx, sy + 5, cz + dz).setType(roof, false);
+            }
+        }
+        world.getBlockAt(cx, sy + 4, cz).setType(accent, false);
+        this.populateLootBarrel(world.getBlockAt(cx + 1, sy + 2, cz + 1), definition, random, 0);
+    }
+
+    /**
+     * 瞭望塔 — 3×3 基底、8–12 格高，頂部平台有 1 個戰利品桶。
+     */
+    private void buildPlanetWatchtower(final PlanetDefinition definition, final World world,
+                                       final int cx, final int cz, final Random random) {
+        final int sy = this.surfaceY(world, cx, cz);
+        if (!world.getBlockAt(cx, sy, cz).isSolid()) return;
+        final Material[] pal = this.planetStructurePalette(definition.id());
+        final Material wall = pal[0], floor = pal[1], accent = pal[3];
+        final int height = 8 + random.nextInt(5);
+        for (int dy = 1; dy <= height; dy++) {
+            world.getBlockAt(cx - 1, sy + dy, cz - 1).setType(wall, false);
+            world.getBlockAt(cx + 1, sy + dy, cz - 1).setType(wall, false);
+            world.getBlockAt(cx - 1, sy + dy, cz + 1).setType(wall, false);
+            world.getBlockAt(cx + 1, sy + dy, cz + 1).setType(wall, false);
+            if (dy % 3 == 0) {
+                world.getBlockAt(cx, sy + dy, cz).setType(floor, false);
+            }
+            world.getBlockAt(cx, sy + dy, cz - 1).setType(Material.LADDER, false);
+        }
+        for (int dx = -2; dx <= 2; dx++) {
+            for (int dz = -2; dz <= 2; dz++) {
+                if (Math.abs(dx) == 2 && Math.abs(dz) == 2) continue;
+                world.getBlockAt(cx + dx, sy + height + 1, cz + dz).setType(floor, false);
+            }
+        }
+        world.getBlockAt(cx, sy + height + 2, cz).setType(accent, false);
+        this.populateLootBarrel(world.getBlockAt(cx + 1, sy + height + 2, cz), definition, random, 0);
+    }
+
+    /**
+     * 地下密室 — 地下 5 格深的 5×5 房間，入口有階梯，含 1 個高級戰利品桶。
+     */
+    private void buildPlanetVault(final PlanetDefinition definition, final World world,
+                                  final int cx, final int cz, final Random random) {
+        final int sy = this.surfaceY(world, cx, cz);
+        if (sy - 6 <= world.getMinHeight()) return;
+        final Material[] pal = this.planetStructurePalette(definition.id());
+        final Material wall = pal[0], floor = pal[1], accent = pal[3];
+        final int vy = sy - 5;
+        for (int dx = -2; dx <= 2; dx++) {
+            for (int dz = -2; dz <= 2; dz++) {
+                world.getBlockAt(cx + dx, vy, cz + dz).setType(floor, false);
+                world.getBlockAt(cx + dx, vy + 4, cz + dz).setType(wall, false);
+                final boolean edge = Math.abs(dx) == 2 || Math.abs(dz) == 2;
+                for (int dy = 1; dy <= 3; dy++) {
+                    world.getBlockAt(cx + dx, vy + dy, cz + dz).setType(edge ? wall : Material.AIR, false);
+                }
+            }
+        }
+        for (int step = 0; step < 5; step++) {
+            world.getBlockAt(cx, sy - step, cz - 3 - step).setType(floor, false);
+            world.getBlockAt(cx, sy - step + 1, cz - 3 - step).setType(Material.AIR, false);
+            world.getBlockAt(cx, sy - step + 2, cz - 3 - step).setType(Material.AIR, false);
+        }
+        world.getBlockAt(cx, vy + 1, cz).setType(accent, false);
+        this.populateLootBarrel(world.getBlockAt(cx - 1, vy + 1, cz + 1), definition, random, 1);
+    }
+
+    /**
+     * 墜毀殘骸 — 不規則碎片散落 7×7 區域，含 1–2 個稀有戰利品桶。
+     */
+    private void buildPlanetCrashSite(final PlanetDefinition definition, final World world,
+                                      final int cx, final int cz, final Random random) {
+        final int sy = this.surfaceY(world, cx, cz);
+        if (!world.getBlockAt(cx, sy, cz).isSolid()) return;
+        final Material hull = Material.IRON_BLOCK;
+        final Material frame = Material.HEAVY_WEIGHTED_PRESSURE_PLATE;
+        final Material glass = Material.GRAY_STAINED_GLASS_PANE;
+        for (int i = 0; i < 12 + random.nextInt(8); i++) {
+            final int dx = random.nextInt(7) - 3;
+            final int dz = random.nextInt(7) - 3;
+            final int surfY = this.surfaceY(world, cx + dx, cz + dz);
+            final Material debris = random.nextInt(3) == 0 ? glass : (random.nextBoolean() ? hull : frame);
+            world.getBlockAt(cx + dx, surfY + 1, cz + dz).setType(debris, false);
+            if (random.nextInt(4) == 0) {
+                world.getBlockAt(cx + dx, surfY + 2, cz + dz).setType(hull, false);
+            }
+        }
+        for (int dx = -1; dx <= 1; dx++) {
+            for (int dz = -1; dz <= 1; dz++) {
+                world.getBlockAt(cx + dx, sy + 1, cz + dz).setType(hull, false);
+            }
+        }
+        world.getBlockAt(cx, sy + 2, cz).setType(Material.REDSTONE_BLOCK, false);
+        this.populateLootBarrel(world.getBlockAt(cx + 2, sy + 1, cz), definition, random, 2);
+        if (random.nextInt(3) == 0) {
+            this.populateLootBarrel(world.getBlockAt(cx - 2, sy + 1, cz + 1), definition, random, 2);
+        }
+    }
+
+    /**
+     * 埋沒遺跡 — 大部分結構埋入地下，只有頂端露出地面，需要向下挖掘進入。
+     */
+    private void buildBuriedRuin(final PlanetDefinition definition, final World world,
+                                 final int cx, final int cz, final Random random) {
+        final int sy = this.surfaceY(world, cx, cz);
+        if (sy - 8 <= world.getMinHeight()) return;
+        if (!world.getBlockAt(cx, sy, cz).isSolid()) return;
+        final Material[] pal = this.planetStructurePalette(definition.id());
+        final Material wall = pal[0], floor = pal[1], accent = pal[3];
+        final int depth = 6 + random.nextInt(3);
+        final int ry = sy - depth;
+        final int sizeX = 3 + random.nextInt(2);
+        final int sizeZ = 3 + random.nextInt(2);
+        // 挖空內部
+        for (int dx = -sizeX; dx <= sizeX; dx++) {
+            for (int dz = -sizeZ; dz <= sizeZ; dz++) {
+                final boolean edge = Math.abs(dx) == sizeX || Math.abs(dz) == sizeZ;
+                world.getBlockAt(cx + dx, ry, cz + dz).setType(floor, false);
+                world.getBlockAt(cx + dx, ry + depth + 1, cz + dz).setType(wall, false);
+                for (int dy = 1; dy <= depth; dy++) {
+                    world.getBlockAt(cx + dx, ry + dy, cz + dz).setType(edge ? wall : Material.AIR, false);
+                }
+            }
+        }
+        // 地面露出部分 — 破損的柱子頂端
+        for (int corner = 0; corner < 4; corner++) {
+            final int px = cx + (corner < 2 ? -sizeX : sizeX);
+            final int pz = cx + (corner % 2 == 0 ? -sizeZ : sizeZ);
+            final int pzActual = cz + (corner % 2 == 0 ? -sizeZ : sizeZ);
+            if (random.nextBoolean()) {
+                world.getBlockAt(px, sy + 1, pzActual).setType(accent, false);
+                if (random.nextBoolean()) {
+                    world.getBlockAt(px, sy + 2, pzActual).setType(accent, false);
+                }
+            }
+        }
+        // 入口階梯 — 向下的通道
+        for (int step = 0; step <= depth; step++) {
+            final int stairZ = cz - sizeZ - 1 - step;
+            world.getBlockAt(cx, sy - step, stairZ).setType(floor, false);
+            world.getBlockAt(cx + 1, sy - step, stairZ).setType(floor, false);
+            world.getBlockAt(cx - 1, sy - step, stairZ).setType(wall, false);
+            world.getBlockAt(cx + 2, sy - step, stairZ).setType(wall, false);
+            for (int clearY = 1; clearY <= 2; clearY++) {
+                world.getBlockAt(cx, sy - step + clearY, stairZ).setType(Material.AIR, false);
+                world.getBlockAt(cx + 1, sy - step + clearY, stairZ).setType(Material.AIR, false);
+            }
+        }
+        // 內部裝飾與戰利品
+        world.getBlockAt(cx, ry + 1, cz).setType(accent, false);
+        this.populateLootBarrel(world.getBlockAt(cx - 1, ry + 1, cz + 1), definition, random, 1);
+        if (random.nextInt(3) == 0) {
+            this.populateLootBarrel(world.getBlockAt(cx + 1, ry + 1, cz - 1), definition, random, 1);
+        }
+    }
+
+    /**
+     * 漂浮平台 — 空中的大型浮島建築，底部有倒三角支撐，頂部有戰利品。
+     */
+    private void buildFloatingPlatform(final PlanetDefinition definition, final World world,
+                                       final int cx, final int cz, final Random random) {
+        final int sy = this.surfaceY(world, cx, cz);
+        final int floatY = Math.min(world.getMaxHeight() - 10, sy + 12 + random.nextInt(8));
+        final Material[] pal = this.planetStructurePalette(definition.id());
+        final Material main = pal[0], floor = pal[1], slab = pal[2], accent = pal[3];
+        final int radius = 3 + random.nextInt(2);
+        // 平台主體
+        for (int dx = -radius; dx <= radius; dx++) {
+            for (int dz = -radius; dz <= radius; dz++) {
+                final double dist = Math.sqrt(dx * dx + dz * dz);
+                if (dist > radius + 0.3) continue;
+                world.getBlockAt(cx + dx, floatY, cz + dz).setType(dist >= radius - 0.8 ? slab : floor, false);
+                if (random.nextInt(3) == 0) {
+                    world.getBlockAt(cx + dx, floatY - 1, cz + dz).setType(main, false);
+                }
+            }
+        }
+        // 底部倒三角支撐
+        for (int layer = 1; layer <= 3; layer++) {
+            final int shrink = layer;
+            for (int dx = -radius + shrink; dx <= radius - shrink; dx++) {
+                for (int dz = -radius + shrink; dz <= radius - shrink; dz++) {
+                    if (random.nextInt(3) != 0) continue;
+                    world.getBlockAt(cx + dx, floatY - layer - 1, cz + dz).setType(main, false);
+                }
+            }
+        }
+        // 頂部建築 — 四柱 + 屋頂
+        for (int corner = 0; corner < 4; corner++) {
+            final int px = cx + (corner < 2 ? -(radius - 1) : (radius - 1));
+            final int pz = cz + (corner % 2 == 0 ? -(radius - 1) : (radius - 1));
+            for (int dy = 1; dy <= 3; dy++) {
+                world.getBlockAt(px, floatY + dy, pz).setType(main, false);
+            }
+            world.getBlockAt(px, floatY + 4, pz).setType(accent, false);
+        }
+        // 中央戰利品
+        this.populateLootBarrel(world.getBlockAt(cx, floatY + 1, cz), definition, random, 1);
+        // 連接地面的柱子（部分殘破）
+        final int pillarX = cx + (random.nextBoolean() ? -1 : 1);
+        final int pillarZ = cz + (random.nextBoolean() ? -1 : 1);
+        for (int y = sy + 1; y < floatY; y++) {
+            if (random.nextInt(4) != 0) {
+                world.getBlockAt(pillarX, y, pillarZ).setType(main, false);
+            }
+        }
+    }
+
+    /**
+     * 崖壁庇護所 — 偵測地形高度差，嵌入崖壁側面的房間。
+     */
+    private void buildCliffShelter(final PlanetDefinition definition, final World world,
+                                   final int cx, final int cz, final Random random) {
+        // 找到一側有明顯高度差的方向
+        final int[][] dirs = {{1, 0}, {-1, 0}, {0, 1}, {0, -1}};
+        int bestDir = -1;
+        int bestDrop = 0;
+        final int centerY = this.surfaceY(world, cx, cz);
+        for (int d = 0; d < dirs.length; d++) {
+            final int checkY = this.surfaceY(world, cx + dirs[d][0] * 4, cz + dirs[d][1] * 4);
+            final int drop = centerY - checkY;
+            if (drop > bestDrop) {
+                bestDrop = drop;
+                bestDir = d;
+            }
+        }
+        if (bestDrop < 4 || bestDir < 0) return;
+        final Material[] pal = this.planetStructurePalette(definition.id());
+        final Material wall = pal[0], floor = pal[1], accent = pal[3];
+        final int dx = dirs[bestDir][0];
+        final int dz = dirs[bestDir][1];
+        // 在崖壁面挖出洞穴 — 深 5 格、寬 3 格、高 4 格
+        final int entryY = centerY - bestDrop / 2;
+        for (int depth = 0; depth < 5; depth++) {
+            final int wx = cx + dx * depth;
+            final int wz = cz + dz * depth;
+            for (int side = -1; side <= 1; side++) {
+                final int sx = wx + (dx == 0 ? side : 0);
+                final int sz = wz + (dz == 0 ? side : 0);
+                world.getBlockAt(sx, entryY, sz).setType(floor, false);
+                for (int dy = 1; dy <= 3; dy++) {
+                    world.getBlockAt(sx, entryY + dy, sz).setType(Material.AIR, false);
+                }
+                world.getBlockAt(sx, entryY + 4, sz).setType(wall, false);
+            }
+        }
+        // 崖壁外的門框裝飾
+        final int frameX = cx - dx;
+        final int frameZ = cz - dz;
+        for (int dy = 1; dy <= 3; dy++) {
+            world.getBlockAt(frameX + (dx == 0 ? -2 : 0), entryY + dy, frameZ + (dz == 0 ? -2 : 0)).setType(wall, false);
+            world.getBlockAt(frameX + (dx == 0 ? 2 : 0), entryY + dy, frameZ + (dz == 0 ? 2 : 0)).setType(wall, false);
+        }
+        world.getBlockAt(frameX, entryY + 4, frameZ).setType(accent, false);
+        // 最深處放置戰利品
+        this.populateLootBarrel(world.getBlockAt(cx + dx * 4, entryY + 1, cz + dz * 4), definition, random, 1);
+    }
+
+    /**
+     * 古代拱門 — 大型裝飾性拱門結構，有時包含隱藏戰利品。
+     */
+    private void buildAncientArchway(final PlanetDefinition definition, final World world,
+                                     final int cx, final int cz, final Random random) {
+        final int sy = this.surfaceY(world, cx, cz);
+        if (!world.getBlockAt(cx, sy, cz).isSolid()) return;
+        final Material[] pal = this.planetStructurePalette(definition.id());
+        final Material pillar = pal[0], accent = pal[3];
+        final boolean alongX = random.nextBoolean();
+        final int height = 6 + random.nextInt(4);
+        final int span = 3 + random.nextInt(2);
+        // 雙柱
+        for (int dy = 1; dy <= height; dy++) {
+            world.getBlockAt(cx + (alongX ? -span : 0), sy + dy, cz + (alongX ? 0 : -span)).setType(pillar, false);
+            world.getBlockAt(cx + (alongX ? span : 0), sy + dy, cz + (alongX ? 0 : span)).setType(pillar, false);
+        }
+        // 拱頂
+        for (int i = -span; i <= span; i++) {
+            final int archY = sy + height + 1 - Math.abs(i) / 2;
+            world.getBlockAt(cx + (alongX ? i : 0), archY, cz + (alongX ? 0 : i)).setType(pillar, false);
+        }
+        // 頂部裝飾
+        world.getBlockAt(cx, sy + height + 2, cz).setType(accent, false);
+        // 底座裝飾
+        for (int side = -1; side <= 1; side += 2) {
+            final int bx = cx + (alongX ? side * span : side);
+            final int bz = cz + (alongX ? side : side * span);
+            world.getBlockAt(bx, sy + 1, bz).setType(accent, false);
+        }
+        // 拱門底部隱藏戰利品
+        if (random.nextInt(3) == 0) {
+            this.populateLootBarrel(world.getBlockAt(cx, sy + 1, cz), definition, random, 0);
+        }
+    }
+
+    // ═══ 戰利品桶填充 ═══
+
+    private static final String[][] PLANET_COMMON_LOOT = {
+        { "irradiated_shard", "void_bloom", "copper_wire", "iron_plate" },
+        { "cryonite_crystal", "frostbloom", "copper_wire", "iron_plate" },
+        { "voidglass_fragment", "echo_spore", "copper_wire", "glass_pane" },
+        { "solarite_shard", "emberroot", "iron_plate", "copper_wire" },
+        { "stormglass_shard", "ion_fern", "iron_plate", "glass_pane" }
+    };
+    private static final String[][] PLANET_UNCOMMON_LOOT = {
+        { "irradiated_shard", "aurelia_parasite_gland", "capacitor_bank", "void_bloom_seeds" },
+        { "cryonite_crystal", "cryon_ice_heart", "control_unit", "frostbloom_seeds" },
+        { "voidglass_fragment", "nyx_phase_tissue", "quantum_frame", "echo_spore_seeds" },
+        { "solarite_shard", "helion_cinder_core", "fusion_core", "emberroot_seeds" },
+        { "stormglass_shard", "tempest_capacitor", "fusion_core", "ion_fern_seeds" }
+    };
+    private static final String[][] PLANET_RARE_LOOT = {
+        { "planetary_relic", "aurelia_parasite_gland", "ancient_signal", "capacitor_bank" },
+        { "cryon_relic", "cryon_ice_heart", "ancient_signal", "control_unit" },
+        { "nyx_relic", "nyx_phase_tissue", "ancient_signal", "quantum_frame" },
+        { "helion_relic", "helion_cinder_core", "frontier_core_fragment", "fusion_core" },
+        { "tempest_relic", "tempest_capacitor", "frontier_core_fragment", "fusion_core" }
+    };
+
+    private int planetLootIndex(final String planetId) {
+        return switch (planetId) {
+            case "aurelia" -> 0;
+            case "cryon" -> 1;
+            case "nyx" -> 2;
+            case "helion" -> 3;
+            case "tempest" -> 4;
+            default -> 0;
+        };
+    }
+
+    private void populateLootBarrel(final Block block, final PlanetDefinition definition,
+                                    final Random random, final int tier) {
+        block.setType(Material.BARREL, false);
+        final Barrel barrel = (Barrel) block.getState();
+        final Inventory inv = barrel.getSnapshotInventory();
+        final int idx = this.planetLootIndex(definition.id());
+        final String[][] table = tier <= 0 ? PLANET_COMMON_LOOT : tier == 1 ? PLANET_UNCOMMON_LOOT : PLANET_RARE_LOOT;
+        final String[] pool = table[idx];
+        final int items = switch (tier) {
+            case 0 -> 3 + random.nextInt(3);
+            case 1 -> 4 + random.nextInt(3);
+            default -> 3 + random.nextInt(4);
+        };
+        for (int i = 0; i < items; i++) {
+            final String itemId = pool[random.nextInt(pool.length)];
+            final ItemStack stack = this.buildLootStack(itemId, 1 + random.nextInt(tier <= 0 ? 3 : tier == 1 ? 4 : 2));
+            if (stack != null) {
+                inv.setItem(random.nextInt(27), stack);
+            }
+        }
+        final PersistentDataContainer pdc = barrel.getPersistentDataContainer();
+        pdc.set(this.lootBarrelPlanetKey, PersistentDataType.STRING, definition.id());
+        pdc.set(this.lootBarrelTierKey, PersistentDataType.INTEGER, tier);
+        pdc.set(this.lootBarrelTimeKey, PersistentDataType.LONG, System.currentTimeMillis());
+        barrel.update(true, false);
+    }
+
+    private void refillLootBarrel(final Block block) {
+        if (block.getType() != Material.BARREL) return;
+        final Barrel barrel = (Barrel) block.getState();
+        final PersistentDataContainer pdc = barrel.getPersistentDataContainer();
+        final String planetId = pdc.get(this.lootBarrelPlanetKey, PersistentDataType.STRING);
+        final Integer tier = pdc.get(this.lootBarrelTierKey, PersistentDataType.INTEGER);
+        final Long lastFill = pdc.get(this.lootBarrelTimeKey, PersistentDataType.LONG);
+        if (planetId == null || tier == null || lastFill == null) return;
+        if (System.currentTimeMillis() - lastFill < LOOT_BARREL_REFILL_MS) return;
+        // 檢查桶內是否已被清空（至少拿走了一半以上的物品）
+        final Inventory inv = barrel.getSnapshotInventory();
+        int occupied = 0;
+        for (final ItemStack item : inv.getContents()) {
+            if (item != null && !item.getType().isAir()) occupied++;
+        }
+        if (occupied > 2) return;
+        // 刷新戰利品
+        inv.clear();
+        final PlanetDefinition definition = this.planets.get(planetId);
+        if (definition == null) return;
+        final Random random = new Random(System.currentTimeMillis() ^ block.getLocation().hashCode());
+        final int idx = this.planetLootIndex(definition.id());
+        final String[][] table = tier <= 0 ? PLANET_COMMON_LOOT : tier == 1 ? PLANET_UNCOMMON_LOOT : PLANET_RARE_LOOT;
+        final String[] pool = table[idx];
+        final int items = switch (tier) {
+            case 0 -> 3 + random.nextInt(3);
+            case 1 -> 4 + random.nextInt(3);
+            default -> 3 + random.nextInt(4);
+        };
+        for (int i = 0; i < items; i++) {
+            final String itemId = pool[random.nextInt(pool.length)];
+            final ItemStack stack = this.buildLootStack(itemId, 1 + random.nextInt(tier <= 0 ? 3 : tier == 1 ? 4 : 2));
+            if (stack != null) {
+                inv.setItem(random.nextInt(27), stack);
+            }
+        }
+        pdc.set(this.lootBarrelTimeKey, PersistentDataType.LONG, System.currentTimeMillis());
+        barrel.update(true, false);
+    }
+
+    private ItemStack buildLootStack(final String id, final int amount) {
+        final var techItem = this.registry.getItem(id);
+        if (techItem != null) {
+            final ItemStack stack = this.itemFactory.buildTechItem(techItem);
+            stack.setAmount(amount);
+            return stack;
+        }
+        try {
+            return new ItemStack(Material.valueOf(id.toUpperCase(Locale.ROOT)), amount);
+        } catch (final IllegalArgumentException ignored) {
+            return null;
+        }
+    }
+
     private void carvePlanetCrater(final PlanetDefinition definition,
                                    final World world,
                                    final int centerX,
@@ -2462,6 +3220,22 @@ public final class PlanetService {
         if (top.isEmpty()) {
             top.setType(shard, false);
         }
+    }
+
+    private void highlightRuinCore(final World world, final int x, final int y, final int z) {
+        final Location loc = new Location(world, x, y, z);
+        // 清除舊的發光標記
+        for (final Entity nearby : world.getNearbyEntities(loc.clone().add(0.5, 0.5, 0.5), 1.0, 1.0, 1.0)) {
+            if (nearby instanceof BlockDisplay bd && bd.getScoreboardTags().contains("ruin_glow")) {
+                bd.remove();
+            }
+        }
+        world.spawn(loc, BlockDisplay.class, display -> {
+            display.setBlock(world.getBlockAt(x, y, z).getBlockData());
+            display.setGlowing(true);
+            display.setPersistent(true);
+            display.addScoreboardTag("ruin_glow");
+        });
     }
 
     private void buildRuinRing(final World world,
@@ -3748,6 +4522,225 @@ public final class PlanetService {
         this.plugin.getPlayerProgressService().unlockByRequirement(player.getUniqueId(), "item:" + itemId);
     }
 
+    // ── 遺跡挑戰系統 ──────────────────────────────────────────
+
+    private void startRuinChallenge(final Player player, final PlanetDefinition definition, final Location coreLoc) {
+        final RuinChallenge challenge = new RuinChallenge(player.getUniqueId(), definition, coreLoc.clone());
+        this.activeRuinChallenges.put(player.getUniqueId(), challenge);
+
+        final World world = coreLoc.getWorld();
+        world.playSound(coreLoc, Sound.BLOCK_TRIAL_SPAWNER_ABOUT_TO_SPAWN_ITEM, 1.0f, 0.7f);
+        world.playSound(coreLoc, Sound.ENTITY_WARDEN_HEARTBEAT, 0.8f, 0.6f);
+        player.sendMessage(this.itemFactory.warning("⚔ 遺跡核心已覺醒！準備迎戰…"));
+
+        this.scheduler.runRegionDelayed(coreLoc, task -> this.spawnRuinWave(challenge), RUIN_WAVE_DELAY_TICKS);
+    }
+
+    private void spawnRuinWave(final RuinChallenge challenge) {
+        if (challenge.failed || challenge.completed) {
+            return;
+        }
+        final Player player = Bukkit.getPlayer(challenge.playerId);
+        if (player == null || !player.isOnline()) {
+            this.cleanupRuinChallenge(challenge, false);
+            return;
+        }
+        final int waveIndex = challenge.currentWave;
+        if (waveIndex >= RUIN_WAVE_COUNTS.length) {
+            this.completeRuinChallenge(challenge, player);
+            return;
+        }
+        final int mobCount = RUIN_WAVE_COUNTS[waveIndex];
+        final World world = challenge.coreLocation.getWorld();
+        if (world == null) {
+            return;
+        }
+
+        challenge.waveStartTick = world.getFullTime();
+
+        final int waveNum = waveIndex + 1;
+        player.sendMessage(this.itemFactory.secondary("▸ 第 " + waveNum + "/" + RUIN_WAVE_COUNTS.length + " 波 — " + mobCount + " 隻敵人逼近！"));
+        world.playSound(challenge.coreLocation, Sound.BLOCK_TRIAL_SPAWNER_SPAWN_MOB, 1.0f, 0.8f + waveIndex * 0.15f);
+
+        final Particle.DustOptions dust = this.planetSpawnDust(challenge.definition.id());
+        world.spawnParticle(Particle.DUST, challenge.coreLocation.clone().add(0.5, 2.0, 0.5), 40, 1.5, 1.0, 1.5, 0.02, dust);
+
+        for (int i = 0; i < mobCount; i++) {
+            final double angle = Math.toRadians((360.0 / mobCount) * i + waveIndex * 30);
+            final double radius = 6.0 + waveIndex * 2.0;
+            final int sx = challenge.coreLocation.getBlockX() + (int) Math.round(Math.cos(angle) * radius);
+            final int sz = challenge.coreLocation.getBlockZ() + (int) Math.round(Math.sin(angle) * radius);
+            final Location regionAnchor = new Location(world, sx + 0.5, 64, sz + 0.5);
+
+            this.scheduler.runRegion(regionAnchor, task -> {
+                if (challenge.failed || challenge.completed) return;
+                final int sy = world.getHighestBlockYAt(sx, sz, HeightMap.MOTION_BLOCKING_NO_LEAVES) + 1;
+                final Location spawnLoc = new Location(world, sx + 0.5, sy, sz + 0.5);
+                final org.bukkit.entity.EntityType mobType = this.planetMobTypeFor(challenge.definition);
+                if (mobType == null) return;
+
+                final Entity spawned = world.spawnEntity(spawnLoc, mobType);
+                if (!(spawned instanceof LivingEntity living)) {
+                    spawned.remove();
+                    return;
+                }
+                living.addScoreboardTag(RUIN_CHALLENGE_MOB_TAG);
+                living.addScoreboardTag(RUIN_CHALLENGE_MOB_TAG + ":" + challenge.playerId);
+                living.setRemoveWhenFarAway(false);
+                living.setPersistent(true);
+                living.setGlowing(true);
+
+                // 波數越高越強
+                final double hpMultiplier = 1.0 + waveIndex * 0.4;
+                this.adjustAttribute(living, Attribute.MAX_HEALTH, hpMultiplier, 0.0, 6.0);
+                final var maxHp = living.getAttribute(Attribute.MAX_HEALTH);
+                if (maxHp != null) living.setHealth(Math.max(1.0, maxHp.getValue()));
+                this.adjustAttribute(living, Attribute.ATTACK_DAMAGE, 1.0, waveIndex * 1.0, 2.0);
+
+                // 最後一波的怪物有精英特效
+                if (waveIndex == RUIN_WAVE_COUNTS.length - 1) {
+                    this.tryEmpowerPlanetMob(living);
+                }
+
+                if (living instanceof Mob mob) {
+                    mob.setTarget(player);
+                }
+
+                challenge.aliveMobs.add(spawned.getUniqueId());
+
+                world.spawnParticle(Particle.DUST, spawnLoc.clone().add(0, 0.5, 0), 15, 0.4, 0.6, 0.4, 0.01, dust);
+                world.spawnParticle(Particle.SMOKE, spawnLoc, 8, 0.3, 0.1, 0.3, 0.02);
+            });
+        }
+
+        // 超時檢查
+        this.scheduler.runGlobalDelayed(task -> this.checkRuinWaveTimeout(challenge), RUIN_WAVE_TIMEOUT_TICKS);
+    }
+
+    private void checkRuinWaveTimeout(final RuinChallenge challenge) {
+        if (challenge.failed || challenge.completed) {
+            return;
+        }
+        if (!challenge.aliveMobs.isEmpty()) {
+            final Player player = Bukkit.getPlayer(challenge.playerId);
+            if (player != null) {
+                player.sendMessage(this.itemFactory.warning("✘ 遺跡挑戰超時，核心陷入休眠…"));
+            }
+            this.cleanupRuinChallenge(challenge, true);
+        }
+    }
+
+    public void onRuinChallengeMobDeath(final LivingEntity entity) {
+        final java.util.UUID entityId = entity.getUniqueId();
+        for (final RuinChallenge challenge : this.activeRuinChallenges.values()) {
+            if (!challenge.aliveMobs.remove(entityId)) {
+                continue;
+            }
+            if (challenge.failed || challenge.completed) {
+                return;
+            }
+            if (!challenge.aliveMobs.isEmpty()) {
+                final Player player = Bukkit.getPlayer(challenge.playerId);
+                if (player != null) {
+                    player.sendActionBar(this.itemFactory.secondary("剩餘敵人：" + challenge.aliveMobs.size()));
+                }
+                return;
+            }
+            // 目前波數清完
+            challenge.currentWave++;
+            if (challenge.currentWave >= RUIN_WAVE_COUNTS.length) {
+                final Player player = Bukkit.getPlayer(challenge.playerId);
+                if (player != null) {
+                    this.completeRuinChallenge(challenge, player);
+                }
+                return;
+            }
+            // 下一波
+            final Player player = Bukkit.getPlayer(challenge.playerId);
+            if (player != null) {
+                final World world = challenge.coreLocation.getWorld();
+                if (world != null) {
+                    world.playSound(challenge.coreLocation, Sound.BLOCK_NOTE_BLOCK_BELL, 1.0f, 1.4f);
+                    player.sendMessage(this.itemFactory.success("✓ 波數清除！下一波即將到來…"));
+                }
+            }
+            this.scheduler.runRegionDelayed(challenge.coreLocation, task -> this.spawnRuinWave(challenge), RUIN_WAVE_DELAY_TICKS);
+            return;
+        }
+    }
+
+    private void completeRuinChallenge(final RuinChallenge challenge, final Player player) {
+        challenge.completed = true;
+        this.activeRuinChallenges.remove(challenge.playerId);
+
+        final PlanetDefinition definition = challenge.definition;
+        final World world = challenge.coreLocation.getWorld();
+
+        // 獎勵
+        final List<ItemStack> rewards = this.buildRewardStacks(definition.ruinRewardIds());
+        final StringJoiner rewardNames = new StringJoiner("、");
+        for (final ItemStack reward : rewards) {
+            final Map<Integer, ItemStack> overflow = player.getInventory().addItem(reward);
+            for (final ItemStack leftover : overflow.values()) {
+                world.dropItemNaturally(challenge.coreLocation.clone().add(0.5, 1.0, 0.5), leftover);
+            }
+            final String rewardId = this.itemFactory.getTechItemId(reward);
+            if (rewardId != null) {
+                this.unlockPlanetItem(player, rewardId);
+                rewardNames.add(this.itemFactory.displayNameForId(rewardId));
+            }
+        }
+
+        // 額外獎勵 — 精英掉落
+        final PlanetEliteProfile eliteProfile = this.eliteProfileFor(definition);
+        if (eliteProfile != null && this.registry.getItem(eliteProfile.combatSampleId()) != null) {
+            final ItemStack bonus = this.itemFactory.buildTechItem(this.registry.getItem(eliteProfile.combatSampleId()));
+            final Map<Integer, ItemStack> overflow = player.getInventory().addItem(bonus);
+            for (final ItemStack leftover : overflow.values()) {
+                world.dropItemNaturally(challenge.coreLocation.clone().add(0.5, 1.0, 0.5), leftover);
+            }
+            this.unlockPlanetItem(player, eliteProfile.combatSampleId());
+            rewardNames.add(this.itemFactory.displayNameForId(eliteProfile.combatSampleId()));
+        }
+
+        this.plugin.getPlayerProgressService().incrementStat(player.getUniqueId(), "planet_ruins_activated", 1);
+
+        // 特效
+        if (world != null) {
+            world.spawnParticle(Particle.END_ROD, challenge.coreLocation.clone().add(0.5, 1.5, 0.5), 60, 1.0, 1.5, 1.0, 0.08);
+            world.spawnParticle(Particle.TRIAL_SPAWNER_DETECTION, challenge.coreLocation.clone().add(0.5, 1.2, 0.5), 30, 1.0, 1.0, 1.0, 0.02);
+            world.spawnParticle(Particle.TOTEM_OF_UNDYING, player.getLocation().add(0, 1, 0), 40, 0.5, 1.0, 0.5, 0.3);
+            world.playSound(challenge.coreLocation, Sound.UI_TOAST_CHALLENGE_COMPLETE, 1.0f, 1.0f);
+            world.playSound(challenge.coreLocation, Sound.BLOCK_BEACON_ACTIVATE, 0.8f, 1.2f);
+        }
+
+        final String rewardSuffix = rewardNames.length() > 0 ? "，獲得：" + rewardNames : "。";
+        player.sendMessage(this.itemFactory.success("★ 遺跡挑戰完成！" + definition.displayName() + " 核心已同步" + rewardSuffix));
+    }
+
+    private void cleanupRuinChallenge(final RuinChallenge challenge, final boolean markFailed) {
+        if (markFailed) {
+            challenge.failed = true;
+        }
+        this.activeRuinChallenges.remove(challenge.playerId);
+        // 移除殘存怪物
+        for (final java.util.UUID mobId : challenge.aliveMobs) {
+            final Entity entity = Bukkit.getEntity(mobId);
+            if (entity != null && entity.isValid()) {
+                this.scheduler.runEntity(entity, entity::remove);
+            }
+        }
+        challenge.aliveMobs.clear();
+        // 失敗時的音效
+        if (markFailed && challenge.coreLocation.getWorld() != null) {
+            challenge.coreLocation.getWorld().playSound(challenge.coreLocation, Sound.BLOCK_RESPAWN_ANCHOR_DEPLETE, 0.8f, 0.6f);
+        }
+    }
+
+    public boolean hasActiveRuinChallenge(final java.util.UUID playerId) {
+        return this.activeRuinChallenges.containsKey(playerId);
+    }
+
     private PlanetEliteProfile eliteProfileFor(final PlanetDefinition definition) {
         if (definition == null) {
             return null;
@@ -4362,6 +5355,7 @@ public final class PlanetService {
                             return;
                         }
                         this.plugin.getPlayerProgressService().incrementStat(player.getUniqueId(), "planets_visited", 1);
+                        this.plugin.getPlayerProgressService().setStatMax(player.getUniqueId(), "planet_visited_" + destination.id(), 1);
                         player.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 16, 0, false, false, true));
                         player.addPotionEffect(new PotionEffect(PotionEffectType.DARKNESS, 20, 0, false, false, true));
                         this.showTravelTitle(player,

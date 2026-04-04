@@ -19,7 +19,7 @@ items:
     family: quarry_drill
     role: drill-component
     icon: NETHERITE_PICKAXE
-    item-model: "-1"
+    item-model: "nexo:drill_head"
     description: 強化鑽頭組，用於真正的採礦設備。
     unlock: machine:compressor&item:steel_plate
     use-cases:
@@ -66,7 +66,7 @@ items:
     category: ADVANCED
     tier: TIER2
     icon: WIND_CHARGE
-    item-model: "-1"
+    item-model: "nexo:storm_rotor"
     description: 風暴轉子，在惡劣天氣下可大幅提升發電效率。
     unlock: machine:wire_mill&item:steel_wire
     use-cases:
@@ -107,7 +107,7 @@ items:
     display-name: 林業機架
     category: INTERMEDIATE
     icon: OAK_FENCE
-    item-model: "-1"
+    item-model: "nexo:arbor_frame"
     description: 林業機械骨架，適合部署戶外伐木設備。
     unlock: machine:assembler&item:machine_component
     use-cases:
@@ -137,7 +137,7 @@ items:
     display-name: 碼頭骨架
     category: INTERMEDIATE
     icon: OAK_SLAB
-    item-model: "-1"
+    item-model: "nexo:dock_frame"
     description: 水上平台骨架，可承載釣魚與吸納機構。
     unlock: machine:assembler&item:pressure_tube
     use-cases:
@@ -473,210 +473,245 @@ recipes:
   drill_head_recipe:
     machine: assembler
     inputs: [steel_plate, titanium_alloy]
+    input-amounts: [1, 1]
     output: drill_head
     energy: 18
     guide: 鋼板 + 鈦合金 → 製造機 → 鑽頭組
   quarry_frame_recipe:
     machine: assembler
     inputs: [machine_component, alloy_frame]
+    input-amounts: [1, 1]
     output: quarry_frame
     energy: 16
     guide: 機械零件 + 合金框架 → 製造機 → 採礦機架
   harvest_matrix_recipe:
     machine: assembler
     inputs: [agri_module, signal_relay]
+    input-amounts: [1, 1]
     output: harvest_matrix
     energy: 15
     guide: 農業模組 + 訊號中繼器 → 製造機 → 收割矩陣
   vacuum_core_recipe:
     machine: assembler
     inputs: [signal_relay, pressure_tube]
+    input-amounts: [1, 1]
     output: vacuum_core
     energy: 15
     guide: 訊號中繼器 + 壓力導管 → 製造機 → 真空核心
   storm_rotor_recipe:
     machine: wire_mill
     inputs: [steel_wire, magnetic_ring]
+    input-amounts: [1, 1]
     output: storm_rotor
     energy: 16
     guide: 鋼線 + 磁環 → 拉線機 → 風暴轉子
   weather_sensor_recipe:
     machine: insulation_press
     inputs: [sensor_array, insulated_wire]
+    input-amounts: [1, 1]
     output: weather_sensor
     energy: 15
     guide: 感測陣列 + 絕緣導線 → 絕緣壓床 → 天候感測器
   field_processor_recipe:
     machine: advanced_assembler
     inputs: [control_unit, logic_gate]
+    input-amounts: [2, 1]
     output: field_processor
     energy: 22
     guide: 控制單元 + 邏輯閘 → 進階製造機 → 戶外處理器
   quarry_drill_recipe:
     machine: advanced_assembler
     inputs: [drill_head, quarry_frame]
+    input-amounts: [2, 1]
     output: quarry_drill
     energy: 24
     guide: 鑽頭組 + 採礦機架 → 進階製造機 → 採礦鑽機
   quarry_drill_mk2_recipe:
     machine: advanced_assembler
     inputs: [quarry_drill, capacitor_bank, control_unit]
+    input-amounts: [1, 1, 1]
     output: quarry_drill_mk2
     energy: 38
     guide: 採礦鑽機 + 電容組 + 控制單元 → 進階製造機 → 採礦鑽機二型
   quarry_drill_mk3_recipe:
     machine: quantum_processor
     inputs: [quarry_drill_mk2, fusion_core, quantum_frame]
+    input-amounts: [1, 1, 1]
     output: quarry_drill_mk3
     energy: 56
     guide: 採礦鑽機二型 + 聚變核心 + 量子框架 → 量子處理器 → 採礦鑽機三型
   crop_harvester_recipe:
     machine: assembler
     inputs: [harvest_matrix, agri_module]
+    input-amounts: [1, 1]
     output: crop_harvester
     energy: 18
     guide: 收割矩陣 + 農業模組 → 製造機 → 作物收割機
   vacuum_inlet_recipe:
     machine: assembler
     inputs: [vacuum_core, machine_casing]
+    input-amounts: [1, 1]
     output: vacuum_inlet
     energy: 17
     guide: 真空核心 + 機械外殼 → 製造機 → 真空吸入口
   storm_turbine_recipe:
     machine: advanced_assembler
     inputs: [storm_rotor, weather_sensor]
+    input-amounts: [2, 1]
     output: storm_turbine
     energy: 26
     guide: 風暴轉子 + 天候感測器 → 進階製造機 → 風暴渦輪機
   logging_blade_recipe:
     machine: assembler
     inputs: [steel_plate, servo_motor]
+    input-amounts: [1, 1]
     output: logging_blade
     energy: 16
     guide: 鋼板 + 伺服馬達 → 製造機 → 伐木刀組
   arbor_frame_recipe:
     machine: assembler
     inputs: [machine_component, treated_plastic]
+    input-amounts: [1, 1]
     output: arbor_frame
     energy: 15
     guide: 機械零件 + 處理塑膠 → 製造機 → 林業機架
   tree_feller_recipe:
     machine: assembler
     inputs: [logging_blade, arbor_frame]
+    input-amounts: [1, 1]
     output: tree_feller
     energy: 18
     guide: 伐木刀組 + 林業機架 → 製造機 → 伐木機
   bait_module_recipe:
     machine: bio_lab
     inputs: [bio_resin, crops]
+    input-amounts: [1, 1]
     output: bait_module
     energy: 12
     guide: 生質樹脂 + 作物 → 生質實驗室 → 誘餌模組
   dock_frame_recipe:
     machine: assembler
     inputs: [pressure_tube, composite_panel]
+    input-amounts: [1, 1]
     output: dock_frame
     energy: 15
     guide: 壓力導管 + 複合面板 → 製造機 → 碼頭骨架
   fishing_dock_recipe:
     machine: assembler
     inputs: [bait_module, dock_frame]
+    input-amounts: [1, 1]
     output: fishing_dock
     energy: 18
     guide: 誘餌模組 + 碼頭骨架 → 製造機 → 自動釣台
   net_launcher_recipe:
     machine: advanced_assembler
     inputs: [field_processor, servo_motor]
+    input-amounts: [2, 1]
     output: net_launcher
     energy: 22
     guide: 戶外處理器 + 伺服馬達 → 進階製造機 → 捕網發射器
   mob_collector_recipe:
     machine: advanced_assembler
     inputs: [net_launcher, field_processor]
+    input-amounts: [2, 1]
     output: mob_collector
     energy: 24
     guide: 捕網發射器 + 戶外處理器 → 進階製造機 → 生物收集器
   storage_crate_recipe:
     machine: assembler
     inputs: [machine_casing, plastic, wiring_bundle]
+    input-amounts: [1, 1, 1]
     output: storage_crate
     energy: 15
     guide: 機械外殼 + 塑膠 + 工業線束 → 製造機 → 儲物箱
   storage_hub_recipe:
     machine: assembler
     inputs: [storage_crate, machine_casing, wiring_bundle]
+    input-amounts: [1, 1, 1]
     output: storage_hub
     energy: 17
     guide: 儲物箱 + 機械外殼 + 工業線束 → 製造機 → 倉儲匯流站
   routing_chip_recipe:
     machine: laser_engraver
     inputs: [etched_circuit, logic_gate, wiring_bundle]
+    input-amounts: [1, 1, 1]
     output: routing_chip
     energy: 20
     guide: 蝕刻電路 + 邏輯閘 + 工業線束 → 雷射雕刻機 → 路由晶片
   filter_mesh_core_recipe:
     machine: advanced_assembler
     inputs: [routing_chip, nano_coating, purifier_membrane]
+    input-amounts: [1, 1, 1]
     output: filter_mesh_core
     energy: 24
     guide: 路由晶片 + 奈米塗層 + 淨化膜片 → 進階製造機 → 過濾網核心
   filter_router_recipe:
     machine: advanced_assembler
     inputs: [filter_mesh_core, routing_chip, purifier_membrane]
+    input-amounts: [1, 1, 1]
     output: filter_router
     energy: 25
     guide: 過濾網核心 + 路由晶片 + 淨化膜片 → 進階製造機 → 過濾路由器
   splitter_core_recipe:
     machine: assembler
     inputs: [routing_chip, signal_relay, servo_motor]
+    input-amounts: [1, 1, 1]
     output: splitter_core
     energy: 18
     guide: 路由晶片 + 訊號中繼器 + 伺服馬達 → 製造機 → 分流核心
   splitter_node_recipe:
     machine: assembler
     inputs: [splitter_core, routing_chip, servo_motor]
+    input-amounts: [1, 1, 1]
     output: splitter_node
     energy: 20
     guide: 分流核心 + 路由晶片 + 伺服馬達 → 製造機 → 分流節點
   bus_frame_recipe:
     machine: wire_mill
     inputs: [steel_wire, copper_wire, centrifuge_rotor]
+    input-amounts: [1, 1, 1]
     output: bus_frame
     energy: 20
     guide: 鋼線 + 銅線 + 離心轉子 → 拉線機 → 總線機架
   industrial_bus_recipe:
     machine: advanced_assembler
     inputs: [bus_frame, storage_crate, routing_chip, centrifuge_rotor]
+    input-amounts: [1, 1, 1, 1]
     output: industrial_bus
     energy: 26
     guide: 總線機架 + 儲物箱 + 路由晶片 + 離心轉子 → 進階製造機 → 工業總線
   cargo_input_node_recipe:
     machine: assembler
     inputs: [routing_chip, servo_motor, storage_crate]
+    input-amounts: [1, 1, 1]
     output: cargo_input_node
     energy: 20
     guide: 路由晶片 + 伺服馬達 + 儲物箱 → 製造機 → 貨物抽取節點
   cargo_manager_recipe:
     machine: advanced_assembler
     inputs: [bus_frame, routing_chip, control_unit, signal_relay]
+    input-amounts: [1, 1, 1, 1]
     output: cargo_manager
     energy: 28
     guide: 總線機架 + 路由晶片 + 控制單元 + 訊號中繼器 → 進階製造機 → 貨物管理站
   trash_node_recipe:
     machine: assembler
     inputs: [machine_casing, lava_bucket]
+    input-amounts: [1, 1]
     output: trash_node
     energy: 12
     guide: 機械外殼 + 岩漿桶 → 製造機 → 銷毀節點
   cargo_output_node_recipe:
     machine: assembler
-    inputs: [routing_chip, servo_motor, storage_crate]
+    inputs: [routing_chip, servo_motor, pressure_tube]
+    input-amounts: [1, 1, 1]
     output: cargo_output_node
     energy: 20
-    guide: 路由晶片 + 伺服馬達 + 儲物箱 → 製造機 → 貨物輸出節點
+    guide: 路由晶片 + 伺服馬達 + 壓力管 → 製造機 → 貨物輸出節點
   cargo_motor_recipe:
     machine: assembler
     inputs: [bus_frame, servo_motor, routing_chip]
+    input-amounts: [1, 1, 1]
     output: cargo_motor
     energy: 22
     guide: 總線機架 + 伺服馬達 + 路由晶片 → 製造機 → 貨物驅動器

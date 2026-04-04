@@ -573,7 +573,7 @@ items:
     display-name: "奈米塗層"
     category: ADVANCED
     icon: PHANTOM_MEMBRANE
-    # item-model: techproject:item/nano_coating
+    item-model: "nexo:nano_coating"
     # nexo-id: nano_coating
     description: "高階機器薄膜材料。"
     unlock: "advanced_assembler"
@@ -642,6 +642,18 @@ items:
       - "蹲下+右鍵：瞬間拆除科技方塊"
       - "保留機器儲存的能源"
       - "合成器配方：鐵板 + 銅錠"
+  logistics_wrench:
+    display-name: "物流扳手"
+    category: INTERMEDIATE
+    icon: GOLDEN_SHOVEL
+    item-model: "nexo:tech_wrench"
+    description: "快速設定機器物流方向的專用工具。左鍵設定輸入面，右鍵設定輸出面；電流機器改為設定電力方向。"
+    unlock: "assembler"
+    use-cases:
+      - "左鍵機器某一面：設定為輸入方向"
+      - "右鍵機器某一面：設定為輸出方向"
+      - "電流機器：左鍵設定收電面、右鍵設定送電面"
+      - "合成器配方：科技扳手 + 邏輯閘"
   wood_dust:
     display-name: "木屑"
     category: BASIC
@@ -771,7 +783,7 @@ items:
     display-name: "反應爐核心"
     category: ADVANCED
     icon: BLAZE_ROD
-    # item-model: techproject:item/reactor_core
+    item-model: "nexo:reactor_core"
     # nexo-id: reactor_core
     description: "高階能源核心。"
     unlock: "advanced_assembler"
@@ -784,7 +796,7 @@ items:
     category: INTERMEDIATE
     icon: GLASS_BOTTLE
     item-model: "nexo:reinforced_glass"
-    # nexo-id: reinforced_glass
+    nexo-id: reinforced_glass
     description: "耐壓透明結構。"
     unlock: "furnace"
     use-cases:
@@ -797,7 +809,7 @@ items:
     tier: TIER2
     icon: NETHERITE_SCRAP
     item-model: "nexo:titanium_alloy"
-    # nexo-id: titanium_alloy
+    nexo-id: titanium_alloy
     description: "高強度輕量合金。"
     unlock: "smeltery"
     use-cases:
@@ -879,7 +891,7 @@ items:
     category: INTERMEDIATE
     icon: LEAD
     item-model: "nexo:alloy_frame"
-    # nexo-id: alloy_frame
+    nexo-id: alloy_frame
     description: "合金機架。"
     unlock: "smeltery"
     use-cases:
@@ -914,7 +926,7 @@ items:
     display-name: "電漿電池"
     category: ADVANCED
     icon: MAGMA_CREAM
-    # item-model: techproject:item/plasma_cell
+    item-model: "nexo:plasma_cell"
     # nexo-id: plasma_cell
     description: "高溫等離子容器。"
     unlock: "advanced_assembler"
@@ -951,7 +963,7 @@ items:
     category: INTERMEDIATE
     icon: REDSTONE
     item-model: "nexo:servo_motor"
-    # nexo-id: servo_motor
+    nexo-id: servo_motor
     description: "自動化執行元件。"
     unlock: "assembler"
     use-cases:
@@ -963,7 +975,7 @@ items:
     category: INTERMEDIATE
     icon: BLAZE_POWDER
     item-model: "nexo:heat_coil"
-    # nexo-id: heat_coil
+    nexo-id: heat_coil
     description: "高溫線圈。"
     unlock: "furnace"
     use-cases:
@@ -1121,7 +1133,7 @@ items:
     display-name: "量子流體"
     category: ADVANCED
     icon: EXPERIENCE_BOTTLE
-    # item-model: techproject:item/quantum_fluid
+    item-model: "nexo:quantum_fluid"
     # nexo-id: quantum_fluid
     description: "量子流體。"
     unlock: "quantum_processor"
@@ -1276,7 +1288,7 @@ items:
     display-name: "相位板"
     category: ADVANCED
     icon: CHORUS_FRUIT
-    # item-model: techproject:item/phase_plate
+    item-model: "nexo:phase_plate"
     # nexo-id: phase_plate
     description: "相位強化材料。"
     unlock: "quantum_processor"
@@ -1300,7 +1312,7 @@ items:
     display-name: "力場發射器"
     category: ADVANCED
     icon: ECHO_SHARD
-    # item-model: techproject:item/field_emitter
+    item-model: "nexo:field_emitter"
     # nexo-id: field_emitter
     description: "力場發生器。"
     unlock: "field_forge"
@@ -1313,7 +1325,7 @@ items:
     category: INTERMEDIATE
     icon: SHIELD
     item-model: "nexo:machine_casing"
-    # nexo-id: machine_casing
+    nexo-id: machine_casing
     description: "標準機器外殼。"
     unlock: "assembler"
     use-cases:
@@ -1324,7 +1336,7 @@ items:
     display-name: "離子粉"
     category: ADVANCED
     icon: GLOWSTONE_DUST
-    # item-model: techproject:item/ion_dust
+    item-model: "nexo:ion_dust"
     # nexo-id: ion_dust
     description: "高能離子粉末。"
     unlock: "centrifuge"
@@ -1336,7 +1348,7 @@ items:
     display-name: "磁環"
     category: INTERMEDIATE
     icon: NAUTILUS_SHELL
-    # item-model: techproject:item/magnetic_ring
+    item-model: "nexo:magnetic_ring"
     # nexo-id: magnetic_ring
     description: "磁場控制零件。"
     unlock: "centrifuge"
@@ -1346,6 +1358,7 @@ items:
       - "支援配方與解鎖鏈"
   centrifuge_rotor:
     display-name: "離心轉子"
+    item-model: "nexo:centrifuge_rotor"
     category: ADVANCED
     icon: LIGHT_WEIGHTED_PRESSURE_PLATE
     description: "能承受高速旋轉的離心總成。"
@@ -1486,7 +1499,7 @@ items:
     category: INTERMEDIATE
     icon: HONEY_BOTTLE
     item-model: "nexo:polymer_resin"
-    # nexo-id: polymer_resin
+    nexo-id: polymer_resin
     description: "化工聚合原液。"
     unlock: "polymer_press"
     use-cases:
@@ -1498,7 +1511,7 @@ items:
     category: INTERMEDIATE
     icon: SLIME_BALL
     item-model: "nexo:treated_plastic"
-    # nexo-id: treated_plastic
+    nexo-id: treated_plastic
     description: "強化塑膠結構件。"
     unlock: "polymer_press"
     use-cases:
@@ -1510,7 +1523,7 @@ items:
     category: INTERMEDIATE
     icon: WHITE_WOOL
     item-model: "nexo:synthetic_fiber"
-    # nexo-id: synthetic_fiber
+    nexo-id: synthetic_fiber
     description: "合成纖維材料。"
     unlock: "chemical_reactor"
     use-cases:
@@ -1544,7 +1557,7 @@ items:
     display-name: "雷射鏡"
     category: INTERMEDIATE
     icon: END_CRYSTAL
-    # item-model: techproject:item/laser_lens
+    item-model: "nexo:laser_lens"
     # nexo-id: laser_lens
     description: "雷射聚焦透鏡。"
     unlock: "laser_engraver"
@@ -1697,7 +1710,7 @@ items:
     display-name: "精密噴嘴"
     category: INTERMEDIATE
     icon: FIRE_CHARGE
-    # item-model: techproject:item/precision_nozzle
+    item-model: "nexo:precision_nozzle"
     # nexo-id: precision_nozzle
     description: "精密噴嘴組件。"
     unlock: "chemical_reactor"
@@ -1852,6 +1865,7 @@ items:
       - "鋅粉 → 熔爐 → 鋅錠"
   bronze_ingot:
     display-name: "青銅錠"
+    item-model: "nexo:bronze_ingot"
     category: INTERMEDIATE
     icon: COPPER_INGOT
     description: "銅與錫的合金，比純銅更堅韌耐用，機械零件的核心材料。"
@@ -1862,6 +1876,7 @@ items:
       - "青銅齒輪、機械零件"
   bronze_dust:
     display-name: "青銅粉"
+    item-model: "nexo:bronze_dust"
     category: INTERMEDIATE
     icon: BROWN_DYE
     description: "青銅錠粉碎後得到的合金粉末。"
@@ -1871,6 +1886,7 @@ items:
       - "青銅粉 → 熔爐 → 青銅錠"
   solder_alloy:
     display-name: "焊錫合金"
+    item-model: "nexo:solder_alloy"
     category: INTERMEDIATE
     icon: CHAIN
     description: "鉛鋅合金，電子焊接必備材料，電路板不可缺少。"
@@ -1880,6 +1896,7 @@ items:
       - "電路板、電子零件"
   solder_alloy_dust:
     display-name: "焊錫合金粉"
+    item-model: "nexo:solder_alloy_dust"
     category: INTERMEDIATE
     icon: LIGHT_GRAY_DYE
     description: "焊錫合金粉碎後得到的細緻粉末。"
@@ -1889,6 +1906,7 @@ items:
       - "焊錫合金粉 → 熔爐 → 焊錫合金"
   brass_ingot:
     display-name: "黃銅錠"
+    item-model: "nexo:brass_ingot"
     category: INTERMEDIATE
     icon: GOLD_INGOT
     description: "銅鋅合金，導電性優秀，進階電路的材料。"
@@ -1898,6 +1916,7 @@ items:
       - "進階電路、導線"
   brass_dust:
     display-name: "黃銅粉"
+    item-model: "nexo:brass_dust"
     category: INTERMEDIATE
     icon: YELLOW_DYE
     description: "黃銅錠粉碎後得到的合金粉末。"
@@ -2460,6 +2479,7 @@ recipes:
   crusher_iron_ore:
     machine: "crusher"
     inputs: ["iron_ore"]
+    input-amounts: [1]
     output: "iron_dust"
     count: 2
     energy: 8
@@ -2467,6 +2487,7 @@ recipes:
   crusher_copper_ore:
     machine: "crusher"
     inputs: ["copper_ore"]
+    input-amounts: [1]
     output: "copper_dust"
     count: 2
     energy: 8
@@ -2474,6 +2495,7 @@ recipes:
   crusher_quartz:
     machine: "crusher"
     inputs: ["quartz"]
+    input-amounts: [1]
     output: "silicon"
     count: 2
     energy: 10
@@ -2481,6 +2503,7 @@ recipes:
   crusher_raw_iron:
     machine: "crusher"
     inputs: ["raw_iron"]
+    input-amounts: [1]
     output: "iron_dust"
     count: 2
     energy: 8
@@ -2488,6 +2511,7 @@ recipes:
   crusher_raw_copper:
     machine: "crusher"
     inputs: ["raw_copper"]
+    input-amounts: [1]
     output: "copper_dust"
     count: 2
     energy: 8
@@ -2495,6 +2519,7 @@ recipes:
   crusher_coal:
     machine: "crusher"
     inputs: ["coal"]
+    input-amounts: [1]
     output: "coal_dust"
     count: 2
     energy: 8
@@ -2502,12 +2527,14 @@ recipes:
   compressor_iron_plate:
     machine: "compressor"
     inputs: ["iron_ingot"]
+    input-amounts: [2]
     output: "iron_plate"
     energy: 12
     guide: "鐵錠 → 壓縮機 → 鐵板"
   furnace_iron_dust:
     machine: "furnace"
     inputs: ["iron_dust"]
+    input-amounts: [1]
     output: "iron_ingot"
     energy: 16
     allow-stack-bonus: false
@@ -2515,13 +2542,15 @@ recipes:
   furnace_copper_dust:
     machine: "furnace"
     inputs: ["copper_dust"]
-    output: "COPPER_INGOT"
+    input-amounts: [1]
+    output: "copper_ingot"
     energy: 16
     allow-stack-bonus: false
     guide: "銅粉 → 熔爐 → 銅錠"
   crusher_iron_ingot:
     machine: "crusher"
     inputs: ["iron_ingot"]
+    input-amounts: [1]
     output: "iron_dust"
     count: 1
     energy: 8
@@ -2530,6 +2559,7 @@ recipes:
   crusher_copper_ingot:
     machine: "crusher"
     inputs: ["copper_ingot"]
+    input-amounts: [1]
     output: "copper_dust"
     count: 1
     energy: 8
@@ -2538,666 +2568,784 @@ recipes:
   furnace_glass:
     machine: "furnace"
     inputs: ["glass"]
+    input-amounts: [1]
     output: "glass_panel"
     energy: 14
     guide: "玻璃 → 熔爐 → 玻璃板"
   furnace_reinforced_glass:
     machine: "furnace"
     inputs: ["glass_panel", "carbon_mesh"]
+    input-amounts: [1, 1]
     output: "reinforced_glass"
     energy: 18
     guide: "玻璃板 + 碳纖網 → 熔爐 → 強化玻璃"
   furnace_heat_coil:
     machine: "furnace"
     inputs: ["copper_wire", "blaze_powder"]
+    input-amounts: [1, 1]
     output: "heat_coil"
     energy: 16
     guide: "銅線 + 烈焰粉 → 熔爐 → 熱線圈"
   furnace_vacuum_tube:
     machine: "furnace"
     inputs: ["glass_panel", "copper_wire"]
+    input-amounts: [1, 1]
     output: "vacuum_tube"
     energy: 14
     guide: "玻璃板 + 銅線 → 熔爐 → 真空管"
   furnace_optic_lens:
     machine: "furnace"
     inputs: ["glass_panel", "silicon"]
+    input-amounts: [1, 1]
     output: "optic_lens"
     energy: 18
     guide: "玻璃板 + 矽晶 → 熔爐 → 光學鏡片"
   saw_wood:
     machine: "electric_saw"
     inputs: ["oak_planks"]
+    input-amounts: [1]
     output: "wood_dust"
     energy: 7
     guide: "木板 → 電鋸 → 木屑"
   saw_fiber:
     machine: "electric_saw"
     inputs: ["bamboo"]
+    input-amounts: [1]
     output: "fiber_mesh"
     energy: 7
     guide: "竹子 → 電鋸 → 纖維網"
   auto_farm_seed_cluster:
     machine: "auto_farm"
     inputs: ["crop_seeds", "bone_meal"]
+    input-amounts: [1, 1]
     output: "seed_cluster"
     energy: 6
     guide: "種子 + 骨粉 → 自動農場 → 種子簇"
   auto_farm_crop:
     machine: "auto_farm"
     inputs: ["crop_seeds"]
+    input-amounts: [1]
     output: "crops"
     energy: 6
     guide: "種子 → 自動農場 → 作物"
   auto_farm_fertilizer:
     machine: "auto_farm"
     inputs: ["crops", "bone_meal"]
+    input-amounts: [1, 1]
     output: "fertilizer_mix"
     energy: 6
     guide: "作物 + 骨粉 → 自動農場 → 肥料混合物"
   auto_farm_agri:
     machine: "auto_farm"
     inputs: ["crops", "hydro_gel"]
+    input-amounts: [1, 1]
     output: "agri_module"
     energy: 7
     guide: "作物 + 水凝膠 → 自動農場 → 農業模組"
   assembler_harvest_unit:
     machine: "assembler"
     inputs: ["servo_motor", "iron_plate"]
+    input-amounts: [1, 1]
     output: "harvest_unit"
     energy: 16
     guide: "伺服馬達 + 鐵板 → 製造機 → 收割單元"
   recycler_material:
     machine: "recycler"
     inputs: ["wood_dust"]
+    input-amounts: [1]
     output: "recycled_material"
     energy: 6
     guide: "木屑 → 回收機 → 回收材料"
   recycler_plastic:
     machine: "recycler"
     inputs: ["wood_dust", "recycled_material"]
+    input-amounts: [1, 1]
     output: "plastic"
     energy: 10
     guide: "木屑 + 回收材料 → 回收機 → 塑膠"
   recycler_filter:
     machine: "recycler"
     inputs: ["paper", "coal_dust"]
+    input-amounts: [1, 1]
     output: "rust_filter"
     energy: 9
     guide: "紙張 + 煤粉 → 回收機 → 鏽蝕濾芯"
   compressor_steel:
     machine: "compressor"
     inputs: ["iron_plate", "coal_dust"]
+    input-amounts: [1, 1]
     output: "steel_plate"
     energy: 14
     guide: "鐵板 + 煤粉 → 壓縮機 → 鋼板"
   compressor_compressed_iron:
     machine: "compressor"
     inputs: ["iron_plate", "iron_plate"]
+    input-amounts: [1, 1]
     output: "compressed_iron_bundle"
     energy: 18
     guide: "鐵板 + 鐵板 → 壓縮機 → 壓實鐵胚"
   compressor_mesh:
     machine: "compressor"
     inputs: ["coal_dust"]
+    input-amounts: [2]
     output: "carbon_mesh"
     energy: 12
     guide: "煤粉 → 壓縮機 → 碳纖網"
   compressor_dense_carbon:
     machine: "compressor"
     inputs: ["carbon_mesh", "carbon_mesh"]
+    input-amounts: [1, 1]
     output: "dense_carbon_block"
     energy: 18
     guide: "碳纖網 + 碳纖網 → 壓縮機 → 高密碳塊"
   compressor_pressure_tube:
     machine: "compressor"
     inputs: ["copper_ingot", "glass_panel"]
+    input-amounts: [1, 1]
     output: "pressure_tube"
     energy: 15
     guide: "銅錠 + 玻璃板 → 壓縮機 → 壓力導管"
   compressor_composite:
     machine: "compressor"
     inputs: ["steel_plate", "plastic"]
+    input-amounts: [1, 1]
     output: "composite_panel"
     energy: 15
     guide: "鋼板 + 塑膠 → 壓縮機 → 複合面板"
   assembler_component:
     machine: "assembler"
     inputs: ["compressed_iron_bundle", "circuit_board", "bronze_gear"]
+    input-amounts: [1, 1, 1]
     output: "machine_component"
     energy: 24
     guide: "壓實鐵胚 + 電路板 + 青銅齒輪 → 製造機 → 機械零件"
   assembler_precision_frame:
     machine: "assembler"
     inputs: ["machine_component", "dense_carbon_block"]
+    input-amounts: [1, 1]
     output: "precision_frame"
     energy: 28
     guide: "機械零件 + 高密碳塊 → 製造機 → 精密框架"
   assembler_circuit:
     machine: "assembler"
     inputs: ["copper_ingot", "silicon", "solder_alloy"]
+    input-amounts: [1, 1, 1]
     output: "circuit_board"
     energy: 20
     guide: "銅錠 + 矽晶 + 焊錫合金 → 製造機 → 電路板"
   assembler_advanced_circuit:
     machine: "assembler"
     inputs: ["circuit_board", "logic_gate", "wiring_bundle", "brass_ingot"]
+    input-amounts: [1, 1, 1, 1]
     output: "advanced_circuit"
     energy: 26
     guide: "電路板 + 邏輯閘 + 工業線束 + 黃銅錠 → 製造機 → 進階電路"
   assembler_tech_wrench:
     machine: "assembler"
     inputs: ["iron_plate", "copper_ingot"]
+    input-amounts: [1, 1]
     output: "tech_wrench"
     energy: 18
     guide: "鐵板 + 銅錠 → 合成器 → 科技扳手"
+  assembler_logistics_wrench:
+    machine: "assembler"
+    inputs: ["tech_wrench", "logic_gate"]
+    input-amounts: [1, 1]
+    output: "logistics_wrench"
+    energy: 22
+    guide: "科技扳手 + 邏輯閘 → 合成器 → 物流扳手"
   assembler_energy_cell:
     machine: "assembler"
     inputs: ["copper_ingot", "redstone"]
+    input-amounts: [1, 1]
     output: "energy_cell"
     energy: 22
     guide: "銅錠 + 紅石 → 製造機 → 能源電池"
   assembler_logic_gate:
     machine: "assembler"
     inputs: ["copper_wire", "silicon"]
+    input-amounts: [1, 1]
     output: "logic_gate"
     energy: 22
     guide: "銅線 + 矽晶 → 製造機 → 邏輯閘"
   assembler_servo:
     machine: "assembler"
     inputs: ["steel_wire", "machine_component"]
+    input-amounts: [1, 1]
     output: "servo_motor"
     energy: 24
     guide: "鋼線 + 機械零件 → 製造機 → 伺服馬達"
   assembler_machine_casing:
     machine: "assembler"
     inputs: ["precision_frame", "glass_panel"]
+    input-amounts: [1, 1]
     output: "machine_casing"
     energy: 28
     guide: "精密框架 + 玻璃板 → 製造機 → 機械外殼"
   assembler_signal_relay:
     machine: "assembler"
     inputs: ["logic_gate", "copper_wire"]
+    input-amounts: [1, 1]
     output: "signal_relay"
     energy: 20
     guide: "邏輯閘 + 銅線 → 製造機 → 訊號中繼器"
   assembler_bronze_gear:
     machine: "assembler"
     inputs: ["bronze_ingot", "iron_plate"]
+    input-amounts: [1, 1]
     output: "bronze_gear"
     energy: 20
     guide: "青銅錠 + 鐵板 → 製造機 → 青銅齒輪"
   smeltery_alloy:
     machine: "smeltery"
     inputs: ["iron_dust", "coal_dust"]
+    input-amounts: [1, 1]
     output: "titanium_alloy"
     energy: 20
     guide: "鐵粉 + 煤粉 → 合金熔煉爐 → 鈦合金"
   smeltery_frame:
     machine: "smeltery"
     inputs: ["titanium_alloy", "steel_wire"]
+    input-amounts: [1, 1]
     output: "alloy_frame"
     energy: 22
     guide: "鈦合金 + 鋼線 → 合金熔煉爐 → 合金框架"
   smeltery_shell:
     machine: "smeltery"
     inputs: ["heat_coil", "steel_plate"]
+    input-amounts: [1, 1]
     output: "thermal_shell"
     energy: 22
     guide: "熱線圈 + 鋼板 → 合金熔煉爐 → 隔熱外殼"
   advanced_nano:
     machine: "advanced_assembler"
     inputs: ["precision_frame", "advanced_circuit"]
+    input-amounts: [2, 1]
     output: "nano_coating"
     energy: 38
     guide: "精密框架 + 進階電路 → 進階製造機 → 奈米塗層"
   advanced_micro:
     machine: "advanced_assembler"
     inputs: ["advanced_circuit", "dense_carbon_block", "wiring_bundle"]
+    input-amounts: [1, 1, 1]
     output: "micro_processor"
     energy: 36
     guide: "進階電路 + 高密碳塊 + 工業線束 → 進階製造機 → 微型處理器"
   advanced_reactor_core:
     machine: "advanced_assembler"
     inputs: ["control_unit", "heat_coil"]
+    input-amounts: [2, 1]
     output: "reactor_core"
     energy: 36
     guide: "控制單元 + 熱線圈 → 進階製造機 → 反應爐核心"
   advanced_drone_core:
     machine: "advanced_assembler"
     inputs: ["control_unit", "emitter_node"]
+    input-amounts: [2, 1]
     output: "drone_core"
     energy: 34
     guide: "控制單元 + 發射節點 → 進階製造機 → 無人機核心"
   advanced_android_core:
     machine: "advanced_assembler"
     inputs: ["control_unit", "servo_motor"]
+    input-amounts: [2, 1]
     output: "android_core"
     energy: 34
     guide: "控制單元 + 伺服馬達 → 進階製造機 → 安卓核心"
   solar_plate:
     machine: "solar_array"
     inputs: ["glass_panel", "energy_cell"]
+    input-amounts: [1, 1]
     output: "starlight_plate"
     energy: 10
     guide: "玻璃板 + 能源電池 → 太陽能陣列 → 星光板"
   solar_grid:
     machine: "solar_array"
     inputs: ["starlight_plate", "copper_wire"]
+    input-amounts: [1, 1]
     output: "grid_module"
     energy: 12
     guide: "星光板 + 銅線 → 太陽能陣列 → 網格模組"
   battery_lithium:
     machine: "battery_bank"
     inputs: ["energy_cell", "copper_ingot"]
+    input-amounts: [1, 1]
     output: "lithium_cell"
     energy: 15
     guide: "能源電池 + 銅錠 → 電池庫 → 鋰電池"
   battery_emitter:
     machine: "battery_bank"
     inputs: ["energy_cell", "logic_gate"]
+    input-amounts: [1, 1]
     output: "emitter_node"
     energy: 14
     guide: "能源電池 + 邏輯閘 → 電池庫 → 發射節點"
   battery_capacitor:
     machine: "battery_bank"
     inputs: ["lithium_cell", "emitter_node"]
+    input-amounts: [1, 1]
     output: "capacitor_bank"
     energy: 18
     guide: "鋰電池 + 發射節點 → 電池庫 → 電容組"
   washer_slurry:
     machine: "ore_washer"
     inputs: ["iron_dust"]
+    input-amounts: [2]
     output: "ore_slurry"
     energy: 12
     guide: "鐵粉 → 洗礦機 → 礦漿"
   washer_biomass:
     machine: "ore_washer"
     inputs: ["crops"]
+    input-amounts: [2]
     output: "crushed_biomass"
     energy: 10
     guide: "作物 → 洗礦機 → 粉碎生質"
   purifier_shard:
     machine: "purifier"
     inputs: ["ore_slurry"]
+    input-amounts: [2]
     output: "purified_shard"
     energy: 15
     guide: "礦漿 → 淨化器 → 淨化碎晶"
   purifier_coolant:
     machine: "purifier"
     inputs: ["snowball", "glass_panel", "purifier_membrane"]
+    input-amounts: [1, 1, 1]
     output: "coolant_cell"
     energy: 16
     guide: "雪球 + 玻璃板 + 淨化膜片 → 淨化器 → 冷卻電池"
   purifier_membrane_recipe:
     machine: "purifier"
     inputs: ["rust_filter", "fiber_mesh"]
+    input-amounts: [1, 1]
     output: "purifier_membrane"
     energy: 16
     guide: "鏽蝕濾芯 + 纖維網 → 淨化器 → 淨化膜片"
   centrifuge_ion:
     machine: "centrifuge"
     inputs: ["purified_shard"]
+    input-amounts: [2]
     output: "ion_dust"
     energy: 28
     guide: "淨化碎晶 → 離心機 → 離子粉"
   centrifuge_rotor_recipe:
     machine: "centrifuge"
     inputs: ["ion_dust", "alloy_frame"]
+    input-amounts: [2, 1]
     output: "centrifuge_rotor"
     energy: 30
     guide: "離子粉 + 合金框架 → 離心機 → 離心轉子"
   centrifuge_ring:
     machine: "centrifuge"
     inputs: ["ion_dust", "steel_wire", "centrifuge_rotor"]
+    input-amounts: [1, 1, 1]
     output: "magnetic_ring"
     energy: 30
     guide: "離子粉 + 鋼線 + 離心轉子 → 離心機 → 磁環"
   bio_resin_recipe:
     machine: "bio_lab"
     inputs: ["crops", "wood_dust"]
+    input-amounts: [1, 1]
     output: "bio_resin"
     energy: 18
     guide: "作物 + 木屑 → 生質實驗室 → 生質樹脂"
   bio_fiber_recipe:
     machine: "bio_lab"
     inputs: ["crushed_biomass", "fiber_mesh"]
+    input-amounts: [1, 1]
     output: "bio_fiber"
     energy: 16
     guide: "粉碎生質 + 纖維網 → 生質實驗室 → 生質纖維"
   greenhouse_growth_lamp:
     machine: "greenhouse"
     inputs: ["glass_panel", "agri_module"]
+    input-amounts: [1, 1]
     output: "growth_lamp"
     energy: 14
     guide: "玻璃板 + 農業模組 → 溫室培育艙 → 生長燈"
   greenhouse_hydro:
     machine: "greenhouse"
     inputs: ["bio_resin", "crops"]
+    input-amounts: [1, 1]
     output: "hydro_gel"
     energy: 14
     guide: "生質樹脂 + 作物 → 溫室培育艙 → 水凝膠"
   polymer_rubber:
     machine: "polymer_press"
     inputs: ["bio_resin"]
+    input-amounts: [2]
     output: "rubber_sheet"
     energy: 15
     guide: "生質樹脂 → 聚合壓床 → 橡膠片"
   polymer_treated:
     machine: "polymer_press"
     inputs: ["plastic", "polymer_resin"]
+    input-amounts: [1, 1]
     output: "treated_plastic"
     energy: 16
     guide: "塑膠 + 聚合樹脂 → 聚合壓床 → 處理塑膠"
   wire_mill_copper:
     machine: "wire_mill"
     inputs: ["copper_ingot"]
+    input-amounts: [2]
     output: "copper_wire"
     energy: 14
     guide: "銅錠 → 拉線機 → 銅線"
   wire_mill_steel:
     machine: "wire_mill"
     inputs: ["steel_plate"]
+    input-amounts: [2]
     output: "steel_wire"
     energy: 11
     guide: "鋼板 → 拉線機 → 鋼線"
   wire_mill_bundle:
     machine: "wire_mill"
     inputs: ["copper_wire", "steel_wire"]
+    input-amounts: [1, 1]
     output: "wiring_bundle"
     energy: 12
     guide: "銅線 + 鋼線 → 拉線機 → 工業線束"
   chemical_polymer:
     machine: "polymer_press"
     inputs: ["bio_resin", "coal_dust"]
+    input-amounts: [1, 1]
     output: "polymer_resin"
     energy: 15
     guide: "生質樹脂 + 煤粉 → 聚合壓床 → 聚合樹脂"
   chemical_synthetic:
     machine: "chemical_reactor"
     inputs: ["polymer_resin", "bio_fiber"]
+    input-amounts: [2, 1]
     output: "synthetic_fiber"
     energy: 16
     guide: "聚合樹脂 + 生質纖維 → 化學反應器 → 合成纖維"
   chemical_nozzle:
     machine: "chemical_reactor"
     inputs: ["pressure_tube", "steel_wire"]
+    input-amounts: [2, 1]
     output: "precision_nozzle"
     energy: 15
     guide: "壓力導管 + 鋼線 → 化學反應器 → 精密噴嘴"
   coolant_mix_recipe:
     machine: "coolant_mixer"
     inputs: ["coolant_cell", "hydro_gel"]
+    input-amounts: [1, 1]
     output: "coolant_mix"
     energy: 7
     guide: "冷卻電池 + 水凝膠 → 冷卻混合器 → 冷卻混合液"
   refinery_oil:
     machine: "refinery"
     inputs: ["bio_resin", "ore_slurry"]
+    input-amounts: [1, 1]
     output: "refined_oil"
     energy: 10
     guide: "生質樹脂 + 礦漿 → 精煉塔 → 精煉油"
   laser_lens_recipe:
     machine: "laser_engraver"
     inputs: ["optic_lens", "reinforced_glass"]
+    input-amounts: [2, 1]
     output: "laser_lens"
     energy: 26
     guide: "光學鏡片 + 強化玻璃 → 雷射雕刻機 → 雷射鏡"
   laser_etched:
     machine: "laser_engraver"
     inputs: ["laser_lens", "advanced_circuit"]
+    input-amounts: [2, 1]
     output: "etched_circuit"
     energy: 27
     guide: "雷射鏡 + 進階電路 → 雷射雕刻機 → 蝕刻電路"
   laser_control:
     machine: "laser_engraver"
     inputs: ["etched_circuit", "logic_gate"]
+    input-amounts: [2, 1]
     output: "control_unit"
     energy: 27
     guide: "蝕刻電路 + 邏輯閘 → 雷射雕刻機 → 控制單元"
   drone_shell_recipe:
     machine: "drone_bay"
     inputs: ["treated_plastic", "machine_casing"]
+    input-amounts: [2, 1]
     output: "drone_shell"
     energy: 18
     guide: "處理塑膠 + 機械外殼 → 無人機艙 → 無人機外殼"
   drone_frame_recipe:
     machine: "drone_bay"
     inputs: ["drone_shell", "synthetic_fiber"]
+    input-amounts: [2, 1]
     output: "drone_frame"
     energy: 19
     guide: "無人機外殼 + 合成纖維 → 無人機艙 → 無人機框架"
   android_shell_recipe:
     machine: "android_bay"
     inputs: ["treated_plastic", "machine_casing"]
+    input-amounts: [2, 1]
     output: "android_shell"
     energy: 18
     guide: "處理塑膠 + 機械外殼 → 安卓艙 → 安卓外殼"
   android_frame_recipe:
     machine: "android_bay"
     inputs: ["android_shell", "synthetic_fiber"]
+    input-amounts: [2, 1]
     output: "android_frame"
     energy: 19
     guide: "安卓外殼 + 合成纖維 → 安卓艙 → 安卓框架"
   android_memory_matrix_recipe:
     machine: "android_bay"
     inputs: ["android_core", "data_matrix"]
+    input-amounts: [2, 1]
     output: "android_memory_matrix"
     energy: 20
     guide: "安卓核心 + 數據矩陣 → 安卓艙 → 安卓記憶矩陣"
   assembler_android_harvest_script:
     machine: "assembler"
     inputs: ["agri_module", "logic_gate"]
+    input-amounts: [1, 1]
     output: "android_harvest_script"
     energy: 14
     guide: "農業模組 + 邏輯閘 → 製造機 → 安卓農務程序"
   assembler_android_logging_script:
     machine: "assembler"
     inputs: ["harvest_unit", "servo_motor"]
+    input-amounts: [1, 1]
     output: "android_logging_script"
     energy: 15
     guide: "收割單元 + 伺服馬達 → 製造機 → 安卓伐木程序"
   assembler_android_salvage_script:
     machine: "assembler"
     inputs: ["signal_relay", "emitter_node"]
+    input-amounts: [1, 1]
     output: "android_salvage_script"
     energy: 15
     guide: "訊號中繼器 + 發射節點 → 製造機 → 安卓回收程序"
   advanced_android_overclock_card:
     machine: "advanced_assembler"
     inputs: ["speed_upgrade", "android_memory_matrix"]
+    input-amounts: [2, 1]
     output: "android_overclock_card"
     energy: 20
     guide: "速度升級 + 安卓記憶矩陣 → 進階製造機 → 安卓超頻卡"
   advanced_android_efficiency_card:
     machine: "advanced_assembler"
     inputs: ["efficiency_upgrade", "android_memory_matrix"]
+    input-amounts: [2, 1]
     output: "android_efficiency_card"
     energy: 20
     guide: "效率升級 + 安卓記憶矩陣 → 進階製造機 → 安卓節能卡"
   quantum_android_expansion_card:
     machine: "quantum_processor"
     inputs: ["range_upgrade", "android_memory_matrix"]
+    input-amounts: [2, 1]
     output: "android_expansion_card"
     energy: 33
     guide: "範圍升級 + 安卓記憶矩陣 → 量子處理器 → 安卓擴域卡"
   quantum_android_planet_script:
     machine: "quantum_processor"
     inputs: ["quantum_frame", "field_emitter"]
+    input-amounts: [2, 1]
     output: "android_planet_script"
     energy: 35
     guide: "量子框架 + 力場發射器 → 量子處理器 → 安卓行星採樣程序"
   advanced_android_station:
     machine: "advanced_assembler"
     inputs: ["android_frame", "android_memory_matrix"]
+    input-amounts: [2, 1]
     output: "android_station"
     energy: 24
     guide: "安卓框架 + 安卓記憶矩陣 → 進階製造機 → 安卓工作站"
   advanced_plasma_cell:
     machine: "advanced_assembler"
     inputs: ["heat_coil", "ion_dust"]
+    input-amounts: [2, 1]
     output: "plasma_cell"
     energy: 22
     guide: "熱線圈 + 離子粉 → 進階製造機 → 電漿電池"
   assembler_android_item_interface:
     machine: "assembler"
     inputs: ["signal_relay", "chest"]
+    input-amounts: [1, 1]
     output: "android_item_interface"
     energy: 16
     guide: "訊號中繼器 + 箱子 → 製造機 → 安卓物品介面"
   assembler_android_fuel_interface:
     machine: "assembler"
     inputs: ["emitter_node", "pressure_tube"]
+    input-amounts: [1, 1]
     output: "android_fuel_interface"
     energy: 16
     guide: "發射節點 + 壓力導管 → 製造機 → 安卓燃料介面"
   quantum_chip_recipe:
     machine: "quantum_processor"
     inputs: ["advanced_circuit", "nano_coating"]
+    input-amounts: [2, 1]
     output: "quantum_chip"
     energy: 30
     guide: "進階電路 + 奈米塗層 → 量子處理器 → 量子晶片"
   quantum_fluid_recipe:
     machine: "quantum_processor"
     inputs: ["ion_dust", "flux_link"]
+    input-amounts: [2, 1]
     output: "quantum_fluid"
     energy: 30
     guide: "離子粉 + 通量連結 → 量子處理器 → 量子流體"
   quantum_frame_recipe:
     machine: "quantum_processor"
     inputs: ["flux_link", "reinforced_glass"]
+    input-amounts: [2, 1]
     output: "quantum_frame"
     energy: 33
     guide: "通量連結 + 強化玻璃 → 量子處理器 → 量子框架"
   quantum_data_matrix:
     machine: "quantum_processor"
     inputs: ["control_unit", "quantum_chip"]
+    input-amounts: [2, 1]
     output: "data_matrix"
     energy: 32
     guide: "控制單元 + 量子晶片 → 量子處理器 → 數據矩陣"
   quantum_crystal_matrix:
     machine: "quantum_processor"
     inputs: ["grown_crystal", "data_matrix"]
+    input-amounts: [2, 1]
     output: "crystal_matrix"
     energy: 32
     guide: "培育晶體 + 數據矩陣 → 量子處理器 → 晶體矩陣"
   quantum_flux_link:
     machine: "quantum_processor"
     inputs: ["magnetic_ring", "energy_cell"]
+    input-amounts: [2, 1]
     output: "flux_link"
     energy: 30
     guide: "磁環 + 能源電池 → 量子處理器 → 通量連結"
   quantum_phase_plate:
     machine: "quantum_processor"
     inputs: ["quantum_frame", "grown_crystal"]
+    input-amounts: [2, 1]
     output: "phase_plate"
     energy: 33
     guide: "量子框架 + 培育晶體 → 量子處理器 → 相位板"
   quantum_field_emitter:
     machine: "quantum_processor"
     inputs: ["flux_link", "control_unit"]
+    input-amounts: [2, 1]
     output: "field_emitter"
     energy: 35
     guide: "通量連結 + 控制單元 → 量子處理器 → 力場發射器"
   crystal_seed_recipe:
     machine: "crystal_growth_chamber"
     inputs: ["amethyst_shard", "coolant_mix"]
+    input-amounts: [2, 1]
     output: "crystal_seed"
     energy: 18
     guide: "紫水晶碎片 + 冷卻混合液 → 晶體培育艙 → 晶種"
   grown_crystal_recipe:
     machine: "crystal_growth_chamber"
     inputs: ["crystal_seed", "quantum_fluid"]
+    input-amounts: [2, 1]
     output: "grown_crystal"
     energy: 19
     guide: "晶種 + 量子流體 → 晶體培育艙 → 培育晶體"
   field_plate_recipe:
     machine: "field_forge"
     inputs: ["field_emitter", "phase_plate"]
+    input-amounts: [2, 1]
     output: "field_plate"
     energy: 22
     guide: "力場發射器 + 相位板 → 力場鍛造台 → 力場板"
   fusion_mesh_recipe:
     machine: "fusion_reactor"
     inputs: ["thermal_shell", "field_plate"]
+    input-amounts: [2, 1]
     output: "fusion_mesh"
     energy: 38
     guide: "隔熱外殼 + 力場板 → 聚變反應爐 → 聚變網"
   stability_core_recipe:
     machine: "fusion_reactor"
     inputs: ["magnetic_ring", "reactor_core"]
+    input-amounts: [2, 1]
     output: "stability_core"
     energy: 26
     guide: "磁環 + 反應爐核心 → 聚變反應爐 → 穩定核心"
   fusion_core_recipe:
     machine: "fusion_reactor"
     inputs: ["fusion_mesh", "stability_core"]
+    input-amounts: [2, 1]
     output: "fusion_core"
     energy: 42
     guide: "聚變網 + 穩定核心 → 聚變反應爐 → 聚變核心"
   matter_blob_recipe:
     machine: "matter_compiler"
     inputs: ["quantum_fluid", "grown_crystal"]
+    input-amounts: [2, 1]
     output: "matter_blob"
     energy: 26
     guide: "量子流體 + 培育晶體 → 物質編譯器 → 物質團"
   singularity_fragment_recipe:
     machine: "matter_compiler"
     inputs: ["matter_blob", "fusion_core"]
+    input-amounts: [2, 1]
     output: "singularity_fragment"
     energy: 27
     guide: "物質團 + 聚變核心 → 物質編譯器 → 奇點碎片"
   advanced_speed_upgrade:
     machine: "advanced_assembler"
     inputs: ["servo_motor", "micro_processor"]
+    input-amounts: [2, 1]
     output: "speed_upgrade"
     energy: 18
     guide: "伺服馬達 + 微型處理器 → 進階製造機 → 速度升級"
   advanced_efficiency_upgrade:
     machine: "advanced_assembler"
     inputs: ["nano_coating", "capacitor_bank"]
+    input-amounts: [2, 1]
     output: "efficiency_upgrade"
     energy: 18
     guide: "奈米塗層 + 電容組 → 進階製造機 → 效率升級"
   advanced_stack_upgrade:
     machine: "advanced_assembler"
     inputs: ["machine_casing", "composite_panel"]
+    input-amounts: [2, 1]
     output: "stack_upgrade"
     energy: 18
     guide: "機械外殼 + 複合面板 → 進階製造機 → 堆疊升級"
   quantum_range_upgrade:
     machine: "quantum_processor"
     inputs: ["flux_link", "sensor_array"]
+    input-amounts: [2, 1]
     output: "range_upgrade"
     energy: 30
     guide: "通量連結 + 感測陣列 → 量子處理器 → 範圍升級"
   assembler_redstone_control:
     machine: "assembler"
-    inputs: ["basic_circuit", "redstone"]
+    inputs: ["circuit_board", "redstone"]
+    input-amounts: [1, 1]
     output: "redstone_control"
     energy: 10
-    guide: "基礎電路 + 紅石 → 製造機 → 紅石集成電路"
+    guide: "電路板 + 紅石 → 製造機 → 紅石集成電路"
   assembler_energy_node:
     machine: "assembler"
     inputs: ["emitter_node", "machine_casing"]
+    input-amounts: [1, 1]
     output: "energy_node"
     energy: 14
     guide: "發射節點 + 機械外殼 → 製造機 → 能源節點"
   assembler_energy_cable:
     machine: "assembler"
     inputs: ["copper_wire", "iron_plate"]
+    input-amounts: [1, 1]
     output: "energy_cable"
     energy: 10
     guide: "銅線 + 鐵板 → 製造機 → 導能線纜"
   assembler_logistics_node:
     machine: "assembler"
     inputs: ["signal_relay", "machine_component"]
+    input-amounts: [1, 1]
     output: "logistics_node"
     energy: 14
     guide: "訊號中繼器 + 機械零件 → 製造機 → 物流節點"
   wire_item_tube:
     machine: "wire_mill"
     inputs: ["pressure_tube", "steel_wire"]
+    input-amounts: [1, 1]
     output: "item_tube"
     energy: 11
     guide: "壓力導管 + 鋼線 → 拉線機 → 物流導管"
@@ -3205,6 +3353,7 @@ recipes:
   assembler_auto_processing_card:
     machine: "advanced_assembler"
     inputs: ["advanced_circuit", "machine_component", "speed_upgrade"]
+    input-amounts: [1, 1, 1]
     output: "auto_processing_card"
     energy: 28
     guide: "進階電路 + 機械零件 + 速度升級 → 進階製造機 → 自動化模組"
@@ -3212,54 +3361,63 @@ recipes:
   assembler_electric_crusher:
     machine: "advanced_assembler"
     inputs: ["crusher", "auto_processing_card", "wiring_bundle", "servo_motor", "steel_plate"]
+    input-amounts: [1, 1, 1, 1, 1]
     output: "electric_crusher"
     energy: 55
     guide: "粉碎機 + 自動化模組 + 工業線束 + 伺服馬達 + 鋼板 → 進階製造機 → 電動粉碎機"
   assembler_electric_compressor:
     machine: "advanced_assembler"
     inputs: ["compressor", "auto_processing_card", "servo_motor", "pressure_tube", "steel_plate"]
+    input-amounts: [1, 1, 1, 1, 1]
     output: "electric_compressor"
     energy: 58
     guide: "壓縮機 + 自動化模組 + 伺服馬達 + 壓力導管 + 鋼板 → 進階製造機 → 電動壓縮機"
   assembler_electric_ore_washer:
     machine: "advanced_assembler"
     inputs: ["ore_washer", "auto_processing_card", "pressure_tube", "coolant_cell", "alloy_frame"]
+    input-amounts: [1, 1, 1, 1, 1]
     output: "electric_ore_washer"
     energy: 55
     guide: "洗礦機 + 自動化模組 + 壓力導管 + 冷卻電池 + 合金框架 → 進階製造機 → 電動洗礦機"
   assembler_electric_wire_mill:
     machine: "advanced_assembler"
     inputs: ["wire_mill", "auto_processing_card", "servo_motor", "wiring_bundle", "bronze_gear"]
+    input-amounts: [1, 1, 1, 1, 1]
     output: "electric_wire_mill"
     energy: 60
     guide: "拉線機 + 自動化模組 + 伺服馬達 + 工業線束 + 青銅齒輪 → 進階製造機 → 電動拉線機"
   assembler_electric_purifier:
     machine: "advanced_assembler"
     inputs: ["purifier", "auto_processing_card", "coolant_cell", "precision_nozzle", "alloy_frame"]
+    input-amounts: [1, 1, 1, 1, 1]
     output: "electric_purifier"
     energy: 62
     guide: "淨化器 + 自動化模組 + 冷卻電池 + 精密噴嘴 + 合金框架 → 進階製造機 → 電動淨化器"
   assembler_electric_centrifuge:
     machine: "advanced_assembler"
     inputs: ["centrifuge", "auto_processing_card", "magnetic_ring", "servo_motor", "energy_cell"]
+    input-amounts: [1, 1, 1, 1, 1]
     output: "electric_centrifuge"
     energy: 70
     guide: "離心機 + 自動化模組 + 磁環 + 伺服馬達 + 能量電池 → 進階製造機 → 電動離心機"
   assembler_electric_bio_lab:
     machine: "advanced_assembler"
     inputs: ["bio_lab", "auto_processing_card", "bio_fiber", "coolant_cell", "circuit_board"]
+    input-amounts: [1, 1, 1, 1, 1]
     output: "electric_bio_lab"
     energy: 60
     guide: "生質實驗室 + 自動化模組 + 生質纖維 + 冷卻電池 + 電路板 → 進階製造機 → 電動生質實驗室"
   assembler_electric_chemical_reactor:
     machine: "advanced_assembler"
     inputs: ["chemical_reactor", "auto_processing_card", "precision_nozzle", "coolant_cell", "energy_cell"]
+    input-amounts: [1, 1, 1, 1, 1]
     output: "electric_chemical_reactor"
     energy: 72
     guide: "化學反應器 + 自動化模組 + 精密噴嘴 + 冷卻電池 + 能量電池 → 進階製造機 → 電動化學反應器"
   assembler_electric_sifter:
     machine: "advanced_assembler"
     inputs: ["gold_pan", "auto_processing_card", "bronze_gear", "wiring_bundle", "alloy_frame"]
+    input-amounts: [1, 1, 1, 1, 1]
     output: "electric_sifter"
     energy: 52
     guide: "淘金盤 + 自動化模組 + 青銅齒輪 + 工業線束 + 合金框架 → 進階製造機 → 電動篩礦機"
@@ -3267,6 +3425,7 @@ recipes:
   electric_crusher_iron_ore:
     machine: "electric_crusher"
     inputs: ["iron_ore"]
+    input-amounts: [2]
     output: "iron_dust"
     count: 2
     energy: 15
@@ -3274,6 +3433,7 @@ recipes:
   electric_crusher_copper_ore:
     machine: "electric_crusher"
     inputs: ["copper_ore"]
+    input-amounts: [2]
     output: "copper_dust"
     count: 2
     energy: 15
@@ -3281,6 +3441,7 @@ recipes:
   electric_crusher_quartz:
     machine: "electric_crusher"
     inputs: ["quartz"]
+    input-amounts: [2]
     output: "silicon"
     count: 2
     energy: 18
@@ -3288,6 +3449,7 @@ recipes:
   electric_crusher_raw_iron:
     machine: "electric_crusher"
     inputs: ["raw_iron"]
+    input-amounts: [2]
     output: "iron_dust"
     count: 2
     energy: 15
@@ -3295,6 +3457,7 @@ recipes:
   electric_crusher_raw_copper:
     machine: "electric_crusher"
     inputs: ["raw_copper"]
+    input-amounts: [2]
     output: "copper_dust"
     count: 2
     energy: 15
@@ -3302,6 +3465,7 @@ recipes:
   electric_crusher_coal:
     machine: "electric_crusher"
     inputs: ["coal"]
+    input-amounts: [2]
     output: "coal_dust"
     count: 2
     energy: 15
@@ -3309,144 +3473,168 @@ recipes:
   electric_compressor_iron_plate:
     machine: "electric_compressor"
     inputs: ["iron_ingot"]
+    input-amounts: [2]
     output: "iron_plate"
     energy: 21
     guide: "鐵錠 → 電動壓縮機 → 鐵板"
   electric_compressor_steel_plate:
     machine: "electric_compressor"
-    inputs: ["iron_plate"]
+    inputs: ["iron_plate", "coal_dust"]
+    input-amounts: [2, 1]
     output: "steel_plate"
     energy: 24
-    guide: "鐵板 → 電動壓縮機 → 鋼板"
+    guide: "鐵板 + 煤粉 → 電動壓縮機 → 鋼板"
   electric_compressor_iron_bundle:
     machine: "electric_compressor"
     inputs: ["iron_plate", "iron_plate"]
+    input-amounts: [2, 1]
     output: "compressed_iron_bundle"
     energy: 36
     guide: "鐵板×2 → 電動壓縮機 → 壓實鐵胚"
   electric_compressor_carbon:
     machine: "electric_compressor"
     inputs: ["coal_dust"]
+    input-amounts: [2]
     output: "carbon_mesh"
     energy: 21
     guide: "煤粉 → 電動壓縮機 → 碳纖網"
   electric_compressor_dense_carbon:
     machine: "electric_compressor"
     inputs: ["carbon_mesh", "carbon_mesh"]
+    input-amounts: [2, 1]
     output: "dense_carbon_block"
     energy: 33
     guide: "碳纖網×2 → 電動壓縮機 → 高密碳塊"
   electric_compressor_pressure_tube:
     machine: "electric_compressor"
     inputs: ["copper_ingot", "glass_panel"]
+    input-amounts: [2, 1]
     output: "pressure_tube"
     energy: 27
     guide: "銅錠 + 玻璃板 → 電動壓縮機 → 壓力導管"
   electric_compressor_composite:
     machine: "electric_compressor"
     inputs: ["steel_plate", "plastic"]
+    input-amounts: [2, 1]
     output: "composite_panel"
     energy: 27
     guide: "鋼板 + 塑膠 → 電動壓縮機 → 複合面板"
   electric_ore_washer_slurry:
     machine: "electric_ore_washer"
     inputs: ["iron_dust"]
+    input-amounts: [2]
     output: "ore_slurry"
     energy: 21
     guide: "鐵粉 → 電動洗礦機 → 礦漿"
   electric_ore_washer_biomass:
     machine: "electric_ore_washer"
     inputs: ["crops"]
+    input-amounts: [2]
     output: "crushed_biomass"
     energy: 18
     guide: "作物 → 電動洗礦機 → 粉碎生質"
   electric_wire_mill_copper:
     machine: "electric_wire_mill"
     inputs: ["copper_ingot"]
+    input-amounts: [2]
     output: "copper_wire"
     energy: 27
     guide: "銅錠 → 電動拉線機 → 銅線"
   electric_wire_mill_steel:
     machine: "electric_wire_mill"
     inputs: ["steel_plate"]
+    input-amounts: [2]
     output: "steel_wire"
     energy: 33
     guide: "鋼板 → 電動拉線機 → 鋼線"
   electric_wire_mill_bundle:
     machine: "electric_wire_mill"
     inputs: ["copper_wire", "steel_wire"]
+    input-amounts: [2, 1]
     output: "wiring_bundle"
     energy: 36
     guide: "銅線 + 鋼線 → 電動拉線機 → 工業線束"
   electric_wire_mill_item_tube:
     machine: "electric_wire_mill"
     inputs: ["pressure_tube", "steel_wire"]
+    input-amounts: [2, 1]
     output: "item_tube"
     energy: 33
     guide: "壓力導管 + 鋼線 → 電動拉線機 → 物流導管"
   electric_purifier_shard:
     machine: "electric_purifier"
     inputs: ["ore_slurry"]
+    input-amounts: [2]
     output: "purified_shard"
     energy: 27
     guide: "礦漿 → 電動淨化器 → 淨化碎晶"
   electric_purifier_coolant:
     machine: "electric_purifier"
     inputs: ["snowball", "glass_panel", "purifier_membrane"]
+    input-amounts: [1, 1, 1]
     output: "coolant_cell"
     energy: 30
     guide: "雪球 + 玻璃板 + 淨化膜片 → 電動淨化器 → 冷卻電池"
   electric_purifier_membrane:
     machine: "electric_purifier"
     inputs: ["rust_filter", "fiber_mesh"]
+    input-amounts: [2, 1]
     output: "purifier_membrane"
     energy: 30
     guide: "鏽蝕濾芯 + 纖維網 → 電動淨化器 → 淨化膜片"
   electric_centrifuge_ion:
     machine: "electric_centrifuge"
     inputs: ["purified_shard"]
+    input-amounts: [2]
     output: "ion_dust"
     energy: 54
     guide: "淨化碎晶 → 電動離心機 → 離子粉"
   electric_centrifuge_rotor:
     machine: "electric_centrifuge"
     inputs: ["ion_dust", "alloy_frame"]
+    input-amounts: [2, 1]
     output: "centrifuge_rotor"
     energy: 60
     guide: "離子粉 + 合金框架 → 電動離心機 → 離心轉子"
   electric_centrifuge_ring:
     machine: "electric_centrifuge"
     inputs: ["ion_dust", "steel_wire", "centrifuge_rotor"]
+    input-amounts: [1, 1, 1]
     output: "magnetic_ring"
     energy: 60
     guide: "離子粉 + 鋼線 + 離心轉子 → 電動離心機 → 磁環"
   electric_bio_lab_resin:
     machine: "electric_bio_lab"
     inputs: ["crops", "wood_dust"]
+    input-amounts: [2, 1]
     output: "bio_resin"
     energy: 33
     guide: "作物 + 木屑 → 電動生質實驗室 → 生質樹脂"
   electric_bio_lab_fiber:
     machine: "electric_bio_lab"
     inputs: ["crushed_biomass", "fiber_mesh"]
+    input-amounts: [2, 1]
     output: "bio_fiber"
     energy: 30
     guide: "粉碎生質 + 纖維網 → 電動生質實驗室 → 生質纖維"
   electric_chemical_polymer:
     machine: "electric_chemical_reactor"
     inputs: ["bio_resin", "coal_dust"]
+    input-amounts: [2, 1]
     output: "polymer_resin"
     energy: 48
     guide: "生質樹脂 + 煤粉 → 電動化學反應器 → 聚合樹脂"
   electric_chemical_fiber:
     machine: "electric_chemical_reactor"
     inputs: ["polymer_resin", "bio_fiber"]
+    input-amounts: [2, 1]
     output: "synthetic_fiber"
     energy: 48
     guide: "聚合樹脂 + 生質纖維 → 電動化學反應器 → 合成纖維"
   electric_chemical_nozzle:
     machine: "electric_chemical_reactor"
     inputs: ["pressure_tube", "steel_wire"]
+    input-amounts: [2, 1]
     output: "precision_nozzle"
     energy: 45
     guide: "壓力導管 + 鋼線 → 電動化學反應器 → 精密噴嘴"
@@ -3454,36 +3642,42 @@ recipes:
   electric_sifter_gravel_iron:
     machine: "electric_sifter"
     inputs: ["gravel"]
+    input-amounts: [2]
     output: "iron_dust"
     energy: 10
     guide: "礫石 → 電動篩礦機 → 鐵粉"
   electric_sifter_gravel_copper:
     machine: "electric_sifter"
     inputs: ["gravel"]
+    input-amounts: [2]
     output: "copper_dust"
     energy: 10
     guide: "礫石 → 電動篩礦機 → 銅粉"
   electric_sifter_gravel_tin:
     machine: "electric_sifter"
     inputs: ["gravel"]
+    input-amounts: [2]
     output: "tin_dust"
     energy: 10
     guide: "礫石 → 電動篩礦機 → 錫粉"
   electric_sifter_gravel_zinc:
     machine: "electric_sifter"
     inputs: ["gravel"]
+    input-amounts: [2]
     output: "zinc_dust"
     energy: 10
     guide: "礫石 → 電動篩礦機 → 鋅粉"
   electric_sifter_gravel_sifted:
     machine: "electric_sifter"
     inputs: ["gravel"]
+    input-amounts: [2]
     output: "sifted_ore"
     energy: 10
     guide: "礫石 → 電動篩礦機 → 篩出礦砂"
   electric_sifter_gravel_silicon:
     machine: "electric_sifter"
     inputs: ["gravel"]
+    input-amounts: [2]
     output: "silicon"
     energy: 10
     guide: "礫石 → 電動篩礦機 → 矽晶"
@@ -3491,36 +3685,42 @@ recipes:
   electric_sifter_soul_lead:
     machine: "electric_sifter"
     inputs: ["soul_sand"]
+    input-amounts: [2]
     output: "lead_dust"
     energy: 10
     guide: "靈魂沙 → 電動篩礦機 → 鉛粉"
   electric_sifter_soul_sifted:
     machine: "electric_sifter"
     inputs: ["soul_sand"]
+    input-amounts: [2]
     output: "sifted_ore"
     energy: 10
     guide: "靈魂沙 → 電動篩礦機 → 篩出礦砂"
   electric_sifter_soul_gold:
     machine: "electric_sifter"
     inputs: ["soul_sand"]
+    input-amounts: [2]
     output: "gold_nugget"
     energy: 10
     guide: "靈魂沙 → 電動篩礦機 → 金粒"
   electric_sifter_soul_quartz:
     machine: "electric_sifter"
     inputs: ["soul_sand"]
+    input-amounts: [2]
     output: "quartz"
     energy: 10
     guide: "靈魂沙 → 電動篩礦機 → 石英"
   electric_sifter_soul_zinc:
     machine: "electric_sifter"
     inputs: ["soul_sand"]
+    input-amounts: [2]
     output: "zinc_dust"
     energy: 10
     guide: "靈魂沙 → 電動篩礦機 → 鋅粉"
   electric_sifter_soul_iron:
     machine: "electric_sifter"
     inputs: ["soul_sand"]
+    input-amounts: [2]
     output: "iron_dust"
     energy: 10
     guide: "靈魂沙 → 電動篩礦機 → 鐵粉"
@@ -3528,6 +3728,7 @@ recipes:
   smeltery_bronze:
     machine: "smeltery"
     inputs: ["copper_dust", "tin_dust"]
+    input-amounts: [1, 1]
     output: "bronze_ingot"
     energy: 16
     allow-stack-bonus: false
@@ -3535,6 +3736,7 @@ recipes:
   smeltery_solder:
     machine: "smeltery"
     inputs: ["lead_dust", "zinc_dust"]
+    input-amounts: [1, 1]
     output: "solder_alloy"
     energy: 16
     allow-stack-bonus: false
@@ -3542,6 +3744,7 @@ recipes:
   smeltery_brass:
     machine: "smeltery"
     inputs: ["copper_dust", "zinc_dust"]
+    input-amounts: [1, 1]
     output: "brass_ingot"
     energy: 16
     allow-stack-bonus: false
@@ -3550,6 +3753,7 @@ recipes:
   furnace_tin_dust:
     machine: "furnace"
     inputs: ["tin_dust"]
+    input-amounts: [1]
     output: "tin_ingot"
     energy: 12
     allow-stack-bonus: false
@@ -3557,6 +3761,7 @@ recipes:
   furnace_lead_dust:
     machine: "furnace"
     inputs: ["lead_dust"]
+    input-amounts: [1]
     output: "lead_ingot"
     energy: 12
     allow-stack-bonus: false
@@ -3564,6 +3769,7 @@ recipes:
   furnace_zinc_dust:
     machine: "furnace"
     inputs: ["zinc_dust"]
+    input-amounts: [1]
     output: "zinc_ingot"
     energy: 12
     allow-stack-bonus: false
@@ -3571,6 +3777,7 @@ recipes:
   furnace_bronze_dust:
     machine: "furnace"
     inputs: ["bronze_dust"]
+    input-amounts: [1]
     output: "bronze_ingot"
     energy: 14
     allow-stack-bonus: false
@@ -3578,6 +3785,7 @@ recipes:
   furnace_solder_alloy_dust:
     machine: "furnace"
     inputs: ["solder_alloy_dust"]
+    input-amounts: [1]
     output: "solder_alloy"
     energy: 14
     allow-stack-bonus: false
@@ -3585,6 +3793,7 @@ recipes:
   furnace_brass_dust:
     machine: "furnace"
     inputs: ["brass_dust"]
+    input-amounts: [1]
     output: "brass_ingot"
     energy: 14
     allow-stack-bonus: false
@@ -3592,6 +3801,7 @@ recipes:
   crusher_tin_ingot:
     machine: "crusher"
     inputs: ["tin_ingot"]
+    input-amounts: [1]
     output: "tin_dust"
     count: 1
     energy: 8
@@ -3600,6 +3810,7 @@ recipes:
   crusher_lead_ingot:
     machine: "crusher"
     inputs: ["lead_ingot"]
+    input-amounts: [1]
     output: "lead_dust"
     count: 1
     energy: 8
@@ -3608,6 +3819,7 @@ recipes:
   crusher_zinc_ingot:
     machine: "crusher"
     inputs: ["zinc_ingot"]
+    input-amounts: [1]
     output: "zinc_dust"
     count: 1
     energy: 8
@@ -3616,6 +3828,7 @@ recipes:
   crusher_bronze_ingot:
     machine: "crusher"
     inputs: ["bronze_ingot"]
+    input-amounts: [1]
     output: "bronze_dust"
     count: 1
     energy: 8
@@ -3624,6 +3837,7 @@ recipes:
   crusher_solder_alloy:
     machine: "crusher"
     inputs: ["solder_alloy"]
+    input-amounts: [1]
     output: "solder_alloy_dust"
     count: 1
     energy: 8
@@ -3632,6 +3846,7 @@ recipes:
   crusher_brass_ingot:
     machine: "crusher"
     inputs: ["brass_ingot"]
+    input-amounts: [1]
     output: "brass_dust"
     count: 1
     energy: 8
@@ -3640,12 +3855,14 @@ recipes:
   furnace_bronze:
     machine: "furnace"
     inputs: ["copper_dust", "tin_dust"]
+    input-amounts: [1, 1]
     output: "bronze_ingot"
     energy: 18
     guide: "銅粉 + 錫粉 → 熔爐 → 青銅錠（基礎合金，可解鎖合金熔煉爐）"
   furnace_sifted_ore:
     machine: "furnace"
     inputs: ["sifted_ore"]
+    input-amounts: [1]
     output: "iron_ingot"
     energy: 14
     guide: "篩出礦砂 → 熔爐 → 鐵錠"

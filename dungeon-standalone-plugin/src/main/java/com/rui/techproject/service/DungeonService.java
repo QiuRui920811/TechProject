@@ -1218,12 +1218,21 @@ public final class DungeonService {
         if (bar != null) bar.removeViewer(player);
         // 清除副本世界的重生點（床/錨），避免 Folia 跨世界檢查床方塊導致錯誤重生
         this.clearDungeonRespawnPoint(player);
-        // 傳回原位
+        // 傳回原位（使用 teleportPlayerSafely 確保 Folia 跨 region 傳送成功）
         final Location returnLoc = instance.getReturnLocation(uuid);
-        if (returnLoc != null && returnLoc.getWorld() != null) {
-            player.teleportAsync(returnLoc);
+        final Location target = (returnLoc != null && returnLoc.getWorld() != null)
+                ? returnLoc : Bukkit.getWorlds().get(0).getSpawnLocation();
+        // 如果玩家已死亡，先重生再傳送
+        if (player.isDead()) {
+            this.scheduler.runEntityDelayed(player, () -> {
+                if (!player.isOnline()) return;
+                if (player.isDead()) player.spigot().respawn();
+                this.scheduler.runEntityDelayed(player, () -> {
+                    if (player.isOnline()) this.teleportPlayerSafely(player, target);
+                }, 2L);
+            }, 1L);
         } else {
-            player.teleportAsync(Bukkit.getWorlds().get(0).getSpawnLocation());
+            this.teleportPlayerSafely(player, target);
         }
     }
 
@@ -2308,11 +2317,23 @@ public final class DungeonService {
         final World world = instance.instanceWorld();
         if (world != null) {
             final World fb = Bukkit.getWorlds().get(0);
-            final List<CompletableFuture<Boolean>> tp = new ArrayList<>();
             for (final Player p : world.getPlayers()) {
                 // 清除可能指向此副本世界的重生點，避免重連後被送回
                 this.clearDungeonRespawnPoint(p);
-                tp.add(p.teleportAsync(fb.getSpawnLocation()));
+                // 優先使用玩家原始返回位置，而不是主世界出生點
+                final Location retLoc = instance.getReturnLocation(p.getUniqueId());
+                final Location dest = (retLoc != null && retLoc.getWorld() != null) ? retLoc : fb.getSpawnLocation();
+                if (p.isDead()) {
+                    this.scheduler.runEntityDelayed(p, () -> {
+                        if (!p.isOnline()) return;
+                        if (p.isDead()) p.spigot().respawn();
+                        this.scheduler.runEntityDelayed(p, () -> {
+                            if (p.isOnline()) this.teleportPlayerSafely(p, dest);
+                        }, 2L);
+                    }, 1L);
+                } else {
+                    this.teleportPlayerSafely(p, dest);
+                }
             }
             final Runnable doClean = () -> this.scheduler.runGlobal(task -> {
                 try {
@@ -2322,8 +2343,8 @@ public final class DungeonService {
                 }
                 this.scheduler.runAsync(() -> this.deleteWorldFolder(new File(Bukkit.getWorldContainer(), instanceId)));
             });
-            if (tp.isEmpty()) doClean.run();
-            else CompletableFuture.allOf(tp.toArray(new CompletableFuture[0])).thenRun(doClean);
+            // teleportPlayerSafely 是非同步的，給足夠時間讓所有玩家傳送完成再清理世界
+            this.scheduler.runGlobalDelayed(task -> doClean.run(), 60L);
         }
     }
 
@@ -3655,6 +3676,8 @@ public final class DungeonService {
                     sp.length > 3 ? (float) sp[3] : 0f, sp.length > 4 ? (float) sp[4] : 0f);
         }
         event.setRespawnLocation(this.findNearestSafeLocation(respawnLoc));
+        // Folia 安全網：setRespawnLocation 在跨 region 時可能不生效，3 tick 後用 teleportPlayerSafely 補強
+        this.scheduler.runEntityDelayed(player, () -> this.safeRespawnTeleport(player, instance), 3L);
     }
 
     /** 處理玩家退出伺服器。 */

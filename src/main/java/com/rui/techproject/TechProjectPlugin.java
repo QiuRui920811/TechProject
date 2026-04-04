@@ -129,6 +129,7 @@ public final class TechProjectPlugin extends JavaPlugin {
         this.planetService = new PlanetService(this, this.safeScheduler, this.itemFactory, this.techRegistry);
         this.machineService = new MachineService(this, this.techRegistry, this.playerProgressService, this.achievementService, this.safeScheduler, this.itemFactory, this.techCropService);
         this.cookingService = new CookingService(this, this.techRegistry, this.itemFactory, this.safeScheduler);
+        this.cookingService.purgeOrphanedDisplays();
         this.achievementGuiService = new AchievementGuiService(this, this.techRegistry, this.playerProgressService, this.itemFactory);
         this.titleService = new TitleService(this, this.playerProgressService);
         this.achievementGuiService.setTitleService(this.titleService);

@@ -6,6 +6,7 @@
 items:
   ceramic_plate:
     display-name: 陶瓷板
+    item-model: "nexo:ceramic_plate"
     category: INTERMEDIATE
     icon: BRICK
     description: 耐熱陶瓷板，可作為冷熱製程保護層。
@@ -15,6 +16,7 @@ items:
       - 低溫 / 電漿前置
   thermal_ceramic:
     display-name: 熱穩陶瓷
+    item-model: "nexo:thermal_ceramic"
     category: ADVANCED
     tier: TIER2
     icon: TERRACOTTA
@@ -25,6 +27,7 @@ items:
       - 終局熱區設備
   insulated_wire:
     display-name: 絕緣線材
+    item-model: "nexo:insulated_wire"
     category: INTERMEDIATE
     icon: TRIPWIRE_HOOK
     description: 包覆絕緣層的線材，適合穩定訊號與能源控制。
@@ -43,6 +46,7 @@ items:
       - 高級控制部件
   servo_bundle:
     display-name: 伺服模組束
+    item-model: "nexo:servo_bundle"
     category: INTERMEDIATE
     icon: PISTON
     description: 一組整合好的伺服執行模組。
@@ -79,6 +83,7 @@ items:
       - 低溫保護核心
   bio_catalyst:
     display-name: 生質觸媒
+    item-model: "nexo:bio_catalyst"
     category: INTERMEDIATE
     icon: FERMENTED_SPIDER_EYE
     description: 生質觸媒，用於基因與合成食品工業。
@@ -648,6 +653,15 @@ items:
     use-cases:
       - 甜點乾糧
       - 遠程探索零食
+  rad_filter_pill:
+    display-name: 輻射濾除劑
+    category: ADVANCED
+    icon: FERMENTED_SPIDER_EYE
+    description: 以生質催化劑與神經樹脂調配的粗製藥劑，能在短時間內緩和輻射灰蝕。
+    unlock: initial
+    use-cases:
+      - 首次登陸奧蕾莉亞對策
+      - 基礎輻射防護
   aurelia_glaze:
     display-name: 輻晶蜜凍
     category: ADVANCED
@@ -1334,6 +1348,7 @@ items:
       - 前線外勤垂直機動
   tech_magnet:
     display-name: 科技磁石
+    item-model: "nexo:tech_magnet"
     category: INTERMEDIATE
     tier: TIER2
     icon: IRON_INGOT
@@ -1686,7 +1701,7 @@ items:
     display-name: 行星測繪資料
     category: ADVANCED
     tier: TIER4
-    icon: MAP
+    icon: PAPER
     description: 經由 Survey Beacon 整理的地表層資料，用於啟動低階遺跡與研究分支。
     unlock: survey_beacon
     use-cases:
@@ -1962,7 +1977,7 @@ items:
   star_chart:
     display-name: 星圖
     category: ADVANCED
-    icon: MAP
+    icon: PAPER
     description: 記錄軌道與星流資料的高精度星圖。
     unlock: observatory
     use-cases:
@@ -2189,10 +2204,10 @@ items:
     category: ADVANCED
     tier: TIER4
     icon: NETHERITE_HELMET
-    description: 虛空材質王冠。穿戴時減傷 20% 並自動緩降。
+    description: 虛空材質王冠。穿戴時減傷 20%，並獲得夜視與潮湧能量。
     unlock: matter_compiler
     use-cases:
-      - 穿戴：20% 減傷 + 緩降
+      - 穿戴：20% 減傷 + 夜視 + 潮湧能量
       - 虛空套裝件
   void_cuirass:
     display-name: 虛空鎧甲
@@ -2359,6 +2374,7 @@ items:
       - 可升級為二級結晶
   magic_lump_2:
     display-name: 魔法結晶 - II
+    item-model: "nexo:magic_crystal_2"
     category: INTERMEDIATE
     tier: TIER2
     icon: GOLD_INGOT
@@ -2390,6 +2406,7 @@ items:
       - 可升級為二級
   ender_lump_2:
     display-name: 末影結晶 - II
+    item-model: "nexo:ender_crystal_2"
     category: INTERMEDIATE
     tier: TIER2
     icon: ENDER_EYE
@@ -2420,6 +2437,7 @@ items:
       - 護符合成材料
   magic_glass:
     display-name: 魔法玻璃
+    item-model: "nexo:magic_glass"
     category: INTERMEDIATE
     tier: TIER2
     icon: GLASS
@@ -2430,6 +2448,7 @@ items:
       - 特殊裝備材料
   lava_crystal:
     display-name: 岩漿水晶
+    item-model: "nexo:lava_crystal"
     category: INTERMEDIATE
     tier: TIER2
     icon: MAGMA_CREAM
@@ -2570,6 +2589,7 @@ items:
       - 交易增益材料
   strange_nether_goo:
     display-name: 異界凝膠
+    item-model: "nexo:strange_nether_goo"
     category: INTERMEDIATE
     tier: TIER2
     icon: SLIME_BALL
@@ -2630,6 +2650,130 @@ items:
     use-cases:
       - 高效採集飲品
       - 工程加速飲料
+
+  # ── 特殊工具 ──────────────────────────────────
+  explosive_pickaxe:
+    display-name: 爆破鎬
+    category: TOOL
+    icon: DIAMOND_PICKAXE
+    description: 挖掘方塊時同時破壞周圍 3×3 區域，大幅加速採礦。
+    unlock: item:advanced_circuit&item:steel_plate
+    use-cases:
+      - 快速礦道開掘
+      - 大面積採石
+  vein_mining_pickaxe:
+    display-name: 礦脈鎬
+    category: TOOL
+    icon: IRON_PICKAXE
+    description: 挖掘礦石時自動連鎖開採相同類型的相鄰礦石（最多 64 塊）。
+    unlock: item:advanced_circuit&item:steel_plate
+    use-cases:
+      - 礦脈一鍵清除
+      - 高效礦石採集
+  smelters_pickaxe:
+    display-name: 熔煉鎬
+    category: TOOL
+    icon: GOLDEN_PICKAXE
+    description: 挖掘礦石時自動將掉落物熔煉為對應錠或成品。
+    unlock: item:advanced_circuit&item:heat_coil
+    use-cases:
+      - 免熔爐直接取錠
+      - 快速資源加工
+  beheading_sword:
+    display-name: 斬首劍
+    category: TOOL
+    icon: NETHERITE_SWORD
+    description: 擊殺生物時有 40% 機率掉落對應頭顱。
+    unlock: item:advanced_circuit&item:steel_plate
+    use-cases:
+      - 頭顱收集
+      - 裝飾素材
+  vampire_blade:
+    display-name: 吸血刃
+    category: TOOL
+    icon: IRON_SWORD
+    description: 每次攻擊命中時回復攻擊傷害 25% 的生命值。
+    unlock: item:advanced_circuit&item:bio_catalyst
+    use-cases:
+      - 持久戰鬥續航
+      - 自我回復
+  seismic_axe:
+    display-name: 地震斧
+    category: TOOL
+    icon: DIAMOND_AXE
+    description: 右鍵使用時對前方 4 格範圍內的所有生物造成 6 點傷害並擊飛（冷卻 5 秒）。
+    unlock: item:advanced_circuit&item:dense_carbon_block
+    use-cases:
+      - 範圍控場
+      - 群體清怪
+
+  # ── 核燃料材料 ──────────────────────────────────
+  uranium_dust:
+    display-name: 鈾粉
+    category: INTERMEDIATE
+    icon: LIME_DYE
+    description: 從礦石中粉碎取得的放射性粉末，是核燃料的起點。
+    unlock: electric_crusher
+    use-cases:
+      - 核燃料前置
+      - 濃縮處理原料
+  enriched_uranium:
+    display-name: 濃縮鈾
+    category: ADVANCED
+    icon: YELLOW_DYE
+    description: 經離心機分離濃縮的鈾同位素，可製成燃料棒。
+    unlock: electric_centrifuge
+    use-cases:
+      - 核燃料棒合成
+      - 高能反應堆原料
+  uranium_rod:
+    display-name: 鈾燃料棒
+    category: ADVANCED
+    tier: TIER3
+    icon: BLAZE_ROD
+    description: 裝填濃縮鈾的燃料棒，是核反應堆的燃料來源。
+    unlock: assembler
+    use-cases:
+      - 核反應堆燃料
+      - 高功率發電
+  spent_fuel_rod:
+    display-name: 乏燃料棒
+    category: INTERMEDIATE
+    icon: STICK
+    description: 反應完畢的廢料棒，仍有微量放射性。可回收再處理。
+    unlock: nuclear_reactor
+    use-cases:
+      - 回收再處理
+      - 廢料管理
+  reactor_coolant:
+    display-name: 反應堆冷卻液
+    category: INTERMEDIATE
+    icon: LIGHT_BLUE_DYE
+    description: 專為核反應堆設計的冷卻液，維持反應堆穩定運轉。
+    unlock: chemical_reactor
+    use-cases:
+      - 核反應堆穩定
+      - 冷卻循環
+
+  # ── 便攜工具 ──────────────────────────────────
+  portable_crafter:
+    display-name: 便攜合成台
+    category: TOOL
+    icon: CRAFTING_TABLE
+    description: 右鍵打開隨身 3×3 合成台介面，可在任何地方合成物品。
+    unlock: item:steel_plate&item:circuit_board
+    use-cases:
+      - 隨身合成
+      - 外出合成
+  portable_dustbin:
+    display-name: 便攜垃圾桶
+    category: TOOL
+    icon: DROPPER
+    description: 右鍵打開 54 格收納箱；關閉時所有物品自動銷毀。
+    unlock: item:steel_plate&item:circuit_board
+    use-cases:
+      - 快速清理背包
+      - 垃圾處理
 
 machines:
   kiln:
@@ -2723,7 +2867,7 @@ machines:
     outputs: [survey_data]
     energy-per-tick: 24
     effect: 將觀測資料轉成可用的星球測繪樣本
-    unlock: observatory&item:radiation_filter&stat:planetary_samples_collected>=6
+    unlock: observatory&item:radiation_filter
   relic_analyzer:
     display-name: 遺物解析儀
     category: ADVANCED
@@ -2759,11 +2903,11 @@ machines:
     category: ADVANCED
     tier: TIER4
     block: CONDUIT
-    inputs: [survey_data, gravitic_bearing, quantum_frame, xeno_alloy]
+    inputs: [survey_data, gravitic_bearing, quantum_frame, data_core]
     outputs: [survey_data]
     energy-per-tick: 12
     effect: 平時維持 12 EU 吸能，啟動躍遷時額外消耗 1200 EU 將玩家投送至目標星球
-    unlock: machine:planetary_forge&item:ancient_signal&stat:planet_elites_defeated>=3
+    unlock: machine:survey_beacon&item:survey_data&item:gravitic_bearing
   planetary_harvester:
     display-name: 行星採集機
     category: ADVANCED
@@ -2774,808 +2918,1020 @@ machines:
     energy-per-tick: 20
     effect: 自動回收行星地表樣本與異星生質
     unlock: machine:survey_beacon&item:irradiated_shard&stat:planetary_samples_collected>=18
+  nuclear_reactor:
+    display-name: 核反應堆
+    category: ADVANCED
+    tier: TIER3
+    block: RESPAWN_ANCHOR
+    archetype: GENERATOR
+    inputs: [uranium_rod, reactor_coolant]
+    outputs: [spent_fuel_rod]
+    energy-per-tick: 0
+    max-energy: 8000
+    effect: 每 20 tick 消耗鈾燃料棒+冷卻液，產生 64 EU 並輸出乏燃料棒
+    unlock: item:uranium_rod&item:reactor_coolant
+  amethyst_grower:
+    display-name: 紫水晶培養機
+    category: ADVANCED
+    tier: TIER2
+    block: BUDDING_AMETHYST
+    inputs: [coolant_mix]
+    outputs: [amethyst_shard]
+    energy-per-tick: 16
+    effect: 消耗冷卻混合液培養紫水晶碎片
+    unlock: machine:crystal_growth_chamber
 recipes:
   kiln_ceramic_plate:
     machine: kiln
     inputs: [clay_ball]
+    input-amounts: [2]
     output: ceramic_plate
     energy: 12
     guide: 黏土球 → 窯爐 → 陶瓷板
   kiln_thermal_ceramic:
     machine: kiln
     inputs: [ceramic_plate, heat_coil]
+    input-amounts: [1, 1]
     output: thermal_ceramic
     energy: 14
     guide: 陶瓷板 + 熱線圈 → 窯爐 → 隔熱陶瓷
   insulation_wire_recipe:
     machine: insulation_press
     inputs: [copper_wire, plastic]
+    input-amounts: [1, 1]
     output: insulated_wire
     energy: 11
     guide: 銅線 + 塑膠 → 絕緣壓床 → 絕緣導線
   insulation_sensor_array:
     machine: insulation_press
     inputs: [insulated_wire, logic_gate]
+    input-amounts: [1, 1]
     output: sensor_array
     energy: 13
     guide: 絕緣導線 + 邏輯閘 → 絕緣壓床 → 感測陣列
   insulation_servo_bundle:
     machine: insulation_press
     inputs: [servo_motor, insulated_wire]
+    input-amounts: [1, 1]
     output: servo_bundle
     energy: 13
     guide: 伺服馬達 + 絕緣導線 → 絕緣壓床 → 伺服束線
   cryo_canister_recipe:
     machine: cryo_distiller
     inputs: [coolant_mix, refined_oil]
+    input-amounts: [2, 1]
     output: coolant_canister
     energy: 17
     guide: 冷卻混合液 + 精煉油 → 低溫蒸餾器 → 冷卻罐
   cryo_gel_recipe:
     machine: cryo_distiller
     inputs: [hydro_gel, coolant_cell]
+    input-amounts: [2, 1]
     output: cryo_gel
     energy: 16
     guide: 水凝膠 + 冷卻電池 → 低溫蒸餾器 → 低溫凝膠
   cryo_core_recipe:
     machine: cryo_distiller
     inputs: [coolant_canister, grown_crystal]
+    input-amounts: [2, 1]
     output: cryo_core
     energy: 20
     guide: 冷卻罐 + 培育晶體 → 低溫蒸餾器 → 低溫核心
   gene_bio_catalyst_recipe:
     machine: gene_splicer
     inputs: [bio_resin, fertilizer_mix]
+    input-amounts: [2, 1]
     output: bio_catalyst
     energy: 18
     guide: 生質樹脂 + 肥料混合物 → 基因剪接台 → 生質催化劑
   gene_template_recipe:
     machine: gene_splicer
     inputs: [crops, etched_circuit]
+    input-amounts: [2, 1]
     output: gene_template
     energy: 20
     guide: 作物 + 蝕刻電路 → 基因剪接台 → 基因模板
   gene_neural_resin_recipe:
     machine: gene_splicer
     inputs: [bio_resin, synthetic_fiber]
+    input-amounts: [2, 1]
     output: neural_resin
     energy: 19
     guide: 生質樹脂 + 合成纖維 → 基因剪接台 → 神經樹脂
   gene_splicer_blade_recipe:
     machine: gene_splicer
     inputs: [steel_plate, precision_nozzle]
+    input-amounts: [2, 1]
     output: splicer_blade
     energy: 17
     guide: 鋼板 + 精密噴嘴 → 基因剪接台 → 剪接刀片
   biosynth_meat_recipe:
     machine: biosynth_vat
     inputs: [gene_template, bio_catalyst]
+    input-amounts: [2, 1]
     output: synth_meat
     energy: 16
     guide: 基因模板 + 生質催化劑 → 生物合成槽 → 合成肉
   auto_farm_soybean_seed:
     machine: auto_farm
     inputs: [crop_seeds, fertilizer_mix]
+    input-amounts: [1, 1]
     output: soybean_seeds
     energy: 4
     guide: 作物種子 + 肥料混合物 → 自動農場 → 黃豆種子
   greenhouse_spiceberry_seed:
     machine: greenhouse
     inputs: [seed_cluster, fertilizer_mix]
+    input-amounts: [1, 1]
     output: spiceberry_seeds
     energy: 8
     guide: 種子簇 + 肥料混合物 → 溫室培育艙 → 香莓種子
   greenhouse_tea_leaf_seed:
     machine: greenhouse
     inputs: [seed_cluster, hydro_gel]
+    input-amounts: [1, 1]
     output: tea_leaf_seeds
     energy: 8
     guide: 種子簇 + 水凝膠 → 溫室培育艙 → 茶葉種子
   bio_lab_nutrition_bar:
     machine: bio_lab
     inputs: [soybean_pods, spiceberry]
+    input-amounts: [1, 1]
     output: nutrition_bar
     energy: 12
     guide: 黃豆莢 + 香莓 → 生質實驗室 → 營養棒
   biosynth_protein_ration:
     machine: biosynth_vat
     inputs: [synth_meat, soybean_pods]
+    input-amounts: [2, 1]
     output: protein_ration
     energy: 18
     guide: 合成肉 + 黃豆莢 → 生物合成槽 → 蛋白口糧
   coolant_radiant_tea:
     machine: coolant_mixer
     inputs: [tea_leaf, hydro_gel]
+    input-amounts: [1, 1]
     output: radiant_tea
     energy: 10
     guide: 茶葉 + 水凝膠 → 冷卻混合器 → 輝光茶飲
   bio_lab_fruit_puree:
     machine: bio_lab
     inputs: [lumenfruit, shadow_berry_cluster]
+    input-amounts: [1, 1]
     output: fruit_puree
     energy: 14
     guide: 微光果 + 影莓串 → 生質實驗室 → 果泥
   coolant_nebula_juice:
     machine: coolant_mixer
     inputs: [frost_apple, lumenfruit]
+    input-amounts: [1, 1]
     output: nebula_juice
     energy: 12
     guide: 霜蘋果 + 微光果 → 冷卻混合器 → 星雲果汁
   biosynth_orchard_ration:
     machine: biosynth_vat
     inputs: [fruit_puree, soybean_pods]
+    input-amounts: [2, 1]
     output: orchard_ration
     energy: 18
     guide: 果泥 + 黃豆莢 → 生物合成槽 → 果園口糧
   bio_lab_stormplum_gel:
     machine: bio_lab
     inputs: [stormplum, hydro_gel]
+    input-amounts: [1, 1]
     output: radiant_tea
     energy: 11
     guide: 風暴李 + 水凝膠 → 生質實驗室 → 輝光茶變種
   biosynth_fig_bar:
     machine: biosynth_vat
     inputs: [sunflare_fig, fruit_puree]
+    input-amounts: [2, 1]
     output: nutrition_bar
     energy: 16
     guide: 烈陽無花果 + 果泥 → 生物合成槽 → 營養棒
   auto_farm_tomato_seed:
     machine: auto_farm
     inputs: [crop_seeds, bio_catalyst]
+    input-amounts: [1, 1]
     output: tomato_seeds
     energy: 4
     guide: 作物種子 + 生質催化劑 → 自動農場 → 番茄種子
   auto_farm_cabbage_seed:
     machine: auto_farm
     inputs: [crop_seeds, hydro_gel]
+    input-amounts: [1, 1]
     output: cabbage_seeds
     energy: 4
     guide: 作物種子 + 水凝膠 → 自動農場 → 高麗菜種子
   greenhouse_corn_seed:
     machine: greenhouse
     inputs: [seed_cluster, bio_catalyst]
+    input-amounts: [1, 1]
     output: corn_seeds
     energy: 8
     guide: 種子簇 + 生質催化劑 → 溫室培育艙 → 玉米粒種
   greenhouse_onion_bulbs:
     machine: greenhouse
     inputs: [seed_cluster, gene_template]
+    input-amounts: [1, 1]
     output: onion_bulbs
     energy: 8
     guide: 種子簇 + 基因模板 → 溫室培育艙 → 洋蔥球根
+  greenhouse_grape_sapling:
+    machine: greenhouse
+    inputs: [seed_cluster, fertilizer_mix]
+    input-amounts: [1, 1]
+    output: grape_sapling
+    energy: 8
+    guide: 種子簇 + 肥料混合物 → 溫室培育艙 → 葡萄架苗
+  greenhouse_banana_sapling:
+    machine: greenhouse
+    inputs: [seed_cluster, bio_catalyst]
+    input-amounts: [1, 1]
+    output: banana_sapling
+    energy: 8
+    guide: 種子簇 + 生質催化劑 → 溫室培育艙 → 蕉苗
+  greenhouse_mango_sapling:
+    machine: greenhouse
+    inputs: [seed_cluster, hydro_gel]
+    input-amounts: [1, 1]
+    output: mango_sapling
+    energy: 8
+    guide: 種子簇 + 水凝膠 → 溫室培育艙 → 芒果樹苗
+  greenhouse_coconut_palm:
+    machine: greenhouse
+    inputs: [seed_cluster, gene_template]
+    input-amounts: [1, 1]
+    output: coconut_palm
+    energy: 8
+    guide: 種子簇 + 基因模板 → 溫室培育艙 → 椰子苗
+  greenhouse_strawberry_bush:
+    machine: greenhouse
+    inputs: [seed_cluster, fertilizer_mix]
+    input-amounts: [1, 1]
+    output: strawberry_bush
+    energy: 8
+    guide: 種子簇 + 肥料混合物 → 溫室培育艙 → 草莓苗
+  greenhouse_blueberry_bush:
+    machine: greenhouse
+    inputs: [seed_cluster, hydro_gel]
+    input-amounts: [1, 1]
+    output: blueberry_bush
+    energy: 8
+    guide: 種子簇 + 水凝膠 → 溫室培育艙 → 藍莓苗
+  greenhouse_raspberry_bush:
+    machine: greenhouse
+    inputs: [seed_cluster, bio_catalyst]
+    input-amounts: [1, 1]
+    output: raspberry_bush
+    energy: 8
+    guide: 種子簇 + 生質催化劑 → 溫室培育艙 → 覆盆子苗
   coolant_lemon_juice:
     machine: coolant_mixer
     inputs: [lemon, hydro_gel]
+    input-amounts: [1, 1]
     output: lemon_juice
     energy: 10
     guide: 黃檸果 + 水凝膠 → 冷卻混合器 → 檸果汁
   coolant_orange_juice:
     machine: coolant_mixer
     inputs: [orange, hydro_gel]
+    input-amounts: [1, 1]
     output: orange_juice
     energy: 10
     guide: 香橙 + 水凝膠 → 冷卻混合器 → 香橙汁
   coolant_peach_juice:
     machine: coolant_mixer
     inputs: [peach, hydro_gel]
+    input-amounts: [1, 1]
     output: peach_juice
     energy: 10
     guide: 蜜桃 + 水凝膠 → 冷卻混合器 → 蜜桃汁
   coolant_pear_juice:
     machine: coolant_mixer
     inputs: [pear, hydro_gel]
+    input-amounts: [1, 1]
     output: pear_juice
     energy: 10
     guide: 青梨 + 水凝膠 → 冷卻混合器 → 青梨汁
   coolant_cherry_juice:
     machine: coolant_mixer
     inputs: [cherry, hydro_gel]
+    input-amounts: [1, 1]
     output: cherry_juice
     energy: 10
     guide: 櫻桃 + 水凝膠 → 冷卻混合器 → 櫻桃汁
   bio_lab_orchard_salad:
     machine: bio_lab
     inputs: [tomato, cabbage]
+    input-amounts: [1, 1]
     output: orchard_salad
     energy: 11
     guide: 番茄 + 高麗菜球 → 生質實驗室 → 果園沙拉
   bio_lab_cornbread:
     machine: bio_lab
     inputs: [corn, soybean_pods]
+    input-amounts: [1, 1]
     output: cornbread
     energy: 12
     guide: 甜玉米 + 黃豆莢 → 生質實驗室 → 玉米麵包
   bio_lab_stuffed_cabbage:
     machine: bio_lab
     inputs: [cabbage, onion]
+    input-amounts: [1, 1]
     output: stuffed_cabbage
     energy: 12
     guide: 高麗菜球 + 洋蔥 → 生質實驗室 → 捲心菜捲
   biosynth_sunrise_pie:
     machine: biosynth_vat
     inputs: [orange, peach]
+    input-amounts: [2, 1]
     output: sunrise_pie
     energy: 16
     guide: 香橙 + 蜜桃 → 生物合成槽 → 晨光果派
   biosynth_berry_tart:
     machine: biosynth_vat
     inputs: [shadow_berry_cluster, spiceberry]
+    input-amounts: [2, 1]
     output: berry_tart
     energy: 16
     guide: 影莓串 + 香莓 → 生物合成槽 → 漿果塔派
   bio_lab_citrus_salad:
     machine: bio_lab
     inputs: [orange, lemon]
+    input-amounts: [1, 1]
     output: citrus_salad
     energy: 11
     guide: 香橙 + 黃檸果 → 生質實驗室 → 柑橘沙拉
   bio_lab_tomato_stew:
     machine: bio_lab
     inputs: [tomato, onion]
+    input-amounts: [1, 1]
     output: tomato_stew
     energy: 11
     guide: 番茄 + 洋蔥 → 生質實驗室 → 番茄燉鍋
   coolant_orchard_smoothie:
     machine: coolant_mixer
     inputs: [peach, pear]
+    input-amounts: [1, 1]
     output: orchard_smoothie
     energy: 11
     guide: 蜜桃 + 青梨 → 冷卻混合器 → 果園奶昔
   coolant_sparkling_lemonade:
     machine: coolant_mixer
     inputs: [lemon, orange]
+    input-amounts: [1, 1]
     output: sparkling_lemonade
     energy: 11
     guide: 黃檸果 + 香橙 → 冷卻混合器 → 氣泡檸橙飲
   biosynth_peach_cobbler:
     machine: biosynth_vat
     inputs: [peach, corn]
+    input-amounts: [2, 1]
     output: peach_cobbler
     energy: 16
     guide: 蜜桃 + 甜玉米 → 生物合成槽 → 蜜桃派盆
   biosynth_pear_crisp:
     machine: biosynth_vat
     inputs: [pear, cornbread]
+    input-amounts: [2, 1]
     output: pear_crisp
     energy: 16
     guide: 青梨 + 玉米麵包 → 生物合成槽 → 青梨脆派
+  bio_lab_rad_filter_pill:
+    machine: bio_lab
+    inputs: [bio_catalyst, neural_resin]
+    input-amounts: [1, 1]
+    output: rad_filter_pill
+    energy: 14
+    guide: 生質催化劑 + 神經樹脂 → 生質實驗室 → 輻射濾除劑
   bio_lab_aurelia_glaze:
     machine: bio_lab
     inputs: [lumenfruit, irradiated_shard]
+    input-amounts: [1, 1]
     output: aurelia_glaze
     energy: 18
     guide: 流明果 + 輻照碎片 → 生質實驗室 → 輻晶蜜凍
   biosynth_cryon_hotpot:
     machine: biosynth_vat
     inputs: [frost_apple, cryonite_crystal]
+    input-amounts: [2, 1]
     output: cryon_hotpot
     energy: 18
     guide: 霜蘋果 + 低溫晶體 → 生物合成槽 → 霜芯暖鍋
   coolant_nyx_phase_gel:
     machine: coolant_mixer
     inputs: [shadow_berry_cluster, voidglass_fragment]
+    input-amounts: [1, 1]
     output: nyx_phase_gel
     energy: 18
     guide: 影莓串 + 虛玻碎片 → 冷卻混合器 → 相位凝露
   cryo_helion_sorbet:
     machine: cryo_distiller
     inputs: [sunflare_fig, solarite_shard]
+    input-amounts: [2, 1]
     output: helion_sorbet
     energy: 18
     guide: 烈陽無花果 + 日灼碎片 → 低溫蒸餾器 → 日冕雪酪
   coolant_tempest_fizz:
     machine: coolant_mixer
     inputs: [stormplum, stormglass_shard]
+    input-amounts: [1, 1]
     output: tempest_fizz
     energy: 18
     guide: 風暴李 + 暴嵐玻片 → 冷卻混合器 → 雷雲汽泡飲
   assembler_field_sickle:
     machine: assembler
     inputs: [harvest_unit, steel_plate]
+    input-amounts: [1, 1]
     output: field_sickle
     energy: 14
     guide: 收割單元 + 鋼板 → 製造機 → 田野鐮刀
   assembler_hydro_spade:
     machine: assembler
     inputs: [agri_module, servo_motor]
+    input-amounts: [1, 1]
     output: hydro_spade
     energy: 14
     guide: 農業模組 + 伺服馬達 → 製造機 → 水培鏟
   assembler_vector_grapple:
     machine: assembler
     inputs: [servo_bundle, insulated_wire, sensor_array]
+    input-amounts: [1, 1, 1]
     output: vector_grapple
     energy: 18
     guide: 伺服模組束 + 絕緣線材 + 感測陣列 → 製造機 → 向量抓鉤
   assembler_tech_magnet:
     machine: assembler
     inputs: [magnetic_ring, energy_cell, copper_wire]
+    input-amounts: [1, 1, 1]
     output: tech_magnet
     energy: 14
     guide: 磁環 + 能量電池 + 銅線 → 製造機 → 科技磁石
   advanced_pulse_thruster:
     machine: advanced_assembler
     inputs: [pressure_membrane, plasma_cell, precision_nozzle]
+    input-amounts: [1, 1, 1]
     output: pulse_thruster
     energy: 24
     guide: 壓差膜層 + 電漿容器 + 精密噴嘴 → 進階製造機 → 脈衝推進器
   purifier_radiation_filter:
     machine: purifier
     inputs: [rust_filter, nano_coating]
+    input-amounts: [1, 1]
     output: radiation_filter
     energy: 14
     guide: 鏽蝕濾芯 + 奈米塗層 → 淨化器 → 輻射濾網
   observatory_survey_chip:
     machine: observatory
     inputs: [star_chart, data_core]
+    input-amounts: [2, 1]
     output: survey_chip
     energy: 24
     guide: 星圖 + 數據核心 → 天文觀測台 → 測繪晶片
   survey_beacon_data:
     machine: survey_beacon
     inputs: [survey_chip, star_chart]
+    input-amounts: [2, 1]
     output: survey_data
     energy: 24
     guide: 測繪晶片 + 星圖 → 測繪信標 → 測繪資料
   relic_analyzer_aurelia:
     machine: relic_analyzer
     inputs: [survey_data, planetary_relic]
+    input-amounts: [2, 1]
     output: ancient_signal
     energy: 26
     guide: 測繪資料 + 行星遺物 → 遺物解析儀 → 古代訊號
   relic_analyzer_cryon:
     machine: relic_analyzer
     inputs: [survey_data, cryon_relic]
+    input-amounts: [2, 1]
     output: ancient_signal
     energy: 26
     guide: 測繪資料 + 克里昂遺物 → 遺物解析儀 → 古代訊號
   relic_analyzer_nyx:
     machine: relic_analyzer
     inputs: [survey_data, nyx_relic]
+    input-amounts: [2, 1]
     output: ancient_signal
     energy: 26
     guide: 測繪資料 + 倪克斯遺核 → 遺物解析儀 → 古代訊號
   relic_analyzer_helion:
     machine: relic_analyzer
     inputs: [ancient_signal, helion_relic]
+    input-amounts: [2, 1]
     output: frontier_core_fragment
     energy: 30
     guide: 古代訊號 + 赫利昂炎核遺物 → 遺物解析儀 → 前線核心碎片
   relic_analyzer_tempest:
     machine: relic_analyzer
     inputs: [ancient_signal, tempest_relic]
+    input-amounts: [2, 1]
     output: frontier_core_fragment
     energy: 30
     guide: 古代訊號 + 坦佩斯特雷核遺物 → 遺物解析儀 → 前線核心碎片
   xeno_alloy_recipe:
     machine: xeno_refinery
     inputs: [ancient_signal, irradiated_shard]
+    input-amounts: [2, 1]
     output: xeno_alloy
     energy: 28
     guide: 古代訊號 + 輻照碎晶 → 異星精煉台 → 異星合金
   xeno_radiation_mesh:
     machine: xeno_refinery
     inputs: [xeno_alloy, irradiated_shard, aurelia_parasite_gland]
+    input-amounts: [1, 1, 1]
     output: radiation_mesh
     energy: 29
     guide: 異星合金 + 輻照碎晶 + 奧蕾莉亞寄生腺體 → 異星精煉台 → 輻射網層
   xeno_thermal_lining:
     machine: xeno_refinery
     inputs: [xeno_alloy, cryonite_crystal, cryon_ice_heart]
+    input-amounts: [1, 1, 1]
     output: thermal_lining
     energy: 29
     guide: 異星合金 + 冰晶礦核 + 克里昂冰脈核心 → 異星精煉台 → 低溫內襯
   xeno_pressure_membrane:
     machine: xeno_refinery
     inputs: [xeno_alloy, voidglass_fragment, nyx_phase_tissue]
+    input-amounts: [1, 1, 1]
     output: pressure_membrane
     energy: 29
     guide: 異星合金 + 虛璃碎片 + 倪克斯相位膜組織 → 異星精煉台 → 壓差膜層
   xeno_flare_shielding:
     machine: xeno_refinery
     inputs: [xeno_alloy, solarite_shard, helion_cinder_core]
+    input-amounts: [1, 1, 1]
     output: flare_shielding
     energy: 31
     guide: 異星合金 + 日灼碎片 + 赫利昂灰燼燃核 → 異星精煉台 → 耀焰屏護層
   xeno_storm_baffle:
     machine: xeno_refinery
     inputs: [xeno_alloy, stormglass_shard, tempest_capacitor]
+    input-amounts: [1, 1, 1]
     output: storm_baffle
     energy: 31
     guide: 異星合金 + 風暴玻璃碎片 + 坦佩斯特電容核 → 異星精煉台 → 風暴導流層
   planetary_exo_frame:
     machine: planetary_forge
     inputs: [xeno_alloy, composite_panel]
+    input-amounts: [2, 1]
     output: exo_frame
     energy: 30
     guide: 異星合金 + 複合面板 → 行星鍛造台 → 外骨骼框架
   planetary_seal_fabric:
     machine: planetary_forge
     inputs: [synthetic_fiber, void_bloom]
+    input-amounts: [2, 1]
     output: seal_fabric
     energy: 28
     guide: 合成纖維 + 虛空花簇 → 行星鍛造台 → 密封織層
   advanced_anti_radiation_helmet:
     machine: planetary_forge
     inputs: [exo_frame, seal_fabric, radiation_mesh, glass_panel]
+    input-amounts: [1, 1, 1, 1]
     output: anti_radiation_helmet
     energy: 32
     guide: 外骨骼框架 + 密封織層 + 輻射網層 + 玻璃板 → 行星鍛造台 → 抗輻射頭盔
   advanced_anti_radiation_chestplate:
     machine: planetary_forge
     inputs: [exo_frame, seal_fabric, radiation_mesh, carbon_mesh]
+    input-amounts: [1, 1, 1, 1]
     output: anti_radiation_chestplate
     energy: 34
     guide: 外骨骼框架 + 密封織層 + 輻射網層 + 碳纖網 → 行星鍛造台 → 抗輻射胸甲
   advanced_anti_radiation_leggings:
     machine: planetary_forge
     inputs: [exo_frame, seal_fabric, radiation_mesh, insulated_wire]
+    input-amounts: [1, 1, 1, 1]
     output: anti_radiation_leggings
     energy: 33
     guide: 外骨骼框架 + 密封織層 + 輻射網層 + 絕緣導線 → 行星鍛造台 → 抗輻射護腿
   advanced_anti_radiation_boots:
     machine: planetary_forge
     inputs: [exo_frame, seal_fabric, radiation_mesh, rubber_sheet]
+    input-amounts: [1, 1, 1, 1]
     output: anti_radiation_boots
     energy: 31
     guide: 外骨骼框架 + 密封織層 + 輻射網層 + 橡膠片 → 行星鍛造台 → 抗輻射靴
   planetary_thermal_helmet:
     machine: planetary_forge
     inputs: [exo_frame, seal_fabric, thermal_lining, glass_panel]
+    input-amounts: [1, 1, 1, 1]
     output: thermal_helmet
     energy: 32
     guide: 外骨骼框架 + 密封織層 + 低溫內襯 + 玻璃板 → 行星鍛造台 → 低溫頭盔
   planetary_thermal_chestplate:
     machine: planetary_forge
     inputs: [exo_frame, seal_fabric, thermal_lining, carbon_mesh]
+    input-amounts: [1, 1, 1, 1]
     output: thermal_chestplate
     energy: 34
     guide: 外骨骼框架 + 密封織層 + 低溫內襯 + 碳纖網 → 行星鍛造台 → 低溫胸甲
   planetary_thermal_leggings:
     machine: planetary_forge
     inputs: [exo_frame, seal_fabric, thermal_lining, insulated_wire]
+    input-amounts: [1, 1, 1, 1]
     output: thermal_leggings
     energy: 33
     guide: 外骨骼框架 + 密封織層 + 低溫內襯 + 絕緣導線 → 行星鍛造台 → 低溫護腿
   planetary_thermal_boots:
     machine: planetary_forge
     inputs: [exo_frame, seal_fabric, thermal_lining, rubber_sheet]
+    input-amounts: [1, 1, 1, 1]
     output: thermal_boots
     energy: 31
     guide: 外骨骼框架 + 密封織層 + 低溫內襯 + 橡膠片 → 行星鍛造台 → 低溫靴
   planetary_pressure_helmet:
     machine: planetary_forge
     inputs: [exo_frame, seal_fabric, pressure_membrane, glass_panel]
+    input-amounts: [1, 1, 1, 1]
     output: pressure_helmet
     energy: 32
     guide: 外骨骼框架 + 密封織層 + 壓差膜層 + 玻璃板 → 行星鍛造台 → 真空頭盔
   planetary_pressure_chestplate:
     machine: planetary_forge
     inputs: [exo_frame, seal_fabric, pressure_membrane, carbon_mesh]
+    input-amounts: [1, 1, 1, 1]
     output: pressure_chestplate
     energy: 34
     guide: 外骨骼框架 + 密封織層 + 壓差膜層 + 碳纖網 → 行星鍛造台 → 真空胸甲
   planetary_pressure_leggings:
     machine: planetary_forge
     inputs: [exo_frame, seal_fabric, pressure_membrane, insulated_wire]
+    input-amounts: [1, 1, 1, 1]
     output: pressure_leggings
     energy: 33
     guide: 外骨骼框架 + 密封織層 + 壓差膜層 + 絕緣導線 → 行星鍛造台 → 真空護腿
   planetary_pressure_boots:
     machine: planetary_forge
     inputs: [exo_frame, seal_fabric, pressure_membrane, rubber_sheet]
+    input-amounts: [1, 1, 1, 1]
     output: pressure_boots
     energy: 31
     guide: 外骨骼框架 + 密封織層 + 壓差膜層 + 橡膠片 → 行星鍛造台 → 真空靴
   frontier_core_recipe:
     machine: planetary_forge
     inputs: [frontier_core_fragment, xeno_alloy, helion_cinder_core, tempest_capacitor]
+    input-amounts: [1, 1, 1, 1]
     output: frontier_core
     energy: 34
     guide: 前線核心碎片 + 異星合金 + 赫利昂灰燼燃核 + 坦佩斯特電容核 → 行星鍛造台 → 前線核心
   frontier_helmet_recipe:
     machine: planetary_forge
     inputs: [frontier_core, flare_shielding, storm_baffle, glass_panel]
+    input-amounts: [1, 1, 1, 1]
     output: frontier_helmet
     energy: 36
     guide: 前線核心 + 耀焰屏護層 + 風暴導流層 + 玻璃板 → 行星鍛造台 → 前線頭盔
   frontier_chestplate_recipe:
     machine: planetary_forge
     inputs: [frontier_core, flare_shielding, storm_baffle, carbon_mesh]
+    input-amounts: [1, 1, 1, 1]
     output: frontier_chestplate
     energy: 38
     guide: 前線核心 + 耀焰屏護層 + 風暴導流層 + 碳纖網 → 行星鍛造台 → 前線胸甲
   frontier_leggings_recipe:
     machine: planetary_forge
     inputs: [frontier_core, flare_shielding, storm_baffle, insulated_wire]
+    input-amounts: [1, 1, 1, 1]
     output: frontier_leggings
     energy: 37
     guide: 前線核心 + 耀焰屏護層 + 風暴導流層 + 絕緣導線 → 行星鍛造台 → 前線護腿
   frontier_boots_recipe:
     machine: planetary_forge
     inputs: [frontier_core, flare_shielding, storm_baffle, rubber_sheet]
+    input-amounts: [1, 1, 1, 1]
     output: frontier_boots
     energy: 35
     guide: 前線核心 + 耀焰屏護層 + 風暴導流層 + 橡膠片 → 行星鍛造台 → 前線靴
   planetary_gate_recipe:
     machine: advanced_assembler
-    inputs: [gravitic_bearing, quantum_frame, xeno_alloy]
+    inputs: [gravitic_bearing, quantum_frame, data_core]
+    input-amounts: [1, 1, 1]
     output: planetary_gate
     energy: 34
-    guide: 重力軸承 + 量子框架 + 異星合金 → 進階製造機 → 行星星門
+    guide: 重力軸承 + 量子框架 + 資料核心 → 進階製造機 → 行星星門
   storm_jetpack_recipe:
     machine: planetary_forge
     inputs: [frontier_core, storm_baffle, drone_frame, precision_nozzle]
+    input-amounts: [1, 1, 1, 1]
     output: storm_jetpack
     energy: 40
     guide: 前線核心 + 風暴偏轉層 + 無人機框架 + 精密噴嘴 → 行星鍛造台 → 風暴噴射背包
   plasma_dust_recipe:
     machine: plasma_refiner
     inputs: [ion_dust, refined_oil]
+    input-amounts: [2, 1]
     output: plasma_dust
     energy: 26
     guide: 離子粉 + 精煉油 → 電漿精煉器 → 電漿粉
   plasma_ingot_recipe:
     machine: plasma_refiner
     inputs: [titanium_alloy, plasma_dust]
+    input-amounts: [2, 1]
     output: plasma_ingot
     energy: 28
     guide: 鈦合金 + 電漿粉 → 電漿精煉器 → 電漿錠
   reactor_lattice_recipe:
     machine: plasma_refiner
     inputs: [plasma_ingot, alloy_frame]
+    input-amounts: [2, 1]
     output: reactor_lattice
     energy: 29
     guide: 電漿錠 + 合金框架 → 電漿精煉器 → 反應格架
   photon_shard_recipe:
     machine: photon_weaver
     inputs: [laser_lens, starlight_plate]
+    input-amounts: [2, 1]
     output: photon_shard
     energy: 23
     guide: 雷射鏡 + 星光板 → 光子編織機 → 光子碎片
   photon_plate_recipe:
     machine: photon_weaver
     inputs: [photon_shard, reinforced_glass]
+    input-amounts: [2, 1]
     output: photon_plate
     energy: 25
     guide: 光子碎片 + 強化玻璃 → 光子編織機 → 光子板
   observatory_lens_recipe:
     machine: photon_weaver
     inputs: [photon_shard, optic_lens]
+    input-amounts: [2, 1]
     output: observatory_lens
     energy: 24
     guide: 光子碎片 + 光學鏡片 → 光子編織機 → 觀測透鏡
   observatory_star_chart_recipe:
     machine: observatory
     inputs: [observatory_lens, data_matrix]
+    input-amounts: [2, 1]
     output: star_chart
     energy: 22
     guide: 觀測透鏡 + 數據矩陣 → 天文觀測台 → 星圖
   observatory_bearing_recipe:
     machine: observatory
     inputs: [magnetic_ring, graviton_lens]
+    input-amounts: [2, 1]
     output: gravitic_bearing
     energy: 24
     guide: 磁環 + 重力子透鏡 → 天文觀測台 → 重力軸承
   observatory_vacuum_module_recipe:
     machine: observatory
     inputs: [star_chart, vacuum_tube]
+    input-amounts: [2, 1]
     output: vacuum_module
     energy: 22
     guide: 星圖 + 真空管 → 天文觀測台 → 真空模組
   observatory_data_core_recipe:
     machine: observatory
     inputs: [star_chart, control_unit]
+    input-amounts: [2, 1]
     output: data_core
     energy: 23
     guide: 星圖 + 控制單元 → 天文觀測台 → 數據核心
   archive_plate_recipe:
     machine: data_archive
     inputs: [data_core, gravitic_bearing]
+    input-amounts: [2, 1]
     output: archive_plate
     energy: 20
     guide: 數據核心 + 重力軸承 → 資料檔案庫 → 檔案板
   craft_pulse_staff:
     machine: field_forge
     inputs: [advanced_circuit, dense_carbon_block]
+    input-amounts: [2, 1]
     output: pulse_staff
     energy: 20
     guide: 高級電路 + 高密碳塊 → 場域鍛爐 → 脈衝法杖
   craft_storm_staff:
     machine: field_forge
     inputs: [advanced_circuit, heat_coil]
+    input-amounts: [2, 1]
     output: storm_staff
     energy: 22
     guide: 高級電路 + 加熱線圈 → 場域鍛爐 → 風暴法杖
   craft_gravity_staff:
     machine: field_forge
     inputs: [graviton_lens, advanced_circuit]
+    input-amounts: [2, 1]
     output: gravity_staff
     energy: 22
     guide: 重力子透鏡 + 高級電路 → 場域鍛爐 → 重力法杖
   craft_warp_orb:
     machine: field_forge
     inputs: [quantum_chip, graviton_lens]
+    input-amounts: [2, 1]
     output: warp_orb
     energy: 24
     guide: 量子晶片 + 重力子透鏡 → 場域鍛爐 → 曲速球
   craft_cryo_wand:
     machine: field_forge
     inputs: [coolant_cell, advanced_circuit]
+    input-amounts: [2, 1]
     output: cryo_wand
     energy: 20
     guide: 冷卻核心 + 高級電路 → 場域鍛爐 → 冰晶權杖
   craft_plasma_lance:
     machine: matter_compiler
     inputs: [plasma_cell, titanium_alloy]
+    input-amounts: [2, 1]
     output: plasma_lance
     energy: 30
     guide: 電漿核心 + 鈦合金 → 物質編譯器 → 電漿長矛
   craft_void_mirror:
     machine: matter_compiler
     inputs: [photon_plate, graviton_lens]
+    input-amounts: [2, 1]
     output: void_mirror
     energy: 32
     guide: 光子板 + 重力子透鏡 → 物質編譯器 → 虛空之鏡
   craft_time_dilator:
     machine: matter_compiler
     inputs: [quantum_chip, control_unit]
+    input-amounts: [2, 1]
     output: time_dilator
     energy: 30
     guide: 量子晶片 + 控制單元 → 物質編譯器 → 時間膨脹器
   craft_heal_beacon:
     machine: matter_compiler
     inputs: [data_core, fusion_core]
+    input-amounts: [2, 1]
     output: heal_beacon
     energy: 34
     guide: 數據核心 + 融合核心 → 物質編譯器 → 修復信標
   craft_entropy_scepter:
     machine: matter_compiler
     inputs: [void_beacon_core, plasma_cell]
+    input-amounts: [2, 1]
     output: entropy_scepter
     energy: 36
     guide: 虛空信標核心 + 電漿核心 → 物質編譯器 → 熵變權杖
   craft_titan_helmet:
     machine: assembler
     inputs: [composite_panel, circuit_board]
+    input-amounts: [1, 1]
     output: titan_helmet
     energy: 14
     guide: 複合面板 + 電路板 → 製造機 → 泰坦頭盔
   craft_titan_chestplate:
     machine: assembler
     inputs: [composite_panel, carbon_mesh]
+    input-amounts: [1, 1]
     output: titan_chestplate
     energy: 16
     guide: 複合面板 + 碳纖網 → 製造機 → 泰坦胸甲
   craft_titan_leggings:
     machine: assembler
     inputs: [composite_panel, copper_wire]
+    input-amounts: [1, 1]
     output: titan_leggings
     energy: 14
     guide: 複合面板 + 銅線 → 製造機 → 泰坦護腿
   craft_titan_boots:
     machine: assembler
     inputs: [composite_panel, rubber_sheet]
+    input-amounts: [1, 1]
     output: titan_boots
     energy: 12
     guide: 複合面板 + 橡膠片 → 製造機 → 泰坦靴子
   craft_quantum_helmet:
     machine: quantum_processor
     inputs: [quantum_chip, titanium_alloy]
+    input-amounts: [2, 1]
     output: quantum_helmet
     energy: 24
     guide: 量子晶片 + 鈦合金 → 量子處理器 → 量子頭盔
   craft_quantum_chestplate:
     machine: quantum_processor
     inputs: [quantum_chip, photon_plate]
+    input-amounts: [2, 1]
     output: quantum_chestplate
     energy: 26
     guide: 量子晶片 + 光子板 → 量子處理器 → 量子胸甲
   craft_quantum_leggings:
     machine: quantum_processor
     inputs: [quantum_chip, carbon_mesh]
+    input-amounts: [2, 1]
     output: quantum_leggings
     energy: 24
     guide: 量子晶片 + 碳纖網 → 量子處理器 → 量子護腿
   craft_quantum_boots:
     machine: quantum_processor
     inputs: [quantum_chip, graviton_lens]
+    input-amounts: [2, 1]
     output: quantum_boots
     energy: 24
     guide: 量子晶片 + 重力子透鏡 → 量子處理器 → 量子靴子
   craft_void_crown:
     machine: matter_compiler
     inputs: [void_beacon_core, photon_plate]
+    input-amounts: [2, 1]
     output: void_crown
     energy: 34
     guide: 虛空信標核心 + 光子板 → 物質編譯器 → 虛空之冠
   craft_void_cuirass:
     machine: matter_compiler
     inputs: [void_beacon_core, titanium_alloy]
+    input-amounts: [2, 1]
     output: void_cuirass
     energy: 36
     guide: 虛空信標核心 + 鈦合金 → 物質編譯器 → 虛空鎧甲
   craft_void_greaves:
     machine: matter_compiler
     inputs: [void_beacon_core, carbon_mesh]
+    input-amounts: [2, 1]
     output: void_greaves
     energy: 34
     guide: 虛空信標核心 + 碳纖網 → 物質編譯器 → 虛空護脛
   craft_void_sabatons:
     machine: matter_compiler
     inputs: [void_beacon_core, graviton_lens]
+    input-amounts: [2, 1]
     output: void_sabatons
     energy: 34
     guide: 虛空信標核心 + 重力子透鏡 → 物質編譯器 → 虛空戰靴
   craft_talisman_fire:
     machine: field_forge
     inputs: [circuit_board, heat_coil]
+    input-amounts: [2, 1]
     output: talisman_fire
     energy: 14
     guide: 電路板 + 加熱線圈 → 場域鍛爐 → 防焰護符
   craft_talisman_water:
     machine: field_forge
     inputs: [circuit_board, hydro_gel]
+    input-amounts: [2, 1]
     output: talisman_water
     energy: 14
     guide: 電路板 + 水凝膠 → 場域鍛爐 → 深海護符
   craft_talisman_angel:
     machine: field_forge
     inputs: [circuit_board, rubber_sheet]
+    input-amounts: [2, 1]
     output: talisman_angel
     energy: 12
     guide: 電路板 + 橡膠片 → 場域鍛爐 → 天使護符
   craft_talisman_warrior:
     machine: field_forge
     inputs: [circuit_board, dense_carbon_block]
+    input-amounts: [2, 1]
     output: talisman_warrior
     energy: 14
     guide: 電路板 + 高密碳塊 → 場域鍛爐 → 戰士護符
   craft_talisman_knight:
     machine: laser_engraver
     inputs: [advanced_circuit, composite_panel]
+    input-amounts: [2, 1]
     output: talisman_knight
     energy: 20
     guide: 高級電路 + 複合面板 → 雷射鵰刻機 → 騎士護符
   craft_talisman_traveler:
     machine: field_forge
     inputs: [circuit_board, copper_wire]
+    input-amounts: [2, 1]
     output: talisman_traveler
     energy: 12
     guide: 電路板 + 銅線 → 場域鍛爐 → 旅者護符
   craft_talisman_hunter:
     machine: laser_engraver
     inputs: [advanced_circuit, optic_lens]
+    input-amounts: [2, 1]
     output: talisman_hunter
     energy: 20
     guide: 高級電路 + 光學鏡片 → 雷射鵰刻機 → 獵人護符
   craft_talisman_miner:
     machine: laser_engraver
     inputs: [advanced_circuit, heat_coil]
+    input-amounts: [2, 1]
     output: talisman_miner
     energy: 20
     guide: 高級電路 + 加熱線圈 → 雷射鵰刻機 → 礦工護符
   craft_talisman_farmer:
     machine: field_forge
     inputs: [circuit_board, bio_catalyst]
+    input-amounts: [2, 1]
     output: talisman_farmer
     energy: 14
     guide: 電路板 + 生質催化劑 → 場域鍛爐 → 農夫護符
   craft_talisman_anvil:
     machine: laser_engraver
     inputs: [advanced_circuit, titanium_alloy]
+    input-amounts: [2, 1]
     output: talisman_anvil
     energy: 22
     guide: 高級電路 + 鈦合金 → 雷射鵰刻機 → 鐵砧護符
   craft_talisman_heal:
     machine: laser_engraver
     inputs: [advanced_circuit, data_matrix]
+    input-amounts: [2, 1]
     output: talisman_heal
     energy: 20
     guide: 高級電路 + 數據矩陣 → 雷射鵰刻機 → 再生護符
   craft_talisman_whirlwind:
     machine: laser_engraver
     inputs: [advanced_circuit, dense_carbon_block]
+    input-amounts: [2, 1]
     output: talisman_whirlwind
     energy: 20
     guide: 高級電路 + 高密碳塊 → 雷射鵰刻機 → 旋風護符
@@ -3584,138 +3940,161 @@ recipes:
   craft_magic_lump_1:
     machine: assembler
     inputs: [iron_dust, gold_nugget]
+    input-amounts: [1, 1]
     output: magic_lump_1
     energy: 6
     guide: 鐵粉 + 金粒 → 製造機 → 魔法結晶 I
   craft_magic_lump_2:
     machine: field_forge
     inputs: [magic_lump_1, magic_lump_1, magic_lump_1, magic_lump_1]
+    input-amounts: [1, 1, 1, 1]
     output: magic_lump_2
     energy: 12
     guide: 4× 魔法結晶 I → 力場鍛造台 → 魔法結晶 II
   craft_magic_lump_3:
     machine: laser_engraver
     inputs: [magic_lump_2, magic_lump_2, magic_lump_2, magic_lump_2]
+    input-amounts: [1, 1, 1, 1]
     output: magic_lump_3
     energy: 20
     guide: 4× 魔法結晶 II → 雷射雕刻機 → 魔法結晶 III
   craft_ender_lump_1:
     machine: assembler
     inputs: [iron_dust, ender_pearl]
+    input-amounts: [1, 1]
     output: ender_lump_1
     energy: 8
     guide: 鐵粉 + 末影珍珠 → 製造機 → 末影結晶 I
   craft_ender_lump_2:
     machine: field_forge
     inputs: [ender_lump_1, ender_lump_1, ender_lump_1, ender_lump_1]
+    input-amounts: [1, 1, 1, 1]
     output: ender_lump_2
     energy: 14
     guide: 4× 末影結晶 I → 力場鍛造台 → 末影結晶 II
   craft_ender_lump_3:
     machine: laser_engraver
     inputs: [ender_lump_2, ender_lump_2, ender_lump_2, ender_lump_2]
+    input-amounts: [1, 1, 1, 1]
     output: ender_lump_3
     energy: 22
     guide: 4× 末影結晶 II → 雷射雕刻機 → 末影結晶 III
   craft_magic_book_cover:
     machine: field_forge
     inputs: [magic_lump_2, magic_lump_2, book, magic_lump_2]
+    input-amounts: [1, 1, 1, 1]
     output: magic_book_cover
     energy: 14
     guide: 魔法結晶 II ×3 + 書 → 力場鍛造台 → 魔法書皮
   craft_magic_glass:
     machine: field_forge
     inputs: [magic_lump_2, copper_dust, glass_pane]
+    input-amounts: [1, 1, 1]
     output: magic_glass
     energy: 14
     guide: 魔法結晶 II + 銅粉 + 玻璃片 → 力場鍛造台 → 魔法玻璃
   craft_lava_crystal:
     machine: field_forge
     inputs: [magic_lump_1, ancient_rune_fire, blaze_powder]
+    input-amounts: [1, 1, 1]
     output: lava_crystal
     energy: 16
     guide: 魔法結晶 I + 古代符文 [火] + 烈焰粉 → 力場鍛造台 → 岩漿水晶
   craft_common_talisman:
     machine: field_forge
     inputs: [magic_lump_2, magic_lump_2, gold_ingot, ender_lump_1]
+    input-amounts: [1, 1, 1, 1]
     output: common_talisman
     energy: 16
     guide: 魔法結晶 II ×2 + 金錠 + 末影結晶 I → 力場鍛造台 → 基礎護符
   craft_necrotic_skull:
     machine: laser_engraver
     inputs: [magic_lump_3, wither_skeleton_skull]
+    input-amounts: [2, 1]
     output: necrotic_skull
     energy: 24
     guide: 魔法結晶 III + 凋零骷髏頭 → 雷射雕刻機 → 壞死顱骨
   craft_essence_of_afterlife:
     machine: quantum_processor
     inputs: [necrotic_skull, ender_lump_3, nether_star]
+    input-amounts: [1, 1, 1]
     output: essence_of_afterlife
     energy: 32
     guide: 壞死顱骨 + 末影結晶 III + 乙太之星 → 量子處理器 → 來世精華
   craft_synthetic_shulker_shell:
     machine: field_forge
     inputs: [magic_lump_2, iron_ingot, ender_lump_1]
+    input-amounts: [1, 1, 1]
     output: synthetic_shulker_shell
     energy: 16
     guide: 魔法結晶 II + 鐵錠 + 末影結晶 I → 力場鍛造台 → 合成潛影殼
   craft_shulker_box:
     machine: field_forge
     inputs: [synthetic_shulker_shell, synthetic_shulker_shell, chest]
+    input-amounts: [1, 1, 1]
     output: SHULKER_BOX
     energy: 18
     guide: 合成潛影殼×2 + 儲物箱 → 力場鍛造台 → 界伏盒
   craft_ancient_rune_fire:
     machine: laser_engraver
     inputs: [magic_lump_2, ender_lump_2, blaze_powder, lava_bucket]
+    input-amounts: [1, 1, 1, 1]
     output: ancient_rune_fire
     energy: 22
     guide: 魔法結晶 II + 末影結晶 II + 烈焰粉 + 熔岩桶 → 雷射雕刻機 → 古代符文 [火]
   craft_ancient_rune_water:
     machine: laser_engraver
     inputs: [magic_lump_2, ender_lump_2, prismarine_shard, water_bucket]
+    input-amounts: [1, 1, 1, 1]
     output: ancient_rune_water
     energy: 22
     guide: 魔法結晶 II + 末影結晶 II + 海磷碎片 + 水桶 → 雷射雕刻機 → 古代符文 [水]
   craft_ancient_rune_earth:
     machine: laser_engraver
     inputs: [magic_lump_2, ender_lump_2, obsidian, moss_block]
+    input-amounts: [1, 1, 1, 1]
     output: ancient_rune_earth
     energy: 22
     guide: 魔法結晶 II + 末影結晶 II + 黑曜石 + 苔蘚塊 → 雷射雕刻機 → 古代符文 [地]
   craft_ancient_rune_air:
     machine: laser_engraver
     inputs: [magic_lump_2, ender_lump_2, feather, phantom_membrane]
+    input-amounts: [1, 1, 1, 1]
     output: ancient_rune_air
     energy: 22
     guide: 魔法結晶 II + 末影結晶 II + 羽毛 + 乾燥薄膜 → 雷射雕刻機 → 古代符文 [風]
   craft_ancient_rune_ender:
     machine: laser_engraver
     inputs: [magic_lump_2, ender_lump_2, chorus_fruit, ender_eye]
+    input-amounts: [1, 1, 1, 1]
     output: ancient_rune_ender
     energy: 24
     guide: 魔法結晶 II + 末影結晶 II + 乳狀果 + 末影之眼 → 雷射雕刻機 → 古代符文 [終]
   craft_ancient_rune_lightning:
     machine: laser_engraver
     inputs: [magic_lump_2, ender_lump_2, copper_ingot, lightning_rod]
+    input-amounts: [1, 1, 1, 1]
     output: ancient_rune_lightning
     energy: 22
     guide: 魔法結晶 II + 末影結晶 II + 銅錠 + 避雷針 → 雷射雕刻機 → 古代符文 [雷]
   craft_ancient_rune_rainbow:
     machine: laser_engraver
     inputs: [magic_lump_2, ender_lump_2, glow_ink_sac, amethyst_shard]
+    input-amounts: [1, 1, 1, 1]
     output: ancient_rune_rainbow
     energy: 24
     guide: 魔法結晶 II + 末影結晶 II + 螢光墨囊 + 紫水晶碎片 → 雷射雕刻機 → 古代符文 [虹]
   craft_ancient_rune_soulbound:
     machine: laser_engraver
     inputs: [magic_lump_3, ender_lump_3, soul_lantern, necrotic_skull]
+    input-amounts: [1, 1, 1, 1]
     output: ancient_rune_soulbound
     energy: 28
     guide: 魔法結晶 III + 末影結晶 III + 靈魂燈籠 + 壞死顱骨 → 雷射雕刻機 → 古代符文 [靈魂綁定]
   craft_ancient_rune_villager:
     machine: laser_engraver
     inputs: [magic_lump_2, ender_lump_2, emerald, strange_nether_goo]
+    input-amounts: [1, 1, 1, 1]
     output: ancient_rune_villager
     energy: 22
     guide: 魔法結晶 II + 末影結晶 II + 綠寶石 + 異界凝膠 → 雷射雕刻機 → 古代符文 [村民]
@@ -3723,120 +4102,140 @@ recipes:
   bio_lab_vegetable_curry:
     machine: bio_lab
     inputs: [onion, bell_pepper]
+    input-amounts: [1, 1]
     output: vegetable_curry
     energy: 18
     guide: 洋蔥 + 甜椒 → 生物實驗室 → 蔬菜咖哩
   bio_lab_ramen:
     machine: bio_lab
     inputs: [soybean_pods, corn]
+    input-amounts: [1, 1]
     output: ramen
     energy: 18
     guide: 大豆莢 + 玉米 → 生物實驗室 → 拉麵
   bio_lab_sushi_roll:
     machine: bio_lab
     inputs: [corn, tomato]
+    input-amounts: [1, 1]
     output: sushi_roll
     energy: 16
     guide: 甜玉米 + 番茄 → 生物實驗室 → 壽司捲
   bio_lab_cheese_pizza:
     machine: bio_lab
     inputs: [tomato, garlic]
+    input-amounts: [1, 1]
     output: cheese_pizza
     energy: 18
     guide: 番茄 + 大蒜 → 生物實驗室 → 起司披薩
   bio_lab_veggie_wrap:
     machine: bio_lab
     inputs: [lettuce, tomato]
+    input-amounts: [1, 1]
     output: veggie_wrap
     energy: 14
     guide: 生菜 + 番茄 → 生物實驗室 → 蔬菜捲餅
   bio_lab_breakfast_burrito:
     machine: bio_lab
     inputs: [bell_pepper, corn]
+    input-amounts: [1, 1]
     output: breakfast_burrito
     energy: 16
     guide: 甜椒 + 甜玉米 → 生物實驗室 → 早安捲餅
   bio_lab_fruit_parfait:
     machine: bio_lab
     inputs: [strawberry, blueberry]
+    input-amounts: [1, 1]
     output: fruit_parfait
     energy: 12
     guide: 草莓 + 藍莓 → 生物實驗室 → 水果帕菲
   biosynth_cheesecake:
     machine: biosynth_vat
     inputs: [fruit_puree, bio_catalyst]
+    input-amounts: [2, 1]
     output: cheesecake
     energy: 16
     guide: 異星果泥 + 生質催化劑 → 生合成槽 → 起司蛋糕
   biosynth_chocolate_cake:
     machine: biosynth_vat
     inputs: [fruit_puree, spiceberry]
+    input-amounts: [2, 1]
     output: chocolate_cake
     energy: 16
     guide: 異星果泥 + 香辛莓 → 生合成槽 → 巧克力蛋糕
   cryo_vanilla_ice_cream:
     machine: cryo_distiller
     inputs: [coconut, fruit_puree]
+    input-amounts: [2, 1]
     output: vanilla_ice_cream
     energy: 18
     guide: 椰子 + 異星果泥 → 冷凍蒸餾機 → 香草冰淇淋
   coolant_grape_juice:
     machine: coolant_mixer
     inputs: [grape, hydro_gel]
+    input-amounts: [1, 1]
     output: grape_juice
     energy: 14
     guide: 葡萄 + 水凝膠 → 冷卻混合器 → 葡萄汁
   coolant_mango_smoothie:
     machine: coolant_mixer
     inputs: [mango, coconut]
+    input-amounts: [1, 1]
     output: mango_smoothie
     energy: 14
     guide: 芒果 + 椰子 → 冷卻混合器 → 芒果奶昔
   coolant_coconut_water:
     machine: coolant_mixer
     inputs: [coconut, hydro_gel]
+    input-amounts: [1, 1]
     output: coconut_water
     energy: 12
     guide: 椰子 + 水凝膠 → 冷卻混合器 → 椰子水
   coolant_berry_blend:
     machine: coolant_mixer
     inputs: [strawberry, blueberry]
+    input-amounts: [1, 1]
     output: berry_blend
     energy: 14
     guide: 草莓 + 藍莓 → 冷卻混合器 → 綜合莓果汁
   coolant_tropical_punch:
     machine: coolant_mixer
     inputs: [pineapple, mango]
+    input-amounts: [1, 1]
     output: tropical_punch
     energy: 14
     guide: 鳳梨 + 芒果 → 冷卻混合器 → 熱帶水果賓治
   coolant_iced_tea:
     machine: coolant_mixer
     inputs: [tea_leaf, coolant_mix]
+    input-amounts: [1, 1]
     output: iced_tea
     energy: 12
     guide: 科技茶葉 + 冷卻混合液 → 冷卻混合器 → 冰紅茶
   coolant_apple_cider:
     machine: coolant_mixer
     inputs: [pear, coolant_mix]
+    input-amounts: [1, 1]
     output: apple_cider
     energy: 12
     guide: 青梨 + 冷卻混合液 → 冷卻混合器 → 蘋果醋飲
   coolant_ginger_ale:
     machine: coolant_mixer
     inputs: [watermelon_slice, hydro_gel]
+    input-amounts: [1, 1]
     output: ginger_ale
     energy: 12
     guide: 科技西瓜片 + 水凝膠 → 冷卻混合器 → 薑汁汽水
   coolant_vanilla_milkshake:
     machine: coolant_mixer
     inputs: [banana, coconut]
+    input-amounts: [1, 1]
     output: vanilla_milkshake
     energy: 14
     guide: 香蕉 + 椰子 → 冷卻混合器 → 香草奶昔
   coolant_strawberry_milkshake:
     machine: coolant_mixer
     inputs: [strawberry, coconut]
+    input-amounts: [1, 1]
     output: strawberry_milkshake
     energy: 14
     guide: 草莓 + 椰子 → 冷卻混合器 → 草莓奶昔
@@ -3877,6 +4276,115 @@ achievements:
     reward-xp: 240
     reward-tokens: 16
     hint: 精煉系持續量產
+
+  # ── 特殊工具合成 ──────────────────────────────────
+  craft_explosive_pickaxe:
+    machine: field_forge
+    inputs: [advanced_circuit, steel_plate]
+    input-amounts: [1, 2]
+    output: explosive_pickaxe
+    energy: 22
+    guide: 高級電路 + 鋼板×2 → 場域鍛爐 → 爆破鎬
+  craft_vein_mining_pickaxe:
+    machine: field_forge
+    inputs: [advanced_circuit, steel_plate]
+    input-amounts: [1, 2]
+    output: vein_mining_pickaxe
+    energy: 22
+    guide: 高級電路 + 鋼板×2 → 場域鍛爐 → 礦脈鎬
+  craft_smelters_pickaxe:
+    machine: field_forge
+    inputs: [advanced_circuit, heat_coil]
+    input-amounts: [1, 2]
+    output: smelters_pickaxe
+    energy: 22
+    guide: 高級電路 + 加熱線圈×2 → 場域鍛爐 → 熔煉鎬
+  craft_beheading_sword:
+    machine: field_forge
+    inputs: [advanced_circuit, steel_plate]
+    input-amounts: [1, 2]
+    output: beheading_sword
+    energy: 24
+    guide: 高級電路 + 鋼板×2 → 場域鍛爐 → 斬首劍
+  craft_vampire_blade:
+    machine: field_forge
+    inputs: [advanced_circuit, bio_catalyst]
+    input-amounts: [1, 2]
+    output: vampire_blade
+    energy: 24
+    guide: 高級電路 + 生質觸媒×2 → 場域鍛爐 → 吸血刃
+  craft_seismic_axe:
+    machine: field_forge
+    inputs: [advanced_circuit, dense_carbon_block]
+    input-amounts: [1, 2]
+    output: seismic_axe
+    energy: 24
+    guide: 高級電路 + 高密碳塊×2 → 場域鍛爐 → 地震斧
+
+  # ── 核燃料合成鏈 ──────────────────────────────────
+  crush_uranium_dust:
+    machine: electric_crusher
+    inputs: [EMERALD_ORE]
+    input-amounts: [1]
+    output: uranium_dust
+    output-count: 2
+    energy: 12
+    guide: 綠寶石礦石 → 電動粉碎機 → 鈾粉×2
+  centrifuge_enriched_uranium:
+    machine: electric_centrifuge
+    inputs: [uranium_dust]
+    input-amounts: [3]
+    output: enriched_uranium
+    energy: 18
+    guide: 鈾粉×3 → 電動離心機 → 濃縮鈾
+  assemble_uranium_rod:
+    machine: assembler
+    inputs: [enriched_uranium, steel_plate]
+    input-amounts: [2, 1]
+    output: uranium_rod
+    energy: 20
+    guide: 濃縮鈾×2 + 鋼板 → 合成器 → 鈾燃料棒
+  mix_reactor_coolant:
+    machine: electric_chemical_reactor
+    inputs: [coolant_canister, cryo_gel]
+    input-amounts: [1, 1]
+    output: reactor_coolant
+    output-count: 2
+    energy: 14
+    guide: 冷卻罐 + 低溫凝膠 → 電動化學反應器 → 反應堆冷卻液×2
+
+  # ── 便攜工具合成 ──────────────────────────────────
+  craft_portable_crafter:
+    machine: assembler
+    inputs: [steel_plate, circuit_board]
+    input-amounts: [2, 1]
+    output: portable_crafter
+    energy: 14
+    guide: 鋼板×2 + 電路板 → 合成器 → 便攜合成台
+  craft_portable_dustbin:
+    machine: assembler
+    inputs: [steel_plate, circuit_board]
+    input-amounts: [2, 1]
+    output: portable_dustbin
+    energy: 14
+    guide: 鋼板×2 + 電路板 → 合成器 → 便攜垃圾桶
+
+  # ── 紫水晶培養機 ──────────────────────────────────
+  grow_amethyst:
+    machine: amethyst_grower
+    inputs: [coolant_mix]
+    input-amounts: [1]
+    output: amethyst_shard
+    output-count: 4
+    energy: 16
+    guide: 冷卻混合液 → 紫水晶培養機 → 紫水晶碎片×4
+  craft_amethyst_grower:
+    machine: assembler
+    inputs: [amethyst_block, coolant_mix, machine_hull]
+    input-amounts: [4, 2, 1]
+    output: amethyst_grower
+    energy: 18
+    guide: 紫水晶塊×4 + 冷卻混合液×2 + 機殼 → 合成器 → 紫水晶培養機
 
 cooking-recipes:
   cooked_beef:

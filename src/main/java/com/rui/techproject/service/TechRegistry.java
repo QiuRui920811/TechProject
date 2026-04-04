@@ -286,12 +286,19 @@ public final class TechRegistry {
     private void registerRecipe(final String id,
                                 final String machineId,
                                 final List<String> inputIds,
+                                final List<Integer> inputAmounts,
                                 final String outputId,
                                 final int outputCount,
                                 final int energyCost,
                                 final String guideText,
                                 final boolean allowStackBonus) {
-        this.recipes.put(this.normalize(id), new MachineRecipe(id, machineId, List.copyOf(inputIds), outputId, Math.max(1, outputCount), energyCost, guideText, allowStackBonus));
+        final List<Integer> amounts = inputAmounts == null || inputAmounts.isEmpty()
+                ? inputIds.stream().map(x -> 1).collect(java.util.stream.Collectors.toList())
+                : new java.util.ArrayList<>(inputAmounts);
+        while (amounts.size() < inputIds.size()) {
+            amounts.add(1);
+        }
+        this.recipes.put(this.normalize(id), new MachineRecipe(id, machineId, List.copyOf(inputIds), List.copyOf(amounts), outputId, Math.max(1, outputCount), energyCost, guideText, allowStackBonus));
     }
 
     private void registerAchievement(final String id,
@@ -410,6 +417,7 @@ public final class TechRegistry {
                     key,
                     section.getString(path + "machine", ""),
                     section.getStringList(path + "inputs"),
+                    section.getIntegerList(path + "input-amounts"),
                     section.getString(path + "output", ""),
                     section.getInt(path + "count", 1),
                     section.getInt(path + "energy", 1),

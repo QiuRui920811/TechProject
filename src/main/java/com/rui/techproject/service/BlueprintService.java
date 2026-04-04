@@ -129,7 +129,7 @@ public final class BlueprintService {
                 : new ArrayList<>();
         if (ingredientLines.isEmpty()) {
             ingredientLines.add("製作站：" + this.itemFactory.displayNameForId(recipe.machineId()));
-            ingredientLines.add("主材料：" + this.itemFactory.joinDisplayNames(recipe.inputIds(), " + "));
+            ingredientLines.add("主材料：" + this.joinInputDisplayNames(recipe));
         }
         final List<String> tutorial = existing != null && !existing.tutorial().isEmpty()
                 ? existing.tutorial()
@@ -396,6 +396,17 @@ public final class BlueprintService {
 
     private String normalize(final String input) {
         return input == null ? "" : input.toLowerCase(Locale.ROOT).trim();
+    }
+
+    private String joinInputDisplayNames(final MachineRecipe recipe) {
+        final StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < recipe.inputIds().size(); i++) {
+            if (i > 0) sb.append(" + ");
+            final int amount = recipe.inputAmount(i);
+            if (amount > 1) sb.append(amount).append("× ");
+            sb.append(this.itemFactory.displayNameForId(recipe.inputIds().get(i)));
+        }
+        return sb.toString();
     }
 
     public record BlueprintEntry(String id,

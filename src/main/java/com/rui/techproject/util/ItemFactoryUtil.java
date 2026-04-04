@@ -200,7 +200,7 @@ public final class ItemFactoryUtil {
         }
         meta.displayName(this.warning(this.localizeInlineTerms(title)));
         meta.lore(lore);
-        meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
+        meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES, ItemFlag.HIDE_ADDITIONAL_TOOLTIP);
         this.applyConfiguredItemModel(meta, definition == null ? "" : definition.itemModel());
         this.applyGuiHudModel(meta, stack.getType(), true);
         stack.setItemMeta(meta);
@@ -546,6 +546,10 @@ public final class ItemFactoryUtil {
         if (material == null || material == Material.AIR) {
             return Material.PAPER;
         }
+        // 樹苗、花、菇、珊瑚等植物方塊本身就是合法物品，保留原樣（onBlockPlace 已防放置）
+        if (this.isPlantDisplayMaterial(material)) {
+            return material;
+        }
         return switch (material) {
             case BEACON -> Material.HEART_OF_THE_SEA;
             case BLACK_STAINED_GLASS_PANE, TINTED_GLASS -> Material.GLASS_BOTTLE;
@@ -603,6 +607,26 @@ public final class ItemFactoryUtil {
                 yield Material.PAPER;
             }
         };
+    }
+
+    private boolean isPlantDisplayMaterial(final Material material) {
+        final String name = material.name();
+        return name.endsWith("_SAPLING")
+                || name.endsWith("_MUSHROOM")
+                || name.endsWith("_FLOWER")
+                || name.endsWith("_AZALEA")
+                || name.endsWith("_FROGLIGHT")
+                || name.endsWith("_BULB")
+                || material == Material.BAMBOO
+                || material == Material.FERN
+                || material == Material.LARGE_FERN
+                || material == Material.DEAD_BUSH
+                || material == Material.SPORE_BLOSSOM
+                || material == Material.NETHER_WART
+                || material == Material.LILY_PAD
+                || material == Material.SUGAR_CANE
+                || material == Material.CACTUS
+                || material == Material.SEA_PICKLE;
     }
 
     public ItemStack buildTechBook() {
@@ -694,6 +718,33 @@ public final class ItemFactoryUtil {
 
     public boolean hasWrenchTag(final ItemStack stack) {
         return "tech_wrench".equalsIgnoreCase(this.getTechItemId(stack));
+    }
+
+    public ItemStack buildLogisticsWrench() {
+        final TechItemDefinition definition = this.registry.getItem("logistics_wrench");
+        final ItemStack stack = new ItemStack(Material.GOLDEN_SHOVEL);
+        final ItemMeta meta = stack.getItemMeta();
+        meta.displayName(this.secondary("⚙ 物流扳手"));
+        meta.lore(List.of(
+                this.muted("快速設定機器物流方向的專用工具。"),
+                this.success("左鍵機器某一面：設定為輸入方向"),
+                this.warning("右鍵機器某一面：設定為輸出方向"),
+                this.secondary("電流機器：左鍵設定收電面、右鍵設定送電面"),
+                this.muted("合成器配方：科技扳手 + 邏輯閘")
+        ));
+        meta.setUnbreakable(true);
+        meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES, ItemFlag.HIDE_UNBREAKABLE);
+        if (definition != null && definition.itemModel() != null && !definition.itemModel().isBlank() && !definition.itemModel().trim().equals("-1")) {
+            this.applyConfiguredItemModel(meta, definition.itemModel());
+        }
+        meta.getPersistentDataContainer().set(this.techItemKey, PersistentDataType.STRING, "logistics_wrench");
+        meta.getPersistentDataContainer().set(this.dataVersionKey, PersistentDataType.INTEGER, this.currentItemDataVersion());
+        stack.setItemMeta(meta);
+        return stack;
+    }
+
+    public boolean hasLogisticsWrenchTag(final ItemStack stack) {
+        return "logistics_wrench".equalsIgnoreCase(this.getTechItemId(stack));
     }
 
     // ── 基因雞工程 ─────────────────────────────────────────
@@ -1398,8 +1449,9 @@ public final class ItemFactoryUtil {
         if (requirement == null || requirement.isBlank() || requirement.equalsIgnoreCase("initial")) {
             return "初始可用";
         }
+        final String cleaned = requirement.replaceAll("[()]", "");
         final List<String> orGroups = new ArrayList<>();
-        for (final String orGroup : requirement.split("\\|")) {
+        for (final String orGroup : cleaned.split("\\|")) {
             final List<String> andTokens = new ArrayList<>();
             for (final String token : orGroup.split("&")) {
                 final String trimmed = token.trim();
@@ -1431,18 +1483,51 @@ public final class ItemFactoryUtil {
             final String raw = token.substring(5);
             final int comparatorIndex = raw.indexOf(">=");
             if (comparatorIndex > 0) {
-                return this.displayStatName(raw.substring(0, comparatorIndex).trim()) + " ≥ " + raw.substring(comparatorIndex + 2).trim();
+                return this.describeStatRequirement(raw.substring(0, comparatorIndex).trim(), raw.substring(comparatorIndex + 2).trim());
             }
             final int legacyIndex = raw.lastIndexOf(':');
             if (legacyIndex > 0) {
-                return this.displayStatName(raw.substring(0, legacyIndex).trim()) + " ≥ " + raw.substring(legacyIndex + 1).trim();
+                return this.describeStatRequirement(raw.substring(0, legacyIndex).trim(), raw.substring(legacyIndex + 1).trim());
             }
             return this.displayStatName(raw.trim());
         }
         return this.displayNameForId(token);
     }
 
-    private String displayStatName(final String statKey) {
+    public String describeStatRequirement(final String statKey, final String amount) {
+        final String name = this.displayStatName(statKey);
+        return switch (statKey.toLowerCase(Locale.ROOT)) {
+            case "energy_generated" -> "使用發電機累計產出 " + amount + " 能量";
+            case "farm_harvested" -> "使用農場機器收成 " + amount + " 次作物";
+            case "recycled_items" -> "使用回收機回收 " + amount + " 個物品";
+            case "items_transferred" -> "透過管道或匯流排搬運 " + amount + " 個物品";
+            case "machines_placed" -> "在世界中放置 " + amount + " 台機器";
+            case "quarry_mined" -> "使用自動礦機採掘 " + amount + " 次";
+            case "vacuum_collected" -> "使用真空收集器吸取 " + amount + " 個物品";
+            case "storm_energy" -> "使用風暴發電機累計產出 " + amount + " 能量";
+            case "planet_elites_defeated" -> "前往星球並擊敗 " + amount + " 隻精英怪物";
+            case "planets_visited" -> "搭乘火箭前往 " + amount + " 座不同星球";
+            case "planet_harvested" -> "在星球上採集資源 " + amount + " 次";
+            case "planetary_samples_collected" -> "在星球上收集 " + amount + " 份地質樣本";
+            case "planet_ruins_activated" -> "在星球上找到遺跡並啟動 " + amount + " 座";
+            case "trees_felled", "logs_felled" -> "使用伐木機砍伐 " + amount + " 次";
+            case "mobs_collected" -> "使用捕捉器收集 " + amount + " 隻生物";
+            case "fish_caught" -> "使用自動釣魚機釣到 " + amount + " 條魚";
+            case "crops_auto_harvested" -> "使用機器自動收割 " + amount + " 次作物";
+            case "items_crafted" -> "透過機器合成 " + amount + " 個物品";
+            case "meals_cooked" -> "使用烹飪機製作 " + amount + " 道料理";
+            case "generators_placed" -> "在世界中放置 " + amount + " 台發電機";
+            case "storage_units_placed" -> "在世界中放置 " + amount + " 個儲存單元";
+            case "total_processed" -> "使用加工機處理 " + amount + " 次物品";
+            case "research_spent" -> "在研究桌消耗 " + amount + " 點研究點數";
+            case "megastructures_built" -> "完成建造 " + amount + " 座巨型結構";
+            case "chickens_bred" -> "使用培育機培育 " + amount + " 隻雞";
+            case "chickens_sequenced" -> "使用基因定序儀分析 " + amount + " 隻雞";
+            default -> name + " " + amount + " 次";
+        };
+    }
+
+    public String displayStatName(final String statKey) {
         return switch (statKey.toLowerCase(Locale.ROOT)) {
             case "energy_generated" -> "累計發電";
             case "farm_harvested" -> "收成作物";
@@ -1455,10 +1540,33 @@ public final class ItemFactoryUtil {
             case "planet_elites_defeated" -> "擊敗星球精英";
             case "planets_visited" -> "探訪星球";
             case "planet_harvested" -> "星球採集";
-            case "trees_felled" -> "伐木數";
+            case "planetary_samples_collected" -> "收集星球樣本";
+            case "planet_ruins_activated" -> "啟動星球遺跡";
+            case "trees_felled", "logs_felled" -> "伐木數";
             case "mobs_collected" -> "收集生物";
             case "fish_caught" -> "釣魚數";
             case "crops_auto_harvested" -> "自動收割";
+            case "android_cycles" -> "自動機運轉次數";
+            case "android_fuel_loaded" -> "自動機燃料裝填";
+            case "android_harvested" -> "自動機收割";
+            case "android_hunts" -> "自動機獵捕";
+            case "android_logs_cut" -> "自動機伐木";
+            case "android_mobs_hunted" -> "自動機擊殺";
+            case "android_planet_samples" -> "自動機星球採樣";
+            case "android_salvaged" -> "自動機回收";
+            case "android_interface_exports" -> "自動機介面搬運";
+            case "items_crafted" -> "合成物品";
+            case "meals_cooked" -> "烹調料理";
+            case "generators_placed" -> "放置發電機";
+            case "storage_units_placed" -> "放置儲物箱";
+            case "total_processed" -> "加工處理總數";
+            case "active_machines" -> "運轉中機器";
+            case "research_spent" -> "消耗研究點數";
+            case "megastructures_built" -> "建造巨型結構";
+            case "electric_sifter_cycles" -> "電篩運行次數";
+            case "chicken_resources_produced" -> "雞隻產出資源";
+            case "chickens_bred" -> "培育雞隻";
+            case "chickens_sequenced" -> "基因定序雞隻";
             default -> this.humanize(statKey);
         };
     }
@@ -1630,6 +1738,7 @@ public final class ItemFactoryUtil {
             case "data_component" -> "資料元件";
             case "dense_fabric" -> "高密度織物";
             case "dimension_anchor" -> "維度錨";
+            case "drill_component" -> "鑽探元件";
             case "drone_assembly" -> "無人機裝配";
             case "dna_analysis" -> "DNA 分析";
             case "dust_material" -> "粉末材料";
@@ -1658,6 +1767,7 @@ public final class ItemFactoryUtil {
             case "filtered_routing" -> "過濾路由";
             case "final_core" -> "最終核心";
             case "final_fabrication" -> "最終製造";
+            case "frame_component" -> "框架元件";
             case "final_showcase" -> "最終展示";
             case "fishing_harvest" -> "漁獲";
             case "flare_module" -> "閃焰模組";
@@ -1704,6 +1814,7 @@ public final class ItemFactoryUtil {
             case "orbital_printing" -> "軌道列印";
             case "orbital_processor" -> "軌道處理器";
             case "orbital_scanning" -> "軌道掃描";
+            case "ore_extraction" -> "礦物開採";
             case "orchard_fruit" -> "果園水果";
             case "orchard_sapling" -> "果園樹苗";
             case "ore_washing" -> "洗礦";
@@ -1816,6 +1927,11 @@ public final class ItemFactoryUtil {
             case "refined_product" -> "精煉產物";
             case "bio_product" -> "生質產物";
             case "food_product" -> "食品產物";
+            // ── inferred roles (from TechRegistry.inferMachineRole) ──
+            case "machine_processing" -> "機器加工";
+            case "power_generation" -> "發電";
+            case "item_routing" -> "物品路由";
+            case "item_buffering" -> "物品緩存";
             default -> null;
         };
     }
