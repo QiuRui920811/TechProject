@@ -3108,11 +3108,11 @@ machines:
     tier: TIER3
     block: CONDUIT
     head-texture: d78f2b7e5e75639ea7fb796c35d364c4df28b4243e66b76277aadcd6261337
-    inputs: [teleport_matrix, ender_pearl]
+    inputs: [teleport_matrix]
     outputs: []
     energy-per-tick: 28
     max-energy: 12000
-    effect: 消耗傳送矩陣與乏末影珍珠執行空間跳躍
+    effect: 消耗背包中的原版末影珍珠與能量執行空間跳躍
     unlock: machine:gps_network_node&item:teleport_matrix
   orbital_relay_station:
     display-name: 軌道中繼站

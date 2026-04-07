@@ -1854,7 +1854,7 @@ items:
     category: BASIC
     icon: LIGHT_GRAY_DYE
     item-model: "nexo:tin_dust"
-    description: "淘金盤從礫石中篩出的錫粉，合金冶煉的關鍵材料。"
+    description: "淘金盤從礫石中篩出的錫粉，合金與電力系統的關鍵材料。"
     unlock: "initial"
     use-cases:
       - "礫石 → 淘金盤 → 錫粉"
@@ -1868,7 +1868,7 @@ items:
     unlock: "initial"
     use-cases:
       - "靈魂沙 → 淘金盤 → 鉛粉"
-      - "鉛粉 + 鋅粉 → 合金熔煉爐 → 焊錫合金"
+      - "鉛粉 + 錫粉 → 合金熔煉爐 → 焊錫合金"
   zinc_dust:
     display-name: "鋅粉"
     category: BASIC
@@ -1884,10 +1884,33 @@ items:
     category: BASIC
     icon: IRON_NUGGET
     item-model: "nexo:tin_ingot"
-    description: "錫粉冶煉而成的金屬錠。"
+    description: "錫粉冶煉而成的金屬錠，在電力系統中廣泛使用。"
     unlock: "furnace"
     use-cases:
       - "錫粉 → 熔爐 → 錫錠"
+      - "錫錠 + 紅石 → 製造機 → 能源電池"
+      - "錫錠 → 壓縮機 → 錫板"
+      - "錫錠 → 拉線機 → 錫線"
+  tin_plate:
+    display-name: "錫板"
+    category: INTERMEDIATE
+    icon: IRON_INGOT
+    item-model: "nexo:tin_plate"
+    description: "壓縮錫錠得到的薄板，電池外殼材料。"
+    unlock: "compressor"
+    use-cases:
+      - "錫錠 → 壓縮機 → 錫板"
+      - "能源電池 + 錫板 → 電池庫 → 鋰電池"
+  tin_wire:
+    display-name: "錫線"
+    category: INTERMEDIATE
+    icon: LEAD
+    item-model: "nexo:tin_wire"
+    description: "低阻抗錫質線材，適合訊號傳輸。"
+    unlock: "wire_mill"
+    use-cases:
+      - "錫錠 → 拉線機 → 錫線"
+      - "邏輯閘 + 錫線 → 製造機 → 訊號中繼器"
   lead_ingot:
     display-name: "鉛錠"
     category: BASIC
@@ -1935,7 +1958,7 @@ items:
     description: "鉛鋅合金，電子焊接必備材料，電路板不可缺少。"
     unlock: "smeltery"
     use-cases:
-      - "鉛粉 + 鋅粉 → 合金熔煉爐 → 焊錫合金"
+      - "鉛粉 + 錫粉 → 合金熔煉爐 → 焊錫合金"
       - "電路板、電子零件"
   solder_alloy_dust:
     display-name: "焊錫合金粉"
@@ -2063,8 +2086,8 @@ machines:
     display-name: "壓縮機"
     category: INTERMEDIATE
     block: PISTON
-    inputs: ["iron_ingot", "iron_plate"]
-    outputs: ["iron_plate", "steel_plate", "compressed_iron_bundle", "dense_carbon_block"]
+    inputs: ["iron_ingot", "iron_plate", "tin_ingot"]
+    outputs: ["iron_plate", "steel_plate", "compressed_iron_bundle", "dense_carbon_block", "tin_plate"]
     energy-per-tick: 8
     effect: "金屬壓縮動畫"
     unlock: "furnace"
@@ -2081,7 +2104,7 @@ machines:
     category: INTERMEDIATE
     block: CRAFTER
     head-texture: 80a4334f6a61e40c0c63deb665fa7b581e6eb259f7a3207ced7a1ff8bdc8a9f9
-    inputs: ["circuit_board", "steel_plate"]
+    inputs: ["circuit_board", "steel_plate", "tin_ingot"]
     outputs: ["machine_component"]
     energy-per-tick: 15
     effect: "光束組裝"
@@ -2132,7 +2155,7 @@ machines:
     category: INTERMEDIATE
     block: REDSTONE_LAMP
     head-texture: 6e2dda6ef6185d4dd6ea8684e97d39ba8ab037e25f75cdea6bd29df8eb34ee
-    inputs: ["energy_cell", "lithium_cell"]
+    inputs: ["energy_cell", "lithium_cell", "tin_plate"]
     outputs: ["capacitor_bank"]
     energy-per-tick: 2
     effect: "儲能脈衝"
@@ -2229,8 +2252,8 @@ machines:
     display-name: "拉線機"
     category: INTERMEDIATE
     block: ANVIL
-    inputs: ["copper_ingot", "steel_plate"]
-    outputs: ["copper_wire", "steel_wire", "wiring_bundle"]
+    inputs: ["copper_ingot", "steel_plate", "tin_ingot"]
+    outputs: ["copper_wire", "steel_wire", "wiring_bundle", "tin_wire"]
     energy-per-tick: 9
     effect: "高速牽引"
     unlock: "compressor"
@@ -2444,8 +2467,8 @@ machines:
     category: ADVANCED
     block: PISTON
     head-texture: 321d495165748d3116f99d6b5bd5d42eb8ba592bcdfad37fd95f9b6c04a3b
-    inputs: ["iron_ingot", "iron_plate"]
-    outputs: ["iron_plate", "steel_plate", "compressed_iron_bundle", "dense_carbon_block"]
+    inputs: ["iron_ingot", "iron_plate", "tin_ingot"]
+    outputs: ["iron_plate", "steel_plate", "compressed_iron_bundle", "dense_carbon_block", "tin_plate"]
     energy-per-tick: 18
     effect: "電動壓縮衝程"
     unlock: "compressor&advanced_assembler"
@@ -2464,8 +2487,8 @@ machines:
     category: ADVANCED
     block: ANVIL
     head-texture: 1085e098756b995b00241644089c55a8f9acde35b9a37785d5e057a923613b
-    inputs: ["copper_ingot", "steel_plate"]
-    outputs: ["copper_wire", "steel_wire", "wiring_bundle"]
+    inputs: ["copper_ingot", "steel_plate", "tin_ingot"]
+    outputs: ["copper_wire", "steel_wire", "wiring_bundle", "tin_wire"]
     energy-per-tick: 20
     effect: "自動高速牽引"
     unlock: "wire_mill&advanced_assembler"
@@ -2574,6 +2597,13 @@ recipes:
     output: "iron_plate"
     energy: 12
     guide: "鐵錠 → 壓縮機 → 鐵板"
+  compressor_tin_plate:
+    machine: "compressor"
+    inputs: ["tin_ingot"]
+    input-amounts: [1]
+    output: "tin_plate"
+    energy: 14
+    guide: "錫錠 → 壓縮機 → 錫板"
   furnace_iron_dust:
     machine: "furnace"
     inputs: ["iron_dust"]
@@ -2799,11 +2829,11 @@ recipes:
     guide: "科技扳手 + 邏輯閘 → 合成器 → 物流扳手"
   assembler_energy_cell:
     machine: "assembler"
-    inputs: ["copper_ingot", "redstone"]
+    inputs: ["tin_ingot", "redstone"]
     input-amounts: [1, 1]
     output: "energy_cell"
     energy: 22
-    guide: "銅錠 + 紅石 → 製造機 → 能源電池"
+    guide: "錫錠 + 紅石 → 製造機 → 能源電池"
   assembler_logic_gate:
     machine: "assembler"
     inputs: ["copper_wire", "silicon"]
@@ -2827,11 +2857,11 @@ recipes:
     guide: "精密框架 + 玻璃板 → 製造機 → 機械外殼"
   assembler_signal_relay:
     machine: "assembler"
-    inputs: ["logic_gate", "copper_wire"]
+    inputs: ["logic_gate", "tin_wire"]
     input-amounts: [1, 1]
     output: "signal_relay"
     energy: 20
-    guide: "邏輯閘 + 銅線 → 製造機 → 訊號中繼器"
+    guide: "邏輯閘 + 錫線 → 製造機 → 訊號中繼器"
   assembler_bronze_gear:
     machine: "assembler"
     inputs: ["bronze_ingot", "iron_plate"]
@@ -2911,11 +2941,11 @@ recipes:
     guide: "星光板 + 銅線 → 太陽能陣列 → 網格模組"
   battery_lithium:
     machine: "battery_bank"
-    inputs: ["energy_cell", "copper_ingot"]
+    inputs: ["energy_cell", "tin_plate"]
     input-amounts: [1, 1]
     output: "lithium_cell"
     energy: 15
-    guide: "能源電池 + 銅錠 → 電池庫 → 鋰電池"
+    guide: "能源電池 + 錫板 → 電池庫 → 鋰電池"
   battery_emitter:
     machine: "battery_bank"
     inputs: ["energy_cell", "logic_gate"]
@@ -3042,6 +3072,13 @@ recipes:
     output: "steel_wire"
     energy: 11
     guide: "鋼板 → 拉線機 → 鋼線"
+  wire_mill_tin:
+    machine: "wire_mill"
+    inputs: ["tin_ingot"]
+    input-amounts: [1]
+    output: "tin_wire"
+    energy: 12
+    guide: "錫錠 → 拉線機 → 錫線"
   wire_mill_bundle:
     machine: "wire_mill"
     inputs: ["copper_wire", "steel_wire"]
@@ -3520,6 +3557,13 @@ recipes:
     output: "iron_plate"
     energy: 21
     guide: "鐵錠 → 電動壓縮機 → 鐵板"
+  electric_compressor_tin_plate:
+    machine: "electric_compressor"
+    inputs: ["tin_ingot"]
+    input-amounts: [1]
+    output: "tin_plate"
+    energy: 24
+    guide: "錫錠 → 電動壓縮機 → 錫板"
   electric_compressor_steel_plate:
     machine: "electric_compressor"
     inputs: ["iron_plate", "coal_dust"]
@@ -3590,6 +3634,13 @@ recipes:
     output: "steel_wire"
     energy: 33
     guide: "鋼板 → 電動拉線機 → 鋼線"
+  electric_wire_mill_tin:
+    machine: "electric_wire_mill"
+    inputs: ["tin_ingot"]
+    input-amounts: [1]
+    output: "tin_wire"
+    energy: 22
+    guide: "錫錠 → 電動拉線機 → 錫線"
   electric_wire_mill_bundle:
     machine: "electric_wire_mill"
     inputs: ["copper_wire", "steel_wire"]
@@ -3778,12 +3829,12 @@ recipes:
     guide: "銅粉 + 錫粉 → 合金熔煉爐 → 青銅錠"
   smeltery_solder:
     machine: "smeltery"
-    inputs: ["lead_dust", "zinc_dust"]
+    inputs: ["lead_dust", "tin_dust"]
     input-amounts: [1, 1]
     output: "solder_alloy"
     energy: 16
     allow-stack-bonus: false
-    guide: "鉛粉 + 鋅粉 → 合金熔煉爐 → 焊錫合金"
+    guide: "鉛粉 + 錫粉 → 合金熔煉爐 → 焊錫合金"
   smeltery_brass:
     machine: "smeltery"
     inputs: ["copper_dust", "zinc_dust"]

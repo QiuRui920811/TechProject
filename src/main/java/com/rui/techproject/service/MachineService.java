@@ -17,6 +17,7 @@ import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.FluidCollisionMode;
 import org.bukkit.Bukkit;
 import org.bukkit.Color;
@@ -1618,6 +1619,7 @@ public final class MachineService {
             entry.put("filter-mode", machine.filterMode());
             entry.put("redstone-mode", machine.redstoneMode());
             entry.put("teleport-label", machine.teleportLabel());
+            entry.put("teleport-public", machine.teleportPublic());
             entry.put("chicken-progress", machine.chickenProgress());
             entry.put("input", ItemStackSerializer.toBase64(machine.inputInventory()));
             entry.put("output", ItemStackSerializer.toBase64(machine.outputInventory()));
@@ -1717,6 +1719,7 @@ public final class MachineService {
                 machine.setFilterMode(data.get("filter-mode") instanceof String s ? s : "WHITELIST");
                 machine.setRedstoneMode(data.get("redstone-mode") instanceof String s ? s : "NONE");
                 machine.setTeleportLabel(data.get("teleport-label") instanceof String s ? s : null);
+                machine.setTeleportPublic(data.get("teleport-public") instanceof Boolean b && b);
                 machine.restoreChickenProgress(data.get("chicken-progress") instanceof Number n ? n.doubleValue() : 0.0);
                 // 舊版逐台信任 → 自動遷移到全域信任
                 final String trustedRaw = data.get("trusted-players") instanceof String s ? s : "";
@@ -10219,7 +10222,12 @@ public final class MachineService {
     // ═══════════════════ 傳送面板系統 ═══════════════════
 
     private static final String TELEPORT_PAD_MENU_PREFIX = "⚡ 傳送面板";
+    private static final int TELEPORT_CHANNELING_SECONDS = 3;
+    private static final long TELEPORT_ENERGY_COST = 200L;
     private final Map<UUID, LocationKey> openTeleportPadMenus = new ConcurrentHashMap<>();
+    private final Map<UUID, List<PlacedMachine>> teleportPadDestinations = new ConcurrentHashMap<>();
+    private final Map<UUID, LocationKey> pendingTeleportRenames = new ConcurrentHashMap<>();
+    private final Set<UUID> channelingPlayers = ConcurrentHashMap.newKeySet();
 
     public boolean isTeleportPadView(final String title) {
         return title != null && title.startsWith(TELEPORT_PAD_MENU_PREFIX);
@@ -10228,16 +10236,66 @@ public final class MachineService {
     public void closeTeleportPadMenu(final Player player) {
         if (player != null) {
             this.openTeleportPadMenus.remove(player.getUniqueId());
+            this.teleportPadDestinations.remove(player.getUniqueId());
         }
+    }
+
+    public boolean hasPendingTeleportRename(final UUID playerId) {
+        return this.pendingTeleportRenames.containsKey(playerId);
+    }
+
+    /**
+     * 判斷物品是否為原版末影珍珠（非科技物品）。
+     */
+    private boolean isVanillaEnderPearl(final ItemStack stack) {
+        if (stack == null || stack.getType() != Material.ENDER_PEARL) {
+            return false;
+        }
+        return this.itemFactory.getTechItemId(stack) == null
+                && this.itemFactory.getMachineId(stack) == null;
+    }
+
+    /**
+     * 從玩家背包消耗指定數量的原版末影珍珠。
+     */
+    private boolean consumeVanillaEnderPearls(final Player player, final int amount) {
+        int remaining = amount;
+        final ItemStack[] contents = player.getInventory().getContents();
+        for (int i = 0; i < contents.length && remaining > 0; i++) {
+            final ItemStack stack = contents[i];
+            if (!this.isVanillaEnderPearl(stack)) continue;
+            final int consume = Math.min(remaining, stack.getAmount());
+            remaining -= consume;
+            if (consume >= stack.getAmount()) {
+                player.getInventory().setItem(i, null);
+            } else {
+                stack.setAmount(stack.getAmount() - consume);
+            }
+        }
+        return remaining <= 0;
+    }
+
+    private int countVanillaEnderPearls(final Player player) {
+        int count = 0;
+        for (final ItemStack stack : player.getInventory().getContents()) {
+            if (this.isVanillaEnderPearl(stack)) {
+                count += stack.getAmount();
+            }
+        }
+        return count;
     }
 
     private boolean handleTeleportPadInteract(final Player player, final Block block, final PlacedMachine machine) {
         if (player.isSneaking()) {
-            // 蹲下右鍵 → 命名傳送面板
+            // 蹲下右鍵 → 擁有者：命名 / 切換公開；非擁有者：提示無權限
+            if (!machine.owner().equals(player.getUniqueId())) {
+                player.sendMessage(this.itemFactory.warning("只有擁有者才能設定傳送面板。"));
+                return true;
+            }
             this.promptTeleportPadRename(player, machine);
             return true;
         }
-        // 普通右鍵 → 開啟傳送選單
+        // 普通右鍵 → 開啟傳送選單（任何人都可以用）
         this.openTeleportPadMenu(player, block, machine);
         final World world = block.getWorld();
         world.playSound(block.getLocation(), Sound.BLOCK_BEACON_POWER_SELECT, 0.42f, 1.18f);
@@ -10247,18 +10305,14 @@ public final class MachineService {
 
     private void promptTeleportPadRename(final Player player, final PlacedMachine machine) {
         final String currentLabel = machine.teleportLabel();
+        final boolean isPublic = machine.teleportPublic();
         player.sendMessage(this.itemFactory.success(
-                "請在聊天輸入新名稱來為這座傳送面板命名（輸入「取消」取消）"));
+                "請在聊天輸入新名稱來為這座傳送面板命名（輸入「取消」取消，輸入「公開」或「私人」切換模式）"));
         if (currentLabel != null) {
             player.sendMessage(this.itemFactory.success("目前名稱：" + currentLabel));
         }
+        player.sendMessage(this.itemFactory.success("目前模式：" + (isPublic ? "§a公開" : "§c私人")));
         this.pendingTeleportRenames.put(player.getUniqueId(), machine.locationKey());
-    }
-
-    private final Map<UUID, LocationKey> pendingTeleportRenames = new ConcurrentHashMap<>();
-
-    public boolean hasPendingTeleportRename(final UUID playerId) {
-        return this.pendingTeleportRenames.containsKey(playerId);
     }
 
     public boolean handleTeleportRenameChat(final Player player, final String message) {
@@ -10266,8 +10320,9 @@ public final class MachineService {
         if (key == null) {
             return false;
         }
-        if ("取消".equals(message.trim())) {
-            player.sendMessage(this.itemFactory.warning("已取消命名。"));
+        final String trimmed = message.trim();
+        if ("取消".equals(trimmed)) {
+            player.sendMessage(this.itemFactory.warning("已取消。"));
             return true;
         }
         final PlacedMachine machine = this.machines.get(key);
@@ -10275,14 +10330,25 @@ public final class MachineService {
             player.sendMessage(this.itemFactory.warning("找不到這座傳送面板。"));
             return true;
         }
-        final String label = message.trim();
-        if (label.length() > 24) {
+        if ("公開".equals(trimmed)) {
+            machine.setTeleportPublic(true);
+            player.sendMessage(this.itemFactory.success("傳送面板已設為 §a公開§r，所有玩家都能看到此面板。"));
+            player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_CHIME, 0.6f, 1.2f);
+            return true;
+        }
+        if ("私人".equals(trimmed)) {
+            machine.setTeleportPublic(false);
+            player.sendMessage(this.itemFactory.success("傳送面板已設為 §c私人§r，僅擁有者與信任玩家可見。"));
+            player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_CHIME, 0.6f, 1.2f);
+            return true;
+        }
+        if (trimmed.length() > 24) {
             player.sendMessage(this.itemFactory.warning("名稱最多 24 個字元。"));
             this.pendingTeleportRenames.put(player.getUniqueId(), key);
             return true;
         }
-        machine.setTeleportLabel(label);
-        player.sendMessage(this.itemFactory.success("傳送面板已命名為「" + label + "」"));
+        machine.setTeleportLabel(trimmed);
+        player.sendMessage(this.itemFactory.success("傳送面板已命名為「" + trimmed + "」"));
         player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_CHIME, 0.6f, 1.2f);
         return true;
     }
@@ -10290,19 +10356,17 @@ public final class MachineService {
     private void openTeleportPadMenu(final Player player, final Block block, final PlacedMachine sourceMachine) {
         final List<PlacedMachine> destinations = new ArrayList<>();
         final LocationKey sourceKey = LocationKey.from(block.getLocation());
+        final UUID playerId = player.getUniqueId();
         for (final PlacedMachine candidate : this.machines.values()) {
-            if (!"teleport_pad".equalsIgnoreCase(this.normalizeId(candidate.machineId()))) {
-                continue;
+            if (!"teleport_pad".equalsIgnoreCase(this.normalizeId(candidate.machineId()))) continue;
+            if (candidate.locationKey().equals(sourceKey)) continue;
+            // 公開面板：所有人可見；私人面板：只有擁有者或受信任的玩家可見
+            if (candidate.teleportPublic()) {
+                destinations.add(candidate);
+            } else if (candidate.owner().equals(playerId)
+                    || this.isGloballyTrusted(candidate.owner(), playerId)) {
+                destinations.add(candidate);
             }
-            if (candidate.locationKey().equals(sourceKey)) {
-                continue;
-            }
-            // 只列出同個擁有者或被信任的面板
-            if (!candidate.owner().equals(sourceMachine.owner())
-                    && !this.isGloballyTrusted(candidate.owner(), sourceMachine.owner())) {
-                continue;
-            }
-            destinations.add(candidate);
         }
 
         final int size = Math.max(9, Math.min(54, ((destinations.size() + 8) / 9) * 9));
@@ -10310,11 +10374,12 @@ public final class MachineService {
         final Inventory inventory = Bukkit.createInventory(null, size,
                 Component.text(TELEPORT_PAD_MENU_PREFIX + " - " + label, NamedTextColor.DARK_PURPLE));
 
+        final int pearls = this.countVanillaEnderPearls(player);
         if (destinations.isEmpty()) {
             inventory.setItem(size / 2, this.itemFactory.buildGuiPane(Material.BARRIER,
                     Component.text("沒有可用的傳送目的地", NamedTextColor.RED),
                     List.of(Component.text("在其他地方放置更多傳送面板", NamedTextColor.GRAY),
-                            Component.text("並確保你是擁有者或受信任", NamedTextColor.GRAY)),
+                            Component.text("對方面板需設為「公開」或加你信任", NamedTextColor.GRAY)),
                     false));
         } else {
             for (int i = 0; i < destinations.size() && i < 54; i++) {
@@ -10328,35 +10393,28 @@ public final class MachineService {
                 lore.add(Component.text("座標: " + loc.x() + ", " + loc.y() + ", " + loc.z(), NamedTextColor.GRAY));
                 lore.add(Component.text("世界: " + worldDisplay, NamedTextColor.GRAY));
                 lore.add(Component.empty());
-                lore.add(Component.text("消耗: 末影珍珠×1 + 能量", NamedTextColor.DARK_AQUA));
-                lore.add(Component.text("點擊傳送", NamedTextColor.GREEN));
+                lore.add(Component.text("消耗: 末影珍珠×1 + " + TELEPORT_ENERGY_COST + " EU", NamedTextColor.DARK_AQUA));
+                lore.add(Component.text("背包珍珠: " + pearls + " 顆", pearls > 0 ? NamedTextColor.GREEN : NamedTextColor.RED));
+                lore.add(Component.empty());
+                lore.add(Component.text("點擊開始傳送（需靜止 " + TELEPORT_CHANNELING_SECONDS + " 秒）", NamedTextColor.GREEN));
 
                 inventory.setItem(i, this.itemFactory.buildGuiPane(Material.ENDER_EYE,
                         Component.text(destLabel, NamedTextColor.LIGHT_PURPLE), lore, false));
             }
         }
 
-        this.openTeleportPadMenus.put(player.getUniqueId(), sourceKey);
-        // 也記住目的地列表的順序
-        this.teleportPadDestinations.put(player.getUniqueId(), destinations);
+        this.openTeleportPadMenus.put(playerId, sourceKey);
+        this.teleportPadDestinations.put(playerId, destinations);
         player.openInventory(inventory);
     }
 
-    private final Map<UUID, List<PlacedMachine>> teleportPadDestinations = new ConcurrentHashMap<>();
-
     public void handleTeleportPadMenuClick(final Player player, final int rawSlot) {
-        if (player == null || rawSlot < 0) {
-            return;
-        }
+        if (player == null || rawSlot < 0) return;
         final LocationKey sourceKey = this.openTeleportPadMenus.get(player.getUniqueId());
-        if (sourceKey == null) {
-            player.closeInventory();
-            return;
-        }
+        if (sourceKey == null) { player.closeInventory(); return; }
         final List<PlacedMachine> destinations = this.teleportPadDestinations.get(player.getUniqueId());
-        if (destinations == null || rawSlot >= destinations.size()) {
-            return;
-        }
+        if (destinations == null || rawSlot >= destinations.size()) return;
+
         final PlacedMachine sourceMachine = this.machines.get(sourceKey);
         if (sourceMachine == null) {
             player.sendMessage(this.itemFactory.warning("這座傳送面板已離線。"));
@@ -10369,22 +10427,103 @@ public final class MachineService {
             player.closeInventory();
             return;
         }
-        // 消耗末影珍珠
-        if (!this.consumeInput(sourceMachine, List.of("ender_pearl"), 1)) {
-            player.sendMessage(this.itemFactory.warning("傳送面板中沒有末影珍珠！請在輸入欄放入末影珍珠。"));
+        // 檢查背包原版末影珍珠
+        if (this.countVanillaEnderPearls(player) < 1) {
+            player.sendMessage(this.itemFactory.warning("背包中沒有末影珍珠！（需要原版末影珍珠，非科技物品）"));
             player.closeInventory();
             return;
         }
-        // 消耗能量
-        final long cost = 200L;
-        this.absorbNearbyEnergy(sourceMachine, locationFromKey(sourceKey), cost);
-        if (!sourceMachine.consumeEnergy(cost)) {
-            player.sendMessage(this.itemFactory.warning("傳送面板能量不足！需要 " + cost + " EU。"));
+        // 檢查能量
+        this.absorbNearbyEnergy(sourceMachine, locationFromKey(sourceKey), TELEPORT_ENERGY_COST);
+        if (sourceMachine.storedEnergy() < TELEPORT_ENERGY_COST) {
+            player.sendMessage(this.itemFactory.warning("傳送面板能量不足！需要 " + TELEPORT_ENERGY_COST + " EU。"));
             player.closeInventory();
             return;
         }
-        // 執行傳送
+        // 防止重複
+        if (this.channelingPlayers.contains(player.getUniqueId())) {
+            player.sendMessage(this.itemFactory.warning("你正在傳送中…"));
+            player.closeInventory();
+            return;
+        }
+        // 關閉選單，開始吟唱倒數
         player.closeInventory();
+        this.startTeleportChanneling(player, sourceMachine, sourceKey, dest);
+    }
+
+    private void startTeleportChanneling(final Player player, final PlacedMachine sourceMachine,
+                                         final LocationKey sourceKey, final PlacedMachine dest) {
+        final UUID uuid = player.getUniqueId();
+        this.channelingPlayers.add(uuid);
+        final Location startLocation = player.getLocation().clone();
+        final int[] remaining = {TELEPORT_CHANNELING_SECONDS};
+
+        this.showTeleportChannelingTick(player, sourceKey, remaining[0]);
+        this.scheduler.runEntityTimer(player, task -> {
+            remaining[0]--;
+            if (!player.isOnline() || !this.channelingPlayers.contains(uuid)) {
+                task.cancel();
+                this.channelingPlayers.remove(uuid);
+                return;
+            }
+            // 檢查是否移動（容許上下 0.1 格的微量偏差）
+            final Location current = player.getLocation();
+            if (current.getWorld() != startLocation.getWorld()
+                    || Math.abs(current.getX() - startLocation.getX()) > 0.15
+                    || Math.abs(current.getZ() - startLocation.getZ()) > 0.15
+                    || Math.abs(current.getY() - startLocation.getY()) > 0.3) {
+                task.cancel();
+                this.channelingPlayers.remove(uuid);
+                player.sendMessage(this.itemFactory.warning("你移動了，傳送已取消。"));
+                player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 0.6f, 0.7f);
+                return;
+            }
+            if (remaining[0] > 0) {
+                this.showTeleportChannelingTick(player, sourceKey, remaining[0]);
+                return;
+            }
+            // 倒數結束，執行傳送
+            task.cancel();
+            this.channelingPlayers.remove(uuid);
+            // 再次驗證條件
+            if (!this.machines.containsKey(sourceKey)) {
+                player.sendMessage(this.itemFactory.warning("來源傳送面板已離線。"));
+                return;
+            }
+            if (!this.machines.containsKey(dest.locationKey())) {
+                player.sendMessage(this.itemFactory.warning("目的地傳送面板已不存在。"));
+                return;
+            }
+            if (this.countVanillaEnderPearls(player) < 1) {
+                player.sendMessage(this.itemFactory.warning("背包中沒有末影珍珠！"));
+                return;
+            }
+            this.absorbNearbyEnergy(sourceMachine, locationFromKey(sourceKey), TELEPORT_ENERGY_COST);
+            if (!sourceMachine.consumeEnergy(TELEPORT_ENERGY_COST)) {
+                player.sendMessage(this.itemFactory.warning("傳送面板能量不足！"));
+                return;
+            }
+            this.consumeVanillaEnderPearls(player, 1);
+            this.executeTeleport(player, sourceKey, dest);
+        }, 20L, 20L);
+    }
+
+    private void showTeleportChannelingTick(final Player player, final LocationKey sourceKey, final int seconds) {
+        final NamedTextColor color = seconds <= 1
+                ? NamedTextColor.RED
+                : seconds <= 2 ? NamedTextColor.GOLD : NamedTextColor.GREEN;
+        player.sendActionBar(Component.text("⚡ 傳送中… " + seconds + " 秒", color, TextDecoration.BOLD));
+        player.playSound(player.getLocation(), Sound.BLOCK_BEACON_AMBIENT, 0.5f, 1.0f + (TELEPORT_CHANNELING_SECONDS - seconds) * 0.15f);
+        // 吟唱粒子效果
+        final World srcWorld = Bukkit.getWorld(sourceKey.worldName());
+        if (srcWorld != null) {
+            final Location center = new Location(srcWorld, sourceKey.x() + 0.5, sourceKey.y() + 1.0, sourceKey.z() + 0.5);
+            srcWorld.spawnParticle(Particle.PORTAL, center, 20, 0.4, 0.6, 0.4, 0.3);
+            srcWorld.spawnParticle(Particle.END_ROD, center.clone().add(0, 0.5, 0), 6, 0.3, 0.2, 0.3, 0.02);
+        }
+    }
+
+    private void executeTeleport(final Player player, final LocationKey sourceKey, final PlacedMachine dest) {
         final LocationKey destLoc = dest.locationKey();
         final World destWorld = Bukkit.getWorld(destLoc.worldName());
         if (destWorld == null) {
@@ -10394,7 +10533,7 @@ public final class MachineService {
         final Location destination = new Location(destWorld, destLoc.x() + 0.5, destLoc.y() + 1.0, destLoc.z() + 0.5,
                 player.getLocation().getYaw(), player.getLocation().getPitch());
 
-        // 傳送前粒子
+        // 來源粒子效果
         final World srcWorld = Bukkit.getWorld(sourceKey.worldName());
         if (srcWorld != null) {
             final Location srcCenter = new Location(srcWorld, sourceKey.x() + 0.5, sourceKey.y() + 0.5, sourceKey.z() + 0.5);

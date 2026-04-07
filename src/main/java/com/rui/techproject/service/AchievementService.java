@@ -5,7 +5,9 @@ import com.rui.techproject.model.TechTier;
 import com.rui.techproject.util.ItemFactoryUtil;
 import com.rui.techproject.util.SafeScheduler;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
@@ -184,8 +186,22 @@ public final class AchievementService {
         }
 
         this.scheduler.runEntity(player, () -> {
-            player.sendMessage(Component.text("成就解鎖：" + this.itemFactory.displayNameForId(achievementId), NamedTextColor.AQUA));
-            player.sendMessage(Component.text(definition.description(), NamedTextColor.GRAY));
+            final String displayName = this.itemFactory.displayNameForId(achievementId);
+
+            // 廣播成就訊息給所有線上玩家（類似原版進度）
+            final Component hoverText = Component.text(definition.description(), NamedTextColor.GRAY);
+            final Component broadcast = Component.text(player.getName(), NamedTextColor.AQUA)
+                .append(Component.text(" 達成了工業成就 ", NamedTextColor.GREEN))
+                .append(Component.text("[" + displayName + "]", NamedTextColor.AQUA, TextDecoration.BOLD)
+                    .hoverEvent(HoverEvent.showText(
+                        Component.text(displayName, NamedTextColor.AQUA, TextDecoration.BOLD)
+                            .append(Component.newline())
+                            .append(Component.text(definition.description(), NamedTextColor.GRAY))
+                    )));
+            for (final Player online : Bukkit.getOnlinePlayers()) {
+                online.sendMessage(broadcast);
+            }
+
             if (definition.rewardXp() > 0) {
                 this.progressService.addTechXp(uuid, definition.rewardXp());
                 player.sendMessage(Component.text("研究 XP +" + definition.rewardXp(), NamedTextColor.LIGHT_PURPLE));
