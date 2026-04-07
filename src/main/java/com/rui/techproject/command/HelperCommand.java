@@ -149,6 +149,20 @@ public final class HelperCommand implements CommandExecutor {
                     case 't' -> sb.append('\t');
                     case '"' -> sb.append('"');
                     case '\\' -> sb.append('\\');
+                    case 'u' -> {
+                        // Unicode hex 跳脫 (\\uXXXX)
+                        if (i + 4 < json.length()) {
+                            final String hex = json.substring(i + 1, i + 5);
+                            try {
+                                sb.append((char) Integer.parseInt(hex, 16));
+                                i += 4;
+                            } catch (NumberFormatException e) {
+                                sb.append("\\u");
+                            }
+                        } else {
+                            sb.append("\\u");
+                        }
+                    }
                     default -> { sb.append('\\'); sb.append(c); }
                 }
                 escaped = false;

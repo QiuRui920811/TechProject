@@ -19,3 +19,4 @@ Thumbs.db
 
 # Maven wrapper
 .mvn/wrapper/maven-wrapper.jar
+tools/tech-helper-bot/.env

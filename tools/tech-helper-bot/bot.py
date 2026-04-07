@@ -15,6 +15,7 @@ import os
 import pathlib
 import re
 import time
+from functools import partial
 from typing import Optional
 
 import discord
@@ -153,11 +154,27 @@ SYSTEM_PROMPT = """你是「科技幫手」，一個專門回答 Minecraft TechP
 class GeminiHelper:
     def __init__(self, api_key: str):
         genai.configure(api_key=api_key)
-        self.model = genai.GenerativeModel(
+        # 按優先順序嘗試模型：最新免費額度最高的優先
+        model_candidates = [
+            "gemini-2.5-flash-lite",
+            "gemini-2.0-flash-lite",
             "gemini-2.0-flash",
+        ]
+        chosen = model_candidates[0]
+        for candidate in model_candidates:
+            try:
+                test_model = genai.GenerativeModel(candidate, system_instruction="test")
+                test_model.generate_content("hi")
+                chosen = candidate
+                break
+            except Exception:
+                log.warning("模型 %s 不可用，嘗試下一個…", candidate)
+                continue
+        self.model = genai.GenerativeModel(
+            chosen,
             system_instruction=SYSTEM_PROMPT,
         )
-        log.info("Gemini 模型初始化完成")
+        log.info("Gemini 模型初始化完成：%s", chosen)
 
     async def ask(self, question: str, context_chunks: list[dict]) -> str:
         """組合知識庫上下文 + 問題，呼叫 Gemini 回答。"""
@@ -264,38 +281,42 @@ async def on_message(message: discord.Message):
 # ─────────────────────────────────────────────
 #  HTTP API（供遊戲內 /幫手 指令使用）
 # ─────────────────────────────────────────────
+def _json_dumps_utf8(obj):
+    return json.dumps(obj, ensure_ascii=False)
+
+
 async def handle_ask(request: web.Request) -> web.Response:
     """POST /ask  body: {"question": "...", "player": "..."}"""
     try:
         data = await request.json()
     except Exception:
-        return web.json_response({"error": "invalid json"}, status=400)
+        return web.json_response({"error": "invalid json"}, status=400, dumps=_json_dumps_utf8)
 
     question = (data.get("question") or "").strip()
     player = (data.get("player") or "unknown").strip()
 
     if not question:
-        return web.json_response({"error": "empty question"}, status=400)
+        return web.json_response({"error": "empty question"}, status=400, dumps=_json_dumps_utf8)
     if len(question) > 500:
-        return web.json_response({"error": "question too long"}, status=400)
+        return web.json_response({"error": "question too long"}, status=400, dumps=_json_dumps_utf8)
 
     # 冷卻
     cd = check_cooldown(f"mc-{player}")
     if cd is not None:
-        return web.json_response({"answer": f"⏳ 冷卻中，請等 {cd} 秒後再問。", "cooldown": cd})
+        return web.json_response({"answer": f"⏳ 冷卻中，請等 {cd} 秒後再問。", "cooldown": cd}, dumps=_json_dumps_utf8)
 
     chunks = kb.search(question, top_k=8)
     answer = await llm.ask(question, chunks)
-    return web.json_response({"answer": answer})
+    return web.json_response({"answer": answer}, dumps=_json_dumps_utf8)
 
 
 async def handle_health(request: web.Request) -> web.Response:
-    return web.json_response({"status": "ok", "chunks": len(kb.chunks) if kb else 0})
+    return web.json_response({"status": "ok", "chunks": len(kb.chunks) if kb else 0}, dumps=_json_dumps_utf8)
 
 
 async def handle_reload(request: web.Request) -> web.Response:
     kb.reload()
-    return web.json_response({"status": "reloaded", "chunks": len(kb.chunks)})
+    return web.json_response({"status": "reloaded", "chunks": len(kb.chunks)}, dumps=_json_dumps_utf8)
 
 
 # ─────────────────────────────────────────────
