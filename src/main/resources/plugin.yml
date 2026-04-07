@@ -11,6 +11,10 @@ commands:
     description: 開啟科技書或管理科技插件
     usage: /tech [book|list|stats|achievements|give|reload|xp|research]
     aliases: [techbook]
+  helper:
+    description: AI 科技幫手 — 詢問科技插件相關問題
+    usage: /helper <問題>
+    aliases: [幫手]
 permissions:
   techproject.admin:
     description: 管理科技插件

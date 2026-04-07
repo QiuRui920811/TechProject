@@ -1,0 +1,4 @@
+discord.py>=2.3
+google-generativeai>=0.8
+aiohttp>=3.9
+scikit-learn>=1.3

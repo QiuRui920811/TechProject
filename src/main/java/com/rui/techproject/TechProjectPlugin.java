@@ -152,6 +152,10 @@ public final class TechProjectPlugin extends JavaPlugin {
             this.getCommand("tech").setExecutor(techCommand);
             this.getCommand("tech").setTabCompleter(techCommand);
         }
+        if (this.getCommand("helper") != null) {
+            this.getCommand("helper").setExecutor(
+                    new com.rui.techproject.command.HelperCommand(this, this.itemFactory));
+        }
 
         this.machineService.start();
         this.machineService.purgeOrphanDisplays();
