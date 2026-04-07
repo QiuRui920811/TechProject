@@ -3,7 +3,10 @@ package com.rui.techproject.command;
 import com.rui.techproject.TechProjectPlugin;
 import com.rui.techproject.util.ItemFactoryUtil;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -99,15 +102,8 @@ public final class HelperCommand implements CommandExecutor {
                     return;
                 }
 
-                // 在主執行緒回覆（分段避免過長）
-                this.plugin.getSafeScheduler().runEntity(player, () -> {
-                    player.sendMessage(Component.text("💡 ", NamedTextColor.GOLD)
-                            .append(Component.text("科技幫手", NamedTextColor.AQUA, TextDecoration.BOLD)));
-                    // 每行分開傳送，避免超長訊息
-                    for (final String line : answer.split("\n")) {
-                        player.sendMessage(Component.text(line, NamedTextColor.WHITE));
-                    }
-                });
+                // 在主執行緒回覆（長回覆使用懸停展開）
+                this.plugin.getSafeScheduler().runEntity(player, () -> sendFormattedAnswer(player, answer));
             } catch (IOException e) {
                 this.plugin.getSafeScheduler().runEntity(player, () ->
                         player.sendMessage(this.itemFactory.warning("⚠ 幫手服務未啟動或連線失敗。")));
@@ -175,5 +171,192 @@ public final class HelperCommand implements CommandExecutor {
             }
         }
         return sb.toString();
+    }
+
+    // ─── 色彩常量 ──────────────────────────────────────
+    private static final TextColor C_ACCENT    = TextColor.color(0x55FFFF); // 亮青
+    private static final TextColor C_TITLE     = TextColor.color(0xFFD700); // 金色
+    private static final TextColor C_HEADING   = TextColor.color(0x00E5FF); // 結構青
+    private static final TextColor C_SUBHEAD   = TextColor.color(0x7BFFA0); // 淡綠
+    private static final TextColor C_BODY      = TextColor.color(0xE0E0E0); // 淡灰白
+    private static final TextColor C_HIGHLIGHT  = TextColor.color(0xFFC857); // 重點黃
+    private static final TextColor C_CODE      = TextColor.color(0xA8D8EA); // 淤藍
+    private static final TextColor C_CODE_FENCE = TextColor.color(0x4A6670); // 深青
+    private static final TextColor C_BULLET    = TextColor.color(0xFFAB40); // 橙色
+    private static final TextColor C_TABLE     = TextColor.color(0x80CBC4); // 青綠
+    private static final TextColor C_HOVER_HINT = TextColor.color(0x607D8B); // 暗灰
+    private static final TextColor C_LINK      = TextColor.color(0x4FC3F7); // 亮藍
+    private static final TextColor C_SEPARATOR = TextColor.color(0x37474F); // 深底線
+
+    private static final String SEPARATOR = "  \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550";
+
+    // ─── 格式化回覆 ──────────────────────────────────────
+
+    private static final int PREVIEW_LINES = 4;
+
+    private void sendFormattedAnswer(final Player player, final String answer) {
+        // 標題分隔線
+        player.sendMessage(Component.text(SEPARATOR, C_SEPARATOR));
+        player.sendMessage(
+            Component.text("  \u2726 ", C_TITLE)
+                .append(Component.text("\u79d1\u6280\u5e6b\u624b", C_ACCENT, TextDecoration.BOLD))
+                .append(Component.text(" \u2014 AI \u77e5\u8b58\u5eab\u56de\u8986", C_HOVER_HINT))
+        );
+        player.sendMessage(Component.text(SEPARATOR, C_SEPARATOR));
+
+        final String[] allLines = answer.split("\n");
+
+        // 短回覆：全部顯示
+        if (allLines.length <= 8) {
+            for (final String line : allLines) {
+                player.sendMessage(formatLine(line));
+            }
+            player.sendMessage(Component.text(SEPARATOR, C_SEPARATOR));
+            return;
+        }
+
+        // 長回覆：預覽前幾行
+        for (int i = 0; i < PREVIEW_LINES && i < allLines.length; i++) {
+            player.sendMessage(formatLine(allLines[i]));
+        }
+
+        player.sendMessage(Component.text("  \u2500\u2500\u2500 \u5c55\u958b\u66f4\u591a \u2500\u2500\u2500", C_HOVER_HINT, TextDecoration.ITALIC));
+
+        // 將剩餘內容按段落分組，各段顯示為可懸停摘要行
+        final StringBuilder remainBuf = new StringBuilder();
+        for (int i = PREVIEW_LINES; i < allLines.length; i++) {
+            if (i > PREVIEW_LINES) remainBuf.append('\n');
+            remainBuf.append(allLines[i]);
+        }
+        final String[] paragraphs = remainBuf.toString().split("\n\n");
+
+        for (final String para : paragraphs) {
+            final String trimmed = para.trim();
+            if (trimmed.isEmpty()) continue;
+
+            final String[] pLines = trimmed.split("\n");
+            String summary = pLines[0].replaceAll("[#*`]", "").replaceAll("^\\s*-\\s*", "").trim();
+            if (summary.length() > 35) summary = summary.substring(0, 35) + "\u2026";
+            if (summary.isEmpty()) continue;
+
+            // 構建此段落的懸停文字
+            final TextComponent.Builder hover = Component.text();
+            hover.append(Component.text("\u250C\u2500 ", C_SEPARATOR))
+                 .append(Component.text(summary, C_HIGHLIGHT, TextDecoration.BOLD))
+                 .append(Component.text(" \u2500\u2510", C_SEPARATOR));
+            for (final String pLine : pLines) {
+                hover.append(Component.newline());
+                hover.append(Component.text("\u2502 ", C_SEPARATOR));
+                hover.append(formatLine(pLine));
+            }
+            hover.append(Component.newline())
+                 .append(Component.text("\u2514\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2518", C_SEPARATOR));
+
+            player.sendMessage(
+                Component.text("  \u25B6 ", C_BULLET)
+                    .append(Component.text(summary, C_HIGHLIGHT))
+                    .append(Component.text("  \u00AB\u61F8\u505C\u67E5\u770B\u00BB", C_HOVER_HINT, TextDecoration.ITALIC))
+                    .hoverEvent(HoverEvent.showText(hover.build()))
+            );
+        }
+
+        // 完整回覆懸停
+        final TextComponent.Builder fullHover = Component.text();
+        fullHover.append(Component.text("\u2554", C_SEPARATOR))
+                 .append(Component.text(" \u2726 \u5B8C\u6574\u56DE\u8986 \u2726 ", C_ACCENT, TextDecoration.BOLD))
+                 .append(Component.text("\u2557", C_SEPARATOR));
+        for (final String allLine : allLines) {
+            fullHover.append(Component.newline());
+            fullHover.append(Component.text("\u2551 ", C_SEPARATOR));
+            fullHover.append(formatLine(allLine));
+        }
+        fullHover.append(Component.newline())
+                 .append(Component.text("\u255A\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u255D", C_SEPARATOR));
+
+        player.sendMessage(
+            Component.text("  \u2605 ", C_TITLE)
+                .append(Component.text("[\u5B8C\u6574\u56DE\u8986]", C_LINK, TextDecoration.UNDERLINED))
+                .append(Component.text("  \u00AB\u61F8\u505C\u67E5\u770B\u5168\u90E8\u00BB", C_HOVER_HINT, TextDecoration.ITALIC))
+                .hoverEvent(HoverEvent.showText(fullHover.build()))
+        );
+        player.sendMessage(Component.text(SEPARATOR, C_SEPARATOR));
+    }
+
+    private static Component formatLine(final String raw) {
+        final String trimmed = raw.trim();
+        if (trimmed.isEmpty()) return Component.empty();
+
+        // Markdown 標題
+        if (trimmed.startsWith("### "))
+            return Component.text("  \u25C8 ", C_BULLET)
+                    .append(Component.text(trimmed.substring(4), C_SUBHEAD, TextDecoration.BOLD));
+        if (trimmed.startsWith("## "))
+            return Component.text("  \u25C6 ", C_TITLE)
+                    .append(Component.text(trimmed.substring(3), C_HEADING, TextDecoration.BOLD));
+        if (trimmed.startsWith("# "))
+            return Component.text("  \u2726 ", C_TITLE)
+                    .append(Component.text(trimmed.substring(2), C_TITLE, TextDecoration.BOLD));
+
+        // 列表項目
+        if (trimmed.startsWith("* ") || trimmed.startsWith("- "))
+            return Component.text("  \u25B9 ", C_BULLET)
+                    .append(formatInline(trimmed.substring(2)));
+
+        // 程式碼區塊圍欄
+        if (trimmed.startsWith("```"))
+            return Component.text("  \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550", C_CODE_FENCE);
+
+        // 合成表格行 [X][Y][Z]
+        if (trimmed.startsWith("[") && trimmed.contains("]["))
+            return Component.text("  ", C_TABLE)
+                    .append(Component.text(trimmed, C_TABLE));
+
+        // 箇頭 / 重要提示
+        if (trimmed.startsWith("\u21d2 ") || trimmed.startsWith("=> "))
+            return Component.text("  \u2794 ", C_HIGHLIGHT)
+                    .append(formatInline(trimmed.substring(trimmed.indexOf(' ') + 1)));
+
+        return Component.text("  ").append(formatInline(trimmed));
+    }
+
+    private static Component formatInline(final String text) {
+        if (!text.contains("**") && !text.contains("`"))
+            return Component.text(text, C_BODY);
+
+        final TextComponent.Builder builder = Component.text();
+        int i = 0;
+        int plainStart = 0;
+
+        while (i < text.length()) {
+            // **粗體** — 亮黃加粗
+            if (i + 1 < text.length() && text.charAt(i) == '*' && text.charAt(i + 1) == '*') {
+                final int end = text.indexOf("**", i + 2);
+                if (end > 0) {
+                    if (i > plainStart)
+                        builder.append(Component.text(text.substring(plainStart, i), C_BODY));
+                    builder.append(Component.text(text.substring(i + 2, end), C_HIGHLIGHT, TextDecoration.BOLD));
+                    i = end + 2;
+                    plainStart = i;
+                    continue;
+                }
+            }
+            // `行內程式碼` — 淤藍底
+            if (text.charAt(i) == '`') {
+                final int end = text.indexOf('`', i + 1);
+                if (end > 0) {
+                    if (i > plainStart)
+                        builder.append(Component.text(text.substring(plainStart, i), C_BODY));
+                    builder.append(Component.text(text.substring(i + 1, end), C_CODE));
+                    i = end + 1;
+                    plainStart = i;
+                    continue;
+                }
+            }
+            i++;
+        }
+        if (plainStart < text.length())
+            builder.append(Component.text(text.substring(plainStart), C_BODY));
+
+        return builder.build();
     }
 }
