@@ -10360,6 +10360,7 @@ public final class MachineService {
         for (final PlacedMachine candidate : this.machines.values()) {
             if (!"teleport_pad".equalsIgnoreCase(this.normalizeId(candidate.machineId()))) continue;
             if (candidate.locationKey().equals(sourceKey)) continue;
+            if (!candidate.enabled()) continue;
             // 公開面板：所有人可見；私人面板：只有擁有者或受信任的玩家可見
             if (candidate.teleportPublic()) {
                 destinations.add(candidate);
@@ -10424,6 +10425,11 @@ public final class MachineService {
         final PlacedMachine dest = destinations.get(rawSlot);
         if (dest == null || !this.machines.containsKey(dest.locationKey())) {
             player.sendMessage(this.itemFactory.warning("目的地傳送面板已不存在。"));
+            player.closeInventory();
+            return;
+        }
+        if (!dest.enabled()) {
+            player.sendMessage(this.itemFactory.warning("目的地傳送面板已關機。"));
             player.closeInventory();
             return;
         }

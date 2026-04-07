@@ -100,6 +100,11 @@ public final class TechListener implements Listener {
     private static final long THRUSTER_ENERGY_COST = 8L;
     private static final long JETPACK_ENERGY_COST = 6L;
 
+    /** 右鍵會觸發原版行為的材質（末影珍珠、終界之眼、玻璃瓶） */
+    private static final Set<Material> VANILLA_INTERACT_MATERIALS = Set.of(
+            Material.ENDER_PEARL, Material.ENDER_EYE, Material.GLASS_BOTTLE
+    );
+
     private final TechProjectPlugin plugin;
     private final Map<UUID, Long> grappleCooldowns = new ConcurrentHashMap<>();
     private final Map<UUID, Long> thrusterCooldowns = new ConcurrentHashMap<>();
@@ -182,6 +187,34 @@ public final class TechListener implements Listener {
         if (this.plugin.getRegionService().isTraveling(deadId)) {
             this.plugin.getRegionService().cleanupPlayer(deadId);
             this.plugin.getPlanetService().cleanupPlayer(deadId);
+        }
+    }
+
+    // ── 科技不死圖騰不應觸發復活效果 ──
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    public void onResurrect(final org.bukkit.event.entity.EntityResurrectEvent event) {
+        if (!(event.getEntity() instanceof Player player)) {
+            return;
+        }
+        for (final EquipmentSlot slot : new EquipmentSlot[]{EquipmentSlot.HAND, EquipmentSlot.OFF_HAND}) {
+            final ItemStack stack = player.getInventory().getItem(slot);
+            if (stack != null && stack.getType() == Material.TOTEM_OF_UNDYING
+                    && this.isTaggedTechMaterial(stack)) {
+                event.setCancelled(true);
+                return;
+            }
+        }
+    }
+
+    // ── 防止豬靈撿起科技物品（避免科技金錠觸發以物易物） ──
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    public void onEntityPickupItem(final org.bukkit.event.entity.EntityPickupItemEvent event) {
+        if (!(event.getEntity() instanceof org.bukkit.entity.Piglin)) {
+            return;
+        }
+        final ItemStack stack = event.getItem().getItemStack();
+        if (this.isTaggedTechMaterial(stack)) {
+            event.setCancelled(true);
         }
     }
 
@@ -367,6 +400,16 @@ public final class TechListener implements Listener {
         }
         final Player player = event.getPlayer();
         final ItemStack hand = player.getInventory().getItemInMainHand();
+        // ── 科技物品與村民/遊商/豬靈互動防護 ──
+        if (hand.getType() != Material.AIR && this.isTaggedTechMaterial(hand)) {
+            final Entity target = event.getRightClicked();
+            if (target instanceof org.bukkit.entity.Villager
+                    || target instanceof org.bukkit.entity.WanderingTrader
+                    || target instanceof org.bukkit.entity.Piglin) {
+                event.setCancelled(true);
+                return;
+            }
+        }
         if (hand.getType() == Material.AIR || !this.plugin.getItemFactory().isChickenNet(hand)) {
             return;
         }
@@ -461,6 +504,14 @@ public final class TechListener implements Listener {
         if (event.getAction() != Action.RIGHT_CLICK_AIR && event.getAction() != Action.RIGHT_CLICK_BLOCK) {
             return;
         }
+        // ── 通用防護：科技物品使用可互動原版材質時封鎖原版右鍵效果 ──
+        {
+            final ItemStack heldItem = event.getItem();
+            if (heldItem != null && VANILLA_INTERACT_MATERIALS.contains(heldItem.getType())
+                    && this.isTaggedTechMaterial(heldItem)) {
+                event.setUseItemInHand(Result.DENY);
+            }
+        }
         // 早期攔截：右鍵有原版容器 GUI 的機器方塊（BEACON、ANVIL 等）時立即封鎖，避免原版 GUI 被打開
         final boolean earlyMachineDeny = event.getAction() == Action.RIGHT_CLICK_BLOCK
                 && event.getClickedBlock() != null
@@ -470,8 +521,14 @@ public final class TechListener implements Listener {
             event.setUseInteractedBlock(Result.DENY);
         }
         if (event.getHand() == EquipmentSlot.OFF_HAND) {
-            // 副手持法器時阻止原版行為（如末影珍珠投擲）
+            // 副手持科技物品時阻止原版行為（末影珍珠投擲、終界之眼飛出、玻璃瓶裝水等）
             final ItemStack offHandStack = event.getItem();
+            if (offHandStack != null && VANILLA_INTERACT_MATERIALS.contains(offHandStack.getType())
+                    && this.isTaggedTechMaterial(offHandStack)) {
+                event.setUseItemInHand(Result.DENY);
+                event.setCancelled(true);
+                return;
+            }
             final String offHandId = offHandStack == null ? null : this.plugin.getItemFactory().getTechItemId(offHandStack);
             if (offHandId != null && ARTIFACT_IDS.contains(offHandId.toLowerCase())) {
                 event.setUseItemInHand(Result.DENY);
@@ -736,6 +793,22 @@ public final class TechListener implements Listener {
         if (this.handleAdvancedWorkbenchClick(event)) {
             return;
         }
+        // ── 村民/遊商交易介面：阻止科技物品被放入交易格 ──
+        if (event.getView().getTopInventory().getType() == InventoryType.MERCHANT
+                && event.getWhoClicked() instanceof Player) {
+            final ItemStack moving;
+            if (event.isShiftClick()) {
+                moving = event.getCurrentItem();
+            } else if (event.getRawSlot() < event.getView().getTopInventory().getSize()) {
+                moving = event.getCursor();
+            } else {
+                moving = null;
+            }
+            if (moving != null && this.isTaggedTechMaterial(moving)) {
+                event.setCancelled(true);
+                return;
+            }
+        }
         // 鐵砧搜尋 GUI
         if (event.getWhoClicked() instanceof Player player
                 && this.plugin.getItemSearchService().isAnvilSearchOpen(player.getUniqueId())) {
@@ -954,6 +1027,11 @@ public final class TechListener implements Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onBucketEmpty(final PlayerBucketEmptyEvent event) {
+        // 禁止在科技方塊上放置液體（水桶/熔岩桶會沖掉機器方塊）
+        if (this.isProtectedTechBlock(event.getBlock())) {
+            event.setCancelled(true);
+            return;
+        }
         if (!this.plugin.getPlanetService().isPlanetWorld(event.getBlock().getWorld())) {
             return;
         }
