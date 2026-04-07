@@ -6,6 +6,7 @@ import com.rui.techproject.util.ItemFactoryUtil;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.World;
 import org.bukkit.block.Block;
@@ -42,6 +43,13 @@ public final class TechCommand implements CommandExecutor, TabCompleter {
                              @NotNull final Command command,
                              @NotNull final String label,
                              @NotNull final String[] args) {
+        // 區域系統指令提前攔截
+        if (args.length >= 1) {
+            final String s = args[0].toLowerCase(Locale.ROOT);
+            if (s.equals("tool") || s.equals("create") || s.equals("region") || (s.equals("set") && args.length >= 2 && args[1].equalsIgnoreCase("points"))) {
+                return this.handleRegionCommands(sender, args);
+            }
+        }
         if (args.length == 0 || args[0].equalsIgnoreCase("book")) {
             if (args.length >= 2 && args[1].equalsIgnoreCase("getall")) {
                 if (!sender.hasPermission("techproject.admin")) {
@@ -298,6 +306,10 @@ public final class TechCommand implements CommandExecutor, TabCompleter {
         }
 
         if (args[0].equalsIgnoreCase("planet")) {
+            if (!sender.hasPermission("techproject.admin")) {
+                sender.sendMessage(Component.text("你沒有權限使用星球指令。", NamedTextColor.RED));
+                return true;
+            }
             if (!(sender instanceof Player player)) {
                 sender.sendMessage(Component.text("只有玩家可以使用星球傳送。", NamedTextColor.RED));
                 return true;
@@ -320,10 +332,6 @@ public final class TechCommand implements CommandExecutor, TabCompleter {
                 return true;
             }
             if (args.length >= 2 && args[1].equalsIgnoreCase("regenerate")) {
-                if (!sender.hasPermission("techproject.admin")) {
-                    sender.sendMessage(Component.text("沒有權限。", NamedTextColor.RED));
-                    return true;
-                }
                 if (this.plugin.getPlanetService().regenerateSpawnStructures(player)) {
                     player.sendMessage(Component.text("✔ 已重新生成此星球的出生點結構（降落台 + 遺跡核心 + 尖塔等）。", NamedTextColor.GREEN));
                 } else {
@@ -339,20 +347,12 @@ public final class TechCommand implements CommandExecutor, TabCompleter {
                 return true;
             }
             if (args.length >= 2 && args[1].equalsIgnoreCase("debug")) {
-                if (!sender.hasPermission("techproject.admin")) {
-                    sender.sendMessage(Component.text("缺少權限。", NamedTextColor.RED));
-                    return true;
-                }
                 for (final String line : this.plugin.getPlanetService().planetDebugLines(player)) {
                     sender.sendMessage(Component.text(line));
                 }
                 return true;
             }
             if (args.length >= 2 && args[1].equalsIgnoreCase("spawntest")) {
-                if (!sender.hasPermission("techproject.admin")) {
-                    sender.sendMessage(Component.text("缺少權限。", NamedTextColor.RED));
-                    return true;
-                }
                 for (final String line : this.plugin.getPlanetService().planetSpawnTestLines(player)) {
                     sender.sendMessage(Component.text(line));
                 }
@@ -524,13 +524,124 @@ public final class TechCommand implements CommandExecutor, TabCompleter {
         return true;
     }
 
+    // ══════════════════ 區域系統指令 ══════════════════
+
+    private boolean handleRegionCommands(final CommandSender sender, final String[] args) {
+        final String sub = args[0].toLowerCase(Locale.ROOT);
+
+        // /tech tool — 給予選取工具
+        if (sub.equals("tool")) {
+            if (!sender.hasPermission("techproject.admin")) {
+                sender.sendMessage(Component.text("缺少權限。", NamedTextColor.RED));
+                return true;
+            }
+            if (!(sender instanceof Player player)) {
+                sender.sendMessage(Component.text("只有玩家可以使用。", NamedTextColor.RED));
+                return true;
+            }
+            final org.bukkit.inventory.ItemStack wand = new org.bukkit.inventory.ItemStack(Material.BLAZE_ROD);
+            final org.bukkit.inventory.meta.ItemMeta meta = wand.getItemMeta();
+            meta.displayName(Component.text("§6區域選取工具"));
+            meta.getPersistentDataContainer().set(
+                    new org.bukkit.NamespacedKey(this.plugin, "region_wand"),
+                    org.bukkit.persistence.PersistentDataType.BYTE, (byte) 1);
+            wand.setItemMeta(meta);
+            player.getInventory().addItem(wand);
+            player.sendMessage(Component.text("✔ 已給予區域選取工具（左鍵=位置1，右鍵=位置2）", NamedTextColor.GREEN));
+            return true;
+        }
+
+        // /tech create <id>
+        if (sub.equals("create")) {
+            if (!sender.hasPermission("techproject.admin")) {
+                sender.sendMessage(Component.text("缺少權限。", NamedTextColor.RED));
+                return true;
+            }
+            if (!(sender instanceof Player player)) {
+                sender.sendMessage(Component.text("只有玩家可以使用。", NamedTextColor.RED));
+                return true;
+            }
+            if (args.length < 2) {
+                sender.sendMessage(Component.text("用法: /tech create <區域ID>", NamedTextColor.RED));
+                return true;
+            }
+            final var regionService = this.plugin.getRegionService();
+            if (!regionService.hasSelection(player)) {
+                sender.sendMessage(Component.text("請先用選取工具點選兩個位置。", NamedTextColor.RED));
+                return true;
+            }
+            if (regionService.createRegion(player, args[1])) {
+                sender.sendMessage(Component.text("✔ 區域 '" + args[1] + "' 已建立。", NamedTextColor.GREEN));
+            } else {
+                sender.sendMessage(Component.text("區域 ID 已存在。", NamedTextColor.RED));
+            }
+            return true;
+        }
+
+        // /tech region <id> action <action> | /tech region <id> delete
+        if (sub.equals("region")) {
+            if (!sender.hasPermission("techproject.admin")) {
+                sender.sendMessage(Component.text("缺少權限。", NamedTextColor.RED));
+                return true;
+            }
+            if (args.length < 3) {
+                sender.sendMessage(Component.text("用法: /tech region <ID> action <rtp> | /tech region <ID> delete", NamedTextColor.RED));
+                return true;
+            }
+            final String regionId = args[1];
+            final String action = args[2].toLowerCase(Locale.ROOT);
+            if (action.equals("delete")) {
+                if (this.plugin.getRegionService().deleteRegion(regionId)) {
+                    sender.sendMessage(Component.text("✔ 區域 '" + regionId + "' 已刪除。", NamedTextColor.GREEN));
+                } else {
+                    sender.sendMessage(Component.text("找不到區域。", NamedTextColor.RED));
+                }
+                return true;
+            }
+            if (action.equals("action") && args.length >= 4) {
+                if (this.plugin.getRegionService().setAction(regionId, args[3])) {
+                    sender.sendMessage(Component.text("✔ 區域 '" + regionId + "' 動作設為 '" + args[3] + "'。", NamedTextColor.GREEN));
+                } else {
+                    sender.sendMessage(Component.text("找不到區域。", NamedTextColor.RED));
+                }
+                return true;
+            }
+            sender.sendMessage(Component.text("用法: /tech region <ID> action <rtp> | delete", NamedTextColor.RED));
+            return true;
+        }
+
+        // /tech set points <regionId>
+        if (sub.equals("set") && args.length >= 3 && args[1].equalsIgnoreCase("points")) {
+            if (!sender.hasPermission("techproject.admin")) {
+                sender.sendMessage(Component.text("缺少權限。", NamedTextColor.RED));
+                return true;
+            }
+            if (!(sender instanceof Player player)) {
+                sender.sendMessage(Component.text("只有玩家可以使用。", NamedTextColor.RED));
+                return true;
+            }
+            if (this.plugin.getRegionService().setSpawnPoint(args[2], player.getLocation())) {
+                sender.sendMessage(Component.text("✔ 區域 '" + args[2] + "' 傳送點已設定為你的位置。", NamedTextColor.GREEN));
+            } else {
+                sender.sendMessage(Component.text("找不到區域。", NamedTextColor.RED));
+            }
+            return true;
+        }
+
+        return false;
+    }
+
     @Override
     public @Nullable List<String> onTabComplete(@NotNull final CommandSender sender,
                                                 @NotNull final Command command,
                                                 @NotNull final String alias,
                                                 @NotNull final String[] args) {
         if (args.length == 1) {
-                                                    return List.of("book", "wrench", "research", "planet", "list", "stats", "xp", "achievements", "title", "search", "give", "trust", "untrust", "trustlist", "reload", "cleandisplay", "debugtree");
+            final List<String> base = new ArrayList<>(List.of("book", "wrench", "research", "list", "stats", "achievements", "title", "search", "trust", "untrust", "trustlist"));
+            if (sender.hasPermission("techproject.admin")) {
+                base.addAll(List.of("planet", "xp", "give", "reload", "cleandisplay", "debugtree", "tool", "create", "region", "set"));
+            }
+            return base;
         }
         if (args.length == 2 && args[0].equalsIgnoreCase("wrench")) {
             return List.of("get");
@@ -589,6 +700,21 @@ public final class TechCommand implements CommandExecutor, TabCompleter {
         }
         if (args.length == 2 && args[0].equalsIgnoreCase("cleandisplay")) {
             return List.of("8", "16", "32", "64");
+        }
+        if (args.length == 2 && (args[0].equalsIgnoreCase("create") || args[0].equalsIgnoreCase("region"))) {
+            return new ArrayList<>(this.plugin.getRegionService().regionIds());
+        }
+        if (args.length == 3 && args[0].equalsIgnoreCase("region")) {
+            return List.of("action", "delete");
+        }
+        if (args.length == 4 && args[0].equalsIgnoreCase("region") && args[2].equalsIgnoreCase("action")) {
+            return List.of("rtp");
+        }
+        if (args.length == 2 && args[0].equalsIgnoreCase("set")) {
+            return List.of("points");
+        }
+        if (args.length == 3 && args[0].equalsIgnoreCase("set") && args[1].equalsIgnoreCase("points")) {
+            return new ArrayList<>(this.plugin.getRegionService().regionIds());
         }
         return List.of();
     }

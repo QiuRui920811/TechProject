@@ -4,6 +4,8 @@ import com.rui.techproject.TechProjectPlugin;
 import com.rui.techproject.storage.StorageBackend;
 import com.rui.techproject.util.ItemFactoryUtil;
 import com.rui.techproject.util.LocationKey;
+import com.destroystokyo.paper.profile.ProfileProperty;
+import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -11,15 +13,20 @@ import org.bukkit.Particle;
 import org.bukkit.Sound;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
+import org.bukkit.block.Skull;
 import org.bukkit.block.data.Ageable;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ThreadLocalRandom;
 
 public final class TechCropService {
     private final TechProjectPlugin plugin;
@@ -29,12 +36,18 @@ public final class TechCropService {
     private final Map<LocationKey, String> plantedCrops = new ConcurrentHashMap<>();
     private StorageBackend storageBackend;
 
+    private static final BlockFace[] RANDOM_FACES = {
+            BlockFace.NORTH, BlockFace.NORTH_EAST, BlockFace.EAST, BlockFace.SOUTH_EAST,
+            BlockFace.SOUTH, BlockFace.SOUTH_WEST, BlockFace.WEST, BlockFace.NORTH_WEST
+    };
+
     private record TechCropDefinition(String id,
                                       String seedItemId,
                                       String produceItemId,
                                       Material plantMaterial,
                                       int produceAmount,
-                                      int seedReturnAmount) {
+                                      int seedReturnAmount,
+                                      String matureTexture) {
     }
 
     public TechCropService(final TechProjectPlugin plugin,
@@ -52,18 +65,30 @@ public final class TechCropService {
     }
 
     private void registerDefaults() {
-        this.registerCrop(new TechCropDefinition("soybean", "soybean_seeds", "soybean_pods", Material.WHEAT, 2, 1));
-        this.registerCrop(new TechCropDefinition("spiceberry", "spiceberry_seeds", "spiceberry", Material.BEETROOTS, 2, 1));
-        this.registerCrop(new TechCropDefinition("tea_leaf", "tea_leaf_seeds", "tea_leaf", Material.CARROTS, 2, 1));
-        this.registerCrop(new TechCropDefinition("tomato", "tomato_seeds", "tomato", Material.BEETROOTS, 2, 1));
-        this.registerCrop(new TechCropDefinition("cabbage", "cabbage_seeds", "cabbage", Material.WHEAT, 2, 1));
-        this.registerCrop(new TechCropDefinition("corn", "corn_seeds", "corn", Material.CARROTS, 2, 1));
-        this.registerCrop(new TechCropDefinition("onion", "onion_bulbs", "onion", Material.POTATOES, 2, 1));
-        this.registerCrop(new TechCropDefinition("void_bloom", "void_bloom_seeds", "void_bloom", Material.BEETROOTS, 2, 1));
-        this.registerCrop(new TechCropDefinition("frostbloom", "frostbloom_seeds", "frostbloom", Material.WHEAT, 2, 1));
-        this.registerCrop(new TechCropDefinition("echo_spore", "echo_spore_seeds", "echo_spore", Material.BEETROOTS, 2, 1));
-        this.registerCrop(new TechCropDefinition("emberroot", "emberroot_seeds", "emberroot", Material.CARROTS, 2, 1));
-        this.registerCrop(new TechCropDefinition("ion_fern", "ion_fern_seeds", "ion_fern", Material.POTATOES, 2, 1));
+        this.registerCrop(new TechCropDefinition("soybean", "soybean_seeds", "soybean_pods", Material.WHEAT, 2, 1,
+                "bb9ec78d598e1360801635bd0ce75aa9e01c4d1d490c9db9def441ff35ef7322"));
+        this.registerCrop(new TechCropDefinition("spiceberry", "spiceberry_seeds", "spiceberry", Material.BEETROOTS, 2, 1,
+                "d5fe6c718fba719ff622237ed9ea6827d093effab814be2192e9643e3e3d7"));
+        this.registerCrop(new TechCropDefinition("tea_leaf", "tea_leaf_seeds", "tea_leaf", Material.CARROTS, 2, 1,
+                "1514c8b461247ab17fe3606e6e2f4d363dccae9ed5bedd012b498d7ae8eb3"));
+        this.registerCrop(new TechCropDefinition("tomato", "tomato_seeds", "tomato", Material.BEETROOTS, 2, 1,
+                "99172226d276070dc21b75ba25cc2aa5649da5cac745ba977695b59aebd"));
+        this.registerCrop(new TechCropDefinition("cabbage", "cabbage_seeds", "cabbage", Material.WHEAT, 2, 1,
+                "fcd6d67320c9131be85a164cd7c5fcf288f28c2816547db30a3187416bdc45b"));
+        this.registerCrop(new TechCropDefinition("corn", "corn_seeds", "corn", Material.CARROTS, 2, 1,
+                "9bd3802e5fac03afab742b0f3cca41bcd4723bee911d23be29cffd5b965f1"));
+        this.registerCrop(new TechCropDefinition("onion", "onion_bulbs", "onion", Material.POTATOES, 2, 1,
+                "6ce036e327cb9d4d8fef36897a89624b5d9b18f705384ce0d7ed1e1fc7f56"));
+        this.registerCrop(new TechCropDefinition("void_bloom", "void_bloom_seeds", "void_bloom", Material.BEETROOTS, 2, 1,
+                "4e35aade81292e6ff4cd33dc0ea6a1326d04597c0e529def4182b1d1548cfe1"));
+        this.registerCrop(new TechCropDefinition("frostbloom", "frostbloom_seeds", "frostbloom", Material.WHEAT, 2, 1,
+                "f88cd6dd50359c7d5898c7c7e3e260bfcd3dcb1493a89b9e88e9cbecbfe45949"));
+        this.registerCrop(new TechCropDefinition("echo_spore", "echo_spore_seeds", "echo_spore", Material.BEETROOTS, 2, 1,
+                "7840b87d52271d2a755dedc82877e0ed3df67dcc42ea479ec146176b02779a5"));
+        this.registerCrop(new TechCropDefinition("emberroot", "emberroot_seeds", "emberroot", Material.CARROTS, 2, 1,
+                "e8deee5866ab199eda1bdd7707bdb9edd693444f1e3bd336bd2c767151cf2"));
+        this.registerCrop(new TechCropDefinition("ion_fern", "ion_fern_seeds", "ion_fern", Material.POTATOES, 2, 1,
+                "16149196f3a8d6d6f24e51b27e4cb71c6bab663449daffb7aa211bbe577242"));
     }
 
     private void registerCrop(final TechCropDefinition definition) {
@@ -109,9 +134,31 @@ public final class TechCropService {
         return this.getDefinition(block) != null;
     }
 
+    /**
+     * 如果方塊是成熟作物上方的頭顱，回傳下方的基礎作物方塊；否則 null。
+     */
+    public Block resolveHeadToCropBase(final Block block) {
+        if (block == null || block.getType() != Material.PLAYER_HEAD) {
+            return null;
+        }
+        final Block below = block.getRelative(BlockFace.DOWN);
+        if (this.getDefinition(below) != null) {
+            return below;
+        }
+        return null;
+    }
+
     public boolean isMature(final Block block) {
         final TechCropDefinition definition = this.getDefinition(block);
-        if (definition == null || block.getType() != definition.plantMaterial()) {
+        if (definition == null) {
+            return false;
+        }
+        // 成熟標誌：上方 Y+1 有 PLAYER_HEAD
+        final Block above = block.getRelative(BlockFace.UP);
+        if (above.getType() == Material.PLAYER_HEAD) {
+            return true;
+        }
+        if (block.getType() != definition.plantMaterial()) {
             return false;
         }
         if (!(block.getBlockData() instanceof Ageable ageable)) {
@@ -134,9 +181,17 @@ public final class TechCropService {
             outputs.add(this.buildStack(definition.seedItemId(), 1));
         }
         outputs.removeIf(stack -> stack == null || stack.getType() == Material.AIR);
-        if (replant && mature && block.getBlockData() instanceof Ageable ageable) {
-            ageable.setAge(0);
-            block.setBlockData(ageable, false);
+        // 移除上方頭顱
+        final Block above = block.getRelative(BlockFace.UP);
+        if (above.getType() == Material.PLAYER_HEAD) {
+            above.setType(Material.AIR, false);
+        }
+        if (replant && mature) {
+            block.setType(definition.plantMaterial(), false);
+            if (block.getBlockData() instanceof Ageable ageable) {
+                ageable.setAge(0);
+                block.setBlockData(ageable, false);
+            }
         } else {
             block.setType(Material.AIR, false);
             this.plantedCrops.remove(LocationKey.from(block.getLocation()));
@@ -146,15 +201,82 @@ public final class TechCropService {
 
     public boolean grow(final Block block, final int stages) {
         final TechCropDefinition definition = this.getDefinition(block);
-        if (definition == null || block.getType() != definition.plantMaterial()) {
+        if (definition == null) {
+            return false;
+        }
+        // 已成熟（底部為 FERN + 上方有 head）
+        if (block.getType() == Material.FERN && block.getRelative(BlockFace.UP).getType() == Material.PLAYER_HEAD) {
+            return false;
+        }
+        if (block.getType() != definition.plantMaterial()) {
             return false;
         }
         if (!(block.getBlockData() instanceof Ageable ageable) || ageable.getAge() >= ageable.getMaximumAge()) {
             return false;
         }
-        ageable.setAge(Math.min(ageable.getMaximumAge(), ageable.getAge() + Math.max(1, stages)));
+        final int newAge = Math.min(ageable.getMaximumAge(), ageable.getAge() + Math.max(1, stages));
+        ageable.setAge(newAge);
         block.setBlockData(ageable, true);
+        if (newAge >= ageable.getMaximumAge()) {
+            this.convertToMatureHead(block);
+        }
         return true;
+    }
+
+    public void convertToMatureHead(final Block block) {
+        final TechCropDefinition definition = this.getDefinition(block);
+        if (definition == null || definition.matureTexture() == null || definition.matureTexture().isBlank()) {
+            return;
+        }
+        final Block above = block.getRelative(BlockFace.UP);
+        if (above.getType() == Material.PLAYER_HEAD) {
+            return;
+        }
+        if (!above.isEmpty()) {
+            return;
+        }
+        // 底部設為蕨類植物外觀
+        block.setType(Material.FERN, false);
+        // 上方放置 head
+        above.setType(Material.PLAYER_HEAD, false);
+
+        // Folia/Luminol: block entity 在 setType 同 tick 可能尚未建立，延後 1 tick
+        final Location loc = above.getLocation();
+        final String cropId = definition.id();
+        final String hash = definition.matureTexture().trim();
+        this.plugin.getSafeScheduler().runRegionDelayed(loc, task -> {
+            final Block target = loc.getBlock();
+            if (target.getType() != Material.PLAYER_HEAD) {
+                return;
+            }
+            if (!(target.getState() instanceof Skull skull)) {
+                this.plugin.getLogger().warning("[CropDebug] 延遲後 getState 仍非 Skull: " + target.getType());
+                return;
+            }
+            try {
+                final String json = "{\"textures\":{\"SKIN\":{\"url\":\"http://textures.minecraft.net/texture/" + hash + "\"}}}";
+                final String base64 = Base64.getEncoder().encodeToString(json.getBytes(StandardCharsets.UTF_8));
+                final var profile = Bukkit.getServer().createProfile(UUID.randomUUID());
+                profile.setProperty(new ProfileProperty("textures", base64));
+                this.plugin.getLogger().info("[CropDebug] crop=" + cropId
+                        + " hash=" + hash.substring(0, Math.min(16, hash.length())) + "..."
+                        + " base64len=" + base64.length()
+                        + " profileClass=" + profile.getClass().getName()
+                        + " properties=" + profile.getProperties());
+                skull.setPlayerProfile(profile);
+                skull.setRotation(RANDOM_FACES[ThreadLocalRandom.current().nextInt(RANDOM_FACES.length)]);
+                final boolean updated = skull.update(true, false);
+                this.plugin.getLogger().info("[CropDebug] update=" + updated
+                        + " loc=" + loc.getWorld().getName() + " " + loc.getBlockX() + "," + loc.getBlockY() + "," + loc.getBlockZ());
+            } catch (final Exception e) {
+                this.plugin.getLogger().warning("無法套用作物頭顱材質：" + cropId + " / " + e.getMessage());
+                e.printStackTrace();
+            }
+        }, 1L);
+
+        block.getWorld().spawnParticle(Particle.HAPPY_VILLAGER,
+                above.getLocation().add(0.5, 0.6, 0.5), 12, 0.25, 0.2, 0.25, 0.02);
+        block.getWorld().playSound(above.getLocation(), Sound.BLOCK_SWEET_BERRY_BUSH_PICK_BERRIES, 0.5f, 1.4f);
     }
 
     public void saveAll() {
@@ -214,6 +336,10 @@ public final class TechCropService {
         }
         if (block.getType() == Material.AIR) {
             this.plantedCrops.remove(LocationKey.from(block.getLocation()));
+            return null;
+        }
+        // 允許 plantMaterial（生長中）和 FERN（成熟底部外觀）
+        if (block.getType() != definition.plantMaterial() && block.getType() != Material.FERN) {
             return null;
         }
         return definition;

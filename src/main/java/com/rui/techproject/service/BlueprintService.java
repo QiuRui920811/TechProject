@@ -403,8 +403,8 @@ public final class BlueprintService {
         for (int i = 0; i < recipe.inputIds().size(); i++) {
             if (i > 0) sb.append(" + ");
             final int amount = recipe.inputAmount(i);
-            if (amount > 1) sb.append(amount).append("× ");
             sb.append(this.itemFactory.displayNameForId(recipe.inputIds().get(i)));
+            if (amount > 1) sb.append("×").append(amount);
         }
         return sb.toString();
     }

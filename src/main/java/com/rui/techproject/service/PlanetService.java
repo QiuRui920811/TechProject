@@ -5,6 +5,7 @@ import com.rui.techproject.model.PlacedMachine;
 import com.rui.techproject.util.ItemFactoryUtil;
 import com.rui.techproject.util.LocationKey;
 import com.rui.techproject.util.SafeScheduler;
+import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -135,6 +136,7 @@ public final class PlanetService {
     private final Set<java.util.UUID> travelingPlayers = ConcurrentHashMap.newKeySet();
     private final Map<java.util.UUID, TravelVessel> travelVessels = new ConcurrentHashMap<>();
     private final Map<java.util.UUID, TravelPlayerState> travelPlayerStates = new ConcurrentHashMap<>();
+    private final Map<java.util.UUID, java.util.function.Consumer<Player>> customTravelCallbacks = new ConcurrentHashMap<>();
     private final Map<java.util.UUID, LocationKey> openPlanetaryGateMenus = new ConcurrentHashMap<>();
     private final Map<java.util.UUID, Map<LocationKey, Long>> personalHarvestCooldowns = new ConcurrentHashMap<>();
     private final Map<LocationKey, Long> machineHarvestCooldowns = new ConcurrentHashMap<>();
@@ -176,6 +178,7 @@ public final class PlanetService {
         long waveStartTick;
         boolean completed;
         boolean failed;
+        BossBar bossBar;
 
         RuinChallenge(final java.util.UUID playerId, final PlanetDefinition definition, final Location coreLocation) {
             this.playerId = playerId;
@@ -354,6 +357,7 @@ public final class PlanetService {
         this.cuisineWardExpiries.remove(playerId);
         this.travelingPlayers.remove(playerId);
         this.openPlanetaryGateMenus.remove(playerId);
+        this.customTravelCallbacks.remove(playerId);
         if (this.travelVessels.containsKey(playerId)) {
             this.cleanupTravelVessel(playerId);
         }
@@ -371,6 +375,7 @@ public final class PlanetService {
         }
         this.travelingPlayers.clear();
         this.travelPlayerStates.clear();
+        this.customTravelCallbacks.clear();
         this.boundaryWarningCooldowns.clear();
         this.cuisineWardExpiries.clear();
         for (final Map.Entry<LocationKey, java.util.UUID> entry : new ArrayList<>(this.harvestNodeDisplays.entrySet())) {
@@ -524,6 +529,27 @@ public final class PlanetService {
             player.clearTitle();
             player.sendMessage(this.itemFactory.warning("已恢復移動速度；若剛剛卡在觀察者模式，請手動切回生存或創造。"));
         }
+    }
+
+    /**
+     * 外部系統（區域系統等）呼叫：啟動完整火箭動畫，動畫結束後執行 onComplete 回調。
+     * 播放期間玩家被鎖定在觀察者模式 + 飛船鏡頭，動畫結束後狀態會自動恢復；
+     * 但 walkSpeed / flySpeed 仍為 0，呼叫端應自行在 onComplete 中恢復速度。
+     */
+    public void startCustomTravel(final Player player,
+                                  final Location origin,
+                                  final java.util.function.Consumer<Player> onComplete) {
+        final java.util.UUID uuid = player.getUniqueId();
+        if (this.travelingPlayers.contains(uuid)) {
+            return;
+        }
+        this.customTravelCallbacks.put(uuid, onComplete);
+        final TravelDestination dummy = new TravelDestination("custom_rtp", "未知區域", origin.getWorld(), null);
+        this.startTravelAnimation(player, origin, dummy);
+    }
+
+    public boolean isCustomTraveling(final java.util.UUID playerId) {
+        return this.customTravelCallbacks.containsKey(playerId);
     }
 
     public void handleChunkLoad(final Chunk chunk) {
@@ -1701,6 +1727,7 @@ public final class PlanetService {
             world.setSpawnFlags(true, true);
             world.setGameRule(GameRules.ADVANCE_TIME, false);
             world.setGameRule(GameRules.ADVANCE_WEATHER, false);
+            world.setGameRule(GameRules.MOB_GRIEFING, false);
             switch (definition.id()) {
                 case "aurelia" -> {
                     world.setTime(2500L);
@@ -2537,7 +2564,7 @@ public final class PlanetService {
         final String trimmed = texture == null ? "" : texture.trim();
         final String normalized = trimmed.startsWith("http://") || trimmed.startsWith("https://")
                 ? trimmed
-                : "https://textures.minecraft.net/texture/" + trimmed;
+                : "http://textures.minecraft.net/texture/" + trimmed;
         try {
             return URI.create(normalized).toURL();
         } catch (final IllegalArgumentException | MalformedURLException exception) {
@@ -3223,6 +3250,18 @@ public final class PlanetService {
     }
 
     private void highlightRuinCore(final World world, final int x, final int y, final int z) {
+        // 清除遺跡核心周圍的方塊，確保玩家可以到達並互動
+        for (int dx = -1; dx <= 1; dx++) {
+            for (int dz = -1; dz <= 1; dz++) {
+                for (int dy = 0; dy <= 3; dy++) {
+                    final Block b = world.getBlockAt(x + dx, y + dy, z + dz);
+                    if (dx == 0 && dz == 0 && dy == 0) {
+                        continue; // 保留核心方塊本身
+                    }
+                    b.setType(Material.AIR, false);
+                }
+            }
+        }
         final Location loc = new Location(world, x, y, z);
         // 清除舊的發光標記
         for (final Entity nearby : world.getNearbyEntities(loc.clone().add(0.5, 0.5, 0.5), 1.0, 1.0, 1.0)) {
@@ -4562,6 +4601,10 @@ public final class PlanetService {
         player.sendMessage(this.itemFactory.secondary("▸ 第 " + waveNum + "/" + RUIN_WAVE_COUNTS.length + " 波 — " + mobCount + " 隻敵人逼近！"));
         world.playSound(challenge.coreLocation, Sound.BLOCK_TRIAL_SPAWNER_SPAWN_MOB, 1.0f, 0.8f + waveIndex * 0.15f);
 
+        // BossBar 倒數
+        this.showRuinBossBar(challenge, player, waveNum, mobCount);
+        this.tickRuinBossBar(challenge);
+
         final Particle.DustOptions dust = this.planetSpawnDust(challenge.definition.id());
         world.spawnParticle(Particle.DUST, challenge.coreLocation.clone().add(0.5, 2.0, 0.5), 40, 1.5, 1.0, 1.5, 0.02, dust);
 
@@ -4617,12 +4660,60 @@ public final class PlanetService {
         this.scheduler.runGlobalDelayed(task -> this.checkRuinWaveTimeout(challenge), RUIN_WAVE_TIMEOUT_TICKS);
     }
 
+    private void showRuinBossBar(final RuinChallenge challenge, final Player player, final int waveNum, final int mobCount) {
+        this.hideRuinBossBar(challenge);
+        final Component title = Component.text("⚔ 第 " + waveNum + "/" + RUIN_WAVE_COUNTS.length + " 波 — 剩餘 " + mobCount + " 隻 — 90 秒", NamedTextColor.GOLD);
+        challenge.bossBar = BossBar.bossBar(title, 1.0f, BossBar.Color.RED, BossBar.Overlay.PROGRESS);
+        player.showBossBar(challenge.bossBar);
+    }
+
+    private void tickRuinBossBar(final RuinChallenge challenge) {
+        this.scheduler.runGlobalDelayed(task -> {
+            if (challenge.failed || challenge.completed || challenge.bossBar == null) {
+                return;
+            }
+            final World world = challenge.coreLocation.getWorld();
+            if (world == null) {
+                return;
+            }
+            final long elapsed = world.getFullTime() - challenge.waveStartTick;
+            final float progress = Math.max(0.0f, Math.min(1.0f, 1.0f - (float) elapsed / RUIN_WAVE_TIMEOUT_TICKS));
+            final int remaining = Math.max(0, (int) ((RUIN_WAVE_TIMEOUT_TICKS - elapsed) / 20L));
+            final int alive = challenge.aliveMobs.size();
+            final int waveNum = challenge.currentWave + 1;
+            challenge.bossBar.progress(progress);
+            challenge.bossBar.name(Component.text("⚔ 第 " + waveNum + "/" + RUIN_WAVE_COUNTS.length + " 波 — 剩餘 " + alive + " 隻 — " + remaining + " 秒", progress > 0.3f ? NamedTextColor.GOLD : NamedTextColor.RED));
+            if (progress > 0.5f) {
+                challenge.bossBar.color(BossBar.Color.YELLOW);
+            } else if (progress > 0.2f) {
+                challenge.bossBar.color(BossBar.Color.RED);
+            } else {
+                challenge.bossBar.color(BossBar.Color.RED);
+            }
+            if (progress > 0.0f && alive > 0) {
+                this.tickRuinBossBar(challenge);
+            }
+        }, 20L);
+    }
+
+    private void hideRuinBossBar(final RuinChallenge challenge) {
+        if (challenge.bossBar == null) {
+            return;
+        }
+        final Player player = Bukkit.getPlayer(challenge.playerId);
+        if (player != null) {
+            player.hideBossBar(challenge.bossBar);
+        }
+        challenge.bossBar = null;
+    }
+
     private void checkRuinWaveTimeout(final RuinChallenge challenge) {
         if (challenge.failed || challenge.completed) {
             return;
         }
         if (!challenge.aliveMobs.isEmpty()) {
             final Player player = Bukkit.getPlayer(challenge.playerId);
+            this.hideRuinBossBar(challenge);
             if (player != null) {
                 player.sendMessage(this.itemFactory.warning("✘ 遺跡挑戰超時，核心陷入休眠…"));
             }
@@ -4671,6 +4762,7 @@ public final class PlanetService {
 
     private void completeRuinChallenge(final RuinChallenge challenge, final Player player) {
         challenge.completed = true;
+        this.hideRuinBossBar(challenge);
         this.activeRuinChallenges.remove(challenge.playerId);
 
         final PlanetDefinition definition = challenge.definition;
@@ -4721,7 +4813,14 @@ public final class PlanetService {
     private void cleanupRuinChallenge(final RuinChallenge challenge, final boolean markFailed) {
         if (markFailed) {
             challenge.failed = true;
+            // 失敗時移除玩家啟動標記，允許消耗新物品重新挑戰
+            final LocationKey ruinKey = LocationKey.from(challenge.coreLocation);
+            final Set<LocationKey> playerRuins = this.playerActivatedRuins.get(challenge.playerId);
+            if (playerRuins != null) {
+                playerRuins.remove(ruinKey);
+            }
         }
+        this.hideRuinBossBar(challenge);
         this.activeRuinChallenges.remove(challenge.playerId);
         // 移除殘存怪物
         for (final java.util.UUID mobId : challenge.aliveMobs) {
@@ -5307,6 +5406,26 @@ public final class PlanetService {
             }
             if (player.getGameMode() == GameMode.SPECTATOR) {
                 player.setSpectatorTarget(null);
+            }
+            // ── 自訂傳送回調（區域系統等）──
+            final java.util.function.Consumer<Player> customCallback = this.customTravelCallbacks.remove(uuid);
+            if (customCallback != null) {
+                final TravelPlayerState cState = this.travelPlayerStates.remove(uuid);
+                // 恢復遊戲模式與飛行權限，但不恢復移動速度（由呼叫端在傳送到位後自行恢復）
+                if (cState != null) {
+                    player.setGameMode(cState.gameMode());
+                    player.setAllowFlight(cState.allowFlight());
+                } else {
+                    player.setGameMode(GameMode.SURVIVAL);
+                }
+                player.removePotionEffect(PotionEffectType.BLINDNESS);
+                player.removePotionEffect(PotionEffectType.DARKNESS);
+                player.removePotionEffect(PotionEffectType.NAUSEA);
+                player.clearTitle();
+                player.setFallDistance(0.0f);
+                this.travelingPlayers.remove(uuid);
+                customCallback.accept(player);
+                return;
             }
             final World targetWorld = destination.world();
             if (targetWorld == null) {

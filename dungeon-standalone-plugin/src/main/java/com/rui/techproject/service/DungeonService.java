@@ -1647,6 +1647,14 @@ public final class DungeonService {
         if (!instance.isCleared()) {
             instance.setCleared(true);
             this.distributeRewards(instance);
+            // 獎勵發放後才設定進入冷卻（on-finish 模式）
+            final DungeonConfig cfg = instance.definition().config();
+            if (cfg.accessCooldownEnabled() && cfg.accessCooldownOnFinish()) {
+                for (final UUID uuid : instance.members()) {
+                    this.getOrCreatePlayerData(uuid).setAccessCooldown(
+                            instance.definition().id(), System.currentTimeMillis());
+                }
+            }
         }
         if (this.hasPendingRewardClaims(instance)) {
             return;
@@ -2083,14 +2091,9 @@ public final class DungeonService {
         this.functionEngine.onDungeonComplete(instance);
         this.killInstanceEntities(instance);
 
-        // 設定進入冷卻（on-finish 模式）
-        final DungeonConfig cfg = instance.definition().config();
-        if (cfg.accessCooldownEnabled() && cfg.accessCooldownOnFinish()) {
-            for (final UUID uuid : instance.members()) {
-                this.getOrCreatePlayerData(uuid).setAccessCooldown(
-                        instance.definition().id(), System.currentTimeMillis());
-            }
-        }
+        // 進入冷卻移至 tickCompleted → distributeRewards 之後設定，
+        // 避免獎勵還沒發就先上冷卻導致玩家拿不到東西又不能重打。
+
         // 恢復觀戰者為生存模式
         for (final UUID uuid : instance.spectators()) {
             final Player p = Bukkit.getPlayer(uuid);

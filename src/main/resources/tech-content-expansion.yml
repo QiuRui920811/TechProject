@@ -95,6 +95,7 @@ items:
     display-name: 基因樣板
     category: ADVANCED
     icon: MAP
+    item-model: "nexo:gene_template"
     description: 已編碼的基因樣板，可導向更高階生物工藝。
     unlock: gene_splicer
     use-cases:
@@ -141,6 +142,7 @@ items:
     display-name: 大豆莢
     category: INTERMEDIATE
     icon: COCOA_BEANS
+    head-texture: bb9ec78d598e1360801635bd0ce75aa9e01c4d1d490c9db9def441ff35ef7322
     description: 高蛋白作物，可供口糧、生質與合成肉工業使用。
     unlock: soybean_seeds
     use-cases:
@@ -159,6 +161,7 @@ items:
     display-name: 香辛莓
     category: INTERMEDIATE
     icon: SWEET_BERRIES
+    head-texture: d5fe6c718fba719ff622237ed9ea6827d093effab814be2192e9643e3e3d7
     description: 帶有微量刺激性的莓果，可加工成高機動性補給。
     unlock: spiceberry_seeds
     use-cases:
@@ -177,6 +180,7 @@ items:
     display-name: 科技茶葉
     category: INTERMEDIATE
     icon: DRIED_KELP
+    head-texture: 1514c8b461247ab17fe3606e6e2f4d363dccae9ed5bedd012b498d7ae8eb3
     description: 可做成提神茶飲，也能加入冷卻與戶外補給鏈。
     unlock: tea_leaf_seeds
     use-cases:
@@ -958,6 +962,7 @@ items:
     display-name: 熱帶水果賓治
     category: ADVANCED
     icon: PAPER
+    item-model: "nexo:tropical_punch"
     description: 鳳梨、芒果與香橙混合的大杯水果飲，適合工地慶功用。
     unlock: initial
     use-cases:
@@ -1422,6 +1427,7 @@ items:
     category: ADVANCED
     tier: TIER4
     icon: CHORUS_FLOWER
+    head-texture: 4e35aade81292e6ff4cd33dc0ea6a1326d04597c0e529def4182b1d1548cfe1
     description: 生長在虛域污染區的異常花簇，能作為外星生質素材。
     unlock: anti_radiation_chestplate
     use-cases:
@@ -1462,6 +1468,7 @@ items:
     category: ADVANCED
     tier: TIER4
     icon: SPORE_BLOSSOM
+    head-texture: f88cd6dd50359c7d5898c7c7e3e260bfcd3dcb1493a89b9e88e9cbecbfe45949
     description: 能在極寒環境中保有活性的異星植株樣本。
     unlock: anti_radiation_chestplate
     use-cases:
@@ -1502,6 +1509,7 @@ items:
     category: ADVANCED
     tier: TIER4
     icon: CHORUS_FLOWER
+    head-texture: 7840b87d52271d2a755dedc82877e0ed3df67dcc42ea479ec146176b02779a5
     description: 漂浮在 Nyx 虛空中的異常孢子樣本。
     unlock: cryon_relic
     use-cases:
@@ -1752,6 +1760,7 @@ items:
     category: ADVANCED
     tier: TIER4
     icon: CRIMSON_ROOTS
+    head-texture: e8deee5866ab199eda1bdd7707bdb9edd693444f1e3bd336bd2c767151cf2
     description: 能承受 Helion 高熱地表的根系材料，可製作前線裝備補強層。
     unlock: emberbloom
     use-cases:
@@ -1802,6 +1811,7 @@ items:
     category: ADVANCED
     tier: TIER4
     icon: FERN
+    head-texture: 16149196f3a8d6d6f24e51b27e4cb71c6bab663449daffb7aa211bbe577242
     description: 在 Tempest 高壓氣旋中存活的導電植株樣本。
     unlock: helion_relic
     use-cases:
@@ -1960,6 +1970,7 @@ items:
     display-name: 光子板
     category: ADVANCED
     icon: LIGHT_WEIGHTED_PRESSURE_PLATE
+    item-model: "nexo:photon_plate"
     description: 將光子束固定為結構板後得到的材料。
     unlock: photon_weaver
     use-cases:
@@ -1969,6 +1980,7 @@ items:
     display-name: 觀測透鏡
     category: ADVANCED
     icon: SPYGLASS
+    item-model: "nexo:observatory_lens"
     description: 天文觀測級透鏡，可用於高階資料擷取。
     unlock: photon_weaver
     use-cases:
@@ -1978,6 +1990,7 @@ items:
     display-name: 星圖
     category: ADVANCED
     icon: PAPER
+    item-model: "nexo:star_chart"
     description: 記錄軌道與星流資料的高精度星圖。
     unlock: observatory
     use-cases:
@@ -1987,6 +2000,7 @@ items:
     display-name: 重力軸承
     category: ADVANCED
     icon: LODESTONE
+    item-model: "nexo:gravitic_bearing"
     description: 穩定重力軸承，適用於重力與軌道機械。
     unlock: observatory
     use-cases:
@@ -2014,6 +2028,7 @@ items:
     display-name: 封存板
     category: ADVANCED
     icon: BOOKSHELF
+    item-model: "nexo:archive_plate"
     description: 用於封存高價值科技資料的強化板件。
     unlock: data_archive
     use-cases:
@@ -2023,7 +2038,7 @@ items:
     display-name: 脈衝法杖
     category: ADVANCED
     tier: TIER3
-    icon: STICK
+    icon: BREEZE_ROD
     description: 右鍵釋放脈衝波，擊退 8 格內所有生物。消耗 5 EU。
     unlock: field_forge
     use-cases:
@@ -2388,6 +2403,7 @@ items:
     category: ADVANCED
     tier: TIER3
     icon: RAW_GOLD
+    item-model: "nexo:magic_lump_3"
     description: 最高級的魔法結晶，蘊含強大的魔力。
     unlock: laser_engraver
     use-cases:
@@ -2420,6 +2436,7 @@ items:
     category: ADVANCED
     tier: TIER3
     icon: END_CRYSTAL
+    item-model: "nexo:ender_lump_3"
     description: 最高級的末影結晶，散發維度裂隙的能量。
     unlock: laser_engraver
     use-cases:
@@ -2472,6 +2489,7 @@ items:
     category: ADVANCED
     tier: TIER3
     icon: WITHER_SKELETON_SKULL
+    item-model: "nexo:necrotic_skull"
     description: 以高級魔法結晶浸潤的凋零骷髏頭顱，散發不祥氣息。
     unlock: laser_engraver
     use-cases:
@@ -2482,6 +2500,7 @@ items:
     category: ADVANCED
     tier: TIER3
     icon: NETHER_STAR
+    item-model: "nexo:essence_of_afterlife"
     description: 凝結生死之間能量的稀有精華，是高階魔法道具的核心材料。
     unlock: quantum_processor
     use-cases:
@@ -2502,6 +2521,7 @@ items:
     category: ADVANCED
     tier: TIER3
     icon: BLAZE_POWDER
+    item-model: "nexo:ancient_rune_fire"
     description: 刻有火焰印記的古老符文石，蘊含灼烈能量。
     unlock: laser_engraver
     use-cases:
@@ -2712,6 +2732,7 @@ items:
     display-name: 鈾粉
     category: INTERMEDIATE
     icon: LIME_DYE
+    item-model: "nexo:uranium_dust"
     description: 從礦石中粉碎取得的放射性粉末，是核燃料的起點。
     unlock: electric_crusher
     use-cases:
@@ -2739,7 +2760,8 @@ items:
   spent_fuel_rod:
     display-name: 乏燃料棒
     category: INTERMEDIATE
-    icon: STICK
+    icon: END_ROD
+    item-model: "nexo:spent_fuel_rod"
     description: 反應完畢的廢料棒，仍有微量放射性。可回收再處理。
     unlock: nuclear_reactor
     use-cases:
@@ -2774,6 +2796,83 @@ items:
     use-cases:
       - 快速清理背包
       - 垃圾處理
+  portable_charger:
+    display-name: 行動充電器
+    category: ADVANCED
+    tier: TIER3
+    icon: LIGHT_GRAY_DYE
+    description: 高容量攜帶式充電裝置，放在背包中會自動為所有電力工具補充電量。
+    unlock: item:advanced_circuit&item:energy_cell
+    use-cases:
+      - 自動為背包中所有電力工具充電
+      - 蹲下+右鍵對準儲能機器充電
+
+  # ═══════════════════════════════════════════
+  # GPS 衛星定位系統素材
+  # ═══════════════════════════════════════════
+  gps_circuit:
+    display-name: 定位電路
+    category: INTERMEDIATE
+    icon: COMPARATOR
+    description: 專為衛星座標運算設計的精密電路板。
+    unlock: item:circuit_board&item:logic_gate
+    use-cases:
+      - GPS 發射器
+      - 衛星模組
+  gps_antenna:
+    display-name: GPS 天線
+    category: INTERMEDIATE
+    icon: LIGHTNING_ROD
+    description: 接收與發射座標訊號的定向天線組件。
+    unlock: item:insulated_wire&item:signal_relay
+    use-cases:
+      - GPS 發射器
+      - 傳送節點
+  satellite_module:
+    display-name: 衛星模組
+    category: ADVANCED
+    icon: END_CRYSTAL
+    description: 可部署至軌道的微型衛星，提供座標解算能力。
+    unlock: gps_control_tower
+    use-cases:
+      - 軌道衛星部署
+      - 增強定位精度
+  gps_marker:
+    display-name: 定位標記
+    category: INTERMEDIATE
+    icon: ENDER_EYE
+    description: 一次性座標存儲元件，可記錄單一地點。
+    unlock: item:gps_circuit&item:ender_pearl
+    use-cases:
+      - 傳送面板標記
+      - 座標儲存
+  teleport_matrix:
+    display-name: 傳送矩陣
+    category: ADVANCED
+    icon: NETHER_STAR
+    description: 將座標訊號轉換為空間跳躍場的核心矩陣。
+    unlock: gps_network_node
+    use-cases:
+      - 傳送面板
+      - 空間穿梭
+  geo_scanner_probe:
+    display-name: 地質掃描探針
+    category: INTERMEDIATE
+    icon: SPYGLASS
+    description: 分析區塊地質組成的多頻探針。
+    unlock: item:sensor_array&item:gps_circuit
+    use-cases:
+      - 地質掃描器
+      - 資源偵測
+  orbital_relay_unit:
+    display-name: 軌道中繼單元
+    category: ADVANCED
+    icon: BEACON
+    description: 高頻率軌道信號中繼裝置，大幅擴大 GPS 覆蓋範圍。
+    unlock: item:satellite_module&item:signal_relay
+    use-cases:
+      - 軌道中繼站
+      - 遠程定位
 
 machines:
   kiln:
@@ -2862,7 +2961,7 @@ machines:
     display-name: 行星測繪信標
     category: ADVANCED
     tier: TIER4
-    block: BEACON
+    block: LODESTONE
     inputs: [survey_chip, star_chart, data_core]
     outputs: [survey_data]
     energy-per-tick: 24
@@ -2940,6 +3039,94 @@ machines:
     energy-per-tick: 16
     effect: 消耗冷卻混合液培養紫水晶碎片
     unlock: machine:crystal_growth_chamber
+
+  # ═══════════════════════════════════════════
+  # 萬用合成站
+  # ═══════════════════════════════════════════
+  auto_crafter:
+    display-name: 萬用合成站
+    category: INTERMEDIATE
+    tier: TIER2
+    block: SMITHING_TABLE
+    inputs: []
+    outputs: []
+    energy-per-tick: 20
+    max-energy: 8000
+    effect: 聚合所有加工配方，耗能加倍
+    unlock: machine:assembler
+
+  # ═══════════════════════════════════════════
+  # GPS 衛星定位系統機器
+  # ═══════════════════════════════════════════
+  gps_transmitter:
+    display-name: GPS 發射器
+    category: ADVANCED
+    tier: TIER2
+    block: DAYLIGHT_DETECTOR
+    head-texture: b0c9c1a022f40b73f14b4cba37c718c6a533f3a2864b6536d5f456934cc1f
+    inputs: [gps_circuit]
+    outputs: [gps_marker]
+    energy-per-tick: 8
+    effect: 消耗定位電路產生定位標記
+    unlock: item:gps_circuit&item:gps_antenna
+  gps_control_tower:
+    display-name: GPS 控制塔
+    category: ADVANCED
+    tier: TIER2
+    block: END_ROD
+    head-texture: ddcfba58faf1f64847884111822b64afa21d7fc62d4481f14f3f3bcb6330
+    inputs: [gps_marker, signal_relay]
+    outputs: [satellite_module]
+    energy-per-tick: 14
+    effect: 將定位標記與訊號中繼器整合為衛星模組
+    unlock: machine:gps_transmitter&item:signal_relay
+  gps_network_node:
+    display-name: GPS 網路節點
+    category: ADVANCED
+    tier: TIER3
+    block: SEA_LANTERN
+    head-texture: 1085e098756b995b00241644089c55a8f9acde35b9a37785d5e057a923613b
+    inputs: [satellite_module, data_core]
+    outputs: [teleport_matrix]
+    energy-per-tick: 20
+    effect: 利用衛星模組與資料核心合成傳送矩陣
+    unlock: machine:gps_control_tower&item:data_core
+  geo_scanner:
+    display-name: 地質掃描器
+    category: ADVANCED
+    tier: TIER2
+    block: OBSERVER
+    head-texture: 2ad8cfeb387a56e3e5bcf85345d6a417b242293887db3ce3ba91fa409b254b86
+    inputs: [geo_scanner_probe, gps_marker]
+    outputs: [data_matrix]
+    energy-per-tick: 12
+    effect: 利用探針與定位標記掃描區塊地質資料
+    unlock: item:geo_scanner_probe&item:gps_marker
+  teleport_pad:
+    display-name: 傳送面板
+    category: ADVANCED
+    tier: TIER3
+    block: CONDUIT
+    head-texture: d78f2b7e5e75639ea7fb796c35d364c4df28b4243e66b76277aadcd6261337
+    inputs: [teleport_matrix, ender_pearl]
+    outputs: []
+    energy-per-tick: 28
+    max-energy: 12000
+    effect: 消耗傳送矩陣與乏末影珍珠執行空間跳躍
+    unlock: machine:gps_network_node&item:teleport_matrix
+  orbital_relay_station:
+    display-name: 軌道中繼站
+    category: ADVANCED
+    tier: TIER4
+    block: BEACON
+    head-texture: c9c8881e42915a9d29bb61a16fb26d059913204d265df5b439b3d792acd56
+    inputs: [orbital_relay_unit, fusion_core]
+    outputs: [satellite_module]
+    energy-per-tick: 32
+    max-energy: 16000
+    effect: 利用聚變能量與軌道中繼單元批量生產衛星模組
+    unlock: machine:gps_network_node&item:fusion_core&item:orbital_relay_unit
+
 recipes:
   kiln_ceramic_plate:
     machine: kiln
@@ -3753,6 +3940,146 @@ recipes:
     output: time_dilator
     energy: 30
     guide: 量子晶片 + 控制單元 → 物質編譯器 → 時間膨脹器
+  craft_nuclear_reactor:
+    machine: matter_compiler
+    inputs: [reactor_lattice, reactor_coolant, fusion_core]
+    input-amounts: [2, 2, 1]
+    output: nuclear_reactor
+    energy: 38
+    guide: 反應爐格架 + 反應堆冷卻液 + 融合核心 → 物質編譯器 → 核反應堆
+
+  # ═══ GPS 衛星定位系統合成鏈 ═══════════════════════════
+  # -- 素材 --
+  assembler_gps_circuit:
+    machine: assembler
+    inputs: [circuit_board, logic_gate, insulated_wire]
+    input-amounts: [1, 1, 2]
+    output: gps_circuit
+    energy: 14
+    guide: 電路板 + 邏輯閘 + 絕緣導線×2 → 製造機 → 定位電路
+  assembler_gps_antenna:
+    machine: assembler
+    inputs: [insulated_wire, signal_relay, steel_plate]
+    input-amounts: [2, 1, 1]
+    output: gps_antenna
+    energy: 16
+    guide: 絕緣導線×2 + 訊號中繼器 + 鋼板 → 製造機 → GPS 天線
+  assembler_geo_scanner_probe:
+    machine: advanced_assembler
+    inputs: [sensor_array, gps_circuit, precision_frame]
+    input-amounts: [1, 1, 1]
+    output: geo_scanner_probe
+    energy: 18
+    guide: 感測陣列 + 定位電路 + 精密框架 → 進階製造機 → 地質掃描探針
+  assembler_gps_marker:
+    machine: assembler
+    inputs: [gps_circuit, ender_pearl]
+    input-amounts: [1, 1]
+    output: gps_marker
+    energy: 12
+    guide: 定位電路 + 末影珍珠 → 製造機 → 定位標記
+  advanced_satellite_module:
+    machine: advanced_assembler
+    inputs: [gps_circuit, gps_antenna, signal_relay]
+    input-amounts: [2, 1, 1]
+    output: satellite_module
+    energy: 22
+    guide: 定位電路×2 + GPS天線 + 訊號中繼器 → 進階製造機 → 衛星模組
+  advanced_teleport_matrix:
+    machine: field_forge
+    inputs: [satellite_module, data_core, phase_plate]
+    input-amounts: [1, 1, 1]
+    output: teleport_matrix
+    energy: 28
+    guide: 衛星模組 + 資料核心 + 相位板 → 力場鍛造台 → 傳送矩陣
+  advanced_orbital_relay_unit:
+    machine: matter_compiler
+    inputs: [satellite_module, signal_relay, fusion_core]
+    input-amounts: [2, 1, 1]
+    output: orbital_relay_unit
+    energy: 34
+    guide: 衛星模組×2 + 訊號中繼器 + 融合核心 → 物質編譯器 → 軌道中繼單元
+  # -- GPS 機器合成 --
+  craft_gps_transmitter:
+    machine: assembler
+    inputs: [gps_circuit, gps_antenna, machine_component]
+    input-amounts: [2, 1, 1]
+    output: gps_transmitter
+    energy: 18
+    guide: 定位電路×2 + GPS天線 + 機械零件 → 製造機 → GPS 發射器
+  craft_gps_control_tower:
+    machine: advanced_assembler
+    inputs: [gps_antenna, satellite_module, advanced_circuit]
+    input-amounts: [2, 1, 1]
+    output: gps_control_tower
+    energy: 24
+    guide: GPS天線×2 + 衛星模組 + 高級電路 → 進階製造機 → GPS 控制塔
+  craft_gps_network_node:
+    machine: advanced_assembler
+    inputs: [satellite_module, data_core, advanced_circuit]
+    input-amounts: [2, 1, 2]
+    output: gps_network_node
+    energy: 30
+    guide: 衛星模組×2 + 資料核心 + 高級電路×2 → 進階製造機 → GPS 網路節點
+  craft_geo_scanner:
+    machine: assembler
+    inputs: [geo_scanner_probe, gps_circuit, sensor_array]
+    input-amounts: [1, 1, 1]
+    output: geo_scanner
+    energy: 16
+    guide: 地質掃描探針 + 定位電路 + 感測陣列 → 製造機 → 地質掃描器
+  craft_teleport_pad:
+    machine: matter_compiler
+    inputs: [teleport_matrix, quantum_frame, field_plate]
+    input-amounts: [2, 1, 1]
+    output: teleport_pad
+    energy: 36
+    guide: 傳送矩陣×2 + 量子框架 + 力場板 → 物質編譯器 → 傳送面板
+  craft_orbital_relay_station:
+    machine: matter_compiler
+    inputs: [orbital_relay_unit, fusion_core, quantum_chip]
+    input-amounts: [2, 1, 1]
+    output: orbital_relay_station
+    energy: 40
+    guide: 軌道中繼單元×2 + 融合核心 + 量子晶片 → 物質編譯器 → 軌道中繼站
+  # -- GPS 機器內部配方 --
+  gps_transmitter_marker:
+    machine: gps_transmitter
+    inputs: [gps_circuit]
+    input-amounts: [1]
+    output: gps_marker
+    energy: 8
+    guide: 定位電路 → GPS 發射器 → 定位標記
+  gps_control_tower_satellite:
+    machine: gps_control_tower
+    inputs: [gps_marker, signal_relay]
+    input-amounts: [2, 1]
+    output: satellite_module
+    energy: 14
+    guide: 定位標記×2 + 訊號中繼器 → GPS 控制塔 → 衛星模組
+  gps_network_node_matrix:
+    machine: gps_network_node
+    inputs: [satellite_module, data_core]
+    input-amounts: [1, 1]
+    output: teleport_matrix
+    energy: 20
+    guide: 衛星模組 + 資料核心 → GPS 網路節點 → 傳送矩陣
+  geo_scanner_data:
+    machine: geo_scanner
+    inputs: [geo_scanner_probe, gps_marker]
+    input-amounts: [1, 1]
+    output: data_matrix
+    energy: 12
+    guide: 地質掃描探針 + 定位標記 → 地質掃描器 → 資料矩陣
+  orbital_relay_station_satellite:
+    machine: orbital_relay_station
+    inputs: [orbital_relay_unit, fusion_core]
+    input-amounts: [1, 1]
+    output: satellite_module
+    output-count: 3
+    energy: 32
+    guide: 軌道中繼單元 + 融合核心 → 軌道中繼站 → 衛星模組×3
+
   craft_heal_beacon:
     machine: matter_compiler
     inputs: [data_core, fusion_core]
@@ -3950,14 +4277,14 @@ recipes:
     input-amounts: [1, 1, 1, 1]
     output: magic_lump_2
     energy: 12
-    guide: 4× 魔法結晶 I → 力場鍛造台 → 魔法結晶 II
+    guide: 魔法結晶 I×4 → 力場鍛造台 → 魔法結晶 II
   craft_magic_lump_3:
     machine: laser_engraver
     inputs: [magic_lump_2, magic_lump_2, magic_lump_2, magic_lump_2]
     input-amounts: [1, 1, 1, 1]
     output: magic_lump_3
     energy: 20
-    guide: 4× 魔法結晶 II → 雷射雕刻機 → 魔法結晶 III
+    guide: 魔法結晶 II×4 → 雷射雕刻機 → 魔法結晶 III
   craft_ender_lump_1:
     machine: assembler
     inputs: [iron_dust, ender_pearl]
@@ -3971,14 +4298,14 @@ recipes:
     input-amounts: [1, 1, 1, 1]
     output: ender_lump_2
     energy: 14
-    guide: 4× 末影結晶 I → 力場鍛造台 → 末影結晶 II
+    guide: 末影結晶 I×4 → 力場鍛造台 → 末影結晶 II
   craft_ender_lump_3:
     machine: laser_engraver
     inputs: [ender_lump_2, ender_lump_2, ender_lump_2, ender_lump_2]
     input-amounts: [1, 1, 1, 1]
     output: ender_lump_3
     energy: 22
-    guide: 4× 末影結晶 II → 雷射雕刻機 → 末影結晶 III
+    guide: 末影結晶 II×4 → 雷射雕刻機 → 末影結晶 III
   craft_magic_book_cover:
     machine: field_forge
     inputs: [magic_lump_2, magic_lump_2, book, magic_lump_2]
@@ -4239,43 +4566,6 @@ recipes:
     output: strawberry_milkshake
     energy: 14
     guide: 草莓 + 椰子 → 冷卻混合器 → 草莓奶昔
-achievements:
-  network_architect:
-    display-name: 物流架構師
-    description: 累計完成 2000 次物流搬運。
-    reward-xp: 320
-    reward-tokens: 18
-    hint: 打造大型物流骨幹
-  upgrade_engineer:
-    display-name: 升級工程師
-    description: 首次取得距離升級模組。
-    reward-xp: 220
-    reward-tokens: 12
-    hint: 善用升級模組強化骨幹
-  fusion_overlord:
-    display-name: 聚變霸主
-    description: 製作出聚變核心。
-    reward-xp: 360
-    reward-tokens: 24
-    hint: 完成聚變工業基礎
-  void_pioneer:
-    display-name: 虛空先鋒
-    description: 首次抽出虛空碎片。
-    reward-xp: 420
-    reward-tokens: 28
-    hint: 開始踏入虛空科技線
-  cryo_specialist:
-    display-name: 低溫專家
-    description: 首次使用低溫蒸餾器。
-    reward-xp: 180
-    reward-tokens: 12
-    hint: 建造低溫蒸餾器
-  refinery_master:
-    display-name: 精煉大師
-    description: 使用精煉系機器共加工 500 個物品。
-    reward-xp: 240
-    reward-tokens: 16
-    hint: 精煉系持續量產
 
   # ── 特殊工具合成 ──────────────────────────────────
   craft_explosive_pickaxe:
@@ -4368,6 +4658,13 @@ achievements:
     output: portable_dustbin
     energy: 14
     guide: 鋼板×2 + 電路板 → 合成器 → 便攜垃圾桶
+  craft_portable_charger:
+    machine: planetary_forge
+    inputs: [advanced_circuit, energy_cell, tempest_capacitor, steel_plate]
+    input-amounts: [2, 4, 1, 4]
+    output: portable_charger
+    energy: 50
+    guide: 進階電路板×2 + 能量電池×4 + 風暴電容核 + 鋼板×4 → 星際鍛造台 → 行動充電器
 
   # ── 紫水晶培養機 ──────────────────────────────────
   grow_amethyst:
@@ -4385,6 +4682,51 @@ achievements:
     output: amethyst_grower
     energy: 18
     guide: 紫水晶塊×4 + 冷卻混合液×2 + 機殼 → 合成器 → 紫水晶培養機
+  craft_auto_crafter:
+    machine: assembler
+    inputs: [machine_casing, advanced_circuit, circuit_board, steel_plate]
+    input-amounts: [1, 2, 4, 4]
+    output: auto_crafter
+    energy: 24
+    guide: 機殼 + 高級電路×2 + 電路板×4 + 鋼板×4 → 合成器 → 萬用合成站
+
+achievements:
+  network_architect:
+    display-name: 物流架構師
+    description: 累計完成 2000 次物流搬運。
+    reward-xp: 320
+    reward-tokens: 18
+    hint: 打造大型物流骨幹
+  upgrade_engineer:
+    display-name: 升級工程師
+    description: 首次取得距離升級模組。
+    reward-xp: 220
+    reward-tokens: 12
+    hint: 善用升級模組強化骨幹
+  fusion_overlord:
+    display-name: 聚變霸主
+    description: 製作出聚變核心。
+    reward-xp: 360
+    reward-tokens: 24
+    hint: 完成聚變工業基礎
+  void_pioneer:
+    display-name: 虛空先鋒
+    description: 首次抽出虛空碎片。
+    reward-xp: 420
+    reward-tokens: 28
+    hint: 開始踏入虛空科技線
+  cryo_specialist:
+    display-name: 低溫專家
+    description: 首次使用低溫蒸餾器。
+    reward-xp: 180
+    reward-tokens: 12
+    hint: 建造低溫蒸餾器
+  refinery_master:
+    display-name: 精煉大師
+    description: 使用精煉系機器共加工 500 個物品。
+    reward-xp: 240
+    reward-tokens: 16
+    hint: 精煉系持續量產
 
 cooking-recipes:
   cooked_beef:

@@ -24,8 +24,8 @@ gui-buttons:
     lore:
       - "先看第一條生存科技流程"
   hub-guide-list:
-    icon: WRITABLE_BOOK
-    item-model: "nexo:book_image_71c8269ed2e50370"
+    icon: PAPER
+    item-model: "nexo:tp_icon_guide"
     display-name: "科技指南"
     lore:
       - "教學 / 配線 / 物流 / 升級"
@@ -36,11 +36,26 @@ gui-buttons:
     lore:
       - "遺失時點這裡補一本文字書"
   hub-refresh:
-    icon: BOOK
+    icon: PAPER
+    item-model: "nexo:tp_icon_refresh"
     display-name: "重新整理分類"
     lore:
       - "更新分類解鎖狀態"
       - "也能當成回首頁"
+  hub-search:
+    icon: PAPER
+    item-model: "nexo:tp_icon_search"
+    display-name: "搜尋物品"
+    lore:
+      - "點擊後在聊天輸入關鍵字"
+      - "可搜尋物品 / 機器 / 指南 / 儀式"
+  hub-achievements:
+    icon: PAPER
+    item-model: "nexo:tp_icon_achievements"
+    display-name: "成就系統"
+    lore:
+      - "查看所有成就進度"
+      - "包含分類篩選與獎勵"
   tier-back-hub:
     icon: ARROW
     item-model: "nexo:back_icon_custom"
@@ -66,8 +81,8 @@ gui-buttons:
       - "先看第一條生存科技流程"
       - "包含合成、擺放、接電順序"
   main-guide-list:
-    icon: WRITABLE_BOOK
-    item-model: "nexo:book_image_71c8269ed2e50370"
+    icon: PAPER
+    item-model: "nexo:tp_icon_guide"
     display-name: "科技指南"
     lore:
       - "教學 / 配線 / 物流 / 升級"
@@ -84,8 +99,36 @@ gui-buttons:
     display-name: "下一頁"
     lore:
       - "頁數 {page}/{max-page}"
+  subcat-search:
+    icon: PAPER
+    item-model: "nexo:tp_icon_search"
+    display-name: "搜尋物品"
+    lore:
+      - "點擊後在聊天輸入關鍵字"
+  subcat-guide-list:
+    icon: PAPER
+    item-model: "nexo:tp_icon_guide"
+    display-name: "科技指南"
+    lore:
+      - "教學 / 配線 / 物流 / 升級"
+  main-search:
+    icon: PAPER
+    item-model: "nexo:tp_icon_search"
+    display-name: "搜尋目標"
+    lore:
+      - "點擊後在聊天輸入關鍵字"
+      - "會跨分類搜尋"
+  main-back-subcats:
+    icon: BOOK
+    item-model: "nexo:back_icon_custom"
+    display-name: "返回子分類"
+    lore:
+      - "分類：{category}"
+      - "子分類：{group}"
+      - "篩選：{tier}"
   research-overview:
-    icon: EXPERIENCE_BOTTLE
+    icon: PAPER
+    item-model: "nexo:tp_icon_research"
     display-name: "研究點數"
     lore:
       - "等級：Lv.{level}"
@@ -299,29 +342,32 @@ gui-buttons:
       - "點擊查看此機器配方列表"
 gui-icons:
   category-card-machines:
-    icon: PISTON
-    item-model: "-1"
+    icon: PAPER
+    item-model: "nexo:tp_icon_machines"
   category-card-energy:
-    icon: LIGHTNING_ROD
-    item-model: "-1"
+    icon: PAPER
+    item-model: "nexo:tp_icon_energy"
   category-card-materials:
-    icon: IRON_INGOT
-    item-model: "-1"
+    icon: PAPER
+    item-model: "nexo:tp_icon_materials"
   category-card-tools:
-    icon: CROSSBOW
-    item-model: "-1"
-  category-card-transport:
-    icon: CHEST_MINECART
-    item-model: "-1"
-  category-card-automation:
-    icon: OBSERVER
-    item-model: "-1"
-  category-card-defense:
-    icon: SHIELD
-    item-model: "-1"
+    icon: PAPER
+    item-model: "nexo:tp_icon_tools"
+  category-card-agriculture:
+    icon: PAPER
+    item-model: "nexo:tp_icon_agriculture"
+  category-card-food:
+    icon: PAPER
+    item-model: "nexo:tp_icon_food"
+  category-card-logistics:
+    icon: PAPER
+    item-model: "nexo:tp_icon_logistics"
+  category-card-network:
+    icon: PAPER
+    item-model: "nexo:tp_icon_network"
   category-card-special:
-    icon: ENCHANTED_BOOK
-    item-model: "-1"
+    icon: PAPER
+    item-model: "nexo:tp_icon_special"
   tier-card-tier1:
     icon: WOODEN_PICKAXE
     item-model: "nexo:first_rank_icon"
@@ -371,29 +417,32 @@ gui-icons:
     icon: KNOWLEDGE_BOOK
     item-model: "-1"
   research-category-machines:
-    icon: PISTON
-    item-model: "-1"
+    icon: PAPER
+    item-model: "nexo:tp_icon_machines"
   research-category-energy:
-    icon: LIGHTNING_ROD
-    item-model: "-1"
+    icon: PAPER
+    item-model: "nexo:tp_icon_energy"
   research-category-materials:
-    icon: IRON_INGOT
-    item-model: "-1"
+    icon: PAPER
+    item-model: "nexo:tp_icon_materials"
   research-category-tools:
-    icon: CROSSBOW
-    item-model: "-1"
-  research-category-transport:
-    icon: CHEST_MINECART
-    item-model: "-1"
-  research-category-automation:
-    icon: OBSERVER
-    item-model: "-1"
-  research-category-defense:
-    icon: SHIELD
-    item-model: "-1"
+    icon: PAPER
+    item-model: "nexo:tp_icon_tools"
+  research-category-agriculture:
+    icon: PAPER
+    item-model: "nexo:tp_icon_agriculture"
+  research-category-food:
+    icon: PAPER
+    item-model: "nexo:tp_icon_food"
+  research-category-logistics:
+    icon: PAPER
+    item-model: "nexo:tp_icon_logistics"
+  research-category-network:
+    icon: PAPER
+    item-model: "nexo:tp_icon_network"
   research-category-special:
-    icon: ENCHANTED_BOOK
-    item-model: "-1"
+    icon: PAPER
+    item-model: "nexo:tp_icon_special"
 gui-panes:
   gray_stained_glass_pane:
     icon: GRAY_STAINED_GLASS_PANE
@@ -562,8 +611,7 @@ items:
     display-name: "量子晶片"
     category: ADVANCED
     icon: ECHO_SHARD
-    # item-model: techproject:item/quantum_chip
-    # nexo-id: quantum_chip
+    item-model: "nexo:quantum_chip"
     description: "高階機器核心。"
     unlock: "quantum_processor"
     use-cases:
@@ -1441,8 +1489,7 @@ items:
     display-name: "量子框架"
     category: ADVANCED
     icon: ECHO_SHARD
-    # item-model: techproject:item/quantum_frame
-    # nexo-id: quantum_frame
+    item-model: "nexo:quantum_frame"
     description: "量子框架結構。"
     unlock: "quantum_processor"
     use-cases:
@@ -1569,8 +1616,7 @@ items:
     display-name: "蝕刻電路"
     category: ADVANCED
     icon: REDSTONE
-    # item-model: techproject:item/etched_circuit
-    # nexo-id: etched_circuit
+    item-model: "nexo:etched_circuit"
     description: "蝕刻後高密度電路。"
     unlock: "laser_engraver"
     use-cases:
@@ -1650,8 +1696,7 @@ items:
     display-name: "培育晶體"
     category: ADVANCED
     icon: DIAMOND
-    # item-model: techproject:item/grown_crystal
-    # nexo-id: grown_crystal
+    item-model: "nexo:grown_crystal"
     description: "培育完成的高純度晶體。"
     unlock: "crystal_growth_chamber"
     use-cases:
@@ -1662,8 +1707,7 @@ items:
     display-name: "力場板"
     category: ADVANCED
     icon: GOLD_NUGGET
-    # item-model: techproject:item/field_plate
-    # nexo-id: field_plate
+    item-model: "nexo:field_plate"
     description: "力場結構板。"
     unlock: "field_forge"
     use-cases:
@@ -1674,8 +1718,7 @@ items:
     display-name: "物質團"
     category: ADVANCED
     icon: SLIME_BALL
-    # item-model: techproject:item/matter_blob
-    # nexo-id: matter_blob
+    item-model: "nexo:matter_blob"
     description: "物質編譯中間體。"
     unlock: "matter_compiler"
     use-cases:
@@ -1686,8 +1729,7 @@ items:
     display-name: "奇點碎片"
     category: ADVANCED
     icon: DRAGON_BREATH
-    # item-model: techproject:item/singularity_fragment
-    # nexo-id: singularity_fragment
+    item-model: "nexo:singularity_fragment"
     description: "奇點碎片。"
     unlock: "matter_compiler"
     use-cases:
@@ -1780,6 +1822,7 @@ items:
     display-name: "自動化模組"
     category: ADVANCED
     icon: COMPARATOR
+    item-model: "nexo:auto_processing_card"
     description: "嵌入手動機器核心即可將其升級為全自動純電力版。"
     unlock: "advanced_assembler"
     use-cases:

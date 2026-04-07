@@ -45,6 +45,7 @@ public final class PlacedMachine {
     private volatile String manualOperationRecipeId;
     private String lockedRecipeId;
     private String redstoneMode = "NONE";
+    private String teleportLabel;
 
     public PlacedMachine(final LocationKey locationKey, final String machineId, final UUID owner) {
         this.locationKey = locationKey;
@@ -157,6 +158,14 @@ public final class PlacedMachine {
 
     public void setRedstoneMode(final String redstoneMode) {
         this.redstoneMode = redstoneMode == null || redstoneMode.isBlank() ? "NONE" : redstoneMode;
+    }
+
+    public String teleportLabel() {
+        return this.teleportLabel;
+    }
+
+    public void setTeleportLabel(final String teleportLabel) {
+        this.teleportLabel = teleportLabel == null || teleportLabel.isBlank() ? null : teleportLabel.trim();
     }
 
     public MachineRuntimeState runtimeState() {

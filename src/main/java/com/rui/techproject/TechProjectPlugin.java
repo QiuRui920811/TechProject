@@ -13,6 +13,7 @@ import com.rui.techproject.service.BlueprintService;
 import com.rui.techproject.service.CookingService;
 import com.rui.techproject.service.MeteorService;
 import com.rui.techproject.service.ItemSearchService;
+import com.rui.techproject.service.RegionService;
 import com.rui.techproject.service.MachineService;
 import com.rui.techproject.service.PlacedTechBlockService;
 import com.rui.techproject.service.PlanetService;
@@ -97,6 +98,7 @@ public final class TechProjectPlugin extends JavaPlugin {
     private MeteorService meteorService;
     private StorageManager storageManager;
     private TitleService titleService;
+    private RegionService regionService;
     private com.rui.techproject.listener.DiscordSrvHook discordSrvHook;
 
     @Override
@@ -135,6 +137,7 @@ public final class TechProjectPlugin extends JavaPlugin {
         this.achievementGuiService.setTitleService(this.titleService);
         this.itemSearchService = new ItemSearchService(this);
         this.meteorService = new MeteorService(this, this.safeScheduler, this.itemFactory);
+        this.regionService = new RegionService(this);
 
         final com.rui.techproject.storage.StorageBackend backend = this.storageManager.getBackend();
         this.playerProgressService.setStorageBackend(backend);
@@ -485,6 +488,10 @@ public final class TechProjectPlugin extends JavaPlugin {
 
     public TitleService getTitleService() {
         return this.titleService;
+    }
+
+    public RegionService getRegionService() {
+        return this.regionService;
     }
 
     @Override

@@ -348,7 +348,7 @@ recipes:
   warp_cell_recipe:
     machine: warp_assembler
     inputs: [antimatter_cell, chrono_thread]
-    input-amounts: [3, 2]
+    input-amounts: [1, 1]
     output: warp_cell
     energy: 42
     guide: 反物質電池 + 時序線 → 曲躍裝配機 → 曲躍電池
@@ -376,7 +376,7 @@ recipes:
   singularity_casing_recipe:
     machine: event_horizon_smith
     inputs: [dark_matter_sheet, neutronium_plate]
-    input-amounts: [3, 2]
+    input-amounts: [2, 1]
     output: singularity_casing
     energy: 45
     guide: 暗物質片材 + 中子板 → 事件視界鍛台 → 奇點外殼

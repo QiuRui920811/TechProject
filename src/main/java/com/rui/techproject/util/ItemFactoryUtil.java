@@ -340,8 +340,10 @@ public final class ItemFactoryUtil {
         lore.add(this.colored("└─────────────────────────┘", MUTED));
         meta.lore(lore);
         meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
-        // 所有科技素材強制可堆疊 64（覆蓋 SHIELD, PLAYER_HEAD 等原版限制）
-        if (stack.getMaxStackSize() < 64) {
+        // 帶電量的工具不可堆疊，其餘強制 64
+        if (maxEnergy > 0L) {
+            meta.setMaxStackSize(1);
+        } else if (stack.getMaxStackSize() < 64) {
             meta.setMaxStackSize(64);
         }
         this.applyConfiguredItemModel(meta, definition.itemModel());
@@ -423,7 +425,7 @@ public final class ItemFactoryUtil {
         final String trimmed = texture.trim();
         final String resolved = trimmed.startsWith("http://") || trimmed.startsWith("https://")
                 ? trimmed
-                : "https://textures.minecraft.net/texture/" + trimmed;
+                : "http://textures.minecraft.net/texture/" + trimmed;
         try {
             return URI.create(resolved).toURL();
         } catch (final IllegalArgumentException | MalformedURLException ignored) {
@@ -1299,6 +1301,7 @@ public final class ItemFactoryUtil {
             case COPPER_INGOT -> "銅錠";
             case REDSTONE -> "紅石粉";
             case PISTON -> "活塞";
+            case STICKY_PISTON -> "黏性活塞";
             case HOPPER -> "漏斗";
             case BARREL -> "木桶";
             case TARGET -> "標靶";
@@ -1415,6 +1418,7 @@ public final class ItemFactoryUtil {
             case PORKCHOP -> "生豬排";
             case CHICKEN -> "生雞肉";
             case FEATHER -> "羽毛";
+            case STICK -> "木棍";
             case ROTTEN_FLESH -> "腐肉";
             case BONE -> "骨頭";
             case GUNPOWDER -> "火藥";
@@ -1441,6 +1445,34 @@ public final class ItemFactoryUtil {
             case MELON_SLICE -> "西瓜片";
             case WITHER_SKELETON_SKULL -> "凋靈骷髏頭顱";
             case KNOWLEDGE_BOOK -> "知識之書";
+            // ── 防止 localizeInlineTerms 誤替換 ──
+            case ACACIA_PRESSURE_PLATE -> "相思木壓力板";
+            case BEETROOT_SEEDS -> "甜菜種子";
+            case BOOKSHELF -> "書架";
+            case COPPER_BLOCK -> "銅方塊";
+            case END_CRYSTAL -> "乙太水晶";
+            case GLOWSTONE_DUST -> "螢光石粉";
+            case IRON_BOOTS -> "鐵靴";
+            case IRON_CHESTPLATE -> "鐵胸甲";
+            case IRON_DOOR -> "鐵門";
+            case IRON_HELMET -> "鐵頭盔";
+            case IRON_HOE -> "鐵鋤";
+            case IRON_LEGGINGS -> "鐵護腿";
+            case IRON_NUGGET -> "鐵粒";
+            case IRON_PICKAXE -> "鐵鎬";
+            case IRON_SHOVEL -> "鐵鏟";
+            case IRON_SWORD -> "鐵劍";
+            case IRON_TRAPDOOR -> "鐵活板門";
+            case MELON_SEEDS -> "西瓜種子";
+            case NETHERITE_INGOT -> "獄髓錠";
+            case OAK_PRESSURE_PLATE -> "橡木壓力板";
+            case PRISMARINE_CRYSTALS -> "海磷晶體";
+            case PUMPKIN_SEEDS -> "南瓜種子";
+            case REDSTONE_BLOCK -> "紅石方塊";
+            case REDSTONE_TORCH -> "紅石火把";
+            case STONE_PRESSURE_PLATE -> "石製壓力板";
+            case WRITABLE_BOOK -> "書與筆";
+            case WRITTEN_BOOK -> "成書";
             default -> this.humanize(material.name());
         };
     }
@@ -2424,6 +2456,7 @@ public final class ItemFactoryUtil {
             case "arcane_circuit_circle" -> "奧術電路法陣";
             case "storm_matrix_obelisk" -> "風暴矩陣方尖碑";
             case "quantum_gate_lattice" -> "量子門晶格";
+            case "auto_crafter" -> "萬用合成站";
             default -> null;
         };
     }
@@ -2754,6 +2787,7 @@ public final class ItemFactoryUtil {
             case "plasma_lance", "time_dilator", "entropy_scepter" -> 100L;
             case "void_mirror" -> 120L;
             case "heal_beacon" -> 150L;
+            case "portable_charger" -> 3000L;
             default -> 0L;
         };
     }

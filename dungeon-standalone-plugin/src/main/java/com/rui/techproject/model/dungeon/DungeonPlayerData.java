@@ -124,6 +124,11 @@ public final class DungeonPlayerData {
         final long elapsed = System.currentTimeMillis() - this.accessCooldownTimes.getOrDefault(dungeonId, 0L);
         return Math.max(0, cooldownSeconds - (int) (elapsed / 1000L));
     }
+    public void clearAllCooldowns(final String dungeonId) {
+        this.accessCooldownTimes.remove(dungeonId);
+        this.lastEntryTime.remove(dungeonId);
+        this.lootCooldownTimes.remove(dungeonId);
+    }
 
     // ── 序列化 ──
 

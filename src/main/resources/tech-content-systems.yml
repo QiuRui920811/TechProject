@@ -296,7 +296,7 @@ machines:
   vacuum_inlet:
     display-name: 真空吸入口
     category: INTERMEDIATE
-    block: HOPPER
+    block: LODESTONE
     head-texture: aba8ebc4c6a81730947499bf7e1d5e73fed6c1bb2c051e96d35eb16d24610e7
     item-model: "-1"
     inputs: [vacuum_core, pressure_tube]
@@ -417,7 +417,7 @@ machines:
   cargo_input_node:
     display-name: 貨物抽取節點
     category: ADVANCED
-    block: HOPPER
+    block: LODESTONE
     head-texture: b439e3f5acbee9be4c4259289d6d9f35c635ffa661114687b3ea6dda8c79
     item-model: "-1"
     inputs: [routing_chip, servo_motor, storage_crate]

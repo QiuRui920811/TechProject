@@ -862,6 +862,14 @@ items:
     acquisition-mode: MACHINE_ASSEMBLY
     family: expedition_tools
     role: jetpack-tool
+  portable_charger:
+    guide-category: TOOLS
+    system-group: ENDGAME
+    item-class: SPECIAL
+    visual-tier: ADVANCED
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: expedition_tools
+    role: portable-charger
   radiation_filter:
     guide-category: SPECIAL
     system-group: ENDGAME
@@ -2379,3 +2387,11 @@ machines:
     acquisition-mode: MACHINE_ASSEMBLY
     family: chicken_genetics
     role: resource-extraction
+  auto_crafter:
+    guide-category: MACHINES
+    system-group: PROCESSING
+    machine-archetype: PROCESSOR
+    visual-tier: ADVANCED
+    acquisition-mode: ADVANCED_WORKBENCH
+    family: assembly
+    role: universal-crafting

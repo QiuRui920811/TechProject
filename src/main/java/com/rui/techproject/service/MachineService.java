@@ -448,11 +448,33 @@ public final class MachineService {
         return definition == null ? null : this.itemFactory.buildMachineItem(definition, machine.storedEnergy());
     }
 
+    /**
+     * 破壞核心時清除上方配件方塊（壓力板、鐵柵欄、拉桿、按鈕等），讓它自然掉落。
+     */
+    public void breakRigComponent(final Block core) {
+        final Block above = core.getRelative(BlockFace.UP);
+        final Material aboveType = above.getType();
+        if (aboveType == Material.HEAVY_WEIGHTED_PRESSURE_PLATE
+                || aboveType == Material.IRON_BARS
+                || aboveType == Material.LEVER
+                || aboveType == Material.STONE_BUTTON
+                || aboveType == Material.POLISHED_BLACKSTONE_BUTTON) {
+            above.breakNaturally();
+        }
+    }
+
     public PlacedMachine placedMachineAt(final Block block) {
         if (block == null) {
             return null;
         }
         return this.machines.get(LocationKey.from(block.getLocation()));
+    }
+
+    public void setMachineEnabled(final Block block, final boolean enabled) {
+        final PlacedMachine machine = this.placedMachineAt(block);
+        if (machine != null) {
+            machine.setEnabled(enabled);
+        }
     }
 
     public boolean addGlobalTrust(final UUID owner, final UUID trusted) {
@@ -506,6 +528,9 @@ public final class MachineService {
         if (this.normalizeId(machine.machineId()).equals("planetary_gate")) {
             this.absorbNearbyEnergy(machine, block.getLocation(), 32L);
             return this.plugin.getPlanetService().handlePlanetaryGateInteract(player, block, machine);
+        }
+        if (this.normalizeId(machine.machineId()).equals("teleport_pad")) {
+            return this.handleTeleportPadInteract(player, block, machine);
         }
         if (this.isQuarryLike(machine.machineId())) {
             final QuarryRigLayout layout = this.quarryRigLayout(block);
@@ -1244,7 +1269,7 @@ public final class MachineService {
         }
         for (int index = 0; index < slots.length && start + index < recipes.size(); index++) {
             final MachineRecipe recipe = recipes.get(start + index);
-            inventory.setItem(slots[index], this.itemFactory.tagGuiAction(this.recipeInfo(recipe), "recipe-detail:" + recipe.id()));
+            inventory.setItem(slots[index], this.itemFactory.tagGuiAction(this.recipeInfo(recipe, machine), "recipe-detail:" + recipe.id()));
         }
         for (final int slot : slots) {
             if (inventory.getItem(slot) == null || inventory.getItem(slot).getType() == Material.AIR) {
@@ -1592,6 +1617,7 @@ public final class MachineService {
             entry.put("energy-output-direction", machine.energyOutputDirection());
             entry.put("filter-mode", machine.filterMode());
             entry.put("redstone-mode", machine.redstoneMode());
+            entry.put("teleport-label", machine.teleportLabel());
             entry.put("chicken-progress", machine.chickenProgress());
             entry.put("input", ItemStackSerializer.toBase64(machine.inputInventory()));
             entry.put("output", ItemStackSerializer.toBase64(machine.outputInventory()));
@@ -1690,6 +1716,7 @@ public final class MachineService {
                 machine.setEnergyOutputDirection(this.restoreEnergyDirection(data.get("energy-output-direction"), outputDirection, machineId));
                 machine.setFilterMode(data.get("filter-mode") instanceof String s ? s : "WHITELIST");
                 machine.setRedstoneMode(data.get("redstone-mode") instanceof String s ? s : "NONE");
+                machine.setTeleportLabel(data.get("teleport-label") instanceof String s ? s : null);
                 machine.restoreChickenProgress(data.get("chicken-progress") instanceof Number n ? n.doubleValue() : 0.0);
                 // 舊版逐台信任 → 自動遷移到全域信任
                 final String trustedRaw = data.get("trusted-players") instanceof String s ? s : "";
@@ -1966,7 +1993,11 @@ public final class MachineService {
 
         machine.tick();
         if (!machine.enabled()) {
-            this.setRuntimeState(machine, MachineRuntimeState.STANDBY, "待機");
+            this.setRuntimeState(machine, MachineRuntimeState.STANDBY, "已暫停");
+            this.transferOutputs(machine, location);
+            this.pushOpenViewState(machine.locationKey(), machine);
+            this.updateMachineDisplay(machine, definition, location);
+            return;
         }
         // 紅石集成電路控制：紅石模式不允許運行時跳過加工，但仍允許物流/顯示更新
         if (this.hasRedstoneControl(machine) && !"NONE".equalsIgnoreCase(machine.redstoneMode())) {
@@ -2031,6 +2062,7 @@ public final class MachineService {
                  "electric_purifier", "electric_centrifuge", "electric_bio_lab", "electric_chemical_reactor" ->
                     this.tickProcessor(machine, definition, location, Particle.ELECTRIC_SPARK, definition.id() + "_cycles");
             case "electric_sifter" -> this.tickElectricSifter(machine, definition, location);
+            case "auto_crafter" -> this.tickProcessor(machine, definition, location, Particle.ELECTRIC_SPARK, "auto_crafter_cycles");
             default -> this.tickConsumer(machine, location, definition.energyPerTick());
         }
         this.transferOutputs(machine, location);
@@ -2184,7 +2216,8 @@ public final class MachineService {
         if (world == null) {
             return;
         }
-        if (machine.ticksActive() % 20L != 0L) {
+        final long nuclearInterval = Math.max(5L, 20L - this.countUpgrade(machine, "speed_upgrade") * 5L);
+        if (machine.ticksActive() % nuclearInterval != 0L) {
             if (this.isChunkViewable(machine.locationKey())) {
                 world.spawnParticle(Particle.SMOKE, location.getX() + 0.5, location.getY() + 1.0, location.getZ() + 0.5, 3, 0.18, 0.25, 0.18, 0.0);
             }
@@ -2228,8 +2261,9 @@ public final class MachineService {
             return;
         }
 
-        // ── 聚變環流：被動發電 18 EU/tick ──
-        final long passiveGen = 18L;
+        // ── 聚變環流：被動發電（speed_upgrade 提升發電量，讓加速有實質意義） ──
+        final int speedUpgrades = this.countUpgrade(machine, "speed_upgrade");
+        final long passiveGen = 18L + (speedUpgrades * 12L);
         final long accepted = this.addEnergyCapped(machine, passiveGen);
         this.progressService.incrementStat(machine.owner(), "energy_generated", accepted);
 
@@ -2294,6 +2328,8 @@ public final class MachineService {
             return;
         }
         final int radius = 2 + this.countUpgrade(machine, "range_upgrade");
+        final int harvestAttempts = 1 + this.countUpgrade(machine, "speed_upgrade");
+        int harvested_total = 0;
 
         // ── 竿狀作物 (甘蔗/竹子)：掃描 Y+1 平面，從頂端往下砍到只剩 Y+1 ──
         for (int dx = -radius; dx <= radius; dx++) {
@@ -2330,11 +2366,14 @@ public final class MachineService {
                     harvested++;
                 }
                 if (harvested > 0) {
+                    harvested_total += harvested;
                     this.progressService.incrementStat(machine.owner(), "farm_harvested", harvested);
                     this.progressService.unlockByRequirement(machine.owner(), "machine:crop_harvester");
                     world.spawnParticle(Particle.HAPPY_VILLAGER, base.getLocation().add(0.5, 0.8, 0.5), 8, 0.2, 0.2, 0.2, 0.01);
                     world.playSound(base.getLocation(), Sound.ITEM_BONE_MEAL_USE, 0.4f, 1.15f);
-                    return;
+                    if (harvested_total >= harvestAttempts) {
+                        return;
+                    }
                 }
             }
         }
@@ -2346,11 +2385,17 @@ public final class MachineService {
                 if (!this.isSafeCropTarget(crop)) {
                     continue;
                 }
-                final BlockData blockData = crop.getBlockData();
-                if (!(blockData instanceof Ageable ageable) || ageable.getAge() < ageable.getMaximumAge()) {
-                    continue;
-                }
                 final boolean customCrop = this.techCropService.isTrackedCrop(crop);
+                if (customCrop) {
+                    if (!this.techCropService.isMature(crop)) {
+                        continue;
+                    }
+                } else {
+                    final BlockData blockData = crop.getBlockData();
+                    if (!(blockData instanceof Ageable ageable) || ageable.getAge() < ageable.getMaximumAge()) {
+                        continue;
+                    }
+                }
                 final List<ItemStack> outputs = customCrop
                         ? this.techCropService.harvest(crop, true)
                         : this.harvestOutputsFor(crop.getType());
@@ -2363,8 +2408,10 @@ public final class MachineService {
                     return;
                 }
                 if (!customCrop) {
-                    ageable.setAge(0);
-                    crop.setBlockData(ageable, true);
+                    if (crop.getBlockData() instanceof Ageable resetAge) {
+                        resetAge.setAge(0);
+                        crop.setBlockData(resetAge, true);
+                    }
                 }
                 this.storeOutputs(machine, outputs);
                 this.progressService.incrementStat(machine.owner(), "farm_harvested", outputs.stream().mapToInt(ItemStack::getAmount).sum());
@@ -2379,7 +2426,10 @@ public final class MachineService {
                 this.progressService.unlockByRequirement(machine.owner(), "machine:crop_harvester");
                 world.spawnParticle(Particle.HAPPY_VILLAGER, crop.getLocation().add(0.5, 0.8, 0.5), 8, 0.2, 0.2, 0.2, 0.01);
                 world.playSound(crop.getLocation(), Sound.ITEM_BONE_MEAL_USE, 0.4f, 1.15f);
-                return;
+                harvested_total++;
+                if (harvested_total >= harvestAttempts) {
+                    return;
+                }
             }
         }
     }
@@ -2517,34 +2567,38 @@ public final class MachineService {
 
     private void tickMobCollector(final PlacedMachine machine, final Location location) {
         final World world = location.getWorld();
-        if (world == null || machine.ticksActive() % 20L != 0L) {
-            return;
-        }
-        if (!this.isAllowedWorld(world)) {
+        if (world == null || machine.ticksActive() % 10L != 0L) {
             return;
         }
         final double radius = 4.0D + this.countUpgrade(machine, "range_upgrade");
         final int attempts = 1 + this.countUpgrade(machine, "speed_upgrade");
-        for (int attempt = 0; attempt < attempts; attempt++)
-        for (final Entity entity : world.getNearbyEntities(location.clone().add(0.5, 0.5, 0.5), radius, 2.5D, radius)) {
-            if (!(entity instanceof LivingEntity living) || living instanceof Player || !this.isCollectableMob(living.getType()) || !this.isSafeMobTarget(living)) {
-                continue;
+        for (int attempt = 0; attempt < attempts; attempt++) {
+            boolean collected = false;
+            for (final Entity entity : world.getNearbyEntities(location.clone().add(0.5, 0.5, 0.5), radius, 2.5D, radius)) {
+                if (!(entity instanceof LivingEntity living) || living instanceof Player || !this.isCollectableMob(living.getType()) || !this.isSafeMobTarget(living)) {
+                    continue;
+                }
+                final List<ItemStack> outputs = this.mobDropsFor(living.getType());
+                if (outputs.isEmpty() || !this.canStoreAllOutputs(machine, outputs)) {
+                    continue;
+                }
+                final long energy = this.effectiveEnergyCost(machine, 14L);
+                this.absorbNearbyEnergy(machine, location, energy);
+                if (!machine.consumeEnergy(energy)) {
+                    return;
+                }
+                this.safeRemoveEntity(living);
+                this.storeOutputs(machine, outputs);
+                this.progressService.incrementStat(machine.owner(), "mobs_collected", 1L);
+                this.progressService.unlockByRequirement(machine.owner(), "machine:mob_collector");
+                world.spawnParticle(Particle.SOUL, entity.getLocation().add(0.5, 0.5, 0.5), 10, 0.2, 0.3, 0.2, 0.02);
+                world.playSound(location, Sound.ENTITY_ENDERMAN_TELEPORT, 0.25f, 0.75f);
+                collected = true;
+                break;
             }
-            final List<ItemStack> outputs = this.mobDropsFor(living.getType());
-            if (outputs.isEmpty() || !this.canStoreAllOutputs(machine, outputs)) {
-                continue;
+            if (!collected) {
+                break;
             }
-            final long energy = this.effectiveEnergyCost(machine, 14L);
-            this.absorbNearbyEnergy(machine, location, energy);
-            if (!machine.consumeEnergy(energy)) {
-                return;
-            }
-            this.safeRemoveEntity(living);
-            this.storeOutputs(machine, outputs);
-            this.progressService.incrementStat(machine.owner(), "mobs_collected", 1L);
-            this.progressService.unlockByRequirement(machine.owner(), "machine:mob_collector");
-            world.spawnParticle(Particle.SOUL, entity.getLocation().add(0.5, 0.5, 0.5), 10, 0.2, 0.3, 0.2, 0.02);
-            world.playSound(location, Sound.ENTITY_ENDERMAN_TELEPORT, 0.25f, 0.75f);
         }
     }
 
@@ -3329,7 +3383,8 @@ public final class MachineService {
         if (!this.isAllowedWorld(world)) {
             return;
         }
-        if (machine.ticksActive() % 4L != 0L) {
+        final long interval = Math.max(1L, 4L - this.countUpgrade(machine, "speed_upgrade"));
+        if (machine.ticksActive() % interval != 0L) {
             return;
         }
         final double radius = 2.5D + this.countUpgrade(machine, "range_upgrade");
@@ -4515,6 +4570,10 @@ public final class MachineService {
         return false;
     }
 
+    private static final Set<Material> LEGACY_MACHINE_BLOCKS = Set.of(
+            Material.ANVIL, Material.CHIPPED_ANVIL, Material.DAMAGED_ANVIL,
+            Material.HOPPER, Material.BEACON);
+
     private boolean isMachineBlock(final Block block, final MachineDefinition definition) {
         final Material type = block.getType();
         if (definition != null && this.isQuarryLike(definition.id())) {
@@ -4528,6 +4587,11 @@ public final class MachineService {
         if (type == Material.PLAYER_HEAD || type == Material.PLAYER_WALL_HEAD) return true;
         if (definition.blockMaterial() == Material.CAULDRON) {
             return type == Material.WATER_CAULDRON || type == Material.LAVA_CAULDRON || type == Material.POWDER_SNOW_CAULDRON;
+        }
+        // 舊版機器方塊遷移：ANVIL/HOPPER/BEACON → 新方塊（LODESTONE）
+        if (LEGACY_MACHINE_BLOCKS.contains(type) && this.machines.containsKey(LocationKey.from(block.getLocation()))) {
+            block.setType(definition.blockMaterial(), false);
+            return true;
         }
         return false;
     }
@@ -5520,6 +5584,12 @@ public final class MachineService {
 
         final long requiredEnergy = Math.max(1L, definition.energyPerTick());
         this.absorbNearbyEnergy(machine, location, requiredEnergy);
+        // 持續待機耗電：每 tick 消耗 energyPerTick 的 1/4 維持運轉
+        final long idleEnergy = Math.max(1L, requiredEnergy / 4L);
+        if (!machine.consumeEnergy(idleEnergy)) {
+            this.setRuntimeState(machine, MachineRuntimeState.NO_POWER, "缺少電力");
+            return;
+        }
         if (this.processMachineRecipes(machine, location, statKey, particle, Sound.BLOCK_AMETHYST_BLOCK_STEP)) {
             this.setRuntimeState(machine, MachineRuntimeState.RUNNING, "加工中");
             if (this.isChunkViewable(machine.locationKey()) && machine.ticksActive() % 8L == 0L) {
@@ -6034,6 +6104,9 @@ public final class MachineService {
     }
 
     private List<MachineRecipe> recipesForMachine(final String machineId) {
+        if ("auto_crafter".equals(this.normalizeId(machineId))) {
+            return this.allProcessorRecipes();
+        }
         final List<MachineRecipe> primary = this.registry.getRecipesForMachine(machineId);
         final String fallbackMachineId = this.electricRecipeFallbackMachine(machineId);
         if (fallbackMachineId == null) {
@@ -6048,6 +6121,15 @@ public final class MachineService {
             merged.put(this.recipeMergeKey(recipe), recipe);
         }
         for (final MachineRecipe recipe : fallback) {
+            merged.putIfAbsent(this.recipeMergeKey(recipe), recipe);
+        }
+        return List.copyOf(merged.values());
+    }
+
+    /** 萬用合成站專用：聚合所有加工機配方，以 mergeKey 去重。 */
+    private List<MachineRecipe> allProcessorRecipes() {
+        final Map<String, MachineRecipe> merged = new LinkedHashMap<>();
+        for (final MachineRecipe recipe : this.registry.allRecipes()) {
             merged.putIfAbsent(this.recipeMergeKey(recipe), recipe);
         }
         return List.copyOf(merged.values());
@@ -6631,9 +6713,7 @@ public final class MachineService {
         }
 
         final List<PlacedMachine> result = new ArrayList<>();
-        List<LocationKey> frontier = new ArrayList<>();
         final java.util.Set<LocationKey> visited = new java.util.HashSet<>();
-        frontier.add(machine.locationKey());
         visited.add(machine.locationKey());
         final int maxDepth = this.networkDepth(machine, logisticsMode);
         /* 加工機器（非採集、非物流）只能透過中繼推送，不能直接推給相鄰的加工機器 */
@@ -6643,65 +6723,87 @@ public final class MachineService {
                 {0, 0, 1}, {0, 0, -1},
                 {0, 1, 0}, {0, -1, 0}
         };
-        for (int depth = 0; depth < maxDepth && !frontier.isEmpty(); depth++) {
-            final List<LocationKey> next = new ArrayList<>();
-            for (final LocationKey currentKey : frontier) {
-                final PlacedMachine currentMachine = this.machines.get(currentKey);
-                for (final int[] offset : offsets) {
-                    final String direction = this.directionForOffset(offset);
-                    if (currentKey.equals(machine.locationKey())) {
-                        if (inputDirection != null && !this.matchesDirection(inputDirection, direction)) {
-                            continue;
-                        }
-                        if (outputDirection != null && !this.matchesDirection(outputDirection, direction)) {
-                            continue;
-                        }
-                    } else if (currentMachine != null && this.isRelayMachine(currentMachine.machineId(), logisticsMode)) {
-                        /* 中繼管道用自己的方向設定；ALL 就是全方向，不繼承來源限制 */
-                        if (inputDirection != null
-                                && !this.matchesDirection(this.machineInputDirection(currentMachine, logisticsMode), direction)) {
-                            continue;
-                        }
-                        if (outputDirection != null
-                                && !this.matchesDirection(this.machineOutputDirection(currentMachine, logisticsMode), direction)) {
-                            continue;
-                        }
-                    }
-                    final LocationKey key = currentKey.offset(offset[0], offset[1], offset[2]);
-                    if (!visited.add(key)) {
+        /*
+         * BFS 佇列：每個條目攜帶自己的剩餘深度。
+         * 普通中繼（item_tube / energy_cable）消耗 1 深度；
+         * 節點中繼（logistics_node / energy_node）重置深度（信號放大器）。
+         */
+        final java.util.ArrayDeque<Object[]> queue = new java.util.ArrayDeque<>();
+        queue.add(new Object[]{machine.locationKey(), maxDepth});
+        while (!queue.isEmpty()) {
+            final Object[] entry = queue.pollFirst();
+            final LocationKey currentKey = (LocationKey) entry[0];
+            final int remaining = (int) entry[1];
+            if (remaining <= 0) {
+                continue;
+            }
+            final boolean isSource = currentKey.equals(machine.locationKey());
+            final PlacedMachine currentMachine = this.machines.get(currentKey);
+            for (final int[] offset : offsets) {
+                final String direction = this.directionForOffset(offset);
+                if (isSource) {
+                    if (inputDirection != null && !this.matchesDirection(inputDirection, direction)) {
                         continue;
                     }
-                    final PlacedMachine neighbor = this.machines.get(key);
-                    if (neighbor == null || !this.isNetworkAllied(machine.owner(), neighbor.owner())) {
+                    if (outputDirection != null && !this.matchesDirection(outputDirection, direction)) {
                         continue;
                     }
-                    if (this.isRelayMachine(neighbor.machineId(), logisticsMode)) {
-                        if (outputDirection != null && !this.matchesDirection(this.machineInputDirection(neighbor, logisticsMode), this.oppositeDirection(direction))) {
-                            continue;
-                        }
-                        if (inputDirection != null && !this.matchesDirection(this.machineOutputDirection(neighbor, logisticsMode), this.oppositeDirection(direction))) {
-                            continue;
-                        }
-                        next.add(key);
+                } else if (currentMachine != null && this.isRelayMachine(currentMachine.machineId(), logisticsMode)) {
+                    /* 中繼管道用自己的方向設定；ALL 就是全方向，不繼承來源限制 */
+                    if (inputDirection != null
+                            && !this.matchesDirection(this.machineInputDirection(currentMachine, logisticsMode), direction)) {
                         continue;
                     }
+                    if (outputDirection != null
+                            && !this.matchesDirection(this.machineOutputDirection(currentMachine, logisticsMode), direction)) {
+                        continue;
+                    }
+                }
+                final LocationKey key = currentKey.offset(offset[0], offset[1], offset[2]);
+                if (!visited.add(key)) {
+                    continue;
+                }
+                final PlacedMachine neighbor = this.machines.get(key);
+                if (neighbor == null || !this.isNetworkAllied(machine.owner(), neighbor.owner())) {
+                    continue;
+                }
+                if (this.isRelayMachine(neighbor.machineId(), logisticsMode)) {
                     if (outputDirection != null && !this.matchesDirection(this.machineInputDirection(neighbor, logisticsMode), this.oppositeDirection(direction))) {
                         continue;
                     }
                     if (inputDirection != null && !this.matchesDirection(this.machineOutputDirection(neighbor, logisticsMode), this.oppositeDirection(direction))) {
                         continue;
                     }
-                    /* 加工機器在 depth==0（直接相鄰）只能推給物流終端，不能推給其他加工機器 */
-                    if (requireRelay && depth == 0 && !this.isLogisticsTerminal(neighbor.machineId())) {
-                        continue;
-                    }
-                    result.add(neighbor);
+                    final int nextRemaining = this.isNetworkNodeRelay(neighbor.machineId(), logisticsMode)
+                            ? maxDepth       // 節點＝信號放大器，重置深度
+                            : remaining - 1; // 導管／線纜＝普通中繼，消耗 1 深度
+                    queue.addLast(new Object[]{key, nextRemaining});
+                    continue;
                 }
+                if (outputDirection != null && !this.matchesDirection(this.machineInputDirection(neighbor, logisticsMode), this.oppositeDirection(direction))) {
+                    continue;
+                }
+                if (inputDirection != null && !this.matchesDirection(this.machineOutputDirection(neighbor, logisticsMode), this.oppositeDirection(direction))) {
+                    continue;
+                }
+                /* 加工機器在直接相鄰（從來源出發）只能推給物流終端，不能推給其他加工機器 */
+                if (requireRelay && isSource && !this.isLogisticsTerminal(neighbor.machineId())) {
+                    continue;
+                }
+                result.add(neighbor);
             }
-            frontier = next;
         }
         this.bfsCache.put(cacheKey, result);
         return result;
+    }
+
+    /**
+     * 節點中繼：通過時重置 BFS 深度（信號放大器）。
+     * logistics_node 放大物流，energy_node 放大電力。
+     */
+    private boolean isNetworkNodeRelay(final String machineId, final boolean logisticsMode) {
+        final String id = machineId.toLowerCase();
+        return logisticsMode ? id.equals("logistics_node") : id.equals("energy_node");
     }
 
     private void transferOutputs(final PlacedMachine machine, final Location location) {
@@ -6870,6 +6972,11 @@ public final class MachineService {
                 player.sendMessage(this.itemFactory.secondary("紅石控制模式已切換為：" + this.redstoneModeName(machine.redstoneMode())));
                 this.openMachineMenuNextTick(player, key);
             }
+            case "toggle-enable" -> {
+                machine.setEnabled(!machine.enabled());
+                player.sendMessage(this.itemFactory.secondary(machine.enabled() ? "§a機器已啟動" : "§c機器已暫停"));
+                this.openMachineMenuNextTick(player, key);
+            }
             case "back-main" -> this.openMachineMenuNextTick(player, key);
             default -> {
                 if (action.startsWith("recipes:")) {
@@ -6940,7 +7047,7 @@ public final class MachineService {
             if (meta != null) {
                 final List<net.kyori.adventure.text.Component> lore = new ArrayList<>();
                 lore.add(this.itemFactory.muted("輸入：" + this.joinInputDisplayNames(recipe)));
-                lore.add(this.itemFactory.muted("耗能：" + recipe.energyCost() + " EU"));
+                lore.add(this.itemFactory.muted(this.formatEnergyCost(machine, recipe.energyCost())));
                 if (isCurrentLock) {
                     lore.add(this.itemFactory.hex("✔ 目前已鎖定，點擊解除", "#55FF55"));
                 } else {
@@ -7578,12 +7685,12 @@ public final class MachineService {
         return builder.toString();
     }
 
-    private ItemStack recipeInfo(final MachineRecipe recipe) {
+    private ItemStack recipeInfo(final MachineRecipe recipe, final PlacedMachine machine) {
         return this.info(this.resolveRecipeIconStack(recipe.outputId()),
                 this.itemFactory.displayNameForId(recipe.outputId()), List.of(
             "輸入：" + this.joinInputDisplayNames(recipe),
             "輸出：" + this.itemFactory.displayNameForId(recipe.outputId()),
-                "耗能：" + recipe.energyCost() + " EU",
+                this.formatEnergyCost(machine, recipe.energyCost()),
                 this.describeRecipeFlow(recipe),
                 "提示：條件不足、輸出滿格或能量不足時不會生產"
         ));
@@ -7619,7 +7726,7 @@ public final class MachineService {
         this.decorateMachineRecipeDetailMenu(inventory, theme);
         inventory.setItem(4, this.info(this.recipeBookMaterial(theme), this.itemFactory.displayNameForId(recipe.outputId()), List.of(
             "機器：" + this.itemFactory.displayNameForId(recipe.machineId()),
-            "耗能：" + recipe.energyCost() + " EU",
+            this.formatEnergyCost(placedMachine, recipe.energyCost()),
             this.describeRecipeFlow(recipe)
         )));
         inventory.setItem(10, this.sectionPane(this.recipeInputPane(theme), "材料區", List.of("左下 3x3 是實際投入順序")));
@@ -7638,7 +7745,7 @@ public final class MachineService {
         inventory.setItem(23, this.sectionPane(this.recipeAccentPane(theme), "→", List.of()));
         inventory.setItem(24, this.info(this.processInfoMaterial(theme), this.processLabel(theme), List.of(
             "機器：" + this.itemFactory.displayNameForId(recipe.machineId()),
-            "耗能：" + recipe.energyCost() + " EU"
+            this.formatEnergyCost(placedMachine, recipe.energyCost())
         )));
         inventory.setItem(25, this.sectionPane(this.recipeAccentPane(theme), "→", List.of()));
         inventory.setItem(32, this.sectionPane(this.recipeOutputPane(theme), "產出", List.of("完成後會進入輸出槽")));
@@ -7669,8 +7776,8 @@ public final class MachineService {
         for (int i = 0; i < recipe.inputIds().size(); i++) {
             if (i > 0) sb.append(" + ");
             final int amount = recipe.inputAmount(i);
-            if (amount > 1) sb.append(amount).append("× ");
             sb.append(this.itemFactory.displayNameForId(recipe.inputIds().get(i)));
+            if (amount > 1) sb.append("×").append(amount);
         }
         return sb.toString();
     }
@@ -7769,13 +7876,10 @@ public final class MachineService {
                 }
             }
         }
-        for (int slot = startSlot; slot < INPUT_SLOTS.length; slot++) {
+        for (int slot = startSlot; slot < INPUT_SLOTS.length && remaining.getAmount() > 0; slot++) {
             final ItemStack current = machine.inputAt(slot);
-            if (current == null || current.getType() == Material.AIR) {
-                machine.setInputAt(slot, remaining);
-                return new ItemStack(Material.AIR);
-            }
-            if (!current.isSimilar(remaining) || current.getAmount() >= current.getMaxStackSize()) {
+            if (current == null || current.getType() == Material.AIR
+                    || !current.isSimilar(remaining) || current.getAmount() >= current.getMaxStackSize()) {
                 continue;
             }
             final int room = current.getMaxStackSize() - current.getAmount();
@@ -7784,11 +7888,18 @@ public final class MachineService {
             merged.setAmount(current.getAmount() + move);
             machine.setInputAt(slot, merged);
             remaining.setAmount(remaining.getAmount() - move);
-            if (remaining.getAmount() <= 0) {
-                return new ItemStack(Material.AIR);
-            }
         }
-        return remaining;
+        for (int slot = startSlot; slot < INPUT_SLOTS.length && remaining.getAmount() > 0; slot++) {
+            final ItemStack current = machine.inputAt(slot);
+            if (current != null && current.getType() != Material.AIR) {
+                continue;
+            }
+            final ItemStack placed = remaining.clone();
+            placed.setAmount(Math.min(remaining.getAmount(), remaining.getMaxStackSize()));
+            machine.setInputAt(slot, placed);
+            remaining.setAmount(remaining.getAmount() - placed.getAmount());
+        }
+        return remaining.getAmount() <= 0 ? new ItemStack(Material.AIR) : remaining;
     }
 
     /**
@@ -8285,11 +8396,20 @@ public final class MachineService {
             return this.hasMachineInputRoom(machine, stack, startSlot, INPUT_SLOTS.length);
         }
 
+        // 如果有鎖定配方，只接受該配方所需的材料
+        final String lockedId = machine.lockedRecipeId();
         boolean usedInRecipe = false;
-        for (final MachineRecipe recipe : this.recipesForMachine(machine.machineId())) {
-            if (recipe.inputIds().stream().map(this::normalizeId).anyMatch(stackId::equals)) {
-                usedInRecipe = true;
-                break;
+        if (lockedId != null) {
+            final MachineRecipe locked = this.findMachineRecipeById(machine.machineId(), lockedId);
+            if (locked != null) {
+                usedInRecipe = locked.inputIds().stream().map(this::normalizeId).anyMatch(stackId::equals);
+            }
+        } else {
+            for (final MachineRecipe recipe : this.recipesForMachine(machine.machineId())) {
+                if (recipe.inputIds().stream().map(this::normalizeId).anyMatch(stackId::equals)) {
+                    usedInRecipe = true;
+                    break;
+                }
             }
         }
         if (!usedInRecipe) {
@@ -8786,7 +8906,20 @@ public final class MachineService {
     private long effectiveEnergyCost(final PlacedMachine machine, final long baseCost) {
         final int efficiency = this.countUpgrade(machine, "efficiency_upgrade");
         final double multiplier = Math.max(0.35D, 1.0D - (efficiency * 0.2D));
-        return Math.max(1L, Math.round(baseCost * multiplier));
+        long cost = Math.max(1L, Math.round(baseCost * multiplier));
+        // 萬用合成站耗能×2 作為便利代價
+        if ("auto_crafter".equals(this.normalizeId(machine.machineId()))) {
+            cost = Math.max(2L, cost * 2L);
+        }
+        return cost;
+    }
+
+    private String formatEnergyCost(final PlacedMachine machine, final long baseCost) {
+        final long effective = this.effectiveEnergyCost(machine, baseCost);
+        if (effective < baseCost) {
+            return "耗能：" + effective + " EU §7(原 " + baseCost + " EU)";
+        }
+        return "耗能：" + baseCost + " EU";
     }
 
     private void pullOpenViewState(final LocationKey key, final PlacedMachine machine) {
@@ -8962,6 +9095,8 @@ public final class MachineService {
         }
         // 配方鎖定按鈕 — 放在所有裝飾之後，避免被 applyIdentityBand 等覆蓋
         this.applyRecipeLockButton(inventory, machine);
+        // 啟停按鈕 — 所有機器都可暫停/啟動
+        this.applyToggleEnableButton(inventory, machine);
     }
 
     private void applyRecipeLockButton(final Inventory inventory, final PlacedMachine machine) {
@@ -8987,6 +9122,15 @@ public final class MachineService {
             "左鍵→下一個 / 右鍵→上一個",
             "§8鎖定後機器只跑該配方"
         )), "lock-recipe"));
+    }
+
+    private void applyToggleEnableButton(final Inventory inventory, final PlacedMachine machine) {
+        final boolean enabled = machine.enabled();
+        final Material mat = enabled ? Material.LIME_DYE : Material.GRAY_DYE;
+        final String title = enabled ? "§a運行中" : "§c已暫停";
+        inventory.setItem(44, this.itemFactory.tagGuiAction(this.guiButton("machine-toggle-enable", mat, title, List.of(
+            enabled ? "§7點擊暫停機器" : "§7點擊啟動機器"
+        )), "toggle-enable"));
     }
 
     private void decorateMachineRecipeMenu(final Inventory inventory, final MachineGuiTheme theme, final int safePage, final int maxPage) {
@@ -9805,6 +9949,8 @@ public final class MachineService {
                 new MachineLayoutSpec("燃料輸入", "燃料回收", "轉換模組", "燃料流程", "匯入方向", "匯出方向");
             case "quarry_drill", "quarry_drill_mk2", "quarry_drill_mk3", "crop_harvester", "planetary_harvester", "planetary_gate", "vacuum_inlet", "tree_feller", "mob_collector", "fishing_dock" ->
                 new MachineLayoutSpec("作業材", "收成", "強化", "作業配方", "匯入方向", "匯出方向");
+            case "gps_transmitter", "gps_control_tower", "gps_network_node", "geo_scanner", "teleport_pad", "orbital_relay_station" ->
+                new MachineLayoutSpec("訊號輸入", "定位輸出", "GPS 模組", "GPS 配方", "接收方向", "發射方向");
             default -> new MachineLayoutSpec("投入", "產出", "模組", "配方", "輸入方向", "輸出方向");
         };
     }
@@ -9822,6 +9968,9 @@ public final class MachineService {
         }
         if (normalized.equals("android_fuel_interface")) {
             return MachineGuiTheme.GENERATOR;
+        }
+        if (normalized.startsWith("gps_") || normalized.equals("geo_scanner") || normalized.equals("teleport_pad") || normalized.equals("orbital_relay_station")) {
+            return MachineGuiTheme.PROCESSOR;
         }
         if (normalized.contains("router") || normalized.contains("splitter") || normalized.contains("bus") || normalized.contains("storage") || normalized.contains("logistics") || normalized.contains("tube") || normalized.contains("node") || normalized.contains("cable") || normalized.contains("cargo") || normalized.contains("motor") || normalized.contains("trash")) {
             return MachineGuiTheme.LOGISTICS;
@@ -10065,5 +10214,207 @@ public final class MachineService {
             }
         }
         return false;
+    }
+
+    // ═══════════════════ 傳送面板系統 ═══════════════════
+
+    private static final String TELEPORT_PAD_MENU_PREFIX = "⚡ 傳送面板";
+    private final Map<UUID, LocationKey> openTeleportPadMenus = new ConcurrentHashMap<>();
+
+    public boolean isTeleportPadView(final String title) {
+        return title != null && title.startsWith(TELEPORT_PAD_MENU_PREFIX);
+    }
+
+    public void closeTeleportPadMenu(final Player player) {
+        if (player != null) {
+            this.openTeleportPadMenus.remove(player.getUniqueId());
+        }
+    }
+
+    private boolean handleTeleportPadInteract(final Player player, final Block block, final PlacedMachine machine) {
+        if (player.isSneaking()) {
+            // 蹲下右鍵 → 命名傳送面板
+            this.promptTeleportPadRename(player, machine);
+            return true;
+        }
+        // 普通右鍵 → 開啟傳送選單
+        this.openTeleportPadMenu(player, block, machine);
+        final World world = block.getWorld();
+        world.playSound(block.getLocation(), Sound.BLOCK_BEACON_POWER_SELECT, 0.42f, 1.18f);
+        world.spawnParticle(Particle.END_ROD, block.getLocation().add(0.5, 1.0, 0.5), 8, 0.28, 0.18, 0.28, 0.02);
+        return true;
+    }
+
+    private void promptTeleportPadRename(final Player player, final PlacedMachine machine) {
+        final String currentLabel = machine.teleportLabel();
+        player.sendMessage(this.itemFactory.success(
+                "請在聊天輸入新名稱來為這座傳送面板命名（輸入「取消」取消）"));
+        if (currentLabel != null) {
+            player.sendMessage(this.itemFactory.success("目前名稱：" + currentLabel));
+        }
+        this.pendingTeleportRenames.put(player.getUniqueId(), machine.locationKey());
+    }
+
+    private final Map<UUID, LocationKey> pendingTeleportRenames = new ConcurrentHashMap<>();
+
+    public boolean hasPendingTeleportRename(final UUID playerId) {
+        return this.pendingTeleportRenames.containsKey(playerId);
+    }
+
+    public boolean handleTeleportRenameChat(final Player player, final String message) {
+        final LocationKey key = this.pendingTeleportRenames.remove(player.getUniqueId());
+        if (key == null) {
+            return false;
+        }
+        if ("取消".equals(message.trim())) {
+            player.sendMessage(this.itemFactory.warning("已取消命名。"));
+            return true;
+        }
+        final PlacedMachine machine = this.machines.get(key);
+        if (machine == null) {
+            player.sendMessage(this.itemFactory.warning("找不到這座傳送面板。"));
+            return true;
+        }
+        final String label = message.trim();
+        if (label.length() > 24) {
+            player.sendMessage(this.itemFactory.warning("名稱最多 24 個字元。"));
+            this.pendingTeleportRenames.put(player.getUniqueId(), key);
+            return true;
+        }
+        machine.setTeleportLabel(label);
+        player.sendMessage(this.itemFactory.success("傳送面板已命名為「" + label + "」"));
+        player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_CHIME, 0.6f, 1.2f);
+        return true;
+    }
+
+    private void openTeleportPadMenu(final Player player, final Block block, final PlacedMachine sourceMachine) {
+        final List<PlacedMachine> destinations = new ArrayList<>();
+        final LocationKey sourceKey = LocationKey.from(block.getLocation());
+        for (final PlacedMachine candidate : this.machines.values()) {
+            if (!"teleport_pad".equalsIgnoreCase(this.normalizeId(candidate.machineId()))) {
+                continue;
+            }
+            if (candidate.locationKey().equals(sourceKey)) {
+                continue;
+            }
+            // 只列出同個擁有者或被信任的面板
+            if (!candidate.owner().equals(sourceMachine.owner())
+                    && !this.isGloballyTrusted(candidate.owner(), sourceMachine.owner())) {
+                continue;
+            }
+            destinations.add(candidate);
+        }
+
+        final int size = Math.max(9, Math.min(54, ((destinations.size() + 8) / 9) * 9));
+        final String label = sourceMachine.teleportLabel() != null ? sourceMachine.teleportLabel() : "未命名";
+        final Inventory inventory = Bukkit.createInventory(null, size,
+                Component.text(TELEPORT_PAD_MENU_PREFIX + " - " + label, NamedTextColor.DARK_PURPLE));
+
+        if (destinations.isEmpty()) {
+            inventory.setItem(size / 2, this.itemFactory.buildGuiPane(Material.BARRIER,
+                    Component.text("沒有可用的傳送目的地", NamedTextColor.RED),
+                    List.of(Component.text("在其他地方放置更多傳送面板", NamedTextColor.GRAY),
+                            Component.text("並確保你是擁有者或受信任", NamedTextColor.GRAY)),
+                    false));
+        } else {
+            for (int i = 0; i < destinations.size() && i < 54; i++) {
+                final PlacedMachine dest = destinations.get(i);
+                final String destLabel = dest.teleportLabel() != null ? dest.teleportLabel() : "未命名";
+                final LocationKey loc = dest.locationKey();
+                final World targetWorld = Bukkit.getWorld(loc.worldName());
+                final String worldDisplay = targetWorld != null ? targetWorld.getName() : loc.worldName();
+
+                final List<Component> lore = new ArrayList<>();
+                lore.add(Component.text("座標: " + loc.x() + ", " + loc.y() + ", " + loc.z(), NamedTextColor.GRAY));
+                lore.add(Component.text("世界: " + worldDisplay, NamedTextColor.GRAY));
+                lore.add(Component.empty());
+                lore.add(Component.text("消耗: 末影珍珠×1 + 能量", NamedTextColor.DARK_AQUA));
+                lore.add(Component.text("點擊傳送", NamedTextColor.GREEN));
+
+                inventory.setItem(i, this.itemFactory.buildGuiPane(Material.ENDER_EYE,
+                        Component.text(destLabel, NamedTextColor.LIGHT_PURPLE), lore, false));
+            }
+        }
+
+        this.openTeleportPadMenus.put(player.getUniqueId(), sourceKey);
+        // 也記住目的地列表的順序
+        this.teleportPadDestinations.put(player.getUniqueId(), destinations);
+        player.openInventory(inventory);
+    }
+
+    private final Map<UUID, List<PlacedMachine>> teleportPadDestinations = new ConcurrentHashMap<>();
+
+    public void handleTeleportPadMenuClick(final Player player, final int rawSlot) {
+        if (player == null || rawSlot < 0) {
+            return;
+        }
+        final LocationKey sourceKey = this.openTeleportPadMenus.get(player.getUniqueId());
+        if (sourceKey == null) {
+            player.closeInventory();
+            return;
+        }
+        final List<PlacedMachine> destinations = this.teleportPadDestinations.get(player.getUniqueId());
+        if (destinations == null || rawSlot >= destinations.size()) {
+            return;
+        }
+        final PlacedMachine sourceMachine = this.machines.get(sourceKey);
+        if (sourceMachine == null) {
+            player.sendMessage(this.itemFactory.warning("這座傳送面板已離線。"));
+            player.closeInventory();
+            return;
+        }
+        final PlacedMachine dest = destinations.get(rawSlot);
+        if (dest == null || !this.machines.containsKey(dest.locationKey())) {
+            player.sendMessage(this.itemFactory.warning("目的地傳送面板已不存在。"));
+            player.closeInventory();
+            return;
+        }
+        // 消耗末影珍珠
+        if (!this.consumeInput(sourceMachine, List.of("ender_pearl"), 1)) {
+            player.sendMessage(this.itemFactory.warning("傳送面板中沒有末影珍珠！請在輸入欄放入末影珍珠。"));
+            player.closeInventory();
+            return;
+        }
+        // 消耗能量
+        final long cost = 200L;
+        this.absorbNearbyEnergy(sourceMachine, locationFromKey(sourceKey), cost);
+        if (!sourceMachine.consumeEnergy(cost)) {
+            player.sendMessage(this.itemFactory.warning("傳送面板能量不足！需要 " + cost + " EU。"));
+            player.closeInventory();
+            return;
+        }
+        // 執行傳送
+        player.closeInventory();
+        final LocationKey destLoc = dest.locationKey();
+        final World destWorld = Bukkit.getWorld(destLoc.worldName());
+        if (destWorld == null) {
+            player.sendMessage(this.itemFactory.warning("目的地世界未載入。"));
+            return;
+        }
+        final Location destination = new Location(destWorld, destLoc.x() + 0.5, destLoc.y() + 1.0, destLoc.z() + 0.5,
+                player.getLocation().getYaw(), player.getLocation().getPitch());
+
+        // 傳送前粒子
+        final World srcWorld = Bukkit.getWorld(sourceKey.worldName());
+        if (srcWorld != null) {
+            final Location srcCenter = new Location(srcWorld, sourceKey.x() + 0.5, sourceKey.y() + 0.5, sourceKey.z() + 0.5);
+            srcWorld.playSound(srcCenter, Sound.ENTITY_ENDERMAN_TELEPORT, 0.8f, 1.2f);
+            srcWorld.spawnParticle(Particle.PORTAL, srcCenter.clone().add(0, 0.5, 0), 40, 0.3, 0.5, 0.3, 0.5);
+        }
+
+        player.teleportAsync(destination).thenAccept(success -> {
+            if (success) {
+                this.scheduler.runEntity(player, () -> {
+                    player.playSound(player.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 0.8f, 1.0f);
+                    player.getWorld().spawnParticle(Particle.PORTAL, player.getLocation().add(0, 0.5, 0), 30, 0.3, 0.5, 0.3, 0.3);
+                    player.getWorld().spawnParticle(Particle.END_ROD, player.getLocation().add(0, 1.0, 0), 12, 0.2, 0.3, 0.2, 0.03);
+                    final String destLabel = dest.teleportLabel() != null ? dest.teleportLabel() : "未命名";
+                    player.sendActionBar(this.itemFactory.success("⚡ 已傳送至「" + destLabel + "」"));
+                });
+            } else {
+                this.scheduler.runEntity(player, () ->
+                        player.sendMessage(this.itemFactory.warning("傳送失敗，請稍後再試。")));
+            }
+        });
     }
 }
