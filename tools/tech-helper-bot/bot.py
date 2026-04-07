@@ -82,10 +82,6 @@ class KnowledgeBase:
                 log.warning("讀取 %s 失敗: %s", filepath, e)
                 continue
 
-            # 跳過 changelog — 太大且對問答沒用
-            if "changelog" in str(rel).lower():
-                continue
-
             # 按 ## 標題拆分段落
             sections = re.split(r"(?=^#{1,3}\s)", text, flags=re.MULTILINE)
             file_title = rel.stem.replace("-", " ").replace("_", " ").title()
@@ -148,33 +144,55 @@ SYSTEM_PROMPT = """你是「科技幫手」，一個專門回答 Minecraft TechP
 4. 如果知識庫中找不到答案，誠實說「目前文件中沒有這方面的資訊」。
 5. 可以引用具體的配方、材料、機器名稱來幫助玩家。
 6. 不要在回答中提及「知識庫」、「文件」等後台概念，用「wiki」或「指南」代替。
-7. 回答長度控制在合理範圍內，避免過長。"""
+7. 回答長度控制在合理範圍內，避免過長。
+8. **更新日誌 / changelog 相關問題**：知識庫中包含完整的更新日誌，請根據其中記錄回答「最近更新了什麼」、「修復了什麼」、「新功能」等問題。"""
 
 
 class GeminiHelper:
     def __init__(self, api_key: str):
         genai.configure(api_key=api_key)
-        # 按優先順序嘗試模型：最新免費額度最高的優先
-        model_candidates = [
+        self.model_candidates = [
             "gemini-2.5-flash-lite",
             "gemini-2.0-flash-lite",
             "gemini-2.0-flash",
+            "gemini-1.5-flash",
         ]
-        chosen = model_candidates[0]
-        for candidate in model_candidates:
+        self.current_model_name = self._pick_model()
+        self.model = genai.GenerativeModel(
+            self.current_model_name,
+            system_instruction=SYSTEM_PROMPT,
+        )
+        log.info("Gemini 模型初始化完成：%s", self.current_model_name)
+
+    def _pick_model(self) -> str:
+        for candidate in self.model_candidates:
             try:
                 test_model = genai.GenerativeModel(candidate, system_instruction="test")
                 test_model.generate_content("hi")
-                chosen = candidate
-                break
+                return candidate
             except Exception:
                 log.warning("模型 %s 不可用，嘗試下一個…", candidate)
+        return self.model_candidates[0]
+
+    def _switch_model(self) -> bool:
+        """429 時嘗試切換到下一個可用模型。"""
+        current_idx = -1
+        for i, name in enumerate(self.model_candidates):
+            if name == self.current_model_name:
+                current_idx = i
+                break
+        remaining = self.model_candidates[current_idx + 1:] + self.model_candidates[:current_idx]
+        for candidate in remaining:
+            try:
+                test_model = genai.GenerativeModel(candidate, system_instruction="test")
+                test_model.generate_content("hi")
+                self.current_model_name = candidate
+                self.model = genai.GenerativeModel(candidate, system_instruction=SYSTEM_PROMPT)
+                log.info("切換模型至：%s", candidate)
+                return True
+            except Exception:
                 continue
-        self.model = genai.GenerativeModel(
-            chosen,
-            system_instruction=SYSTEM_PROMPT,
-        )
-        log.info("Gemini 模型初始化完成：%s", chosen)
+        return False
 
     async def ask(self, question: str, context_chunks: list[dict]) -> str:
         """組合知識庫上下文 + 問題，呼叫 Gemini 回答。"""
@@ -193,17 +211,22 @@ class GeminiHelper:
 
 請根據上述知識庫內容回答。"""
 
-        try:
-            response = await asyncio.to_thread(
-                self.model.generate_content, prompt
-            )
-            text = response.text.strip()
-            if len(text) > MAX_RESPONSE_CHARS:
-                text = text[:MAX_RESPONSE_CHARS] + "…（回答過長已截斷）"
-            return text
-        except Exception as e:
-            log.error("Gemini API 錯誤: %s", e)
-            return f"⚠ AI 回答時發生錯誤：{e}"
+        for attempt in range(2):
+            try:
+                response = await asyncio.to_thread(
+                    self.model.generate_content, prompt
+                )
+                text = response.text.strip()
+                if len(text) > MAX_RESPONSE_CHARS:
+                    text = text[:MAX_RESPONSE_CHARS] + "…（回答過長已截斷）"
+                return text
+            except Exception as e:
+                err_str = str(e)
+                log.error("Gemini API 錯誤 (attempt %d): %s", attempt + 1, err_str)
+                if "429" in err_str or "quota" in err_str.lower():
+                    if self._switch_model():
+                        continue
+                return "⚠ AI 繁忙中，請稍後再試。"
 
 
 # ─────────────────────────────────────────────
