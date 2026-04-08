@@ -44,7 +44,20 @@ public final class PlayerProgressService {
             progress.unlockedMachines.add(machineId);
         }
         progress.unlockedItems.add("tech_book");
-        this.unlockByRequirement(player.getUniqueId(), "initial");
+        // 只直接解鎖標記為 "initial" 的物品/機器，不觸發級聯
+        // （級聯在玩家實際操作機器時由 unlockByRequirement 處理）
+        for (final var item : this.registry.allItems()) {
+            final String req = item.unlockRequirement();
+            if (req == null || req.isBlank() || req.equalsIgnoreCase("initial")) {
+                progress.unlockedItems.add(item.id());
+            }
+        }
+        for (final var machine : this.registry.allMachines()) {
+            final String req = machine.unlockRequirement();
+            if (req == null || req.isBlank() || req.equalsIgnoreCase("initial")) {
+                progress.unlockedMachines.add(machine.id());
+            }
+        }
         if (this.getStat(player.getUniqueId(), "starter_research_xp_seeded") <= 0L) {
             this.addTechXp(player.getUniqueId(), this.configLong("research.xp.starting", 36L));
             this.incrementStat(player.getUniqueId(), "starter_research_xp_seeded", 1L);

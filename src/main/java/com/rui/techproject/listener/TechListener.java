@@ -359,6 +359,11 @@ public final class TechListener implements Listener {
             return;
         }
         if (!this.plugin.getTechBookService().isAwaitingSearchInput(event.getPlayer().getUniqueId())) {
+            // AI 幫手輸入
+            if (this.plugin.getTechBookService().isAwaitingHelperInput(event.getPlayer().getUniqueId())) {
+                event.setCancelled(true);
+                this.plugin.getTechBookService().consumeHelperInput(event.getPlayer(), plainText);
+            }
             return;
         }
         event.setCancelled(true);

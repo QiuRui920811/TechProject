@@ -13,6 +13,7 @@ import com.rui.techproject.model.TechTier;
 import com.rui.techproject.util.ItemFactoryUtil;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.Color;
@@ -104,6 +105,7 @@ public final class TechBookService {
     private final Map<String, Map<String, GuideEntry>> guidesByLocale = new LinkedHashMap<>();
     private final Map<String, StructurePreview> machineStructurePreviews = new LinkedHashMap<>();
     private final java.util.Set<UUID> pendingSearchInput = java.util.concurrent.ConcurrentHashMap.newKeySet();
+    private final java.util.Set<UUID> pendingHelperInput = java.util.concurrent.ConcurrentHashMap.newKeySet();
     private final java.util.Set<UUID> openBookViewPlayers = java.util.concurrent.ConcurrentHashMap.newKeySet();
     private final Map<UUID, Inventory> openBookInventories = new java.util.concurrent.ConcurrentHashMap<>();
     private final Map<UUID, String> lastBookAction = new java.util.concurrent.ConcurrentHashMap<>();
@@ -160,7 +162,7 @@ public final class TechBookService {
 
     public void openCategoryHub(final Player player) {
         final Inventory inventory = this.createHudBookInventory();
-        inventory.setItem(4, this.info(Material.ENCHANTED_BOOK, "功能分類", List.of("先選你要看的功能類別", "進去後直接看內容，想縮小再用階級篩選")));
+        inventory.setItem(4, this.itemFactory.tagGuiAction(this.guiButton("hub-wiki", Material.BOOK, "科技百科網站", List.of("點擊開啟科技專案網頁版百科", "包含機器、配方、教學等")), "wiki-link"));
 
         final GuideCategory[] order = HUB_ORDER;
         final int[] slots = {10, 12, 14, 16, 19, 21, 23, 25, 31};
@@ -172,7 +174,7 @@ public final class TechBookService {
         inventory.setItem(47, this.itemFactory.tagGuiAction(this.guiButton("hub-guide-list", Material.WRITABLE_BOOK, "科技指南", List.of("教學 / 配線 / 物流 / 升級")), "guide-list:0"));
         inventory.setItem(48, this.itemFactory.tagGuiAction(this.guiButton("hub-search", Material.COMPASS, "搜尋物品", List.of("點擊後在聊天輸入關鍵字", "可搜尋物品 / 機器 / 指南 / 儀式")), "search-prompt"));
         inventory.setItem(49, this.itemFactory.tagGuiAction(this.guiButton("hub-book-claim", Material.ENCHANTED_BOOK, "補發科技書", List.of("遺失時點這裡補一本文字書")), "book-claim"));
-        inventory.setItem(50, this.info(Material.CRAFTING_TABLE, "如何使用", List.of("1. 先選功能分類", "2. 直接看內容", "3. 用搜尋快速找目標", "4. 需要時再用階級篩選")));
+        inventory.setItem(50, this.itemFactory.tagGuiAction(this.guiButton("hub-ai-helper", Material.PLAYER_HEAD, "AI 科技幫手", List.of("點擊後在聊天輸入你的問題", "AI 會幫你查詢科技知識庫")), "helper-prompt"));
         inventory.setItem(51, this.itemFactory.tagGuiAction(this.guiButton("hub-achievements", Material.DIAMOND, "成就系統", List.of("查看所有成就進度", "包含分類篩選與獎勵")), "achievements"));
         inventory.setItem(52, this.researchOverviewIcon(player.getUniqueId(), null, null, false));
         inventory.setItem(53, this.itemFactory.tagGuiAction(this.guiButton("hub-refresh", Material.BOOK, "重新整理分類", List.of("更新分類解鎖狀態", "也能當成回首頁")), "hub"));
@@ -841,7 +843,7 @@ public final class TechBookService {
     }
 
     private static final java.util.Set<String> NON_REMEMBERABLE_ACTIONS = java.util.Set.of(
-            "hub", "search-prompt", "book-claim", "research", "achievements"
+            "hub", "search-prompt", "helper-prompt", "book-claim", "research", "achievements", "wiki-link"
     );
 
     public void handleAction(final Player player, final String action) {
@@ -884,6 +886,15 @@ public final class TechBookService {
             }
             case "hub" -> this.openCategoryHub(player);
             case "search-prompt" -> this.promptSearch(player);
+            case "helper-prompt" -> this.promptHelper(player);
+            case "wiki-link" -> {
+                player.closeInventory();
+                player.sendMessage(Component.text("➡ ", NamedTextColor.GREEN)
+                        .append(Component.text("點此開啟科技百科網站", NamedTextColor.AQUA)
+                                .clickEvent(ClickEvent.openUrl("https://qiurui920811.github.io/TechProject/"))
+                                .hoverEvent(net.kyori.adventure.text.event.HoverEvent.showText(Component.text("https://qiurui920811.github.io/TechProject/", NamedTextColor.GRAY))))
+                );
+            }
             case "search-results" -> {
                 final String[] detail = argument.split(":", 2);
                 final String query = detail.length > 0 ? detail[0] : "";
@@ -1042,6 +1053,32 @@ public final class TechBookService {
         player.closeInventory();
         player.sendMessage(this.itemFactory.secondary("請在聊天輸入要搜尋的關鍵字，例如：太陽能、物流、虛空、種子。"));
         player.sendMessage(this.itemFactory.warning("輸入 cancel 或 取消 可放棄搜尋。"));
+    }
+
+    private void promptHelper(final Player player) {
+        this.pendingHelperInput.add(player.getUniqueId());
+        player.closeInventory();
+        player.sendMessage(this.itemFactory.hex("🤖 AI 科技幫手", "#55FFFF"));
+        player.sendMessage(this.itemFactory.secondary("請在聊天輸入你的問題，例如：碧礦機怎麼合成？物流節點怎麼用？"));
+        player.sendMessage(this.itemFactory.warning("輸入 cancel 或 取消 可放棄。"));
+    }
+
+    public boolean isAwaitingHelperInput(final UUID uuid) {
+        return uuid != null && this.pendingHelperInput.contains(uuid);
+    }
+
+    public boolean consumeHelperInput(final Player player, final String question) {
+        if (player == null || question == null || !this.pendingHelperInput.remove(player.getUniqueId())) {
+            return false;
+        }
+        final String normalized = question.trim();
+        if (normalized.isBlank() || normalized.equalsIgnoreCase("cancel") || normalized.equalsIgnoreCase("取消")) {
+            player.sendMessage(this.itemFactory.warning("已取消 AI 幫手查詢。"));
+            return true;
+        }
+        // 轉發給 /幫手 (或 /helper) 指令
+        this.plugin.getSafeScheduler().runEntity(player, () -> player.performCommand("幫手 " + normalized));
+        return true;
     }
 
     public void openSearchResults(final Player player, final String query, final int page) {

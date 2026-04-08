@@ -1102,6 +1102,17 @@ items:
       - "自動機 工作站程序槽"
       - "星球資源採樣"
       - "支援配方與解鎖鏈"
+  android_explore_script:
+    display-name: "安卓探索程序"
+    category: ADVANCED
+    icon: SPYGLASS
+    description: "讓 自動機 在任何世界中探索稀有資源，包含古代碎片、綠寶石礦等。"
+    unlock: "android_station"
+    use-cases:
+      - "自動機 工作站程序槽"
+      - "任意世界深層探索"
+      - "稀有礦物自動採集"
+      - "鈾燃料自動化關鍵"
   android_overclock_card:
     display-name: "安卓超頻卡"
     category: ADVANCED
@@ -3226,6 +3237,13 @@ recipes:
     output: "android_planet_script"
     energy: 35
     guide: "量子框架 + 力場發射器 → 量子處理器 → 安卓行星採樣程序"
+  quantum_android_explore_script:
+    machine: "quantum_processor"
+    inputs: ["quantum_frame", "android_memory_matrix"]
+    input-amounts: [2, 2]
+    output: "android_explore_script"
+    energy: 38
+    guide: "量子框架×2 + 安卓記憶矩陣×2 → 量子處理器 → 安卓探索程序"
   advanced_android_station:
     machine: "advanced_assembler"
     inputs: ["android_frame", "android_memory_matrix"]

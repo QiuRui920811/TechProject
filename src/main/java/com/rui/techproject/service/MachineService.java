@@ -95,7 +95,8 @@ public final class MachineService {
         LOGGING("android_logging_script", "伐木程序", 12L, 2, 12L),
         SALVAGE("android_salvage_script", "回收程序", 6L, 1, 6L),
         PLANET("android_planet_script", "行星採樣程序", 10L, 2, 14L),
-        HUNT(null, "獵捕程序", 10L, 2, 16L);
+        HUNT(null, "獵捕程序", 10L, 2, 16L),
+        EXPLORE("android_explore_script", "探索程序", 15L, 3, 20L);
 
         private final String itemId;
         private final String displayName;
@@ -2327,9 +2328,6 @@ public final class MachineService {
         if (world == null || machine.ticksActive() % 8L != 0L) {
             return;
         }
-        if (!this.isAllowedWorld(world)) {
-            return;
-        }
         final int radius = 2 + this.countUpgrade(machine, "range_upgrade");
         final int harvestAttempts = 1 + this.countUpgrade(machine, "speed_upgrade");
         int harvested_total = 0;
@@ -2490,9 +2488,6 @@ public final class MachineService {
         if (world == null || machine.ticksActive() % 12L != 0L) {
             return;
         }
-        if (!this.isAllowedWorld(world)) {
-            return;
-        }
         final int radius = 2 + Math.min(2, this.countUpgrade(machine, "range_upgrade"));
         final int maxLogs = 32 + this.countUpgrade(machine, "stack_upgrade") * 12;
         final LocationKey selfKey = machine.locationKey();
@@ -2610,9 +2605,6 @@ public final class MachineService {
         if (world == null || machine.ticksActive() % 16L != 0L) {
             return;
         }
-        if (!this.isAllowedWorld(world)) {
-            return;
-        }
         if (this.countAdjacentWater(world, location) < 3) {
             return;
         }
@@ -2652,10 +2644,6 @@ public final class MachineService {
             this.setRuntimeState(machine, MachineRuntimeState.RUNNING, "巡邏中：" + script.displayName());
             return;
         }
-        if (script != AndroidScriptProfile.PLANET && !this.isAllowedWorld(world)) {
-            this.setRuntimeState(machine, MachineRuntimeState.STANDBY, "目前世界停用戶外自動機");
-            return;
-        }
         if (script == AndroidScriptProfile.PLANET && !this.plugin.getPlanetService().isPlanetWorld(world)) {
             this.setRuntimeState(machine, MachineRuntimeState.STANDBY, "不是可採樣星球");
             return;
@@ -2666,6 +2654,7 @@ public final class MachineService {
             case SALVAGE -> this.runAndroidSalvage(machine, location, script);
             case PLANET -> this.runAndroidPlanetSampling(machine, location, script);
             case HUNT -> this.runAndroidHunt(machine, location, script);
+            case EXPLORE -> this.runAndroidExplore(machine, location, script);
         };
         if (acted) {
             this.setRuntimeState(machine, MachineRuntimeState.RUNNING, "執行中：" + script.displayName());
@@ -2674,6 +2663,9 @@ public final class MachineService {
             this.progressService.unlockByRequirement(machine.owner(), "machine:" + definition.id());
             if (script == AndroidScriptProfile.HUNT) {
                 this.progressService.incrementStat(machine.owner(), "android_hunts", 1L);
+            }
+            if (script == AndroidScriptProfile.EXPLORE) {
+                this.progressService.incrementStat(machine.owner(), "android_explored", 1L);
             }
             return;
         }
@@ -2877,6 +2869,75 @@ public final class MachineService {
         }
         this.advanceAndroidPatrol(machine, location);
         return false;
+    }
+
+    private boolean runAndroidExplore(final PlacedMachine machine, final Location location, final AndroidScriptProfile script) {
+        final World world = location.getWorld();
+        if (world == null) {
+            return false;
+        }
+        final Location patrol = this.currentAndroidPatrolTarget(machine, location);
+        final double chance = 0.12 + this.countUpgrade(machine, "speed_upgrade") * 0.04;
+        if (java.util.concurrent.ThreadLocalRandom.current().nextDouble() > chance) {
+            this.advanceAndroidPatrol(machine, location);
+            return false;
+        }
+        final List<ItemStack> outputs = this.rollExploreLoot(world, patrol);
+        if (outputs.isEmpty() || !this.canStoreAllOutputs(machine, outputs)) {
+            this.advanceAndroidPatrol(machine, location);
+            return false;
+        }
+        if (!this.consumeAndroidRuntime(machine, location, script.baseEnergyCost(), this.androidFuelCost(script, machine))) {
+            return false;
+        }
+        this.storeOutputs(machine, outputs);
+        this.progressService.incrementStat(machine.owner(), "android_explore_finds", outputs.stream().mapToInt(ItemStack::getAmount).sum());
+        this.progressService.unlockItem(machine.owner(), "android_explore_script");
+        world.spawnParticle(Particle.TRIAL_SPAWNER_DETECTION, patrol.getX() + 0.5, patrol.getY() + 1.0, patrol.getZ() + 0.5, 10, 0.3, 0.3, 0.3, 0.02);
+        world.playSound(patrol, Sound.UI_CARTOGRAPHY_TABLE_TAKE_RESULT, 0.5f, 1.2f);
+        this.advanceAndroidPatrol(machine, location);
+        return true;
+    }
+
+    private List<ItemStack> rollExploreLoot(final World world, final Location location) {
+        final List<ItemStack> result = new ArrayList<>();
+        final java.util.concurrent.ThreadLocalRandom rng = java.util.concurrent.ThreadLocalRandom.current();
+        final World.Environment env = world.getEnvironment();
+        switch (env) {
+            case NETHER -> {
+                final double roll = rng.nextDouble();
+                if (roll < 0.08) result.add(new ItemStack(Material.ANCIENT_DEBRIS, 1));
+                else if (roll < 0.25) result.add(new ItemStack(Material.QUARTZ, rng.nextInt(2, 5)));
+                else if (roll < 0.50) result.add(new ItemStack(Material.GOLD_NUGGET, rng.nextInt(3, 8)));
+                else if (roll < 0.75) result.add(new ItemStack(Material.GLOWSTONE_DUST, rng.nextInt(2, 6)));
+                else result.add(new ItemStack(Material.MAGMA_CREAM, rng.nextInt(1, 3)));
+            }
+            case THE_END -> {
+                final double roll = rng.nextDouble();
+                if (roll < 0.12) result.add(new ItemStack(Material.ENDER_PEARL, rng.nextInt(1, 3)));
+                else if (roll < 0.35) result.add(new ItemStack(Material.CHORUS_FRUIT, rng.nextInt(2, 5)));
+                else if (roll < 0.50) result.add(new ItemStack(Material.SHULKER_SHELL, 1));
+                else result.add(new ItemStack(Material.END_STONE, rng.nextInt(4, 8)));
+            }
+            default -> {
+                final int y = location.getBlockY();
+                final double roll = rng.nextDouble();
+                if (y < 16) {
+                    if (roll < 0.06) result.add(new ItemStack(Material.DIAMOND, 1));
+                    else if (roll < 0.18) result.add(new ItemStack(Material.EMERALD_ORE, 1));
+                    else if (roll < 0.35) result.add(new ItemStack(Material.RAW_GOLD, rng.nextInt(1, 3)));
+                    else if (roll < 0.55) result.add(new ItemStack(Material.LAPIS_LAZULI, rng.nextInt(3, 7)));
+                    else result.add(new ItemStack(Material.RAW_COPPER, rng.nextInt(3, 6)));
+                } else {
+                    if (roll < 0.04) result.add(new ItemStack(Material.DIAMOND, 1));
+                    else if (roll < 0.12) result.add(new ItemStack(Material.EMERALD_ORE, 1));
+                    else if (roll < 0.30) result.add(new ItemStack(Material.AMETHYST_SHARD, rng.nextInt(2, 5)));
+                    else if (roll < 0.50) result.add(new ItemStack(Material.RAW_IRON, rng.nextInt(2, 4)));
+                    else result.add(new ItemStack(Material.RAW_COPPER, rng.nextInt(3, 6)));
+                }
+            }
+        }
+        return result;
     }
 
     private void tickAndroidItemInterface(final PlacedMachine machine, final Location location) {
@@ -3381,9 +3442,6 @@ public final class MachineService {
     private void tickVacuumInlet(final PlacedMachine machine, final Location location) {
         final World world = location.getWorld();
         if (world == null) {
-            return;
-        }
-        if (!this.isAllowedWorld(world)) {
             return;
         }
         final long interval = Math.max(1L, 4L - this.countUpgrade(machine, "speed_upgrade"));
@@ -5708,30 +5766,32 @@ public final class MachineService {
 
     /**
      * 電動篩礦機礫石掉落表（100% 產出，無空回合）：
-     * 20% 鐵粉  18% 銅粉  17% 錫粉  15% 鋅粉  18% 篩出礦砂  12% 矽晶
+     * 18% 鐵粉  16% 銅粉  14% 錫粉  12% 鋅粉  16% 篩出礦砂  10% 矽晶  14% 鉛粉
      */
     private String rollSifterGravelDrop() {
         final double r = ThreadLocalRandom.current().nextDouble();
-        if (r < 0.20) return "iron_dust";
-        if (r < 0.38) return "copper_dust";
-        if (r < 0.55) return "tin_dust";
-        if (r < 0.70) return "zinc_dust";
-        if (r < 0.88) return "sifted_ore";
-        return "silicon";
+        if (r < 0.18) return "iron_dust";
+        if (r < 0.34) return "copper_dust";
+        if (r < 0.48) return "tin_dust";
+        if (r < 0.60) return "zinc_dust";
+        if (r < 0.76) return "sifted_ore";
+        if (r < 0.86) return "silicon";
+        return "lead_dust";
     }
 
     /**
      * 電動篩礦機靈魂沙掉落表（100% 產出，無空回合）：
-     * 22% 鉛粉  20% 篩出礦砂  18% 金粒  16% 石英  14% 鋅粉  10% 鐵粉
+     * 19% 鉛粉  17% 篩出礦砂  16% 金粒  14% 石英  12% 鋅粉  10% 鐵粉  12% 矽晶
      */
     private String rollSifterSoulSandDrop() {
         final double r = ThreadLocalRandom.current().nextDouble();
-        if (r < 0.22) return "lead_dust";
-        if (r < 0.42) return "sifted_ore";
-        if (r < 0.60) return "gold_nugget";
-        if (r < 0.76) return "quartz";
-        if (r < 0.90) return "zinc_dust";
-        return "iron_dust";
+        if (r < 0.19) return "lead_dust";
+        if (r < 0.36) return "sifted_ore";
+        if (r < 0.52) return "gold_nugget";
+        if (r < 0.66) return "quartz";
+        if (r < 0.78) return "zinc_dust";
+        if (r < 0.88) return "iron_dust";
+        return "silicon";
     }
 
     private void tickManualCrusher(final PlacedMachine machine,
@@ -7117,10 +7177,7 @@ public final class MachineService {
     }
 
     private boolean isWorldInteractionMachine(final String machineId) {
-        return switch (machineId.toLowerCase()) {
-            case "crop_harvester", "planetary_harvester", "tree_feller", "mob_collector", "fishing_dock", "vacuum_inlet", "quarry_drill", "storm_turbine", "android_station" -> true;
-            default -> false;
-        };
+        return "quarry_drill".equalsIgnoreCase(machineId);
     }
 
     private boolean isSafeCropTarget(final Block crop) {

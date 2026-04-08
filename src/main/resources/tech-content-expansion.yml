@@ -4620,6 +4620,14 @@ recipes:
     output-count: 2
     energy: 12
     guide: 綠寶石礦石 → 電動粉碎機 → 鈾粉×2
+  crush_emerald_uranium:
+    machine: electric_crusher
+    inputs: [EMERALD]
+    input-amounts: [1]
+    output: uranium_dust
+    output-count: 1
+    energy: 14
+    guide: 綠寶石 → 電動粉碎機 → 鈾粉×1
   centrifuge_enriched_uranium:
     machine: electric_centrifuge
     inputs: [uranium_dust]
