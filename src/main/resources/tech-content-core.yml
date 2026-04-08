@@ -3523,7 +3523,7 @@ recipes:
   electric_crusher_iron_ore:
     machine: "electric_crusher"
     inputs: ["iron_ore"]
-    input-amounts: [2]
+    input-amounts: [1]
     output: "iron_dust"
     count: 2
     energy: 15
@@ -3531,7 +3531,7 @@ recipes:
   electric_crusher_copper_ore:
     machine: "electric_crusher"
     inputs: ["copper_ore"]
-    input-amounts: [2]
+    input-amounts: [1]
     output: "copper_dust"
     count: 2
     energy: 15
@@ -3539,7 +3539,7 @@ recipes:
   electric_crusher_quartz:
     machine: "electric_crusher"
     inputs: ["quartz"]
-    input-amounts: [2]
+    input-amounts: [1]
     output: "silicon"
     count: 2
     energy: 18
@@ -3547,7 +3547,7 @@ recipes:
   electric_crusher_raw_iron:
     machine: "electric_crusher"
     inputs: ["raw_iron"]
-    input-amounts: [2]
+    input-amounts: [1]
     output: "iron_dust"
     count: 2
     energy: 15
@@ -3555,7 +3555,7 @@ recipes:
   electric_crusher_raw_copper:
     machine: "electric_crusher"
     inputs: ["raw_copper"]
-    input-amounts: [2]
+    input-amounts: [1]
     output: "copper_dust"
     count: 2
     energy: 15
@@ -3563,7 +3563,7 @@ recipes:
   electric_crusher_coal:
     machine: "electric_crusher"
     inputs: ["coal"]
-    input-amounts: [2]
+    input-amounts: [1]
     output: "coal_dust"
     count: 2
     energy: 15
@@ -3843,7 +3843,6 @@ recipes:
     input-amounts: [1, 1]
     output: "bronze_ingot"
     energy: 16
-    allow-stack-bonus: false
     guide: "銅粉 + 錫粉 → 合金熔煉爐 → 青銅錠"
   smeltery_solder:
     machine: "smeltery"
@@ -3851,7 +3850,6 @@ recipes:
     input-amounts: [1, 1]
     output: "solder_alloy"
     energy: 16
-    allow-stack-bonus: false
     guide: "鉛粉 + 錫粉 → 合金熔煉爐 → 焊錫合金"
   smeltery_brass:
     machine: "smeltery"
@@ -3859,7 +3857,6 @@ recipes:
     input-amounts: [1, 1]
     output: "brass_ingot"
     energy: 16
-    allow-stack-bonus: false
     guide: "銅粉 + 鋅粉 → 合金熔煉爐 → 黃銅錠"
   # ═══ 新金屬熔爐配方 ═══
   furnace_tin_dust:
