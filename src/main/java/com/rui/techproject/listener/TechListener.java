@@ -520,6 +520,10 @@ public final class TechListener implements Listener {
         if (earlyMachineDeny) {
             event.setUseInteractedBlock(Result.DENY);
         }
+        // 傳送面板：任何手持物（含空手）都應能互動，不受其他插件 DENY 影響
+        final boolean earlyTeleportPad = event.getAction() == Action.RIGHT_CLICK_BLOCK
+                && event.getClickedBlock() != null
+                && this.plugin.getMachineService().isTeleportPadBlock(event.getClickedBlock());
         if (event.getHand() == EquipmentSlot.OFF_HAND) {
             // 副手持科技物品時阻止原版行為（末影珍珠投擲、終界之眼飛出、玻璃瓶裝水等）
             final ItemStack offHandStack = event.getItem();
@@ -593,8 +597,8 @@ public final class TechListener implements Listener {
             return;
         }
         if (event.useInteractedBlock() == Result.DENY || event.useItemInHand() == Result.DENY) {
-            // 若 DENY 是我們自己設的（早期烽火台攔截），仍繼續處理機器互動
-            if (!earlyMachineDeny) {
+            // 若 DENY 是我們自己設的（早期烽火台攔截）或傳送面板，仍繼續處理機器互動
+            if (!earlyMachineDeny && !earlyTeleportPad) {
                 return;
             }
         }
@@ -666,9 +670,10 @@ public final class TechListener implements Listener {
                 return;
             }
             // ── 蹲下+手持可放置方塊：允許原版放置（方便在機器旁放方塊 / 放置新機器）──
-            // 採礦鑽機例外：蹲下右鍵一律交給 handleManagedMachineInteract 做啟停切換
+            // 採礦鑽機 / 傳送面板例外：蹲下右鍵一律交給 handleManagedMachineInteract
             if (event.getPlayer().isSneaking() && stack != null && stack.getType().isBlock()
-                    && !this.plugin.getMachineService().isQuarryBlock(machineBlock)) {
+                    && !this.plugin.getMachineService().isQuarryBlock(machineBlock)
+                    && !this.plugin.getMachineService().isTeleportPadBlock(machineBlock)) {
                 return;
             }
             event.setUseInteractedBlock(Result.DENY);

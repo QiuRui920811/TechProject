@@ -4761,6 +4761,11 @@ public final class MachineService {
         return machine != null && this.isQuarryLike(machine.machineId());
     }
 
+    public boolean isTeleportPadBlock(final Block block) {
+        final PlacedMachine machine = this.machines.get(LocationKey.from(block.getLocation()));
+        return machine != null && this.normalizeId(machine.machineId()).equals("teleport_pad");
+    }
+
     private void splitAndIncrementUses(final PlacedMachine machine, final int slot, final int maxBreed) {
         final ItemStack stack = machine.inputAt(slot);
         if (stack == null) return;
