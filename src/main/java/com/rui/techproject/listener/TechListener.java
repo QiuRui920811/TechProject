@@ -2321,7 +2321,7 @@ public final class TechListener implements Listener {
                         target.getWorld().dropItemNaturally(target.getLocation().add(0.5, 0.4, 0.5), drop);
                     }
                     target.getWorld().spawnParticle(Particle.BLOCK, target.getLocation().add(0.5, 0.5, 0.5), 6, 0.2, 0.2, 0.2, target.getBlockData());
-                    target.setType(Material.AIR, false);
+                    target.setType(Material.AIR, true);
                     broken++;
                 }
             }
@@ -2380,7 +2380,7 @@ public final class TechListener implements Listener {
                 block.getWorld().dropItemNaturally(block.getLocation().add(0.5, 0.4, 0.5), drop);
             }
             block.getWorld().spawnParticle(Particle.BLOCK, block.getLocation().add(0.5, 0.5, 0.5), 6, 0.2, 0.2, 0.2, block.getBlockData());
-            block.setType(Material.AIR, false);
+            block.setType(Material.AIR, true);
             broken++;
         }
         if (broken > 0) {
