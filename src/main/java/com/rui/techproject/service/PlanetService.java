@@ -175,6 +175,7 @@ public final class PlanetService {
         final Location coreLocation;
         final Set<java.util.UUID> aliveMobs = ConcurrentHashMap.newKeySet();
         int currentWave;
+        int waveGeneration;
         long waveStartTick;
         boolean completed;
         boolean failed;
@@ -4596,6 +4597,7 @@ public final class PlanetService {
         }
 
         challenge.waveStartTick = world.getFullTime();
+        challenge.waveGeneration++;
 
         final int waveNum = waveIndex + 1;
         player.sendMessage(this.itemFactory.secondary("▸ 第 " + waveNum + "/" + RUIN_WAVE_COUNTS.length + " 波 — " + mobCount + " 隻敵人逼近！"));
@@ -4656,13 +4658,15 @@ public final class PlanetService {
             });
         }
 
-        // 超時檢查
-        this.scheduler.runGlobalDelayed(task -> this.checkRuinWaveTimeout(challenge), RUIN_WAVE_TIMEOUT_TICKS);
+        // 超時檢查（記錄當前波世代，避免舊波超時誤殺新波）
+        final int gen = challenge.waveGeneration;
+        this.scheduler.runGlobalDelayed(task -> this.checkRuinWaveTimeout(challenge, gen), RUIN_WAVE_TIMEOUT_TICKS);
     }
 
     private void showRuinBossBar(final RuinChallenge challenge, final Player player, final int waveNum, final int mobCount) {
         this.hideRuinBossBar(challenge);
-        final Component title = Component.text("⚔ 第 " + waveNum + "/" + RUIN_WAVE_COUNTS.length + " 波 — 剩餘 " + mobCount + " 隻 — 90 秒", NamedTextColor.GOLD);
+        final int totalSeconds = (int) (RUIN_WAVE_TIMEOUT_TICKS / 20L);
+        final Component title = Component.text("⚔ 第 " + waveNum + "/" + RUIN_WAVE_COUNTS.length + " 波 — 剩餘 " + mobCount + " 隻 — " + totalSeconds + " 秒", NamedTextColor.GOLD);
         challenge.bossBar = BossBar.bossBar(title, 1.0f, BossBar.Color.RED, BossBar.Overlay.PROGRESS);
         player.showBossBar(challenge.bossBar);
     }
@@ -4707,8 +4711,12 @@ public final class PlanetService {
         challenge.bossBar = null;
     }
 
-    private void checkRuinWaveTimeout(final RuinChallenge challenge) {
+    private void checkRuinWaveTimeout(final RuinChallenge challenge, final int generation) {
         if (challenge.failed || challenge.completed) {
+            return;
+        }
+        // 若波世代不符，表示此超時屬於舊波，已被新波取代，忽略
+        if (challenge.waveGeneration != generation) {
             return;
         }
         if (!challenge.aliveMobs.isEmpty()) {
