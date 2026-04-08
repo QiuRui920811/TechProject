@@ -155,43 +155,26 @@ class GeminiHelper:
             "gemini-2.5-flash-lite",
             "gemini-2.0-flash-lite",
             "gemini-2.0-flash",
-            "gemini-1.5-flash",
         ]
-        self.current_model_name = self._pick_model()
+        # 不做初始化測試請求（避免消耗免費配額），直接使用第一個模型
+        self.current_model_idx = 0
+        self.current_model_name = self.model_candidates[0]
         self.model = genai.GenerativeModel(
             self.current_model_name,
             system_instruction=SYSTEM_PROMPT,
         )
         log.info("Gemini 模型初始化完成：%s", self.current_model_name)
 
-    def _pick_model(self) -> str:
-        for candidate in self.model_candidates:
-            try:
-                test_model = genai.GenerativeModel(candidate, system_instruction="test")
-                test_model.generate_content("hi")
-                return candidate
-            except Exception:
-                log.warning("模型 %s 不可用，嘗試下一個…", candidate)
-        return self.model_candidates[0]
-
     def _switch_model(self) -> bool:
-        """429 時嘗試切換到下一個可用模型。"""
-        current_idx = -1
-        for i, name in enumerate(self.model_candidates):
-            if name == self.current_model_name:
-                current_idx = i
-                break
-        remaining = self.model_candidates[current_idx + 1:] + self.model_candidates[:current_idx]
-        for candidate in remaining:
-            try:
-                test_model = genai.GenerativeModel(candidate, system_instruction="test")
-                test_model.generate_content("hi")
-                self.current_model_name = candidate
-                self.model = genai.GenerativeModel(candidate, system_instruction=SYSTEM_PROMPT)
-                log.info("切換模型至：%s", candidate)
-                return True
-            except Exception:
-                continue
+        """遇到 429 / 404 時切換到下一個模型（不做測試請求）。"""
+        for offset in range(1, len(self.model_candidates)):
+            idx = (self.current_model_idx + offset) % len(self.model_candidates)
+            candidate = self.model_candidates[idx]
+            self.current_model_idx = idx
+            self.current_model_name = candidate
+            self.model = genai.GenerativeModel(candidate, system_instruction=SYSTEM_PROMPT)
+            log.info("切換模型至：%s", candidate)
+            return True
         return False
 
     async def ask(self, question: str, context_chunks: list[dict]) -> str:
@@ -211,7 +194,7 @@ class GeminiHelper:
 
 請根據上述知識庫內容回答。"""
 
-        for attempt in range(2):
+        for attempt in range(len(self.model_candidates)):
             try:
                 response = await asyncio.to_thread(
                     self.model.generate_content, prompt
@@ -222,9 +205,10 @@ class GeminiHelper:
                 return text
             except Exception as e:
                 err_str = str(e)
-                log.error("Gemini API 錯誤 (attempt %d): %s", attempt + 1, err_str)
-                if "429" in err_str or "quota" in err_str.lower():
-                    if self._switch_model():
+                log.error("Gemini API 錯誤 (%s, attempt %d): %s",
+                          self.current_model_name, attempt + 1, err_str)
+                if "429" in err_str or "quota" in err_str.lower() or "404" in err_str:
+                    if attempt + 1 < len(self.model_candidates) and self._switch_model():
                         continue
                 return "⚠ AI 繁忙中，請稍後再試。"
 
