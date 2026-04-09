@@ -1783,6 +1783,11 @@ public final class PlanetService {
                     world.setStorm(true);
                     world.setThundering(true);
                 }
+                case "labyrinth" -> {
+                    world.setTime(18000L); // 午夜
+                    world.setStorm(true);  // 厚雲層遮蔽天空
+                    world.setThundering(false);
+                }
                 default -> {
                     world.setTime(6000L);
                     world.setStorm(false);
@@ -3682,9 +3687,12 @@ public final class PlanetService {
                 }
             }
             case "labyrinth" -> {
+                // DARKNESS 效果製造恐怖氛圍（8 秒，持續刷新）
+                player.addPotionEffect(new PotionEffect(PotionEffectType.DARKNESS, 160, 0, true, false, false));
                 if (this.ambientRandom.nextInt(2) == 0) {
                     player.getWorld().spawnParticle(Particle.SCULK_SOUL, origin, 8, 1.1, 0.6, 1.1, 0.015);
                     player.getWorld().spawnParticle(Particle.SMOKE, origin, 6, 0.9, 0.45, 0.9, 0.01);
+                    player.getWorld().spawnParticle(Particle.ASH, origin, 15, 2.0, 1.5, 2.0, 0.02);
                     this.spawnAmbientDustBurst(player, origin, Color.fromRGB(22, 60, 82), Color.fromRGB(10, 180, 160), 9, 0.88D);
                 }
                 if (this.ambientRandom.nextInt(4) == 0) {
@@ -3692,6 +3700,15 @@ public final class PlanetService {
                 }
                 if (this.ambientRandom.nextInt(8) == 0) {
                     this.playAttachedPlanetSound(player, Sound.AMBIENT_SOUL_SAND_VALLEY_MOOD, SoundCategory.AMBIENT, 0.55f, 0.38f);
+                }
+                if (this.ambientRandom.nextInt(12) == 0) {
+                    this.playAttachedPlanetSound(player, Sound.ENTITY_WARDEN_AMBIENT, SoundCategory.AMBIENT, 0.3f, 0.4f);
+                }
+                if (this.ambientRandom.nextInt(20) == 0) {
+                    this.playAttachedPlanetSound(player, Sound.ENTITY_PHANTOM_AMBIENT, SoundCategory.AMBIENT, 0.35f, 0.5f);
+                }
+                if (this.ambientRandom.nextInt(15) == 0) {
+                    this.playAttachedPlanetSound(player, Sound.AMBIENT_NETHER_WASTES_MOOD, SoundCategory.AMBIENT, 0.4f, 0.3f);
                 }
             }
             default -> {
@@ -6476,29 +6493,37 @@ public final class PlanetService {
                             }
                             chunkData.setBlock(localX, y, localZ, wallMat);
                         }
-                        // 頂部裝飾：每隔幾格放置牆頭尖柱
-                        final long capHash = mazeBorderHash(seed, worldX, wallTop, worldZ, worldX + worldZ);
-                        if ((capHash & 0x7) == 0) {
-                            chunkData.setBlock(localX, wallTop + 1, localZ, Material.DEEPSLATE_BRICK_WALL);
-                        }
                     }
                     // ── The Glade（倖存者基地）結構 ──
                     if ("labyrinth".equals(this.planetId)
-                            && Math.abs(worldX) < GLADE_HALF - 1 && Math.abs(worldZ) < GLADE_HALF - 1) {
+                            && Math.abs(worldX) < GLADE_HALF - 2 && Math.abs(worldZ) < GLADE_HALF - 2) {
                         final int gladeFloor = column.surfaceY();
-                        // 中央篝火（3×3 鵝卵石平台）
-                        if (Math.abs(worldX) <= 1 && Math.abs(worldZ) <= 1) {
-                            chunkData.setBlock(localX, gladeFloor, localZ, Material.COBBLESTONE);
+                        // 中央篝火（5×5 石磚平台 + 火焰）
+                        if (Math.abs(worldX) <= 2 && Math.abs(worldZ) <= 2) {
+                            chunkData.setBlock(localX, gladeFloor, localZ, Material.STONE_BRICKS);
                             if (worldX == 0 && worldZ == 0) {
                                 chunkData.setBlock(localX, gladeFloor + 1, localZ, Material.CAMPFIRE);
+                            } else if (Math.abs(worldX) == 2 && Math.abs(worldZ) == 2) {
+                                chunkData.setBlock(localX, gladeFloor + 1, localZ, Material.LANTERN);
                             }
                         } else {
-                            // 基地地面材質變化（泥路 / 粗泥）
+                            // 基地地面材質：石磚為主 + 深板岩點綴 + 燈籠照明
                             final long pathHash = mazeBorderHash(seed, worldX, 0, worldZ, 0);
-                            if ((pathHash & 0x7) < 2) {
-                                chunkData.setBlock(localX, gladeFloor, localZ, Material.DIRT_PATH);
-                            } else if ((pathHash & 0xF) == 3) {
-                                chunkData.setBlock(localX, gladeFloor, localZ, Material.COARSE_DIRT);
+                            final int dist = Math.max(Math.abs(worldX), Math.abs(worldZ));
+                            if (dist >= GLADE_HALF - 8) {
+                                // 外圈：粗糙深板岩
+                                chunkData.setBlock(localX, gladeFloor, localZ,
+                                        (pathHash & 0x3) == 0 ? Material.COBBLED_DEEPSLATE : Material.DEEPSLATE);
+                            } else if ((pathHash & 0xF) == 0) {
+                                chunkData.setBlock(localX, gladeFloor, localZ, Material.POLISHED_DEEPSLATE);
+                            } else if ((pathHash & 0x7) < 2) {
+                                chunkData.setBlock(localX, gladeFloor, localZ, Material.STONE_BRICK_SLAB);
+                            } else {
+                                chunkData.setBlock(localX, gladeFloor, localZ, Material.STONE_BRICKS);
+                            }
+                            // 每 8 格放置燈籠
+                            if (worldX % 8 == 0 && worldZ % 8 == 0 && dist < GLADE_HALF - 8) {
+                                chunkData.setBlock(localX, gladeFloor + 1, localZ, Material.LANTERN);
                             }
                         }
                         // 四間小木屋（5×5×4）
@@ -6543,6 +6568,21 @@ public final class PlanetService {
             return new Location(world, 0.5, y, 0.5);
         }
 
+        @Override
+        public boolean shouldGenerateStructures() {
+            return !"labyrinth".equals(this.planetId);
+        }
+
+        @Override
+        public boolean shouldGenerateDecorations() {
+            return !"labyrinth".equals(this.planetId);
+        }
+
+        @Override
+        public boolean shouldGenerateCaves() {
+            return !"labyrinth".equals(this.planetId);
+        }
+
         // ─── Labyrinth 迷宮牆壁生成 ───
 
         private static final int MAZE_CELL_SIZE = 9;
@@ -6553,37 +6593,40 @@ public final class PlanetService {
             if (Math.abs(worldX) > MAZE_HALF_EXTENT || Math.abs(worldZ) > MAZE_HALF_EXTENT) {
                 return false;
             }
-            // ── The Glade（倖存者基地 100×100）──
+            // ── The Glade（倖存者基地 100×100）── 3 格厚圍牆
             if (Math.abs(worldX) <= GLADE_HALF && Math.abs(worldZ) <= GLADE_HALF) {
-                // 基地內部
-                if (Math.abs(worldX) < GLADE_HALF - 1 && Math.abs(worldZ) < GLADE_HALF - 1) {
+                // 基地內部（距圍牆 3 格以上）
+                if (Math.abs(worldX) < GLADE_HALF - 2 && Math.abs(worldZ) < GLADE_HALF - 2) {
                     return false;
                 }
-                // 邊界牆（|x|=49~50 或 |z|=49~50）
-                final boolean gladeXBorder = Math.abs(worldX) >= GLADE_HALF - 1;
-                final boolean gladeZBorder = Math.abs(worldZ) >= GLADE_HALF - 1;
-                // 四方向大門（5 格寬）：N/S 門 ∈ |x|≤2, E/W 門 ∈ |z|≤2
-                if (gladeZBorder && Math.abs(worldX) <= 2) return false;
-                if (gladeXBorder && Math.abs(worldZ) <= 2) return false;
+                // 邊界牆（|x|=48~50 或 |z|=48~50）── 完全封閉，門由 MazeService 管理
                 return true;
             }
-            // ── 外部迷宮 ──
+            // ── 外部迷宮（3 格厚牆壁）──
             final int shifted = worldX + MAZE_HALF_EXTENT;
             final int shiftedZ = worldZ + MAZE_HALF_EXTENT;
             final int localX = Math.floorMod(shifted, MAZE_CELL_SIZE);
             final int localZ = Math.floorMod(shiftedZ, MAZE_CELL_SIZE);
             final int cellX = Math.floorDiv(shifted, MAZE_CELL_SIZE);
             final int cellZ = Math.floorDiv(shiftedZ, MAZE_CELL_SIZE);
-            final boolean onXBorder = localX == 0;
-            final boolean onZBorder = localZ == 0;
-            if (!onXBorder && !onZBorder) {
+            // 3 格厚：位置 0, 1 和 MAZE_CELL_SIZE-1 都是牆
+            final boolean inXWall = localX <= 1 || localX >= MAZE_CELL_SIZE - 1;
+            final boolean inZWall = localZ <= 1 || localZ >= MAZE_CELL_SIZE - 1;
+            if (!inXWall && !inZWall) {
                 return false;
             }
-            if (onXBorder && onZBorder) {
-                return true;
+            if (inXWall && inZWall) {
+                return true; // 角柱（交叉處）
             }
-            if (onXBorder) {
+            if (inXWall) {
+                if (localX >= MAZE_CELL_SIZE - 1) {
+                    return !isMazePassage(seed, cellX, cellZ, cellX + 1, cellZ);
+                }
                 return !isMazePassage(seed, cellX - 1, cellZ, cellX, cellZ);
+            }
+            // inZWall
+            if (localZ >= MAZE_CELL_SIZE - 1) {
+                return !isMazePassage(seed, cellX, cellZ, cellX, cellZ + 1);
             }
             return !isMazePassage(seed, cellX, cellZ - 1, cellX, cellZ);
         }

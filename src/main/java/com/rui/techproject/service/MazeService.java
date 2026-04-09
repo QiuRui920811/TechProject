@@ -21,6 +21,7 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Mob;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.TextDisplay;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.EulerAngle;
@@ -54,6 +55,21 @@ public final class MazeService {
     private static final int SAFE_RADIUS_SQ = 3 * 3; // 不能在玩家 3 格內關閉牆壁
     private static final int WALL_ANIM_TICKS = 60;     // 牆壁升降動畫 3 秒
     private static final String WALL_ANIM_TAG = "techproject:maze_wall_anim";
+
+    // ─── 門系統 ───
+    private static final long GATE_INTERVAL_TICKS = 20L * 600L;  // 10 分鐘
+    private static final long GATE_OPEN_DURATION_TICKS = 20L * 30L; // 30 秒
+    private static final int GATE_HALF_WIDTH = 2;   // 門寬 5 格 (-2..2)
+    private static final int GATE_HEIGHT = 5;       // 門高 5 格
+    private static final int GATE_THICKNESS = 3;    // 圍牆厚度 3 格
+    private static final String GATE_TEXT_TAG = "techproject:maze_gate_text";
+    /** Glade 四個門的方向：+Z(S), -Z(N), +X(E), -X(W) */
+    private static final int[][] GATE_DIRECTIONS = {
+        {0,  1},  // South
+        {0, -1},  // North
+        {1,  0},  // East
+        {-1, 0},  // West
+    };
 
     // ─── 挖掘動畫 ───
     private static final String MINING_STAND_TAG = "techproject:maze_mining";
@@ -96,6 +112,12 @@ public final class MazeService {
     private long wallShiftWarningTick = 0L;
     private final Random random = new Random();
 
+    /** 門狀態 */
+    private boolean gatesOpen = false;
+    private long lastGateOpenTick = 0L;
+    private long gateOpenEndTick = 0L;
+    private final List<UUID> gateTextDisplays = new ArrayList<>();
+
     public MazeService(final TechProjectPlugin plugin,
                        final SafeScheduler scheduler,
                        final ItemFactoryUtil itemFactory) {
@@ -109,6 +131,8 @@ public final class MazeService {
         this.scheduler.runGlobalTimer(task -> this.tickMazeWalls(), 100L, 20L);
         // 挖掘動畫清理 tick
         this.scheduler.runGlobalTimer(task -> this.tickMiningAnimations(), 60L, 5L);
+        // 門計時器 tick
+        this.scheduler.runGlobalTimer(task -> this.tickGladeGates(), 80L, 20L);
     }
 
     // ═══════════════════════════════════════
@@ -718,5 +742,156 @@ public final class MazeService {
 
     public boolean isLabyrinthWorld(final World world) {
         return world != null && PlanetService.LABYRINTH_WORLD.equals(world.getName());
+    }
+
+    // ═══════════════════════════════════════
+    //  Glade 門系統（10分開一次、30秒後關）
+    // ═══════════════════════════════════════
+
+    private void tickGladeGates() {
+        final World world = Bukkit.getWorld(PlanetService.LABYRINTH_WORLD);
+        if (world == null || world.getPlayers().isEmpty()) {
+            return;
+        }
+        final long currentTick = world.getGameTime();
+
+        if (this.lastGateOpenTick == 0L) {
+            this.lastGateOpenTick = currentTick;
+            // 初始化：確保門關閉 + 生成 TextDisplay
+            this.closeGates(world);
+            this.spawnGateTextDisplays(world);
+            return;
+        }
+
+        // 門開著的時候：檢查是否該關閉
+        if (this.gatesOpen) {
+            if (currentTick >= this.gateOpenEndTick) {
+                this.closeGates(world);
+                this.gatesOpen = false;
+                for (final Player player : world.getPlayers()) {
+                    player.sendActionBar(this.itemFactory.warning("⚠ Glade 大門已關閉！"));
+                    player.playSound(player.getLocation(), Sound.BLOCK_IRON_DOOR_CLOSE, SoundCategory.BLOCKS, 1.0f, 0.6f);
+                }
+            }
+        } else {
+            // 門關著：檢查是否該開啟
+            if (currentTick - this.lastGateOpenTick >= GATE_INTERVAL_TICKS) {
+                this.openGates(world);
+                this.gatesOpen = true;
+                this.lastGateOpenTick = currentTick;
+                this.gateOpenEndTick = currentTick + GATE_OPEN_DURATION_TICKS;
+                for (final Player player : world.getPlayers()) {
+                    player.sendActionBar(this.itemFactory.info("❖ Glade 大門已開啟！30 秒後關閉！"));
+                    player.playSound(player.getLocation(), Sound.BLOCK_IRON_DOOR_OPEN, SoundCategory.BLOCKS, 1.0f, 0.6f);
+                    player.playSound(player.getLocation(), Sound.ENTITY_WARDEN_ROAR, SoundCategory.AMBIENT, 0.3f, 1.6f);
+                }
+            }
+        }
+
+        // 更新倒數文字
+        this.updateGateCountdownText(world, currentTick);
+    }
+
+    private void openGates(final World world) {
+        for (final int[] dir : GATE_DIRECTIONS) {
+            this.setGateBlocks(world, dir[0], dir[1], Material.AIR);
+        }
+    }
+
+    private void closeGates(final World world) {
+        for (final int[] dir : GATE_DIRECTIONS) {
+            this.setGateBlocks(world, dir[0], dir[1], Material.DEEPSLATE_BRICKS);
+        }
+    }
+
+    private void setGateBlocks(final World world, final int dirX, final int dirZ, final Material mat) {
+        // dirX/dirZ 其中一個為 0，另一個為 ±1
+        for (int w = -GATE_HALF_WIDTH; w <= GATE_HALF_WIDTH; w++) {
+            for (int t = 0; t < GATE_THICKNESS; t++) {
+                final int wallOffset = GLADE_HALF - 2 + t; // 48, 49, 50
+                final int bx;
+                final int bz;
+                if (dirX != 0) {
+                    // E/W 門：X 方向牆
+                    bx = dirX * wallOffset;
+                    bz = w;
+                } else {
+                    // N/S 門：Z 方向牆
+                    bx = w;
+                    bz = dirZ * wallOffset;
+                }
+                final Location loc = new Location(world, bx, FLOOR_Y + 1, bz);
+                if (loc.isChunkLoaded()) {
+                    for (int y = FLOOR_Y + 1; y <= FLOOR_Y + GATE_HEIGHT; y++) {
+                        world.getBlockAt(bx, y, bz).setType(mat, false);
+                    }
+                }
+            }
+        }
+    }
+
+    private void spawnGateTextDisplays(final World world) {
+        // 清除舊的 TextDisplay
+        this.removeGateTextDisplays();
+
+        for (final int[] dir : GATE_DIRECTIONS) {
+            // 文字顯示在門外側（迷宮側）
+            final double tx = dir[0] * (GLADE_HALF + 2) + 0.5;
+            final double tz = dir[1] * (GLADE_HALF + 2) + 0.5;
+            final Location textLoc = new Location(world, tx, FLOOR_Y + 4, tz);
+
+            if (!textLoc.isChunkLoaded()) {
+                continue;
+            }
+            this.scheduler.runRegion(textLoc, task -> {
+                final TextDisplay td = world.spawn(textLoc, TextDisplay.class, display -> {
+                    display.text(Component.text("░ 門將在 10:00 後開啟 ░", NamedTextColor.RED));
+                    display.setBillboard(Display.Billboard.CENTER);
+                    display.setBackgroundColor(org.bukkit.Color.fromARGB(160, 0, 0, 0));
+                    display.setSeeThrough(false);
+                    display.setPersistent(false);
+                    display.setGravity(false);
+                    display.addScoreboardTag(GATE_TEXT_TAG);
+                    display.setTransformation(new Transformation(
+                            new Vector3f(0, 0, 0),
+                            new AxisAngle4f(0, 0, 1, 0),
+                            new Vector3f(2.0f, 2.0f, 2.0f),
+                            new AxisAngle4f(0, 0, 1, 0)));
+                });
+                this.gateTextDisplays.add(td.getUniqueId());
+            });
+        }
+    }
+
+    private void removeGateTextDisplays() {
+        for (final UUID id : this.gateTextDisplays) {
+            final Entity entity = Bukkit.getEntity(id);
+            if (entity != null && entity.isValid()) {
+                entity.remove();
+            }
+        }
+        this.gateTextDisplays.clear();
+    }
+
+    private void updateGateCountdownText(final World world, final long currentTick) {
+        final Component text;
+        if (this.gatesOpen) {
+            final long remainTicks = Math.max(0, this.gateOpenEndTick - currentTick);
+            final int secs = (int) (remainTicks / 20L);
+            text = Component.text(String.format("█ 門將在 %02d 秒後關閉 █", secs), NamedTextColor.GREEN, TextDecoration.BOLD);
+        } else {
+            final long remainTicks = Math.max(0, GATE_INTERVAL_TICKS - (currentTick - this.lastGateOpenTick));
+            final int totalSecs = (int) (remainTicks / 20L);
+            final int mins = totalSecs / 60;
+            final int secs = totalSecs % 60;
+            text = Component.text(String.format("░ 門將在 %d:%02d 後開啟 ░", mins, secs), NamedTextColor.RED);
+        }
+
+        for (final UUID id : this.gateTextDisplays) {
+            final Entity entity = Bukkit.getEntity(id);
+            if (entity instanceof TextDisplay td && td.isValid()) {
+                td.text(text);
+            }
+        }
     }
 }
