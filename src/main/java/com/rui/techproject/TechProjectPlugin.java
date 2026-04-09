@@ -173,11 +173,42 @@ public final class TechProjectPlugin extends JavaPlugin {
             this.discordSrvHook.tryRegister();
         }
 
+        // InventorySorter/超級烽火台 挂接：全部科技機器位置繞過烽火台面板
+        this.hookBeaconAPI();
+
+        // DebugWand 挂接：除錯棒無法修改科技機器方塊
+        this.hookDebugWandAPI();
+
         // 定期自動存檔（每 5 分鐘），防止崩潰時資料遺失
         final long autoSaveInterval = 20L * 60L * 5L; // 6000 ticks = 5 分鐘
         this.safeScheduler.runGlobalTimer(task -> this.autoSave(), autoSaveInterval, autoSaveInterval);
 
         this.getLogger().info("TechProject enabled: " + this.techRegistry.summaryLine());
+    }
+
+    private void hookBeaconAPI() {
+        try {
+            if (this.getServer().getPluginManager().getPlugin("InventorySorter") == null) return;
+            // 已載入的機器全部加入繞過
+            for (final org.bukkit.Location loc : this.machineService.allMachineLocations()) {
+                tw.rui.egg.inventorysorter.beacon.BeaconAPI.addBypassLocation(loc);
+            }
+            this.getLogger().info("BeaconAPI 已挂接，" + this.machineService.machineCount() + " 個機器位置已繞過超級烽火台。");
+        } catch (final NoClassDefFoundError ignored) {
+            // InventorySorter 未安裝或版本不符
+        }
+    }
+
+    private void hookDebugWandAPI() {
+        try {
+            if (this.getServer().getPluginManager().getPlugin("DebugWand") == null) return;
+            com.debugstick.debugwand.api.DebugWandAPI.registerProtection(this, block ->
+                    this.machineService.isManagedMachine(block)
+                    || this.placedTechBlockService.isTrackedBlock(block));
+            this.getLogger().info("DebugWandAPI 已挂接，科技機器方塊受除錯棒保護。");
+        } catch (final NoClassDefFoundError ignored) {
+            // DebugWand 未安裝或版本不符
+        }
     }
 
     /**
@@ -373,6 +404,12 @@ public final class TechProjectPlugin extends JavaPlugin {
         if (this.discordSrvHook != null) {
             this.discordSrvHook.tryUnregister();
         }
+        // DebugWand 解除
+        try {
+            if (this.getServer().getPluginManager().getPlugin("DebugWand") != null) {
+                com.debugstick.debugwand.api.DebugWandAPI.unregisterProtection(this);
+            }
+        } catch (final NoClassDefFoundError ignored) { }
         if (this.meteorService != null) {
             this.meteorService.shutdown();
         }

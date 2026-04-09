@@ -326,6 +326,7 @@ public final class MachineService {
         }
         this.machines.put(key, placedMachine);
         this.invalidateNetworkCache();
+        this.notifyBeaconBypass(block.getLocation(), true);
         this.progressService.unlockMachine(player.getUniqueId(), machineId);
         this.progressService.unlockByRequirement(player.getUniqueId(), machineId);
         this.progressService.unlockByRequirement(player.getUniqueId(), "machine:" + machineId);
@@ -354,6 +355,7 @@ public final class MachineService {
         final PlacedMachine removed = this.machines.remove(key);
         if (removed != null) {
             this.invalidateNetworkCache();
+            this.notifyBeaconBypass(block.getLocation(), false);
             if (this.isQuarryLike(removed.machineId())) {
                 this.quarryBusy.remove(removed.locationKey());
                 this.quarryWarmedUp.remove(removed.locationKey());
@@ -376,6 +378,27 @@ public final class MachineService {
 
     public int machineCount() {
         return this.machines.size();
+    }
+
+    public java.util.List<org.bukkit.Location> allMachineLocations() {
+        final java.util.List<org.bukkit.Location> locations = new java.util.ArrayList<>(this.machines.size());
+        for (final com.rui.techproject.util.LocationKey key : this.machines.keySet()) {
+            final org.bukkit.World world = org.bukkit.Bukkit.getWorld(key.worldName());
+            if (world != null) {
+                locations.add(new org.bukkit.Location(world, key.x(), key.y(), key.z()));
+            }
+        }
+        return locations;
+    }
+
+    private void notifyBeaconBypass(final org.bukkit.Location location, final boolean add) {
+        try {
+            if (add) {
+                tw.rui.egg.inventorysorter.beacon.BeaconAPI.addBypassLocation(location);
+            } else {
+                tw.rui.egg.inventorysorter.beacon.BeaconAPI.removeBypassLocation(location);
+            }
+        } catch (final NoClassDefFoundError ignored) { }
     }
 
     public boolean isManagedMachine(final Block block) {
