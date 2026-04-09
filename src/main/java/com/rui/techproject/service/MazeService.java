@@ -790,7 +790,7 @@ public final class MazeService {
                 this.lastGateOpenTick = currentTick;
                 this.gateOpenEndTick = currentTick + GATE_OPEN_DURATION_TICKS;
                 for (final Player player : world.getPlayers()) {
-                    player.sendActionBar(this.itemFactory.info("❖ Glade 大門已開啟！30 秒後關閉！"));
+                    player.sendActionBar(this.itemFactory.warning("❖ Glade 大門已開啟！30 秒後關閉！"));
                     player.playSound(player.getLocation(), Sound.BLOCK_IRON_DOOR_OPEN, SoundCategory.BLOCKS, 1.0f, 0.6f);
                     player.playSound(player.getLocation(), Sound.ENTITY_WARDEN_ROAR, SoundCategory.AMBIENT, 0.3f, 1.6f);
                 }
