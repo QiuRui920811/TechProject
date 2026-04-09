@@ -63,7 +63,11 @@ public final class TechProjectPlugin extends JavaPlugin {
                 "datapacks/techproject_dimensions/data/techproject/worldgen/noise_settings/cryon_surface_noise.json",
                 "datapacks/techproject_dimensions/data/techproject/worldgen/noise_settings/nyx_orbit_noise.json",
                 "datapacks/techproject_dimensions/data/techproject/worldgen/noise_settings/helion_surface_noise.json",
-                "datapacks/techproject_dimensions/data/techproject/worldgen/noise_settings/tempest_surface_noise.json"
+                "datapacks/techproject_dimensions/data/techproject/worldgen/noise_settings/tempest_surface_noise.json",
+                "datapacks/techproject_dimensions/data/techproject/dimension_type/labyrinth_abyss.json",
+                "datapacks/techproject_dimensions/data/techproject/dimension/labyrinth_surface.json",
+                "datapacks/techproject_dimensions/data/techproject/worldgen/biome/labyrinth_maze.json",
+                "datapacks/techproject_dimensions/data/techproject/worldgen/noise_settings/labyrinth_surface_noise.json"
     };
 
     private static final String[] MANAGED_DATA_FILES = {

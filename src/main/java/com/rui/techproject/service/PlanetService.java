@@ -3687,8 +3687,6 @@ public final class PlanetService {
                 }
             }
             case "labyrinth" -> {
-                // DARKNESS 效果製造恐怖氛圍（8 秒，持續刷新）
-                player.addPotionEffect(new PotionEffect(PotionEffectType.DARKNESS, 160, 0, true, false, false));
                 if (this.ambientRandom.nextInt(2) == 0) {
                     player.getWorld().spawnParticle(Particle.SCULK_SOUL, origin, 8, 1.1, 0.6, 1.1, 0.015);
                     player.getWorld().spawnParticle(Particle.SMOKE, origin, 6, 0.9, 0.45, 0.9, 0.01);
@@ -4036,6 +4034,31 @@ public final class PlanetService {
             }
         }
         return null;
+    }
+
+    /**
+     * 公開查詢指定星球的世界（依主名稱 + 別名查詢）。
+     */
+    public World findPlanetWorld(final String planetId) {
+        final PlanetDefinition def = this.planets.get(planetId);
+        if (def == null) {
+            return null;
+        }
+        return this.resolveExistingPlanetWorld(def);
+    }
+
+    /**
+     * 檢查 world 是否為給定 planetId 的世界。
+     */
+    public boolean isPlanetWorld(final String planetId, final World world) {
+        if (world == null || planetId == null) {
+            return false;
+        }
+        final PlanetDefinition def = this.planets.get(planetId);
+        if (def == null) {
+            return false;
+        }
+        return this.matchesPlanetWorldName(def, world.getName());
     }
 
     private boolean matchesPlanetWorldName(final PlanetDefinition definition, final String worldName) {

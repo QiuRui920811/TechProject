@@ -126,6 +126,11 @@ public final class MazeService {
         this.itemFactory = itemFactory;
     }
 
+    private World resolveLabyrinthWorld() {
+        final PlanetService ps = this.plugin.getPlanetService();
+        return ps != null ? ps.findPlanetWorld("labyrinth") : null;
+    }
+
     public void startTimers() {
         // 迷宮牆壁移動 tick
         this.scheduler.runGlobalTimer(task -> this.tickMazeWalls(), 100L, 20L);
@@ -140,7 +145,7 @@ public final class MazeService {
     // ═══════════════════════════════════════
 
     private void tickMazeWalls() {
-        final World world = Bukkit.getWorld(PlanetService.LABYRINTH_WORLD);
+        final World world = this.resolveLabyrinthWorld();
         if (world == null || world.getPlayers().isEmpty()) {
             return;
         }
@@ -589,7 +594,7 @@ public final class MazeService {
             return;
         }
 
-        final World world = Bukkit.getWorld(PlanetService.LABYRINTH_WORLD);
+        final World world = this.resolveLabyrinthWorld();
         if (world == null) {
             return;
         }
@@ -703,7 +708,7 @@ public final class MazeService {
      */
     public void checkCenterReach(final Player player) {
         final World world = player.getWorld();
-        if (!PlanetService.LABYRINTH_WORLD.equals(world.getName())) {
+        if (!this.isLabyrinthWorld(world)) {
             return;
         }
         final int zone = getMazeZone(player.getLocation().getBlockX(), player.getLocation().getBlockZ());
@@ -741,7 +746,11 @@ public final class MazeService {
     }
 
     public boolean isLabyrinthWorld(final World world) {
-        return world != null && PlanetService.LABYRINTH_WORLD.equals(world.getName());
+        if (world == null) {
+            return false;
+        }
+        final PlanetService ps = this.plugin.getPlanetService();
+        return ps != null && ps.isPlanetWorld("labyrinth", world);
     }
 
     // ═══════════════════════════════════════
@@ -749,7 +758,7 @@ public final class MazeService {
     // ═══════════════════════════════════════
 
     private void tickGladeGates() {
-        final World world = Bukkit.getWorld(PlanetService.LABYRINTH_WORLD);
+        final World world = this.resolveLabyrinthWorld();
         if (world == null || world.getPlayers().isEmpty()) {
             return;
         }

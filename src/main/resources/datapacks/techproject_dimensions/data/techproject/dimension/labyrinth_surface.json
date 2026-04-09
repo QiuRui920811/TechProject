@@ -1,0 +1,11 @@
+{
+  "type": "techproject:labyrinth_abyss",
+  "generator": {
+    "type": "minecraft:noise",
+    "settings": "techproject:labyrinth_surface_noise",
+    "biome_source": {
+      "type": "minecraft:fixed",
+      "biome": "techproject:labyrinth_maze"
+    }
+  }
+}
