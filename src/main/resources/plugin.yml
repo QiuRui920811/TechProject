@@ -3,6 +3,7 @@ main: com.rui.techproject.TechProjectPlugin
 version: 0.1.0
 api-version: '1.21'
 folia-supported: true
+load: STARTUP
 author: _RuCat
 website: https://example.invalid
 softdepend: [Nexo, PlaceholderAPI, DiscordSRV, InventorySorter, DebugWand, SuperHopper]
