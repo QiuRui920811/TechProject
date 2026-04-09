@@ -6517,7 +6517,7 @@ public final class PlanetService {
                             chunkData.setBlock(localX, y, localZ, wallMat);
                         }
                     }
-                    // ── The Glade（倖存者基地）結構 ──
+                    // ── The Glade（倖存者基地）地板 ──
                     if ("labyrinth".equals(this.planetId)
                             && Math.abs(worldX) < GLADE_HALF - 2 && Math.abs(worldZ) < GLADE_HALF - 2) {
                         final int gladeFloor = column.surfaceY();
@@ -6530,42 +6530,22 @@ public final class PlanetService {
                                 chunkData.setBlock(localX, gladeFloor + 1, localZ, Material.LANTERN);
                             }
                         } else {
-                            // 基地地面材質：石磚為主 + 深板岩點綴 + 燈籠照明
+                            // 基地地面材質
                             final long pathHash = mazeBorderHash(seed, worldX, 0, worldZ, 0);
                             final int dist = Math.max(Math.abs(worldX), Math.abs(worldZ));
                             if (dist >= GLADE_HALF - 8) {
-                                // 外圈：粗糙深板岩
                                 chunkData.setBlock(localX, gladeFloor, localZ,
                                         (pathHash & 0x3) == 0 ? Material.COBBLED_DEEPSLATE : Material.DEEPSLATE);
                             } else if ((pathHash & 0xF) == 0) {
                                 chunkData.setBlock(localX, gladeFloor, localZ, Material.POLISHED_DEEPSLATE);
                             } else if ((pathHash & 0x7) < 2) {
-                                chunkData.setBlock(localX, gladeFloor, localZ, Material.STONE_BRICK_SLAB);
+                                chunkData.setBlock(localX, gladeFloor, localZ, Material.CRACKED_STONE_BRICKS);
                             } else {
                                 chunkData.setBlock(localX, gladeFloor, localZ, Material.STONE_BRICKS);
                             }
                             // 每 8 格放置燈籠
                             if (worldX % 8 == 0 && worldZ % 8 == 0 && dist < GLADE_HALF - 8) {
                                 chunkData.setBlock(localX, gladeFloor + 1, localZ, Material.LANTERN);
-                            }
-                        }
-                        // 四間小木屋（5×5×4）
-                        generateGladeHut(chunkData, localX, localZ, worldX, worldZ, gladeFloor, 25, 25);
-                        generateGladeHut(chunkData, localX, localZ, worldX, worldZ, gladeFloor, -25, 25);
-                        generateGladeHut(chunkData, localX, localZ, worldX, worldZ, gladeFloor, 25, -25);
-                        generateGladeHut(chunkData, localX, localZ, worldX, worldZ, gladeFloor, -25, -25);
-                        // 瞭望塔（3×3×15）
-                        if (Math.abs(worldX - 35) <= 1 && Math.abs(worldZ + 30) <= 1) {
-                            final boolean tCorner = Math.abs(worldX - 35) == 1 && Math.abs(worldZ + 30) == 1;
-                            for (int ty = gladeFloor + 1; ty <= gladeFloor + 15; ty++) {
-                                if (ty == gladeFloor + 15) {
-                                    chunkData.setBlock(localX, ty, localZ, Material.STONE_BRICK_SLAB);
-                                } else if (tCorner) {
-                                    chunkData.setBlock(localX, ty, localZ, Material.STONE_BRICKS);
-                                } else if (Math.abs(worldX - 35) == 1 || Math.abs(worldZ + 30) == 1) {
-                                    chunkData.setBlock(localX, ty, localZ,
-                                            ty <= gladeFloor + 2 || ty >= gladeFloor + 13 ? Material.STONE_BRICKS : Material.AIR);
-                                }
                             }
                         }
                     }
@@ -6603,6 +6583,16 @@ public final class PlanetService {
 
         @Override
         public boolean shouldGenerateCaves() {
+            return !"labyrinth".equals(this.planetId);
+        }
+
+        @Override
+        public boolean shouldGenerateMobs() {
+            return !"labyrinth".equals(this.planetId);
+        }
+
+        @Override
+        public boolean shouldGenerateSurface() {
             return !"labyrinth".equals(this.planetId);
         }
 
