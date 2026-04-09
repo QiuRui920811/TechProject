@@ -6398,12 +6398,12 @@ public final class PlanetService {
         }
         final String normalized = key.toLowerCase(Locale.ROOT).trim();
         return switch (normalized) {
-            case "aurelia", AURELIA_WORLD, "d_techproject_aurelia_surface" -> "aurelia";
-            case "cryon", CRYON_WORLD, "d_techproject_cryon_surface" -> "cryon";
-            case "nyx", NYX_WORLD, "d_techproject_nyx_orbit" -> "nyx";
-            case "helion", HELION_WORLD, "d_techproject_helion_surface" -> "helion";
-            case "tempest", TEMPEST_WORLD, "d_techproject_tempest_surface" -> "tempest";
-            case "labyrinth", LABYRINTH_WORLD, "d_techproject_labyrinth_surface" -> "labyrinth";
+            case "aurelia", AURELIA_WORLD, "d_techproject_aurelia_surface", "world_techproject_aurelia_surface" -> "aurelia";
+            case "cryon", CRYON_WORLD, "d_techproject_cryon_surface", "world_techproject_cryon_surface" -> "cryon";
+            case "nyx", NYX_WORLD, "d_techproject_nyx_orbit", "world_techproject_nyx_orbit" -> "nyx";
+            case "helion", HELION_WORLD, "d_techproject_helion_surface", "world_techproject_helion_surface" -> "helion";
+            case "tempest", TEMPEST_WORLD, "d_techproject_tempest_surface", "world_techproject_tempest_surface" -> "tempest";
+            case "labyrinth", LABYRINTH_WORLD, "d_techproject_labyrinth_surface", "world_techproject_labyrinth_surface" -> "labyrinth";
             default -> null;
         };
     }
