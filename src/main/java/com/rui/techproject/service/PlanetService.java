@@ -6453,12 +6453,31 @@ public final class PlanetService {
                             chunkData.setBlock(localX, y, localZ, column.fluidMaterial());
                         }
                     }
-                    // 迷宮牆壁：labyrinth 星球在平坦地面上生成迷宮結構
+                    // 迷宮牆壁：labyrinth 星球在平坦地面上生成高聳迷宮城牆
                     if ("labyrinth".equals(this.planetId) && isStaticMazeWall(seed, worldX, worldZ)) {
                         final int floorY = column.surfaceY();
-                        for (int y = floorY + 1; y <= floorY + 4; y++) {
-                            chunkData.setBlock(localX, y, localZ,
-                                    y == floorY + 4 ? Material.CHISELED_DEEPSLATE : Material.DEEPSLATE_BRICKS);
+                        final int wallTop = floorY + 40; // 40 格高城牆
+                        for (int y = floorY + 1; y <= wallTop; y++) {
+                            final Material wallMat;
+                            if (y == wallTop) {
+                                wallMat = Material.CHISELED_DEEPSLATE;
+                            } else if (y >= wallTop - 2) {
+                                wallMat = Material.POLISHED_DEEPSLATE;
+                            } else if (y <= floorY + 3) {
+                                wallMat = Material.DEEPSLATE;
+                            } else {
+                                // 中段隨機苔蘚化
+                                final long vineHash = mazeBorderHash(seed, worldX, y, worldX ^ y, worldZ);
+                                wallMat = (vineHash & 0xF) == 0 ? Material.MOSS_BLOCK
+                                        : (vineHash & 0xF) == 1 ? Material.DEEPSLATE_TILE_WALL.isBlock() ? Material.DEEPSLATE_TILES : Material.DEEPSLATE_BRICKS
+                                        : Material.DEEPSLATE_BRICKS;
+                            }
+                            chunkData.setBlock(localX, y, localZ, wallMat);
+                        }
+                        // 頂部裝飾：每隔幾格放置牆頭尖柱
+                        final long capHash = mazeBorderHash(seed, worldX, wallTop, worldZ, worldX + worldZ);
+                        if ((capHash & 0x7) == 0) {
+                            chunkData.setBlock(localX, wallTop + 1, localZ, Material.DEEPSLATE_BRICK_WALL);
                         }
                     }
                 }

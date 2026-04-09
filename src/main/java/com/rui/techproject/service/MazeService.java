@@ -40,7 +40,7 @@ public final class MazeService {
     // ─── 迷宮常數 ───
     private static final int MAZE_CELL_SIZE = 7;
     private static final int MAZE_HALF_EXTENT = 224;
-    private static final int WALL_HEIGHT = 4;
+    private static final int WALL_HEIGHT = 40;
     private static final int FLOOR_Y = 64;
     private static final long WALL_SHIFT_INTERVAL_TICKS = 20L * 300L; // 5 分鐘
     private static final long WALL_SHIFT_WARNING_TICKS = 20L * 30L;   // 提前 30 秒預警
@@ -178,9 +178,9 @@ public final class MazeService {
         for (final long packed : this.pendingShiftWalls) {
             final int wx = unpackX(packed);
             final int wz = unpackZ(packed);
-            final Location loc = new Location(world, wx + 0.5, FLOOR_Y + 3, wz + 0.5);
+            final Location loc = new Location(world, wx + 0.5, FLOOR_Y + 20, wz + 0.5);
             if (loc.isChunkLoaded()) {
-                world.spawnParticle(Particle.SCULK_SOUL, loc, 8, 0.3, 1.5, 0.3, 0.02);
+                world.spawnParticle(Particle.SCULK_SOUL, loc, 15, 0.3, 15.0, 0.3, 0.02);
             }
         }
     }
@@ -211,26 +211,37 @@ public final class MazeService {
                     || wallBase.getBlock().getType() == Material.CHISELED_DEEPSLATE;
 
             if (currentlyWall) {
-                // 拆除牆壁
+                // 拆除牆壁（整面 40 格高）
                 this.shiftedWallsOpen.add(packed);
                 this.shiftedWallsClosed.remove(packed);
-                for (int y = FLOOR_Y + 1; y <= FLOOR_Y + WALL_HEIGHT; y++) {
+                for (int y = FLOOR_Y + 1; y <= FLOOR_Y + WALL_HEIGHT + 1; y++) {
                     world.getBlockAt(wx, y, wz).setType(Material.AIR, false);
                 }
-                world.spawnParticle(Particle.BLOCK, wallBase.clone().add(0.5, 2, 0.5), 30,
-                        0.4, 1.5, 0.4, 0.1, Material.DEEPSLATE_BRICKS.createBlockData());
-                world.playSound(wallBase, Sound.BLOCK_DEEPSLATE_BRICKS_BREAK, SoundCategory.BLOCKS, 1.0f, 0.7f);
+                world.spawnParticle(Particle.BLOCK, wallBase.clone().add(0.5, 20, 0.5), 60,
+                        0.4, 15.0, 0.4, 0.1, Material.DEEPSLATE_BRICKS.createBlockData());
+                world.playSound(wallBase, Sound.BLOCK_DEEPSLATE_BRICKS_BREAK, SoundCategory.BLOCKS, 1.2f, 0.5f);
+                world.playSound(wallBase.clone().add(0, 20, 0), Sound.ENTITY_WARDEN_EMERGE, SoundCategory.BLOCKS, 0.6f, 1.4f);
             } else if (!playerNearby) {
-                // 豎起牆壁
+                // 豎起牆壁（整面 40 格高）
                 this.shiftedWallsClosed.add(packed);
                 this.shiftedWallsOpen.remove(packed);
                 for (int y = FLOOR_Y + 1; y <= FLOOR_Y + WALL_HEIGHT; y++) {
-                    world.getBlockAt(wx, y, wz).setType(
-                            y == FLOOR_Y + WALL_HEIGHT ? Material.CHISELED_DEEPSLATE : Material.DEEPSLATE_BRICKS, false);
+                    final Material mat;
+                    if (y == FLOOR_Y + WALL_HEIGHT) {
+                        mat = Material.CHISELED_DEEPSLATE;
+                    } else if (y >= FLOOR_Y + WALL_HEIGHT - 2) {
+                        mat = Material.POLISHED_DEEPSLATE;
+                    } else if (y <= FLOOR_Y + 3) {
+                        mat = Material.DEEPSLATE;
+                    } else {
+                        mat = Material.DEEPSLATE_BRICKS;
+                    }
+                    world.getBlockAt(wx, y, wz).setType(mat, false);
                 }
-                world.spawnParticle(Particle.BLOCK, wallBase.clone().add(0.5, 2, 0.5), 20,
-                        0.4, 1.5, 0.4, 0.05, Material.DEEPSLATE_BRICKS.createBlockData());
-                world.playSound(wallBase, Sound.BLOCK_DEEPSLATE_BRICKS_PLACE, SoundCategory.BLOCKS, 1.0f, 0.8f);
+                world.spawnParticle(Particle.BLOCK, wallBase.clone().add(0.5, 20, 0.5), 40,
+                        0.4, 15.0, 0.4, 0.05, Material.DEEPSLATE_BRICKS.createBlockData());
+                world.playSound(wallBase, Sound.BLOCK_DEEPSLATE_BRICKS_PLACE, SoundCategory.BLOCKS, 1.2f, 0.6f);
+                world.playSound(wallBase.clone().add(0, 20, 0), Sound.ENTITY_IRON_GOLEM_REPAIR, SoundCategory.BLOCKS, 0.8f, 0.5f);
             }
         }
         this.pendingShiftWalls.clear();
