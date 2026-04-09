@@ -23,6 +23,7 @@ public final class PlacedMachine {
     private String energyInputDirection = "ALL";
     private String energyOutputDirection = "ALL";
     private boolean enabled = true;
+    private volatile long enabledSince = System.currentTimeMillis();
     private final AtomicLong storedEnergy = new AtomicLong();
     private final AtomicLong totalGenerated = new AtomicLong();
     private volatile long ticksActive;
@@ -239,11 +240,22 @@ public final class PlacedMachine {
 
     public void setEnabled(final boolean enabled) {
         this.enabled = enabled;
+        if (enabled) {
+            this.enabledSince = System.currentTimeMillis();
+        }
     }
 
     public boolean toggleEnabled() {
         this.enabled = !this.enabled;
+        if (this.enabled) {
+            this.enabledSince = System.currentTimeMillis();
+        }
         return this.enabled;
+    }
+
+    /** 回傳自上次開機以來經過的毫秒數；關機時回傳 0。 */
+    public long enabledDurationMs() {
+        return this.enabled ? System.currentTimeMillis() - this.enabledSince : 0L;
     }
 
     public ItemStack[] inputInventory() {

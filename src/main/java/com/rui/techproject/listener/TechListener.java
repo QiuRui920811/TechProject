@@ -398,6 +398,33 @@ public final class TechListener implements Listener {
         this.plugin.getPlanetService().onRuinChallengeMobDeath(event.getEntity());
     }
 
+    // ── 星球世界限制：禁止設領地、設家、傳送 ──
+    private static final Set<String> BLOCKED_PLANET_COMMANDS = Set.of(
+            "res", "residence", "resadmin",
+            "sethome", "home", "huskhomes:sethome", "huskhomes:home",
+            "tpa", "tpaccept", "tpahere", "tpyes",
+            "huskhomes:tpa", "huskhomes:tpaccept", "huskhomes:tpahere"
+    );
+
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void onPlanetCommandBlock(final PlayerCommandPreprocessEvent event) {
+        if (!this.plugin.getPlanetService().isPlanetWorld(event.getPlayer().getWorld())) {
+            return;
+        }
+        if (event.getPlayer().hasPermission("techproject.planet.bypass")) {
+            return;
+        }
+        final String message = event.getMessage().toLowerCase();
+        // /res create, /res set, /sethome, /home set, /tpa ...
+        final String[] parts = message.split("\\s+");
+        if (parts.length == 0) return;
+        final String cmd = parts[0].substring(1); // 去掉前面的 /
+        if (BLOCKED_PLANET_COMMANDS.contains(cmd)) {
+            event.setCancelled(true);
+            event.getPlayer().sendMessage(this.plugin.getItemFactory().warning("星球區域禁止使用此指令。"));
+        }
+    }
+
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onInteractEntity(final PlayerInteractEntityEvent event) {
         if (event.getHand() != EquipmentSlot.HAND) {
@@ -603,7 +630,13 @@ public final class TechListener implements Listener {
         }
         if (event.useInteractedBlock() == Result.DENY || event.useItemInHand() == Result.DENY) {
             // 若 DENY 是我們自己設的（早期烽火台攔截）或傳送面板，仍繼續處理機器互動
-            if (!earlyMachineDeny && !earlyTeleportPad) {
+            // 蹲下右鍵方塊時法器充電也需放行（科技物品原版材質保護會設 DENY）
+            final boolean artifactCharging = event.getPlayer().isSneaking()
+                    && event.getAction() == Action.RIGHT_CLICK_BLOCK
+                    && stack != null
+                    && this.plugin.getItemFactory().getTechItemId(stack) != null
+                    && ARTIFACT_IDS.contains(this.plugin.getItemFactory().getTechItemId(stack).toLowerCase());
+            if (!earlyMachineDeny && !earlyTeleportPad && !artifactCharging) {
                 return;
             }
         }
@@ -1120,6 +1153,10 @@ public final class TechListener implements Listener {
     public void onEntityExplode(final EntityExplodeEvent event) {
         if (this.plugin.getPlanetService().isPlanetWorld(event.getEntity().getWorld())) {
             event.blockList().clear();
+        }
+        // 苦力怕自爆：EntityDeathEvent 不保證觸發，在此額外通知遺跡系統
+        if (event.getEntity() instanceof org.bukkit.entity.LivingEntity living) {
+            this.plugin.getPlanetService().onRuinChallengeMobDeath(living);
         }
     }
 

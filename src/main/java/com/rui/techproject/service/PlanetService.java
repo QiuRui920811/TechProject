@@ -110,6 +110,7 @@ public final class PlanetService {
     private static final int MAX_VISIBLE_HARVEST_NODES = 10;
     private static final int PLANET_BOUNDARY_RADIUS = 3000;
     private static final long PLANETARY_GATE_TRAVEL_COST = 1200L;
+    private static final long PLANETARY_GATE_WARMUP_MS = 60_000L; // 開機至少 1 分鐘才能傳送
     private static final String SHIP_FUEL_ITEM_ID = "refined_oil";
     private static final int SHIP_BASE_FUEL_COST = 2;
     private static final int SHIP_FUEL_WEIGHT_DIVISOR = 64;
@@ -4804,6 +4805,7 @@ public final class PlanetService {
         }
 
         this.plugin.getPlayerProgressService().incrementStat(player.getUniqueId(), "planet_ruins_activated", 1);
+        this.plugin.getAchievementService().evaluate(player.getUniqueId());
 
         // 特效
         if (world != null) {
@@ -5073,6 +5075,17 @@ public final class PlanetService {
         if (gateMachine == null || !"planetary_gate".equalsIgnoreCase(gateMachine.machineId())) {
             player.sendMessage(this.itemFactory.warning("這座星門已離線，請重新放置或檢查結構。"));
             player.closeInventory();
+            return;
+        }
+        if (!gateMachine.enabled()) {
+            player.sendMessage(this.itemFactory.warning("星門尚未啟動，請先開機。"));
+            player.closeInventory();
+            return;
+        }
+        if (gateMachine.enabledDurationMs() < PLANETARY_GATE_WARMUP_MS) {
+            final long remaining = (PLANETARY_GATE_WARMUP_MS - gateMachine.enabledDurationMs()) / 1000L + 1;
+            player.sendMessage(this.itemFactory.warning("星門正在暖機中，還需約 " + remaining + " 秒…"));
+            gateBlock.getWorld().playSound(gateBlock.getLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 0.45f, 0.72f);
             return;
         }
         if (!this.isStandingOnGate(player, gateBlock)) {

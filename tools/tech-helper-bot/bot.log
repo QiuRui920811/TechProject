@@ -1,0 +1,27 @@
+nohup: 忽略輸入
+/rui/fs/大廳/plugins/科技專案/tools/tech-helper-bot/.venv/lib/python3.10/site-packages/google/api_core/_python_version_support.py:263: FutureWarning: You are using a Python version (3.10.12) which Google will stop supporting in new releases of google.api_core once it reaches its end of life (2026-10-04). Please upgrade to the latest Python version, or at least Python 3.11, to continue receiving updates for google.api_core past that date.
+  warnings.warn(message, FutureWarning)
+/rui/fs/大廳/plugins/科技專案/tools/tech-helper-bot/bot.py:22: FutureWarning: 
+
+All support for the `google.generativeai` package has ended. It will no longer be receiving 
+updates or bug fixes. Please switch to the `google.genai` package as soon as possible.
+See README for more details:
+
+https://github.com/google-gemini/deprecated-generative-ai-python/blob/main/README.md
+
+  import google.generativeai as genai
+2026-04-09 00:57:52,877 [WARNING] PyNaCl is not installed, voice will NOT be supported
+2026-04-09 00:57:52,877 [WARNING] davey is not installed, voice will NOT be supported
+2026-04-09 00:57:53,073 [INFO] 知識庫載入完成：699 個段落，來自 54 個檔案
+2026-04-09 00:57:53,073 [INFO] Gemini 模型初始化完成：gemini-2.5-flash-lite
+2026-04-09 00:57:53,073 [INFO] HTTP API 啟動於 http://127.0.0.1:18923
+2026-04-09 00:57:53,074 [INFO] logging in using static token
+2026-04-09 00:57:54,731 [INFO] Shard ID None has connected to Gateway (Session ID: a2764c625feff5ff0e01db216cb27939).
+2026-04-09 00:57:56,738 [INFO] Discord Bot 已上線: TechMC (ID: 1491153252430118982)
+2026-04-09 00:57:59,160 [INFO] 127.0.0.1 [09/Apr/2026:00:57:59 +0800] "GET /health HTTP/1.1" 200 190 "-" "curl/7.81.0"
+2026-04-09 03:07:03,338 [INFO] Shard ID None has successfully RESUMED session a2764c625feff5ff0e01db216cb27939.
+2026-04-09 03:57:12,554 [INFO] Shard ID None has successfully RESUMED session a2764c625feff5ff0e01db216cb27939.
+2026-04-09 04:20:06,797 [INFO] Shard ID None has successfully RESUMED session a2764c625feff5ff0e01db216cb27939.
+2026-04-09 05:47:27,111 [INFO] Shard ID None has successfully RESUMED session a2764c625feff5ff0e01db216cb27939.
+2026-04-09 07:54:10,738 [INFO] Shard ID None has successfully RESUMED session a2764c625feff5ff0e01db216cb27939.
+2026-04-09 11:16:50,733 [INFO] Shard ID None has successfully RESUMED session a2764c625feff5ff0e01db216cb27939.

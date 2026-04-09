@@ -238,45 +238,53 @@ public final class TechCropService {
         // 底部設為蕨類植物外觀
         block.setType(Material.FERN, false);
         // 上方放置 head
-        above.setType(Material.PLAYER_HEAD, false);
+        above.setType(Material.PLAYER_HEAD, true);
 
-        // Folia/Luminol: block entity 在 setType 同 tick 可能尚未建立，延後 1 tick
+        // Folia/Luminol: block entity 在 setType 同 tick 可能尚未建立，延後 2 tick
         final Location loc = above.getLocation();
         final String cropId = definition.id();
         final String hash = definition.matureTexture().trim();
+        this.applySkullTexture(loc, cropId, hash, 2L, 0);
+
+        block.getWorld().spawnParticle(Particle.HAPPY_VILLAGER,
+                above.getLocation().add(0.5, 0.6, 0.5), 12, 0.25, 0.2, 0.25, 0.02);
+        block.getWorld().playSound(above.getLocation(), Sound.BLOCK_SWEET_BERRY_BUSH_PICK_BERRIES, 0.5f, 1.4f);
+    }
+
+    private void applySkullTexture(final Location loc, final String cropId, final String hash,
+                                   final long delayTicks, final int attempt) {
         this.plugin.getSafeScheduler().runRegionDelayed(loc, task -> {
             final Block target = loc.getBlock();
             if (target.getType() != Material.PLAYER_HEAD) {
                 return;
             }
             if (!(target.getState() instanceof Skull skull)) {
-                this.plugin.getLogger().warning("[CropDebug] 延遲後 getState 仍非 Skull: " + target.getType());
+                if (attempt < 2) {
+                    this.applySkullTexture(loc, cropId, hash, 5L, attempt + 1);
+                } else {
+                    this.plugin.getLogger().warning("[CropDebug] 多次嘗試後 getState 仍非 Skull: " + target.getType());
+                }
                 return;
             }
             try {
                 final String json = "{\"textures\":{\"SKIN\":{\"url\":\"http://textures.minecraft.net/texture/" + hash + "\"}}}";
                 final String base64 = Base64.getEncoder().encodeToString(json.getBytes(StandardCharsets.UTF_8));
-                final var profile = Bukkit.getServer().createProfile(UUID.randomUUID());
+                // 使用基於 cropId 的固定 UUID，避免 Paper 嘗試向 Mojang 查詢隨機 UUID
+                final UUID textureUUID = UUID.nameUUIDFromBytes(("techproject:crop:" + cropId).getBytes(StandardCharsets.UTF_8));
+                final var profile = Bukkit.getServer().createProfile(textureUUID);
                 profile.setProperty(new ProfileProperty("textures", base64));
-                this.plugin.getLogger().info("[CropDebug] crop=" + cropId
-                        + " hash=" + hash.substring(0, Math.min(16, hash.length())) + "..."
-                        + " base64len=" + base64.length()
-                        + " profileClass=" + profile.getClass().getName()
-                        + " properties=" + profile.getProperties());
                 skull.setPlayerProfile(profile);
                 skull.setRotation(RANDOM_FACES[ThreadLocalRandom.current().nextInt(RANDOM_FACES.length)]);
                 final boolean updated = skull.update(true, false);
-                this.plugin.getLogger().info("[CropDebug] update=" + updated
-                        + " loc=" + loc.getWorld().getName() + " " + loc.getBlockX() + "," + loc.getBlockY() + "," + loc.getBlockZ());
+                if (!updated && attempt < 2) {
+                    this.plugin.getLogger().warning("[CropDebug] update=false attempt=" + attempt + " crop=" + cropId + " — 排程重試…");
+                    this.applySkullTexture(loc, cropId, hash, 10L, attempt + 1);
+                }
             } catch (final Exception e) {
                 this.plugin.getLogger().warning("無法套用作物頭顱材質：" + cropId + " / " + e.getMessage());
                 e.printStackTrace();
             }
-        }, 1L);
-
-        block.getWorld().spawnParticle(Particle.HAPPY_VILLAGER,
-                above.getLocation().add(0.5, 0.6, 0.5), 12, 0.25, 0.2, 0.25, 0.02);
-        block.getWorld().playSound(above.getLocation(), Sound.BLOCK_SWEET_BERRY_BUSH_PICK_BERRIES, 0.5f, 1.4f);
+        }, delayTicks);
     }
 
     public void saveAll() {
