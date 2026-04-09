@@ -179,6 +179,9 @@ public final class TechProjectPlugin extends JavaPlugin {
         // DebugWand 挂接：除錯棒無法修改科技機器方塊
         this.hookDebugWandAPI();
 
+        // SuperHopper 挂接：全部科技機器位置繞過超級漏斗
+        this.hookSuperHopperAPI();
+
         // 定期自動存檔（每 5 分鐘），防止崩潰時資料遺失
         final long autoSaveInterval = 20L * 60L * 5L; // 6000 ticks = 5 分鐘
         this.safeScheduler.runGlobalTimer(task -> this.autoSave(), autoSaveInterval, autoSaveInterval);
@@ -208,6 +211,18 @@ public final class TechProjectPlugin extends JavaPlugin {
             this.getLogger().info("DebugWandAPI 已挂接，科技機器方塊受除錯棒保護。");
         } catch (final NoClassDefFoundError ignored) {
             // DebugWand 未安裝或版本不符
+        }
+    }
+
+    private void hookSuperHopperAPI() {
+        try {
+            if (this.getServer().getPluginManager().getPlugin("SuperHopper") == null) return;
+            for (final org.bukkit.Location loc : this.machineService.allMachineLocations()) {
+                com.ruisisz.superhopper.api.SuperHopperAPI.addBypassLocation(loc);
+            }
+            this.getLogger().info("SuperHopperAPI 已挂接，" + this.machineService.machineCount() + " 個機器位置已繞過超級漏斗。");
+        } catch (final NoClassDefFoundError ignored) {
+            // SuperHopper 未安裝或版本不符
         }
     }
 

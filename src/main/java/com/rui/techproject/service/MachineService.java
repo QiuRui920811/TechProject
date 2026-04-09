@@ -327,6 +327,7 @@ public final class MachineService {
         this.machines.put(key, placedMachine);
         this.invalidateNetworkCache();
         this.notifyBeaconBypass(block.getLocation(), true);
+        this.notifyHopperBypass(block.getLocation(), true);
         this.progressService.unlockMachine(player.getUniqueId(), machineId);
         this.progressService.unlockByRequirement(player.getUniqueId(), machineId);
         this.progressService.unlockByRequirement(player.getUniqueId(), "machine:" + machineId);
@@ -356,6 +357,7 @@ public final class MachineService {
         if (removed != null) {
             this.invalidateNetworkCache();
             this.notifyBeaconBypass(block.getLocation(), false);
+            this.notifyHopperBypass(block.getLocation(), false);
             if (this.isQuarryLike(removed.machineId())) {
                 this.quarryBusy.remove(removed.locationKey());
                 this.quarryWarmedUp.remove(removed.locationKey());
@@ -397,6 +399,16 @@ public final class MachineService {
                 tw.rui.egg.inventorysorter.beacon.BeaconAPI.addBypassLocation(location);
             } else {
                 tw.rui.egg.inventorysorter.beacon.BeaconAPI.removeBypassLocation(location);
+            }
+        } catch (final NoClassDefFoundError ignored) { }
+    }
+
+    private void notifyHopperBypass(final org.bukkit.Location location, final boolean add) {
+        try {
+            if (add) {
+                com.ruisisz.superhopper.api.SuperHopperAPI.addBypassLocation(location);
+            } else {
+                com.ruisisz.superhopper.api.SuperHopperAPI.removeBypassLocation(location);
             }
         } catch (final NoClassDefFoundError ignored) { }
     }

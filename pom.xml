@@ -80,6 +80,14 @@
             <scope>system</scope>
             <systemPath>/media/ruiouo/d5339ede-13e7-49e2-8d9b-b6abc85649eb2/tech/plugins/debugwand-1.0.0.jar</systemPath>
         </dependency>
+        <!-- SuperHopper（超級漏斗繞過 API） -->
+        <dependency>
+            <groupId>com.ruisisz</groupId>
+            <artifactId>SuperHopper</artifactId>
+            <version>1.0-SNAPSHOT</version>
+            <scope>system</scope>
+            <systemPath>/media/ruiouo/d5339ede-13e7-49e2-8d9b-b6abc85649eb2/tech/plugins/SuperHopper-1.0-SNAPSHOT.jar</systemPath>
+        </dependency>
     </dependencies>
 
     <build>
