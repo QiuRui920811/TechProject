@@ -2395,3 +2395,117 @@ machines:
     acquisition-mode: ADVANCED_WORKBENCH
     family: assembly
     role: universal-crafting
+
+  # ─── 迷途星 (Labyrinth) ───
+  labyrinth_fragment:
+    guide-category: SPECIAL
+    system-group: ENDGAME
+    item-class: ENDGAME_COMPONENT
+    visual-tier: ENDGAME
+    acquisition-mode: FIELD_COLLECTION
+    family: labyrinth_suit
+    role: maze-fragment
+  maze_vine:
+    guide-category: SPECIAL
+    system-group: ENDGAME
+    item-class: ENDGAME_COMPONENT
+    visual-tier: ENDGAME
+    acquisition-mode: FIELD_COLLECTION
+    family: labyrinth_suit
+    role: maze-vine
+  maze_vine_seeds:
+    guide-category: SPECIAL
+    system-group: ENDGAME
+    item-class: ENDGAME_COMPONENT
+    visual-tier: ENDGAME
+    acquisition-mode: FIELD_COLLECTION
+    family: labyrinth_suit
+    role: maze-vine-seed
+  labyrinth_relic:
+    guide-category: SPECIAL
+    system-group: ENDGAME
+    item-class: ENDGAME_COMPONENT
+    visual-tier: ENDGAME
+    acquisition-mode: FIELD_COLLECTION
+    family: labyrinth_suit
+    role: maze-relic
+  guardian_core:
+    guide-category: SPECIAL
+    system-group: ENDGAME
+    item-class: ENDGAME_COMPONENT
+    visual-tier: ENDGAME
+    acquisition-mode: FIELD_COLLECTION
+    family: labyrinth_suit
+    role: boss-drop
+  labyrinth_salve:
+    guide-category: SPECIAL
+    system-group: ENDGAME
+    item-class: ENDGAME_COMPONENT
+    visual-tier: ENDGAME
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: labyrinth_suit
+    role: cuisine-ward
+  maze_blade:
+    guide-category: SPECIAL
+    system-group: ENDGAME
+    item-class: ENDGAME_EQUIPMENT
+    visual-tier: ENDGAME
+    acquisition-mode: FIELD_COLLECTION
+    family: labyrinth_suit
+    role: maze-weapon
+  maze_pickaxe:
+    guide-category: SPECIAL
+    system-group: ENDGAME
+    item-class: ENDGAME_EQUIPMENT
+    visual-tier: ENDGAME
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: labyrinth_suit
+    role: maze-tool
+  maze_helmet:
+    guide-category: SPECIAL
+    system-group: ENDGAME
+    item-class: ENDGAME_EQUIPMENT
+    visual-tier: ENDGAME
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: labyrinth_suit
+    role: protective-gear
+  maze_chestplate:
+    guide-category: SPECIAL
+    system-group: ENDGAME
+    item-class: ENDGAME_EQUIPMENT
+    visual-tier: ENDGAME
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: labyrinth_suit
+    role: protective-gear
+  maze_leggings:
+    guide-category: SPECIAL
+    system-group: ENDGAME
+    item-class: ENDGAME_EQUIPMENT
+    visual-tier: ENDGAME
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: labyrinth_suit
+    role: protective-gear
+  maze_boots:
+    guide-category: SPECIAL
+    system-group: ENDGAME
+    item-class: ENDGAME_EQUIPMENT
+    visual-tier: ENDGAME
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: labyrinth_suit
+    role: protective-gear
+  maze_compass:
+    guide-category: SPECIAL
+    system-group: ENDGAME
+    item-class: ENDGAME_EQUIPMENT
+    visual-tier: ENDGAME
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: labyrinth_suit
+    role: navigation
+  ancient_signal:
+    guide-category: SPECIAL
+    system-group: ENDGAME
+    item-class: ENDGAME_COMPONENT
+    visual-tier: ENDGAME
+    acquisition-mode: MACHINE_ASSEMBLY
+    family: labyrinth_suit
+    role: activation-key

@@ -226,6 +226,8 @@ public final class TechListener implements Listener {
                 || event.getFrom().getBlockY() != event.getTo().getBlockY()
                 || event.getFrom().getBlockZ() != event.getTo().getBlockZ()) {
             this.plugin.getRegionService().onPlayerMove(event.getPlayer(), event.getTo());
+            // 迷宮中心抵達任務
+            this.plugin.getMazeService().checkCenterReach(event.getPlayer());
         }
     }
 
@@ -396,6 +398,13 @@ public final class TechListener implements Listener {
     public void onPlanetMobDeath(final EntityDeathEvent event) {
         this.plugin.getPlanetService().handlePlanetEliteDeath(event.getEntity(), event.getEntity().getKiller(), event.getDrops());
         this.plugin.getPlanetService().onRuinChallengeMobDeath(event.getEntity());
+        // 迷宮 Boss / 怪物擊殺
+        if (this.plugin.getMazeService().isLabyrinthWorld(event.getEntity().getWorld())) {
+            this.plugin.getMazeService().onBossDeath(event.getEntity(), event.getEntity().getKiller());
+            if (event.getEntity().getKiller() != null) {
+                this.plugin.getMazeService().onMobKill(event.getEntity().getKiller());
+            }
+        }
     }
 
     // ── 星球世界限制：禁止設領地、設家、傳送 ──

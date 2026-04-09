@@ -2874,6 +2874,163 @@ items:
       - 軌道中繼站
       - 遠程定位
 
+  # ─── 迷途星 (Labyrinth) 資源、裝備與武器 ───
+  labyrinth_fragment:
+    display-name: 迷宮碎片
+    category: ADVANCED
+    tier: TIER4
+    icon: ECHO_SHARD
+    description: 從迷途星地穴深層採集的回聲碎片，殘留古代迷宮的共振記憶。
+    unlock: labyrinth_fragment
+    use-cases:
+      - 迷宮套裝材料
+      - 迷宮裝備前置
+  maze_vine:
+    display-name: 迷宮蔓藤
+    category: ADVANCED
+    tier: TIER4
+    icon: VINE
+    description: 在瘴氣中頑強蔓生的生物蔓藤，可用於合成瘴氣藥膏。
+    unlock: maze_vine
+    use-cases:
+      - 瘴氣藥膏材料
+      - 地表採集
+  maze_vine_seeds:
+    display-name: 迷宮蔓藤種子
+    category: ADVANCED
+    tier: TIER4
+    icon: WHEAT_SEEDS
+    description: 迷宮蔓藤的種子，在特定深岩環境下可重新生長。
+    unlock: maze_vine
+    use-cases:
+      - 蔓藤栽培
+      - 資源再生
+  labyrinth_relic:
+    display-name: 迷宮遺物
+    category: ADVANCED
+    tier: TIER4
+    icon: RECOVERY_COMPASS
+    description: 從迷途星最深處的強化深岩中取得的古代遺物，散發不穩定的空間頻率。
+    unlock: labyrinth_relic
+    use-cases:
+      - 高階迷宮裝備
+      - 迷宮魔像掉落物
+  guardian_core:
+    display-name: 守衛者核心
+    category: ADVANCED
+    tier: TIER4
+    icon: HEART_OF_THE_SEA
+    description: 迷宮守衛者體內的力量核心，蘊含高密度空間能量。
+    unlock: guardian_core
+    use-cases:
+      - 迷宮刃強化
+      - Boss / 菁英掉落
+  labyrinth_salve:
+    display-name: 瘴氣藥膏
+    category: ADVANCED
+    tier: TIER4
+    icon: FERMENTED_SPIDER_EYE
+    description: 以迷宮蔓藤調製的護肤藥膏，暫時抵抗迷途星的瘴氣侵蝕。
+    unlock: maze_vine
+    use-cases:
+      - 迷途星星球料理
+      - 瘴氣防護
+  maze_blade:
+    display-name: 迷途刃
+    category: ADVANCED
+    tier: TIER4
+    icon: NETHERITE_SWORD
+    description: 以守衛者核心鍛造的科技劍刃，劍身閃爍幽藍回聲光紋。攻擊時有概率減速目標。
+    unlock: guardian_core
+    use-cases:
+      - 迷途星專屬武器
+      - Boss 掉落
+    attributes:
+      attack-damage: 11
+      attack-speed: 1.7
+  maze_pickaxe:
+    display-name: 回聲鎬
+    category: ADVANCED
+    tier: TIER4
+    icon: NETHERITE_PICKAXE
+    description: 特化迷宮採集用鎬，提升深岩類節點採集效率。
+    unlock: labyrinth_fragment
+    use-cases:
+      - 迷途星採集工具
+      - 節點加速採集
+  maze_helmet:
+    display-name: 迷宮頭盔
+    category: ADVANCED
+    tier: TIER4
+    icon: NETHERITE_HELMET
+    description: 內建回聲定位雷達的頭盔，可在瘴氣中維持視野。穿戴時獲得夜視效果。
+    unlock: labyrinth_fragment
+    use-cases:
+      - 迷途星探索
+      - 完整迷宮套裝
+    attributes:
+      armor: 4
+      armor-toughness: 3
+  maze_chestplate:
+    display-name: 迷宮胸甲
+    category: ADVANCED
+    tier: TIER4
+    icon: NETHERITE_CHESTPLATE
+    description: 以迷宮碎片為核心骨架的重型胸甲，自帶被動瘴氣過濾系統。
+    unlock: labyrinth_fragment
+    use-cases:
+      - 迷途星探索
+      - 完整迷宮套裝
+    attributes:
+      armor: 9
+      armor-toughness: 3
+  maze_leggings:
+    display-name: 迷宮護腿
+    category: ADVANCED
+    tier: TIER4
+    icon: NETHERITE_LEGGINGS
+    description: 嵌入空間穩定器的護腿，在迷宮牆壁移動時維持行動穩定。
+    unlock: labyrinth_fragment
+    use-cases:
+      - 迷途星探索
+      - 完整迷宮套裝
+    attributes:
+      armor: 7
+      armor-toughness: 3
+  maze_boots:
+    display-name: 迷宮靴
+    category: ADVANCED
+    tier: TIER4
+    icon: NETHERITE_BOOTS
+    description: 底部刻有回聲紋路的靴具，可偵測附近牆壁結構變化。
+    unlock: labyrinth_fragment
+    use-cases:
+      - 迷途星探索
+      - 完整迷宮套裝
+    attributes:
+      armor: 4
+      armor-toughness: 3
+  maze_compass:
+    display-name: 迷宮羅盤
+    category: ADVANCED
+    tier: TIER4
+    icon: RECOVERY_COMPASS
+    description: 指向迷宮中心的特殊羅盤，在瘴氣中也能保持精確方向感。
+    unlock: labyrinth_fragment
+    use-cases:
+      - 迷途星導航
+      - 核心區域定位
+  ancient_signal:
+    display-name: 古代信號器
+    category: ADVANCED
+    tier: TIER4
+    icon: SCULK_SENSOR
+    description: 發出深層回聲共振的裝置，可啟動迷途星地表的遺跡核心。
+    unlock: labyrinth_fragment
+    use-cases:
+      - 遺跡啟動物品
+      - 迷途星專用
+
 machines:
   kiln:
     display-name: 工業窯爐

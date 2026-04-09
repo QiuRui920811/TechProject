@@ -16,6 +16,7 @@ import com.rui.techproject.service.ItemSearchService;
 import com.rui.techproject.service.RegionService;
 import com.rui.techproject.service.MachineService;
 import com.rui.techproject.service.PlacedTechBlockService;
+import com.rui.techproject.service.MazeService;
 import com.rui.techproject.service.PlanetService;
 import com.rui.techproject.service.PlayerProgressService;
 import com.rui.techproject.service.TechBookService;
@@ -92,6 +93,7 @@ public final class TechProjectPlugin extends JavaPlugin {
     private PlacedTechBlockService placedTechBlockService;
     private TechCropService techCropService;
     private PlanetService planetService;
+    private MazeService mazeService;
     private CookingService cookingService;
     private AchievementGuiService achievementGuiService;
     private ItemSearchService itemSearchService;
@@ -129,6 +131,7 @@ public final class TechProjectPlugin extends JavaPlugin {
         this.placedTechBlockService = new PlacedTechBlockService(this, this.techRegistry, this.itemFactory);
         this.techCropService = new TechCropService(this, this.techRegistry, this.itemFactory);
         this.planetService = new PlanetService(this, this.safeScheduler, this.itemFactory, this.techRegistry);
+        this.mazeService = new MazeService(this, this.safeScheduler, this.itemFactory);
         this.machineService = new MachineService(this, this.techRegistry, this.playerProgressService, this.achievementService, this.safeScheduler, this.itemFactory, this.techCropService);
         this.cookingService = new CookingService(this, this.techRegistry, this.itemFactory, this.safeScheduler);
         this.cookingService.purgeOrphanedDisplays();
@@ -160,6 +163,7 @@ public final class TechProjectPlugin extends JavaPlugin {
         this.machineService.start();
         this.machineService.purgeOrphanDisplays();
         this.planetService.start();
+        this.mazeService.startTimers();
         this.meteorService.start();
 
         if (this.getServer().getPluginManager().getPlugin("PlaceholderAPI") != null) {
@@ -536,6 +540,10 @@ public final class TechProjectPlugin extends JavaPlugin {
 
     public MeteorService getMeteorService() {
         return this.meteorService;
+    }
+
+    public MazeService getMazeService() {
+        return this.mazeService;
     }
 
     public StorageManager getStorageManager() {

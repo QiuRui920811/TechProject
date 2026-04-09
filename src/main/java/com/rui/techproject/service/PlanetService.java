@@ -80,6 +80,7 @@ public final class PlanetService {
     public static final String NYX_WORLD = "tech_nyx";
     public static final String HELION_WORLD = "tech_helion";
     public static final String TEMPEST_WORLD = "tech_tempest";
+    public static final String LABYRINTH_WORLD = "tech_labyrinth";
 
     private static final List<String> FRONTIER_SUIT = List.of(
             "frontier_helmet",
@@ -167,7 +168,8 @@ public final class PlanetService {
         CRYO,
         VACUUM,
         SOLAR,
-        STORM
+        STORM,
+        MIASMA
     }
 
     private static final class RuinChallenge {
@@ -230,7 +232,8 @@ public final class PlanetService {
             new PlanetaryGateButtonLayout("planetary-gate-helion", "helion", 0, 6),
             new PlanetaryGateButtonLayout("planetary-gate-nyx", "nyx", 3, 0),
             new PlanetaryGateButtonLayout("planetary-gate-cryon", "cryon", 3, 3),
-            new PlanetaryGateButtonLayout("planetary-gate-tempest", "tempest", 3, 6)
+            new PlanetaryGateButtonLayout("planetary-gate-tempest", "tempest", 3, 6),
+            new PlanetaryGateButtonLayout("planetary-gate-labyrinth", "labyrinth", 5, 4)
         );
 
     private record TravelVessel(ArmorStand seat, ArmorStand cameraAnchor, List<TravelVesselPart> parts, float yaw) {
@@ -437,6 +440,13 @@ public final class PlanetService {
         if (block.getType() == Material.BARREL) {
             this.refillLootBarrel(block);
             return false;
+        }
+        // 迷途星：中心 SCULK_SHRIEKER 召喚 Boss
+        if (LABYRINTH_WORLD.equals(block.getWorld().getName())
+                && block.getType() == Material.SCULK_SHRIEKER
+                && com.rui.techproject.service.MazeService.getMazeZone(block.getX(), block.getZ()) == 0) {
+            this.plugin.getMazeService().trySpawnBoss(player);
+            return true;
         }
         if (block.getType() != definition.ruinCoreMaterial()) {
             return this.collectPlanetSurfaceNode(player, block, definition);
@@ -846,6 +856,10 @@ public final class PlanetService {
             }
             case "tempest_fizz" -> {
                 this.grantCuisineWard(player, HazardType.STORM, 20L * 180L, "導電亂流");
+                yield true;
+            }
+            case "labyrinth_salve" -> {
+                this.grantCuisineWard(player, HazardType.MIASMA, 20L * 180L, "瘴氣消散");
                 yield true;
             }
             default -> false;
@@ -1439,6 +1453,19 @@ public final class PlanetService {
                 Material.LIGHTNING_ROD,
                 "ancient_signal",
                 List.of("tempest_relic", "frontier_core_fragment")
+        ));
+        this.planets.put("labyrinth", new PlanetDefinition(
+                "labyrinth",
+                "迷途星",
+                LABYRINTH_WORLD,
+            List.of("d_techproject_labyrinth_surface", "world_techproject_labyrinth_surface"),
+            World.Environment.NORMAL,
+                HazardType.MIASMA,
+                FRONTIER_SUIT,
+                Material.ANCIENT_DEBRIS,
+                Material.SCULK_SHRIEKER,
+                "ancient_signal",
+                List.of("labyrinth_relic", "frontier_core_fragment")
         ));
     }
 
@@ -3496,6 +3523,14 @@ public final class PlanetService {
                         : roll < 9 ? org.bukkit.entity.EntityType.SKELETON
                         : org.bukkit.entity.EntityType.WITCH;
             }
+            case "labyrinth" -> {
+                final int roll = rng.nextInt(20);
+                yield roll < 6 ? org.bukkit.entity.EntityType.ZOMBIE
+                        : roll < 11 ? org.bukkit.entity.EntityType.CAVE_SPIDER
+                        : roll < 15 ? org.bukkit.entity.EntityType.SKELETON
+                        : roll < 18 ? org.bukkit.entity.EntityType.SILVERFISH
+                        : org.bukkit.entity.EntityType.PHANTOM;
+            }
             default -> null;
         };
     }
@@ -3646,6 +3681,19 @@ public final class PlanetService {
                     this.triggerAmbientLightning(player, 10, 26);
                 }
             }
+            case "labyrinth" -> {
+                if (this.ambientRandom.nextInt(2) == 0) {
+                    player.getWorld().spawnParticle(Particle.SCULK_SOUL, origin, 8, 1.1, 0.6, 1.1, 0.015);
+                    player.getWorld().spawnParticle(Particle.SMOKE, origin, 6, 0.9, 0.45, 0.9, 0.01);
+                    this.spawnAmbientDustBurst(player, origin, Color.fromRGB(22, 60, 82), Color.fromRGB(10, 180, 160), 9, 0.88D);
+                }
+                if (this.ambientRandom.nextInt(4) == 0) {
+                    this.playAttachedPlanetSound(player, Sound.BLOCK_SCULK_SENSOR_CLICKING, SoundCategory.AMBIENT, 0.45f, 0.5f);
+                }
+                if (this.ambientRandom.nextInt(8) == 0) {
+                    this.playAttachedPlanetSound(player, Sound.AMBIENT_SOUL_SAND_VALLEY_MOOD, SoundCategory.AMBIENT, 0.55f, 0.38f);
+                }
+            }
             default -> {
             }
         }
@@ -3726,6 +3774,10 @@ public final class PlanetService {
                     player.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE, 60, 0, false, false, true));
                     player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 60, 0, false, false, true));
                 }
+                case MIASMA -> {
+                    player.addPotionEffect(new PotionEffect(PotionEffectType.HASTE, 60, 0, false, false, true));
+                    player.addPotionEffect(new PotionEffect(PotionEffectType.NIGHT_VISION, 60, 0, false, false, true));
+                }
             }
             return;
         }
@@ -3801,6 +3853,19 @@ public final class PlanetService {
                 }
                 player.getWorld().spawnParticle(Particle.ELECTRIC_SPARK, player.getLocation().add(0.0, 1.0, 0.0), 12, 0.35, 0.45, 0.35, 0.02);
                 this.playAttachedPlanetSound(player, Sound.ENTITY_LIGHTNING_BOLT_IMPACT, SoundCategory.PLAYERS, 0.25f, 1.4f);
+            }
+            case MIASMA -> {
+                if (cuisineWard) {
+                    player.addPotionEffect(new PotionEffect(PotionEffectType.NIGHT_VISION, 80, 0, false, true, true));
+                    player.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE, 80, 0, false, true, true));
+                } else {
+                    player.addPotionEffect(new PotionEffect(PotionEffectType.WITHER, 80, 0, false, true, true));
+                    player.addPotionEffect(new PotionEffect(PotionEffectType.MINING_FATIGUE, 90, 0, false, true, true));
+                    player.addPotionEffect(new PotionEffect(PotionEffectType.DARKNESS, 60, 0, false, true, true));
+                    player.damage(1.0D);
+                }
+                player.getWorld().spawnParticle(Particle.SCULK_SOUL, player.getLocation().add(0.0, 1.0, 0.0), 10, 0.35, 0.45, 0.35, 0.02);
+                this.playAttachedPlanetSound(player, Sound.BLOCK_SCULK_SPREAD, SoundCategory.PLAYERS, 0.35f, 0.6f);
             }
         }
     }
@@ -4014,6 +4079,12 @@ public final class PlanetService {
                 case EXPOSED_COPPER -> includeRelics ? new PlanetHarvestProfile("tempest_relic", 1, null, 0, 740L, 920L, true) : null;
                 default -> null;
             };
+            case "labyrinth" -> switch (material) {
+                case SCULK -> new PlanetHarvestProfile("labyrinth_fragment", 1, null, 0, 190L, 270L, true);
+                case MOSS_BLOCK -> new PlanetHarvestProfile("maze_vine", 2, "maze_vine_seeds", 1, 260L, 340L, true);
+                case REINFORCED_DEEPSLATE -> includeRelics ? new PlanetHarvestProfile("labyrinth_relic", 1, null, 0, 740L, 920L, true) : null;
+                default -> null;
+            };
             default -> null;
         };
     }
@@ -4025,6 +4096,7 @@ public final class PlanetService {
             case VACUUM -> "相位失壓";
             case SOLAR -> "日冕灼燒";
             case STORM -> "導電亂流";
+            case MIASMA -> "瘴氣侵蝕";
         };
     }
 
@@ -4040,6 +4112,7 @@ public final class PlanetService {
             case "nyx" -> 0.58D;
             case "helion" -> 0.74D;
             case "tempest" -> 0.70D;
+            case "labyrinth" -> 0.92D;
             default -> 0.88D;
         };
     }
@@ -4286,6 +4359,10 @@ public final class PlanetService {
         player.playSound(center, Sound.BLOCK_AMETHYST_BLOCK_CHIME, 0.42f, 1.22f);
         player.playSound(center, Sound.ITEM_BRUSH_BRUSHING_GENERIC, 0.35f, 0.92f);
         player.sendActionBar(this.itemFactory.secondary("開始採集「" + this.itemFactory.displayNameForId(profile.dropItemId()) + "」 " + this.harvestProgressBar(0.0D)));
+        // 迷途星：播放鎬子挖掘動畫
+        if (LABYRINTH_WORLD.equals(block.getWorld().getName())) {
+            this.plugin.getMazeService().playMiningAnimation(player, block);
+        }
         this.scheduler.runEntityTimer(player, task -> {
             final PendingHarvest current = this.pendingHarvests.get(player.getUniqueId());
             if (current == null || current.token() != token) {
@@ -4297,6 +4374,10 @@ public final class PlanetService {
                 task.cancel();
                 player.sendActionBar(this.itemFactory.warning("你離開了採集範圍，採集已中斷。"));
                 player.playSound(center, Sound.BLOCK_FIRE_EXTINGUISH, 0.25f, 0.7f);
+                // 中斷時取消動畫
+                if (LABYRINTH_WORLD.equals(block.getWorld().getName())) {
+                    this.plugin.getMazeService().cancelMiningAnimation(player);
+                }
                 return;
             }
             final double progress = this.pendingHarvestProgress(current);
@@ -4334,6 +4415,10 @@ public final class PlanetService {
             }
         }
         this.plugin.getPlayerProgressService().incrementStat(player.getUniqueId(), "planetary_samples_collected", outputs.stream().mapToInt(ItemStack::getAmount).sum());
+        // 迷宮採集任務推進
+        if (LABYRINTH_WORLD.equals(block.getWorld().getName())) {
+            this.plugin.getMazeService().onCollect(player);
+        }
         this.hideHarvestNode(player, block);
         player.spawnParticle(Particle.PORTAL, block.getLocation().add(0.5, 0.7, 0.5), 20, 0.2, 0.22, 0.2, 0.03);
         player.spawnParticle(Particle.END_ROD, block.getLocation().add(0.5, 0.9, 0.5), 8, 0.12, 0.16, 0.12, 0.0);
@@ -4860,6 +4945,7 @@ public final class PlanetService {
             case "nyx" -> new PlanetEliteProfile("虛響觀測者", "nyx_phase_tissue", "voidglass_fragment", 1.55D, 2.5D, 0.03D);
             case "helion" -> new PlanetEliteProfile("日灼焰獸", "helion_cinder_core", "solarite_shard", 1.9D, 3.0D, 0.02D);
             case "tempest" -> new PlanetEliteProfile("雷殼追獵者", "tempest_capacitor", "stormglass_shard", 1.7D, 2.0D, 0.04D);
+            case "labyrinth" -> new PlanetEliteProfile("迷宮守衛者", "guardian_core", "labyrinth_fragment", 1.8D, 2.5D, 0.025D);
             default -> null;
         };
     }
@@ -6317,6 +6403,7 @@ public final class PlanetService {
             case "nyx", NYX_WORLD, "d_techproject_nyx_orbit" -> "nyx";
             case "helion", HELION_WORLD, "d_techproject_helion_surface" -> "helion";
             case "tempest", TEMPEST_WORLD, "d_techproject_tempest_surface" -> "tempest";
+            case "labyrinth", LABYRINTH_WORLD, "d_techproject_labyrinth_surface" -> "labyrinth";
             default -> null;
         };
     }
@@ -6366,6 +6453,14 @@ public final class PlanetService {
                             chunkData.setBlock(localX, y, localZ, column.fluidMaterial());
                         }
                     }
+                    // 迷宮牆壁：labyrinth 星球在平坦地面上生成迷宮結構
+                    if ("labyrinth".equals(this.planetId) && isStaticMazeWall(seed, worldX, worldZ)) {
+                        final int floorY = column.surfaceY();
+                        for (int y = floorY + 1; y <= floorY + 4; y++) {
+                            chunkData.setBlock(localX, y, localZ,
+                                    y == floorY + 4 ? Material.CHISELED_DEEPSLATE : Material.DEEPSLATE_BRICKS);
+                        }
+                    }
                 }
             }
         }
@@ -6387,6 +6482,76 @@ public final class PlanetService {
             final int y = profile.sample(world.getSeed() ^ ((long) this.planetId.hashCode() << 32), 0, 0, world.getMinHeight(), world.getMaxHeight()).surfaceY() + 2;
             return new Location(world, 0.5, y, 0.5);
         }
+
+        // ─── Labyrinth 迷宮牆壁生成 ───
+
+        private static final int MAZE_CELL_SIZE = 7;
+        private static final int MAZE_HALF_EXTENT = 224; // 64 cells * 7 blocks / 2
+
+        private static boolean isStaticMazeWall(final long seed, final int worldX, final int worldZ) {
+            if (Math.abs(worldX) > MAZE_HALF_EXTENT || Math.abs(worldZ) > MAZE_HALF_EXTENT) {
+                return false;
+            }
+            // 中心安全區 (3x3 cells)
+            if (Math.abs(worldX) <= MAZE_CELL_SIZE && Math.abs(worldZ) <= MAZE_CELL_SIZE) {
+                return false;
+            }
+            final int shifted = worldX + MAZE_HALF_EXTENT;
+            final int shiftedZ = worldZ + MAZE_HALF_EXTENT;
+            final int localX = Math.floorMod(shifted, MAZE_CELL_SIZE);
+            final int localZ = Math.floorMod(shiftedZ, MAZE_CELL_SIZE);
+            final int cellX = Math.floorDiv(shifted, MAZE_CELL_SIZE);
+            final int cellZ = Math.floorDiv(shiftedZ, MAZE_CELL_SIZE);
+            final boolean onXBorder = localX == 0;
+            final boolean onZBorder = localZ == 0;
+            if (!onXBorder && !onZBorder) {
+                return false; // 格子內部
+            }
+            if (onXBorder && onZBorder) {
+                return true; // 角柱
+            }
+            if (onXBorder) {
+                return !isMazePassage(seed, cellX - 1, cellZ, cellX, cellZ);
+            }
+            return !isMazePassage(seed, cellX, cellZ - 1, cellX, cellZ);
+        }
+
+        private static boolean isMazePassage(final long seed, final int ax, final int az, final int bx, final int bz) {
+            // 每個格子用 hash 決定往哪打通 (spanning tree)
+            final int dirB = mazeCellDir(seed, bx, bz);
+            final int parentBx = bx + (dirB == 1 ? 1 : dirB == 3 ? -1 : 0);
+            final int parentBz = bz + (dirB == 0 ? -1 : dirB == 2 ? 1 : 0);
+            if (parentBx == ax && parentBz == az) {
+                return true;
+            }
+            final int dirA = mazeCellDir(seed, ax, az);
+            final int parentAx = ax + (dirA == 1 ? 1 : dirA == 3 ? -1 : 0);
+            final int parentAz = az + (dirA == 0 ? -1 : dirA == 2 ? 1 : 0);
+            if (parentAx == bx && parentAz == bz) {
+                return true;
+            }
+            // 額外隨機通道 (~15%) 增加路線多樣性
+            final long borderHash = mazeBorderHash(seed, ax, az, bx, bz);
+            return (borderHash & 0x1FL) < 5L;
+        }
+
+        private static int mazeCellDir(final long seed, final int cx, final int cz) {
+            long h = seed ^ ((long) cx * 0x517cc1b727220a95L) ^ ((long) cz * 0x6c62272e07bb0142L);
+            h = (h ^ (h >>> 33)) * 0xff51afd7ed558ccdL;
+            h = (h ^ (h >>> 33)) * 0xc4ceb9fe1a85ec53L;
+            return (int) ((h ^ (h >>> 33)) & 3L); // 0=N, 1=E, 2=S, 3=W
+        }
+
+        private static long mazeBorderHash(final long seed, final int ax, final int az, final int bx, final int bz) {
+            final int minX = Math.min(ax, bx);
+            final int minZ = Math.min(az, bz);
+            final int maxX = Math.max(ax, bx);
+            final int maxZ = Math.max(az, bz);
+            long h = seed ^ ((long) minX * 0x9e3779b97f4a7c15L) ^ ((long) minZ * 0x6c62272e07bb0142L)
+                    ^ ((long) maxX * 0x2545f4914f6cdd1dL) ^ ((long) maxZ * 0xbf58476d1ce4e5b9L);
+            h = (h ^ (h >>> 30)) * 0xbf58476d1ce4e5b9L;
+            return h ^ (h >>> 27);
+        }
     }
 
     private static final class PlanetBiomeProvider extends BiomeProvider {
@@ -6405,6 +6570,7 @@ public final class PlanetService {
                 case "nyx" -> climate > 0.3D ? Biome.END_HIGHLANDS : climate > -0.2D ? Biome.THE_END : Biome.SMALL_END_ISLANDS;
                 case "helion" -> climate > 0.34D ? Biome.BASALT_DELTAS : climate > -0.05D ? Biome.BADLANDS : Biome.DESERT;
                 case "tempest" -> climate > 0.3D ? Biome.WINDSWEPT_GRAVELLY_HILLS : climate > -0.08D ? Biome.SWAMP : Biome.MANGROVE_SWAMP;
+                case "labyrinth" -> climate > 0.25D ? Biome.DEEP_DARK : climate > -0.15D ? Biome.DARK_FOREST : Biome.LUSH_CAVES;
                 default -> Biome.PLAINS;
             };
         }
@@ -6417,6 +6583,7 @@ public final class PlanetService {
                 case "nyx" -> List.of(Biome.THE_END, Biome.END_HIGHLANDS, Biome.SMALL_END_ISLANDS);
                 case "helion" -> List.of(Biome.DESERT, Biome.BADLANDS, Biome.BASALT_DELTAS);
                 case "tempest" -> List.of(Biome.SWAMP, Biome.MANGROVE_SWAMP, Biome.WINDSWEPT_GRAVELLY_HILLS);
+                case "labyrinth" -> List.of(Biome.DEEP_DARK, Biome.DARK_FOREST, Biome.LUSH_CAVES);
                 default -> List.of(Biome.PLAINS);
             };
         }
@@ -6462,6 +6629,9 @@ public final class PlanetService {
             case "tempest" -> new PlanetTerrainProfile(86, 82, 17.0D, 7.0D, 8.5D, 108, 9, 20, 7.0D,
                 7.0D, 3.5D, 2.0D, 3.5D,
                         Material.STONE, Material.DEEPSLATE, Material.WEATHERED_COPPER, Material.WATER);
+            case "labyrinth" -> new PlanetTerrainProfile(64, 60, 0.0D, 0.0D, 0.0D, 0, 0, 0, 0.0D,
+                0.0D, 0.0D, 0.0D, 0.0D,
+                        Material.DEEPSLATE, Material.POLISHED_DEEPSLATE, Material.SMOOTH_STONE, null);
             default -> new PlanetTerrainProfile(88, 74, 18.0D, 6.0D, 7.0D, 118, 9, 20, 8.0D,
                 8.0D, 3.5D, 2.0D, 3.0D,
                         Material.END_STONE, Material.END_STONE, Material.END_STONE, null);
