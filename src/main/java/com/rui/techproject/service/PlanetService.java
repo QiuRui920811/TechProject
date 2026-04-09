@@ -6839,6 +6839,9 @@ public final class PlanetService {
                                           final int radiusMin,
                                           final int radiusMax,
                                           final double maxDepth) {
+            if (spacing <= 0 || maxDepth <= 0.0D) {
+                return 0.0D;
+            }
             final int gridX = Math.floorDiv(x, spacing);
             final int gridZ = Math.floorDiv(z, spacing);
             double deepest = 0.0D;
