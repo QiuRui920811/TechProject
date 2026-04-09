@@ -6497,10 +6497,26 @@ public final class PlanetService {
                     if ("labyrinth".equals(this.planetId) && isStaticMazeWall(seed, worldX, worldZ)) {
                         final int floorY = column.surfaceY();
                         final int wallTop = floorY + 100; // 100 格高城牆（移動迷宮風格）
+
+                        // ── 判斷是否為門框區域（門兩側柱子 + 拱頂）──
+                        final boolean isGateFrame = isGladeGateFrame(worldX, worldZ);
+
                         for (int y = floorY + 1; y <= wallTop; y++) {
                             final Material wallMat;
                             final int relY = y - floorY;
-                            if (y == wallTop) {
+                            if (isGateFrame) {
+                                // 門框材質：鍍金黑石 + 紫珀柱 + 靈魂燈籠
+                                if (y == wallTop) {
+                                    wallMat = Material.CHISELED_POLISHED_BLACKSTONE;
+                                } else if (relY <= 6) {
+                                    // 門框底部：柱子用黑石磚
+                                    wallMat = Material.POLISHED_BLACKSTONE_BRICKS;
+                                } else if (relY <= 8) {
+                                    wallMat = Material.GILDED_BLACKSTONE;
+                                } else {
+                                    wallMat = (relY % 8 == 0) ? Material.GILDED_BLACKSTONE : Material.POLISHED_BLACKSTONE_BRICKS;
+                                }
+                            } else if (y == wallTop) {
                                 wallMat = Material.CHISELED_DEEPSLATE;
                             } else if (relY >= 95) {
                                 wallMat = Material.POLISHED_DEEPSLATE;
@@ -6515,6 +6531,10 @@ public final class PlanetService {
                                         : Material.DEEPSLATE_BRICKS;
                             }
                             chunkData.setBlock(localX, y, localZ, wallMat);
+                        }
+                        // 門框頂部加靈魂火把
+                        if (isGateFrame && isGladeGatePillarCorner(worldX, worldZ)) {
+                            chunkData.setBlock(localX, wallTop + 1, localZ, Material.SOUL_LANTERN);
                         }
                     }
                     // ── The Glade（倖存者基地）地板 ──
@@ -6533,7 +6553,23 @@ public final class PlanetService {
                             // 基地地面材質
                             final long pathHash = mazeBorderHash(seed, worldX, 0, worldZ, 0);
                             final int dist = Math.max(Math.abs(worldX), Math.abs(worldZ));
-                            if (dist >= GLADE_HALF - 8) {
+
+                            // 門前通道：黑石磚地板 + 靈魂火把（通往四個門的道路）
+                            final boolean gatePathNS = Math.abs(worldX) <= 2 && Math.abs(worldZ) >= GLADE_HALF - 12;
+                            final boolean gatePathEW = Math.abs(worldZ) <= 2 && Math.abs(worldX) >= GLADE_HALF - 12;
+                            if (gatePathNS || gatePathEW) {
+                                if (Math.abs(worldX) == 2 || Math.abs(worldZ) == 2) {
+                                    // 通道邊緣
+                                    chunkData.setBlock(localX, gladeFloor, localZ, Material.GILDED_BLACKSTONE);
+                                } else {
+                                    chunkData.setBlock(localX, gladeFloor, localZ, Material.POLISHED_BLACKSTONE_BRICKS);
+                                }
+                                // 通道邊的靈魂燈
+                                if ((Math.abs(worldX) == 2 || Math.abs(worldZ) == 2)
+                                        && (worldX % 4 == 0 || worldZ % 4 == 0)) {
+                                    chunkData.setBlock(localX, gladeFloor + 1, localZ, Material.SOUL_LANTERN);
+                                }
+                            } else if (dist >= GLADE_HALF - 8) {
                                 chunkData.setBlock(localX, gladeFloor, localZ,
                                         (pathHash & 0x3) == 0 ? Material.COBBLED_DEEPSLATE : Material.DEEPSLATE);
                             } else if ((pathHash & 0xF) == 0) {
@@ -6544,7 +6580,8 @@ public final class PlanetService {
                                 chunkData.setBlock(localX, gladeFloor, localZ, Material.STONE_BRICKS);
                             }
                             // 每 8 格放置燈籠
-                            if (worldX % 8 == 0 && worldZ % 8 == 0 && dist < GLADE_HALF - 8) {
+                            if (worldX % 8 == 0 && worldZ % 8 == 0 && dist < GLADE_HALF - 8
+                                    && !gatePathNS && !gatePathEW) {
                                 chunkData.setBlock(localX, gladeFloor + 1, localZ, Material.LANTERN);
                             }
                         }
@@ -6642,6 +6679,43 @@ public final class PlanetService {
                 return !isMazePassage(seed, cellX, cellZ, cellX, cellZ + 1);
             }
             return !isMazePassage(seed, cellX, cellZ - 1, cellX, cellZ);
+        }
+
+        /**
+         * 判斷座標是否為 Glade 大門的門框區域（門兩側 + 門上方拱頂）。
+         * 門位於四個方向：N(z=-48~-50,|x|≤2), S(z=48~50,|x|≤2),
+         *                  E(x=48~50,|z|≤2), W(x=-48~-50,|z|≤2)
+         * 門框 = 門洞邊緣 ±1 格（|coord| = 3~4）
+         */
+        private static boolean isGladeGateFrame(final int worldX, final int worldZ) {
+            if (Math.abs(worldX) > GLADE_HALF || Math.abs(worldZ) > GLADE_HALF) {
+                return false;
+            }
+            final boolean onZWall = Math.abs(worldZ) >= GLADE_HALF - 2;
+            final boolean onXWall = Math.abs(worldX) >= GLADE_HALF - 2;
+            // N/S 門框：Z 方向是牆，|x| = 3 或 4（門洞邊緣柱子）
+            if (onZWall && (Math.abs(worldX) == 3 || Math.abs(worldX) == 4)) {
+                return true;
+            }
+            // E/W 門框：X 方向是牆，|z| = 3 或 4（門洞邊緣柱子）
+            if (onXWall && (Math.abs(worldZ) == 3 || Math.abs(worldZ) == 4)) {
+                return true;
+            }
+            // 門拱頂：牆壁上方橫跨門洞的部分也用門框材質
+            // (由 MazeService 的 GATE_HALF_WIDTH=2 可知門洞 |coord|≤2)
+            // 拱頂不在 ChunkGen，因為它是 MazeService 動態管理的門方塊
+            return false;
+        }
+
+        /**
+         * 判斷是否為門框最外側角落（放靈魂燈籠的位置）。
+         */
+        private static boolean isGladeGatePillarCorner(final int worldX, final int worldZ) {
+            final boolean onZWall = Math.abs(worldZ) >= GLADE_HALF - 2;
+            final boolean onXWall = Math.abs(worldX) >= GLADE_HALF - 2;
+            if (onZWall && Math.abs(worldX) == 4) return true;
+            if (onXWall && Math.abs(worldZ) == 4) return true;
+            return false;
         }
 
         /**
