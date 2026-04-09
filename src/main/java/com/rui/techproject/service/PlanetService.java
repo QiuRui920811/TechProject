@@ -6456,20 +6456,22 @@ public final class PlanetService {
                     // 迷宮牆壁：labyrinth 星球在平坦地面上生成高聳迷宮城牆
                     if ("labyrinth".equals(this.planetId) && isStaticMazeWall(seed, worldX, worldZ)) {
                         final int floorY = column.surfaceY();
-                        final int wallTop = floorY + 40; // 40 格高城牆
+                        final int wallTop = floorY + 100; // 100 格高城牆（移動迷宮風格）
                         for (int y = floorY + 1; y <= wallTop; y++) {
                             final Material wallMat;
+                            final int relY = y - floorY;
                             if (y == wallTop) {
                                 wallMat = Material.CHISELED_DEEPSLATE;
-                            } else if (y >= wallTop - 2) {
+                            } else if (relY >= 95) {
                                 wallMat = Material.POLISHED_DEEPSLATE;
-                            } else if (y <= floorY + 3) {
+                            } else if (relY <= 5) {
                                 wallMat = Material.DEEPSLATE;
                             } else {
-                                // 中段隨機苔蘚化
+                                // 中段隨機變化：苔蘚、磚瓦、裂痕
                                 final long vineHash = mazeBorderHash(seed, worldX, y, worldX ^ y, worldZ);
                                 wallMat = (vineHash & 0xF) == 0 ? Material.MOSS_BLOCK
-                                        : (vineHash & 0xF) == 1 ? Material.DEEPSLATE_TILE_WALL.isBlock() ? Material.DEEPSLATE_TILES : Material.DEEPSLATE_BRICKS
+                                        : (vineHash & 0xF) == 1 ? Material.DEEPSLATE_TILES
+                                        : (vineHash & 0x1F) < 3 ? Material.COBBLED_DEEPSLATE
                                         : Material.DEEPSLATE_BRICKS;
                             }
                             chunkData.setBlock(localX, y, localZ, wallMat);
@@ -6478,6 +6480,45 @@ public final class PlanetService {
                         final long capHash = mazeBorderHash(seed, worldX, wallTop, worldZ, worldX + worldZ);
                         if ((capHash & 0x7) == 0) {
                             chunkData.setBlock(localX, wallTop + 1, localZ, Material.DEEPSLATE_BRICK_WALL);
+                        }
+                    }
+                    // ── The Glade（倖存者基地）結構 ──
+                    if ("labyrinth".equals(this.planetId)
+                            && Math.abs(worldX) < GLADE_HALF - 1 && Math.abs(worldZ) < GLADE_HALF - 1) {
+                        final int gladeFloor = column.surfaceY();
+                        // 中央篝火（3×3 鵝卵石平台）
+                        if (Math.abs(worldX) <= 1 && Math.abs(worldZ) <= 1) {
+                            chunkData.setBlock(localX, gladeFloor, localZ, Material.COBBLESTONE);
+                            if (worldX == 0 && worldZ == 0) {
+                                chunkData.setBlock(localX, gladeFloor + 1, localZ, Material.CAMPFIRE);
+                            }
+                        } else {
+                            // 基地地面材質變化（泥路 / 粗泥）
+                            final long pathHash = mazeBorderHash(seed, worldX, 0, worldZ, 0);
+                            if ((pathHash & 0x7) < 2) {
+                                chunkData.setBlock(localX, gladeFloor, localZ, Material.DIRT_PATH);
+                            } else if ((pathHash & 0xF) == 3) {
+                                chunkData.setBlock(localX, gladeFloor, localZ, Material.COARSE_DIRT);
+                            }
+                        }
+                        // 四間小木屋（5×5×4）
+                        generateGladeHut(chunkData, localX, localZ, worldX, worldZ, gladeFloor, 25, 25);
+                        generateGladeHut(chunkData, localX, localZ, worldX, worldZ, gladeFloor, -25, 25);
+                        generateGladeHut(chunkData, localX, localZ, worldX, worldZ, gladeFloor, 25, -25);
+                        generateGladeHut(chunkData, localX, localZ, worldX, worldZ, gladeFloor, -25, -25);
+                        // 瞭望塔（3×3×15）
+                        if (Math.abs(worldX - 35) <= 1 && Math.abs(worldZ + 30) <= 1) {
+                            final boolean tCorner = Math.abs(worldX - 35) == 1 && Math.abs(worldZ + 30) == 1;
+                            for (int ty = gladeFloor + 1; ty <= gladeFloor + 15; ty++) {
+                                if (ty == gladeFloor + 15) {
+                                    chunkData.setBlock(localX, ty, localZ, Material.STONE_BRICK_SLAB);
+                                } else if (tCorner) {
+                                    chunkData.setBlock(localX, ty, localZ, Material.STONE_BRICKS);
+                                } else if (Math.abs(worldX - 35) == 1 || Math.abs(worldZ + 30) == 1) {
+                                    chunkData.setBlock(localX, ty, localZ,
+                                            ty <= gladeFloor + 2 || ty >= gladeFloor + 13 ? Material.STONE_BRICKS : Material.AIR);
+                                }
+                            }
                         }
                     }
                 }
@@ -6504,17 +6545,29 @@ public final class PlanetService {
 
         // ─── Labyrinth 迷宮牆壁生成 ───
 
-        private static final int MAZE_CELL_SIZE = 7;
-        private static final int MAZE_HALF_EXTENT = 224; // 64 cells * 7 blocks / 2
+        private static final int MAZE_CELL_SIZE = 9;
+        private static final int MAZE_HALF_EXTENT = 490; // ~108 cells × 9 / 2
+        private static final int GLADE_HALF = 50;         // 100×100 倖存者基地 (The Glade)
 
         private static boolean isStaticMazeWall(final long seed, final int worldX, final int worldZ) {
             if (Math.abs(worldX) > MAZE_HALF_EXTENT || Math.abs(worldZ) > MAZE_HALF_EXTENT) {
                 return false;
             }
-            // 中心安全區 (3x3 cells)
-            if (Math.abs(worldX) <= MAZE_CELL_SIZE && Math.abs(worldZ) <= MAZE_CELL_SIZE) {
-                return false;
+            // ── The Glade（倖存者基地 100×100）──
+            if (Math.abs(worldX) <= GLADE_HALF && Math.abs(worldZ) <= GLADE_HALF) {
+                // 基地內部
+                if (Math.abs(worldX) < GLADE_HALF - 1 && Math.abs(worldZ) < GLADE_HALF - 1) {
+                    return false;
+                }
+                // 邊界牆（|x|=49~50 或 |z|=49~50）
+                final boolean gladeXBorder = Math.abs(worldX) >= GLADE_HALF - 1;
+                final boolean gladeZBorder = Math.abs(worldZ) >= GLADE_HALF - 1;
+                // 四方向大門（5 格寬）：N/S 門 ∈ |x|≤2, E/W 門 ∈ |z|≤2
+                if (gladeZBorder && Math.abs(worldX) <= 2) return false;
+                if (gladeXBorder && Math.abs(worldZ) <= 2) return false;
+                return true;
             }
+            // ── 外部迷宮 ──
             final int shifted = worldX + MAZE_HALF_EXTENT;
             final int shiftedZ = worldZ + MAZE_HALF_EXTENT;
             final int localX = Math.floorMod(shifted, MAZE_CELL_SIZE);
@@ -6524,15 +6577,48 @@ public final class PlanetService {
             final boolean onXBorder = localX == 0;
             final boolean onZBorder = localZ == 0;
             if (!onXBorder && !onZBorder) {
-                return false; // 格子內部
+                return false;
             }
             if (onXBorder && onZBorder) {
-                return true; // 角柱
+                return true;
             }
             if (onXBorder) {
                 return !isMazePassage(seed, cellX - 1, cellZ, cellX, cellZ);
             }
             return !isMazePassage(seed, cellX, cellZ - 1, cellX, cellZ);
+        }
+
+        /**
+         * 在 The Glade 內生成一間 5×5×4 的簡易小木屋。
+         */
+        private static void generateGladeHut(final ChunkGenerator.ChunkData data,
+                                             final int localX,
+                                             final int localZ,
+                                             final int worldX,
+                                             final int worldZ,
+                                             final int floorY,
+                                             final int hutCenterX,
+                                             final int hutCenterZ) {
+            final int dx = worldX - hutCenterX;
+            final int dz = worldZ - hutCenterZ;
+            if (Math.abs(dx) > 2 || Math.abs(dz) > 2) {
+                return;
+            }
+            final boolean corner = Math.abs(dx) == 2 && Math.abs(dz) == 2;
+            final boolean edge = Math.abs(dx) == 2 || Math.abs(dz) == 2;
+            for (int y = floorY + 1; y <= floorY + 4; y++) {
+                if (y == floorY + 4) {
+                    data.setBlock(localX, y, localZ, Material.OAK_SLAB);
+                } else if (corner) {
+                    data.setBlock(localX, y, localZ, Material.OAK_LOG);
+                } else if (edge && y <= floorY + 3) {
+                    // 正面門 (dz == -2 的方向留門)
+                    if (dx == 0 && dz == -2 && y <= floorY + 2) {
+                        continue; // 門口
+                    }
+                    data.setBlock(localX, y, localZ, Material.OAK_PLANKS);
+                }
+            }
         }
 
         private static boolean isMazePassage(final long seed, final int ax, final int az, final int bx, final int bz) {

@@ -15,6 +15,8 @@ import org.bukkit.SoundCategory;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.entity.ArmorStand;
+import org.bukkit.entity.BlockDisplay;
+import org.bukkit.entity.Display;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Mob;
@@ -22,6 +24,9 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.EulerAngle;
+import org.bukkit.util.Transformation;
+import org.joml.AxisAngle4f;
+import org.joml.Vector3f;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,14 +43,17 @@ import java.util.concurrent.ThreadLocalRandom;
 public final class MazeService {
 
     // ─── 迷宮常數 ───
-    private static final int MAZE_CELL_SIZE = 7;
-    private static final int MAZE_HALF_EXTENT = 224;
-    private static final int WALL_HEIGHT = 40;
+    private static final int MAZE_CELL_SIZE = 9;
+    private static final int MAZE_HALF_EXTENT = 490;
+    private static final int GLADE_HALF = 50;
+    private static final int WALL_HEIGHT = 100;
     private static final int FLOOR_Y = 64;
     private static final long WALL_SHIFT_INTERVAL_TICKS = 20L * 300L; // 5 分鐘
     private static final long WALL_SHIFT_WARNING_TICKS = 20L * 30L;   // 提前 30 秒預警
     private static final int WALLS_PER_SHIFT = 18;
     private static final int SAFE_RADIUS_SQ = 3 * 3; // 不能在玩家 3 格內關閉牆壁
+    private static final int WALL_ANIM_TICKS = 60;     // 牆壁升降動畫 3 秒
+    private static final String WALL_ANIM_TAG = "techproject:maze_wall_anim";
 
     // ─── 挖掘動畫 ───
     private static final String MINING_STAND_TAG = "techproject:maze_mining";
@@ -142,15 +150,17 @@ public final class MazeService {
         this.pendingShiftWalls.clear();
         final long seed = world.getSeed() ^ ((long) "labyrinth".hashCode() << 32);
         final ThreadLocalRandom rng = ThreadLocalRandom.current();
+        final int halfCells = MAZE_HALF_EXTENT / MAZE_CELL_SIZE;
+        final int gladeCells = GLADE_HALF / MAZE_CELL_SIZE + 1;
 
         int count = 0;
         int attempts = 0;
         while (count < WALLS_PER_SHIFT && attempts < WALLS_PER_SHIFT * 10) {
             attempts++;
-            final int cellX = rng.nextInt(-30, 30);
-            final int cellZ = rng.nextInt(-30, 30);
-            if (Math.abs(cellX) <= 1 && Math.abs(cellZ) <= 1) {
-                continue; // 中心安全區
+            final int cellX = rng.nextInt(-halfCells, halfCells);
+            final int cellZ = rng.nextInt(-halfCells, halfCells);
+            if (Math.abs(cellX) <= gladeCells && Math.abs(cellZ) <= gladeCells) {
+                continue; // The Glade 區域
             }
             final int dir = rng.nextInt(2); // 0=X border, 1=Z border
             final int wallWorldX;
@@ -178,9 +188,9 @@ public final class MazeService {
         for (final long packed : this.pendingShiftWalls) {
             final int wx = unpackX(packed);
             final int wz = unpackZ(packed);
-            final Location loc = new Location(world, wx + 0.5, FLOOR_Y + 20, wz + 0.5);
+            final Location loc = new Location(world, wx + 0.5, FLOOR_Y + 50, wz + 0.5);
             if (loc.isChunkLoaded()) {
-                world.spawnParticle(Particle.SCULK_SOUL, loc, 15, 0.3, 15.0, 0.3, 0.02);
+                world.spawnParticle(Particle.SCULK_SOUL, loc, 20, 0.3, 40.0, 0.3, 0.02);
             }
         }
     }
@@ -211,37 +221,9 @@ public final class MazeService {
                     || wallBase.getBlock().getType() == Material.CHISELED_DEEPSLATE;
 
             if (currentlyWall) {
-                // 拆除牆壁（整面 40 格高）
-                this.shiftedWallsOpen.add(packed);
-                this.shiftedWallsClosed.remove(packed);
-                for (int y = FLOOR_Y + 1; y <= FLOOR_Y + WALL_HEIGHT + 1; y++) {
-                    world.getBlockAt(wx, y, wz).setType(Material.AIR, false);
-                }
-                world.spawnParticle(Particle.BLOCK, wallBase.clone().add(0.5, 20, 0.5), 60,
-                        0.4, 15.0, 0.4, 0.1, Material.DEEPSLATE_BRICKS.createBlockData());
-                world.playSound(wallBase, Sound.BLOCK_DEEPSLATE_BRICKS_BREAK, SoundCategory.BLOCKS, 1.2f, 0.5f);
-                world.playSound(wallBase.clone().add(0, 20, 0), Sound.ENTITY_WARDEN_EMERGE, SoundCategory.BLOCKS, 0.6f, 1.4f);
+                this.animateWallFall(world, wx, wz);
             } else if (!playerNearby) {
-                // 豎起牆壁（整面 40 格高）
-                this.shiftedWallsClosed.add(packed);
-                this.shiftedWallsOpen.remove(packed);
-                for (int y = FLOOR_Y + 1; y <= FLOOR_Y + WALL_HEIGHT; y++) {
-                    final Material mat;
-                    if (y == FLOOR_Y + WALL_HEIGHT) {
-                        mat = Material.CHISELED_DEEPSLATE;
-                    } else if (y >= FLOOR_Y + WALL_HEIGHT - 2) {
-                        mat = Material.POLISHED_DEEPSLATE;
-                    } else if (y <= FLOOR_Y + 3) {
-                        mat = Material.DEEPSLATE;
-                    } else {
-                        mat = Material.DEEPSLATE_BRICKS;
-                    }
-                    world.getBlockAt(wx, y, wz).setType(mat, false);
-                }
-                world.spawnParticle(Particle.BLOCK, wallBase.clone().add(0.5, 20, 0.5), 40,
-                        0.4, 15.0, 0.4, 0.05, Material.DEEPSLATE_BRICKS.createBlockData());
-                world.playSound(wallBase, Sound.BLOCK_DEEPSLATE_BRICKS_PLACE, SoundCategory.BLOCKS, 1.2f, 0.6f);
-                world.playSound(wallBase.clone().add(0, 20, 0), Sound.ENTITY_IRON_GOLEM_REPAIR, SoundCategory.BLOCKS, 0.8f, 0.5f);
+                this.animateWallRise(world, wx, wz);
             }
         }
         this.pendingShiftWalls.clear();
@@ -251,6 +233,127 @@ public final class MazeService {
             player.sendActionBar(this.itemFactory.warning("迷宮結構已重組！小心新的通道與死路。"));
             player.playSound(player.getLocation(), Sound.ENTITY_WARDEN_ROAR, SoundCategory.AMBIENT, 0.45f, 1.4f);
         }
+    }
+
+    /**
+     * 牆壁升起動畫：用 BlockDisplay 從地下平滑滑出。
+     */
+    private void animateWallRise(final World world, final int wx, final int wz) {
+        final Location base = new Location(world, wx, FLOOR_Y + 1, wz);
+        this.scheduler.runRegion(base, task -> {
+            final BlockDisplay display = world.spawn(base, BlockDisplay.class, bd -> {
+                bd.setBlock(Material.DEEPSLATE_BRICKS.createBlockData());
+                bd.setPersistent(false);
+                bd.setGravity(false);
+                bd.setInvulnerable(true);
+                bd.setInterpolationDelay(-1);
+                bd.setInterpolationDuration(WALL_ANIM_TICKS);
+                bd.setTeleportDuration(0);
+                bd.addScoreboardTag(WALL_ANIM_TAG);
+                bd.setTransformation(new Transformation(
+                        new Vector3f(0.0f, (float) -WALL_HEIGHT, 0.0f),
+                        new AxisAngle4f(0.0f, 0.0f, 1.0f, 0.0f),
+                        new Vector3f(1.0f, (float) WALL_HEIGHT, 1.0f),
+                        new AxisAngle4f(0.0f, 0.0f, 1.0f, 0.0f)));
+            });
+
+            // 下一 tick 設定目標 transformation（觸發插值動畫）
+            this.scheduler.runRegionDelayed(base, t2 -> {
+                if (display.isValid()) {
+                    display.setInterpolationDelay(0);
+                    display.setTransformation(new Transformation(
+                            new Vector3f(0.0f, 0.0f, 0.0f),
+                            new AxisAngle4f(0.0f, 0.0f, 1.0f, 0.0f),
+                            new Vector3f(1.0f, (float) WALL_HEIGHT, 1.0f),
+                            new AxisAngle4f(0.0f, 0.0f, 1.0f, 0.0f)));
+                }
+            }, 1L);
+
+            // 升起音效
+            world.playSound(base, Sound.ENTITY_WARDEN_EMERGE, SoundCategory.BLOCKS, 0.8f, 0.5f);
+            world.playSound(base, Sound.BLOCK_DEEPSLATE_BRICKS_PLACE, SoundCategory.BLOCKS, 1.2f, 0.6f);
+            world.spawnParticle(Particle.BLOCK, base.clone().add(0.5, 0, 0.5), 40,
+                    0.3, 0.5, 0.3, 0.05, Material.DEEPSLATE_BRICKS.createBlockData());
+
+            // 動畫結束後放置實際方塊並移除 display
+            this.scheduler.runRegionDelayed(base, t3 -> {
+                for (int y = FLOOR_Y + 1; y <= FLOOR_Y + WALL_HEIGHT; y++) {
+                    final Material mat;
+                    final int relY = y - FLOOR_Y;
+                    if (relY == WALL_HEIGHT) {
+                        mat = Material.CHISELED_DEEPSLATE;
+                    } else if (relY >= WALL_HEIGHT - 4) {
+                        mat = Material.POLISHED_DEEPSLATE;
+                    } else if (relY <= 5) {
+                        mat = Material.DEEPSLATE;
+                    } else {
+                        mat = Material.DEEPSLATE_BRICKS;
+                    }
+                    world.getBlockAt(wx, y, wz).setType(mat, false);
+                }
+                if (display.isValid()) {
+                    display.remove();
+                }
+                this.shiftedWallsClosed.add(packCoord(wx, wz));
+                this.shiftedWallsOpen.remove(packCoord(wx, wz));
+            }, WALL_ANIM_TICKS + 5L);
+        });
+    }
+
+    /**
+     * 牆壁沉降動畫：先移除實際方塊，用 BlockDisplay 平滑沉入地下。
+     */
+    private void animateWallFall(final World world, final int wx, final int wz) {
+        final Location base = new Location(world, wx, FLOOR_Y + 1, wz);
+        this.scheduler.runRegion(base, task -> {
+            // 先移除實際方塊
+            for (int y = FLOOR_Y + 1; y <= FLOOR_Y + WALL_HEIGHT + 1; y++) {
+                world.getBlockAt(wx, y, wz).setType(Material.AIR, false);
+            }
+
+            final BlockDisplay display = world.spawn(base, BlockDisplay.class, bd -> {
+                bd.setBlock(Material.DEEPSLATE_BRICKS.createBlockData());
+                bd.setPersistent(false);
+                bd.setGravity(false);
+                bd.setInvulnerable(true);
+                bd.setInterpolationDelay(-1);
+                bd.setInterpolationDuration(WALL_ANIM_TICKS);
+                bd.setTeleportDuration(0);
+                bd.addScoreboardTag(WALL_ANIM_TAG);
+                bd.setTransformation(new Transformation(
+                        new Vector3f(0.0f, 0.0f, 0.0f),
+                        new AxisAngle4f(0.0f, 0.0f, 1.0f, 0.0f),
+                        new Vector3f(1.0f, (float) WALL_HEIGHT, 1.0f),
+                        new AxisAngle4f(0.0f, 0.0f, 1.0f, 0.0f)));
+            });
+
+            // 下一 tick 設定沉降目標
+            this.scheduler.runRegionDelayed(base, t2 -> {
+                if (display.isValid()) {
+                    display.setInterpolationDelay(0);
+                    display.setTransformation(new Transformation(
+                            new Vector3f(0.0f, (float) -WALL_HEIGHT, 0.0f),
+                            new AxisAngle4f(0.0f, 0.0f, 1.0f, 0.0f),
+                            new Vector3f(1.0f, (float) WALL_HEIGHT, 1.0f),
+                            new AxisAngle4f(0.0f, 0.0f, 1.0f, 0.0f)));
+                }
+            }, 1L);
+
+            // 沉降音效 + 粒子
+            world.playSound(base, Sound.BLOCK_DEEPSLATE_BRICKS_BREAK, SoundCategory.BLOCKS, 1.2f, 0.5f);
+            world.playSound(base, Sound.ENTITY_WARDEN_EMERGE, SoundCategory.BLOCKS, 0.6f, 1.4f);
+            world.spawnParticle(Particle.BLOCK, base.clone().add(0.5, 50, 0.5), 80,
+                    0.4, 40.0, 0.4, 0.1, Material.DEEPSLATE_BRICKS.createBlockData());
+
+            // 動畫結束後移除 display
+            this.scheduler.runRegionDelayed(base, t3 -> {
+                if (display.isValid()) {
+                    display.remove();
+                }
+                this.shiftedWallsOpen.add(packCoord(wx, wz));
+                this.shiftedWallsClosed.remove(packCoord(wx, wz));
+            }, WALL_ANIM_TICKS + 5L);
+        });
     }
 
     // ═══════════════════════════════════════
@@ -270,7 +373,7 @@ public final class MazeService {
         final Location spawnLoc = block.getLocation().add(0.5, 0.0, 0.5);
         final World world = block.getWorld();
 
-        this.scheduler.runAt(spawnLoc, () -> {
+        this.scheduler.runRegion(spawnLoc, task -> {
             final ArmorStand stand = world.spawn(spawnLoc, ArmorStand.class, as -> {
                 as.setVisible(false);
                 as.setGravity(false);
@@ -290,7 +393,7 @@ public final class MazeService {
             // 揮動動畫：每 5 tick 改變手臂角度
             for (int frame = 0; frame < PICKAXE_ANGLES.length; frame++) {
                 final int f = frame;
-                this.scheduler.runLater(spawnLoc, () -> {
+                this.scheduler.runRegionDelayed(spawnLoc, t -> {
                     final Entity entity = Bukkit.getEntity(standId);
                     if (entity instanceof ArmorStand as && as.isValid()) {
                         as.setRightArmPose(new EulerAngle(PICKAXE_ANGLES[f], 0, 0));
@@ -303,7 +406,7 @@ public final class MazeService {
             }
 
             // 結束時移除
-            this.scheduler.runLater(spawnLoc, () -> {
+            this.scheduler.runRegionDelayed(spawnLoc, t -> {
                 final Entity entity = Bukkit.getEntity(standId);
                 if (entity != null && entity.isValid()) {
                     entity.remove();
@@ -478,7 +581,7 @@ public final class MazeService {
 
         this.bossCooldowns.put(summoner.getUniqueId(), now);
 
-        this.scheduler.runAt(center, () -> {
+        this.scheduler.runRegion(center, task -> {
             final org.bukkit.entity.IronGolem golem = world.spawn(center, org.bukkit.entity.IronGolem.class, boss -> {
                 boss.customName(Component.text(BOSS_NAME));
                 boss.setCustomNameVisible(true);
@@ -558,14 +661,14 @@ public final class MazeService {
         if (dist > MAZE_HALF_EXTENT) {
             return -1;
         }
-        if (dist <= MAZE_CELL_SIZE) {
+        if (dist <= GLADE_HALF) {
             return 0;
         }
         final int cellDist = dist / MAZE_CELL_SIZE;
-        if (cellDist <= 10) {
+        if (cellDist <= 20) {
             return 1; // 內圈
         }
-        if (cellDist <= 22) {
+        if (cellDist <= 40) {
             return 2; // 中圈
         }
         return 3; // 外圈
