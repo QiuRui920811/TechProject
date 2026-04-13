@@ -42,6 +42,8 @@
 # 🌌 科技樹
 
 - [科技樹總覽](tech-tree/README.md)
+- [天賦樹系統](tech-tree/talent-trees.md)
+- [法術系統](tech-tree/spells.md)
 
 # 🍳 食物系統
 
