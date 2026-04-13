@@ -19,6 +19,7 @@
 - [四階 — 終局機器](machines/tier-4.md)
 - [巨構機器](machines/megastructures.md)
 - [⚡ 純電力版機器](machines/electric-machines.md)
+- [🏭 工業擴展機器](machines/industrial.md)
 
 # 🧱 物品百科
 
@@ -28,6 +29,7 @@
 - [進階材料](items/advanced-materials.md)
 - [魔法物品](items/magical-items.md)
 - [升級模組](items/upgrades.md)
+- [工業擴展材料](items/industrial-materials.md)
 - [終局材料](items/endgame-materials.md)
 
 # 📖 配方指南
@@ -64,6 +66,7 @@
 - [倪克斯](planets/nyx.md)
 - [赫利昂](planets/helion.md)
 - [坦佩斯特](planets/tempest.md)
+- [迷途星](planets/labyrinth.md)
 - [星門與旅行](planets/stargate.md)
 - [行星防護套裝](planets/planet-suits.md)
 
