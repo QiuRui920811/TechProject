@@ -39,6 +39,9 @@ public final class PlacedMachine {
     private int androidRouteCursor;
     private String androidRouteMode = "SERPENTINE";
     private String filterMode = "WHITELIST";
+    /** 輸入過濾：玩家設定的允許/阻擋物品 ID 清單。空集合 = 不過濾。 */
+    private final Set<String> inputFilterIds = ConcurrentHashMap.newKeySet();
+    private String inputFilterMode = "NONE";  // NONE / WHITELIST / BLACKLIST
     private final Set<UUID> trustedPlayers = ConcurrentHashMap.newKeySet();
     private volatile MachineRuntimeState runtimeState = MachineRuntimeState.IDLE;
     private volatile String runtimeDetail = "待命";
@@ -48,6 +51,7 @@ public final class PlacedMachine {
     private String redstoneMode = "NONE";
     private String teleportLabel;
     private boolean teleportPublic;
+    private volatile int heatLevel;
 
     public PlacedMachine(final LocationKey locationKey, final String machineId, final UUID owner) {
         this.locationKey = locationKey;
@@ -154,6 +158,22 @@ public final class PlacedMachine {
         this.filterMode = filterMode == null || filterMode.isBlank() ? "WHITELIST" : filterMode;
     }
 
+    public Set<String> inputFilterIds() {
+        return this.inputFilterIds;
+    }
+
+    public String inputFilterMode() {
+        return this.inputFilterMode;
+    }
+
+    public void setInputFilterMode(final String mode) {
+        this.inputFilterMode = mode == null || mode.isBlank() ? "NONE" : mode;
+    }
+
+    public boolean hasInputFilter() {
+        return !"NONE".equalsIgnoreCase(this.inputFilterMode) && !this.inputFilterIds.isEmpty();
+    }
+
     public String redstoneMode() {
         return this.redstoneMode;
     }
@@ -176,6 +196,18 @@ public final class PlacedMachine {
 
     public void setTeleportPublic(final boolean teleportPublic) {
         this.teleportPublic = teleportPublic;
+    }
+
+    public int heatLevel() {
+        return this.heatLevel;
+    }
+
+    public void setHeatLevel(final int heat) {
+        this.heatLevel = Math.max(0, Math.min(1000, heat));
+    }
+
+    public void addHeat(final int delta) {
+        this.setHeatLevel(this.heatLevel + delta);
     }
 
     public MachineRuntimeState runtimeState() {

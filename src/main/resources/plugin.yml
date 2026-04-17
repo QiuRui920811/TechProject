@@ -1,5 +1,5 @@
 name: TechProject
-main: com.rui.techproject.TechProjectPlugin
+main: com.rui.techproject.TechMCPlugin
 version: 0.1.0
 api-version: '1.21'
 folia-supported: true
@@ -9,14 +9,14 @@ website: https://example.invalid
 softdepend: [Nexo, PlaceholderAPI, DiscordSRV, InventorySorter, DebugWand, SuperHopper]
 commands:
   tech:
-    description: 開啟科技書或管理科技插件
+    description: 開啟 TechMC 科技書或管理 TechMC 插件
     usage: /tech [book|list|stats|achievements|give|reload|xp|research]
-    aliases: [techbook]
+    aliases: [techbook, techmc]
   helper:
-    description: AI 科技幫手 — 詢問科技插件相關問題
+    description: TechMC AI 科技幫手 — 詢問 TechMC 相關問題
     usage: /helper <問題>
     aliases: [幫手]
 permissions:
   techproject.admin:
-    description: 管理科技插件
+    description: 管理 TechMC 插件
     default: op

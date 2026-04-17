@@ -1,6 +1,6 @@
 package com.rui.techproject.service;
 
-import com.rui.techproject.TechProjectPlugin;
+import com.rui.techproject.TechMCPlugin;
 import com.rui.techproject.util.ItemFactoryUtil;
 import com.rui.techproject.util.SafeScheduler;
 import net.kyori.adventure.text.Component;
@@ -68,7 +68,7 @@ public final class MeteorService {
     }
 
     // ── 實例欄位 ──────────────────────────────────────────────
-    private final TechProjectPlugin plugin;
+    private final TechMCPlugin plugin;
     private final SafeScheduler scheduler;
     private final ItemFactoryUtil itemFactory;
     private final Logger logger;
@@ -81,7 +81,7 @@ public final class MeteorService {
     private boolean running;
 
     // ── 建構 ──────────────────────────────────────────────────
-    public MeteorService(final TechProjectPlugin plugin,
+    public MeteorService(final TechMCPlugin plugin,
                          final SafeScheduler scheduler,
                          final ItemFactoryUtil itemFactory) {
         this.plugin = plugin;
@@ -117,14 +117,8 @@ public final class MeteorService {
             this.cleanupMeteor(meteor);
         }
         this.activeMeteors.clear();
-        // 清理可能殘留的實體
-        for (final World world : Bukkit.getWorlds()) {
-            for (final BlockDisplay display : world.getEntitiesByClass(BlockDisplay.class)) {
-                if (display.getScoreboardTags().contains(METEOR_TAG)) {
-                    display.remove();
-                }
-            }
-        }
+        // Folia: onDisable 在主控台線程，無法存取區域實體 (getEntitiesByClass 會拋異常)
+        // 伺服器即將關閉，Display 實體會自動消失，不需要手動清理
         this.logger.info("[MeteorService] 流星系統已關閉");
     }
 
@@ -270,39 +264,39 @@ public final class MeteorService {
             return;
         }
 
-        // ── 移動所有 BlockDisplay 部件 ──
-        final double tumbleAngle = tick * 0.14;
-        for (final MeteorPart part : meteor.parts) {
-            if (part.display() == null || !part.display().isValid()) {
-                continue;
-            }
-            // 計算旋轉偏移（模擬翻滾）
-            final double tumble = part.tumbleSpeed() * tumbleAngle;
-            final double rx = part.offsetX() * Math.cos(tumble) - part.offsetZ() * Math.sin(tumble);
-            final double rz = part.offsetX() * Math.sin(tumble) + part.offsetZ() * Math.cos(tumble);
-            final double ry = part.offsetY() + Math.sin(tumbleAngle * part.tumbleSpeed() * 1.7) * 0.08;
+        // Folia: 世界操作必須在區域線程執行，從全域線程排程到流星目前位置的區域
+        this.scheduler.runRegion(currentCenter, task -> {
+            // ── 移動所有 BlockDisplay 部件 ──
+            final double tumbleAngle = tick * 0.14;
+            for (final MeteorPart part : meteor.parts) {
+                if (part.display() == null || !part.display().isValid()) {
+                    continue;
+                }
+                final double tumble = part.tumbleSpeed() * tumbleAngle;
+                final double rx = part.offsetX() * Math.cos(tumble) - part.offsetZ() * Math.sin(tumble);
+                final double rz = part.offsetX() * Math.sin(tumble) + part.offsetZ() * Math.cos(tumble);
+                final double ry = part.offsetY() + Math.sin(tumbleAngle * part.tumbleSpeed() * 1.7) * 0.08;
 
-            final Location partLoc = currentCenter.clone().add(rx, ry, rz);
-            final BlockDisplay display = part.display();
-            this.scheduler.runEntity(display, () -> {
+                final Location partLoc = currentCenter.clone().add(rx, ry, rz);
+                final BlockDisplay display = part.display();
                 if (display.isValid()) {
                     display.teleportAsync(partLoc);
                 }
-            });
-        }
+            }
 
-        // ── 粒子尾跡 ──
-        this.spawnTrailParticles(world, currentCenter, meteor.direction, tick, progress);
+            // ── 粒子尾跡 ──
+            this.spawnTrailParticles(world, currentCenter, meteor.direction, tick, progress);
 
-        // ── 音效：對附近玩家播放 ──
-        if (tick % 4 == 0) {
-            this.playMeteorSounds(world, currentCenter, tick, progress);
-        }
+            // ── 音效：對附近玩家播放 ──
+            if (tick % 4 == 0) {
+                this.playMeteorSounds(world, currentCenter, tick, progress);
+            }
 
-        // ── Title 提示：第一次靠近玩家時 ──
-        if (tick == 10) {
-            this.notifyNearbyPlayers(world, currentCenter);
-        }
+            // ── Title 提示：第一次靠近玩家時 ──
+            if (tick == 10) {
+                this.notifyNearbyPlayers(world, currentCenter);
+            }
+        });
     }
 
     private void spawnTrailParticles(final World world,
@@ -391,15 +385,10 @@ public final class MeteorService {
             if (dist > VISIBILITY_RANGE) {
                 continue;
             }
-            player.showTitle(Title.title(
+            this.plugin.getTitleMsgService().send(player,
                     Component.empty(),
                     this.itemFactory.muted("☄ 一顆流星正劃過天際……"),
-                    Title.Times.times(
-                            Duration.ofMillis(200),
-                            Duration.ofMillis(2400),
-                            Duration.ofMillis(800)
-                    )
-            ));
+                    48L, Sound.BLOCK_NOTE_BLOCK_HAT);
         }
     }
 
@@ -452,15 +441,10 @@ public final class MeteorService {
         // 通知附近玩家
         for (final Player player : world.getPlayers()) {
             if (player.getLocation().distance(impactPoint) <= VISIBILITY_RANGE) {
-                player.showTitle(Title.title(
+                this.plugin.getTitleMsgService().send(player,
                         this.itemFactory.primary("☄ 流星墜落！"),
                         this.itemFactory.secondary("一顆流星在附近墜落了——快去看看！"),
-                        Title.Times.times(
-                                Duration.ofMillis(200),
-                                Duration.ofMillis(3200),
-                                Duration.ofMillis(1200)
-                        )
-                ));
+                        64L, Sound.BLOCK_NOTE_BLOCK_BASS);
                 player.sendMessage(this.itemFactory.secondary("✦ 一顆流星在 " +
                         impactPoint.getBlockX() + ", " + impactPoint.getBlockY() + ", " + impactPoint.getBlockZ() +
                         " 附近墜落！可能殘留了珍貴的碎片……"));

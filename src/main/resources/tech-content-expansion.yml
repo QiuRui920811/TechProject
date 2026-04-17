@@ -4,6 +4,14 @@
 # head-texture: minecraft_texture_hash_or_full_url
 # items 與 machines 都可用，設定後會優先使用該外觀。
 items:
+  machine_hull:
+    display-name: 機殼
+    category: BASIC
+    icon: IRON_BLOCK
+    description: 標準機器外殼，各類加工機器的基礎框架。
+    unlock: "assembler"
+    use-cases:
+      - "機器合成材料"
   ceramic_plate:
     display-name: 陶瓷板
     item-model: "nexo:ceramic_plate"
@@ -38,7 +46,7 @@ items:
   sensor_array:
     display-name: 感測陣列
     category: INTERMEDIATE
-    icon: OBSERVER
+    icon: SPYGLASS
     description: 多點感測陣列，可做為精密工業邏輯元件。
     unlock: insulation_press
     use-cases:
@@ -2532,6 +2540,7 @@ items:
     category: ADVANCED
     tier: TIER3
     icon: HEART_OF_THE_SEA
+    item-model: "nexo:ancient_rune_water"
     description: 刻有水流印記的古老符文石，蘊含潮汐能量。
     unlock: laser_engraver
     use-cases:
@@ -2542,6 +2551,7 @@ items:
     category: ADVANCED
     tier: TIER3
     icon: MOSS_BLOCK
+    item-model: "nexo:ancient_rune_earth"
     description: 刻有大地印記的古老符文石，蘊含穩固能量。
     unlock: laser_engraver
     use-cases:
@@ -2552,6 +2562,7 @@ items:
     category: ADVANCED
     tier: TIER3
     icon: FEATHER
+    item-model: "nexo:ancient_rune_air"
     description: 刻有氣流印記的古老符文石，蘊含飄逸能量。
     unlock: laser_engraver
     use-cases:
@@ -2562,6 +2573,7 @@ items:
     category: ADVANCED
     tier: TIER3
     icon: CHORUS_FRUIT
+    item-model: "nexo:ancient_rune_ender"
     description: 刻有終界印記的古老符文石，蘊含維度裂隙能量。
     unlock: laser_engraver
     use-cases:
@@ -2572,6 +2584,7 @@ items:
     category: ADVANCED
     tier: TIER3
     icon: LIGHTNING_ROD
+    item-model: "nexo:ancient_rune_lightning"
     description: 刻有閃電印記的古老符文石，蘊含雷擊能量。
     unlock: laser_engraver
     use-cases:
@@ -2582,6 +2595,7 @@ items:
     category: ADVANCED
     tier: TIER3
     icon: GLOW_INK_SAC
+    item-model: "nexo:ancient_rune_rainbow"
     description: 刻有光譜印記的古老符文石，蘊含七彩能量。
     unlock: laser_engraver
     use-cases:
@@ -2592,6 +2606,7 @@ items:
     category: ADVANCED
     tier: TIER3
     icon: SOUL_LANTERN
+    item-model: "nexo:ancient_rune_soulbound"
     description: 刻有靈魂印記的古老符文石，可將物品綁定於靈魂，死亡時不掉落。
     unlock: laser_engraver
     use-cases:
@@ -2727,6 +2742,88 @@ items:
       - 範圍控場
       - 群體清怪
 
+  # ── 多方塊結構（選單展示用） ──────────────────────────
+  multiblock_grind_stone:
+    display-name: 研磨石
+    category: BASIC
+    guide-category: MACHINES
+    tier: TIER1
+    icon: OAK_FENCE
+    item-class: STRUCTURAL
+    description: "橡木柵欄放在發射器上方即可使用。右鍵發射器合成：原礦研磨成粉。"
+    unlock: initial
+    use-cases:
+      - 鐵粉、銅粉、金粉
+      - 碳粉、硫磺
+      - 前期零門檻研磨
+  multiblock_smeltery:
+    display-name: 合金冶煉爐
+    category: BASIC
+    guide-category: MACHINES
+    tier: TIER1
+    icon: NETHER_BRICK_SLAB
+    item-class: STRUCTURAL
+    description: "地獄磚台階放在發射器上方，旁邊點火（打火石）。右鍵發射器合成：合金冶煉。"
+    unlock: initial
+    use-cases:
+      - 青銅錠、鋼錠、焊錫錠
+      - 鍍金鐵錠、矽鐵錠
+      - 前期合金路徑
+  multiblock_pressure_chamber:
+    display-name: 壓力室
+    category: BASIC
+    guide-category: MACHINES
+    tier: TIER1
+    icon: SMOOTH_STONE_SLAB
+    item-class: STRUCTURAL
+    description: "平滑石台階放在發射器上方即可使用。右鍵發射器合成：錠壓成板。"
+    unlock: initial
+    use-cases:
+      - 鐵板、銅板、鋼板
+      - 青銅板、碳板、錫板
+      - 前期壓板路徑
+  multiblock_armor_forge:
+    display-name: 護甲鍛造台
+    category: BASIC
+    guide-category: MACHINES
+    tier: TIER1
+    icon: ANVIL
+    item-class: STRUCTURAL
+    description: "鐵砧放在發射器上方即可使用。右鍵發射器合成：護甲與特殊工具。"
+    unlock: initial
+    use-cases:
+      - 泰坦護甲套裝
+      - 伐木斧、太陽能頭盔
+      - 前期鍛造路徑
+
+  lumber_axe:
+    display-name: 伐木斧
+    category: TOOL
+    icon: IRON_AXE
+    description: 砍一根原木即連鎖砍倒整棵樹（最多 128 根），每根消耗 1 耐久。
+    unlock: item:steel_ingot&item:iron_plate
+    use-cases:
+      - 整株砍樹
+      - 高效伐木
+  solar_helmet:
+    display-name: 太陽能頭盔
+    category: TOOL
+    icon: GOLDEN_HELMET
+    description: 戴在頭上時，在陽光下每 5 秒為背包中的能源工具充入 1 EU。
+    unlock: item:circuit_board&item:iron_plate
+    use-cases:
+      - 被動充能
+      - 野外續航
+  tech_backpack:
+    display-name: 科技背包
+    category: TOOL
+    icon: CHEST
+    description: 右鍵開啟 27 格便攜儲物空間，物品跟著背包走。
+    unlock: item:machine_component&item:circuit_board
+    use-cases:
+      - 便攜儲物
+      - 擴充背包容量
+
   # ── 核燃料材料 ──────────────────────────────────
   uranium_dust:
     display-name: 鈾粉
@@ -2782,6 +2879,7 @@ items:
     display-name: 便攜合成台
     category: TOOL
     icon: CRAFTING_TABLE
+    head-texture: 35b6e41f66a170ea23e85b2749694e2525061821686cbb1f615cea8102dba4fc
     description: 右鍵打開隨身 3×3 合成台介面，可在任何地方合成物品。
     unlock: item:steel_plate&item:circuit_board
     use-cases:
@@ -2791,6 +2889,7 @@ items:
     display-name: 便攜垃圾桶
     category: TOOL
     icon: DROPPER
+    head-texture: 441f4edbc68c9061355242bd73effc9299a3252b9f11e82b5f1ec7b3b6ac0
     description: 右鍵打開 54 格收納箱；關閉時所有物品自動銷毀。
     unlock: item:steel_plate&item:circuit_board
     use-cases:
@@ -2823,6 +2922,7 @@ items:
     display-name: GPS 天線
     category: INTERMEDIATE
     icon: LIGHTNING_ROD
+    item-model: "nexo:gps_antenna"
     description: 接收與發射座標訊號的定向天線組件。
     unlock: item:insulated_wire&item:signal_relay
     use-cases:
@@ -2881,7 +2981,7 @@ items:
     tier: TIER4
     icon: ECHO_SHARD
     description: 從迷途星地穴深層採集的回聲碎片，殘留古代迷宮的共振記憶。
-    unlock: labyrinth_fragment
+    unlock: machine:otherworld_portal
     use-cases:
       - 迷宮套裝材料
       - 迷宮裝備前置
@@ -2891,7 +2991,7 @@ items:
     tier: TIER4
     icon: VINE
     description: 在瘴氣中頑強蔓生的生物蔓藤，可用於合成瘴氣藥膏。
-    unlock: maze_vine
+    unlock: machine:otherworld_portal
     use-cases:
       - 瘴氣藥膏材料
       - 地表採集
@@ -2911,7 +3011,7 @@ items:
     tier: TIER4
     icon: RECOVERY_COMPASS
     description: 從迷途星最深處的強化深岩中取得的古代遺物，散發不穩定的空間頻率。
-    unlock: labyrinth_relic
+    unlock: machine:otherworld_portal
     use-cases:
       - 高階迷宮裝備
       - 迷宮魔像掉落物
@@ -2921,7 +3021,7 @@ items:
     tier: TIER4
     icon: HEART_OF_THE_SEA
     description: 迷宮守衛者體內的力量核心，蘊含高密度空間能量。
-    unlock: guardian_core
+    unlock: machine:otherworld_portal
     use-cases:
       - 迷宮刃強化
       - Boss / 菁英掉落
@@ -2940,14 +3040,26 @@ items:
     category: ADVANCED
     tier: TIER4
     icon: NETHERITE_SWORD
-    description: 以守衛者核心鍛造的科技劍刃，劍身閃爍幽藍回聲光紋。攻擊時有概率減速目標。
+    description: 以守衛者核心鍛造的科技劍刃，劍身閃爍幽藍回聲光紋。右鍵發動「回聲震擊」，向前方揮出扇形聲波，擊飛敵人並有機率施加深淵盲視。消耗 12 EU。
     unlock: guardian_core
     use-cases:
-      - 迷途星專屬武器
-      - Boss 掉落
+      - 右鍵：回聲震擊 扇形聲波
+      - 迷途星專屬近戰
+      - 附模：【深淵共鳴】擊中敵人 30% 機率盲視 + 緩速
     attributes:
       attack-damage: 11
       attack-speed: 1.7
+  echo_crossbow:
+    display-name: 回聲連弩
+    category: ADVANCED
+    tier: TIER4
+    icon: CROSSBOW
+    description: 搭載回聲共鳴模組的科技連弩，右鍵發動「回聲連射」：0.8 秒內連續射出 5 發穿透強化箭矢。改善原版十字弩只能單發的節奏。消耗 10 EU。
+    unlock: guardian_core
+    use-cases:
+      - 右鍵：回聲連射 5 連發穿透
+      - 迷途星專屬遠程
+      - 附模：【共振穿透】每支箭穿透 2 個敵人
   maze_pickaxe:
     display-name: 回聲鎬
     category: ADVANCED
@@ -3020,16 +3132,70 @@ items:
     use-cases:
       - 迷途星導航
       - 核心區域定位
-  ancient_signal:
-    display-name: 古代信號器
-    category: ADVANCED
-    tier: TIER4
-    icon: SCULK_SENSOR
-    description: 發出深層回聲共振的裝置，可啟動迷途星地表的遺跡核心。
-    unlock: labyrinth_fragment
+  # ancient_signal 已在上方 line 1726 定義，不重複
+
+  # ═══ 異世界 (Otherworld) 線 ═══════════════════════════════════
+  mana_meteorite:
+    display-name: 魔力隕石
+    category: SPECIAL
+    tier: TIER3
+    icon: AMETHYST_SHARD
+    description: 自裂界處墜落的結晶碎片，蘊含濃縮的奧術能量。作為異界傳送門的動力核心。
+    unlock: otherworld_portal
     use-cases:
-      - 遺跡啟動物品
-      - 迷途星專用
+      - 異界傳送門燃料（每次傳送消耗 1）
+      - 高階魔武合成素材
+      - 異世界探索必備物
+  riftblade:
+    display-name: 裂空劍
+    category: SPECIAL
+    tier: TIER4
+    icon: NETHERITE_SWORD
+    description: 劍身鑲嵌一塊裂界晶核，揮舞時釋放壓縮的空間能量。右鍵發動「裂空斬」，釋放扇形能量波，劈開 6 格內的敵人並造成劇烈傷害。消耗 14 EU。
+    unlock: mana_meteorite
+    use-cases:
+      - 右鍵：裂空斬 扇形能量波
+      - 異世界近戰首選
+      - 附模：【空間裂痕】擊中敵人有機率使其被吸入短暫虛空
+    attributes:
+      attack-damage: 9
+      attack-speed: 1.6
+  frostfang_bow:
+    display-name: 霜淵之弓
+    category: SPECIAL
+    tier: TIER4
+    icon: BOW
+    description: 用霜淵之核與奧術織線纏繞而成的長弓。右鍵召喚寒冰漩渦，冰封 10 格內所有生物 6 秒並造成額外傷害。消耗 12 EU。
+    unlock: mana_meteorite
+    use-cases:
+      - 右鍵：霜淵漩渦 AOE 冰封
+      - 範圍控場型弓術
+      - 附模：【永霜共鳴】被霜凍的敵人受到額外 25% 傷害
+  thunder_hammer:
+    display-name: 雷霆戰錘
+    category: SPECIAL
+    tier: TIER4
+    icon: MACE
+    description: 蘊含風暴之心的鎖鏈戰錘，重擊地面召喚連鎖雷擊。右鍵發動「天雷震擊」：在準心 12 格前降下落雷並擊退周圍敵人。消耗 16 EU。
+    unlock: mana_meteorite
+    use-cases:
+      - 右鍵：天雷震擊 連鎖雷擊
+      - 重裝近戰 AOE 毀滅
+      - 附模：【雷霆怒吼】擊中敵人附加短暫麻痺
+    attributes:
+      attack-damage: 11
+      attack-speed: 0.9
+  arcane_scepter:
+    display-name: 奧術權杖
+    category: SPECIAL
+    tier: TIER4
+    icon: BLAZE_ROD
+    description: 以魔力隕石封裝奧術晶格而成的法杖。右鍵發射三連奧術飛彈，每發造成 6 點傷害並穿透 3 個敵人。消耗 14 EU。
+    unlock: mana_meteorite
+    use-cases:
+      - 右鍵：奧術三連擊 穿透彈幕
+      - 遠距法系核心武器
+      - 附模：【秘銀共振】連續命中同一目標時傷害堆疊
 
 machines:
   kiln:
@@ -3164,6 +3330,16 @@ machines:
     energy-per-tick: 12
     effect: 平時維持 12 EU 吸能，啟動躍遷時額外消耗 1200 EU 將玩家投送至目標星球
     unlock: machine:survey_beacon&item:survey_data&item:gravitic_bearing
+  otherworld_portal:
+    display-name: 異界傳送門
+    category: SPECIAL
+    tier: TIER4
+    block: END_PORTAL_FRAME
+    inputs: [mana_meteorite]
+    outputs: []
+    energy-per-tick: 0
+    effect: 手持魔力隕石右鍵啟動，消耗 1 顆隕石將玩家投送至異世界；探索結束後由撤離點自動送回。
+    unlock: item:mana_meteorite&machine:planetary_gate
   planetary_harvester:
     display-name: 行星採集機
     category: ADVANCED
@@ -3183,8 +3359,8 @@ machines:
     inputs: [uranium_rod, reactor_coolant]
     outputs: [spent_fuel_rod]
     energy-per-tick: 0
-    max-energy: 8000
-    effect: 每 20 tick 消耗鈾燃料棒+冷卻液，產生 64 EU 並輸出乏燃料棒
+    max-energy: 24000
+    effect: 反應堆冷卻液為【永久催化劑】，放入一次後永不消耗；每根鈾燃料棒可運轉 40 秒，穩定輸出 200 EU/秒（加速模組額外 +60 EU），循環結束自動輸出乏燃料棒（可於物質編譯器回收為新燃料棒）。無燃料時完全不發電。
     unlock: item:uranium_rod&item:reactor_coolant
   amethyst_grower:
     display-name: 紫水晶培養機
@@ -3283,6 +3459,18 @@ machines:
     max-energy: 16000
     effect: 利用聚變能量與軌道中繼單元批量生產衛星模組
     unlock: machine:gps_network_node&item:fusion_core&item:orbital_relay_unit
+
+  block_breaker:
+    display-name: 方塊破壞器
+    category: BASIC
+    guide-category: MACHINES
+    tier: TIER1
+    block: DROPPER
+    inputs: []
+    outputs: []
+    energy-per-tick: 0
+    effect: 收到紅石訊號時破壞前方一格方塊，掉落物存入內部容器
+    unlock: item:iron_plate&item:machine_component
 
 recipes:
   kiln_ceramic_plate:
@@ -4251,6 +4439,49 @@ recipes:
     output: entropy_scepter
     energy: 36
     guide: 虛空信標核心 + 電漿核心 → 物質編譯器 → 熵變權杖
+  # ═══ 異世界線合成 ═══════════════════════════════════
+  craft_mana_meteorite:
+    machine: matter_compiler
+    inputs: [voidglass_fragment, irradiated_shard, solarite_shard]
+    input-amounts: [2, 2, 1]
+    output: mana_meteorite
+    energy: 40
+    guide: 虛空玻璃 + 輻射晶體 + 日輝晶體 → 物質編譯器 → 魔力隕石（或於異世界採集補充）
+  craft_otherworld_portal:
+    machine: matter_compiler
+    inputs: [mana_meteorite, gravitic_bearing, quantum_frame]
+    input-amounts: [4, 2, 2]
+    output: otherworld_portal
+    energy: 60
+    guide: 魔力隕石 ×4 + 重力軸承 ×2 + 量子框架 ×2 → 物質編譯器 → 異界傳送門
+  craft_riftblade:
+    machine: matter_compiler
+    inputs: [mana_meteorite, voidglass_fragment, titanium_alloy]
+    input-amounts: [2, 2, 1]
+    output: riftblade
+    energy: 48
+    guide: 魔力隕石 + 虛空玻璃 + 鈦合金 → 物質編譯器 → 裂空劍
+  craft_frostfang_bow:
+    machine: matter_compiler
+    inputs: [mana_meteorite, cryo_core, photon_plate]
+    input-amounts: [2, 2, 1]
+    output: frostfang_bow
+    energy: 48
+    guide: 魔力隕石 + 低溫核心 + 光子板 → 物質編譯器 → 霜淵之弓
+  craft_thunder_hammer:
+    machine: matter_compiler
+    inputs: [mana_meteorite, graviton_lens, titanium_alloy]
+    input-amounts: [2, 2, 2]
+    output: thunder_hammer
+    energy: 52
+    guide: 魔力隕石 + 重力子透鏡 + 鈦合金 → 物質編譯器 → 雷霆戰錘
+  craft_arcane_scepter:
+    machine: matter_compiler
+    inputs: [mana_meteorite, quantum_chip, photon_plate]
+    input-amounts: [2, 2, 1]
+    output: arcane_scepter
+    energy: 50
+    guide: 魔力隕石 + 量子晶片 + 光子板 → 物質編譯器 → 奧術權杖
   craft_titan_helmet:
     machine: assembler
     inputs: [composite_panel, circuit_board]
@@ -4768,6 +4999,36 @@ recipes:
     energy: 24
     guide: 高級電路 + 高密碳塊×2 → 場域鍛爐 → 地震斧
 
+  craft_block_breaker:
+    machine: assembler
+    inputs: [iron_plate, machine_component, DROPPER]
+    input-amounts: [2, 1, 1]
+    output: block_breaker
+    output-type: MACHINE
+    energy: 12
+    guide: 鐵板×2 + 機器零件 + 投擲器 → 組裝機 → 方塊破壞器
+  craft_lumber_axe:
+    machine: field_forge
+    inputs: [steel_ingot, iron_plate]
+    input-amounts: [3, 2]
+    output: lumber_axe
+    energy: 20
+    guide: 鋼錠×3 + 鐵板×2 → 場域鍛爐 → 伐木斧（或護甲鍛造台合成）
+  craft_solar_helmet:
+    machine: field_forge
+    inputs: [iron_plate, circuit_board, daylight_detector]
+    input-amounts: [3, 1, 1]
+    output: solar_helmet
+    energy: 18
+    guide: 鐵板×3 + 電路板 + 日照感測器 → 場域鍛爐 → 太陽能頭盔（或護甲鍛造台合成）
+  craft_tech_backpack:
+    machine: assembler
+    inputs: [machine_component, circuit_board, leather]
+    input-amounts: [1, 1, 4]
+    output: tech_backpack
+    energy: 16
+    guide: 機器零件 + 電路板 + 皮革×4 → 組裝機 → 科技背包
+
   # ── 核燃料合成鏈 ──────────────────────────────────
   crush_uranium_dust:
     machine: electric_crusher
@@ -4807,6 +5068,14 @@ recipes:
     output-count: 2
     energy: 14
     guide: 冷卻罐 + 低溫凝膠 → 電動化學反應器 → 反應堆冷卻液×2
+  recycle_spent_fuel_rod:
+    machine: electric_centrifuge
+    inputs: [spent_fuel_rod]
+    input-amounts: [2]
+    output: uranium_rod
+    output-count: 1
+    energy: 26
+    guide: 乏燃料棒×2 → 電動離心機 → 鈾燃料棒×1（反應堆閉環：冷卻液永久不消耗，只需持續回收乏燃料棒即可長期發電，2 燒 1 回收的差額用鈾礦補）
 
   # ── 便攜工具合成 ──────────────────────────────────
   craft_portable_crafter:
@@ -4840,6 +5109,14 @@ recipes:
     output-count: 4
     energy: 16
     guide: 冷卻混合液 → 紫水晶培養機 → 紫水晶碎片×4
+  craft_machine_hull:
+    machine: assembler
+    inputs: [iron_plate, iron_gear]
+    input-amounts: [4, 2]
+    output: machine_hull
+    count: 1
+    energy: 12
+    guide: 鐵板×4 + 鐵齒輪×2 → 合成器 → 機殼
   craft_amethyst_grower:
     machine: assembler
     inputs: [amethyst_block, coolant_mix, machine_hull]

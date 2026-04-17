@@ -1,6 +1,6 @@
 package com.rui.techproject.service;
 
-import com.rui.techproject.TechProjectPlugin;
+import com.rui.techproject.TechMCPlugin;
 import com.rui.techproject.model.PlacedMachine;
 import com.rui.techproject.util.ItemFactoryUtil;
 import com.rui.techproject.util.LocationKey;
@@ -120,11 +120,19 @@ public final class PlanetService {
     private static final String PLANETARY_GATE_MENU_SHIFT = "\uF100";
     private static final String PLANETARY_GATE_MENU_GLYPH = "\uF000";
     private static final String PLANETARY_GATE_MENU_TITLE = PLANETARY_GATE_MENU_SHIFT + PLANETARY_GATE_MENU_GLYPH;
+    // 異界傳送門 GUI — 搭配 pack/assets/minecraft/font/techproject_labyrinth.json
+    private static final Key LABYRINTH_MENU_FONT = Key.key("minecraft", "techproject_labyrinth");
+    private static final String LABYRINTH_MENU_SHIFT = "\uF102";
+    private static final String LABYRINTH_MENU_GLYPH = "\uF006";
+    private static final String LABYRINTH_MENU_TITLE = LABYRINTH_MENU_SHIFT + LABYRINTH_MENU_GLYPH;
+    // 傳送按鈕所在槽位（GUI 下半段中央附近）
+    // 兩顆傳送按鈕上下相疊：原本 {31,40}（row3/row4），改為 {22,31}（row2/row3）往上移一列
+    private static final int[] OTHERWORLD_PORTAL_BUTTON_SLOTS = {22, 31};
     private static final String EARTH_DESTINATION_ID = "earth";
     private static final String EARTH_WORLD_NAME = "world";
     private static final long LOOT_BARREL_REFILL_MS = 12L * 60L * 60L * 1000L;
 
-    private final TechProjectPlugin plugin;
+    private final TechMCPlugin plugin;
     private final SafeScheduler scheduler;
     private final ItemFactoryUtil itemFactory;
     private final TechRegistry registry;
@@ -182,6 +190,12 @@ public final class PlanetService {
         long waveStartTick;
         boolean completed;
         boolean failed;
+        /**
+         * 波進度推進鎖：設為 true 後，其他路徑不得再嘗試推進。
+         * 在下一波 spawnRuinWave() 真正開始生怪時清為 false。
+         * 修復：原本 onRuinChallengeMobDeath 和 tickRuinBossBar 各自推進導致跳波、重複生怪。
+         */
+        final java.util.concurrent.atomic.AtomicBoolean waveAdvancing = new java.util.concurrent.atomic.AtomicBoolean(false);
         BossBar bossBar;
 
         RuinChallenge(final java.util.UUID playerId, final PlanetDefinition definition, final Location coreLocation) {
@@ -232,8 +246,8 @@ public final class PlanetService {
             new PlanetaryGateButtonLayout("planetary-gate-helion", "helion", 0, 6),
             new PlanetaryGateButtonLayout("planetary-gate-nyx", "nyx", 3, 0),
             new PlanetaryGateButtonLayout("planetary-gate-cryon", "cryon", 3, 3),
-            new PlanetaryGateButtonLayout("planetary-gate-tempest", "tempest", 3, 6),
-            new PlanetaryGateButtonLayout("planetary-gate-labyrinth", "labyrinth", 5, 4)
+            new PlanetaryGateButtonLayout("planetary-gate-tempest", "tempest", 3, 6)
+            // labyrinth 已從星門移除，改由「異界傳送門」進入其他世界
         );
 
     private record TravelVessel(ArmorStand seat, ArmorStand cameraAnchor, List<TravelVesselPart> parts, float yaw) {
@@ -293,7 +307,7 @@ public final class PlanetService {
                                       double speedBonus) {
     }
 
-    public PlanetService(final TechProjectPlugin plugin,
+    public PlanetService(final TechMCPlugin plugin,
                          final SafeScheduler scheduler,
                          final ItemFactoryUtil itemFactory,
                          final TechRegistry registry) {
@@ -389,7 +403,8 @@ public final class PlanetService {
         this.harvestNodeDisplays.clear();
         this.fruitNodeRegrowths.clear();
         this.techItemStackCache.clear();
-        this.purgeManagedPlanetEntities();
+        // Folia: onDisable 在主控台線程，無法存取區域實體，伺服器關閉後實體自動消失
+        // this.purgeManagedPlanetEntities();
     }
 
     public boolean handlePlanetBreak(final BlockBreakEvent event) {
@@ -498,6 +513,20 @@ public final class PlanetService {
         final World world = this.ensurePlanetWorld(definition);
         if (player == null || world == null) {
             return false;
+        }
+        // 進入迷途星前記下返回點，供撤離火箭送玩家回來時使用
+        // 注意：若玩家剛跑完火箭動畫（經異界傳送門觸發），不要用當前動畫位置覆寫 —
+        // handleOtherworldPortalInteract 已事先在地面記錄了真正的返回點。
+        if ("labyrinth".equalsIgnoreCase(definition.id())
+                && !this.isPlanetWorld("labyrinth", player.getWorld())
+                && !this.travelingPlayers.contains(player.getUniqueId())
+                && !this.customTravelCallbacks.containsKey(player.getUniqueId())
+                && this.plugin.getMazeService().returnPointFor(player.getUniqueId()) == null) {
+            this.plugin.getMazeService().rememberReturnPoint(player, player.getLocation());
+        }
+        // 教學鏈：進入星球傳送門
+        if (this.plugin.getTutorialChainService() != null) {
+            this.plugin.getTutorialChainService().onPlanetEnter(player);
         }
         final Location anchor = new Location(world, 0.5, Math.max(world.getMinHeight() + 8, 80), 0.5);
         this.scheduler.runRegion(anchor, task -> {
@@ -620,6 +649,124 @@ public final class PlanetService {
             world.spawnParticle(Particle.END_ROD, gateBlock.getLocation().add(0.5, 1.0, 0.5), 8, 0.28, 0.18, 0.28, 0.02);
         }
         return true;
+    }
+
+    /**
+     * 「異界傳送門」右鍵互動：開啟異界專屬 GUI（背景為 techproject_labyrinth_hud glyph）。
+     * 玩家在 GUI 內點擊傳送按鈕後才會消耗魔力隕石並啟動火箭躍遷至異世界。
+     */
+    public boolean handleOtherworldPortalInteract(final Player player,
+                                                   final Block portalBlock,
+                                                   final PlacedMachine portalMachine) {
+        if (player == null || portalBlock == null || portalMachine == null) {
+            return false;
+        }
+        if (this.travelingPlayers.contains(player.getUniqueId())) {
+            player.sendMessage(this.itemFactory.warning("異界躍遷程序仍在進行中。"));
+            return true;
+        }
+        this.openOtherworldPortalMenu(player);
+        return true;
+    }
+
+    /** 開啟異界傳送門 GUI（54 格，背景以 font glyph 呈現 generic.png）。 */
+    public void openOtherworldPortalMenu(final Player player) {
+        if (player == null) {
+            return;
+        }
+        final OtherworldPortalHolder holder = new OtherworldPortalHolder(player.getUniqueId());
+        final net.kyori.adventure.text.Component title = net.kyori.adventure.text.Component
+                .text(LABYRINTH_MENU_TITLE, net.kyori.adventure.text.format.NamedTextColor.WHITE)
+                .font(LABYRINTH_MENU_FONT);
+        final org.bukkit.inventory.Inventory inv = Bukkit.createInventory(holder, 54, title);
+        holder.setInventory(inv);
+        // 背景填充：以透明 PAPER pane（同星球傳送門 hover item）填滿 1-7 欄 × 5 列（slots 1-7, 10-16, 19-25, 28-34, 37-43）
+        final org.bukkit.inventory.ItemStack filler = this.itemFactory.buildGuiPane(
+                "otherworld-portal-pane",
+                Material.PAPER,
+                net.kyori.adventure.text.Component
+                        .text(" ", net.kyori.adventure.text.format.NamedTextColor.WHITE)
+                        .decoration(net.kyori.adventure.text.format.TextDecoration.ITALIC, false),
+                java.util.List.of(),
+                false
+        );
+        for (int row = 0; row < 5; row++) {
+            for (int col = 1; col <= 7; col++) {
+                inv.setItem(row * 9 + col, filler.clone());
+            }
+        }
+        // 傳送按鈕：中央槽位覆寫為可點擊的透明按鈕（同樣透明 PAPER pane，只是附帶顯示名與 lore）
+        final org.bukkit.inventory.ItemStack button = this.itemFactory.buildGuiPane(
+                "otherworld-portal-pane",
+                Material.PAPER,
+                net.kyori.adventure.text.Component
+                        .text("▶ 傳送至異世界", net.kyori.adventure.text.format.NamedTextColor.WHITE)
+                        .decoration(net.kyori.adventure.text.format.TextDecoration.ITALIC, false),
+                java.util.List.of(
+                        net.kyori.adventure.text.Component
+                                .text("消耗 1 顆 魔力隕石 啟動異界躍遷", net.kyori.adventure.text.format.TextColor.color(0xB186D8))
+                                .decoration(net.kyori.adventure.text.format.TextDecoration.ITALIC, false),
+                        net.kyori.adventure.text.Component
+                                .text("返回點已鎖定此處", net.kyori.adventure.text.format.TextColor.color(0x8FE3B4))
+                                .decoration(net.kyori.adventure.text.format.TextDecoration.ITALIC, false)
+                ),
+                false
+        );
+        for (final int slot : OTHERWORLD_PORTAL_BUTTON_SLOTS) {
+            inv.setItem(slot, button.clone());
+        }
+        player.openInventory(inv);
+        player.playSound(player.getLocation(), Sound.BLOCK_RESPAWN_ANCHOR_CHARGE, 0.5f, 1.2f);
+    }
+
+    /** 處理異界傳送門 GUI 的點擊：任何按鈕槽位點擊 → 檢查隕石、消耗、關閉 GUI、啟動火箭。 */
+    public void handleOtherworldPortalMenuClick(final Player player, final int rawSlot) {
+        if (player == null) {
+            return;
+        }
+        boolean buttonSlot = false;
+        for (final int slot : OTHERWORLD_PORTAL_BUTTON_SLOTS) {
+            if (slot == rawSlot) {
+                buttonSlot = true;
+                break;
+            }
+        }
+        if (!buttonSlot) {
+            return;
+        }
+        if (this.travelingPlayers.contains(player.getUniqueId())) {
+            player.sendActionBar(this.itemFactory.warning("異界躍遷程序仍在進行中。"));
+            return;
+        }
+        final org.bukkit.inventory.ItemStack main = player.getInventory().getItemInMainHand();
+        final String mainId = this.itemFactory.getTechItemId(main);
+        if (mainId == null || !"mana_meteorite".equalsIgnoreCase(mainId) || main.getAmount() < 1) {
+            player.sendActionBar(this.itemFactory.warning("需要手持 魔力隕石 啟動異界傳送門。"));
+            player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 0.4f, 0.7f);
+            return;
+        }
+        // 消耗 1 顆魔力隕石
+        main.setAmount(main.getAmount() - 1);
+        // 記錄返回點
+        this.plugin.getMazeService().rememberReturnPoint(player, player.getLocation());
+        // 關閉 GUI
+        player.closeInventory();
+        // 視覺 & 音效
+        final World world = player.getWorld();
+        if (world != null) {
+            world.playSound(player.getLocation(), Sound.BLOCK_PORTAL_TRIGGER, 1.0f, 0.6f);
+            world.playSound(player.getLocation(), Sound.BLOCK_BEACON_ACTIVATE, 0.8f, 0.9f);
+            world.spawnParticle(Particle.PORTAL, player.getLocation().add(0, 1.5, 0), 80, 0.6, 1.2, 0.6, 0.3);
+            world.spawnParticle(Particle.END_ROD, player.getLocation().add(0, 1.2, 0), 40, 0.4, 0.6, 0.4, 0.04);
+        }
+        // 啟動火箭 → 抵達後送入迷途星
+        this.startCustomTravel(player, player.getLocation(), arrived -> {
+            if (arrived == null || !arrived.isOnline()) {
+                return;
+            }
+            this.teleportToPlanet(arrived, "labyrinth");
+            arrived.sendActionBar(this.itemFactory.success("✦ 已抵達異世界 — 尋找撤離點返回 ✦"));
+        });
     }
 
     public boolean isPlanetaryGateView(final String title) {
@@ -878,7 +1025,42 @@ public final class PlanetService {
         if (definition == null || entity.getScoreboardTags().contains(PLANET_ELITE_TAG)) {
             return;
         }
-        if (this.ambientRandom.nextInt(8) != 0) {
+
+        // ── 迷途星分層：越外圈精英率越高，強度越強 ──
+        double labyrinthStrengthBonus = 0.0; // 額外屬性倍率（加成到 profile 上）
+        int eliteChanceDenominator = 8;      // 預設 1/8 精英率
+        if ("labyrinth".equals(definition.id())) {
+            final int zone = this.plugin.getMazeService().getMazeZoneForLocation(entity.getLocation());
+            switch (zone) {
+                case 0, 1 -> {
+                    // Glade / 內圈：普通怪（不精英化）
+                    return;
+                }
+                case 2 -> {
+                    // 中圈：15% 精英率，+20% 強度
+                    eliteChanceDenominator = 7; // ~15%
+                    labyrinthStrengthBonus = 0.2;
+                }
+                case 3 -> {
+                    // 外圈：30% 精英率，+40% 強度
+                    eliteChanceDenominator = 3; // ~33%
+                    labyrinthStrengthBonus = 0.4;
+                }
+                default -> {
+                }
+            }
+            // 全迷途星：對 Zone 2/3 普通怪也加基礎屬性加成（不管是否精英化）
+            if (zone >= 2) {
+                this.adjustAttribute(monster, Attribute.MAX_HEALTH, 1.0 + labyrinthStrengthBonus, 0.0D, 4.0D);
+                final var hp = monster.getAttribute(Attribute.MAX_HEALTH);
+                if (hp != null) {
+                    monster.setHealth(Math.max(1.0D, hp.getValue()));
+                }
+                this.adjustAttribute(monster, Attribute.ATTACK_DAMAGE, 1.0 + labyrinthStrengthBonus, 0.0D, 1.5D);
+            }
+        }
+
+        if (this.ambientRandom.nextInt(eliteChanceDenominator) != 0) {
             return;
         }
         if (this.countNearbyPlanetElites(entity) >= 3) {
@@ -892,12 +1074,12 @@ public final class PlanetService {
         monster.addScoreboardTag(PLANET_ELITE_TAG_PREFIX + definition.id());
         monster.customName(Component.text(profile.displayName()));
         monster.setCustomNameVisible(true);
-        this.adjustAttribute(monster, Attribute.MAX_HEALTH, profile.healthMultiplier(), 0.0D, 8.0D);
+        this.adjustAttribute(monster, Attribute.MAX_HEALTH, profile.healthMultiplier() + labyrinthStrengthBonus, 0.0D, 8.0D);
         final var maxHealth = monster.getAttribute(Attribute.MAX_HEALTH);
         if (maxHealth != null) {
             monster.setHealth(Math.max(1.0D, maxHealth.getValue()));
         }
-        this.adjustAttribute(monster, Attribute.ATTACK_DAMAGE, 1.0D, profile.attackBonus(), 2.0D);
+        this.adjustAttribute(monster, Attribute.ATTACK_DAMAGE, 1.0D, profile.attackBonus() + labyrinthStrengthBonus, 2.0D);
         this.adjustAttribute(monster, Attribute.MOVEMENT_SPEED, 1.0D, profile.speedBonus(), 0.22D);
         this.adjustAttribute(monster, Attribute.FOLLOW_RANGE, 1.0D, 8.0D, 24.0D);
         switch (definition.id()) {
@@ -1601,25 +1783,32 @@ public final class PlanetService {
      * 改為在已知 XZ 柱體內搜尋核心方塊。
      */
     private void scheduleRuinCoreVerification(final PlanetDefinition definition, final World world) {
-        world.getChunkAtAsync(0, 0).thenAccept(chunk -> {
-            final Location anchor = new Location(world, 0.5, Math.max(world.getMinHeight() + 8, 80), 0.5);
-            this.scheduler.runRegion(anchor, task -> {
-                final int[] offset = switch (definition.id()) {
-                    case "aurelia"  -> new int[]{0, 7};
-                    case "cryon"    -> new int[]{3, 8};
-                    case "nyx"      -> new int[]{2, 7};
-                    case "helion"   -> new int[]{-1, 8};
-                    case "tempest"  -> new int[]{1, 7};
-                    default -> null;
-                };
-                if (offset == null) return;
-                final int minY = Math.max(world.getMinHeight(), 40);
-                final int maxY = Math.min(world.getMaxHeight(), 200);
-                for (int y = minY; y <= maxY; y++) {
-                    if (world.getBlockAt(offset[0], y, offset[1]).getType() == definition.ruinCoreMaterial()) {
-                        return; // 核心存在，無需修復
-                    }
+        final int[] offset = switch (definition.id()) {
+            case "aurelia"  -> new int[]{0, 7};
+            case "cryon"    -> new int[]{3, 8};
+            case "nyx"      -> new int[]{2, 7};
+            case "helion"   -> new int[]{-1, 8};
+            case "tempest"  -> new int[]{1, 7};
+            default -> null;
+        };
+        if (offset == null) return;
+        // 用 getChunkAtAsync 載入 chunk 後直接從 chunk 物件讀方塊，完全避免 syncLoad
+        final int chunkX = offset[0] >> 4;
+        final int chunkZ = offset[1] >> 4;
+        world.getChunkAtAsync(chunkX, chunkZ).thenAccept(chunk -> {
+            // 直接在 async callback 中用 chunk 物件讀方塊，不經過 world.getBlockAt
+            final int localX = offset[0] & 15;
+            final int localZ = offset[1] & 15;
+            final int minY = Math.max(world.getMinHeight(), 40);
+            final int maxY = Math.min(world.getMaxHeight(), 200);
+            for (int y = minY; y <= maxY; y++) {
+                if (chunk.getBlock(localX, y, localZ).getType() == definition.ruinCoreMaterial()) {
+                    return; // 核心存在，無需修復
                 }
+            }
+            // 核心不存在，排程修復（需要在 region 線程執行）
+            final Location anchor = new Location(world, offset[0] + 0.5, Math.max(world.getMinHeight() + 8, 80), offset[1] + 0.5);
+            this.scheduler.runRegion(anchor, task -> {
                 this.plugin.getLogger().info("偵測到 " + definition.displayName() + " 遺跡核心遺失，自動修復中…");
                 this.doGeneratePlanetSpawn(definition, world);
             });
@@ -1750,46 +1939,67 @@ public final class PlanetService {
         this.highlightRuinCore(world, 1, baseY + 2, 7);
     }
 
+    /** 安全呼叫 setTime — 若維度已設 fixed_time 則跳過（26.1+ 會拋例外） */
+    private static void safeSetTime(final World world, final long time) {
+        try {
+            world.setTime(time);
+        } catch (final IllegalArgumentException ignored) {
+            // 維度已設 has_fixed_time，不需要手動設定
+        }
+    }
+
     private void applyPlanetWorldSettings(final PlanetDefinition definition, final World world) {
         this.scheduler.runGlobal(task -> {
             world.setDifficulty(org.bukkit.Difficulty.HARD);
             world.setSpawnFlags(true, true);
-            world.setGameRule(GameRules.ADVANCE_TIME, false);
-            world.setGameRule(GameRules.ADVANCE_WEATHER, false);
+            try { world.setGameRule(GameRules.ADVANCE_TIME, false); } catch (final Exception ignored) {}
+            try { world.setGameRule(GameRules.ADVANCE_WEATHER, false); } catch (final Exception ignored) {}
             world.setGameRule(GameRules.MOB_GRIEFING, false);
             switch (definition.id()) {
                 case "aurelia" -> {
-                    world.setTime(2500L);
+                    safeSetTime(world, 2500L);
                     world.setStorm(false);
                     world.setThundering(false);
                 }
                 case "cryon" -> {
-                    world.setTime(23000L);
+                    safeSetTime(world, 23000L);
                     world.setStorm(false);
                     world.setThundering(false);
                 }
                 case "nyx" -> {
-                    world.setTime(23000L);
+                    safeSetTime(world, 23000L);
                     world.setStorm(false);
                     world.setThundering(false);
                 }
                 case "helion" -> {
-                    world.setTime(4500L);
+                    safeSetTime(world, 4500L);
                     world.setStorm(false);
                     world.setThundering(false);
                 }
                 case "tempest" -> {
-                    world.setTime(12800L);
+                    safeSetTime(world, 12800L);
                     world.setStorm(true);
                     world.setThundering(true);
                 }
                 case "labyrinth" -> {
-                    world.setTime(18000L); // 午夜
+                    safeSetTime(world, 18000L); // 午夜
                     world.setStorm(true);  // 厚雲層遮蔽天空
                     world.setThundering(false);
+                    // 拉高怪物生成上限（迷宮需要詭譎氛圍 + 危險感）
+                    try {
+                        world.setMonsterSpawnLimit(120);
+                        world.setAmbientSpawnLimit(40);
+                    } catch (final Exception ignored) { }
+                    // 世界邊界：2000×2000（中心 0,0）
+                    final org.bukkit.WorldBorder border = world.getWorldBorder();
+                    border.setCenter(0, 0);
+                    border.setSize(2000);
+                    border.setWarningDistance(20);
+                    border.setDamageAmount(2.0);
+                    border.setDamageBuffer(5.0);
                 }
                 default -> {
-                    world.setTime(6000L);
+                    safeSetTime(world, 6000L);
                     world.setStorm(false);
                     world.setThundering(false);
                 }
@@ -1954,6 +2164,10 @@ public final class PlanetService {
     }
 
     private void decoratePlanetChunk(final PlanetDefinition definition, final Chunk chunk) {
+        // 迷途星有自己的 MazeService 裝飾系統，跳過通用星球裝飾
+        if ("labyrinth".equals(definition.id())) {
+            return;
+        }
         final World world = chunk.getWorld();
         final Random random = new Random(world.getSeed() ^ ((long) definition.id().hashCode() << 27) ^ (chunk.getX() * 341873128712L) ^ (chunk.getZ() * 132897987541L));
         if (random.nextInt(8) == 0) {
@@ -1993,6 +2207,10 @@ public final class PlanetService {
     private void enrichPlanetBiologyChunk(final PlanetDefinition definition,
                                           final Chunk chunk,
                                           final Random random) {
+        if ("labyrinth".equals(definition.id())) {
+            this.enrichLabyrinthChunk(chunk, random);
+            return;
+        }
         final World world = chunk.getWorld();
         for (int attempt = 0; attempt < this.scaledDecorationCount(6, true); attempt++) {
             final int x = (chunk.getX() << 4) + random.nextInt(16);
@@ -2013,6 +2231,80 @@ public final class PlanetService {
                 this.placePlanetMiniTree(definition, world, x + random.nextInt(5) - 2, z + random.nextInt(5) - 2, random);
             }
         }
+    }
+
+    /**
+     * 迷宮分區採集節點：越外層越稀有，總量遠低於一般星球。
+     * Zone 0 (Glade)：無節點
+     * Zone 1 (cellDist ≤ 20)：~0.8/區塊，常見礦
+     * Zone 2 (cellDist ≤ 40)：~0.4/區塊，中階礦
+     * Zone 3 (cellDist > 40)：~0.15/區塊，稀有礦（含遠古殘骸）
+     */
+    private void enrichLabyrinthChunk(final Chunk chunk, final Random random) {
+        final World world = chunk.getWorld();
+        final int chunkX = chunk.getX() << 4;
+        final int chunkZ = chunk.getZ() << 4;
+        final Location centerLoc = new Location(world, chunkX + 8, 65, chunkZ + 8);
+        final int chunkZone = this.plugin.getMazeService().getMazeZoneForLocation(centerLoc);
+        if (chunkZone < 0) {
+            return; // 不在迷宮世界
+        }
+
+        // 迷宮地面固定 Y=64（profile 噪點全為 0），節點放置於 Y=65
+        final int floorY = 64;
+        // 每 chunk 最多嘗試 1 次，大幅降低稀有度
+        if (random.nextDouble() >= 0.25D) {
+            return;
+        }
+        final int x = chunkX + 1 + random.nextInt(14);
+        final int z = chunkZ + 1 + random.nextInt(14);
+        // 嚴格按「每個放置位置」的分區判定，避免 chunk 中心在迷宮外但採集點落在 Glade 內
+        final Location nodeLoc = new Location(world, x, floorY + 1, z);
+        final int posZone = this.plugin.getMazeService().getMazeZoneForLocation(nodeLoc);
+        if (posZone <= 0) {
+            return; // Glade（0）或不在迷宮（<0）：嚴禁放置
+        }
+
+        final double successChance;
+        final Material[] pool;
+        switch (posZone) {
+            case 1 -> {
+                successChance = 0.40D; // 0.25 * 0.40 = 10% 每 chunk
+                pool = new Material[] {
+                        Material.DEEPSLATE_COAL_ORE, Material.DEEPSLATE_COAL_ORE,
+                        Material.DEEPSLATE_IRON_ORE,
+                        Material.DEEPSLATE_COPPER_ORE
+                };
+            }
+            case 2 -> {
+                successChance = 0.25D; // 0.25 * 0.25 ≈ 6.3% 每 chunk
+                pool = new Material[] {
+                        Material.DEEPSLATE_REDSTONE_ORE,
+                        Material.DEEPSLATE_LAPIS_ORE,
+                        Material.DEEPSLATE_GOLD_ORE,
+                        Material.DEEPSLATE_DIAMOND_ORE,
+                        Material.DEEPSLATE_EMERALD_ORE
+                };
+            }
+            case 3 -> {
+                successChance = 0.12D; // 0.25 * 0.12 = 3% 每 chunk
+                pool = new Material[] {
+                        Material.DEEPSLATE_DIAMOND_ORE,
+                        Material.DEEPSLATE_EMERALD_ORE,
+                        Material.AMETHYST_CLUSTER,
+                        Material.ANCIENT_DEBRIS
+                };
+            }
+            default -> { return; }
+        }
+
+        if (random.nextDouble() >= successChance) return;
+        final Block floor = world.getBlockAt(x, floorY, z);
+        final Block node = world.getBlockAt(x, floorY + 1, z);
+        final Block above = world.getBlockAt(x, floorY + 2, z);
+        if (!floor.isSolid() || floor.isLiquid()) return;
+        if (!node.isEmpty() || !above.isEmpty()) return;
+        node.setType(pool[random.nextInt(pool.length)], false);
     }
 
     private void placePlanetFlora(final PlanetDefinition definition,
@@ -2665,6 +2957,10 @@ public final class PlanetService {
     // ═══ 星球探險結構（前哨站 / 瞭望塔 / 地下密室 / 墜毀殘骸）═══
 
     private void generatePlanetStructures(final PlanetDefinition definition, final Chunk chunk) {
+        // 迷途星有自己的迷宮結構系統，禁止通用星球瞭望塔/階梯/廢墟等建築
+        if ("labyrinth".equals(definition.id())) {
+            return;
+        }
         final World world = chunk.getWorld();
         final Random random = new Random(world.getSeed() ^ ((long) definition.id().hashCode() << 31)
                 ^ (chunk.getX() * 482716293781L) ^ (chunk.getZ() * 782913648173L));
@@ -3540,6 +3836,57 @@ public final class PlanetService {
         };
     }
 
+    /**
+     * 遺跡挑戰專用怪物池：排除會飛的怪物（BLAZE、PHANTOM），
+     * 確保玩家能在限時內清完所有怪物。
+     */
+    private org.bukkit.entity.EntityType ruinChallengeMobTypeFor(final PlanetDefinition definition) {
+        final java.util.concurrent.ThreadLocalRandom rng = java.util.concurrent.ThreadLocalRandom.current();
+        return switch (definition.id()) {
+            case "aurelia" -> {
+                final int roll = rng.nextInt(10);
+                yield roll < 4 ? org.bukkit.entity.EntityType.HUSK
+                        : roll < 7 ? org.bukkit.entity.EntityType.SKELETON
+                        : org.bukkit.entity.EntityType.SPIDER;
+            }
+            case "cryon" -> {
+                final int roll = rng.nextInt(10);
+                yield roll < 4 ? org.bukkit.entity.EntityType.STRAY
+                        : roll < 7 ? org.bukkit.entity.EntityType.SKELETON
+                        : org.bukkit.entity.EntityType.ZOMBIE;
+            }
+            case "nyx" -> {
+                final int roll = rng.nextInt(10);
+                // 移除 PHANTOM，改為 ENDERMAN / SKELETON / CREEPER
+                yield roll < 4 ? org.bukkit.entity.EntityType.ENDERMAN
+                        : roll < 7 ? org.bukkit.entity.EntityType.SKELETON
+                        : org.bukkit.entity.EntityType.CREEPER;
+            }
+            case "helion" -> {
+                final int roll = rng.nextInt(10);
+                // 移除 BLAZE（會飛），改為 WITHER_SKELETON / HUSK / MAGMA_CUBE
+                yield roll < 4 ? org.bukkit.entity.EntityType.WITHER_SKELETON
+                        : roll < 7 ? org.bukkit.entity.EntityType.HUSK
+                        : org.bukkit.entity.EntityType.MAGMA_CUBE;
+            }
+            case "tempest" -> {
+                final int roll = rng.nextInt(10);
+                yield roll < 4 ? org.bukkit.entity.EntityType.ZOMBIE
+                        : roll < 7 ? org.bukkit.entity.EntityType.CREEPER
+                        : roll < 9 ? org.bukkit.entity.EntityType.SKELETON
+                        : org.bukkit.entity.EntityType.WITCH;
+            }
+            case "labyrinth" -> {
+                final int roll = rng.nextInt(10);
+                yield roll < 4 ? org.bukkit.entity.EntityType.ZOMBIE
+                        : roll < 7 ? org.bukkit.entity.EntityType.CAVE_SPIDER
+                        : roll < 9 ? org.bukkit.entity.EntityType.SKELETON
+                        : org.bukkit.entity.EntityType.SILVERFISH;
+            }
+            default -> this.planetMobTypeFor(definition);
+        };
+    }
+
     private boolean isUndead(final org.bukkit.entity.EntityType type) {
         return type == org.bukkit.entity.EntityType.SKELETON
                 || type == org.bukkit.entity.EntityType.STRAY
@@ -3876,7 +4223,7 @@ public final class PlanetService {
                 } else {
                     player.addPotionEffect(new PotionEffect(PotionEffectType.WITHER, 80, 0, false, true, true));
                     player.addPotionEffect(new PotionEffect(PotionEffectType.MINING_FATIGUE, 90, 0, false, true, true));
-                    player.addPotionEffect(new PotionEffect(PotionEffectType.DARKNESS, 60, 0, false, true, true));
+                    // 視覺 debuff（DARKNESS）已移除 — 迷途星主要靠氛圍與敵人壓迫感，不再強制黑屏
                     player.damage(1.0D);
                 }
                 player.getWorld().spawnParticle(Particle.SCULK_SOUL, player.getLocation().add(0.0, 1.0, 0.0), 10, 0.35, 0.45, 0.35, 0.02);
@@ -4240,7 +4587,35 @@ public final class PlanetService {
                 outputs.add(seed);
             }
         }
+        this.appendLabyrinthBonusDrops(profile, outputs);
         return outputs;
+    }
+
+    // 異世界（labyrinth）採集附加掉物：
+    //  ▸ labyrinth_fragment 主掉：10% 機率額外掉 1 顆 mana_meteorite（科技線燃料）
+    //  ▸ labyrinth_relic 主掉：25% 機率額外掉 1~2 顆 mana_meteorite；3% 機率隨機掉落一把 RPG 武器
+    private void appendLabyrinthBonusDrops(final PlanetHarvestProfile profile, final List<ItemStack> outputs) {
+        if (profile == null || profile.dropItemId() == null) {
+            return;
+        }
+        final java.util.concurrent.ThreadLocalRandom rng = java.util.concurrent.ThreadLocalRandom.current();
+        final String id = profile.dropItemId();
+        if ("labyrinth_fragment".equals(id)) {
+            if (rng.nextDouble() < 0.10D) {
+                final ItemStack meteor = this.buildTechStack("mana_meteorite", 1);
+                if (meteor != null) outputs.add(meteor);
+            }
+        } else if ("labyrinth_relic".equals(id)) {
+            if (rng.nextDouble() < 0.25D) {
+                final ItemStack meteor = this.buildTechStack("mana_meteorite", 1 + rng.nextInt(2));
+                if (meteor != null) outputs.add(meteor);
+            }
+            if (rng.nextDouble() < 0.03D) {
+                final String[] weapons = { "riftblade", "frostfang_bow", "thunder_hammer", "arcane_scepter" };
+                final ItemStack rpg = this.buildTechStack(weapons[rng.nextInt(weapons.length)], 1);
+                if (rpg != null) outputs.add(rpg);
+            }
+        }
     }
 
     private ItemStack buildTechStack(final String itemId, final int amount) {
@@ -4455,6 +4830,10 @@ public final class PlanetService {
             }
         }
         this.plugin.getPlayerProgressService().incrementStat(player.getUniqueId(), "planetary_samples_collected", outputs.stream().mapToInt(ItemStack::getAmount).sum());
+        // 教學鏈：星球採集
+        if (this.plugin.getTutorialChainService() != null) {
+            this.plugin.getTutorialChainService().onPlanetHarvest(player);
+        }
         // 迷宮採集任務推進
         if (LABYRINTH_WORLD.equals(block.getWorld().getName())) {
             this.plugin.getMazeService().onCollect(player);
@@ -4658,12 +5037,12 @@ public final class PlanetService {
         if (currentId == null || !currentId.equals(entityId)) {
             return;
         }
-        final Entity entity = Bukkit.getEntity(entityId);
-        if (entity != null && entity.isValid()) {
-            if (this.plugin.isEnabled()) {
+        // 關服期間 Folia RegionizedWorldData 已進入關閉狀態，呼叫 entity.remove() 會 NPE；
+        // 關服時直接移除追蹤即可（伺服器關閉後實體本來就會被丟棄）
+        if (this.plugin.isEnabled()) {
+            final Entity entity = Bukkit.getEntity(entityId);
+            if (entity != null && entity.isValid()) {
                 this.scheduler.runEntity(entity, entity::remove);
-            } else {
-                entity.remove();
             }
         }
         this.harvestNodeDisplays.remove(key, entityId);
@@ -4704,26 +5083,32 @@ public final class PlanetService {
 
     private void spawnRuinWave(final RuinChallenge challenge) {
         if (challenge.failed || challenge.completed) {
+            challenge.waveAdvancing.set(false);
             return;
         }
         final Player player = Bukkit.getPlayer(challenge.playerId);
         if (player == null || !player.isOnline()) {
+            challenge.waveAdvancing.set(false);
             this.cleanupRuinChallenge(challenge, false);
             return;
         }
         final int waveIndex = challenge.currentWave;
         if (waveIndex >= RUIN_WAVE_COUNTS.length) {
+            challenge.waveAdvancing.set(false);
             this.completeRuinChallenge(challenge, player);
             return;
         }
         final int mobCount = RUIN_WAVE_COUNTS[waveIndex];
         final World world = challenge.coreLocation.getWorld();
         if (world == null) {
+            challenge.waveAdvancing.set(false);
             return;
         }
 
         challenge.waveStartTick = world.getFullTime();
         challenge.waveGeneration++;
+        // 進入生怪階段，釋放推進鎖：這一波真正開始了
+        challenge.waveAdvancing.set(false);
 
         final int waveNum = waveIndex + 1;
         player.sendMessage(this.itemFactory.secondary("▸ 第 " + waveNum + "/" + RUIN_WAVE_COUNTS.length + " 波 — " + mobCount + " 隻敵人逼近！"));
@@ -4747,7 +5132,8 @@ public final class PlanetService {
                 if (challenge.failed || challenge.completed) return;
                 final int sy = world.getHighestBlockYAt(sx, sz, HeightMap.MOTION_BLOCKING_NO_LEAVES) + 1;
                 final Location spawnLoc = new Location(world, sx + 0.5, sy, sz + 0.5);
-                final org.bukkit.entity.EntityType mobType = this.planetMobTypeFor(challenge.definition);
+                // 遺跡挑戰使用地面專用怪池（排除會飛的 BLAZE / PHANTOM，避免玩家無法攻擊）
+                final org.bukkit.entity.EntityType mobType = this.ruinChallengeMobTypeFor(challenge.definition);
                 if (mobType == null) return;
 
                 final Entity spawned = world.spawnEntity(spawnLoc, mobType);
@@ -4806,10 +5192,40 @@ public final class PlanetService {
             if (world == null) {
                 return;
             }
+            // 週期性清除已死亡/失效的怪物（補捕苦力怕自爆等事件遺漏）
+            challenge.aliveMobs.removeIf(mobId -> {
+                final Entity mob = Bukkit.getEntity(mobId);
+                return mob == null || mob.isDead() || !mob.isValid();
+            });
+            final int alive = challenge.aliveMobs.size();
+            if (alive == 0 && !challenge.failed && !challenge.completed) {
+                // 安全網：若 onRuinChallengeMobDeath 已觸發推進，則略過避免重複生怪
+                if (!challenge.waveAdvancing.compareAndSet(false, true)) {
+                    this.tickRuinBossBar(challenge);
+                    return;
+                }
+                // 所有怪物已死 — 推進波數
+                challenge.currentWave++;
+                if (challenge.currentWave >= RUIN_WAVE_COUNTS.length) {
+                    final Player player = Bukkit.getPlayer(challenge.playerId);
+                    if (player != null) {
+                        this.completeRuinChallenge(challenge, player);
+                    }
+                    challenge.waveAdvancing.set(false);
+                } else {
+                    final Player player = Bukkit.getPlayer(challenge.playerId);
+                    if (player != null) {
+                        world.playSound(challenge.coreLocation, Sound.BLOCK_NOTE_BLOCK_BELL, 1.0f, 1.4f);
+                        player.sendMessage(this.itemFactory.success("✓ 波數清除！下一波即將到來…"));
+                    }
+                    this.scheduler.runRegionDelayed(challenge.coreLocation,
+                            t -> this.spawnRuinWave(challenge), RUIN_WAVE_DELAY_TICKS);
+                }
+                return;
+            }
             final long elapsed = world.getFullTime() - challenge.waveStartTick;
             final float progress = Math.max(0.0f, Math.min(1.0f, 1.0f - (float) elapsed / RUIN_WAVE_TIMEOUT_TICKS));
             final int remaining = Math.max(0, (int) ((RUIN_WAVE_TIMEOUT_TICKS - elapsed) / 20L));
-            final int alive = challenge.aliveMobs.size();
             final int waveNum = challenge.currentWave + 1;
             challenge.bossBar.progress(progress);
             challenge.bossBar.name(Component.text("⚔ 第 " + waveNum + "/" + RUIN_WAVE_COUNTS.length + " 波 — 剩餘 " + alive + " 隻 — " + remaining + " 秒", progress > 0.3f ? NamedTextColor.GOLD : NamedTextColor.RED));
@@ -4871,13 +5287,17 @@ public final class PlanetService {
                 }
                 return;
             }
-            // 目前波數清完
+            // 目前波數清完 — CAS 搶推進權，已被推進則略過
+            if (!challenge.waveAdvancing.compareAndSet(false, true)) {
+                return;
+            }
             challenge.currentWave++;
             if (challenge.currentWave >= RUIN_WAVE_COUNTS.length) {
                 final Player player = Bukkit.getPlayer(challenge.playerId);
                 if (player != null) {
                     this.completeRuinChallenge(challenge, player);
                 }
+                challenge.waveAdvancing.set(false);
                 return;
             }
             // 下一波
@@ -5148,7 +5568,10 @@ public final class PlanetService {
         for (final PlanetaryGateButtonLayout layout : PLANETARY_GATE_LAYOUTS) {
             final int centerRow = layout.startRow() + 1;
             final int centerColumn = layout.startColumn() + 1;
-            inventory.setItem(centerRow * 9 + centerColumn, this.buildPlanetaryGateHoverItem(layout, viewer));
+            final int slot = centerRow * 9 + centerColumn;
+            if (slot >= 0 && slot < inventory.getSize()) {
+                inventory.setItem(slot, this.buildPlanetaryGateHoverItem(layout, viewer));
+            }
         }
     }
 
@@ -5298,10 +5721,15 @@ public final class PlanetService {
             gateMachine.consumeEnergy(PLANETARY_GATE_TRAVEL_COST);
             this.consumeShipFuel(player, fuelCost);
             this.gateDestinations.put(LocationKey.from(gateLoc), destination.id());
-            this.showTravelTitle(player,
+            // 立即顯示發射字幕（非打字機），避免被後續動畫 title 打斷。
+            this.plugin.getTitleMsgService().cancel(player.getUniqueId());
+            player.showTitle(net.kyori.adventure.title.Title.title(
                     Component.text("▶ 發射", NamedTextColor.GREEN, TextDecoration.BOLD),
                     this.itemFactory.secondary("目的地：" + destination.displayName()),
-                    2L, 16L, 4L);
+                    net.kyori.adventure.title.Title.Times.times(
+                            java.time.Duration.ZERO,
+                            java.time.Duration.ofMillis(1400L),
+                            java.time.Duration.ZERO)));
             player.playSound(player.getLocation(), Sound.ENTITY_FIREWORK_ROCKET_LAUNCH, 0.9f, 0.8f);
             gateLoc.getWorld().spawnParticle(Particle.END_ROD,
                     gateLoc.clone().add(0.5, 2.0, 0.5), 40, 0.6, 0.4, 0.6, 0.08);
@@ -5315,10 +5743,15 @@ public final class PlanetService {
         final NamedTextColor color = seconds <= 2
                 ? NamedTextColor.RED
                 : seconds <= 3 ? NamedTextColor.GOLD : NamedTextColor.GREEN;
-        this.showTravelTitle(player,
+        // 倒數直接顯示（不用打字機），避免下一次 tick 在前一次打字完成前覆蓋。
+        this.plugin.getTitleMsgService().cancel(player.getUniqueId());
+        player.showTitle(net.kyori.adventure.title.Title.title(
                 Component.text("▶ " + seconds, color, TextDecoration.BOLD),
                 this.itemFactory.secondary("星門啟動倒數"),
-                3L, 17L, 2L);
+                net.kyori.adventure.title.Title.Times.times(
+                        java.time.Duration.ZERO,
+                        java.time.Duration.ofMillis(1100L),
+                        java.time.Duration.ZERO)));
         final float pitch = seconds <= 2 ? 1.6f : 1.0f;
         player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_PLING, 0.8f, pitch);
         if (gateLoc.getWorld() != null) {
@@ -5558,12 +5991,18 @@ public final class PlanetService {
             final java.util.function.Consumer<Player> customCallback = this.customTravelCallbacks.remove(uuid);
             if (customCallback != null) {
                 final TravelPlayerState cState = this.travelPlayerStates.remove(uuid);
-                // 恢復遊戲模式與飛行權限，但不恢復移動速度（由呼叫端在傳送到位後自行恢復）
+                // 完整恢復：gameMode / flight / walkSpeed / flySpeed。
+                // 歷史註解說移動速度由呼叫端自行恢復，但實務上呼叫端常忘記，
+                // 結果玩家抵達目的地後完全無法移動（walkSpeed=0）。預設完整還原才安全。
                 if (cState != null) {
                     player.setGameMode(cState.gameMode());
                     player.setAllowFlight(cState.allowFlight());
+                    player.setWalkSpeed(cState.walkSpeed() > 0.0f ? cState.walkSpeed() : 0.2f);
+                    player.setFlySpeed(cState.flySpeed() > 0.0f ? cState.flySpeed() : 0.1f);
                 } else {
                     player.setGameMode(GameMode.SURVIVAL);
+                    player.setWalkSpeed(0.2f);
+                    player.setFlySpeed(0.1f);
                 }
                 player.removePotionEffect(PotionEffectType.BLINDNESS);
                 player.removePotionEffect(PotionEffectType.DARKNESS);
@@ -5757,32 +6196,18 @@ public final class PlanetService {
         if (seat == null || !seat.isValid()) {
             return;
         }
+        // ── 預先計算所有位置，然後在單一 runEntity 內批次 teleport ──
+        // 這避免了每 tick 對 26+ 個實體各自排程 runEntity 導致 Folia region TPS 暴跌
         final Location seatLocation = center.clone().add(sway * 0.55D, -1.15D + Math.abs(sway) * 0.12D, 0.0D);
-        this.scheduler.runEntity(seat, () -> {
-            if (!seat.isValid()) {
-                return;
-            }
-            seat.teleportAsync(seatLocation);
-            seat.setRotation(vessel.yaw(), 0.0f);
-        });
         final ArmorStand cameraAnchor = vessel.cameraAnchor();
-        if (cameraAnchor != null && cameraAnchor.isValid()) {
-            final Location cameraLocation = this.travelCameraLocation(vessel, center, hatchProgress, ascentProgress, sway);
-            this.scheduler.runEntity(cameraAnchor, () -> {
-                if (!cameraAnchor.isValid()) {
-                    return;
-                }
-                cameraAnchor.teleportAsync(cameraLocation);
-                cameraAnchor.setRotation(vessel.yaw(), (float) Math.max(-18.0D, -2.0D - ascentProgress * 10.0D));
-            });
-            if (player != null && player.isValid() && player.getGameMode() == GameMode.SPECTATOR && player.getSpectatorTarget() != cameraAnchor) {
-                this.scheduler.runEntity(player, () -> {
-                    if (player.isValid() && player.getGameMode() == GameMode.SPECTATOR) {
-                        player.setSpectatorTarget(cameraAnchor);
-                    }
-                });
-            }
-        }
+        final Location cameraLocation = (cameraAnchor != null && cameraAnchor.isValid())
+                ? this.travelCameraLocation(vessel, center, hatchProgress, ascentProgress, sway) : null;
+        final float cameraPitch = (float) Math.max(-18.0D, -2.0D - ascentProgress * 10.0D);
+        final boolean needSpectatorFix = player != null && player.isValid()
+                && player.getGameMode() == GameMode.SPECTATOR
+                && cameraAnchor != null && player.getSpectatorTarget() != cameraAnchor;
+        // 預算零件位置
+        final List<Map.Entry<BlockDisplay, Location>> partMoves = new ArrayList<>();
         for (final TravelVesselPart part : vessel.parts()) {
             if (part.display() == null || !part.display().isValid()) {
                 continue;
@@ -5799,11 +6224,29 @@ public final class PlanetService {
                 offsetY += Math.abs(sway) * 0.18D;
             }
             final Vector rotated = this.rotateTravelOffset(offsetX + sway, offsetY, offsetZ, vessel.yaw());
-            final BlockDisplay display = part.display();
-            final Location displayLocation = center.clone().add(rotated);
-            this.scheduler.runEntity(display, () -> {
-                if (display.isValid()) {
-                    display.teleportAsync(displayLocation);
+            partMoves.add(Map.entry(part.display(), center.clone().add(rotated)));
+        }
+        // 單一排程：所有實體同一 region 垂直柱內，只需一次 runEntity
+        this.scheduler.runEntity(seat, () -> {
+            if (!seat.isValid()) {
+                return;
+            }
+            seat.teleportAsync(seatLocation);
+            seat.setRotation(vessel.yaw(), 0.0f);
+            if (cameraAnchor != null && cameraAnchor.isValid() && cameraLocation != null) {
+                cameraAnchor.teleportAsync(cameraLocation);
+                cameraAnchor.setRotation(vessel.yaw(), cameraPitch);
+            }
+            for (final Map.Entry<BlockDisplay, Location> entry : partMoves) {
+                if (entry.getKey().isValid()) {
+                    entry.getKey().teleportAsync(entry.getValue());
+                }
+            }
+        });
+        if (needSpectatorFix) {
+            this.scheduler.runEntity(player, () -> {
+                if (player.isValid() && player.getGameMode() == GameMode.SPECTATOR) {
+                    player.setSpectatorTarget(cameraAnchor);
                 }
             });
         }
@@ -6114,15 +6557,7 @@ public final class PlanetService {
                                  final long fadeInTicks,
                                  final long stayTicks,
                                  final long fadeOutTicks) {
-        player.showTitle(Title.title(
-                title,
-                subtitle,
-                Title.Times.times(
-                        Duration.ofMillis(fadeInTicks * 50L),
-                        Duration.ofMillis(stayTicks * 50L),
-                        Duration.ofMillis(fadeOutTicks * 50L)
-                )
-        ));
+        this.plugin.getTitleMsgService().send(player, title, subtitle, stayTicks, Sound.BLOCK_NOTE_BLOCK_HAT);
     }
 
     private long playLandingSequence(final Player player,
@@ -6449,6 +6884,15 @@ public final class PlanetService {
     }
 
     private static final class PlanetChunkGenerator extends ChunkGenerator {
+        // 預載所有非同步區塊生成會用到的內部類別，避免 hot-deploy 覆蓋 JAR 後
+        // ClassLoader 的 ZipFile 已關閉而觸發 "zip file closed" 崩服。
+        static {
+            // noinspection ResultOfMethodCallIgnored — 觸發 class loading 即可
+            PlanetTerrainProfile.class.getName();
+            PlanetSurfaceColumn.class.getName();
+            PlanetBiomeProvider.class.getName();
+        }
+
         private final String planetId;
 
         private PlanetChunkGenerator(final PlanetDefinition definition) {
@@ -6493,6 +6937,64 @@ public final class PlanetService {
                             chunkData.setBlock(localX, y, localZ, column.fluidMaterial());
                         }
                     }
+                    // ── 迷宮走道地板：噪點替換地表方塊，營造詭譎氛圍 ──
+                    // 僅在 labyrinth 星球、The Glade 外且非牆壁位置套用
+                    if ("labyrinth".equals(this.planetId)
+                            && !(Math.abs(worldX) <= GLADE_HALF && Math.abs(worldZ) <= GLADE_HALF)
+                            && !isStaticMazeWall(seed, worldX, worldZ)) {
+                        final int floorY = column.surfaceY();
+                        final long floorHash = mazeBorderHash(seed, worldX, 0, worldZ, floorY);
+                        final int floorRoll = (int) (floorHash & 0x7F);
+                        final Material floorMat;
+                        // 主調：潮濕破損深板岩，點綴菌絲、靈魂沙、骸骨、凋零玫瑰苗床
+                        // 採集物（SCULK/MOSS_BLOCK）降至原本一半 / 三分之一，減少玩家採集負荷
+                        if (floorRoll < 2) {
+                            floorMat = Material.SOUL_SAND;
+                        } else if (floorRoll < 4) {
+                            floorMat = Material.SOUL_SOIL;
+                        } else if (floorRoll < 6) {
+                            floorMat = Material.MYCELIUM;
+                        } else if (floorRoll < 7) {
+                            floorMat = Material.SCULK;           // 1/128 (原 2/128) 減半
+                        } else if (floorRoll < 9) {
+                            floorMat = Material.BONE_BLOCK;
+                        } else if (floorRoll < 11) {
+                            floorMat = Material.MOSS_BLOCK;      // 2/128 (原 6/128) 降至三分之一
+                        } else if (floorRoll < 24) {
+                            floorMat = Material.MOSSY_COBBLESTONE;
+                        } else if (floorRoll < 32) {
+                            floorMat = Material.CRACKED_DEEPSLATE_TILES;
+                        } else if (floorRoll < 44) {
+                            floorMat = Material.COBBLED_DEEPSLATE;
+                        } else if (floorRoll < 56) {
+                            floorMat = Material.DEEPSLATE_TILES;
+                        } else if (floorRoll < 72) {
+                            floorMat = Material.CRACKED_DEEPSLATE_BRICKS;
+                        } else {
+                            floorMat = Material.DEEPSLATE_BRICKS;
+                        }
+                        chunkData.setBlock(localX, floorY, localZ, floorMat);
+                        // 次表層也弄髒：3 層向下填充深板岩變體
+                        final long subHash = floorHash >>> 8;
+                        for (int depth = 1; depth <= 3; depth++) {
+                            final int y = floorY - depth;
+                            if (y <= minY) break;
+                            final Material subMat = ((subHash >>> (depth * 3)) & 0x7L) == 0
+                                    ? Material.COBBLED_DEEPSLATE
+                                    : Material.DEEPSLATE;
+                            chunkData.setBlock(localX, y, localZ, subMat);
+                        }
+                        // 稀疏地表裝飾：約 1.2% 機率放置植被（從 3.1% 降低至 ~1/3）
+                        final long decoHash = mazeBorderHash(seed, worldX, worldZ, floorY, 0xBEEF);
+                        final int decoRoll = (int) (decoHash & 0xFF);
+                        if (decoRoll == 0) {
+                            chunkData.setBlock(localX, floorY + 1, localZ, Material.DEAD_BUSH);
+                        } else if (decoRoll == 1) {
+                            chunkData.setBlock(localX, floorY + 1, localZ, Material.WITHER_ROSE);
+                        } else if (decoRoll == 2) {
+                            chunkData.setBlock(localX, floorY + 1, localZ, Material.COBWEB);
+                        }
+                    }
                     // 迷宮牆壁：labyrinth 星球在平坦地面上生成高聳迷宮城牆
                     if ("labyrinth".equals(this.planetId) && isStaticMazeWall(seed, worldX, worldZ)) {
                         final int floorY = column.surfaceY();
@@ -6520,17 +7022,45 @@ public final class PlanetService {
                                 wallMat = Material.CHISELED_DEEPSLATE;
                             } else if (relY >= 95) {
                                 wallMat = Material.POLISHED_DEEPSLATE;
-                            } else if (relY <= 5) {
-                                wallMat = Material.DEEPSLATE;
+                            } else if (relY <= 3) {
+                                // 基底：苔蘚與深板岩斑駁（MOSS_BLOCK 為採集物，降至 1/16）
+                                final long baseHash = mazeBorderHash(seed, worldX, y, worldZ, relY * 3);
+                                wallMat = (baseHash & 0xF) == 0 ? Material.MOSS_BLOCK
+                                        : (baseHash & 0x7) == 1 ? Material.MOSSY_COBBLESTONE
+                                        : Material.DEEPSLATE;
                             } else {
-                                // 中段隨機變化：苔蘚、磚瓦、裂痕
+                                // 中段多重噪點變化：採集物（MOSS/SCULK）降至原本四分之一，避免牆面被玩家當採集礦洞
                                 final long vineHash = mazeBorderHash(seed, worldX, y, worldX ^ y, worldZ);
-                                wallMat = (vineHash & 0xF) == 0 ? Material.MOSS_BLOCK
-                                        : (vineHash & 0xF) == 1 ? Material.DEEPSLATE_TILES
-                                        : (vineHash & 0x1F) < 3 ? Material.COBBLED_DEEPSLATE
-                                        : Material.DEEPSLATE_BRICKS;
+                                final int roll = (int) (vineHash & 0x3F);
+                                if (roll == 0) {
+                                    wallMat = Material.MOSS_BLOCK;   // 1/64 (原 2/64)
+                                } else if (roll == 1) {
+                                    wallMat = Material.SCULK;        // 1/64 (原 2/64)
+                                } else if (roll == 4) {
+                                    wallMat = Material.BONE_BLOCK;
+                                } else if (roll == 5) {
+                                    wallMat = Material.SOUL_SOIL;
+                                } else if (roll < 8) {
+                                    wallMat = Material.CRACKED_DEEPSLATE_BRICKS;
+                                } else if (roll < 12) {
+                                    wallMat = Material.COBBLED_DEEPSLATE;
+                                } else if (roll < 16) {
+                                    wallMat = Material.DEEPSLATE_TILES;
+                                } else if (roll < 20) {
+                                    wallMat = Material.CRACKED_DEEPSLATE_TILES;
+                                } else {
+                                    wallMat = Material.DEEPSLATE_BRICKS;
+                                }
                             }
                             chunkData.setBlock(localX, y, localZ, wallMat);
+                        }
+                        // 中段稀疏放置發光苔蘚（避免完全黑暗），每 ~64 格一塊
+                        final long lightHash = mazeBorderHash(seed, worldX, worldZ, wallTop, 42);
+                        if ((lightHash & 0x3FL) == 0) {
+                            final int glowY = floorY + 20 + (int) ((lightHash >>> 6) & 0x1F);
+                            if (glowY < wallTop) {
+                                chunkData.setBlock(localX, glowY, localZ, Material.GLOW_LICHEN);
+                            }
                         }
                         // 門框頂部加靈魂火把
                         if (isGateFrame && isGladeGatePillarCorner(worldX, worldZ)) {
@@ -6541,14 +7071,9 @@ public final class PlanetService {
                     if ("labyrinth".equals(this.planetId)
                             && Math.abs(worldX) < GLADE_HALF - 2 && Math.abs(worldZ) < GLADE_HALF - 2) {
                         final int gladeFloor = column.surfaceY();
-                        // 中央篝火（5×5 石磚平台 + 火焰）
-                        if (Math.abs(worldX) <= 2 && Math.abs(worldZ) <= 2) {
-                            chunkData.setBlock(localX, gladeFloor, localZ, Material.STONE_BRICKS);
-                            if (worldX == 0 && worldZ == 0) {
-                                chunkData.setBlock(localX, gladeFloor + 1, localZ, Material.CAMPFIRE);
-                            } else if (Math.abs(worldX) == 2 && Math.abs(worldZ) == 2) {
-                                chunkData.setBlock(localX, gladeFloor + 1, localZ, Material.LANTERN);
-                            }
+                        // ═══ 中央古代電梯建築（11×11，|x|,|z|≤5）═══
+                        if (Math.abs(worldX) <= 5 && Math.abs(worldZ) <= 5) {
+                            buildAncientElevatorColumn(chunkData, localX, localZ, worldX, worldZ, gladeFloor);
                         } else {
                             // 基地地面材質
                             final long pathHash = mazeBorderHash(seed, worldX, 0, worldZ, 0);
@@ -6570,14 +7095,31 @@ public final class PlanetService {
                                     chunkData.setBlock(localX, gladeFloor + 1, localZ, Material.SOUL_LANTERN);
                                 }
                             } else if (dist >= GLADE_HALF - 8) {
-                                chunkData.setBlock(localX, gladeFloor, localZ,
-                                        (pathHash & 0x3) == 0 ? Material.COBBLED_DEEPSLATE : Material.DEEPSLATE);
-                            } else if ((pathHash & 0xF) == 0) {
-                                chunkData.setBlock(localX, gladeFloor, localZ, Material.POLISHED_DEEPSLATE);
-                            } else if ((pathHash & 0x7) < 2) {
-                                chunkData.setBlock(localX, gladeFloor, localZ, Material.CRACKED_STONE_BRICKS);
+                                // 外圈：破舊深板岩
+                                final int outerRoll = (int) (pathHash & 0x7);
+                                chunkData.setBlock(localX, gladeFloor, localZ, switch (outerRoll) {
+                                    case 0 -> Material.COBBLED_DEEPSLATE;
+                                    case 1 -> Material.DEEPSLATE_TILES;
+                                    case 2 -> Material.CRACKED_DEEPSLATE_TILES;
+                                    case 3 -> Material.MOSS_BLOCK;
+                                    default -> Material.DEEPSLATE;
+                                });
                             } else {
-                                chunkData.setBlock(localX, gladeFloor, localZ, Material.STONE_BRICKS);
+                                // 內區：隨機破損地板（亂一點）
+                                final int floorRoll = (int) (pathHash & 0xF);
+                                chunkData.setBlock(localX, gladeFloor, localZ, switch (floorRoll) {
+                                    case 0 -> Material.POLISHED_DEEPSLATE;
+                                    case 1, 2 -> Material.CRACKED_STONE_BRICKS;
+                                    case 3 -> Material.MOSSY_STONE_BRICKS;
+                                    case 4 -> Material.COBBLESTONE;
+                                    case 5 -> Material.DEEPSLATE_TILES;
+                                    case 6 -> Material.CRACKED_DEEPSLATE_BRICKS;
+                                    case 7 -> Material.MOSS_BLOCK;
+                                    case 8 -> Material.COBBLED_DEEPSLATE;
+                                    case 9 -> Material.DEEPSLATE_BRICKS;
+                                    case 10 -> Material.MOSSY_COBBLESTONE;
+                                    default -> Material.STONE_BRICKS;
+                                });
                             }
                             // 每 8 格放置燈籠
                             if (worldX % 8 == 0 && worldZ % 8 == 0 && dist < GLADE_HALF - 8
@@ -6625,7 +7167,8 @@ public final class PlanetService {
 
         @Override
         public boolean shouldGenerateMobs() {
-            return !"labyrinth".equals(this.planetId);
+            // labyrinth 需要生怪以營造詭譎氛圍，但關閉裝飾/結構/洞穴避免破壞迷宮
+            return true;
         }
 
         @Override
@@ -6639,10 +7182,10 @@ public final class PlanetService {
         private static final int MAZE_HALF_EXTENT = 490; // ~108 cells × 9 / 2
         private static final int GLADE_HALF = 50;         // 100×100 倖存者基地 (The Glade)
 
+        private static final int GATE_EXIT_HALF_WIDTH = 10;   // 門洞半寬（與 MazeService.GATE_HALF_WIDTH 同步）
+        private static final int GATE_EXIT_CORRIDOR_LEN = 45; // 門外保底走廊長度 (5 cells)，確保玩家能深入迷宮且不被困
+
         private static boolean isStaticMazeWall(final long seed, final int worldX, final int worldZ) {
-            if (Math.abs(worldX) > MAZE_HALF_EXTENT || Math.abs(worldZ) > MAZE_HALF_EXTENT) {
-                return false;
-            }
             // ── The Glade（倖存者基地 100×100）── 3 格厚圍牆
             if (Math.abs(worldX) <= GLADE_HALF && Math.abs(worldZ) <= GLADE_HALF) {
                 // 基地內部（距圍牆 3 格以上）
@@ -6651,6 +7194,24 @@ public final class PlanetService {
                 }
                 // 邊界牆（|x|=48~50 或 |z|=48~50）── 完全封閉，門由 MazeService 管理
                 return true;
+            }
+            // ── 門外保底走廊：四個方向各自向外延伸 27 格開放通道，避免玩家出門即死路 ──
+            // 走廊範圍：沿門的軸向 27 格，橫向 20 格（對應 GATE_WIDTH）
+            if (Math.abs(worldX) <= GATE_EXIT_HALF_WIDTH
+                    && worldZ > GLADE_HALF && worldZ <= GLADE_HALF + GATE_EXIT_CORRIDOR_LEN) {
+                return false; // 南門走廊
+            }
+            if (Math.abs(worldX) <= GATE_EXIT_HALF_WIDTH
+                    && worldZ < -GLADE_HALF && worldZ >= -GLADE_HALF - GATE_EXIT_CORRIDOR_LEN) {
+                return false; // 北門走廊
+            }
+            if (Math.abs(worldZ) <= GATE_EXIT_HALF_WIDTH
+                    && worldX > GLADE_HALF && worldX <= GLADE_HALF + GATE_EXIT_CORRIDOR_LEN) {
+                return false; // 東門走廊
+            }
+            if (Math.abs(worldZ) <= GATE_EXIT_HALF_WIDTH
+                    && worldX < -GLADE_HALF && worldX >= -GLADE_HALF - GATE_EXIT_CORRIDOR_LEN) {
+                return false; // 西門走廊
             }
             // ── 外部迷宮（3 格厚牆壁）──
             final int shifted = worldX + MAZE_HALF_EXTENT;
@@ -6719,6 +7280,113 @@ public final class PlanetService {
         }
 
         /**
+         * 倖存者基地中央的古代撤離點建築 — 11×11、7 格高、四面開門。
+         * 玩家站在中心 Reinforced Deepslate 上跳一下即可觸發撤離火箭，被送回進入迷宮前的位置。
+         * 內部角落放置一個 BARREL 作為「冒險者拾取物」虛擬倉庫（每玩家獨立視圖）。
+         */
+        /**
+         * 「時空錨點」撤離聖殿（11×11 開放式紀念碑，取代舊的封閉電梯塔）。
+         *
+         * <p>核心概念：不再是一間屋子，而是四柱托起一塊浮空石碑的開放廣場。
+         * 四角有高聳的雕花深板岩柱 + 頂部靈魂燈籠，把整個 Glade 中心化為明顯地標；
+         * 中心踏板仍維持原座標與材質，好讓 MazeService 的撤離觸發邏輯不需變動。</p>
+         *
+         * <p>關鍵座標（MazeService 依賴，禁止改動）：
+         * <ul>
+         *   <li>(0, floorY, 0) = REINFORCED_DEEPSLATE 撤離觸發踏板</li>
+         *   <li>(3, floorY+1, 3) = BARREL 冒險者拾取物倉庫</li>
+         * </ul>
+         * </p>
+         */
+        private static void buildAncientElevatorColumn(final ChunkGenerator.ChunkData data,
+                                                        final int localX,
+                                                        final int localZ,
+                                                        final int worldX,
+                                                        final int worldZ,
+                                                        final int floorY) {
+            final int ax = Math.abs(worldX);
+            final int az = Math.abs(worldZ);
+
+            // ── 地板：內圈撤離踏板 + 外圈深板岩磚 ──
+            final Material floorMat;
+            if (worldX == 0 && worldZ == 0) {
+                floorMat = Material.REINFORCED_DEEPSLATE;    // 撤離觸發中心（不可改）
+            } else if (ax <= 1 && az <= 1) {
+                floorMat = Material.SCULK;                    // 中央 3×3 踏板
+            } else if (ax == 2 && az == 2) {
+                floorMat = Material.CHISELED_DEEPSLATE;       // 踏板四角
+            } else if ((ax == 2 && az <= 2) || (az == 2 && ax <= 2)) {
+                floorMat = Material.POLISHED_DEEPSLATE;       // 踏板邊緣
+            } else if (ax <= 5 && az <= 5) {
+                // 廣場地磚：交錯紋路，越靠近中心越精緻
+                final int ringDist = Math.max(ax, az);
+                floorMat = switch (ringDist) {
+                    case 3 -> (ax + az) % 2 == 0 ? Material.DEEPSLATE_TILES : Material.DEEPSLATE_BRICKS;
+                    case 4 -> Material.CRACKED_DEEPSLATE_TILES;
+                    default -> Material.COBBLED_DEEPSLATE;
+                };
+            } else {
+                return;
+            }
+            data.setBlock(localX, floorY, localZ, floorMat);
+
+            // ── 四角石柱：|x|=|z|=4，從地面往上升 12 格，頂部靈魂燈 ──
+            final boolean isCornerPillar = ax == 4 && az == 4;
+            if (isCornerPillar) {
+                for (int y = floorY + 1; y <= floorY + 12; y++) {
+                    final int rel = y - floorY;
+                    final Material pillarMat;
+                    if (rel == 12) {
+                        pillarMat = Material.SOUL_LANTERN;
+                    } else if (rel == 11) {
+                        pillarMat = Material.CHISELED_DEEPSLATE;
+                    } else if (rel % 3 == 0) {
+                        pillarMat = Material.CHISELED_DEEPSLATE;
+                    } else {
+                        pillarMat = Material.POLISHED_DEEPSLATE;
+                    }
+                    data.setBlock(localX, y, localZ, pillarMat);
+                }
+                return;
+            }
+
+            // ── 頂部懸浮石碑：在 floorY+10，四角內延伸 3×3 區塊連接 ──
+            if (ax <= 4 && az <= 4 && ax >= 2 && az >= 2) {
+                // 頂部橫樑：連接四角柱的外圍框架 (|x|=4 或 |z|=4)
+                if (ax == 4 || az == 4) {
+                    data.setBlock(localX, floorY + 11, localZ, Material.DEEPSLATE_TILES);
+                    data.setBlock(localX, floorY + 12, localZ, Material.DEEPSLATE_TILE_SLAB);
+                }
+            }
+
+            // ── 中央靈魂火陣列：floorY+1 中心踩點上方 6 格處的裝飾火焰 ──
+            // 頂部 sculk catalyst 作為視覺標誌（不用 SHRIEKER，避免呼喚 Warden）
+            if (worldX == 0 && worldZ == 0) {
+                data.setBlock(localX, floorY + 6, localZ, Material.SOUL_FIRE);
+                data.setBlock(localX, floorY + 10, localZ, Material.SCULK_CATALYST);
+            }
+
+            // ── 中心踏板四角：floorY+1 靈魂燈（視覺引導玩家走到中心）──
+            if (ax == 2 && az == 2) {
+                data.setBlock(localX, floorY + 1, localZ, Material.SOUL_LANTERN);
+                return;
+            }
+
+            // ── 儲物倉庫桶（MazeService 依賴，禁止改動）──
+            if (worldX == 3 && worldZ == 3) {
+                data.setBlock(localX, floorY + 1, localZ, Material.BARREL);
+                return;
+            }
+
+            // ── 邊緣裝飾：|x|=3 或 |z|=3 的位置散放 sculk vein，呼應迷宮主題 ──
+            if ((ax == 3 && az <= 3) || (az == 3 && ax <= 3)) {
+                if ((worldX + worldZ) % 2 == 0) {
+                    data.setBlock(localX, floorY + 1, localZ, Material.SCULK_VEIN);
+                }
+            }
+        }
+
+        /**
          * 在 The Glade 內生成一間 5×5×4 的簡易小木屋。
          */
         private static void generateGladeHut(final ChunkGenerator.ChunkData data,
@@ -6765,9 +7433,9 @@ public final class PlanetService {
             if (parentAx == bx && parentAz == bz) {
                 return true;
             }
-            // 額外隨機通道 (~15%) 增加路線多樣性
+            // 額外隨機通道（~31%）大幅提升連通性，避免出現封閉死區困住玩家
             final long borderHash = mazeBorderHash(seed, ax, az, bx, bz);
-            return (borderHash & 0x1FL) < 5L;
+            return (borderHash & 0x1FL) < 10L;
         }
 
         private static int mazeCellDir(final long seed, final int cx, final int cz) {
@@ -6805,7 +7473,11 @@ public final class PlanetService {
                 case "nyx" -> climate > 0.3D ? Biome.END_HIGHLANDS : climate > -0.2D ? Biome.THE_END : Biome.SMALL_END_ISLANDS;
                 case "helion" -> climate > 0.34D ? Biome.BASALT_DELTAS : climate > -0.05D ? Biome.BADLANDS : Biome.DESERT;
                 case "tempest" -> climate > 0.3D ? Biome.WINDSWEPT_GRAVELLY_HILLS : climate > -0.08D ? Biome.SWAMP : Biome.MANGROVE_SWAMP;
-                case "labyrinth" -> climate > 0.25D ? Biome.DEEP_DARK : climate > -0.15D ? Biome.DARK_FOREST : Biome.LUSH_CAVES;
+                // DEEP_DARK 只在 shouldGenerateStructures() = true 時會生成 ancient city，
+                // 我們已經把迷途星的 structures 全部關掉，所以安全。
+                // 原本使用 DARK_FOREST 會讓 vanilla 在迷途星地表強制塞入 woodland mansion（拱門+石磚屋），
+                // 因此改用 DEEP_DARK，無原生結構、色調也貼合迷宮氛圍。
+                case "labyrinth" -> Biome.DEEP_DARK;
                 default -> Biome.PLAINS;
             };
         }
@@ -6818,7 +7490,7 @@ public final class PlanetService {
                 case "nyx" -> List.of(Biome.THE_END, Biome.END_HIGHLANDS, Biome.SMALL_END_ISLANDS);
                 case "helion" -> List.of(Biome.DESERT, Biome.BADLANDS, Biome.BASALT_DELTAS);
                 case "tempest" -> List.of(Biome.SWAMP, Biome.MANGROVE_SWAMP, Biome.WINDSWEPT_GRAVELLY_HILLS);
-                case "labyrinth" -> List.of(Biome.DEEP_DARK, Biome.DARK_FOREST, Biome.LUSH_CAVES);
+                case "labyrinth" -> List.of(Biome.DEEP_DARK);
                 default -> List.of(Biome.PLAINS);
             };
         }

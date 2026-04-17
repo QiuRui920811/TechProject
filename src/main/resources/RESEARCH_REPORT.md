@@ -1,4 +1,4 @@
-# TechProject 全 YAML 配方與機器研究報告
+# TechMC 全 YAML 配方與機器研究報告
 
 ---
 

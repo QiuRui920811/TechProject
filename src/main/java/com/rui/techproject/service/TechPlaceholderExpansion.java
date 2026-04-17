@@ -1,15 +1,15 @@
 package com.rui.techproject.service;
 
-import com.rui.techproject.TechProjectPlugin;
+import com.rui.techproject.TechMCPlugin;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public final class TechPlaceholderExpansion extends PlaceholderExpansion {
-    private final TechProjectPlugin plugin;
+    private final TechMCPlugin plugin;
 
-    public TechPlaceholderExpansion(final TechProjectPlugin plugin) {
+    public TechPlaceholderExpansion(final TechMCPlugin plugin) {
         this.plugin = plugin;
     }
 
@@ -56,6 +56,14 @@ public final class TechPlaceholderExpansion extends PlaceholderExpansion {
             case "achievements_total" -> String.valueOf(registry.allAchievements().size());
             case "items" -> String.valueOf(progressService.unlockedItemCount(uuid));
             case "machines" -> String.valueOf(progressService.unlockedMachineCount(uuid));
+            case "mana" -> {
+                final var mana = this.plugin.getManaService();
+                yield mana != null ? String.valueOf((int) mana.getCurrentMana(uuid)) : "0";
+            }
+            case "mana_max" -> {
+                final var mana = this.plugin.getManaService();
+                yield mana != null ? String.valueOf((int) mana.getMaxMana(uuid)) : "0";
+            }
             default -> null;
         };
     }

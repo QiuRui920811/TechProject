@@ -1,6 +1,6 @@
 package com.rui.techproject.util;
 
-import com.rui.techproject.TechProjectPlugin;
+import com.rui.techproject.TechMCPlugin;
 import com.rui.techproject.model.AcquisitionMode;
 import com.rui.techproject.model.ItemClass;
 import com.rui.techproject.model.MachineArchetype;
@@ -16,6 +16,8 @@ import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
+import org.bukkit.block.Block;
+import org.bukkit.block.Skull;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.inventory.ItemFlag;
@@ -53,7 +55,7 @@ public final class ItemFactoryUtil {
     private static final TextColor HIGH_TIER = TextColor.color(0xC58BFF);
     private static final TextColor SPECIAL_TIER = TextColor.color(0xFFD166);
 
-    private final TechProjectPlugin plugin;
+    private final TechMCPlugin plugin;
     private final NamespacedKey techItemKey;
     private final NamespacedKey machineKey;
     private final NamespacedKey machineEnergyKey;
@@ -66,12 +68,14 @@ public final class ItemFactoryUtil {
     private final NamespacedKey chickenSequencedKey;
     private final NamespacedKey chickenResourceKey;
     private final NamespacedKey chickenUsesKey;
+    private final NamespacedKey drawerStoredCountKey;
+    private final NamespacedKey drawerTemplateKey;
     private final TechRegistry registry;
     private final Map<String, GuiButtonDefinition> guiButtons = new LinkedHashMap<>();
     private final Map<String, GuiIconDefinition> guiIcons = new LinkedHashMap<>();
     private final Map<String, GuiPaneDefinition> guiPanes = new LinkedHashMap<>();
 
-    public ItemFactoryUtil(final TechProjectPlugin plugin, final TechRegistry registry) {
+    public ItemFactoryUtil(final TechMCPlugin plugin, final TechRegistry registry) {
         this.plugin = plugin;
         this.techItemKey = new NamespacedKey(plugin, "tech_item_id");
         this.machineKey = new NamespacedKey(plugin, "machine_id");
@@ -85,6 +89,8 @@ public final class ItemFactoryUtil {
         this.chickenSequencedKey = new NamespacedKey(plugin, "chicken_sequenced");
         this.chickenResourceKey = new NamespacedKey(plugin, "chicken_resource");
         this.chickenUsesKey = new NamespacedKey(plugin, "chicken_uses");
+        this.drawerStoredCountKey = new NamespacedKey(plugin, "drawer_stored_count");
+        this.drawerTemplateKey = new NamespacedKey(plugin, "drawer_template");
         this.registry = registry;
         this.loadGuiConfig();
     }
@@ -361,10 +367,9 @@ public final class ItemFactoryUtil {
     }
 
     public ItemStack buildMachineItem(final MachineDefinition definition, final long storedEnergy) {
-        final boolean hasItemModel = definition.itemModel() != null && !definition.itemModel().isBlank() && !definition.itemModel().trim().equals("-1");
-        final ItemStack stack = hasItemModel
-                ? this.resolveBaseItem(definition.blockMaterial(), null, definition.headTexture())
-                : this.resolveBaseItem(definition.blockMaterial(), definition.nexoId(), definition.headTexture());
+        // 機器物品必須使用方塊材質作為基底，否則 Nexo 物品（如 PAPER）無法放置。
+        // nexo-id 只用於放置後的 ItemDisplay 覆蓋外觀（見 spawnNexoMachineDisplay）。
+        final ItemStack stack = this.resolveBaseItem(definition.blockMaterial(), null, definition.headTexture());
         final ItemMeta meta = stack.getItemMeta();
         this.applyMachineMeta(meta, definition, storedEnergy);
         if (storedEnergy > 0L) {
@@ -418,6 +423,36 @@ public final class ItemFactoryUtil {
         }
     }
 
+    /**
+     * 將指定的 head-texture 套用到世界中的 PLAYER_HEAD / PLAYER_WALL_HEAD 方塊。
+     * 用途：修正「放置後 SkullMeta profile 沒有正確傳遞到方塊 state，導致變成史蒂夫」的 bug。
+     * 非 head 方塊或空貼圖會直接略過，不會丟錯。
+     */
+    public boolean applyHeadTextureToBlock(final Block block, final String headTexture) {
+        if (block == null || headTexture == null || headTexture.isBlank()) {
+            return false;
+        }
+        if (block.getType() != Material.PLAYER_HEAD && block.getType() != Material.PLAYER_WALL_HEAD) {
+            return false;
+        }
+        if (!(block.getState() instanceof Skull skull)) {
+            return false;
+        }
+        final URL skinUrl = this.normalizeHeadTextureUrl(headTexture);
+        if (skinUrl == null) {
+            return false;
+        }
+        try {
+            final PlayerProfile profile = Bukkit.createPlayerProfile(UUID.nameUUIDFromBytes(headTexture.getBytes(java.nio.charset.StandardCharsets.UTF_8)));
+            profile.getTextures().setSkin(skinUrl);
+            skull.setOwnerProfile(profile);
+            skull.update(true, false);
+            return true;
+        } catch (final IllegalArgumentException ignored) {
+            return false;
+        }
+    }
+
     private URL normalizeHeadTextureUrl(final String texture) {
         if (texture == null || texture.isBlank()) {
             return null;
@@ -444,6 +479,10 @@ public final class ItemFactoryUtil {
     }
 
     private ItemStack tryBuildNexoItem(final String nexoId) {
+        return this.tryBuildNexoItemPublic(nexoId);
+    }
+
+    public ItemStack tryBuildNexoItemPublic(final String nexoId) {
         if (nexoId == null || nexoId.isBlank() || Bukkit.getPluginManager().getPlugin("Nexo") == null) {
             return null;
         }
@@ -468,7 +507,8 @@ public final class ItemFactoryUtil {
                 } catch (final NoSuchMethodException ignored) {
                 }
             }
-        } catch (final ReflectiveOperationException ignored) {
+        } catch (final ReflectiveOperationException ex) {
+            this.plugin.getLogger().warning("[Nexo] Reflection error for " + nexoId + ": " + ex.getMessage());
         }
         return null;
     }
@@ -569,6 +609,7 @@ public final class ItemFactoryUtil {
             case DIAMOND_BLOCK -> Material.DIAMOND;
             case EMERALD_BLOCK -> Material.EMERALD;
             case LAPIS_BLOCK -> Material.LAPIS_LAZULI;
+            case LODESTONE -> Material.LODESTONE; // 古代祭壇需要實際可放置
             case REDSTONE_BLOCK -> Material.REDSTONE;
             case COPPER_BLOCK -> Material.COPPER_INGOT;
             case NETHERITE_BLOCK -> Material.NETHERITE_INGOT;
@@ -747,6 +788,69 @@ public final class ItemFactoryUtil {
 
     public boolean hasLogisticsWrenchTag(final ItemStack stack) {
         return "logistics_wrench".equalsIgnoreCase(this.getTechItemId(stack));
+    }
+
+    // ── Hazmat 防護衣（輻射系統） ──────────────────────────
+
+    /**
+     * 建構 Hazmat 防護衣四件套中的指定部位。
+     * 使用染色皮甲（黃色）+ 不可堆疊 + tech item id 標記，
+     * 配合 {@link com.rui.techproject.service.RadiationService} 的全套判定。
+     */
+    public ItemStack buildHazmatPiece(final String slotId) {
+        final Material mat;
+        final String displayName;
+        switch (slotId) {
+            case "hazmat_helmet" -> { mat = Material.LEATHER_HELMET; displayName = "◆ Hazmat 防護頭盔"; }
+            case "hazmat_chestplate" -> { mat = Material.LEATHER_CHESTPLATE; displayName = "◆ Hazmat 防護胸甲"; }
+            case "hazmat_leggings" -> { mat = Material.LEATHER_LEGGINGS; displayName = "◆ Hazmat 防護護腿"; }
+            case "hazmat_boots" -> { mat = Material.LEATHER_BOOTS; displayName = "◆ Hazmat 防護靴"; }
+            default -> throw new IllegalArgumentException("unknown hazmat slot: " + slotId);
+        }
+        final ItemStack stack = new ItemStack(mat);
+        final ItemMeta meta = stack.getItemMeta();
+        meta.displayName(this.warning(displayName));
+        meta.lore(List.of(
+                this.muted("具備輻射防護塗層的特化防具。"),
+                this.success("四件套齊全時：完全阻擋輻射吸收"),
+                this.secondary("僅穿部分：每件提供 20% 輻射減免"),
+                this.warning("每次抵擋輻射會消耗耐久 1"),
+                this.muted("合成配方：鉛板 + 防護纖維")
+        ));
+        // 染色：螢光黃
+        if (meta instanceof org.bukkit.inventory.meta.LeatherArmorMeta leather) {
+            leather.setColor(org.bukkit.Color.fromRGB(0xFDE047));
+        }
+        meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES, ItemFlag.HIDE_DYE);
+        meta.getPersistentDataContainer().set(this.techItemKey, PersistentDataType.STRING, slotId);
+        meta.getPersistentDataContainer().set(this.dataVersionKey, PersistentDataType.INTEGER,
+                this.currentItemDataVersion());
+        stack.setItemMeta(meta);
+        return stack;
+    }
+
+    // ── GEO Scanner ─────────────────────────────────────────
+
+    public ItemStack buildGeoScanner() {
+        final ItemStack stack = new ItemStack(Material.CLOCK);
+        final ItemMeta meta = stack.getItemMeta();
+        meta.displayName(this.warning("◆ 地質掃描儀"));
+        meta.lore(List.of(
+                this.muted("右鍵：掃描腳下 chunk 的地質資源"),
+                this.secondary("掃描結果不會改變資源存量"),
+                this.muted("部署地質抽取機才能抽取"),
+                this.muted("合成配方：循跡手環 ＋ 石英 ＋ 鐵板")
+        ));
+        meta.addItemFlags(org.bukkit.inventory.ItemFlag.HIDE_ATTRIBUTES);
+        meta.getPersistentDataContainer().set(this.techItemKey, PersistentDataType.STRING, "geo_scanner");
+        meta.getPersistentDataContainer().set(this.dataVersionKey, PersistentDataType.INTEGER,
+                this.currentItemDataVersion());
+        stack.setItemMeta(meta);
+        return stack;
+    }
+
+    public boolean isGeoScanner(final ItemStack stack) {
+        return "geo_scanner".equalsIgnoreCase(this.getTechItemId(stack));
     }
 
     // ── 基因雞工程 ─────────────────────────────────────────
@@ -1290,7 +1394,8 @@ public final class ItemFactoryUtil {
         if (material != null) {
             return this.displayNameForMaterial(material);
         }
-        return this.humanize(id);
+        // 嚴禁回傳英文 — 未對照一律顯示「未分類」
+        return "未分類";
     }
 
     public String displayNameForMaterial(final Material material) {
@@ -1473,7 +1578,82 @@ public final class ItemFactoryUtil {
             case STONE_PRESSURE_PLATE -> "石製壓力板";
             case WRITABLE_BOOK -> "書與筆";
             case WRITTEN_BOOK -> "成書";
-            default -> this.humanize(material.name());
+            // ── 常見原版素材補齊 ──
+            case GRAVEL -> "礫石";
+            case SAND -> "沙子";
+            case RED_SAND -> "紅沙";
+            case DIRT -> "泥土";
+            case CLAY -> "黏土";
+            case STONE -> "石頭";
+            case SMOOTH_STONE -> "平滑石";
+            case STONE_BRICKS -> "石磚";
+            case DEEPSLATE -> "深板岩";
+            case TUFF -> "凝灰岩";
+            case CALCITE -> "方解石";
+            case DRIPSTONE_BLOCK -> "鐘乳石方塊";
+            case BLACKSTONE -> "黑石";
+            case NETHERRACK -> "地獄石";
+            case SOUL_SAND -> "靈魂砂";
+            case SOUL_SOIL -> "靈魂土";
+            case BASALT -> "玄武岩";
+            case GLOWSTONE -> "螢光石";
+            case ANCIENT_DEBRIS -> "遠古乏餘碎片";
+            case NETHERITE_SCRAP -> "獄髓碎片";
+            case CHARCOAL -> "木炭";
+            case SUGAR_CANE -> "甘蔗";
+            case SUGAR -> "糖";
+            case CACTUS -> "仙人掌";
+            case KELP -> "海帶";
+            case DRIED_KELP -> "乾海帶";
+            case DRIED_KELP_BLOCK -> "乾海帶方塊";
+            case PUMPKIN -> "南瓜";
+            case MELON -> "西瓜";
+            case POTATO -> "馬鈴薯";
+            case CARROT -> "胡蘿蔔";
+            case BEETROOT -> "甜菜";
+            case SWEET_BERRIES -> "甜莓";
+            case GLOW_BERRIES -> "螢光莓";
+            case APPLE -> "蘋果";
+            case EGG -> "蛋";
+            case GOLD_BLOCK -> "金方塊";
+            case EMERALD_ORE -> "綠寶石礦石";
+            case GOLD_ORE -> "金礦石";
+            case DIAMOND_ORE -> "鑽石礦石";
+            case COAL_ORE -> "煤礦石";
+            case LAPIS_ORE -> "青金石礦石";
+            case REDSTONE_ORE -> "紅石礦石";
+            case BUCKET -> "桶";
+            case ARROW -> "箭";
+            case BOW -> "弓";
+            case SHIELD -> "盾牌";
+            case COMPASS -> "指南針";
+            case CLOCK -> "時鐘";
+            case MAP -> "地圖";
+            case TNT -> "TNT";
+            case RAIL -> "鐵軌";
+            case POWERED_RAIL -> "動力鐵軌";
+            case DETECTOR_RAIL -> "感測鐵軌";
+            case ACTIVATOR_RAIL -> "啟動鐵軌";
+            case MINECART -> "礦車";
+            case LEVER -> "控制桿";
+            case TORCH -> "火把";
+            case LADDER -> "梯子";
+            case LANTERN -> "燈籠";
+            case SPYGLASS -> "望遠鏡";
+            case HEART_OF_THE_SEA -> "海洋之心";
+            case ICE -> "冰";
+            case SNOW_BLOCK -> "雪方塊";
+            case DISPENSER -> "發射器";
+            case TRIPWIRE_HOOK -> "絆線鈎";
+            case STONE_BUTTON -> "石製按鈕";
+            case HEAVY_WEIGHTED_PRESSURE_PLATE -> "重質測重壓力板";
+            case LIGHT_WEIGHTED_PRESSURE_PLATE -> "輕質測重壓力板";
+            case BLACK_STAINED_GLASS_PANE -> "黑色玻璃片";
+            case WHITE_STAINED_GLASS_PANE -> "白色玻璃片";
+            case BLAZE_ROD -> "烈焰棒";
+            case GHAST_TEAR -> "乖瓦斯特之淚";
+            case INK_SAC -> "墨囊";
+            default -> "未分類";
         };
     }
 
@@ -1492,7 +1672,7 @@ public final class ItemFactoryUtil {
                 }
             }
             if (!andTokens.isEmpty()) {
-                orGroups.add(String.join(" 並且 ", andTokens));
+                orGroups.add(String.join(" ＋ ", andTokens));
             }
         }
         return orGroups.isEmpty() ? this.displayNameForId(requirement) : String.join(" 或 ", orGroups);
@@ -1630,7 +1810,8 @@ public final class ItemFactoryUtil {
         if (resolved.chars().anyMatch(ch -> Character.UnicodeScript.of(ch) == Character.UnicodeScript.HAN)) {
             return resolved;
         }
-        return this.localizeInlineTerms(this.humanize(id));
+        // 最終保底：嚴禁輸出英文，未對照的鍵值一律顯示為「未分類」
+        return "未分類";
     }
 
     private String familyRoleLabel(final String key) {
@@ -1964,6 +2145,20 @@ public final class ItemFactoryUtil {
             case "power_generation" -> "發電";
             case "item_routing" -> "物品路由";
             case "item_buffering" -> "物品緩存";
+            // ── 補齊 tech-metadata 缺漏條目 ──
+            case "activation_key" -> "啟動密鑰";
+            case "boss_drop" -> "王怪掉落";
+            case "cuisine_ward" -> "佳餚庇護";
+            case "labyrinth_suit" -> "迷宮套裝";
+            case "maze_fragment" -> "迷宮碎片";
+            case "maze_relic" -> "迷宮遺物";
+            case "maze_tool" -> "迷宮工具";
+            case "maze_vine" -> "迷宮藤蔓";
+            case "maze_vine_seed" -> "迷宮藤種";
+            case "maze_weapon" -> "迷宮武器";
+            case "navigation" -> "導航";
+            case "passive_xp_research_gateway" -> "被動經驗研究閘道";
+            case "universal_crafting" -> "通用合成";
             default -> null;
         };
     }
@@ -2501,6 +2696,42 @@ public final class ItemFactoryUtil {
         return stored == null ? 0L : Math.max(0L, stored);
     }
 
+    public void setDrawerContents(final ItemStack machineStack, final ItemStack template, final int storedCount) {
+        if (machineStack == null || !machineStack.hasItemMeta()) return;
+        final ItemMeta meta = machineStack.getItemMeta();
+        final var pdc = meta.getPersistentDataContainer();
+        if (template != null && template.getType() != Material.AIR && storedCount > 0) {
+            pdc.set(this.drawerStoredCountKey, PersistentDataType.INTEGER, storedCount);
+            pdc.set(this.drawerTemplateKey, PersistentDataType.BYTE_ARRAY, template.serializeAsBytes());
+            // 在 lore 中顯示儲存內容
+            final String techId = this.getTechItemId(template);
+            final String itemName = techId != null ? this.displayNameForId(techId)
+                    : this.displayNameForMaterial(template.getType());
+            final List<Component> lore = meta.lore() != null ? new java.util.ArrayList<>(meta.lore()) : new java.util.ArrayList<>();
+            // 插入在底框 └ 之前
+            final int insertIdx = lore.size() - 1;
+            if (insertIdx >= 0) {
+                lore.add(insertIdx, this.colored("├─────────────────────────┤", MUTED));
+                lore.add(insertIdx + 1, this.colored("  ◆ 儲存物品：" + itemName, net.kyori.adventure.text.format.TextColor.color(0x7CFC9A)));
+                lore.add(insertIdx + 2, this.colored("  ◆ 數量：" + storedCount, net.kyori.adventure.text.format.TextColor.color(0x7CFC9A)));
+            }
+        }
+        machineStack.setItemMeta(meta);
+    }
+
+    public int getDrawerStoredCount(final ItemStack stack) {
+        if (stack == null || !stack.hasItemMeta()) return 0;
+        final Integer count = stack.getItemMeta().getPersistentDataContainer().get(this.drawerStoredCountKey, PersistentDataType.INTEGER);
+        return count == null ? 0 : Math.max(0, count);
+    }
+
+    public ItemStack getDrawerTemplate(final ItemStack stack) {
+        if (stack == null || !stack.hasItemMeta()) return null;
+        final byte[] data = stack.getItemMeta().getPersistentDataContainer().get(this.drawerTemplateKey, PersistentDataType.BYTE_ARRAY);
+        if (data == null || data.length == 0) return null;
+        return ItemStack.deserializeBytes(data);
+    }
+
     public String getGuiAction(final ItemStack stack) {
         if (stack == null || !stack.hasItemMeta()) {
             return null;
@@ -2618,6 +2849,11 @@ public final class ItemFactoryUtil {
     }
 
     private boolean refreshTechItemLore(final ItemStack stack, final TechItemDefinition definition, final int newVersion) {
+        // 修正底層材質（例如 IRON_NUGGET → IRON_INGOT）
+        final Material expectedType = definition.icon();
+        if (expectedType != null && stack.getType() != expectedType) {
+            stack.setType(expectedType);
+        }
         final ItemMeta meta = stack.getItemMeta();
         // 保留儲能
         final Long energy = meta.getPersistentDataContainer().get(this.techItemEnergyKey, PersistentDataType.LONG);
@@ -2788,6 +3024,13 @@ public final class ItemFactoryUtil {
             case "void_mirror" -> 120L;
             case "heal_beacon" -> 150L;
             case "portable_charger" -> 3000L;
+            // 異世界 RPG 武器
+            case "riftblade", "arcane_scepter" -> 140L;
+            case "frostfang_bow" -> 120L;
+            case "thunder_hammer" -> 160L;
+            // 迷途星 RPG 武器
+            case "maze_blade" -> 130L;
+            case "echo_crossbow" -> 110L;
             default -> 0L;
         };
     }

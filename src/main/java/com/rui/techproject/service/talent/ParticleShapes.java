@@ -375,6 +375,183 @@ public final class ParticleShapes {
     }
 
 
+
+    /**
+     * 弧線逐幀掃描：弧線在 ticks 內從一端逐漸繪製到另一端，前端有明亮「筆頭」。
+     */
+    public void animateArcSweep(final Location center, final float yaw,
+                                 final double radius, final double yOffset,
+                                 final double arcDeg, final double step,
+                                 final int ticks,
+                                 final Particle particle, final Particle.DustOptions dust,
+                                 final Particle.DustOptions headDust) {
+        final Location frozen = center.clone();
+        final double yawRad = Math.toRadians(yaw);
+        final double fx = -Math.sin(yawRad), fz = Math.cos(yawRad);
+        final double rx = Math.cos(yawRad), rz = Math.sin(yawRad);
+        final double arcRad = Math.toRadians(arcDeg);
+        final int totalPoints = Math.max(1, (int) (radius * arcRad / step));
+        for (int t = 0; t < ticks; t++) {
+            final int tick = t;
+            this.plugin.getSafeScheduler().runRegionDelayed(frozen, task -> {
+                final World w = frozen.getWorld();
+                if (w == null) return;
+                final int segStart = totalPoints * tick / ticks;
+                final int segEnd = Math.min(totalPoints, totalPoints * (tick + 1) / ticks);
+                for (int i = segStart; i <= segEnd; i++) {
+                    final double angle = -arcRad / 2.0 + arcRad * ((double) i / totalPoints);
+                    final double side = radius * Math.sin(angle);
+                    final double fwd = radius * Math.cos(angle);
+                    final Location p = new Location(w,
+                            frozen.getX() + rx * side + fx * fwd,
+                            frozen.getY() + yOffset,
+                            frozen.getZ() + rz * side + fz * fwd);
+                    final boolean isHead = i >= segEnd - 4;
+                    final Particle.DustOptions d = isHead && headDust != null ? headDust : dust;
+                    if (d != null) w.spawnParticle(particle, p, 1, 0, 0, 0, 0, d);
+                    else w.spawnParticle(particle, p, 1, 0, 0, 0, 0);
+                }
+            }, t);
+        }
+    }
+
+    /**
+     * 閃電逐幀爬行：鋸齒閃電從 from 逐漸蔓延到 to，前端有電火花。
+     */
+    public void animateLightningCrawl(final Location from, final Location to,
+                                       final int ticks, final double step,
+                                       final Particle particle,
+                                       final Particle.DustOptions dust,
+                                       final Particle.DustOptions headDust) {
+        final World w = from.getWorld();
+        if (w == null) return;
+        final Vector dir = to.toVector().subtract(from.toVector());
+        final double dist = dir.length();
+        if (dist <= 0) return;
+        final Vector normDir = dir.clone().normalize();
+        final Vector perp = Math.abs(normDir.getY()) < 0.9
+                ? normDir.clone().crossProduct(new Vector(0, 1, 0)).normalize()
+                : normDir.clone().crossProduct(new Vector(1, 0, 0)).normalize();
+        final Vector perp2 = normDir.clone().crossProduct(perp).normalize();
+        final double segLen = 0.5;
+        final int segments = Math.max(1, (int) (dist / segLen));
+        final Location[] path = new Location[segments + 1];
+        path[0] = from.clone();
+        for (int i = 1; i < segments; i++) {
+            final double t = (double) i / segments;
+            final double off1 = (Math.random() - 0.5) * 1.2;
+            final double off2 = (Math.random() - 0.5) * 0.6;
+            path[i] = from.clone().add(normDir.clone().multiply(t * dist))
+                    .add(perp.clone().multiply(off1)).add(perp2.clone().multiply(off2));
+        }
+        path[segments] = to.clone();
+        for (int t = 0; t < ticks; t++) {
+            final int tick = t;
+            this.plugin.getSafeScheduler().runRegionDelayed(from.clone(), task -> {
+                if (w.getPlayers().isEmpty()) return;
+                final int segStart = segments * tick / ticks;
+                final int segEnd = Math.min(segments, segments * (tick + 1) / ticks);
+                for (int i = segStart; i < segEnd; i++) {
+                    final boolean isHead = i >= segEnd - 2;
+                    final Particle.DustOptions d = isHead && headDust != null ? headDust : dust;
+                    line(path[i], path[i + 1], step, particle, d);
+                }
+                if (segEnd <= segments) {
+                    w.spawnParticle(Particle.ELECTRIC_SPARK, path[Math.min(segEnd, segments)],
+                            8, 0.12, 0.12, 0.12, 0.1);
+                }
+            }, t);
+        }
+    }
+
+    /**
+     * 閃電逐幀爬行（可控鋸齒幅度）：segLen 控制每段轉折長度，amplitude 控制左右偏移幅度。
+     * 幅度越大，鋸齒越明顯（圖片級閃電效果建議 segLen=1.5~2.5, amplitude=2.0~3.5）。
+     */
+    public void animateLightningCrawl(final Location from, final Location to,
+                                       final int ticks, final double step,
+                                       final double segLen, final double amplitude,
+                                       final Particle particle,
+                                       final Particle.DustOptions dust,
+                                       final Particle.DustOptions headDust) {
+        final World w = from.getWorld();
+        if (w == null) return;
+        final Vector dir = to.toVector().subtract(from.toVector());
+        final double dist = dir.length();
+        if (dist <= 0) return;
+        final Vector normDir = dir.clone().normalize();
+        final Vector perp = Math.abs(normDir.getY()) < 0.9
+                ? normDir.clone().crossProduct(new Vector(0, 1, 0)).normalize()
+                : normDir.clone().crossProduct(new Vector(1, 0, 0)).normalize();
+        final Vector perp2 = normDir.clone().crossProduct(perp).normalize();
+        final int segments = Math.max(1, (int) (dist / segLen));
+        final Location[] path = new Location[segments + 1];
+        path[0] = from.clone();
+        for (int i = 1; i < segments; i++) {
+            final double t = (double) i / segments;
+            final double off1 = (Math.random() - 0.5) * amplitude * 2;
+            final double off2 = (Math.random() - 0.5) * amplitude * 0.5;
+            path[i] = from.clone().add(normDir.clone().multiply(t * dist))
+                    .add(perp.clone().multiply(off1)).add(perp2.clone().multiply(off2));
+        }
+        path[segments] = to.clone();
+        for (int t = 0; t < ticks; t++) {
+            final int tick = t;
+            this.plugin.getSafeScheduler().runRegionDelayed(from.clone(), task -> {
+                if (w.getPlayers().isEmpty()) return;
+                final int segStart = segments * tick / ticks;
+                final int segEnd = Math.min(segments, segments * (tick + 1) / ticks);
+                for (int i = segStart; i < segEnd; i++) {
+                    final boolean isHead = i >= segEnd - 2;
+                    final Particle.DustOptions d = isHead && headDust != null ? headDust : dust;
+                    line(path[i], path[i + 1], step, particle, d);
+                }
+                if (segEnd <= segments) {
+                    w.spawnParticle(Particle.ELECTRIC_SPARK, path[Math.min(segEnd, segments)],
+                            12, 0.15, 0.15, 0.15, 0.12);
+                }
+            }, t);
+        }
+    }
+
+    /**
+     * 閃電鋸齒線：在 from 到 to 之間繪製隨機鋸齒的閃電效果。
+     */
+    public static void lightningBolt(final Location from, final Location to,
+                                      final double step,
+                                      final Particle particle, final Particle.DustOptions dust) {
+        final World w = from.getWorld();
+        if (w == null) return;
+        final Vector dir = to.toVector().subtract(from.toVector());
+        final double dist = dir.length();
+        if (dist <= 0) return;
+        dir.normalize();
+        final Vector perp = Math.abs(dir.getY()) < 0.9
+                ? dir.clone().crossProduct(new Vector(0, 1, 0)).normalize()
+                : dir.clone().crossProduct(new Vector(1, 0, 0)).normalize();
+        final Vector perp2 = dir.clone().crossProduct(perp).normalize();
+
+        Location current = from.clone();
+        final double segLen = 0.5;
+        final int segments = Math.max(1, (int) (dist / segLen));
+
+        for (int i = 0; i < segments; i++) {
+            Location next;
+            if (i == segments - 1) {
+                next = to.clone();
+            } else {
+                final double t = (i + 1.0) / segments;
+                final double off1 = (Math.random() - 0.5) * 1.2;
+                final double off2 = (Math.random() - 0.5) * 0.6;
+                next = from.clone().add(dir.clone().multiply(t * dist))
+                        .add(perp.clone().multiply(off1))
+                        .add(perp2.clone().multiply(off2));
+            }
+            line(current, next, step, particle, dust);
+            current = next;
+        }
+    }
+
     // ═══════════════════════════════════════════
     //  顏色 / Dust 便利方法
     // ═══════════════════════════════════════════

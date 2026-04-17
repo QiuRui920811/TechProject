@@ -1,6 +1,6 @@
 package com.rui.techproject.listener;
 
-import com.rui.techproject.TechProjectPlugin;
+import com.rui.techproject.TechMCPlugin;
 import com.rui.techproject.model.PlacedMachine;
 import io.papermc.paper.event.player.AsyncChatEvent;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
@@ -39,6 +39,7 @@ import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
+import org.bukkit.event.entity.EntityChangeBlockEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.entity.ProjectileHitEvent;
 import org.bukkit.event.hanging.HangingPlaceEvent;
@@ -102,10 +103,10 @@ public final class TechListener implements Listener {
 
     /** 右鍵會觸發原版行為的材質（末影珍珠、終界之眼、玻璃瓶） */
     private static final Set<Material> VANILLA_INTERACT_MATERIALS = Set.of(
-            Material.ENDER_PEARL, Material.ENDER_EYE, Material.GLASS_BOTTLE
+            Material.ENDER_PEARL, Material.ENDER_EYE, Material.GLASS_BOTTLE, Material.WIND_CHARGE
     );
 
-    private final TechProjectPlugin plugin;
+    private final TechMCPlugin plugin;
     private final Map<UUID, Long> grappleCooldowns = new ConcurrentHashMap<>();
     private final Map<UUID, Long> thrusterCooldowns = new ConcurrentHashMap<>();
     private final Map<UUID, Long> jetpackCooldowns = new ConcurrentHashMap<>();
@@ -120,13 +121,21 @@ public final class TechListener implements Listener {
     private final Map<UUID, Long> voidMirrorActive = new ConcurrentHashMap<>();
     private final Map<UUID, Long> seismicAxeCooldowns = new ConcurrentHashMap<>();
     private final Map<UUID, Long> wrenchCooldowns = new ConcurrentHashMap<>();
-    private final Set<Long> simulatingBreakThreads = ConcurrentHashMap.newKeySet();
+    /**
+     * 模擬 BlockBreakEvent 的執行緒 ID 集合 — 用於重入保護。
+     * 公開為 static 讓 SpellExecutor 等外部模組共用，避免模擬事件觸發 onBlockBreak 處理器。
+     */
+    public static final Set<Long> simulatingBreakThreads = ConcurrentHashMap.newKeySet();
     private static final String TECH_MAGNET = "tech_magnet";
     private static final double MAGNET_RANGE = 5.0;
 
     private static final Set<String> ARTIFACT_IDS = Set.of(
             "pulse_staff", "storm_staff", "gravity_staff", "warp_orb", "cryo_wand",
-            "plasma_lance", "void_mirror", "time_dilator", "heal_beacon", "entropy_scepter"
+            "plasma_lance", "void_mirror", "time_dilator", "heal_beacon", "entropy_scepter",
+            // 異世界線 RPG 武器
+            "riftblade", "frostfang_bow", "thunder_hammer", "arcane_scepter",
+            // 迷途星線 RPG 武器
+            "maze_blade", "echo_crossbow"
     );
 
     private static final Set<String> TALISMAN_IDS = Set.of(
@@ -135,7 +144,7 @@ public final class TechListener implements Listener {
             "talisman_farmer", "talisman_anvil", "talisman_heal", "talisman_whirlwind"
     );
 
-    public TechListener(final TechProjectPlugin plugin) {
+    public TechListener(final TechMCPlugin plugin) {
         this.plugin = plugin;
     }
 
@@ -169,12 +178,34 @@ public final class TechListener implements Listener {
         this.talismanCooldowns.remove(playerId);
         this.lastEquipmentTick.remove(playerId);
         this.magnetDisabled.remove(playerId);
+        this.voidMirrorActive.remove(playerId);
+        this.seismicAxeCooldowns.remove(playerId);
+        this.wrenchCooldowns.remove(playerId);
+        this.thornsProcessing.remove(playerId);
+        this.explorationDistance.remove(playerId);
+        // 清理該玩家的抓鉤箭矢 UUID（避免 chunk 卸載導致殘留）
+        this.grappleArrowOwners.values().removeIf(owner -> owner.equals(playerId));
         this.plugin.getMachineService().cleanupPlayer(playerId);
         this.plugin.getCookingService().cancelSession(playerId);
         this.plugin.getAchievementGuiService().clearState(playerId);
         this.plugin.getPlanetService().cleanupPlayer(playerId);
         this.plugin.getRegionService().cleanupPlayer(playerId);
+        this.plugin.getMazeService().onPlayerQuitCleanup(playerId);
+        this.plugin.getTitleMsgService().onPlayerQuit(playerId);
+        if (this.plugin.getTalentGuiService() != null) {
+            this.plugin.getTalentGuiService().clearPlayer(playerId);
+        }
         this.plugin.getPlayerProgressService().saveAndEvict(playerId);
+    }
+
+    // 新手引導：首次加入時顯示引導提示
+    @EventHandler(priority = EventPriority.MONITOR)
+    public void onJoinTutorial(final PlayerJoinEvent event) {
+        if (this.plugin.getTutorialChainService() != null) {
+            // 延遲 40 ticks 讓玩家完全加入後再顯示
+            this.plugin.getSafeScheduler().runGlobalDelayed(task ->
+                    this.plugin.getTutorialChainService().onPlayerJoin(event.getPlayer()), 40L);
+        }
     }
 
     @EventHandler(priority = EventPriority.MONITOR)
@@ -206,17 +237,37 @@ public final class TechListener implements Listener {
         }
     }
 
-    // ── 防止豬靈撿起科技物品（避免科技金錠觸發以物易物） ──
+    // ── 防止豬靈撿起科技物品 + 迷宮世界撿取攔截到冒險者倉庫 ──
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onEntityPickupItem(final org.bukkit.event.entity.EntityPickupItemEvent event) {
-        if (!(event.getEntity() instanceof org.bukkit.entity.Piglin)) {
+        // 豬靈：擋下科技金錠避免觸發以物易物
+        if (event.getEntity() instanceof org.bukkit.entity.Piglin) {
+            final ItemStack stack = event.getItem().getItemStack();
+            if (this.isTaggedTechMaterial(stack)) {
+                event.setCancelled(true);
+            }
             return;
         }
-        final ItemStack stack = event.getItem().getItemStack();
-        if (this.isTaggedTechMaterial(stack)) {
+        // 玩家在迷途星：攔截所有拾取，改入「冒險者拾取物」虛擬倉庫
+        if (event.getEntity() instanceof Player player
+                && this.plugin.getMazeService().isLabyrinthWorld(player.getWorld())) {
+            final ItemStack stack = event.getItem().getItemStack();
+            final boolean ok = this.plugin.getMazeService().depositToAdventurerStash(player, stack);
             event.setCancelled(true);
+            if (ok) {
+                event.getItem().remove();
+                player.playSound(player.getLocation(), Sound.ENTITY_ITEM_PICKUP, 0.4f, 1.3f);
+            } else {
+                // 倉庫已滿：每 5 秒提醒一次（用 cooldown stat 避免洗頻訊息較複雜，這邊直接送一次）
+                player.sendActionBar(net.kyori.adventure.text.Component.text(
+                        "冒險者拾取物已滿 (54)",
+                        net.kyori.adventure.text.format.TextColor.color(0xE8A36A)));
+            }
         }
     }
+
+    /** 探索經驗用：累計移動距離（方塊數），每 100 格給一次 XP */
+    private final java.util.Map<java.util.UUID, Double> explorationDistance = new java.util.concurrent.ConcurrentHashMap<>();
 
     @EventHandler(ignoreCancelled = true)
     public void onMove(final PlayerMoveEvent event) {
@@ -228,7 +279,29 @@ public final class TechListener implements Listener {
             this.plugin.getRegionService().onPlayerMove(event.getPlayer(), event.getTo());
             // 迷宮中心抵達任務
             this.plugin.getMazeService().checkCenterReach(event.getPlayer());
+            // Glade 邊界穿越偵測（進入迷宮時的震撼 title）
+            this.plugin.getMazeService().checkGladeBoundaryCrossing(event.getPlayer());
+            // 全域探索經驗：累計移動距離，每 100 格 +3 XP
+            if (this.plugin.getSkillService() != null
+                    && event.getPlayer().getGameMode() == GameMode.SURVIVAL) {
+                final double dx = event.getTo().getX() - event.getFrom().getX();
+                final double dz = event.getTo().getZ() - event.getFrom().getZ();
+                final double dist = Math.sqrt(dx * dx + dz * dz);
+                final double total = this.explorationDistance.merge(
+                        event.getPlayer().getUniqueId(), dist, Double::sum);
+                if (total >= 100.0) {
+                    this.explorationDistance.put(event.getPlayer().getUniqueId(),
+                            total - 100.0);
+                    this.plugin.getSkillService().grantXp(event.getPlayer(), "exploration", 3L);
+                }
+            }
         }
+    }
+
+    // ── 撤離點跳躍觸發 ──
+    @EventHandler(ignoreCancelled = true)
+    public void onPlayerJump(final com.destroystokyo.paper.event.player.PlayerJumpEvent event) {
+        this.plugin.getMazeService().checkExtractionTrigger(event.getPlayer());
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
@@ -382,6 +455,24 @@ public final class TechListener implements Listener {
         this.plugin.getPlanetService().handleChunkUnload(event.getChunk());
     }
 
+    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+    public void onGladeSafeZone(final CreatureSpawnEvent event) {
+        // Glade 內禁止生敵對怪物（動物允許）
+        if (!(event.getEntity() instanceof Monster)) {
+            return;
+        }
+        if (!this.plugin.getMazeService().isInsideGlade(event.getLocation())) {
+            return;
+        }
+        final CreatureSpawnEvent.SpawnReason reason = event.getSpawnReason();
+        if (reason == CreatureSpawnEvent.SpawnReason.CUSTOM
+                || reason == CreatureSpawnEvent.SpawnReason.COMMAND
+                || reason == CreatureSpawnEvent.SpawnReason.SPAWNER_EGG) {
+            return; // 允許玩家/指令召喚
+        }
+        event.setCancelled(true);
+    }
+
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onPlanetMobSpawn(final CreatureSpawnEvent event) {
         if (event.getSpawnReason() != CreatureSpawnEvent.SpawnReason.NATURAL
@@ -405,12 +496,29 @@ public final class TechListener implements Listener {
                 this.plugin.getMazeService().onMobKill(event.getEntity().getKiller());
             }
         }
+        // 新增：技能經驗 + 每日任務 + 排行榜 + 隨機事件
+        final Player killer = event.getEntity().getKiller();
+        if (killer != null) {
+            if (this.plugin.getSkillService() != null) {
+                this.plugin.getSkillService().grantXp(killer, "combat", 5L);
+            }
+            if (this.plugin.getDailyQuestService() != null) {
+                this.plugin.getDailyQuestService().onMobKill(killer);
+            }
+            if (this.plugin.getLeaderboardService() != null) {
+                this.plugin.getLeaderboardService().incrementKills(killer.getUniqueId(), 1L);
+            }
+            // 擊殺回魔：讓傳統 skill 行動能搭配施法循環
+            if (this.plugin.getManaService() != null) {
+                this.plugin.getManaService().restore(killer, 8.0);
+            }
+        }
     }
 
     // ── 星球世界限制：禁止設領地、設家、傳送 ──
     private static final Set<String> BLOCKED_PLANET_COMMANDS = Set.of(
             "res", "residence", "resadmin",
-            "sethome", "home", "huskhomes:sethome", "huskhomes:home",
+            "sethome", "huskhomes:sethome",
             "tpa", "tpaccept", "tpahere", "tpyes",
             "huskhomes:tpa", "huskhomes:tpaccept", "huskhomes:tpahere"
     );
@@ -438,6 +546,40 @@ public final class TechListener implements Listener {
     public void onInteractEntity(final PlayerInteractEntityEvent event) {
         if (event.getHand() != EquipmentSlot.HAND) {
             return;
+        }
+        // ── Nexo 家具互動 → 開啟機器界面 ──
+        final Entity clicked = event.getRightClicked();
+        if (clicked instanceof org.bukkit.entity.Interaction || clicked instanceof org.bukkit.entity.ItemDisplay) {
+            // ItemDisplay (techproject_display tag) 或 Interaction 實體 → 嘗試解析為機器方塊
+            if (clicked instanceof org.bukkit.entity.ItemDisplay && !clicked.getScoreboardTags().contains("techproject_display")) {
+                // 不是我們生成的 ItemDisplay，跳過
+            } else if (clicked instanceof org.bukkit.entity.Interaction && !clicked.getScoreboardTags().contains("techproject_hitbox")) {
+                // 不是我們生成的 Interaction hitbox，跳過
+            } else {
+                final Block block = clicked.getLocation().getBlock();
+                final Block machineBlock = this.plugin.getMachineService().resolveManagedMachineBlock(block);
+                if (machineBlock != null) {
+                    event.setCancelled(true);
+                    if (!this.plugin.getMachineService().canModifyMachine(event.getPlayer(), machineBlock, false)) {
+                        return;
+                    }
+                    // 扳手拆卸：蹲下+右鍵
+                    final ItemStack wrenchHand = event.getPlayer().getInventory().getItemInMainHand();
+                    if (event.getPlayer().isSneaking() && this.plugin.getItemFactory().hasWrenchTag(wrenchHand)) {
+                        final UUID wrenchUid = event.getPlayer().getUniqueId();
+                        final long now = System.currentTimeMillis();
+                        final Long lastWrench = this.wrenchCooldowns.get(wrenchUid);
+                        if (lastWrench != null && now - lastWrench < 500L) {
+                            return;
+                        }
+                        this.wrenchCooldowns.put(wrenchUid, now);
+                        this.handleWrenchDismantle(event.getPlayer(), machineBlock);
+                        return;
+                    }
+                    this.plugin.getMachineService().handleManagedMachineInteract(event.getPlayer(), machineBlock, block);
+                    return;
+                }
+            }
         }
         final Player player = event.getPlayer();
         final ItemStack hand = player.getInventory().getItemInMainHand();
@@ -482,8 +624,86 @@ public final class TechListener implements Listener {
         this.plugin.getPlayerProgressService().unlockByRequirement(player.getUniqueId(), "chicken_net");
     }
 
+    private void handleGeoScannerUse(final Player player) {
+        final com.rui.techproject.service.GeoResourceService geo = this.plugin.getGeoResourceService();
+        if (geo == null) return;
+        final org.bukkit.Chunk chunk = player.getLocation().getChunk();
+        final com.rui.techproject.service.GeoResourceService.GeoSnapshot snap = geo.peek(chunk);
+        geo.markScanned(chunk);
+        player.getWorld().playSound(player.getLocation(), Sound.BLOCK_BEACON_ACTIVATE, 0.35f, 1.6f);
+        final int[] rgb = snap.type().rgb();
+        final org.bukkit.Particle.DustOptions dust = new org.bukkit.Particle.DustOptions(
+                org.bukkit.Color.fromRGB(rgb[0], rgb[1], rgb[2]), 1.6f);
+        // 在 chunk 四角噴出彩色粒子柱作為視覺提示
+        final int cx = chunk.getX() << 4;
+        final int cz = chunk.getZ() << 4;
+        final double y = player.getLocation().getY();
+        for (int i = 0; i <= 16; i += 4) {
+            player.spawnParticle(org.bukkit.Particle.DUST, cx + 0.5 + i, y + 1.2, cz + 0.5, 2, 0, 0.25, 0, dust);
+            player.spawnParticle(org.bukkit.Particle.DUST, cx + 0.5 + i, y + 1.2, cz + 15.5, 2, 0, 0.25, 0, dust);
+            player.spawnParticle(org.bukkit.Particle.DUST, cx + 0.5, y + 1.2, cz + 0.5 + i, 2, 0, 0.25, 0, dust);
+            player.spawnParticle(org.bukkit.Particle.DUST, cx + 15.5, y + 1.2, cz + 0.5 + i, 2, 0, 0.25, 0, dust);
+        }
+        // 訊息
+        final net.kyori.adventure.text.format.TextColor typeColor = snap.isDepleted()
+                ? net.kyori.adventure.text.format.NamedTextColor.GRAY
+                : net.kyori.adventure.text.format.TextColor.color(rgb[0], rgb[1], rgb[2]);
+        player.sendMessage(net.kyori.adventure.text.Component.text("◆ 地質掃描 ", net.kyori.adventure.text.format.NamedTextColor.AQUA)
+                .append(net.kyori.adventure.text.Component.text("區塊 [" + chunk.getX() + ", " + chunk.getZ() + "]",
+                        net.kyori.adventure.text.format.NamedTextColor.GRAY)));
+        player.sendMessage(net.kyori.adventure.text.Component.text("  類型：", net.kyori.adventure.text.format.NamedTextColor.GRAY)
+                .append(net.kyori.adventure.text.Component.text(snap.type().displayName(), typeColor)));
+        if (!snap.isDepleted()) {
+            player.sendMessage(net.kyori.adventure.text.Component.text("  剩餘：" + snap.remaining() + " / " + snap.initial(),
+                    net.kyori.adventure.text.format.NamedTextColor.WHITE));
+            player.sendMessage(net.kyori.adventure.text.Component.text("  → 部署 GEO 抽取機以開始生產",
+                    net.kyori.adventure.text.format.NamedTextColor.DARK_GRAY));
+        } else {
+            player.sendMessage(net.kyori.adventure.text.Component.text("  此地層已枯竭，請往其他區塊勘探",
+                    net.kyori.adventure.text.format.NamedTextColor.DARK_GRAY));
+        }
+        this.plugin.getPlayerProgressService().incrementStat(player.getUniqueId(), "geo_scanned", 1);
+        this.plugin.getPlayerProgressService().unlockByRequirement(player.getUniqueId(), "geo_scanner");
+    }
+
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onInteract(final PlayerInteractEvent event) {
+        // ── 冒險者拾取物倉庫桶：右鍵開啟專屬虛擬 GUI（唯讀） ──
+        if (event.getAction() == Action.RIGHT_CLICK_BLOCK
+                && event.getClickedBlock() != null
+                && event.getClickedBlock().getType() == Material.BARREL
+                && this.plugin.getMazeService().isAdventurerStashBlock(event.getClickedBlock().getLocation())) {
+            event.setCancelled(true);
+            this.plugin.getMazeService().openAdventurerStash(event.getPlayer());
+            return;
+        }
+        // ── 多方塊結構合成：右鍵發射器 → 偵測結構並合成 ──
+        if (event.getAction() == Action.RIGHT_CLICK_BLOCK
+                && event.getClickedBlock() != null
+                && event.getClickedBlock().getType() == Material.DISPENSER
+                && this.plugin.getMultiblockCraftingService() != null
+                && this.plugin.getMultiblockCraftingService().tryCraft(event.getPlayer(), event.getClickedBlock())) {
+            event.setCancelled(true);
+            return;
+        }
+        // ── 地質掃描儀：右鍵 → 勘探腳下區塊 ──
+        if ((event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK)
+                && event.getItem() != null
+                && this.plugin.getItemFactory().isGeoScanner(event.getItem())) {
+            event.setCancelled(true);
+            this.handleGeoScannerUse(event.getPlayer());
+            return;
+        }
+        // ── 古代祭壇：右鍵 Lodestone 核心 → 嘗試啟動儀式 ──
+        if (event.getAction() == Action.RIGHT_CLICK_BLOCK
+                && event.getClickedBlock() != null
+                && this.plugin.getAltarService() != null
+                && this.plugin.getAltarService().isAltarCore(event.getClickedBlock())) {
+            if (this.plugin.getAltarService().onAltarInteract(event.getPlayer(), event.getClickedBlock())) {
+                event.setCancelled(true);
+                return;
+            }
+        }
         // ── 區域選取工具 ──
         if (event.getItem() != null && event.getItem().hasItemMeta()
                 && event.getItem().getItemMeta().getPersistentDataContainer().has(
@@ -524,7 +744,7 @@ public final class TechListener implements Listener {
                     return;
                 }
             }
-            // ── 科技扳手：左鍵機器 → 關機 ──
+            // ── 科技扳手：左鍵機器 → 切換開/關機 ──
             if (event.getAction() == Action.LEFT_CLICK_BLOCK && leftStack != null
                     && this.plugin.getItemFactory().hasWrenchTag(leftStack)
                     && event.getClickedBlock() != null) {
@@ -534,9 +754,31 @@ public final class TechListener implements Listener {
                     if (!this.plugin.getMachineService().canModifyMachine(event.getPlayer(), wrenchBlock, false)) {
                         return;
                     }
-                    this.plugin.getMachineService().setMachineEnabled(wrenchBlock, false);
-                    event.getPlayer().sendActionBar(this.plugin.getItemFactory().warning("⚙ 機器已暫停"));
-                    event.getPlayer().playSound(event.getPlayer().getLocation(), Sound.BLOCK_LEVER_CLICK, 0.6f, 0.8f);
+                    final PlacedMachine wrenchPm = this.plugin.getMachineService().placedMachineAt(wrenchBlock);
+                    if (wrenchPm != null) {
+                        final boolean newEnabled = !wrenchPm.enabled();
+                        this.plugin.getMachineService().setMachineEnabled(wrenchBlock, newEnabled);
+                        event.getPlayer().sendActionBar(newEnabled
+                                ? this.plugin.getItemFactory().success("⚙ 機器已啟動")
+                                : this.plugin.getItemFactory().warning("⚙ 機器已暫停"));
+                        event.getPlayer().playSound(event.getPlayer().getLocation(), Sound.BLOCK_LEVER_CLICK, 0.6f, newEnabled ? 1.2f : 0.8f);
+                        if (this.plugin.getTutorialChainService() != null) {
+                            this.plugin.getTutorialChainService().onWrenchToggle(event.getPlayer());
+                        }
+                    }
+                    return;
+                }
+            }
+            // ── BARRIER Nexo 機器：左鍵 → 拆除機器（BARRIER 無法正常挖掘） ──
+            if (event.getAction() == Action.LEFT_CLICK_BLOCK && event.getClickedBlock() != null
+                    && event.getClickedBlock().getType() == Material.BARRIER) {
+                final Block barrierMachine = this.plugin.getMachineService().resolveManagedMachineBlock(event.getClickedBlock());
+                if (barrierMachine != null) {
+                    event.setCancelled(true);
+                    if (!this.plugin.getMachineService().canModifyMachine(event.getPlayer(), barrierMachine, true)) {
+                        return;
+                    }
+                    this.handleWrenchDismantle(event.getPlayer(), barrierMachine);
                     return;
                 }
             }
@@ -634,7 +876,12 @@ public final class TechListener implements Listener {
             return;
         }
         // 便攜工具優先處理：不受其他插件 DENY 影響
-        if (this.handlePortableCrafter(event) || this.handlePortableDustbin(event)) {
+        if (this.handlePortableCrafter(event) || this.handlePortableDustbin(event) || this.handleTechBackpack(event)) {
+            return;
+        }
+        // 機動工具（脈衝推進器／向量抓鉤）優先處理：右鍵空氣時 useInteractedBlock 預設為 DENY，
+        // 若等到下方 DENY 檢查會被直接 return，導致空氣右鍵永遠無法觸發。
+        if (this.tryUseVectorGrapple(event) || this.tryUsePulseThruster(event)) {
             return;
         }
         if (event.useInteractedBlock() == Result.DENY || event.useItemInHand() == Result.DENY) {
@@ -660,7 +907,7 @@ public final class TechListener implements Listener {
             return;
         }
         // 互動烹調：右鍵營火/煙燻/高爐並手持食物
-        if (event.getClickedBlock() != null && event.getHand() == EquipmentSlot.HAND
+        if (event.getClickedBlock() != null && event.getHand() == EquipmentSlot.HAND && !earlyMachineDeny
                 && this.plugin.getCookingService().isCookingStation(event.getClickedBlock().getType())) {
             if (this.plugin.getCookingService().tryStartCooking(event.getPlayer(), event.getClickedBlock())) {
                 event.setUseInteractedBlock(Result.DENY);
@@ -751,11 +998,21 @@ public final class TechListener implements Listener {
             event.setCancelled(true);
             return;
         }
+        final BlockFace dir = event.getDirection();
         for (final Block pushed : event.getBlocks()) {
             if (this.isProtectedTechBlock(pushed)) {
                 event.setCancelled(true);
                 return;
             }
+            // 也檢查推送目的地方塊，防止普通方塊被推入科技方塊位置
+            if (this.isProtectedTechBlock(pushed.getRelative(dir))) {
+                event.setCancelled(true);
+                return;
+            }
+        }
+        // 活塞臂伸出位置
+        if (this.isProtectedTechBlock(event.getBlock().getRelative(dir))) {
+            event.setCancelled(true);
         }
     }
 
@@ -765,11 +1022,25 @@ public final class TechListener implements Listener {
             event.setCancelled(true);
             return;
         }
+        final BlockFace dir = event.getDirection();
         for (final Block pulled : event.getBlocks()) {
             if (this.isProtectedTechBlock(pulled)) {
                 event.setCancelled(true);
                 return;
             }
+            // 檢查拉動目的地，防止方塊被拉入科技方塊位置
+            if (this.isProtectedTechBlock(pulled.getRelative(dir))) {
+                event.setCancelled(true);
+                return;
+            }
+        }
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    public void onEntityChangeBlock(final EntityChangeBlockEvent event) {
+        // 阻止安德、末影龍、羊（吃草）等生物把科技方塊變成別的方塊
+        if (this.isProtectedTechBlock(event.getBlock())) {
+            event.setCancelled(true);
         }
     }
 
@@ -839,6 +1110,67 @@ public final class TechListener implements Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onInventoryClick(final InventoryClickEvent event) {
+        // ── 冒險者拾取物倉庫：唯讀，阻止任何操作 ──
+        if (event.getView().getTopInventory().getHolder()
+                instanceof com.rui.techproject.service.AdventurerStashHolder) {
+            event.setCancelled(true);
+            return;
+        }
+        // ── 新系統 GUI：技能 / 任務 / 排行榜（一律阻止拿取，只處理按鈕點擊） ──
+        final Object topHolder = event.getView().getTopInventory().getHolder();
+        if (topHolder instanceof com.rui.techproject.service.SkillService.SkillMenuHolder
+                || topHolder instanceof com.rui.techproject.service.SkillService.SkillDetailHolder) {
+            event.setCancelled(true);
+            if (event.getWhoClicked() instanceof Player sp
+                    && event.getRawSlot() >= 0
+                    && event.getRawSlot() < event.getView().getTopInventory().getSize()) {
+                final boolean right = event.getClick().isRightClick();
+                this.plugin.getSkillService().handleClick(sp, event.getRawSlot(), topHolder, right);
+            }
+            return;
+        }
+        // ── 天賦樹 GUI（單樹可拖動大畫布） ──
+        if (topHolder instanceof com.rui.techproject.service.talent.TalentGuiService.TalentTreeHolder) {
+            event.setCancelled(true);
+            if (event.getWhoClicked() instanceof Player tp
+                    && event.getRawSlot() >= 0
+                    && event.getRawSlot() < event.getView().getTopInventory().getSize()) {
+                final boolean right = event.getClick().isRightClick();
+                final boolean shift = event.getClick().isShiftClick();
+                this.plugin.getTalentGuiService().handleClick(tp, event.getRawSlot(), topHolder,
+                        right, shift);
+            }
+            return;
+        }
+        if (topHolder instanceof com.rui.techproject.service.DailyQuestService.QuestMenuHolder) {
+            event.setCancelled(true);
+            if (event.getWhoClicked() instanceof Player qp
+                    && event.getRawSlot() >= 0
+                    && event.getRawSlot() < event.getView().getTopInventory().getSize()) {
+                this.plugin.getDailyQuestService().handleClick(qp, event.getRawSlot());
+            }
+            return;
+        }
+        if (topHolder instanceof com.rui.techproject.service.LeaderboardService.LeaderboardHolder lbHolder) {
+            event.setCancelled(true);
+            if (event.getWhoClicked() instanceof Player lp
+                    && event.getRawSlot() >= 0
+                    && event.getRawSlot() < event.getView().getTopInventory().getSize()) {
+                this.plugin.getLeaderboardService().handleClick(lp, event.getRawSlot(), lbHolder.category);
+            }
+            return;
+        }
+        // ── 異界傳送門 GUI：取消任何移動，只處理按鈕點擊 ──
+        if (event.getView().getTopInventory().getHolder()
+                instanceof com.rui.techproject.service.OtherworldPortalHolder) {
+            event.setCancelled(true);
+            if (event.getWhoClicked() instanceof Player otherworldPlayer
+                    && event.getRawSlot() >= 0
+                    && event.getRawSlot() < event.getView().getTopInventory().getSize()) {
+                this.plugin.getPlanetService().handleOtherworldPortalMenuClick(otherworldPlayer, event.getRawSlot());
+            }
+            return;
+        }
         if (this.handleProtectedWorkbenchResultClick(event)) {
             return;
         }
@@ -915,6 +1247,16 @@ public final class TechListener implements Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onInventoryDrag(final InventoryDragEvent event) {
+        if (event.getView().getTopInventory().getHolder()
+                instanceof com.rui.techproject.service.AdventurerStashHolder) {
+            event.setCancelled(true);
+            return;
+        }
+        if (event.getView().getTopInventory().getHolder()
+                instanceof com.rui.techproject.service.OtherworldPortalHolder) {
+            event.setCancelled(true);
+            return;
+        }
         final String title = PlainTextComponentSerializer.plainText().serialize(event.getView().title());
         final boolean bookViewOpen = this.plugin.getTechBookService().isBookInventory(event.getView().getTopInventory());
         if (this.plugin.getPlanetService().isPlanetaryGateView(title)) {
@@ -1020,6 +1362,10 @@ public final class TechListener implements Listener {
             this.plugin.getItemSearchService().clearState(player.getUniqueId());
         }
         final String title = PlainTextComponentSerializer.plainText().serialize(event.getView().title());
+        // 科技背包：關閉時儲存內容到物品 PDC
+        if (title.equals("科技背包") && event.getPlayer() instanceof Player player && this.hasOpenBackpack(player.getUniqueId())) {
+            this.saveBackpackOnClose(player, event.getInventory());
+        }
         // 便攜垃圾桶：關閉時清空所有內容
         if (title.startsWith("便攜垃圾桶")) {
             event.getInventory().clear();
@@ -1047,7 +1393,8 @@ public final class TechListener implements Listener {
         final String techItemId = this.plugin.getItemFactory().getTechItemId(event.getItemInHand());
         final String machineId = this.plugin.getItemFactory().getMachineId(event.getItemInHand());
         if (this.plugin.getPlanetService().isPlanetWorld(event.getBlockPlaced().getWorld())
-                && !"planetary_gate".equalsIgnoreCase(machineId)) {
+                && !"planetary_gate".equalsIgnoreCase(machineId)
+                && !"planetary_harvester".equalsIgnoreCase(machineId)) {
             event.setCancelled(true);
             event.getPlayer().sendActionBar(this.plugin.getItemFactory().warning("星球地表禁止建造，這裡只能探勘、採集與戰鬥。"));
             event.getPlayer().playSound(event.getBlockPlaced().getLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 0.35f, 0.7f);
@@ -1110,6 +1457,35 @@ public final class TechListener implements Listener {
         if (this.simulatingBreakThreads.contains(Thread.currentThread().getId())) {
             return;
         }
+        // 採集技能經驗 + 每日任務進度 — 排除科技機器與科技方塊（防止拆放洗經驗）
+        if (event.getPlayer() != null && event.getPlayer().getGameMode() == GameMode.SURVIVAL) {
+            final boolean isTechBlock = this.plugin.getMachineService().resolveManagedMachineBlock(event.getBlock()) != null
+                    || this.plugin.getPlacedTechBlockService().isTrackedBlock(event.getBlock());
+            if (!isTechBlock) {
+                if (this.plugin.getSkillService() != null) {
+                    this.plugin.getSkillService().grantXp(event.getPlayer(), "gathering", 1L);
+                }
+                if (this.plugin.getDailyQuestService() != null) {
+                    this.plugin.getDailyQuestService().onBlockMine(event.getPlayer());
+                }
+                // 挖礦回魔：小額補充，避免掛機刷方塊過於誇張
+                if (this.plugin.getManaService() != null) {
+                    this.plugin.getManaService().restore(event.getPlayer(), 0.5);
+                }
+            }
+        }
+        // 礦脈連鎖：下一鎬觸發 BFS 連挖（不含原方塊，原方塊由原版事件處理）
+        if (event.getPlayer() != null && this.plugin.getSpellExecutor() != null) {
+            final Block broken = event.getBlock();
+            final Material brokenType = broken.getType();
+            final String bName = brokenType.name();
+            if ((bName.endsWith("_ORE") || "ANCIENT_DEBRIS".equals(bName) || "NETHER_QUARTZ_ORE".equals(bName))
+                    && this.plugin.getSpellExecutor().consumeVeinChain(event.getPlayer().getUniqueId())) {
+                // 立即 BFS 鄰居（原方塊還在，BFS 內會跳過已訪問的）
+                final Player bp = event.getPlayer();
+                this.plugin.getSpellExecutor().executeVeinChain(bp, broken);
+            }
+        }
         // 互動烹調：破壞烹調中的方塊會中斷烹調
         this.plugin.getCookingService().interruptByBlockBreak(event.getBlock());
         final Block managedMachine = this.plugin.getMachineService().resolveManagedMachineBlock(event.getBlock());
@@ -1127,7 +1503,7 @@ public final class TechListener implements Listener {
         this.handleTalismanFarmer(event);
         if (this.handleFieldSickle(event) || this.handleCustomCropBreak(event)
                 || this.handleExplosivePickaxe(event) || this.handleVeinMiningPickaxe(event)
-                || this.handleSmeltersPickaxe(event)) {
+                || this.handleSmeltersPickaxe(event) || this.handleLumberAxe(event)) {
             return;
         }
         final Block protectedMachine = isRigComponent ? null : managedMachine;
@@ -2126,6 +2502,14 @@ public final class TechListener implements Listener {
         arrow.setVelocity(player.getLocation().getDirection().multiply(3.5));
         arrow.setPickupStatus(AbstractArrow.PickupStatus.DISALLOWED);
         arrow.setGravity(true);
+        // 防止記憶體洩漏：超過 200 個殘留箭矢 UUID 時清理最舊的
+        if (this.grappleArrowOwners.size() > 200) {
+            final var it = this.grappleArrowOwners.entrySet().iterator();
+            while (it.hasNext() && this.grappleArrowOwners.size() > 100) {
+                it.next();
+                it.remove();
+            }
+        }
         this.grappleArrowOwners.put(arrow.getUniqueId(), player.getUniqueId());
         this.startCooldown(this.grappleCooldowns, player.getUniqueId(), 1200L);
 
@@ -2379,6 +2763,19 @@ public final class TechListener implements Listener {
         }
         if (broken > 0) {
             this.plugin.getPlayerProgressService().incrementStat(player.getUniqueId(), "blocks_mined", broken);
+            // 額外破壞的方塊也要給採集經驗 + 推進每日挖礦任務
+            // （原點方塊在 onBlockBreak 頂部已經計過 1 次，這裡補 broken-1 次）
+            final int extras = broken - 1;
+            if (extras > 0 && player.getGameMode() == GameMode.SURVIVAL) {
+                if (this.plugin.getSkillService() != null) {
+                    this.plugin.getSkillService().grantXp(player, "gathering", extras);
+                }
+                if (this.plugin.getDailyQuestService() != null) {
+                    for (int i = 0; i < extras; i++) {
+                        this.plugin.getDailyQuestService().onBlockMine(player);
+                    }
+                }
+            }
             origin.getWorld().playSound(origin.getLocation(), Sound.ENTITY_GENERIC_EXPLODE, 0.4f, 1.4f);
             this.damageToolInHand(player, broken);
         }
@@ -2436,6 +2833,7 @@ public final class TechListener implements Listener {
         }
         if (broken > 0) {
             this.plugin.getPlayerProgressService().incrementStat(player.getUniqueId(), "blocks_mined", broken);
+            // 注意：礦脈鎬連鎖方塊「不」額外給採集經驗，只算原點那 1 顆，避免刷經驗
             origin.getWorld().playSound(origin.getLocation(), Sound.BLOCK_STONE_BREAK, 0.6f, 1.2f);
             player.sendActionBar(this.plugin.getItemFactory().success("礦脈鎬連鎖開採 " + broken + " 塊！"));
             this.damageToolInHand(player, broken);
@@ -2514,6 +2912,60 @@ public final class TechListener implements Listener {
             case ANCIENT_DEBRIS -> Material.NETHERITE_SCRAP;
             default -> null;
         };
+    }
+
+    // ── 伐木斧：BFS 連鎖砍倒整棵樹 ──
+    private boolean handleLumberAxe(final BlockBreakEvent event) {
+        final ItemStack tool = event.getPlayer().getInventory().getItemInMainHand();
+        if (!"lumber_axe".equalsIgnoreCase(this.plugin.getItemFactory().getTechItemId(tool))) {
+            return false;
+        }
+        final Block origin = event.getBlock();
+        if (!this.isLogBlock(origin.getType())) {
+            return false;
+        }
+        final Player player = event.getPlayer();
+        event.setCancelled(true);
+        event.setDropItems(false);
+        final Material logType = origin.getType();
+        final java.util.List<Block> tree = new java.util.ArrayList<>();
+        final java.util.List<Block> frontier = new java.util.ArrayList<>();
+        final java.util.Set<String> visited = new java.util.HashSet<>();
+        frontier.add(origin);
+        while (!frontier.isEmpty() && tree.size() < 128) {
+            final Block current = frontier.remove(0);
+            final String key = current.getX() + ":" + current.getY() + ":" + current.getZ();
+            if (!visited.add(key)) continue;
+            if (!this.isLogBlock(current.getType())) continue;
+            if (current != origin && !this.canModifyBlock(player, current)) continue;
+            if (this.plugin.getMachineService().resolveManagedMachineBlock(current) != null) continue;
+            tree.add(current);
+            // 搜索上方 + 四周（原木通常往上長，也可能有分支）
+            for (final int[] offset : new int[][]{{0,1,0},{0,-1,0},{1,0,0},{-1,0,0},{0,0,1},{0,0,-1},{1,1,0},{-1,1,0},{0,1,1},{0,1,-1}}) {
+                frontier.add(current.getWorld().getBlockAt(current.getX()+offset[0], current.getY()+offset[1], current.getZ()+offset[2]));
+            }
+        }
+        int broken = 0;
+        for (final Block block : tree) {
+            for (final ItemStack drop : block.getDrops(tool, player)) {
+                block.getWorld().dropItemNaturally(block.getLocation().add(0.5, 0.4, 0.5), drop);
+            }
+            block.getWorld().spawnParticle(Particle.BLOCK, block.getLocation().add(0.5, 0.5, 0.5), 6, 0.2, 0.2, 0.2, block.getBlockData());
+            block.setType(Material.AIR, true);
+            broken++;
+        }
+        if (broken > 0) {
+            this.plugin.getPlayerProgressService().incrementStat(player.getUniqueId(), "blocks_mined", broken);
+            origin.getWorld().playSound(origin.getLocation(), Sound.BLOCK_WOOD_BREAK, 0.7f, 0.8f);
+            player.sendActionBar(this.plugin.getItemFactory().success("伐木斧連鎖砍伐 " + broken + " 根原木！"));
+            this.damageToolInHand(player, broken);
+        }
+        return true;
+    }
+
+    private boolean isLogBlock(final Material material) {
+        final String name = material.name();
+        return name.endsWith("_LOG") || name.endsWith("_STEM") || name.endsWith("_WOOD") || name.endsWith("_HYPHAE");
     }
 
     private void refreshJetpackFlightState(final Player player) {
@@ -2631,9 +3083,9 @@ public final class TechListener implements Listener {
                 : this.plugin.getItemFactory().buildMachineItem(match.machine());
         event.setCancelled(true);
         if (event.isShiftClick()) {
-            // Shift-click：持續合成直到材料不足或背包滿
+            // Shift-click：持續合成直到材料不足或背包滿（上限 64 次防無限迴圈）
             int crafted = 0;
-            while (true) {
+            while (crafted < 64) {
                 final ItemStack batchResult = match.isItemBlueprint()
                         ? this.plugin.getItemFactory().buildTechItem(match.item())
                         : this.plugin.getItemFactory().buildMachineItem(match.machine());
@@ -2643,9 +3095,7 @@ public final class TechListener implements Listener {
                     }
                     break;
                 }
-                player.getInventory().addItem(batchResult);
-                crafted++;
-                // 消耗材料
+                // 先消耗材料，再給物品（防止複製）
                 final ItemStack[] mat = craftingInventory.getMatrix();
                 for (int i = 0; i < mat.length; i++) {
                     final ItemStack ing = mat[i];
@@ -2654,6 +3104,12 @@ public final class TechListener implements Listener {
                     else { ing.setAmount(ing.getAmount() - 1); mat[i] = ing; }
                 }
                 craftingInventory.setMatrix(mat);
+                // 材料已消耗，給予成品（處理溢出）
+                final java.util.Map<Integer, ItemStack> overflow = player.getInventory().addItem(batchResult);
+                for (final ItemStack leftover : overflow.values()) {
+                    player.getWorld().dropItemNaturally(player.getLocation(), leftover);
+                }
+                crafted++;
                 // 檢查剩餘材料是否還能匹配配方
                 final var next = this.plugin.getBlueprintService().matchCraftingMatrix(craftingInventory.getMatrix());
                 if (next == null || !this.plugin.getBlueprintService().isAdvancedWorkbench(craftingInventory.getLocation())) {
@@ -2886,6 +3342,24 @@ public final class TechListener implements Listener {
         }
         this.applyEquipmentDamageReduction(player, event);
         this.handleTalismanOnDamage(player, event);
+        this.handleQuickReactionTalent(player);
+    }
+
+    /**
+     * 快速反應天賦（探索樹 MINOR_RIGHT_R）：受到傷害時獲得迅捷 I，每級 2 秒。
+     * 原為被動爆擊率，改成主動觸發型以契合「反應」的概念。
+     */
+    private void handleQuickReactionTalent(final Player player) {
+        final com.rui.techproject.service.talent.TalentService talent =
+                this.plugin.getTalentService();
+        if (talent == null) return;
+        final int rank = talent.getRank(player.getUniqueId(),
+                com.rui.techproject.service.SkillService.Skill.EXPLORATION,
+                com.rui.techproject.service.talent.TalentSlot.MINOR_RIGHT_R);
+        if (rank <= 0) return;
+        final int durationTicks = rank * 2 * 20; // 每級 2 秒
+        player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED,
+                durationTicks, 0, true, true, true));
     }
 
     /**
@@ -2908,15 +3382,100 @@ public final class TechListener implements Listener {
         }
     }
 
+    // ── Nexo 機器 Interaction hitbox 被攻擊（左鍵）：扳手切換 / 蹲下拆除 ──
+    @EventHandler(priority = EventPriority.LOW, ignoreCancelled = false)
+    public void onHitboxAttack(final EntityDamageByEntityEvent event) {
+        if (!(event.getDamager() instanceof Player player)) return;
+        if (!(event.getEntity() instanceof org.bukkit.entity.Interaction interaction)) return;
+        if (!interaction.getScoreboardTags().contains("techproject_hitbox")) return;
+        event.setCancelled(true);
+        final Block block = interaction.getLocation().getBlock();
+        final Block machineBlock = this.plugin.getMachineService().resolveManagedMachineBlock(block);
+        if (machineBlock == null) return;
+        if (!this.plugin.getMachineService().canModifyMachine(player, machineBlock, false)) return;
+        final ItemStack hand = player.getInventory().getItemInMainHand();
+        // 扳手左鍵 → 切換開/關機
+        if (this.plugin.getItemFactory().hasWrenchTag(hand)) {
+            final PlacedMachine pm = this.plugin.getMachineService().placedMachineAt(machineBlock);
+            if (pm != null) {
+                final boolean newEnabled = !pm.enabled();
+                this.plugin.getMachineService().setMachineEnabled(machineBlock, newEnabled);
+                player.sendActionBar(newEnabled
+                        ? this.plugin.getItemFactory().success("⚙ 機器已啟動")
+                        : this.plugin.getItemFactory().warning("⚙ 機器已暫停"));
+                player.playSound(player.getLocation(), Sound.BLOCK_LEVER_CLICK, 0.6f, newEnabled ? 1.2f : 0.8f);
+            }
+            return;
+        }
+        // 左鍵攻擊 hitbox → 拆除機器（BARRIER 無法正常挖掘）
+        if (!this.plugin.getMachineService().canModifyMachine(player, machineBlock, true)) return;
+        this.handleWrenchDismantle(player, machineBlock);
+    }
+
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onEntityDamageByEntity(final EntityDamageByEntityEvent event) {
         if (event.getDamager() instanceof Player attacker) {
             this.handleTalismanOnAttack(attacker, event);
             this.handleVampireBlade(attacker, event);
+            // 全域戰鬥經驗：對怪物造成傷害 +1
+            if (event.getEntity() instanceof org.bukkit.entity.Monster
+                    && this.plugin.getSkillService() != null) {
+                this.plugin.getSkillService().grantXp(attacker, "combat", 1L);
+            }
+            // ── 套用屬性系統：力量加成 + 暴擊率/暴擊傷害 ──
+            if (event.getEntity() instanceof LivingEntity victim
+                    && this.plugin.getSkillService() != null) {
+                final double baseDmg = event.getDamage();
+                final com.rui.techproject.service.SkillService sk = this.plugin.getSkillService();
+                final java.util.UUID uuid = attacker.getUniqueId();
+                final double strength = sk.getStatValue(uuid, com.rui.techproject.service.SkillService.Stat.STRENGTH);
+                final double critChance = sk.getStatValue(uuid, com.rui.techproject.service.SkillService.Stat.CRIT_CHANCE);
+                final double critDamage = sk.getStatValue(uuid, com.rui.techproject.service.SkillService.Stat.CRIT_DAMAGE);
+                // 力量加成
+                double finalDmg = baseDmg * (1.0 + strength / 100.0);
+                // 影襲必爆擊判定
+                final boolean shadowCrit = this.plugin.getSpellExecutor() != null
+                        && this.plugin.getSpellExecutor().consumeShadowCrit(uuid);
+                final boolean isCrit = shadowCrit || Math.random() * 100.0 < critChance;
+                if (isCrit) {
+                    finalDmg *= (1.0 + critDamage / 100.0);
+                }
+                event.setDamage(finalDmg);
+                // 浮動傷害數字
+                final double displayDmg = finalDmg;
+                final String text = (isCrit ? "✦ " : "♥ ")
+                        + String.format("%.1f", displayDmg);
+                final net.kyori.adventure.text.format.TextColor color = isCrit
+                        ? net.kyori.adventure.text.format.TextColor.color(0xFF8800)
+                        : net.kyori.adventure.text.format.TextColor.color(0xFF4444);
+                final net.kyori.adventure.text.Component comp =
+                        net.kyori.adventure.text.Component.text(text, color)
+                                .decoration(net.kyori.adventure.text.format.TextDecoration.BOLD, isCrit)
+                                .decoration(net.kyori.adventure.text.format.TextDecoration.ITALIC, false);
+                com.rui.techproject.util.FloatingTextUtil.spawnAbove(
+                        victim.getEyeLocation(), comp,
+                        isCrit ? 0.6f : 0.45f,
+                        this.plugin.getSafeScheduler());
+                // 暴擊音效回饋
+                if (isCrit) {
+                    attacker.playSound(attacker.getLocation(), org.bukkit.Sound.ENTITY_PLAYER_ATTACK_CRIT,
+                            org.bukkit.SoundCategory.PLAYERS, 0.6f, 1.2f);
+                }
+            }
         }
-        if (event.getEntity() instanceof Player victim && event.getDamager() instanceof LivingEntity) {
+        if (event.getEntity() instanceof Player victim && event.getDamager() instanceof LivingEntity attk) {
             this.handleTalismanWhirlwind(victim);
             this.handleEquipmentThorns(victim, event);
+            // 止水：反射傷害
+            if (this.plugin.getSpellExecutor() != null
+                    && this.plugin.getSpellExecutor().isDeadCalmActive(victim.getUniqueId())) {
+                final double reflectDmg = event.getDamage() * 0.5;
+                if (!attk.equals(victim)) {
+                    this.plugin.getSafeScheduler().runEntity(attk, () -> attk.damage(reflectDmg, victim));
+                    attk.getWorld().spawnParticle(Particle.ENCHANTED_HIT,
+                            attk.getLocation().add(0, 1, 0), 12, 0.3, 0.5, 0.3, 0.1);
+                }
+            }
         }
         // 虛空之鏡 — 反彈投射物
         if (event.getEntity() instanceof Player victim && event.getDamager() instanceof Projectile projectile) {
@@ -3043,6 +3602,7 @@ public final class TechListener implements Listener {
         this.handleTalismanPassiveChecks(player);
         this.handleMagnetTick(player);
         this.handlePortableChargerTick(player);
+        this.handleSolarHelmetTick(player);
     }
 
     private boolean tryUseArtifact(final PlayerInteractEvent event) {
@@ -3196,6 +3756,190 @@ public final class TechListener implements Listener {
                 loc.getWorld().playSound(loc, Sound.ENTITY_WITHER_AMBIENT, 0.7f, 1.3f);
                 loc.getWorld().spawnParticle(Particle.SMOKE, loc.add(0, 1, 0), 30, 3, 1.5, 3, 0.03);
             }
+            // ═══ 異世界 RPG 武器技能 ═══
+            case "riftblade" -> {
+                // 裂空斬：扇形能量波，劈開 6 格內的敵人
+                final Vector dir = player.getEyeLocation().getDirection().setY(0).normalize();
+                final Location origin = player.getEyeLocation();
+                for (int i = 1; i <= 6; i++) {
+                    final Location point = origin.clone().add(dir.clone().multiply(i));
+                    for (double offset = -1.5; offset <= 1.5; offset += 0.3) {
+                        final Vector side = new Vector(-dir.getZ(), 0, dir.getX()).multiply(offset);
+                        final Location particlePt = point.clone().add(side);
+                        particlePt.getWorld().spawnParticle(Particle.SWEEP_ATTACK, particlePt, 1, 0, 0, 0, 0);
+                        particlePt.getWorld().spawnParticle(Particle.END_ROD, particlePt, 2, 0.05, 0.05, 0.05, 0.01);
+                    }
+                    for (final Entity entity : point.getWorld().getNearbyEntities(point, 1.6, 1.6, 1.6)) {
+                        if (entity instanceof LivingEntity living && entity != player) {
+                            living.damage(14.0, player);
+                            // 附模「空間裂痕」20% 機率吸入
+                            if (Math.random() < 0.20) {
+                                living.addPotionEffect(new PotionEffect(PotionEffectType.LEVITATION, 20, 2, false, true, true));
+                                living.getWorld().spawnParticle(Particle.PORTAL, living.getLocation().add(0, 1, 0), 20, 0.3, 0.5, 0.3, 0.1);
+                            }
+                        }
+                    }
+                }
+                loc.getWorld().playSound(loc, Sound.ENTITY_PLAYER_ATTACK_SWEEP, 0.9f, 0.7f);
+                loc.getWorld().playSound(loc, Sound.ENTITY_ENDER_DRAGON_FLAP, 0.6f, 1.4f);
+            }
+            case "frostfang_bow" -> {
+                // 霜淵漩渦：10 格內冰封 + 額外傷害
+                for (final Entity entity : player.getNearbyEntities(10, 5, 10)) {
+                    if (entity instanceof LivingEntity living && entity != player) {
+                        living.setFreezeTicks(20 * 6);
+                        living.addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS, 20 * 6, 3, false, true, true));
+                        // 附模「永霜共鳴」+25% 傷害
+                        living.damage(10.0 * 1.25, player);
+                    }
+                }
+                // 視覺：螺旋冰暴
+                for (int ring = 0; ring < 3; ring++) {
+                    for (int angle = 0; angle < 360; angle += 12) {
+                        final double rad = Math.toRadians(angle);
+                        final double radius = 3.0 + ring * 1.5;
+                        final Location pt = loc.clone().add(Math.cos(rad) * radius, 0.5 + ring * 0.4, Math.sin(rad) * radius);
+                        pt.getWorld().spawnParticle(Particle.SNOWFLAKE, pt, 1, 0, 0, 0, 0);
+                        pt.getWorld().spawnParticle(Particle.ITEM_SNOWBALL, pt, 1, 0, 0, 0, 0);
+                    }
+                }
+                loc.getWorld().playSound(loc, Sound.BLOCK_GLASS_BREAK, 1.0f, 0.6f);
+                loc.getWorld().playSound(loc, Sound.ENTITY_ILLUSIONER_CAST_SPELL, 0.9f, 1.1f);
+            }
+            case "thunder_hammer" -> {
+                // 天雷震擊：準心 12 格前落雷 + 擊退
+                final RayTraceResult ray = player.rayTraceBlocks(16, FluidCollisionMode.NEVER);
+                final Location target;
+                if (ray != null && ray.getHitBlock() != null) {
+                    target = ray.getHitBlock().getLocation().add(0.5, 1, 0.5);
+                } else {
+                    target = player.getLocation().add(player.getLocation().getDirection().multiply(12));
+                }
+                target.getWorld().strikeLightningEffect(target);
+                target.getWorld().strikeLightningEffect(target);
+                for (final Entity entity : target.getWorld().getNearbyEntities(target, 5, 4, 5)) {
+                    if (entity instanceof LivingEntity living && entity != player) {
+                        living.damage(18.0, player);
+                        // 附模「雷霆怒吼」短暫麻痺（以 SLOWNESS IV + MINING_FATIGUE 模擬）
+                        living.addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS, 20 * 2, 4, false, true, true));
+                        living.addPotionEffect(new PotionEffect(PotionEffectType.MINING_FATIGUE, 20 * 2, 3, false, true, true));
+                        final Vector push = living.getLocation().toVector().subtract(target.toVector()).normalize().multiply(1.4);
+                        push.setY(0.7);
+                        living.setVelocity(push);
+                    }
+                }
+                target.getWorld().spawnParticle(Particle.EXPLOSION, target, 3, 1, 0.5, 1, 0);
+                target.getWorld().spawnParticle(Particle.FIREWORK, target, 40, 2, 1, 2, 0.2);
+                loc.getWorld().playSound(loc, Sound.ENTITY_LIGHTNING_BOLT_THUNDER, 1.2f, 0.8f);
+            }
+            case "arcane_scepter" -> {
+                // 奧術三連擊：沿視線發射 3 道穿透彈幕
+                final Vector dir = player.getEyeLocation().getDirection().normalize();
+                final Location start = player.getEyeLocation();
+                final double[] spreadAngles = {-8.0, 0.0, 8.0};
+                int hitCountTotal = 0;
+                for (final double spread : spreadAngles) {
+                    final double rad = Math.toRadians(spread);
+                    final Vector bolt = new Vector(
+                        dir.getX() * Math.cos(rad) - dir.getZ() * Math.sin(rad),
+                        dir.getY(),
+                        dir.getX() * Math.sin(rad) + dir.getZ() * Math.cos(rad)
+                    ).normalize();
+                    int pierced = 0;
+                    for (int step = 1; step <= 20 && pierced < 3; step++) {
+                        final Location pt = start.clone().add(bolt.clone().multiply(step));
+                        pt.getWorld().spawnParticle(Particle.END_ROD, pt, 2, 0.02, 0.02, 0.02, 0.01);
+                        pt.getWorld().spawnParticle(Particle.WITCH, pt, 1, 0.05, 0.05, 0.05, 0);
+                        if (pt.getBlock().getType().isSolid()) {
+                            break;
+                        }
+                        for (final Entity entity : pt.getWorld().getNearbyEntities(pt, 0.9, 0.9, 0.9)) {
+                            if (entity instanceof LivingEntity living && entity != player) {
+                                // 附模「秘銀共振」每命中一次傷害 +1.5
+                                final double stackBonus = hitCountTotal * 1.5;
+                                living.damage(6.0 + stackBonus, player);
+                                hitCountTotal++;
+                                pierced++;
+                                if (pierced >= 3) break;
+                            }
+                        }
+                    }
+                }
+                loc.getWorld().playSound(loc, Sound.ENTITY_EVOKER_CAST_SPELL, 0.9f, 1.4f);
+                loc.getWorld().playSound(loc, Sound.BLOCK_AMETHYST_BLOCK_CHIME, 1.0f, 1.6f);
+            }
+            // ═══ 迷途星 RPG 武器技能 ═══
+            case "maze_blade" -> {
+                // 回聲震擊：向前方揮出一道深淵聲波，擊飛 + 暗黑共振
+                final Vector dir = player.getEyeLocation().getDirection().setY(0).normalize();
+                final Location origin = player.getEyeLocation();
+                // 波形擴張粒子：3 段弧線（wynncraft 風格）
+                for (int phase = 0; phase < 3; phase++) {
+                    final double phaseRadius = 2.5 + phase * 1.5;
+                    for (int angle = -60; angle <= 60; angle += 6) {
+                        final double rad = Math.toRadians(angle);
+                        final double cx = dir.getX() * Math.cos(rad) - dir.getZ() * Math.sin(rad);
+                        final double cz = dir.getX() * Math.sin(rad) + dir.getZ() * Math.cos(rad);
+                        final Location pt = origin.clone().add(cx * phaseRadius, 0.2 + phase * 0.15, cz * phaseRadius);
+                        pt.getWorld().spawnParticle(Particle.SONIC_BOOM, pt, 1, 0.0, 0.0, 0.0, 0.0);
+                        pt.getWorld().spawnParticle(Particle.SCULK_SOUL, pt, 2, 0.05, 0.15, 0.05, 0.015);
+                        pt.getWorld().spawnParticle(Particle.SCULK_CHARGE_POP, pt, 1, 0.05, 0.1, 0.05, 0.01);
+                    }
+                }
+                // 傷害判定：前方 6 格內
+                final Location hitOrigin = player.getLocation().add(dir.clone().multiply(3));
+                for (final Entity entity : hitOrigin.getWorld().getNearbyEntities(hitOrigin, 4.5, 3.0, 4.5)) {
+                    if (entity instanceof LivingEntity living && entity != player) {
+                        living.damage(13.0, player);
+                        // 深淵拉扯：把目標往玩家視線方向推飛
+                        final Vector push = dir.clone().multiply(1.1);
+                        push.setY(0.45);
+                        living.setVelocity(push);
+                        // 附模：回聲共鳴 — 30% 機率施加短暫盲視 + 緩速
+                        if (Math.random() < 0.30) {
+                            living.addPotionEffect(new PotionEffect(PotionEffectType.DARKNESS, 60, 0, false, true, true));
+                            living.addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS, 60, 2, false, true, true));
+                            living.getWorld().spawnParticle(Particle.REVERSE_PORTAL, living.getLocation().add(0, 1, 0), 15, 0.3, 0.5, 0.3, 0.05);
+                        }
+                    }
+                }
+                loc.getWorld().playSound(loc, Sound.ENTITY_WARDEN_SONIC_BOOM, 0.8f, 0.9f);
+                loc.getWorld().playSound(loc, Sound.BLOCK_SCULK_CATALYST_BLOOM, 0.8f, 0.7f);
+            }
+            case "echo_crossbow" -> {
+                // 回聲連射：1 秒內射出 5 發穿透箭矢（彌補原版十字弩只能單發）
+                final Location shootOrigin = player.getEyeLocation();
+                final java.util.UUID uuid = player.getUniqueId();
+                for (int i = 0; i < 5; i++) {
+                    final int shotIndex = i;
+                    this.plugin.getSafeScheduler().runEntityDelayed(player, () -> {
+                        if (!player.isOnline() || !player.isValid()) {
+                            return;
+                        }
+                        final Vector shootDir = player.getEyeLocation().getDirection().normalize();
+                        // 隨機散佈（小幅度，避免亂射）
+                        final double jitterX = (Math.random() - 0.5) * 0.08;
+                        final double jitterY = (Math.random() - 0.5) * 0.08;
+                        final double jitterZ = (Math.random() - 0.5) * 0.08;
+                        final Vector finalDir = shootDir.add(new Vector(jitterX, jitterY, jitterZ)).normalize().multiply(2.6);
+                        final org.bukkit.entity.Arrow arrow = player.launchProjectile(org.bukkit.entity.Arrow.class, finalDir);
+                        arrow.setShooter(player);
+                        arrow.setDamage(5.5);
+                        arrow.setPierceLevel(2);
+                        arrow.setCritical(true);
+                        arrow.setPersistent(false);
+                        arrow.getPersistentDataContainer().set(
+                                new org.bukkit.NamespacedKey(this.plugin, "echo_arrow"),
+                                org.bukkit.persistence.PersistentDataType.BYTE, (byte) 1);
+                        // 發射粒子與音效
+                        final Location muzzle = player.getEyeLocation().add(shootDir.clone().multiply(0.8));
+                        muzzle.getWorld().spawnParticle(Particle.CRIT, muzzle, 6, 0.1, 0.1, 0.1, 0.02);
+                        muzzle.getWorld().spawnParticle(Particle.SCULK_CHARGE_POP, muzzle, 3, 0.05, 0.05, 0.05, 0.01);
+                        player.getWorld().playSound(muzzle, Sound.ITEM_CROSSBOW_SHOOT, 0.6f, 1.2f + shotIndex * 0.05f);
+                    }, i * 4L);  // 每 4 tick 一發，5 發共 0.8 秒
+                }
+                loc.getWorld().playSound(loc, Sound.ITEM_CROSSBOW_LOADING_START, 0.7f, 1.6f);
+            }
         }
     }
 
@@ -3211,6 +3955,12 @@ public final class TechListener implements Listener {
             case "time_dilator" -> 8L;
             case "heal_beacon" -> 12L;
             case "entropy_scepter" -> 10L;
+            case "riftblade" -> 14L;
+            case "frostfang_bow" -> 12L;
+            case "thunder_hammer" -> 16L;
+            case "arcane_scepter" -> 14L;
+            case "maze_blade" -> 12L;
+            case "echo_crossbow" -> 10L;
             default -> 0L;
         };
     }
@@ -3227,6 +3977,12 @@ public final class TechListener implements Listener {
             case "time_dilator" -> 6000L;
             case "heal_beacon" -> 10000L;
             case "entropy_scepter" -> 5000L;
+            case "riftblade" -> 4500L;
+            case "frostfang_bow" -> 6000L;
+            case "thunder_hammer" -> 7000L;
+            case "arcane_scepter" -> 4000L;
+            case "maze_blade" -> 5000L;
+            case "echo_crossbow" -> 3500L;
             default -> 3000L;
         };
     }
@@ -3271,12 +4027,15 @@ public final class TechListener implements Listener {
         }
         if (event.getCause() == EntityDamageEvent.DamageCause.FIRE
                 || event.getCause() == EntityDamageEvent.DamageCause.FIRE_TICK
-                || event.getCause() == EntityDamageEvent.DamageCause.LAVA) {
+                || event.getCause() == EntityDamageEvent.DamageCause.LAVA
+                || event.getCause() == EntityDamageEvent.DamageCause.HOT_FLOOR) {
             for (final ItemStack armor : player.getInventory().getArmorContents()) {
                 if (armor == null) { continue; }
                 final String id = this.plugin.getItemFactory().getTechItemId(armor);
                 if ("void_sabatons".equalsIgnoreCase(id)) {
                     event.setDamage(0.0);
+                    event.setCancelled(true);
+                    player.setFireTicks(0);
                     break;
                 }
             }
@@ -3303,6 +4062,24 @@ public final class TechListener implements Listener {
                 }
                 case "void_cuirass" -> player.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, 20 * 5, 0, false, false, true));
                 case "void_greaves" -> player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 20 * 5, 2, false, false, true));
+                case "void_sabatons" -> player.addPotionEffect(new PotionEffect(PotionEffectType.FIRE_RESISTANCE, 20 * 5, 0, false, false, true));
+                // ═══ 迷途星套裝被動 ═══
+                case "maze_helmet" -> {
+                    // 回聲定位：黑暗中保持視野
+                    player.addPotionEffect(new PotionEffect(PotionEffectType.NIGHT_VISION, 20 * 15, 0, false, false, true));
+                }
+                case "maze_chestplate" -> {
+                    // 空間穩定：受傷時減少擊退 + 輕微抗性
+                    player.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE, 20 * 5, 0, false, false, true));
+                }
+                case "maze_leggings" -> {
+                    // 迷宮行者：提升迷宮探索速度
+                    player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 20 * 5, 1, false, false, true));
+                }
+                case "maze_boots" -> {
+                    // 回聲步伐：跳躍加強 + 摔落減免（由 talisman_angel 風格衍生）
+                    player.addPotionEffect(new PotionEffect(PotionEffectType.JUMP_BOOST, 20 * 5, 1, false, false, true));
+                }
             }
         }
     }
@@ -3537,7 +4314,8 @@ public final class TechListener implements Listener {
                  STONECUTTER, LOOM, SMITHING_TABLE, CARTOGRAPHY_TABLE, GRINDSTONE,
                  CRAFTING_TABLE, FURNACE, BLAST_FURNACE, SMOKER, BARREL,
                  CHEST, TRAPPED_CHEST, HOPPER, DROPPER, DISPENSER,
-                 BREWING_STAND, LECTERN, CHISELED_BOOKSHELF -> true;
+                 BREWING_STAND, LECTERN, CHISELED_BOOKSHELF,
+                 CAULDRON, WATER_CAULDRON, LAVA_CAULDRON, POWDER_SNOW_CAULDRON -> true;
             default -> false;
         };
     }
@@ -3642,6 +4420,40 @@ public final class TechListener implements Listener {
         }
     }
 
+    // ── 太陽能頭盔：每 5 秒在陽光下為背包中隨機工具充 1 EU ──
+    private void handleSolarHelmetTick(final Player player) {
+        final var factory = this.plugin.getItemFactory();
+        final ItemStack helmet = player.getInventory().getHelmet();
+        if (helmet == null || !"solar_helmet".equalsIgnoreCase(factory.getTechItemId(helmet))) return;
+        // 需要在露天且白天
+        final var world = player.getWorld();
+        if (world.getEnvironment() != org.bukkit.World.Environment.NORMAL) return;
+        final long time = world.getTime();
+        if (time > 13000L || time < 0L) return; // 夜晚不充
+        if (player.getLocation().getBlockY() < world.getHighestBlockYAt(player.getLocation()) - 1) return; // 需要頭上無遮擋
+        // 每 100 tick (5 秒) 充一次
+        if (player.getTicksLived() % 100 != 0) return;
+        final var inv = player.getInventory();
+        final ItemStack[] contents = inv.getContents();
+        final java.util.List<Integer> chargeable = new java.util.ArrayList<>();
+        for (int i = 0; i < contents.length; i++) {
+            final ItemStack item = contents[i];
+            if (item == null || item.isEmpty()) continue;
+            final String id = factory.getTechItemId(item);
+            if (id == null || "solar_helmet".equals(id)) continue;
+            final long max = factory.maxItemEnergy(id);
+            if (max <= 0L) continue;
+            if (factory.getItemStoredEnergy(item) >= max) continue;
+            chargeable.add(i);
+        }
+        if (chargeable.isEmpty()) return;
+        final int slot = chargeable.get(ThreadLocalRandom.current().nextInt(chargeable.size()));
+        final ItemStack tool = contents[slot];
+        final long current = factory.getItemStoredEnergy(tool);
+        final long max = factory.maxItemEnergy(factory.getTechItemId(tool));
+        factory.setItemStoredEnergy(tool, Math.min(max, current + 1L));
+    }
+
     private void handleWrenchDismantle(final Player player, final Block machineBlock) {
         // 互動烹調：拆卸方塊會中斷烹調
         this.plugin.getCookingService().interruptByBlockBreak(machineBlock);
@@ -3660,18 +4472,27 @@ public final class TechListener implements Listener {
         }
         // 移除方塊
         machineBlock.setType(org.bukkit.Material.AIR, false);
-        // 掉落物放進玩家背包（裝不下才掉地上）
+        // 掉落物放進玩家背包（裝不下才掉地上）；迷宮世界改入冒險者倉庫
         final org.bukkit.Location dropLoc = machineBlock.getLocation().add(0.5, 0.5, 0.5);
+        final boolean inLabyrinth = this.plugin.getMazeService().isLabyrinthWorld(player.getWorld());
         if (machineDrop != null) {
-            final java.util.Map<Integer, ItemStack> overflow = player.getInventory().addItem(machineDrop);
-            for (final ItemStack leftover : overflow.values()) {
-                machineBlock.getWorld().dropItemNaturally(dropLoc, leftover);
+            if (inLabyrinth) {
+                this.plugin.getMazeService().depositToAdventurerStash(player, machineDrop);
+            } else {
+                final java.util.Map<Integer, ItemStack> overflow = player.getInventory().addItem(machineDrop);
+                for (final ItemStack leftover : overflow.values()) {
+                    machineBlock.getWorld().dropItemNaturally(dropLoc, leftover);
+                }
             }
         }
         if (techBlockDrop != null) {
-            final java.util.Map<Integer, ItemStack> overflow = player.getInventory().addItem(techBlockDrop);
-            for (final ItemStack leftover : overflow.values()) {
-                machineBlock.getWorld().dropItemNaturally(dropLoc, leftover);
+            if (inLabyrinth) {
+                this.plugin.getMazeService().depositToAdventurerStash(player, techBlockDrop);
+            } else {
+                final java.util.Map<Integer, ItemStack> overflow = player.getInventory().addItem(techBlockDrop);
+                for (final ItemStack leftover : overflow.values()) {
+                    machineBlock.getWorld().dropItemNaturally(dropLoc, leftover);
+                }
             }
         }
         player.sendActionBar(this.plugin.getItemFactory().success("⚙ 已拆除機器！"));
@@ -3733,6 +4554,74 @@ public final class TechListener implements Listener {
         return true;
     }
 
+    // ── 科技背包：便攜儲物空間 ──
+    private static final org.bukkit.NamespacedKey BACKPACK_DATA_KEY = new org.bukkit.NamespacedKey("techproject", "backpack_data");
+    private final Map<UUID, ItemStack> openBackpacks = new java.util.concurrent.ConcurrentHashMap<>();
+
+    private boolean handleTechBackpack(final PlayerInteractEvent event) {
+        if (event.getItem() == null) return false;
+        if (event.getAction() != Action.RIGHT_CLICK_AIR && event.getAction() != Action.RIGHT_CLICK_BLOCK) return false;
+        final String techItemId = this.plugin.getItemFactory().getTechItemId(event.getItem());
+        if (!"tech_backpack".equalsIgnoreCase(techItemId)) return false;
+        final Player player = event.getPlayer();
+        event.setUseInteractedBlock(Result.DENY);
+        event.setUseItemInHand(Result.DENY);
+        event.setCancelled(true);
+
+        final ItemStack backpackItem = event.getItem();
+        final org.bukkit.inventory.Inventory backpackInv = Bukkit.createInventory(null, 27,
+                net.kyori.adventure.text.Component.text("科技背包"));
+        // 讀取已存的物品
+        if (backpackItem.hasItemMeta()) {
+            final String base64 = backpackItem.getItemMeta().getPersistentDataContainer()
+                    .get(BACKPACK_DATA_KEY, org.bukkit.persistence.PersistentDataType.STRING);
+            if (base64 != null && !base64.isBlank()) {
+                try {
+                    final byte[] bytes = java.util.Base64.getDecoder().decode(base64);
+                    final java.io.ByteArrayInputStream bis = new java.io.ByteArrayInputStream(bytes);
+                    final org.bukkit.util.io.BukkitObjectInputStream ois = new org.bukkit.util.io.BukkitObjectInputStream(bis);
+                    final int size = ois.readInt();
+                    for (int i = 0; i < size; i++) {
+                        backpackInv.setItem(i, (ItemStack) ois.readObject());
+                    }
+                    ois.close();
+                } catch (final Exception ex) {
+                    this.plugin.getLogger().warning("無法讀取背包資料：" + ex.getMessage());
+                }
+            }
+        }
+        this.openBackpacks.put(player.getUniqueId(), backpackItem);
+        player.openInventory(backpackInv);
+        player.playSound(player.getLocation(), Sound.BLOCK_CHEST_OPEN, 0.5f, 1.2f);
+        return true;
+    }
+
+    /** 關閉背包時序列化內容到物品 PDC。 */
+    void saveBackpackOnClose(final Player player, final org.bukkit.inventory.Inventory inv) {
+        final ItemStack backpackItem = this.openBackpacks.remove(player.getUniqueId());
+        if (backpackItem == null) return;
+        try {
+            final java.io.ByteArrayOutputStream bos = new java.io.ByteArrayOutputStream();
+            final org.bukkit.util.io.BukkitObjectOutputStream oos = new org.bukkit.util.io.BukkitObjectOutputStream(bos);
+            oos.writeInt(inv.getSize());
+            for (int i = 0; i < inv.getSize(); i++) {
+                oos.writeObject(inv.getItem(i));
+            }
+            oos.close();
+            final String base64 = java.util.Base64.getEncoder().encodeToString(bos.toByteArray());
+            final org.bukkit.inventory.meta.ItemMeta meta = backpackItem.getItemMeta();
+            meta.getPersistentDataContainer().set(BACKPACK_DATA_KEY, org.bukkit.persistence.PersistentDataType.STRING, base64);
+            backpackItem.setItemMeta(meta);
+        } catch (final Exception ex) {
+            this.plugin.getLogger().warning("無法儲存背包資料：" + ex.getMessage());
+        }
+        player.playSound(player.getLocation(), Sound.BLOCK_CHEST_CLOSE, 0.5f, 1.2f);
+    }
+
+    public boolean hasOpenBackpack(final UUID uuid) {
+        return this.openBackpacks.containsKey(uuid);
+    }
+
     /**
      * 透過模擬 BlockBreakEvent 檢查玩家是否有權修改指定方塊。
      * 任何領地/保護插件（Residence、WorldGuard 等）若監聽 BlockBreakEvent
@@ -3749,4 +4638,70 @@ public final class TechListener implements Listener {
             this.simulatingBreakThreads.remove(threadId);
         }
     }
+
+    // ═══════════════════════════════════════════════════════════
+    //  全域技能經驗（EcoSkills 風格）
+    // ═══════════════════════════════════════════════════════════
+
+    /** 探索：切換世界 +15 XP */
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onWorldChange(final org.bukkit.event.player.PlayerChangedWorldEvent event) {
+        if (this.plugin.getSkillService() != null) {
+            this.plugin.getSkillService().grantXp(event.getPlayer(), "exploration", 15L);
+        }
+    }
+
+    /** 採集：釣魚成功 +5 XP（探索也 +3） */
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onFish(final org.bukkit.event.player.PlayerFishEvent event) {
+        if (event.getState() != org.bukkit.event.player.PlayerFishEvent.State.CAUGHT_FISH) return;
+        if (this.plugin.getSkillService() == null) return;
+        this.plugin.getSkillService().grantXp(event.getPlayer(), "gathering", 5L);
+        this.plugin.getSkillService().grantXp(event.getPlayer(), "exploration", 3L);
+    }
+
+    /** 採集：收成成熟作物 +2 XP */
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onHarvestBlock(final org.bukkit.event.player.PlayerHarvestBlockEvent event) {
+        if (this.plugin.getSkillService() != null) {
+            this.plugin.getSkillService().grantXp(event.getPlayer(), "gathering", 2L);
+        }
+    }
+
+    /** 研究：附魔物品 +5 XP */
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onEnchant(final org.bukkit.event.enchantment.EnchantItemEvent event) {
+        if (this.plugin.getSkillService() != null) {
+            this.plugin.getSkillService().grantXp(event.getEnchanter(), "research", 5L);
+        }
+    }
+
+    /** 研究：釀造完成 +3 XP（給放入材料的玩家，若附近 8 格有玩家） */
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onBrew(final org.bukkit.event.inventory.BrewEvent event) {
+        if (this.plugin.getSkillService() == null) return;
+        final Location loc = event.getBlock().getLocation().add(0.5, 0.5, 0.5);
+        for (final Player nearby : loc.getNearbyPlayers(8.0)) {
+            this.plugin.getSkillService().grantXp(nearby, "research", 3L);
+            break; // 只給最近的一位
+        }
+    }
+
+    /** 工程：從熔爐取出成品 +1 XP */
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onFurnaceExtract(final org.bukkit.event.inventory.FurnaceExtractEvent event) {
+        if (this.plugin.getSkillService() != null) {
+            this.plugin.getSkillService().grantXp(event.getPlayer(), "engineering", 1L);
+        }
+    }
+
+    /** 共鳴：撿到經驗球 +1 XP */
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onExpPickup(final org.bukkit.event.player.PlayerExpChangeEvent event) {
+        if (event.getAmount() <= 0) return;
+        if (this.plugin.getSkillService() != null) {
+            this.plugin.getSkillService().grantXp(event.getPlayer(), "resonance", 1L);
+        }
+    }
+
 }

@@ -27,3 +27,140 @@ https://github.com/google-gemini/deprecated-generative-ai-python/blob/main/READM
 2026-04-09 11:16:50,733 [INFO] Shard ID None has successfully RESUMED session a2764c625feff5ff0e01db216cb27939.
 2026-04-09 12:26:34,531 [INFO] Shard ID None has successfully RESUMED session a2764c625feff5ff0e01db216cb27939.
 2026-04-09 13:18:28,521 [INFO] Shard ID None has successfully RESUMED session a2764c625feff5ff0e01db216cb27939.
+2026-04-09 14:36:45,904 [INFO] Shard ID None has successfully RESUMED session a2764c625feff5ff0e01db216cb27939.
+2026-04-09 17:17:07,404 [INFO] Shard ID None has successfully RESUMED session a2764c625feff5ff0e01db216cb27939.
+2026-04-09 18:01:45,242 [INFO] 127.0.0.1 [09/Apr/2026:18:01:43 +0800] "POST /ask HTTP/1.1" 200 1224 "-" "Java-http-client/21.0.10"
+2026-04-09 18:02:56,645 [INFO] 127.0.0.1 [09/Apr/2026:18:02:55 +0800] "POST /ask HTTP/1.1" 200 1269 "-" "Java-http-client/21.0.10"
+2026-04-09 18:05:13,000 [INFO] 127.0.0.1 [09/Apr/2026:18:05:11 +0800] "POST /ask HTTP/1.1" 200 313 "-" "Java-http-client/21.0.10"
+2026-04-09 18:08:03,142 [INFO] 127.0.0.1 [09/Apr/2026:18:08:01 +0800] "POST /ask HTTP/1.1" 200 724 "-" "Java-http-client/21.0.10"
+2026-04-09 18:08:33,033 [INFO] 127.0.0.1 [09/Apr/2026:18:08:32 +0800] "POST /ask HTTP/1.1" 200 332 "-" "Java-http-client/21.0.10"
+2026-04-09 18:08:57,004 [INFO] 127.0.0.1 [09/Apr/2026:18:08:55 +0800] "POST /ask HTTP/1.1" 200 633 "-" "Java-http-client/21.0.10"
+2026-04-09 18:09:17,833 [INFO] 127.0.0.1 [09/Apr/2026:18:09:17 +0800] "POST /ask HTTP/1.1" 200 401 "-" "Java-http-client/21.0.10"
+2026-04-09 18:41:00,453 [INFO] Shard ID None has successfully RESUMED session a2764c625feff5ff0e01db216cb27939.
+2026-04-09 18:54:52,011 [INFO] 127.0.0.1 [09/Apr/2026:18:54:50 +0800] "POST /ask HTTP/1.1" 200 518 "-" "Java-http-client/21.0.10"
+2026-04-09 19:09:52,099 [INFO] 127.0.0.1 [09/Apr/2026:19:09:51 +0800] "POST /ask HTTP/1.1" 200 350 "-" "Java-http-client/21.0.10"
+2026-04-09 19:13:53,605 [INFO] 127.0.0.1 [09/Apr/2026:19:13:52 +0800] "POST /ask HTTP/1.1" 200 420 "-" "Java-http-client/21.0.10"
+2026-04-09 19:21:58,829 [INFO] Shard ID None has successfully RESUMED session a2764c625feff5ff0e01db216cb27939.
+2026-04-09 22:56:06,355 [INFO] Shard ID None has successfully RESUMED session a2764c625feff5ff0e01db216cb27939.
+2026-04-10 02:19:50,146 [INFO] Shard ID None has successfully RESUMED session a2764c625feff5ff0e01db216cb27939.
+2026-04-10 02:59:50,009 [INFO] Shard ID None has successfully RESUMED session a2764c625feff5ff0e01db216cb27939.
+2026-04-10 04:17:14,058 [INFO] Shard ID None has successfully RESUMED session a2764c625feff5ff0e01db216cb27939.
+2026-04-10 06:10:09,308 [INFO] 127.0.0.1 [10/Apr/2026:06:10:08 +0800] "POST /ask HTTP/1.1" 200 224 "-" "Java-http-client/21.0.10"
+2026-04-10 06:32:06,090 [INFO] Shard ID None has successfully RESUMED session a2764c625feff5ff0e01db216cb27939.
+2026-04-10 07:27:49,054 [INFO] Shard ID None has successfully RESUMED session a2764c625feff5ff0e01db216cb27939.
+2026-04-10 10:27:29,315 [INFO] Shard ID None has successfully RESUMED session a2764c625feff5ff0e01db216cb27939.
+2026-04-10 13:19:51,160 [INFO] 知識庫載入完成：720 個段落，來自 55 個檔案
+2026-04-10 13:19:51,160 [INFO] 127.0.0.1 [10/Apr/2026:13:19:50 +0800] "POST /reload HTTP/1.1" 200 196 "-" "curl/7.81.0"
+2026-04-10 14:11:09,416 [INFO] Shard ID None has successfully RESUMED session a2764c625feff5ff0e01db216cb27939.
+2026-04-10 15:01:14,407 [INFO] Shard ID None has successfully RESUMED session a2764c625feff5ff0e01db216cb27939.
+2026-04-10 16:22:17,825 [INFO] Shard ID None has successfully RESUMED session a2764c625feff5ff0e01db216cb27939.
+2026-04-10 17:50:36,243 [INFO] Shard ID None has successfully RESUMED session a2764c625feff5ff0e01db216cb27939.
+2026-04-10 18:48:32,269 [INFO] Shard ID None has successfully RESUMED session a2764c625feff5ff0e01db216cb27939.
+2026-04-10 22:24:42,499 [INFO] Shard ID None has successfully RESUMED session a2764c625feff5ff0e01db216cb27939.
+2026-04-10 23:22:50,710 [INFO] Shard ID None has successfully RESUMED session a2764c625feff5ff0e01db216cb27939.
+2026-04-11 02:15:48,441 [INFO] Shard ID None has successfully RESUMED session a2764c625feff5ff0e01db216cb27939.
+2026-04-11 02:25:57,213 [INFO] Shard ID None has successfully RESUMED session a2764c625feff5ff0e01db216cb27939.
+2026-04-11 05:03:26,408 [INFO] Shard ID None has successfully RESUMED session a2764c625feff5ff0e01db216cb27939.
+2026-04-11 06:38:16,102 [INFO] Shard ID None has successfully RESUMED session a2764c625feff5ff0e01db216cb27939.
+2026-04-11 10:06:02,917 [INFO] Shard ID None has successfully RESUMED session a2764c625feff5ff0e01db216cb27939.
+2026-04-11 11:14:09,441 [INFO] Shard ID None has successfully RESUMED session a2764c625feff5ff0e01db216cb27939.
+2026-04-11 14:10:41,952 [INFO] 127.0.0.1 [11/Apr/2026:14:10:40 +0800] "POST /ask HTTP/1.1" 200 285 "-" "Java-http-client/21.0.10"
+2026-04-11 14:35:13,531 [INFO] Shard ID None has successfully RESUMED session a2764c625feff5ff0e01db216cb27939.
+2026-04-11 17:57:34,303 [INFO] 127.0.0.1 [11/Apr/2026:17:57:33 +0800] "POST /ask HTTP/1.1" 200 975 "-" "Java-http-client/21.0.10"
+2026-04-11 18:19:47,560 [INFO] Shard ID None has successfully RESUMED session a2764c625feff5ff0e01db216cb27939.
+2026-04-11 20:05:34,939 [INFO] Shard ID None has successfully RESUMED session a2764c625feff5ff0e01db216cb27939.
+2026-04-11 22:05:07,038 [INFO] Shard ID None has successfully RESUMED session a2764c625feff5ff0e01db216cb27939.
+2026-04-12 01:55:26,346 [INFO] Shard ID None has successfully RESUMED session a2764c625feff5ff0e01db216cb27939.
+2026-04-12 02:22:10,723 [INFO] Shard ID None has successfully RESUMED session a2764c625feff5ff0e01db216cb27939.
+2026-04-12 05:03:03,967 [INFO] Shard ID None has successfully RESUMED session a2764c625feff5ff0e01db216cb27939.
+2026-04-12 08:12:06,826 [INFO] Shard ID None has successfully RESUMED session a2764c625feff5ff0e01db216cb27939.
+2026-04-12 09:50:04,167 [INFO] Shard ID None has successfully RESUMED session a2764c625feff5ff0e01db216cb27939.
+2026-04-12 10:28:06,781 [INFO] Shard ID None has successfully RESUMED session a2764c625feff5ff0e01db216cb27939.
+2026-04-12 11:55:13,738 [INFO] Shard ID None has successfully RESUMED session a2764c625feff5ff0e01db216cb27939.
+2026-04-12 12:12:25,614 [INFO] Shard ID None has successfully RESUMED session a2764c625feff5ff0e01db216cb27939.
+2026-04-12 12:57:45,976 [INFO] 127.0.0.1 [12/Apr/2026:12:57:44 +0800] "POST /ask HTTP/1.1" 200 553 "-" "Java-http-client/21.0.10"
+2026-04-12 14:16:59,857 [INFO] Shard ID None has successfully RESUMED session a2764c625feff5ff0e01db216cb27939.
+2026-04-12 17:36:15,763 [INFO] Shard ID None has successfully RESUMED session a2764c625feff5ff0e01db216cb27939.
+2026-04-12 18:03:00,747 [INFO] Shard ID None has successfully RESUMED session a2764c625feff5ff0e01db216cb27939.
+2026-04-12 21:04:11,733 [INFO] Shard ID None has successfully RESUMED session a2764c625feff5ff0e01db216cb27939.
+2026-04-12 22:28:09,834 [INFO] Shard ID None has successfully RESUMED session a2764c625feff5ff0e01db216cb27939.
+2026-04-13 00:12:30,887 [INFO] 127.0.0.1 [13/Apr/2026:00:12:30 +0800] "POST /ask HTTP/1.1" 200 280 "-" "Java-http-client/21.0.10"
+2026-04-13 01:44:28,251 [INFO] Shard ID None has successfully RESUMED session a2764c625feff5ff0e01db216cb27939.
+2026-04-13 04:29:49,415 [INFO] Shard ID None has successfully RESUMED session a2764c625feff5ff0e01db216cb27939.
+2026-04-13 05:51:25,285 [INFO] Shard ID None has successfully RESUMED session a2764c625feff5ff0e01db216cb27939.
+2026-04-13 06:21:06,498 [INFO] 127.0.0.1 [13/Apr/2026:06:21:04 +0800] "POST /ask HTTP/1.1" 200 994 "-" "Java-http-client/21.0.10"
+2026-04-13 09:24:53,793 [INFO] Shard ID None has successfully RESUMED session a2764c625feff5ff0e01db216cb27939.
+2026-04-13 11:09:08,988 [INFO] Shard ID None has successfully RESUMED session a2764c625feff5ff0e01db216cb27939.
+2026-04-13 14:59:28,022 [INFO] Shard ID None has successfully RESUMED session a2764c625feff5ff0e01db216cb27939.
+2026-04-13 16:29:18,193 [INFO] Shard ID None has successfully RESUMED session a2764c625feff5ff0e01db216cb27939.
+2026-04-13 16:42:16,799 [INFO] 知識庫載入完成：759 個段落，來自 57 個檔案
+2026-04-13 19:50:31,832 [INFO] Shard ID None has successfully RESUMED session a2764c625feff5ff0e01db216cb27939.
+2026-04-13 22:43:05,521 [INFO] Shard ID None has successfully RESUMED session a2764c625feff5ff0e01db216cb27939.
+2026-04-13 23:20:43,219 [INFO] 127.0.0.1 [13/Apr/2026:23:20:42 +0800] "POST /ask HTTP/1.1" 200 305 "-" "Java-http-client/21.0.10"
+2026-04-14 00:36:44,706 [INFO] Shard ID None has successfully RESUMED session a2764c625feff5ff0e01db216cb27939.
+2026-04-14 02:01:14,099 [INFO] Shard ID None has successfully RESUMED session a2764c625feff5ff0e01db216cb27939.
+2026-04-14 03:39:09,980 [INFO] Shard ID None has successfully RESUMED session a2764c625feff5ff0e01db216cb27939.
+2026-04-14 04:15:01,825 [INFO] Shard ID None has successfully RESUMED session a2764c625feff5ff0e01db216cb27939.
+2026-04-14 07:20:40,661 [INFO] Shard ID None has successfully RESUMED session a2764c625feff5ff0e01db216cb27939.
+2026-04-14 10:27:27,491 [INFO] Shard ID None has successfully RESUMED session a2764c625feff5ff0e01db216cb27939.
+2026-04-14 14:17:57,545 [INFO] Shard ID None has successfully RESUMED session a2764c625feff5ff0e01db216cb27939.
+2026-04-14 17:18:05,873 [INFO] Shard ID None has successfully RESUMED session a2764c625feff5ff0e01db216cb27939.
+2026-04-14 18:44:19,662 [INFO] Shard ID None has successfully RESUMED session a2764c625feff5ff0e01db216cb27939.
+2026-04-14 19:04:16,405 [INFO] Shard ID None has successfully RESUMED session a2764c625feff5ff0e01db216cb27939.
+2026-04-14 19:25:36,682 [INFO] Shard ID None has successfully RESUMED session a2764c625feff5ff0e01db216cb27939.
+2026-04-14 21:46:02,418 [INFO] Shard ID None has successfully RESUMED session a2764c625feff5ff0e01db216cb27939.
+2026-04-14 23:21:48,857 [INFO] Shard ID None has successfully RESUMED session a2764c625feff5ff0e01db216cb27939.
+2026-04-15 01:23:54,930 [INFO] 127.0.0.1 [15/Apr/2026:01:23:53 +0800] "POST /ask HTTP/1.1" 200 502 "-" "Java-http-client/21.0.10"
+2026-04-15 01:45:10,765 [INFO] Shard ID None has successfully RESUMED session a2764c625feff5ff0e01db216cb27939.
+2026-04-15 03:22:11,339 [INFO] Shard ID None has successfully RESUMED session a2764c625feff5ff0e01db216cb27939.
+2026-04-15 03:40:53,468 [INFO] Shard ID None has successfully RESUMED session a2764c625feff5ff0e01db216cb27939.
+2026-04-15 04:41:14,420 [INFO] Shard ID None has successfully RESUMED session a2764c625feff5ff0e01db216cb27939.
+2026-04-15 05:21:14,662 [INFO] Shard ID None has successfully RESUMED session a2764c625feff5ff0e01db216cb27939.
+2026-04-15 07:02:54,862 [INFO] Shard ID None has successfully RESUMED session a2764c625feff5ff0e01db216cb27939.
+2026-04-15 08:55:56,269 [INFO] Shard ID None has successfully RESUMED session a2764c625feff5ff0e01db216cb27939.
+2026-04-15 09:05:10,910 [INFO] Shard ID None has successfully RESUMED session a2764c625feff5ff0e01db216cb27939.
+2026-04-15 09:42:53,950 [INFO] Shard ID None has successfully RESUMED session a2764c625feff5ff0e01db216cb27939.
+2026-04-15 11:05:03,061 [INFO] Shard ID None has successfully RESUMED session a2764c625feff5ff0e01db216cb27939.
+2026-04-15 11:22:11,997 [INFO] 知識庫載入完成：781 個段落，來自 59 個檔案
+2026-04-15 11:37:34,582 [INFO] Shard ID None has successfully RESUMED session a2764c625feff5ff0e01db216cb27939.
+2026-04-15 14:15:53,567 [INFO] Shard ID None has successfully RESUMED session a2764c625feff5ff0e01db216cb27939.
+2026-04-15 15:03:21,360 [INFO] Shard ID None has successfully RESUMED session a2764c625feff5ff0e01db216cb27939.
+2026-04-15 15:56:20,552 [INFO] Shard ID None has successfully RESUMED session a2764c625feff5ff0e01db216cb27939.
+2026-04-15 18:04:05,394 [INFO] Shard ID None has successfully RESUMED session a2764c625feff5ff0e01db216cb27939.
+2026-04-15 20:22:57,157 [INFO] 127.0.0.1 [15/Apr/2026:20:22:55 +0800] "POST /ask HTTP/1.1" 200 1332 "-" "Java-http-client/21.0.10"
+2026-04-15 20:23:58,673 [INFO] 127.0.0.1 [15/Apr/2026:20:23:57 +0800] "POST /ask HTTP/1.1" 200 899 "-" "Java-http-client/21.0.10"
+2026-04-15 20:25:06,755 [INFO] 127.0.0.1 [15/Apr/2026:20:25:05 +0800] "POST /ask HTTP/1.1" 200 424 "-" "Java-http-client/21.0.10"
+2026-04-15 20:25:35,060 [INFO] 127.0.0.1 [15/Apr/2026:20:25:34 +0800] "POST /ask HTTP/1.1" 200 611 "-" "Java-http-client/21.0.10"
+2026-04-15 21:29:29,679 [INFO] Shard ID None has successfully RESUMED session a2764c625feff5ff0e01db216cb27939.
+2026-04-15 21:38:11,247 [INFO] 127.0.0.1 [15/Apr/2026:21:38:09 +0800] "POST /ask HTTP/1.1" 200 645 "-" "Java-http-client/21.0.10"
+2026-04-15 23:00:30,879 [INFO] 127.0.0.1 [15/Apr/2026:23:00:29 +0800] "POST /ask HTTP/1.1" 200 600 "-" "Java-http-client/21.0.10"
+2026-04-15 23:49:32,604 [INFO] 127.0.0.1 [15/Apr/2026:23:49:31 +0800] "POST /ask HTTP/1.1" 200 322 "-" "Java-http-client/21.0.10"
+2026-04-15 23:50:29,110 [INFO] 127.0.0.1 [15/Apr/2026:23:50:27 +0800] "POST /ask HTTP/1.1" 200 800 "-" "Java-http-client/21.0.10"
+2026-04-16 00:42:10,063 [INFO] Shard ID None has successfully RESUMED session a2764c625feff5ff0e01db216cb27939.
+2026-04-16 04:06:02,952 [INFO] Shard ID None has successfully RESUMED session a2764c625feff5ff0e01db216cb27939.
+2026-04-16 04:23:00,515 [INFO] Shard ID None has successfully RESUMED session a2764c625feff5ff0e01db216cb27939.
+2026-04-16 07:25:58,297 [INFO] Shard ID None has successfully RESUMED session a2764c625feff5ff0e01db216cb27939.
+2026-04-16 08:16:11,310 [INFO] Shard ID None has successfully RESUMED session a2764c625feff5ff0e01db216cb27939.
+2026-04-16 09:59:51,883 [INFO] Shard ID None has successfully RESUMED session a2764c625feff5ff0e01db216cb27939.
+2026-04-16 13:50:22,392 [INFO] Shard ID None has successfully RESUMED session a2764c625feff5ff0e01db216cb27939.
+2026-04-16 16:23:32,144 [INFO] Shard ID None has successfully RESUMED session a2764c625feff5ff0e01db216cb27939.
+2026-04-16 17:25:49,438 [INFO] 127.0.0.1 [16/Apr/2026:17:25:48 +0800] "POST /ask HTTP/1.1" 200 242 "-" "Java-http-client/21.0.10"
+2026-04-16 18:59:04,009 [INFO] Shard ID None has successfully RESUMED session a2764c625feff5ff0e01db216cb27939.
+2026-04-16 20:37:49,833 [INFO] Shard ID None has successfully RESUMED session a2764c625feff5ff0e01db216cb27939.
+2026-04-16 22:40:19,486 [INFO] Shard ID None has successfully RESUMED session a2764c625feff5ff0e01db216cb27939.
+2026-04-17 02:17:09,138 [INFO] Shard ID None has successfully RESUMED session a2764c625feff5ff0e01db216cb27939.
+2026-04-17 06:00:54,265 [INFO] Shard ID None has successfully RESUMED session a2764c625feff5ff0e01db216cb27939.
+2026-04-17 08:47:44,796 [INFO] Shard ID None has successfully RESUMED session a2764c625feff5ff0e01db216cb27939.
+2026-04-17 09:16:00,915 [INFO] Shard ID None has successfully RESUMED session a2764c625feff5ff0e01db216cb27939.
+2026-04-17 11:02:01,924 [INFO] Shard ID None has successfully RESUMED session a2764c625feff5ff0e01db216cb27939.
+2026-04-17 11:28:40,717 [INFO] Shard ID None has successfully RESUMED session a2764c625feff5ff0e01db216cb27939.
+2026-04-17 13:14:42,694 [INFO] Shard ID None has successfully RESUMED session a2764c625feff5ff0e01db216cb27939.
+2026-04-17 15:27:57,117 [INFO] Shard ID None has successfully RESUMED session a2764c625feff5ff0e01db216cb27939.
+2026-04-17 17:54:24,676 [INFO] Shard ID None has successfully RESUMED session a2764c625feff5ff0e01db216cb27939.
+2026-04-17 17:58:12,010 [INFO] Shard ID None has successfully RESUMED session a2764c625feff5ff0e01db216cb27939.
+2026-04-17 19:22:46,155 [INFO] Shard ID None has successfully RESUMED session a2764c625feff5ff0e01db216cb27939.
+2026-04-17 22:06:15,759 [INFO] 127.0.0.1 [17/Apr/2026:22:06:14 +0800] "POST /ask HTTP/1.1" 200 817 "-" "Java-http-client/21.0.10"
+2026-04-17 22:06:51,191 [INFO] 127.0.0.1 [17/Apr/2026:22:06:49 +0800] "POST /ask HTTP/1.1" 200 1141 "-" "Java-http-client/21.0.10"
+2026-04-17 22:34:34,163 [INFO] 127.0.0.1 [17/Apr/2026:22:34:31 +0800] "POST /ask HTTP/1.1" 200 1643 "-" "Java-http-client/21.0.10"
+2026-04-17 22:34:47,896 [INFO] Shard ID None has successfully RESUMED session a2764c625feff5ff0e01db216cb27939.
+2026-04-17 23:46:49,374 [INFO] Shard ID None has successfully RESUMED session a2764c625feff5ff0e01db216cb27939.

@@ -49,6 +49,27 @@ gui-buttons:
     lore:
       - "點擊後在聊天輸入關鍵字"
       - "可搜尋物品 / 機器 / 指南 / 儀式"
+  hub-skill:
+    icon: PAPER
+    item-model: "nexo:resonance"
+    display-name: "共鳴技能"
+    lore:
+      - "查看 6 大技能的等級與屬性加成"
+      - "可獲得戰鬥、採集、工程等被動"
+  hub-quest:
+    icon: PAPER
+    item-model: "nexo:day_mission"
+    display-name: "每日/每週任務"
+    lore:
+      - "每日 3 個、每週 2 個任務"
+      - "領取經驗、資源、稀有獎勵"
+  hub-talent:
+    icon: PAPER
+    item-model: "nexo:talent_tree"
+    display-name: "天賦樹"
+    lore:
+      - "投入天賦點解鎖被動加成與技能"
+      - "每個技能各有獨立天賦樹"
   hub-achievements:
     icon: PAPER
     item-model: "nexo:tp_icon_achievements"
@@ -514,6 +535,9 @@ gui-panes:
   planetary-gate-tempest:
     icon: PAPER
     item-model: "nexo:techproject_gate_hover"
+  otherworld-portal-pane:
+    icon: PAPER
+    item-model: "nexo:techproject_gate_hover"
 items:
   iron_dust:
     display-name: "鐵粉"
@@ -607,6 +631,16 @@ items:
     use-cases:
       - "儲能"
       - "發電系統"
+  resonance_crystal:
+    display-name: "共鳴寶石"
+    category: ADVANCED
+    icon: AMETHYST_CLUSTER
+    description: "古代祭壇儀式凝聚出的靈能結晶，帶有獨特的共鳴頻率。"
+    unlock: "ancient_altar"
+    use-cases:
+      - "古代祭壇 共鳴寶石儀式 產物"
+      - "紫水晶碎片×8 + 綠寶石×2 + 終界珍珠×1"
+      - "進階儀式配方原料"
   quantum_chip:
     display-name: "量子晶片"
     category: ADVANCED
@@ -684,12 +718,31 @@ items:
     category: BASIC
     icon: IRON_SHOVEL
     item-model: "nexo:tech_wrench"
-    description: "蹲下+右鍵對準機器可瞬間拆除並回收；不消耗耐久。"
-    unlock: "assembler"
+    description: "多功能工具：左鍵開關機省電，蹲下+右鍵瞬間拆除並回收機器；不消耗耐久。"
+    unlock: "furnace"
     use-cases:
+      - "左鍵對準機器：開關機（省電）"
       - "蹲下+右鍵：瞬間拆除科技方塊"
       - "保留機器儲存的能源"
-      - "合成器配方：鐵板 + 銅錠"
+      - "進階工作台配方：鐵板 + 銅錠"
+  geo_scanner:
+    display-name: "地質掃描儀"
+    category: INTERMEDIATE
+    icon: CLOCK
+    description: "右鍵使用以勘探腳下區塊的地質資源蘊藏。"
+    unlock: "assembler"
+    use-cases:
+      - "右鍵：掃描腳下區塊"
+      - "搭配地質抽取機使用"
+  ancient_altar:
+    display-name: "古代祭壇"
+    category: ADVANCED
+    icon: LODESTONE
+    description: "遺落文明留下的祭祀法壇。將材料拋入周圍 4 格，右鍵祭壇啟動儀式合成。"
+    unlock: "assembler"
+    use-cases:
+      - "儀式合成（拋入物品 → 右鍵祭壇）"
+      - "產出：能源電池、共鳴水晶、鈦合金、量子框架"
   logistics_wrench:
     display-name: "物流扳手"
     category: INTERMEDIATE
@@ -702,6 +755,87 @@ items:
       - "右鍵機器某一面：設定為輸出方向"
       - "電流機器：左鍵設定收電面、右鍵設定送電面"
       - "合成器配方：科技扳手 + 邏輯閘"
+
+  # ── 天賦施法武器（6 種，對應 6 棵天賦樹）──
+  spell_blade:
+    display-name: "蒼浪之刃"
+    category: BASIC
+    guide-category: TOOLS
+    icon: IRON_SWORD
+    family: spell_weapons
+    description: "注入科技能量的戰鬥武器，揮舞時能引動天賦樹的戰鬥技能。"
+    unlock: "assembler"
+    use-cases:
+      - "施法武器：右鍵組合觸發 戰鬥 系天賦技能"
+      - "右·蹲右·右 → 碎浪斬 | 蹲右·右·蹲右 → 霹靂一閃"
+      - "右·右·蹲右 → 漩淵 | 蹲右·蹲右·右 → 生生流轉"
+      - "合成器配方：鐵錠 + 銅錠"
+  spell_bow:
+    display-name: "疾風獵弓"
+    category: BASIC
+    guide-category: TOOLS
+    icon: BOW
+    family: spell_weapons
+    description: "以科技改良的輕量弓，能引動天賦樹的探索技能。"
+    unlock: "assembler"
+    use-cases:
+      - "施法武器：右鍵組合觸發 探索 系天賦技能"
+      - "右·蹲右·右 → 疾風三步 | 蹲右·右·蹲右 → 能量鉤索"
+      - "右·右·蹲右 → 風暴箭雨 | 蹲右·蹲右·右 → 影襲"
+      - "合成器配方：鐵錠 + 線"
+  spell_pick:
+    display-name: "大地之鎬"
+    category: BASIC
+    guide-category: TOOLS
+    icon: IRON_PICKAXE
+    family: spell_weapons
+    description: "共鳴大地脈動的特殊鎬，能引動天賦樹的採集技能。"
+    unlock: "assembler"
+    use-cases:
+      - "施法武器：右鍵組合觸發 採集 系天賦技能"
+      - "右·蹲右·右 → 礦脈連鎖 | 蹲右·右·蹲右 → 地脈震盪"
+      - "右·右·蹲右 → 大地裂擊 | 蹲右·蹲右·右 → 大地共鳴"
+      - "合成器配方：鐵錠 + 紅石"
+  spell_wrench:
+    display-name: "動力扳手"
+    category: BASIC
+    guide-category: TOOLS
+    icon: REDSTONE_TORCH
+    family: spell_weapons
+    description: "高壓科技扳手，能引動天賦樹的工程技能。"
+    unlock: "assembler"
+    use-cases:
+      - "施法武器：右鍵組合觸發 工程 系天賦技能"
+      - "右·蹲右·右 → 機械傀儡 | 蹲右·右·蹲右 → 過載核心"
+      - "右·右·蹲右 → 磁軌砲 | 蹲右·蹲右·右 → 電磁脈衝"
+      - "合成器配方：銅錠 + 紅石"
+  spell_staff:
+    display-name: "奧術法杖"
+    category: BASIC
+    guide-category: TOOLS
+    icon: END_ROD
+    family: spell_weapons
+    description: "凝聚奧術能量的法杖，能引動天賦樹的研究技能。"
+    unlock: "assembler"
+    use-cases:
+      - "施法武器：右鍵組合觸發 研究 系天賦技能"
+      - "右·蹲右·右 → 隕石術 | 蹲右·右·蹲右 → 時間凍結"
+      - "右·右·蹲右 → 元素裂變 | 蹲右·蹲右·右 → 虛空坍縮"
+      - "合成器配方：鐵錠 + 終界珍珠"
+  spell_crystal:
+    display-name: "共鳴水晶"
+    category: BASIC
+    guide-category: TOOLS
+    icon: AMETHYST_SHARD
+    family: spell_weapons
+    description: "與共鳴頻率同調的水晶，能引動天賦樹的共鳴技能。"
+    unlock: "assembler"
+    use-cases:
+      - "施法武器：右鍵組合觸發 共鳴 系天賦技能"
+      - "右·蹲右·右 → 治癒波動 | 蹲右·右·蹲右 → 共振護盾"
+      - "右·右·蹲右 → 星爆 | 蹲右·蹲右·右 → 傳送信標"
+      - "合成器配方：銅錠 + 紫水晶碎片"
+
   wood_dust:
     display-name: "木屑"
     category: BASIC
@@ -1113,6 +1247,17 @@ items:
       - "任意世界深層探索"
       - "稀有礦物自動採集"
       - "鈾燃料自動化關鍵"
+  android_custom_script:
+    display-name: "安卓自訂程序"
+    category: ADVANCED
+    icon: WRITABLE_BOOK
+    description: "可編寫的自訂程式模組。使用 /tech android program add <指令> 編寫 MOVE/HARVEST/CHOP/ATTACK/SALVAGE/WAIT/JUMP/RESET 等 DSL 指令。"
+    unlock: "android_explore_script"
+    use-cases:
+      - "自動機 工作站程序槽"
+      - "玩家可編寫的指令序列"
+      - "精準巡邏路線"
+      - "自動化管線工序"
   android_overclock_card:
     display-name: "安卓超頻卡"
     category: ADVANCED
@@ -1611,6 +1756,85 @@ items:
       - "科技書詳細頁"
       - "可用於後續科技線"
       - "支援配方與解鎖鏈"
+  crude_oil:
+    display-name: "原油"
+    category: BASIC
+    icon: BLACK_DYE
+    item-model: "nexo:crude_oil"
+    description: "從地層中抽出的未精煉原油，可送進精煉塔。"
+    unlock: "geo_extractor"
+    use-cases:
+      - "地質抽取機抽取"
+      - "精煉塔 → 精煉油"
+  rock_salt:
+    display-name: "岩鹽"
+    category: BASIC
+    icon: WHITE_DYE
+    item-model: "nexo:rock_salt"
+    description: "從地層中抽出的鹽礦礦砂，可提煉成多種化工原料。"
+    unlock: "geo_extractor"
+    use-cases:
+      - "地質抽取機抽取"
+      - "化工合成基底"
+  sulfur_dust:
+    display-name: "硫磺粉"
+    category: BASIC
+    icon: YELLOW_DYE
+    item-model: "nexo:sulfur_dust"
+    description: "從地底硫磺礦中抽出的硫黃粉末，可製造火藥與火器。"
+    unlock: "geo_extractor"
+    use-cases:
+      - "地質抽取機抽取"
+      - "火藥與爆藥"
+  uranium_ore_raw:
+    display-name: "鈾礦原礦"
+    category: ADVANCED
+    icon: LIME_DYE
+    description: "含放射性的鈾礦原石，需後續精煉才能成為核燃料。"
+    unlock: "geo_extractor"
+    use-cases:
+      - "地質抽取機抽取"
+      - "精煉塔 → 鈾粉 → 電動離心機 → 濃縮鈾"
+  hazmat_helmet:
+    display-name: "防輻射頭盔"
+    category: ADVANCED
+    icon: LEATHER_HELMET
+    description: "鉛合金內襯的防輻射頭盔。單件防禦 25%，集齊四件套可完全免疫輻射。"
+    unlock: "nuclear_reactor"
+    use-cases:
+      - "核反應堆現場作業"
+      - "抽取鈾礦脈時防護"
+      - "/tech hazmat <玩家> 直接發放"
+  hazmat_chestplate:
+    display-name: "防輻射胸甲"
+    category: ADVANCED
+    icon: LEATHER_CHESTPLATE
+    description: "覆蓋胸腹要害的鉛合金胸甲。與其他 3 件套組合時完全阻斷輻射傷害。"
+    unlock: "nuclear_reactor"
+    use-cases:
+      - "核反應堆現場作業"
+      - "抽取鈾礦脈時防護"
+      - "/tech hazmat <玩家> 直接發放"
+  hazmat_leggings:
+    display-name: "防輻射護腿"
+    category: ADVANCED
+    icon: LEATHER_LEGGINGS
+    description: "附加鉛箔的防輻射護腿。四件組合可完全免疫核反應堆與鈾礦輻射。"
+    unlock: "nuclear_reactor"
+    use-cases:
+      - "核反應堆現場作業"
+      - "抽取鈾礦脈時防護"
+      - "/tech hazmat <玩家> 直接發放"
+  hazmat_boots:
+    display-name: "防輻射靴"
+    category: ADVANCED
+    icon: LEATHER_BOOTS
+    description: "能在輻射污染區域安全行走的鉛合金靴。四件組合可完全免疫輻射。"
+    unlock: "nuclear_reactor"
+    use-cases:
+      - "核反應堆現場作業"
+      - "抽取鈾礦脈時防護"
+      - "/tech hazmat <玩家> 直接發放"
   laser_lens:
     display-name: "雷射鏡"
     category: INTERMEDIATE
@@ -1893,7 +2117,7 @@ items:
   tin_ingot:
     display-name: "錫錠"
     category: BASIC
-    icon: IRON_NUGGET
+    icon: IRON_INGOT
     item-model: "nexo:tin_ingot"
     description: "錫粉冶煉而成的金屬錠，在電力系統中廣泛使用。"
     unlock: "furnace"
@@ -1916,7 +2140,6 @@ items:
     display-name: "錫線"
     category: INTERMEDIATE
     icon: LEAD
-    item-model: "nexo:tin_wire"
     description: "低阻抗錫質線材，適合訊號傳輸。"
     unlock: "wire_mill"
     use-cases:
@@ -2093,9 +2316,42 @@ machines:
     energy-generation: 2
     effect: "火焰 + 蒸氣"
     unlock: "initial"
+  lava_generator:
+    display-name: "岩漿發電機"
+    category: BASIC
+    block: MAGMA_BLOCK
+    head-texture: 9343ce58da54c79924a2c9331cfc417fe8ccbbea9be45a7ac85860a6c730
+    inputs: ["lava_bucket"]
+    outputs: ["energy_cell"]
+    energy-per-tick: 0
+    energy-generation: 5
+    effect: "岩漿燃燒"
+    unlock: "coal_generator"
+  bio_reactor:
+    display-name: "生質反應爐"
+    category: INTERMEDIATE
+    block: COMPOSTER
+    head-texture: 9343ce58da54c79924a2c9331cfc417fe8ccbbea9be45a7ac85860a6c730
+    inputs: ["crops"]
+    outputs: ["energy_cell"]
+    energy-per-tick: 0
+    energy-generation: 4
+    effect: "生質發酵"
+    unlock: "compressor"
+  wind_turbine:
+    display-name: "風力渦輪機"
+    category: INTERMEDIATE
+    block: LIGHTNING_ROD
+    head-texture: 5584432af6f382167120258d1eee8c87c6e75d9e479e7b0d4c7b6ad48cfeef
+    inputs: ["wind"]
+    outputs: ["energy_cell"]
+    energy-per-tick: 0
+    energy-generation: 3
+    effect: "風力發電（高空效率更佳）"
+    unlock: "assembler"
   compressor:
     display-name: "壓縮機"
-    category: INTERMEDIATE
+    category: BASIC
     block: PISTON
     inputs: ["iron_ingot", "iron_plate", "tin_ingot"]
     outputs: ["iron_plate", "steel_plate", "compressed_iron_bundle", "dense_carbon_block", "tin_plate"]
@@ -2261,7 +2517,7 @@ machines:
     unlock: "bio_lab"
   wire_mill:
     display-name: "拉線機"
-    category: INTERMEDIATE
+    category: BASIC
     block: ANVIL
     inputs: ["copper_ingot", "steel_plate", "tin_ingot"]
     outputs: ["copper_wire", "steel_wire", "wiring_bundle", "tin_wire"]
@@ -2368,7 +2624,7 @@ machines:
     category: ADVANCED
     block: BARREL
     head-texture: 55b21fd480c1c43bf3b9f842c869bdc3bc5acc2599bf2eb6b8a1c95dce978f
-    inputs: ["signal_relay", "chest"]
+    inputs: ["signal_relay", "machine_casing"]
     outputs: []
     energy-per-tick: 4
     effect: "物資回收"
@@ -2467,7 +2723,8 @@ machines:
     display-name: "電動粉碎機"
     category: ADVANCED
     block: BLAST_FURNACE
-    head-texture: 8cbca012f67e54de9aee72ff424e056c2ae58de5eacc949ab2bcd9683cec
+    nexo-id: "tech_grinder"
+    item-model: "techproject:grinder"
     inputs: ["iron_ore", "copper_ore"]
     outputs: ["iron_dust", "copper_dust"]
     energy-per-tick: 12
@@ -2733,6 +2990,14 @@ recipes:
     output: "harvest_unit"
     energy: 16
     guide: "伺服馬達 + 鐵板 → 製造機 → 收割單元"
+  recycler_junk:
+    machine: "recycler"
+    inputs: ["junk"]
+    input-amounts: [2]
+    output: "recycled_material"
+    count: 1
+    energy: 4
+    guide: "雜物×2 → 回收機 → 回收材料"
   recycler_material:
     machine: "recycler"
     inputs: ["wood_dust"]
@@ -2824,13 +3089,6 @@ recipes:
     output: "advanced_circuit"
     energy: 26
     guide: "電路板 + 邏輯閘 + 工業線束 + 黃銅錠 → 製造機 → 進階電路"
-  assembler_tech_wrench:
-    machine: "assembler"
-    inputs: ["iron_plate", "copper_ingot"]
-    input-amounts: [1, 1]
-    output: "tech_wrench"
-    energy: 18
-    guide: "鐵板 + 銅錠 → 合成器 → 科技扳手"
   assembler_logistics_wrench:
     machine: "assembler"
     inputs: ["tech_wrench", "logic_gate"]
@@ -2838,6 +3096,51 @@ recipes:
     output: "logistics_wrench"
     energy: 22
     guide: "科技扳手 + 邏輯閘 → 合成器 → 物流扳手"
+
+  # ── 天賦施法武器配方（前期低成本）──
+  assembler_spell_blade:
+    machine: "assembler"
+    inputs: ["iron_ingot", "copper_ingot"]
+    input-amounts: [2, 1]
+    output: "spell_blade"
+    energy: 12
+    guide: "鐵錠×2 + 銅錠 → 合成器 → 蒼浪之刃"
+  assembler_spell_bow:
+    machine: "assembler"
+    inputs: ["iron_ingot", "string"]
+    input-amounts: [1, 2]
+    output: "spell_bow"
+    energy: 12
+    guide: "鐵錠 + 線×2 → 合成器 → 疾風獵弓"
+  assembler_spell_pick:
+    machine: "assembler"
+    inputs: ["iron_ingot", "redstone"]
+    input-amounts: [2, 1]
+    output: "spell_pick"
+    energy: 12
+    guide: "鐵錠×2 + 紅石 → 合成器 → 大地之鎬"
+  assembler_spell_wrench:
+    machine: "assembler"
+    inputs: ["copper_ingot", "redstone"]
+    input-amounts: [2, 1]
+    output: "spell_wrench"
+    energy: 12
+    guide: "銅錠×2 + 紅石 → 合成器 → 動力扳手"
+  assembler_spell_staff:
+    machine: "assembler"
+    inputs: ["iron_ingot", "ender_pearl"]
+    input-amounts: [1, 1]
+    output: "spell_staff"
+    energy: 12
+    guide: "鐵錠 + 終界珍珠 → 合成器 → 奧術法杖"
+  assembler_spell_crystal:
+    machine: "assembler"
+    inputs: ["copper_ingot", "amethyst_shard"]
+    input-amounts: [1, 2]
+    output: "spell_crystal"
+    energy: 12
+    guide: "銅錠 + 紫水晶碎片×2 → 合成器 → 共鳴水晶"
+
   assembler_energy_cell:
     machine: "assembler"
     inputs: ["tin_ingot", "redstone"]
@@ -3132,6 +3435,30 @@ recipes:
     output: "refined_oil"
     energy: 10
     guide: "生質樹脂 + 礦漿 → 精煉塔 → 精煉油"
+  refinery_uranium:
+    machine: "refinery"
+    inputs: ["uranium_ore_raw", "ore_slurry"]
+    input-amounts: [2, 1]
+    output: "uranium_dust"
+    count: 1
+    energy: 18
+    guide: "鈾礦原礦×2 + 礦漿 → 精煉塔 → 鈾粉"
+  refinery_crude_oil:
+    machine: "refinery"
+    inputs: ["crude_oil"]
+    input-amounts: [2]
+    output: "refined_oil"
+    count: 2
+    energy: 12
+    guide: "原油×2 → 精煉塔 → 精煉油×2"
+  refinery_sulfur:
+    machine: "refinery"
+    inputs: ["crude_oil", "ore_slurry"]
+    input-amounts: [1, 1]
+    output: "sulfur_dust"
+    count: 2
+    energy: 14
+    guide: "原油 + 礦漿 → 精煉塔 → 硫磺粉×2"
   laser_lens_recipe:
     machine: "laser_engraver"
     inputs: ["optic_lens", "reinforced_glass"]
@@ -3244,6 +3571,13 @@ recipes:
     output: "android_explore_script"
     energy: 38
     guide: "量子框架×2 + 安卓記憶矩陣×2 → 量子處理器 → 安卓探索程序"
+  quantum_android_custom_script:
+    machine: "quantum_processor"
+    inputs: ["android_memory_matrix", "logic_gate"]
+    input-amounts: [2, 4]
+    output: "android_custom_script"
+    energy: 42
+    guide: "安卓記憶矩陣×2 + 邏輯閘×4 → 量子處理器 → 安卓自訂程序（可由玩家編寫 DSL）"
   advanced_android_station:
     machine: "advanced_assembler"
     inputs: ["android_frame", "android_memory_matrix"]
@@ -3260,11 +3594,11 @@ recipes:
     guide: "熱線圈 + 離子粉 → 進階製造機 → 電漿電池"
   assembler_android_item_interface:
     machine: "assembler"
-    inputs: ["signal_relay", "chest"]
+    inputs: ["signal_relay", "machine_casing"]
     input-amounts: [1, 1]
     output: "android_item_interface"
     energy: 16
-    guide: "訊號中繼器 + 箱子 → 製造機 → 安卓物品介面"
+    guide: "訊號中繼器 + 機械外殼 → 製造機 → 安卓物品介面"
   assembler_android_fuel_interface:
     machine: "assembler"
     inputs: ["emitter_node", "pressure_tube"]

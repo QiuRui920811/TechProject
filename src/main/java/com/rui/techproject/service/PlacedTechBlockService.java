@@ -1,6 +1,6 @@
 package com.rui.techproject.service;
 
-import com.rui.techproject.TechProjectPlugin;
+import com.rui.techproject.TechMCPlugin;
 import com.rui.techproject.model.TechItemDefinition;
 import com.rui.techproject.storage.StorageBackend;
 import com.rui.techproject.util.ItemFactoryUtil;
@@ -18,9 +18,9 @@ public final class PlacedTechBlockService {
     private final ItemFactoryUtil itemFactory;
     private final Map<LocationKey, String> placedBlocks = new ConcurrentHashMap<>();
     private StorageBackend storageBackend;
-    private final TechProjectPlugin plugin;
+    private final TechMCPlugin plugin;
 
-    public PlacedTechBlockService(final TechProjectPlugin plugin,
+    public PlacedTechBlockService(final TechMCPlugin plugin,
                                   final TechRegistry registry,
                                   final ItemFactoryUtil itemFactory) {
         this.plugin = plugin;

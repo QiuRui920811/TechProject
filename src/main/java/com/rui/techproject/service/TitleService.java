@@ -1,6 +1,6 @@
 package com.rui.techproject.service;
 
-import com.rui.techproject.TechProjectPlugin;
+import com.rui.techproject.TechMCPlugin;
 import org.bukkit.ChatColor;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -23,11 +23,11 @@ import java.util.regex.Pattern;
 public final class TitleService {
     private static final String FILE_NAME = "tech-titles.yml";
     private static final Pattern HEX_PATTERN = Pattern.compile("&#([0-9a-fA-F]{6})");
-    private final TechProjectPlugin plugin;
+    private final TechMCPlugin plugin;
     private final PlayerProgressService progressService;
     private final Map<String, String> titleMap = new LinkedHashMap<>();
 
-    public TitleService(final TechProjectPlugin plugin, final PlayerProgressService progressService) {
+    public TitleService(final TechMCPlugin plugin, final PlayerProgressService progressService) {
         this.plugin = plugin;
         this.progressService = progressService;
         this.reload();

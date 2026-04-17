@@ -1,4 +1,23 @@
 blueprints:
+  tech_wrench:
+    shape:
+      - "_ P"
+      - "_CP"
+      - "I__"
+    ingredients:
+      I: IRON_INGOT
+      C: COPPER_INGOT
+      P: tech:iron_plate
+    tutorial:
+      - 準備 1 個鐵錠、1 個銅錠與 1 個鐵板。
+      - 先在地上放鐵方塊，再把工作台放在上方形成進階工作台。
+      - 用進階工作台照配方擺出科技扳手。
+      - 左鍵對準機器：開關機省電。
+      - 蹲下+右鍵對準機器：瞬間拆除並保留儲存能源。
+      - 不用的機器記得關機，省電很重要！
+    placement:
+      - 這是手持工具，不需要放置。
+      - 建議隨身攜帶，隨時管理機器電力。
   gold_pan:
     shape:
       - "___"
@@ -972,3 +991,93 @@ blueprints:
     placement:
       - 建議與虛空信標和奇點壓縮機組成一條完整產線。
       - 此機器耗能極高，務必確保充足的電力來源。
+  industrial_centrifuge:
+    shape:
+      - "APA"
+      - "SMS"
+      - "APA"
+    ingredients:
+      A: tech:advanced_circuit
+      P: tech:iron_plate
+      S: tech:machine_component
+      M: IRON_BLOCK
+    tutorial:
+      - 工業離心機透過高速旋轉分離礦物成分。
+      - 需要先解鎖工業水洗機，才能使用離心機。
+      - 主要用於從純化鐵粉和鈾礦粉中提取稀有元素。
+      - 可產出鉻粉、鈷粉、濃縮鈾等高階材料。
+    placement:
+      - 建議放置在工業水洗機旁，形成完整的礦物處理產線。
+      - 此機器每 tick 消耗 20 電力，確保電力充足。
+  electrolytic_separator:
+    shape:
+      - "AGA"
+      - "WMW"
+      - "ARA"
+    ingredients:
+      A: tech:advanced_circuit
+      G: GLASS
+      W: tech:copper_wire
+      M: IRON_BLOCK
+      R: REDSTONE_BLOCK
+    tutorial:
+      - 電解分離機利用電流將化合物分解為基本元素。
+      - 需要先解鎖工業離心機，才能建造電解分離機。
+      - 輸入水桶和紅石，可產出氫、氧、硒粉和矽。
+      - 硒粉是太陽能板的關鍵材料。
+    placement:
+      - 建議放置在離心機產線後方，進一步精煉材料。
+      - 此機器每 tick 消耗 25 電力，是高耗能設備。
+  hazmat_helmet:
+    shape:
+      - "LNL"
+      - "L_L"
+      - "___"
+    ingredients:
+      L: tech:lead_ingot
+      N: tech:nano_coating
+    tutorial:
+      - 防輻射頭盔，單件可防禦 25% 輻射傷害。
+      - 集齊四件套（頭盔、胸甲、護腿、靴）可完全免疫輻射。
+      - 在核反應堆或鈾礦脈附近作業時必備。
+    placement:
+      - 穿戴在頭部裝備欄位。
+  hazmat_chestplate:
+    shape:
+      - "L_L"
+      - "LNL"
+      - "LLL"
+    ingredients:
+      L: tech:lead_ingot
+      N: tech:nano_coating
+    tutorial:
+      - 防輻射胸甲，覆蓋胸腹要害，單件防禦 25% 輻射。
+      - 四件組合可完全阻斷輻射傷害。
+    placement:
+      - 穿戴在胸部裝備欄位。
+  hazmat_leggings:
+    shape:
+      - "LNL"
+      - "L_L"
+      - "L_L"
+    ingredients:
+      L: tech:lead_ingot
+      N: tech:nano_coating
+    tutorial:
+      - 防輻射護腿，附加鉛箔隔離輻射，單件防禦 25%。
+      - 搭配其他三件防輻射裝備可完全免疫。
+    placement:
+      - 穿戴在腿部裝備欄位。
+  hazmat_boots:
+    shape:
+      - "___"
+      - "L_L"
+      - "LNL"
+    ingredients:
+      L: tech:lead_ingot
+      N: tech:nano_coating
+    tutorial:
+      - 防輻射靴，能在輻射區域安全行走，單件防禦 25%。
+      - 四件組合完全免疫核反應堆與鈾礦輻射。
+    placement:
+      - 穿戴在腳部裝備欄位。

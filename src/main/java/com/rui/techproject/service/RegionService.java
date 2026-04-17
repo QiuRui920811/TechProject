@@ -1,6 +1,6 @@
 package com.rui.techproject.service;
 
-import com.rui.techproject.TechProjectPlugin;
+import com.rui.techproject.TechMCPlugin;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
@@ -41,10 +41,10 @@ public final class RegionService {
     private final Map<UUID, float[]> savedSpeeds = new ConcurrentHashMap<>();
     private static final long COOLDOWN_MS = 15_000L;
 
-    private final TechProjectPlugin plugin;
+    private final TechMCPlugin plugin;
     private final File dataFile;
 
-    public RegionService(final TechProjectPlugin plugin) {
+    public RegionService(final TechMCPlugin plugin) {
         this.plugin = plugin;
         this.dataFile = new File(plugin.getDataFolder(), "tech-regions.yml");
         this.load();
@@ -211,10 +211,10 @@ public final class RegionService {
                 }
                 this.plugin.getSafeScheduler().runEntity(player, () -> {
                     this.restoreAndCleanup(player);
-                    player.showTitle(Title.title(
+                    this.plugin.getTitleMsgService().send(player,
                             Component.text("✔ 抵達目的地", NamedTextColor.GREEN, TextDecoration.BOLD),
                             Component.text("X:" + dest.getBlockX() + " Z:" + dest.getBlockZ(), NamedTextColor.GRAY),
-                            Title.Times.times(Duration.ofMillis(200), Duration.ofSeconds(2), Duration.ofMillis(500))));
+                            40L, Sound.BLOCK_NOTE_BLOCK_BELL);
                     player.playSound(dest, Sound.ENTITY_PLAYER_LEVELUP, 0.6f, 1.3f);
                     player.playSound(dest, "techproject:electric_keys", 0.35f, 1f);
                     this.launchFirework(dest);

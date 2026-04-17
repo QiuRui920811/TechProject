@@ -8,8 +8,8 @@
     <version>0.1.0</version>
     <packaging>jar</packaging>
 
-    <name>TechProject</name>
-    <description>Medium-sized technology framework plugin for Paper/Folia-safe scheduling.</description>
+    <name>TechMC</name>
+    <description>TechMC — medium-sized technology framework plugin for Paper/Folia-safe scheduling.</description>
 
     <properties>
         <maven.compiler.release>21</maven.compiler.release>
@@ -87,6 +87,14 @@
             <version>1.0-SNAPSHOT</version>
             <scope>system</scope>
             <systemPath>/media/ruiouo/d5339ede-13e7-49e2-8d9b-b6abc85649eb2/tech/plugins/SuperHopper-1.0-SNAPSHOT.jar</systemPath>
+        </dependency>
+        <!-- BetterModel（骨骼動畫 API） -->
+        <dependency>
+            <groupId>kr.toxicity</groupId>
+            <artifactId>bettermodel</artifactId>
+            <version>2.2.1</version>
+            <scope>system</scope>
+            <systemPath>/media/ruiouo/d5339ede-13e7-49e2-8d9b-b6abc85649eb2/tech/plugins/BetterModel-2.2.1-SNAPSHOT-481-paper.jar</systemPath>
         </dependency>
     </dependencies>
 

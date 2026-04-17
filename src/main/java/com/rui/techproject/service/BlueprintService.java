@@ -1,6 +1,6 @@
 package com.rui.techproject.service;
 
-import com.rui.techproject.TechProjectPlugin;
+import com.rui.techproject.TechMCPlugin;
 import com.rui.techproject.model.MachineDefinition;
 import com.rui.techproject.model.MachineRecipe;
 import com.rui.techproject.model.TechItemDefinition;
@@ -29,7 +29,7 @@ public final class BlueprintService {
     private final ItemFactoryUtil itemFactory;
     private final Map<String, BlueprintEntry> entries = new LinkedHashMap<>();
 
-    public BlueprintService(final TechProjectPlugin plugin,
+    public BlueprintService(final TechMCPlugin plugin,
                             final TechRegistry registry,
                             final ItemFactoryUtil itemFactory) {
         this.registry = registry;
@@ -43,14 +43,14 @@ public final class BlueprintService {
         return this.entries.get(this.normalize(id));
     }
 
-    public void reload(final TechProjectPlugin plugin) {
+    public void reload(final TechMCPlugin plugin) {
         this.entries.clear();
         this.load(plugin, "tech-blueprints.yml");
         this.ensureCraftableMachineBlueprints();
         this.unregisterRecipes(plugin);
     }
 
-    private void load(final TechProjectPlugin plugin, final String resourcePath) {
+    private void load(final TechMCPlugin plugin, final String resourcePath) {
         final File externalFile = new File(plugin.getDataFolder(), resourcePath);
         if (externalFile.isFile()) {
             final YamlConfiguration yaml = YamlConfiguration.loadConfiguration(externalFile);
@@ -92,7 +92,7 @@ public final class BlueprintService {
         }
     }
 
-    private void unregisterRecipes(final TechProjectPlugin plugin) {
+    private void unregisterRecipes(final TechMCPlugin plugin) {
         for (final BlueprintEntry entry : this.entries.values()) {
             if (!entry.registerRecipe()) {
                 continue;

@@ -1,6 +1,6 @@
 package com.rui.techproject.command;
 
-import com.rui.techproject.TechProjectPlugin;
+import com.rui.techproject.TechMCPlugin;
 import com.rui.techproject.util.ItemFactoryUtil;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
@@ -30,13 +30,13 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public final class HelperCommand implements CommandExecutor {
 
-    private final TechProjectPlugin plugin;
+    private final TechMCPlugin plugin;
     private final ItemFactoryUtil itemFactory;
     private final HttpClient httpClient;
     private final Map<UUID, Long> cooldowns = new ConcurrentHashMap<>();
     private static final long COOLDOWN_MS = 15_000L;
 
-    public HelperCommand(final TechProjectPlugin plugin, final ItemFactoryUtil itemFactory) {
+    public HelperCommand(final TechMCPlugin plugin, final ItemFactoryUtil itemFactory) {
         this.plugin = plugin;
         this.itemFactory = itemFactory;
         this.httpClient = HttpClient.newBuilder()

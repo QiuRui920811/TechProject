@@ -22,7 +22,7 @@
 #    4. /tech title clear — 取消稱號
 #
 #  聊天整合：
-#    TechProject 會自動在聊天訊息前顯示稱號並附帶 hover 資訊。
+#    TechMC 會自動在聊天訊息前顯示稱號並附帶 hover 資訊。
 #    請勿在 CMI GeneralFormat 中重複使用 %techproject_title%。
 #
 # ═══════════════════════════════════════════════════════════
@@ -183,3 +183,19 @@ titles:
     title: "&#9AA5B4〔&#8CE0F2低溫專家&#9AA5B4〕"
   refinery_master:
     title: "&#9AA5B4〔&#F5E0A0精煉大師&#9AA5B4〕"
+
+  # ── 系統擴展 ──
+  geo_prospector:
+    title: "&#9AA5B4〔&#C8A882地質勘探員&#9AA5B4〕"
+  geo_extractor_baron:
+    title: "&#9AA5B4〔&#D4A862地質開採男爵&#9AA5B4〕"
+  altar_initiate:
+    title: "&#9AA5B4〔&#C8B8F0祭壇學徒&#9AA5B4〕"
+  altar_high_priest:
+    title: "&#9AA5B4〔&#A08CF0祭壇大祭司&#9AA5B4〕"
+  radiation_safe:
+    title: "&#9AA5B4〔&#7CFC9A輻射安全官&#9AA5B4〕"
+  cargo_drawer_keeper:
+    title: "&#9AA5B4〔&#8ED8C8儲物櫃管理員&#9AA5B4〕"
+  android_programmer:
+    title: "&#9AA5B4〔&#7FDBFF人造人工程師&#9AA5B4〕"

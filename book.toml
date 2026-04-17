@@ -1,7 +1,7 @@
 [book]
-title = "TechProject 科技百科"
+title = "TechMC 科技百科"
 authors = ["RuCat"]
-description = "TechProject Minecraft 科技模組插件百科全書"
+description = "TechMC Minecraft 科技模組插件百科全書"
 language = "zh-TW"
 src = "docs/wiki"
 

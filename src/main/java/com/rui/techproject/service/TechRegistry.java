@@ -49,6 +49,7 @@ public final class TechRegistry {
         this.loadDataDrivenContent(plugin, "tech-content-expansion.yml");
         this.loadDataDrivenContent(plugin, "tech-content-megastructures.yml");
         this.loadDataDrivenContent(plugin, "tech-content-chickens.yml");
+        this.loadDataDrivenContent(plugin, "tech-content-industrial.yml");
         this.rebuildRecipesByMachineIndex();
     }
 

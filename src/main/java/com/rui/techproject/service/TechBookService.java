@@ -1,6 +1,6 @@
 package com.rui.techproject.service;
 
-import com.rui.techproject.TechProjectPlugin;
+import com.rui.techproject.TechMCPlugin;
 import com.rui.techproject.addon.TechAddonService;
 import com.rui.techproject.addon.TechInteractionDefinition;
 import com.rui.techproject.addon.TechInteractionType;
@@ -15,6 +15,7 @@ import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Bukkit;
 import org.bukkit.Color;
 import org.bukkit.Location;
@@ -35,10 +36,12 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 public final class TechBookService {
@@ -58,6 +61,10 @@ public final class TechBookService {
     private static final Key RECIPE_MENU_TITLE_FONT = Key.key("minecraft", "techproject_recipe");
     private static final String RECIPE_MENU_TITLE_GLYPH = "\uF004";
     private static final String RECIPE_MENU_TITLE = TECH_MENU_TITLE_SHIFT + RECIPE_MENU_TITLE_GLYPH;
+    // 原料總量沿用「稱號/成就」HUD 底圖
+    private static final Key ACHIEVEMENT_MENU_FONT = Key.key("minecraft", "techproject_achievement");
+    private static final String ACHIEVEMENT_MENU_GLYPH = "\uF007";
+    private static final String ACHIEVEMENT_MENU_TITLE = TECH_MENU_TITLE_SHIFT + ACHIEVEMENT_MENU_GLYPH;
     private static final String STARTER_GUIDE_ID = "starter_path";
     private static final String ANDROID_GUIDE_ID = "android_system_overview";
     private static final String MAIN_TITLE = "科技書";
@@ -96,7 +103,7 @@ public final class TechBookService {
             GuideCategory.SPECIAL
     };
 
-    private final TechProjectPlugin plugin;
+    private final TechMCPlugin plugin;
     private final TechRegistry registry;
     private final PlayerProgressService progressService;
     private final ItemFactoryUtil itemFactory;
@@ -110,7 +117,7 @@ public final class TechBookService {
     private final Map<UUID, Inventory> openBookInventories = new java.util.concurrent.ConcurrentHashMap<>();
     private final Map<UUID, String> lastBookAction = new java.util.concurrent.ConcurrentHashMap<>();
 
-    public TechBookService(final TechProjectPlugin plugin,
+    public TechBookService(final TechMCPlugin plugin,
                            final TechRegistry registry,
                            final PlayerProgressService progressService,
                            final ItemFactoryUtil itemFactory,
@@ -128,6 +135,10 @@ public final class TechBookService {
 
     public void openDefaultBook(final Player player) {
         this.playBookOpenSound(player);
+        // 新手引導：打開科技書
+        if (this.plugin.getTutorialChainService() != null) {
+            this.plugin.getTutorialChainService().onBookOpen(player);
+        }
         final UUID uuid = player.getUniqueId();
         if (this.isRememberPageEnabled(uuid)) {
             final String saved = this.lastBookAction.get(uuid);
@@ -149,7 +160,7 @@ public final class TechBookService {
         return newState;
     }
 
-    public void reload(final TechProjectPlugin plugin) {
+    public void reload(final TechMCPlugin plugin) {
         this.guidesByLocale.clear();
         this.machineStructurePreviews.clear();
         this.loadGuides(plugin);
@@ -162,7 +173,7 @@ public final class TechBookService {
 
     public void openCategoryHub(final Player player) {
         final Inventory inventory = this.createHudBookInventory();
-        inventory.setItem(4, this.itemFactory.tagGuiAction(this.guiButton("hub-wiki", Material.BOOK, "科技百科網站", List.of("點擊開啟科技專案網頁版百科", "包含機器、配方、教學等")), "wiki-link"));
+        inventory.setItem(4, this.itemFactory.tagGuiAction(this.guiButton("hub-wiki", Material.BOOK, "科技百科網站", List.of("點擊開啟 TechMC 網頁版百科", "包含機器、配方、教學等")), "wiki-link"));
 
         final GuideCategory[] order = HUB_ORDER;
         final int[] slots = {10, 12, 14, 16, 19, 21, 23, 25, 31};
@@ -170,6 +181,10 @@ public final class TechBookService {
             inventory.setItem(slots[index], this.renderGuideCategoryCard(player, order[index]));
         }
 
+        inventory.setItem(38, this.itemFactory.tagGuiAction(this.guiButton("hub-skill", Material.EXPERIENCE_BOTTLE, "共鳴技能", List.of("查看 6 大技能的等級與屬性加成", "可獲得戰鬥、採集、工程等被動")), "open-skill"));
+        inventory.setItem(40, this.itemFactory.tagGuiAction(this.guiButton("hub-quest", Material.WRITTEN_BOOK, "每日/每週任務", List.of("每日 3 個、每週 2 個任務", "領取經驗、資源、稀有獎勵")), "open-quest"));
+        inventory.setItem(42, this.itemFactory.tagGuiAction(this.guiButton("hub-talent", Material.ENCHANTING_TABLE, "天賦樹", List.of("投入天賦點解鎖被動加成與技能", "每個技能各有獨立天賦樹")), "open-talent"));
+        inventory.setItem(44, this.itemFactory.tagGuiAction(this.guiButton("hub-top", Material.GOLD_INGOT, "科技排行榜", List.of("查看等級、經驗、任務、擊殺等排名")), "open-top"));
         inventory.setItem(46, this.itemFactory.tagGuiAction(this.guiButton("hub-starter-guide", Material.KNOWLEDGE_BOOK, "新手起步", List.of("先看第一條生存科技流程")), "guide-direct:" + STARTER_GUIDE_ID));
         inventory.setItem(47, this.itemFactory.tagGuiAction(this.guiButton("hub-guide-list", Material.WRITABLE_BOOK, "科技指南", List.of("教學 / 配線 / 物流 / 升級")), "guide-list:0"));
         inventory.setItem(48, this.itemFactory.tagGuiAction(this.guiButton("hub-search", Material.COMPASS, "搜尋物品", List.of("點擊後在聊天輸入關鍵字", "可搜尋物品 / 機器 / 指南 / 儀式")), "search-prompt"));
@@ -475,39 +490,41 @@ public final class TechBookService {
                 "階級：" + item.tier().displayName(),
                 "用途：" + this.itemFactory.localizeInlineTerms(String.join(" / ", item.useCases()))
             )));
-            inventory.setItem(12, this.sectionPane(Material.LIGHT_BLUE_STAINED_GLASS_PANE, "取得", List.of("左欄固定放取得方式")));
             inventory.setItem(13, this.itemFactory.tagPreviewClaim(this.itemFactory.buildTechItem(item), "item:" + item.id()));
-            inventory.setItem(14, this.sectionPane(Material.LIME_STAINED_GLASS_PANE, "用途", List.of("右欄固定放用途與配方")));
-            final List<MachineRecipe> outputRecipes = this.registry.getRecipesForOutput(item.id());
-            final List<String> acquisitionLines = new ArrayList<>();
-            acquisitionLines.add("解鎖條件：" + this.itemFactory.formatUnlockRequirement(item.unlockRequirement()));
-            acquisitionLines.addAll(this.baseItemAcquisitionHints(item));
-            acquisitionLines.add("用途：" + this.itemFactory.localizeInlineTerms(String.join(" / ", item.useCases())));
-            acquisitionLines.add("提示：可放入機器輸入欄或物流網路");
-            inventory.setItem(21, this.info(Material.COMPASS, "取得方法", acquisitionLines));
 
-            final List<String> recipeSummaryLines = new ArrayList<>();
-            if (outputRecipes.isEmpty()) {
-                recipeSummaryLines.add("目前沒有可顯示的機器配方");
-            } else {
-                for (int index = 0; index < Math.min(4, outputRecipes.size()); index++) {
-                    recipeSummaryLines.add(this.describeRecipeFlow(outputRecipes.get(index)));
+            // ── 多方塊結構特殊展示 ──
+            final String multiblockType = this.resolveMultiblockType(item.id());
+            if (multiblockType != null && this.plugin.getMultiblockCraftingService() != null) {
+                final List<String> structureLines = new ArrayList<>();
+                structureLines.add("§f搭建方式：");
+                structureLines.add(this.multiblockBuildHint(multiblockType));
+                structureLines.add("§7右鍵發射器即可合成，不需要電力。");
+                inventory.setItem(22, this.info(Material.CRAFTING_TABLE, "結構說明", structureLines));
+                final List<String> recipeDescs = this.plugin.getMultiblockCraftingService().getRecipeDescriptions(multiblockType);
+                final int[] recipeSlots = {19, 20, 21, 28, 29, 30, 31, 32, 33, 34};
+                for (int ri = 0; ri < recipeDescs.size() && ri < recipeSlots.length; ri++) {
+                    inventory.setItem(recipeSlots[ri], this.info(Material.PAPER, "配方 #" + (ri + 1), List.of(recipeDescs.get(ri))));
                 }
+            } else {
+                final List<String> acquisitionLines = new ArrayList<>();
+                acquisitionLines.add("解鎖條件：" + this.itemFactory.formatUnlockRequirement(item.unlockRequirement()));
+                acquisitionLines.addAll(this.baseItemAcquisitionHints(item));
+                acquisitionLines.add("提示：可放入機器輸入欄或物流網路");
+                inventory.setItem(22, this.info(Material.COMPASS, "取得方法", acquisitionLines));
             }
-            inventory.setItem(22, this.info(Material.PAPER, "來源配方", recipeSummaryLines));
-            inventory.setItem(23, this.info(Material.KNOWLEDGE_BOOK, "用途", item.useCases().stream().map(this.itemFactory::localizeInlineTerms).toList()));
-            inventory.setItem(30, this.researchActionIcon(player, "item", item.id(), item.unlockRequirement(), this.researchCost(item), this.progressService.hasItemUnlocked(player.getUniqueId(), item.id())));
+            // ── 統一底列按鈕：47=返回 / 48=研究 / 49=配方 / 50=科技樹 ──
+            inventory.setItem(47, this.itemFactory.tagGuiAction(this.guiButton("detail-back-tier", Material.ARROW, "返回階級內容", List.of("{category}", "{tier}"), this.placeholders("category", item.guideCategory().displayName(), "tier", item.tier().displayName())), "back:" + item.guideCategory().name() + ":" + item.tier().name() + ":0"));
+            inventory.setItem(48, this.researchActionIcon(player, "item", item.id(), item.unlockRequirement(), this.researchCost(item), this.progressService.hasItemUnlocked(player.getUniqueId(), item.id())));
             final int totalRecipeViews = this.recipeViewsFor(item.id()).size();
             if (totalRecipeViews > 0) {
-                inventory.setItem(31, this.itemFactory.tagGuiAction(this.guiButton("detail-view-recipe", Material.KNOWLEDGE_BOOK, "查看配方圖", List.of(
+                inventory.setItem(49, this.itemFactory.tagGuiAction(this.guiButton("detail-view-recipe", Material.KNOWLEDGE_BOOK, "查看配方圖", List.of(
                     "共有 {count} 種取得方式",
                     "點擊後直接顯示九宮格 / 製程格"
                 ), this.placeholders("count", String.valueOf(totalRecipeViews))), "recipe-view:" + item.id() + ":0"));
-            } else {
-                inventory.setItem(31, this.info(Material.BARRIER, "暫無配方圖", List.of("這個物品目前沒有額外配方頁可查看")));
+            } else if (multiblockType == null) {
+                inventory.setItem(49, this.info(Material.BARRIER, "暫無配方圖", List.of("這個物品目前沒有額外配方頁可查看")));
             }
-            inventory.setItem(32, this.itemFactory.tagGuiAction(this.guiButton("detail-tech-tree", Material.MANGROVE_PROPAGULE, "科技樹前置線", this.buildTechTreeSummaryLines(item.id(), item.unlockRequirement()), this.indexedPlaceholders("line", this.buildTechTreeSummaryLines(item.id(), item.unlockRequirement()), 6)), "tree:item:" + item.id()));
-            inventory.setItem(49, this.itemFactory.tagGuiAction(this.guiButton("detail-back-tier", Material.ARROW, "返回階級內容", List.of("{category}", "{tier}"), this.placeholders("category", item.guideCategory().displayName(), "tier", item.tier().displayName())), "back:" + item.guideCategory().name() + ":" + item.tier().name() + ":0"));
+            inventory.setItem(50, this.itemFactory.tagGuiAction(this.guiButton("detail-tech-tree", Material.MANGROVE_PROPAGULE, "科技樹前置線", this.buildTechTreeSummaryLines(item.id(), item.unlockRequirement()), this.indexedPlaceholders("line", this.buildTechTreeSummaryLines(item.id(), item.unlockRequirement()), 6)), "tree:item:" + item.id()));
         }
 
         final MachineDefinition machine = this.registry.getMachine(targetId);
@@ -517,9 +534,7 @@ public final class TechBookService {
                 "階級：" + machine.tier().displayName(),
                 "功能：" + this.itemFactory.localizeInlineTerms(machine.effectDescription())
             )));
-            inventory.setItem(12, this.sectionPane(Material.LIGHT_BLUE_STAINED_GLASS_PANE, "前置材料", List.of("左欄固定放前置材料")));
             inventory.setItem(13, this.itemFactory.tagPreviewClaim(this.itemFactory.buildMachineGuiIcon(machine), "machine:" + machine.id()));
-            inventory.setItem(14, this.sectionPane(Material.LIME_STAINED_GLASS_PANE, "主要產物", List.of("右欄固定放主要產物")));
             final List<String> inputIds = this.itemFactory.machineDisplayInputIds(machine);
             for (int index = 0; index < 3; index++) {
                 inventory.setItem(19 + index, index < inputIds.size() ? this.clickableReference(inputIds.get(index), true) : this.recipeBlankPane());
@@ -533,33 +548,14 @@ public final class TechBookService {
             machineInfoLines.addAll(this.itemFactory.machineEnergySummaryLines(machine));
             inventory.setItem(22, this.info(Material.REDSTONE, "機器資訊", machineInfoLines));
             final int recipeViewCount = this.recipeViewsFor(machine.id()).size();
-            inventory.setItem(37, this.researchActionIcon(player, "machine", machine.id(), machine.unlockRequirement(), this.researchCost(machine), this.progressService.hasMachineUnlocked(player.getUniqueId(), machine.id())));
-            if (recipeViewCount > 1) {
-                inventory.setItem(40, this.itemFactory.tagGuiAction(this.guiButton("machine-detail-recipe-index", Material.KNOWLEDGE_BOOK, "配方總覽", List.of(
-                    "共有 {count} 種配方",
-                    "{hint}"
-                ), this.placeholders(
-                    "count", String.valueOf(recipeViewCount),
-                    "hint", "點擊打開配方一覽表格"
-                )), "recipe-view:" + machine.id() + ":0"));
-            } else if (recipeViewCount == 1) {
-                inventory.setItem(40, this.itemFactory.tagGuiAction(this.guiButton("machine-detail-view-recipe", Material.KNOWLEDGE_BOOK, "查看製作配方", List.of(
-                    "共有 1 種配方圖",
-                    "{hint}"
-                ), this.placeholders(
-                    "count", "1",
-                    "hint", "點擊後直接顯示九宮格 / 製程格"
-                )), "recipe-view:" + machine.id() + ":0"));
-            } else {
-                inventory.setItem(40, this.info(Material.BARRIER, "暫無配方圖", List.of("這台機器目前沒有額外配方頁可查看")));
-            }
-            inventory.setItem(43, this.itemFactory.tagGuiAction(this.guiButton("detail-tech-tree", Material.MANGROVE_PROPAGULE, "科技樹前置線", this.buildTechTreeSummaryLines(machine.id(), machine.unlockRequirement()), this.indexedPlaceholders("line", this.buildTechTreeSummaryLines(machine.id(), machine.unlockRequirement()), 6)), "tree:machine:" + machine.id()));
             final TechInteractionDefinition relatedInteraction = this.firstInteractionFor(machine.id());
             this.renderMachineStructurePreview(inventory, machine);
+
+            // ── 統一底列按鈕：47=返回 / 48=研究 / 49=配方 / 50=科技樹 / 51=互動（可無） ──
             inventory.setItem(47, this.itemFactory.tagGuiAction(this.guiButton("detail-back-tier", Material.ARROW, "返回階級內容", List.of("{category}", "{tier}"), this.placeholders("category", machine.guideCategory().displayName(), "tier", machine.tier().displayName())), "back:" + machine.guideCategory().name() + ":" + machine.tier().name() + ":0"));
             inventory.setItem(48, this.researchActionIcon(player, "machine", machine.id(), machine.unlockRequirement(), this.researchCost(machine), this.progressService.hasMachineUnlocked(player.getUniqueId(), machine.id())));
             if (recipeViewCount > 1) {
-                inventory.setItem(49, this.itemFactory.tagGuiAction(this.guiButton("machine-detail-recipe-index-2", Material.KNOWLEDGE_BOOK, "配方總覽", List.of(
+                inventory.setItem(49, this.itemFactory.tagGuiAction(this.guiButton("machine-detail-recipe-index", Material.KNOWLEDGE_BOOK, "配方總覽", List.of(
                     "共有 {count} 種配方",
                     "{hint}"
                 ), this.placeholders("count", String.valueOf(recipeViewCount), "hint", "點擊打開配方一覽表格")), "recipe-view:" + machine.id() + ":0"));
@@ -567,7 +563,9 @@ public final class TechBookService {
                 inventory.setItem(49, this.itemFactory.tagGuiAction(this.guiButton("machine-detail-view-recipe", Material.KNOWLEDGE_BOOK, "查看製作配方", List.of(
                     "共有 1 種配方圖",
                     "{hint}"
-                ), this.placeholders("count", "1", "hint", "點擊查看完整配方頁")), "recipe-view:" + machine.id() + ":0"));
+                ), this.placeholders("count", "1", "hint", "點擊後直接顯示九宮格 / 製程格")), "recipe-view:" + machine.id() + ":0"));
+            } else {
+                inventory.setItem(49, this.info(Material.BARRIER, "暫無配方圖", List.of("這台機器目前沒有額外配方頁可查看")));
             }
             inventory.setItem(50, this.itemFactory.tagGuiAction(this.guiButton("detail-tech-tree", Material.MANGROVE_PROPAGULE, "科技樹前置線", this.buildTechTreeSummaryLines(machine.id(), machine.unlockRequirement()), this.indexedPlaceholders("line", this.buildTechTreeSummaryLines(machine.id(), machine.unlockRequirement()), 6)), "tree:machine:" + machine.id()));
             if (relatedInteraction != null) {
@@ -608,6 +606,13 @@ public final class TechBookService {
         if (!view.detailLines().isEmpty()) {
             inventory.setItem(42, this.info(Material.PAPER, "配方說明", view.detailLines()));
         }
+        // 計算總原料按鈕（放在返回詳情的正上方）
+        inventory.setItem(35, this.itemFactory.tagGuiAction(
+                this.guiButton("recipe-raw-totals", Material.CHEST,
+                        "計算總原料需求",
+                        List.of("遞迴展開所有子配方", "累計一次生產所需的原始素材"),
+                        this.placeholders()),
+                "recipe-raw:" + targetId));
         // 右側配方選擇列表 — 讓玩家直接點選而非翻頁
         if (maxPage > 0) {
             final int[] selectorSlots = {5, 6, 7, 14, 15, 16, 25, 34, 43};
@@ -624,7 +629,7 @@ public final class TechBookService {
                 inventory.setItem(selectorSlots[index], current ? selectorIcon : this.itemFactory.tagGuiAction(selectorIcon, "recipe-view:" + targetId + ":" + index));
             }
         }
-        inventory.setItem(35, this.itemFactory.tagGuiAction(this.guiButton("recipe-view-prev", Material.LIME_DYE, "◀ 上一種配方", List.of("目前第 {page} / {max-page} 種", "{hint}"), this.placeholders("page", String.valueOf(safePage + 1), "max-page", String.valueOf(maxPage + 1), "hint", safePage <= 0 ? "已經是第一種" : "點擊查看上一種")), "recipe-view:" + targetId + ":" + Math.max(0, safePage - 1)));
+        inventory.setItem(26, this.itemFactory.tagGuiAction(this.guiButton("recipe-view-prev", Material.LIME_DYE, "◀ 上一種配方", List.of("目前第 {page} / {max-page} 種", "{hint}"), this.placeholders("page", String.valueOf(safePage + 1), "max-page", String.valueOf(maxPage + 1), "hint", safePage <= 0 ? "已經是第一種" : "點擊查看上一種")), "recipe-view:" + targetId + ":" + Math.max(0, safePage - 1)));
         inventory.setItem(44, this.itemFactory.tagGuiAction(this.guiButton("recipe-view-back-detail", Material.ARROW, "返回詳情", List.of("{name}"), this.placeholders("name", view.resultName())), (this.registry.getMachine(targetId) != null ? "machine:" : "item:") + targetId));
         inventory.setItem(53, this.itemFactory.tagGuiAction(this.guiButton("recipe-view-next", Material.MAGENTA_DYE, "下一種配方 ▶", List.of("目前第 {page} / {max-page} 種", "{hint}"), this.placeholders("page", String.valueOf(safePage + 1), "max-page", String.valueOf(maxPage + 1), "hint", safePage >= maxPage ? "已經是最後一種" : "點擊查看下一種")), "recipe-view:" + targetId + ":" + Math.min(maxPage, safePage + 1)));
         this.openBookInventory(player, inventory);
@@ -843,7 +848,8 @@ public final class TechBookService {
     }
 
     private static final java.util.Set<String> NON_REMEMBERABLE_ACTIONS = java.util.Set.of(
-            "hub", "search-prompt", "helper-prompt", "book-claim", "research", "achievements", "wiki-link"
+            "hub", "search-prompt", "helper-prompt", "book-claim", "research", "achievements", "wiki-link",
+            "open-skill", "open-quest", "open-top", "open-talent"
     );
 
     public void handleAction(final Player player, final String action) {
@@ -948,6 +954,7 @@ public final class TechBookService {
                 final int page = detail.length > 1 ? this.parsePage(detail[1]) : 0;
                 this.openRecipeViewer(player, targetId, page);
             }
+            case "recipe-raw" -> this.openRawMaterials(player, argument);
             case "tree" -> {
                 final String[] detail = argument.split(":");
                 if (detail.length < 2) {
@@ -968,6 +975,31 @@ public final class TechBookService {
                 this.openCategoryHub(player);
             }
             case "achievements" -> this.plugin.getAchievementGuiService().openAchievementGui(player);
+            case "open-skill" -> {
+                if (this.plugin.getSkillService() != null) {
+                    player.closeInventory();
+                    this.plugin.getSkillService().openSkillMenu(player);
+                }
+            }
+            case "open-quest" -> {
+                if (this.plugin.getDailyQuestService() != null) {
+                    player.closeInventory();
+                    this.plugin.getDailyQuestService().openQuestMenu(player);
+                }
+            }
+            case "open-top" -> {
+                if (this.plugin.getLeaderboardService() != null) {
+                    player.closeInventory();
+                    this.plugin.getLeaderboardService().openLeaderboardMenu(player);
+                }
+            }
+            case "open-talent" -> {
+                if (this.plugin.getTalentGuiService() != null) {
+                    player.closeInventory();
+                    this.plugin.getTalentGuiService().openTree(player,
+                            com.rui.techproject.service.SkillService.Skill.COMBAT);
+                }
+            }
             default -> {
             }
         }
@@ -1484,6 +1516,29 @@ public final class TechBookService {
         return false;
     }
 
+    /** 將 multiblock_xxx 物品 ID 映射到 MultiblockCraftingService 的類型常量。 */
+    private String resolveMultiblockType(final String itemId) {
+        if (itemId == null) return null;
+        return switch (itemId) {
+            case "multiblock_grind_stone" -> MultiblockCraftingService.GRIND_STONE;
+            case "multiblock_smeltery" -> MultiblockCraftingService.SMELTERY;
+            case "multiblock_pressure_chamber" -> MultiblockCraftingService.PRESSURE_CHAMBER;
+            case "multiblock_armor_forge" -> MultiblockCraftingService.ARMOR_FORGE;
+            default -> null;
+        };
+    }
+
+    /** 各多方塊結構的搭建提示。 */
+    private String multiblockBuildHint(final String type) {
+        return switch (type) {
+            case "grind_stone" -> "§e橡木柵欄§f 放在 §e發射器§f 上方";
+            case "smeltery" -> "§e地獄磚台階§f 放在 §e發射器§f 上方，旁邊用打火石 §c點火§f";
+            case "pressure_chamber" -> "§e平滑石台階§f 放在 §e發射器§f 上方";
+            case "armor_forge" -> "§e鐵砧§f 放在 §e發射器§f 上方";
+            default -> "§7未知結構";
+        };
+    }
+
     private String guideCategoryFlavor(final GuideCategory category) {
         return switch (category) {
             case MACHINES -> "核心加工設備、製程站與裝配主線";
@@ -1563,13 +1618,13 @@ public final class TechBookService {
         }, 2L);
     }
 
-    private void loadGuides(final TechProjectPlugin plugin) {
+    private void loadGuides(final TechMCPlugin plugin) {
         this.loadGuideResource(plugin, "default", "tech-guides.yml");
         this.loadGuideResource(plugin, "zh_tw", "tech-guides_zh_tw.yml");
         this.loadGuideResource(plugin, "en_us", "tech-guides_en_us.yml");
     }
 
-    private void loadStructurePreviews(final TechProjectPlugin plugin) {
+    private void loadStructurePreviews(final TechMCPlugin plugin) {
         for (final String resourcePath : CONTENT_STRUCTURE_FILES) {
             final File externalFile = new File(plugin.getDataFolder(), resourcePath);
             if (externalFile.isFile()) {
@@ -1612,7 +1667,7 @@ public final class TechBookService {
         }
     }
 
-    private void loadGuideResource(final TechProjectPlugin plugin, final String localeKey, final String resourcePath) {
+    private void loadGuideResource(final TechMCPlugin plugin, final String localeKey, final String resourcePath) {
         final File externalFile = new File(plugin.getDataFolder(), resourcePath);
         if (externalFile.isFile()) {
             final YamlConfiguration yaml = YamlConfiguration.loadConfiguration(externalFile);
@@ -1976,6 +2031,16 @@ public final class TechBookService {
         return Bukkit.createInventory(BOOK_VIEW_HOLDER, 54, this.recipeMenuTitle());
     }
 
+    private Component achievementMenuTitle() {
+        return Component.text(ACHIEVEMENT_MENU_TITLE, NamedTextColor.WHITE)
+                .decoration(TextDecoration.ITALIC, false)
+                .font(ACHIEVEMENT_MENU_FONT);
+    }
+
+    private Inventory createAchievementHudBookInventory() {
+        return Bukkit.createInventory(BOOK_VIEW_HOLDER, 54, this.achievementMenuTitle());
+    }
+
     private Inventory createBookInventory(final String title) {
         return Bukkit.createInventory(BOOK_VIEW_HOLDER, 54, this.plainBookTitle(title));
     }
@@ -2078,6 +2143,14 @@ public final class TechBookService {
             }
             player.sendMessage(this.itemFactory.success("研究完成：" + displayName + "  (-" + cost + " 研究點)"));
             this.playResearchUnlockEffect(player, tier);
+            // 新手引導：解鎖研究
+            if (this.plugin.getTutorialChainService() != null) {
+                this.plugin.getTutorialChainService().onResearchUnlock(player);
+            }
+            // 解鎖配方 + 消耗科技經驗 → 推進「研究」技能 XP（1:1 對應研究成本）
+            if (this.plugin.getSkillService() != null) {
+                this.plugin.getSkillService().grantXp(player, "research", cost);
+            }
         }
 
         switch (kind) {
@@ -2228,6 +2301,131 @@ public final class TechBookService {
         return this.itemFactory.buildGuiButton(key, fallbackMaterial, fallbackTitle, fallbackLore, placeholders);
     }
 
+    /** 遞迴展開 targetId 生產 1 份所需的最終原料總量。 */
+    public void openRawMaterials(final Player player, final String targetId) {
+        final List<MachineRecipe> recipes = this.registry.getRecipesForOutput(targetId);
+        if (recipes.isEmpty()) {
+            player.sendMessage(this.itemFactory.warning("此物品沒有配方可展開。"));
+            this.openDetail(player, targetId);
+            return;
+        }
+        final MachineRecipe top = recipes.get(0);
+        final long topOut = Math.max(1, top.outputCount());
+        final Map<String, Long> raw = new LinkedHashMap<>();
+        final Set<String> path = new HashSet<>();
+        path.add(targetId);
+        for (int i = 0; i < top.inputIds().size(); i++) {
+            final String inId = top.inputIds().get(i);
+            final int amt = top.inputAmount(i);
+            if (amt <= 0) continue;
+            this.walkRaw(inId, amt, raw, path, 1);
+        }
+        path.remove(targetId);
+
+        final Inventory inventory = this.createAchievementHudBookInventory();
+        final String targetName = this.itemFactory.displayNameForId(targetId);
+        inventory.setItem(4, this.info(Material.CHEST, "原料總計 — " + targetName, List.of(
+                "產出：" + targetName + " × " + topOut,
+                "向下展開所有子配方，列出最終原料總量",
+                "數量顯示於 lore，堆疊封頂僅作視覺參考"
+        )));
+
+        // 沿用稱號/成就 GUI 的展示槽位（rows 1-4 的 7×4 區塊）
+        final int[] gridSlots = {10, 11, 12, 13, 14, 15, 16,
+                                 19, 20, 21, 22, 23, 24, 25,
+                                 28, 29, 30, 31, 32, 33, 34,
+                                 37, 38, 39, 40, 41, 42, 43};
+        int idx = 0;
+        for (final Map.Entry<String, Long> entry : raw.entrySet()) {
+            if (idx >= gridSlots.length) break;
+            final String id = entry.getKey();
+            final long qty = entry.getValue();
+            ItemStack stack = this.displayStack(id);
+            if (stack == null) {
+                stack = new ItemStack(Material.PAPER);
+            }
+            stack.setAmount((int) Math.min(64, Math.max(1, qty)));
+            final ItemMeta meta = stack.getItemMeta();
+            if (meta != null) {
+                final Component baseName = this.localizedNameComponent(id, stack.getType());
+                meta.displayName(Component.empty()
+                        .decoration(TextDecoration.ITALIC, false)
+                        .append(baseName.colorIfAbsent(NamedTextColor.AQUA))
+                        .append(Component.text(" × " + qty, NamedTextColor.AQUA)));
+                final List<Component> lore = new ArrayList<>();
+                lore.add(this.itemFactory.muted("總需求：" + qty).decoration(TextDecoration.ITALIC, false));
+                lore.add(this.itemFactory.muted("點擊查看此物品").decoration(TextDecoration.ITALIC, false));
+                meta.lore(lore);
+                // 隱藏原版附加資訊（例：元件列表、命名空間 ID 等）
+                for (final ItemFlag flag : ItemFlag.values()) {
+                    meta.addItemFlags(flag);
+                }
+                stack.setItemMeta(meta);
+            }
+            inventory.setItem(gridSlots[idx], this.itemFactory.tagGuiAction(stack,
+                    (this.registry.getItem(id) != null ? "item:" : "material:") + id));
+            idx++;
+        }
+
+        inventory.setItem(49, this.itemFactory.tagGuiAction(
+                this.guiButton("recipe-raw-back", Material.ARROW, "返回配方",
+                        List.of("回到 " + targetName + " 的配方預覽"),
+                        this.placeholders()),
+                "recipe-view:" + targetId + ":0"));
+        this.openBookInventory(player, inventory);
+    }
+
+    private void walkRaw(final String id, final long qty, final Map<String, Long> raw,
+                         final Set<String> path, final int depth) {
+        if (id == null || id.isBlank() || qty <= 0L) return;
+        if (depth > 24 || path.contains(id)) {
+            raw.merge(id, qty, Long::sum);
+            return;
+        }
+        final List<MachineRecipe> recipes = this.registry.getRecipesForOutput(id);
+        if (recipes.isEmpty()) {
+            raw.merge(id, qty, Long::sum);
+            return;
+        }
+        final MachineRecipe r = recipes.get(0);
+        final long outCount = Math.max(1, r.outputCount());
+        final long batches = (qty + outCount - 1) / outCount;
+        path.add(id);
+        for (int i = 0; i < r.inputIds().size(); i++) {
+            final String inId = r.inputIds().get(i);
+            final int amt = r.inputAmount(i);
+            if (amt <= 0) continue;
+            this.walkRaw(inId, amt * batches, raw, path, depth + 1);
+        }
+        path.remove(id);
+    }
+
+    /** 產生完全中文化的名稱 Component：
+     *  - 若為插件內部 id（tech/machine/achievement），使用 displayNameForId
+     *  - 若對應原版材料，使用 translatable(translationKey)，由客戶端 zh_tw 語言檔翻譯
+     *  - 兩者皆失敗時退回 "未分類"
+     */
+    private Component localizedNameComponent(final String id, final Material fallbackMaterial) {
+        if (id != null && !id.isBlank()) {
+            final String resolved = this.itemFactory.displayNameForId(id);
+            if (resolved != null && !resolved.isBlank()
+                    && resolved.chars().anyMatch(ch -> Character.UnicodeScript.of(ch) == Character.UnicodeScript.HAN)) {
+                return Component.text(resolved);
+            }
+            final String normalized = id.trim().toLowerCase(Locale.ROOT);
+            final String materialToken = normalized.startsWith("minecraft:") ? normalized.substring(10)
+                    : normalized.startsWith("vanilla:") ? normalized.substring(8) : normalized;
+            final Material mat = Material.matchMaterial(materialToken.toUpperCase(Locale.ROOT));
+            if (mat != null) {
+                return Component.translatable(mat.translationKey());
+            }
+        }
+        if (fallbackMaterial != null) {
+            return Component.translatable(fallbackMaterial.translationKey());
+        }
+        return Component.text("未分類");
+    }
+
     private Map<String, String> placeholders(final String... values) {
         final Map<String, String> placeholders = new LinkedHashMap<>();
         for (int index = 0; index + 1 < values.length; index += 2) {
@@ -2260,18 +2458,30 @@ public final class TechBookService {
         if (stack == null) {
             return this.recipeBlankPane();
         }
-        if (this.registry.getMachine(id) != null) {
-            return this.itemFactory.tagPreviewClaim(this.itemFactory.tagGuiAction(stack, "machine:" + id), "machine:" + id);
+        // 正規化 ID：去掉 tech: / machine: / vanilla: / minecraft: 前綴，與 registry 保持一致
+        final String normalized = id == null ? "" : id.trim().toLowerCase(Locale.ROOT);
+        final String resolvedId;
+        if (normalized.startsWith("tech:")) {
+            resolvedId = normalized.substring(5);
+        } else if (normalized.startsWith("machine:")) {
+            resolvedId = normalized.substring(8);
+        } else if (normalized.startsWith("vanilla:") || normalized.startsWith("minecraft:")) {
+            resolvedId = normalized.contains(":") ? normalized.substring(normalized.indexOf(':') + 1) : normalized;
+        } else {
+            resolvedId = normalized;
         }
-        if (this.registry.getItem(id) != null) {
-            return this.itemFactory.tagPreviewClaim(this.itemFactory.tagGuiAction(stack, "item:" + id), "item:" + id);
+        if (this.registry.getMachine(resolvedId) != null) {
+            return this.itemFactory.tagPreviewClaim(this.itemFactory.tagGuiAction(stack, "machine:" + resolvedId), "machine:" + resolvedId);
         }
-        if (!this.registry.getRecipesForOutput(id).isEmpty() || this.blueprintService.get(id) != null) {
+        if (this.registry.getItem(resolvedId) != null) {
+            return this.itemFactory.tagPreviewClaim(this.itemFactory.tagGuiAction(stack, "item:" + resolvedId), "item:" + resolvedId);
+        }
+        if (!this.registry.getRecipesForOutput(resolvedId).isEmpty() || this.blueprintService.get(resolvedId) != null) {
             return this.itemFactory.tagPreviewClaim(
-                this.itemFactory.tagGuiAction(stack, "recipe-view:" + id + ":0"),
-                "material:" + id);
+                this.itemFactory.tagGuiAction(stack, "recipe-view:" + resolvedId + ":0"),
+                "material:" + resolvedId);
         }
-        return this.itemFactory.tagPreviewClaim(stack, "material:" + id);
+        return this.itemFactory.tagPreviewClaim(stack, "material:" + resolvedId);
     }
 
     private void renderMachineStructurePreview(final Inventory inventory, final MachineDefinition machine) {

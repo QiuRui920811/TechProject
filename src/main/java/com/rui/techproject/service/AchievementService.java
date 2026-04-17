@@ -1,6 +1,6 @@
 package com.rui.techproject.service;
 
-import com.rui.techproject.TechProjectPlugin;
+import com.rui.techproject.TechMCPlugin;
 import com.rui.techproject.model.TechTier;
 import com.rui.techproject.util.ItemFactoryUtil;
 import com.rui.techproject.util.SafeScheduler;
@@ -21,7 +21,7 @@ public final class AchievementService {
     private final ItemFactoryUtil itemFactory;
     private final SafeScheduler scheduler;
 
-    public AchievementService(final TechProjectPlugin plugin,
+    public AchievementService(final TechMCPlugin plugin,
                               final TechRegistry registry,
                               final PlayerProgressService progressService,
                               final ItemFactoryUtil itemFactory,
@@ -70,7 +70,10 @@ public final class AchievementService {
         this.tryUnlock(uuid, unlocked, "cook_10_meals", this.progressService.getStat(uuid, "meals_cooked") >= 10);
         this.tryUnlock(uuid, unlocked, "cook_50_meals", this.progressService.getStat(uuid, "meals_cooked") >= 50);
         this.tryUnlock(uuid, unlocked, "bio_researcher", this.progressService.hasMachineUnlocked(uuid, "gene_splicer"));
-        this.tryUnlock(uuid, unlocked, "orchard_keeper", this.progressService.getStat(uuid, "crop_varieties") >= 5
+        final long cropVarieties = java.util.stream.Stream.of("wheat", "carrots", "potatoes", "beetroots",
+                "nether_wart", "sweet_berry_bush", "cocoa", "melon_stem", "pumpkin_stem", "sugar_cane", "bamboo", "cactus")
+                .filter(c -> this.progressService.getStat(uuid, "crop_var_" + c) > 0).count();
+        this.tryUnlock(uuid, unlocked, "orchard_keeper", cropVarieties >= 5
             || this.progressService.getStat(uuid, "farm_harvested") >= 500);
 
         // ═══ 物流 ═══
@@ -121,7 +124,7 @@ public final class AchievementService {
         this.tryUnlock(uuid, unlocked, "collect_200", unlockedItemCount >= 200);
         this.tryUnlock(uuid, unlocked, "machine_collector_10", unlockedMachineCount >= 10);
         this.tryUnlock(uuid, unlocked, "machine_collector_20", unlockedMachineCount >= 20);
-        this.tryUnlock(uuid, unlocked, "all_machines_collector", unlockedMachineCount >= this.registry.allMachines().size());
+        this.tryUnlock(uuid, unlocked, "all_machines_collector", this.progressService.builtMachineCount(uuid) >= this.registry.allMachines().size());
 
         // ═══ 終局 ═══
         this.tryUnlock(uuid, unlocked, "quantum_engineer", this.progressService.hasItemUnlocked(uuid, "quantum_chip"));
@@ -145,6 +148,28 @@ public final class AchievementService {
         this.tryUnlock(uuid, unlocked, "cryo_specialist", this.progressService.hasMachineUnlocked(uuid, "cryo_distiller"));
         this.tryUnlock(uuid, unlocked, "refinery_master", this.progressService.hasMachineUnlocked(uuid, "refinery")
             && this.progressService.getStat(uuid, "total_processed") >= 500);
+
+        // ═══ 地質 / 祭壇 / 安卓自訂 / 輻射防護 ═══
+        this.tryUnlock(uuid, unlocked, "geo_prospector",
+            this.progressService.getStat(uuid, "geo_scanned") >= 5);
+        this.tryUnlock(uuid, unlocked, "geo_extractor_baron",
+            this.progressService.getStat(uuid, "geo_extracted") >= 500);
+        this.tryUnlock(uuid, unlocked, "altar_initiate",
+            this.progressService.getStat(uuid, "altar_rituals") >= 1);
+        this.tryUnlock(uuid, unlocked, "altar_high_priest",
+            this.progressService.getStat(uuid, "altar_rituals") >= 10);
+        this.tryUnlock(uuid, unlocked, "radiation_safe",
+            this.progressService.hasItemUnlocked(uuid, "hazmat_helmet")
+                && this.progressService.hasItemUnlocked(uuid, "hazmat_chestplate")
+                && this.progressService.hasItemUnlocked(uuid, "hazmat_leggings")
+                && this.progressService.hasItemUnlocked(uuid, "hazmat_boots"));
+        this.tryUnlock(uuid, unlocked, "cargo_drawer_keeper",
+            this.progressService.hasMachineUnlocked(uuid, "cargo_drawer"));
+        this.tryUnlock(uuid, unlocked, "android_programmer",
+            this.progressService.getStat(uuid, "android_custom_harvested")
+                + this.progressService.getStat(uuid, "android_custom_logs")
+                + this.progressService.getStat(uuid, "android_custom_kills")
+                + this.progressService.getStat(uuid, "android_custom_salvaged") >= 50);
 
         // ═══ 全成就 ═══
         final boolean allCore = this.registry.allAchievements().stream()

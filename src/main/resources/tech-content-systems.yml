@@ -9,6 +9,16 @@
 #   nexo-id: your_nexo_item_id
 # items 與 machines 都可用，設定後會優先使用該外觀。
 items:
+  junk:
+    display-name: 雜物
+    category: BASIC
+    icon: CLAY_BALL
+    item-model: "nexo:junk"
+    description: 真空吸入口撿拾的雜物殘片，可投入回收機。
+    unlock: "vacuum_inlet"
+    use-cases:
+      - "真空吸入口產出"
+      - "回收機原料"
   drill_head:
     display-name: 鑽頭組
     category: INTERMEDIATE
@@ -51,6 +61,7 @@ items:
     use-cases:
       - 作物收割機前置
       - 農業自動化
+  # junk 已在上方定義，不重複
   vacuum_core:
     display-name: 真空核心
     category: INTERMEDIATE
@@ -284,7 +295,7 @@ machines:
     outputs: [crops, crop_seeds, bio_fiber]
     energy-per-tick: 8
     effect: 收割附近成熟作物並自動重植
-    unlock: machine:auto_farm&item:harvest_matrix
+    unlock: machine:auto_farm&item:harvest_matrix&item:agri_module
     structure-preview:
       title: 收割架
       rows:
@@ -469,6 +480,32 @@ machines:
     energy-per-tick: 1
     effect: 高速物流中繼站，每次傳輸最多 8 件物品
     unlock: machine:assembler&item:bus_frame&item:servo_motor&item:routing_chip
+  geo_extractor:
+    display-name: 地質抽取機
+    category: ADVANCED
+    system-group: FIELD_AUTOMATION
+    machine-archetype: FIELD
+    visual-tier: ADVANCED
+    block: BLAST_FURNACE
+    item-model: "-1"
+    inputs: [drill_head, precision_frame]
+    outputs: [crude_oil, rock_salt, sulfur_dust, uranium_ore_raw, copper_dust]
+    energy-per-tick: 18
+    effect: 持續抽取腳下區塊的地質資源，需先用地質掃描儀勘探
+    unlock: machine:quarry_drill&item:drill_head&item:precision_frame
+  cargo_drawer:
+    display-name: 量子倉儲抽屜
+    category: ADVANCED
+    system-group: LOGISTICS
+    machine-archetype: FIELD
+    visual-tier: ADVANCED
+    block: BARREL
+    item-model: "-1"
+    inputs: [storage_crate, routing_chip]
+    outputs: [storage_crate]
+    energy-per-tick: 0
+    effect: 單一類型大容量倉儲；容量 50,000，可配合貨物網路自動進出
+    unlock: machine:storage_hub&item:storage_crate&item:routing_chip
 recipes:
   drill_head_recipe:
     machine: assembler
@@ -740,3 +777,45 @@ achievements:
     reward-xp: 400
     reward-tokens: 25
     hint: 建立完整的進階貨物物流系統
+  geo_prospector:
+    display-name: 地質勘探員
+    description: 使用地質掃描儀掃過至少 5 個區塊。
+    reward-xp: 140
+    reward-tokens: 6
+    hint: 右鍵地質掃描儀進行勘探
+  geo_extractor_baron:
+    display-name: 地層礦主
+    description: 以地質抽取機累計抽取 500 單位地質資源。
+    reward-xp: 260
+    reward-tokens: 12
+    hint: 放置地質抽取機到富礦脈區塊
+  altar_initiate:
+    display-name: 祭壇見習
+    description: 完成第一次古代祭壇儀式。
+    reward-xp: 180
+    reward-tokens: 8
+    hint: 把配方需要的物品丟在祭壇旁再右鍵核心
+  altar_high_priest:
+    display-name: 祭壇大祭司
+    description: 完成 10 次古代祭壇儀式。
+    reward-xp: 360
+    reward-tokens: 18
+    hint: 準備大量儀式素材長期操作祭壇
+  radiation_safe:
+    display-name: 輻射防護
+    description: 集齊防輻射四件套，達到完全輻射免疫。
+    reward-xp: 240
+    reward-tokens: 10
+    hint: 頭盔、胸甲、護腿、靴子都要解鎖
+  cargo_drawer_keeper:
+    display-name: 倉儲抽屜主
+    description: 建造第一座量子倉儲抽屜。
+    reward-xp: 200
+    reward-tokens: 10
+    hint: 在物流網路中放置量子倉儲抽屜
+  android_programmer:
+    display-name: 安卓程式員
+    description: 透過自訂程式指令完成總計 50 次工作（收成、砍樹、攻擊、拾取）。
+    reward-xp: 320
+    reward-tokens: 16
+    hint: 用 /tech android program 編寫程式並讓工作站執行

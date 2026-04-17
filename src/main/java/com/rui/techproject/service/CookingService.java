@@ -1,6 +1,6 @@
 package com.rui.techproject.service;
 
-import com.rui.techproject.TechProjectPlugin;
+import com.rui.techproject.TechMCPlugin;
 import com.rui.techproject.util.ItemFactoryUtil;
 import com.rui.techproject.util.LocationKey;
 import com.rui.techproject.util.SafeScheduler;
@@ -143,14 +143,14 @@ public final class CookingService {
     }
 
     // ── 欄位 ──
-    private final TechProjectPlugin plugin;
+    private final TechMCPlugin plugin;
     private final TechRegistry registry;
     private final ItemFactoryUtil itemFactory;
     private final SafeScheduler scheduler;
     private final Map<LocationKey, CookingSession> activeSessions = new ConcurrentHashMap<>();
     private final List<CookingRecipe> recipes = new ArrayList<>();
 
-    public CookingService(final TechProjectPlugin plugin,
+    public CookingService(final TechMCPlugin plugin,
                           final TechRegistry registry,
                           final ItemFactoryUtil itemFactory,
                           final SafeScheduler scheduler) {
@@ -308,7 +308,9 @@ public final class CookingService {
             }
         }
         this.activeSessions.clear();
-        this.removeOrphanedCookingDisplays();
+        // Folia: onDisable 在主控台線程，無法存取區域實體 (getEntities 會拋異常)
+        // 伺服器即將關閉，Display 實體會自動消失，不需要手動清理
+        // 下次啟動時 purgeOrphanedDisplays() 會清理殘留
     }
 
     /**
@@ -358,12 +360,11 @@ public final class CookingService {
         );
         player.showBossBar(session.bossBar);
 
-        // 開場 Title
-        player.showTitle(Title.title(
+        // 開場 Title（打字機）
+        this.plugin.getTitleMsgService().send(player,
                 Component.text("🔥", HEAT_COLOR),
                 Component.text("開始烹調 " + recipe.displayName, SUBTITLE_COLOR),
-                Title.Times.times(Duration.ofMillis(200), Duration.ofMillis(800), Duration.ofMillis(400))
-        ));
+                16L, Sound.BLOCK_NOTE_BLOCK_HAT);
 
         // 開場音效
         player.playSound(block.getLocation(), Sound.BLOCK_FIRE_AMBIENT, 0.6f, 1.0f);
@@ -429,13 +430,12 @@ public final class CookingService {
                 final int idx = session.nextInteractionIndex;
                 session.nextInteractionIndex++;
                 if (player != null) {
-                    player.showTitle(Title.title(
+                    this.plugin.getTitleMsgService().send(player,
                             Component.text(INTERACTION_LABELS[idx].substring(0, 2),
                                     TextColor.color(0xFFE066)).decoration(TextDecoration.BOLD, true),
                             Component.text(INTERACTION_LABELS[idx].substring(2).trim(),
                                     TextColor.color(0xFFF4C2)),
-                            Title.Times.times(Duration.ofMillis(50), Duration.ofMillis(800), Duration.ofMillis(200))
-                    ));
+                            16L, Sound.BLOCK_NOTE_BLOCK_HAT);
                     player.playSound(player.getLocation(), INTERACTION_CUES[idx], 0.8f, 1.2f);
                     player.playSound(player.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 0.3f, 2.0f);
                 }
@@ -482,11 +482,10 @@ public final class CookingService {
                     final IngredientAddition addition = additions.get(session.nextIngredientIndex);
                     session.nextIngredientIndex++;
                     if (player != null) {
-                        player.showTitle(Title.title(
+                        this.plugin.getTitleMsgService().send(player,
                                 Component.text("🧂", TextColor.color(0x88EEFF)).decoration(TextDecoration.BOLD, true),
                                 Component.text(addition.prompt, TextColor.color(0xCCF0FF)),
-                                Title.Times.times(Duration.ofMillis(50), Duration.ofMillis(800), Duration.ofMillis(200))
-                        ));
+                                16L, Sound.BLOCK_NOTE_BLOCK_HAT);
                         player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_HARP, 0.8f, 1.4f);
                         player.playSound(player.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 0.3f, 1.8f);
                     }
@@ -562,12 +561,11 @@ public final class CookingService {
         if (player != null && phaseIndex != session.lastPhase && !session.awaitingInteraction) {
             session.lastPhase = phaseIndex;
             if (phaseIndex > 0) {
-                player.showTitle(Title.title(
+                this.plugin.getTitleMsgService().send(player,
                         Component.text(PHASE_LABELS[phaseIndex].substring(0, 2), barColor)
                                 .decoration(TextDecoration.BOLD, true),
                         Component.text(PHASE_LABELS[phaseIndex].substring(2).trim(), SUBTITLE_COLOR),
-                        Title.Times.times(Duration.ofMillis(100), Duration.ofMillis(600), Duration.ofMillis(300))
-                ));
+                        12L, Sound.BLOCK_NOTE_BLOCK_HAT);
                 player.playSound(player.getLocation(), PHASE_SOUNDS[phaseIndex], 0.45f, 1.0f + phaseIndex * 0.1f);
             }
 
@@ -670,10 +668,8 @@ public final class CookingService {
                     ? Component.text(subtitleMsg, TextColor.color(0xFFD700))
                     : Component.text(subtitleMsg, DONE_COLOR);
 
-            player.showTitle(Title.title(
-                    titleText, subtitleText,
-                    Title.Times.times(Duration.ofMillis(100), Duration.ofMillis(1500), Duration.ofMillis(600))
-            ));
+            this.plugin.getTitleMsgService().send(player, titleText, subtitleText,
+                    30L, Sound.BLOCK_NOTE_BLOCK_HAT);
             player.sendActionBar(Component.text("🍽 " + session.recipe.displayName + " 已完成烹調" + bonusText, DONE_COLOR));
             player.hideBossBar(session.bossBar);
 
@@ -696,12 +692,11 @@ public final class CookingService {
         final String successMsg = idx >= 0 && idx < INTERACTION_SUCCESS.length
                 ? INTERACTION_SUCCESS[idx] : "操作成功！";
 
-        // 成功 Title
-        player.showTitle(Title.title(
+        // 成功 Title（打字機）
+        this.plugin.getTitleMsgService().send(player,
                 Component.text("✓", DONE_COLOR).decoration(TextDecoration.BOLD, true),
                 Component.text(successMsg, COOK_COLOR),
-                Title.Times.times(Duration.ofMillis(50), Duration.ofMillis(500), Duration.ofMillis(200))
-        ));
+                10L, Sound.BLOCK_NOTE_BLOCK_HAT);
 
         // 音效
         player.playSound(blockLoc, Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 0.7f, 1.5f);
@@ -759,11 +754,10 @@ public final class CookingService {
         this.removeDisplayEntity(session);
 
         // 失敗 Title
-        player.showTitle(Title.title(
+        this.plugin.getTitleMsgService().send(player,
                 Component.text("✖", TextColor.color(0xFF4444)).decoration(TextDecoration.BOLD, true),
                 Component.text("烹調失敗！非互動時間請勿操作烹飪台", TextColor.color(0xFF7B7B)),
-                Title.Times.times(Duration.ofMillis(100), Duration.ofMillis(1500), Duration.ofMillis(600))
-        ));
+                30L, Sound.BLOCK_NOTE_BLOCK_HAT);
         player.sendActionBar(Component.text("❌ " + session.recipe.displayName + " 燒焦了…", TextColor.color(0xFF4444)));
         player.playSound(blockLoc, Sound.BLOCK_FIRE_EXTINGUISH, 0.8f, 0.6f);
         player.playSound(blockLoc, Sound.ENTITY_VILLAGER_NO, 0.5f, 1.0f);
@@ -818,11 +812,10 @@ public final class CookingService {
         session.bonusTicks += INTERACTION_SPEED_BONUS;
 
         // 成功提示
-        player.showTitle(Title.title(
+        this.plugin.getTitleMsgService().send(player,
                 Component.text("✓", DONE_COLOR).decoration(TextDecoration.BOLD, true),
                 Component.text("加料成功！" + required.prompt, COOK_COLOR),
-                Title.Times.times(Duration.ofMillis(50), Duration.ofMillis(500), Duration.ofMillis(200))
-        ));
+                10L, Sound.BLOCK_NOTE_BLOCK_HAT);
         player.playSound(blockLoc, Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 0.7f, 1.5f);
         player.playSound(blockLoc, Sound.ITEM_BOTTLE_FILL, 0.5f, 1.3f);
 

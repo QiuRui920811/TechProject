@@ -1,6 +1,6 @@
 package com.rui.techproject.service;
 
-import com.rui.techproject.TechProjectPlugin;
+import com.rui.techproject.TechMCPlugin;
 import com.rui.techproject.storage.StorageBackend;
 import com.rui.techproject.util.ItemFactoryUtil;
 import com.rui.techproject.util.LocationKey;
@@ -29,7 +29,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ThreadLocalRandom;
 
 public final class TechCropService {
-    private final TechProjectPlugin plugin;
+    private final TechMCPlugin plugin;
     private final TechRegistry registry;
     private final ItemFactoryUtil itemFactory;
     private final Map<String, TechCropDefinition> crops = new LinkedHashMap<>();
@@ -50,7 +50,7 @@ public final class TechCropService {
                                       String matureTexture) {
     }
 
-    public TechCropService(final TechProjectPlugin plugin,
+    public TechCropService(final TechMCPlugin plugin,
                            final TechRegistry registry,
                            final ItemFactoryUtil itemFactory) {
         this.plugin = plugin;

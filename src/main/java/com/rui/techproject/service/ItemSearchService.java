@@ -1,6 +1,6 @@
 package com.rui.techproject.service;
 
-import com.rui.techproject.TechProjectPlugin;
+import com.rui.techproject.TechMCPlugin;
 import com.rui.techproject.util.ItemFactoryUtil;
 import com.rui.techproject.util.SafeScheduler;
 import net.kyori.adventure.text.Component;
@@ -41,14 +41,14 @@ public final class ItemSearchService {
 
     private static final String SEARCH_PREFIX = "?";
 
-    private final TechProjectPlugin plugin;
+    private final TechMCPlugin plugin;
     private final SafeScheduler scheduler;
     private final ItemFactoryUtil itemFactory;
 
     /** 追蹤正在使用鐵砧搜尋的玩家 */
     private final Set<UUID> anvilSearchPlayers = ConcurrentHashMap.newKeySet();
 
-    public ItemSearchService(final TechProjectPlugin plugin) {
+    public ItemSearchService(final TechMCPlugin plugin) {
         this.plugin = plugin;
         this.scheduler = plugin.getSafeScheduler();
         this.itemFactory = plugin.getItemFactory();

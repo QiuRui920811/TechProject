@@ -1,6 +1,6 @@
 package com.rui.techproject.listener;
 
-import com.rui.techproject.TechProjectPlugin;
+import com.rui.techproject.TechMCPlugin;
 import github.scarsz.discordsrv.DiscordSRV;
 import github.scarsz.discordsrv.api.Subscribe;
 import github.scarsz.discordsrv.api.events.GameChatMessagePreProcessEvent;
@@ -16,10 +16,10 @@ public final class DiscordSrvHook {
 
     private static final String SEARCH_PREFIX = "?";
 
-    private final TechProjectPlugin plugin;
+    private final TechMCPlugin plugin;
     private boolean registered = false;
 
-    public DiscordSrvHook(final TechProjectPlugin plugin) {
+    public DiscordSrvHook(final TechMCPlugin plugin) {
         this.plugin = plugin;
     }
 

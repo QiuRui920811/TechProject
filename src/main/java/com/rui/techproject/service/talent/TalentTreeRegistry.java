@@ -99,9 +99,9 @@ public final class TalentTreeRegistry {
 
         nodes.put(TalentSlot.KEYSTONE_RRL, new TalentNode(
                 Skill.COMBAT, TalentSlot.KEYSTONE_RRL,
-                "止水 ✦", "解鎖主動：3 秒無敵結界 + 反射傷害",
-                Material.BLUE_ICE,
-                Map.of(Stat.DEFENSE, 10.0, Stat.STRENGTH, 5.0),
+                "生生流轉 ✦", "解鎖主動：凝出具象水龍沿視線疾馳 40 格貫穿敵陣",
+                Material.HEART_OF_THE_SEA,
+                Map.of(Stat.STRENGTH, 10.0, Stat.DEFENSE, 5.0),
                 List.of("▸ 輸入 蹲右·蹲右·右 施放", "▸ 60 秒冷卻 / 消耗 80 魔力")));
 
         nodes.put(TalentSlot.NOTABLE_MID, new TalentNode(
@@ -148,8 +148,8 @@ public final class TalentTreeRegistry {
 
         nodes.put(TalentSlot.KEYSTONE_RLR, new TalentNode(
                 Skill.COMBAT, TalentSlot.KEYSTONE_RLR,
-                "奔流三式 ✦", "解鎖主動：3 段水流突進 + 殘影軌跡",
-                Material.NETHERITE_AXE,
+                "霹靂一閃 ✦", "解鎖主動：瞬間雷速拔刀斬 + 雷電軌跡",
+                Material.LIGHTNING_ROD,
                 Map.of(Stat.STRENGTH, 5.0, Stat.CRIT_CHANCE, 5.0),
                 List.of("▸ 輸入 蹲右·右·蹲右 施放", "▸ 18 秒冷卻 / 消耗 50 魔力")));
 
@@ -320,10 +320,10 @@ public final class TalentTreeRegistry {
 
         nodes.put(TalentSlot.KEYSTONE_LLR, new TalentNode(
                 Skill.GATHERING, TalentSlot.KEYSTONE_LLR,
-                "豐饒祝福 ✦", "解鎖主動：30 秒內掉落 ×3",
-                Material.ENCHANTED_GOLDEN_APPLE,
+                "大地裂擊 ✦", "解鎖主動：重鎬轟地製造前方裂縫拋飛敵人",
+                Material.IRON_PICKAXE,
                 Map.of(Stat.LUCK, 5.0),
-                List.of("▸ 輸入 右·右·蹲右 施放", "▸ 180 秒冷卻 / 消耗 60 魔力")));
+                List.of("▸ 輸入 右·右·蹲右 施放", "▸ 60 秒冷卻 / 消耗 60 魔力")));
 
         nodes.put(TalentSlot.KEYSTONE_RRL, new TalentNode(
                 Skill.GATHERING, TalentSlot.KEYSTONE_RRL,
@@ -434,10 +434,10 @@ public final class TalentTreeRegistry {
 
         nodes.put(TalentSlot.KEYSTONE_LLR, new TalentNode(
                 Skill.ENGINEERING, TalentSlot.KEYSTONE_LLR,
-                "自動修復 ✦", "解鎖主動：所有裝備回滿耐久",
-                Material.ANVIL,
+                "磁軌砲 ✦", "解鎖主動：蓄力後發射電磁穿透砲擊",
+                Material.LIGHTNING_ROD,
                 Map.of(Stat.DEFENSE, 5.0),
-                List.of("▸ 輸入 右·右·蹲右 施放", "▸ 300 秒冷卻 / 消耗 60 魔力")));
+                List.of("▸ 輸入 右·右·蹲右 施放", "▸ 60 秒冷卻 / 消耗 70 魔力")));
 
         nodes.put(TalentSlot.KEYSTONE_RRL, new TalentNode(
                 Skill.ENGINEERING, TalentSlot.KEYSTONE_RRL,
@@ -483,10 +483,11 @@ public final class TalentTreeRegistry {
 
         nodes.put(TalentSlot.KEYSTONE_LRL, new TalentNode(
                 Skill.ENGINEERING, TalentSlot.KEYSTONE_LRL,
-                "機械傀儡 ✦", "解鎖主動：召喚 30s 戰鬥機器人",
-                Material.IRON_GOLEM_SPAWN_EGG,
+                "自動砲台 ✦", "解鎖主動：部署 15 秒自動鎖定砲台",
+                Material.DISPENSER,
                 Map.of(Stat.DEFENSE, 5.0),
-                List.of("▸ 輸入 右·蹲右·右 施放", "▸ 120 秒冷卻 / 消耗 80 魔力")));
+                List.of("▸ 輸入 右·蹲右·右 施放", "▸ 90 秒冷卻 / 消耗 80 魔力",
+                        "▸ 每秒鎖定 10 格內最近敵人射擊")));
 
         nodes.put(TalentSlot.KEYSTONE_RLR, new TalentNode(
                 Skill.ENGINEERING, TalentSlot.KEYSTONE_RLR,
@@ -555,16 +556,16 @@ public final class TalentTreeRegistry {
 
         nodes.put(TalentSlot.KEYSTONE_RRL, new TalentNode(
                 Skill.RESEARCH, TalentSlot.KEYSTONE_RRL,
-                "量子複製 ✦", "解鎖主動：下次合成 ×2",
-                Material.END_CRYSTAL,
+                "虛空坍縮 ✦", "解鎖主動：製造黑洞吸引敵人後爆炸",
+                Material.ENDER_EYE,
                 Map.of(Stat.MAGIC_POWER, 5.0),
-                List.of("▸ 輸入 蹲右·蹲右·右 施放", "▸ 180 秒冷卻 / 消耗 80 魔力")));
+                List.of("▸ 輸入 蹲右·蹲右·右 施放", "▸ 90 秒冷卻 / 消耗 80 魔力")));
 
         nodes.put(TalentSlot.NOTABLE_MID, new TalentNode(
                 Skill.RESEARCH, TalentSlot.NOTABLE_MID,
-                "秘術專精", "一次性 +10 魔法強度、+3 魔力回復",
+                "秘術專精", "一次性 +10 魔法強度、+3 魔力回復、+5% 冷卻縮減",
                 Material.BOOK,
-                Map.of(Stat.MAGIC_POWER, 10.0, Stat.MANA_REGEN, 3.0),
+                Map.of(Stat.MAGIC_POWER, 10.0, Stat.MANA_REGEN, 3.0, Stat.COOLDOWN_REDUCTION, 5.0),
                 List.of("萬卷書中自有乾坤")));
 
         nodes.put(TalentSlot.MINOR_UP1, new TalentNode(
@@ -583,9 +584,9 @@ public final class TalentTreeRegistry {
 
         nodes.put(TalentSlot.NOTABLE_TL, new TalentNode(
                 Skill.RESEARCH, TalentSlot.NOTABLE_TL,
-                "烈焰核心", "一次性 +15 魔法強度",
+                "烈焰核心", "一次性 +15 魔法強度、+5% 冷卻縮減",
                 Material.FIRE_CHARGE,
-                Map.of(Stat.MAGIC_POWER, 15.0),
+                Map.of(Stat.MAGIC_POWER, 15.0, Stat.COOLDOWN_REDUCTION, 5.0),
                 List.of("心中烈火永不熄滅")));
 
         nodes.put(TalentSlot.NOTABLE_TR, new TalentNode(
@@ -655,17 +656,17 @@ public final class TalentTreeRegistry {
 
         nodes.put(TalentSlot.NOTABLE_LEFT, new TalentNode(
                 Skill.RESONANCE, TalentSlot.NOTABLE_LEFT,
-                "神聖光環", "一次性 +8 治療強度、+5 魔力回復",
+                "神聖光環", "一次性 +8 治療強度、+5 魔力回復、+5% 冷卻縮減",
                 Material.BEACON,
-                Map.of(Stat.HEALING_POWER, 8.0, Stat.MANA_REGEN, 5.0),
+                Map.of(Stat.HEALING_POWER, 8.0, Stat.MANA_REGEN, 5.0, Stat.COOLDOWN_REDUCTION, 5.0),
                 List.of("光芒四射的救贖")));
 
         nodes.put(TalentSlot.KEYSTONE_LLR, new TalentNode(
                 Skill.RESONANCE, TalentSlot.KEYSTONE_LLR,
-                "力量共鳴 ✦", "解鎖主動：隊友 +30% 傷 30s",
-                Material.GOLD_BLOCK,
+                "星爆 ✦", "解鎖主動：聚集星光能量後釋放結晶新星爆炸",
+                Material.AMETHYST_SHARD,
                 Map.of(Stat.HEALING_POWER, 5.0),
-                List.of("▸ 輸入 右·右·蹲右 施放", "▸ 120 秒冷卻 / 消耗 90 魔力")));
+                List.of("▸ 輸入 右·右·蹲右 施放", "▸ 75 秒冷卻 / 消耗 80 魔力")));
 
         nodes.put(TalentSlot.KEYSTONE_RRL, new TalentNode(
                 Skill.RESONANCE, TalentSlot.KEYSTONE_RRL,
@@ -697,9 +698,9 @@ public final class TalentTreeRegistry {
 
         nodes.put(TalentSlot.NOTABLE_TL, new TalentNode(
                 Skill.RESONANCE, TalentSlot.NOTABLE_TL,
-                "慈悲之主", "一次性 +15 治療強度",
+                "慈悲之主", "一次性 +15 治療強度、+5% 冷卻縮減",
                 Material.TOTEM_OF_UNDYING,
-                Map.of(Stat.HEALING_POWER, 15.0),
+                Map.of(Stat.HEALING_POWER, 15.0, Stat.COOLDOWN_REDUCTION, 5.0),
                 List.of("毫無保留地付出")));
 
         nodes.put(TalentSlot.NOTABLE_TR, new TalentNode(

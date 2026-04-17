@@ -1,6 +1,6 @@
 package com.rui.techproject.command;
 
-import com.rui.techproject.TechProjectPlugin;
+import com.rui.techproject.TechMCPlugin;
 import com.rui.techproject.service.TechRegistry;
 import com.rui.techproject.util.ItemFactoryUtil;
 import net.kyori.adventure.text.Component;
@@ -28,11 +28,11 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 public final class TechCommand implements CommandExecutor, TabCompleter {
-    private final TechProjectPlugin plugin;
+    private final TechMCPlugin plugin;
     private final TechRegistry registry;
     private final ItemFactoryUtil itemFactory;
 
-    public TechCommand(final TechProjectPlugin plugin, final TechRegistry registry, final ItemFactoryUtil itemFactory) {
+    public TechCommand(final TechMCPlugin plugin, final TechRegistry registry, final ItemFactoryUtil itemFactory) {
         this.plugin = plugin;
         this.registry = registry;
         this.itemFactory = itemFactory;
@@ -157,6 +157,204 @@ public final class TechCommand implements CommandExecutor, TabCompleter {
                 return true;
             }
             this.plugin.getTechBookService().openResearchDesk(player);
+            return true;
+        }
+
+        // ── 新系統指令：/tech skill | quest | top | event ──
+        if (args[0].equalsIgnoreCase("skill") || args[0].equalsIgnoreCase("skills")) {
+            if (!(sender instanceof Player player)) {
+                sender.sendMessage(Component.text("只有玩家可以開啟技能選單。", NamedTextColor.RED));
+                return true;
+            }
+            if (this.plugin.getSkillService() == null) {
+                sender.sendMessage(Component.text("技能系統尚未初始化。", NamedTextColor.RED));
+                return true;
+            }
+            this.plugin.getSkillService().openSkillMenu(player);
+            return true;
+        }
+        if (args[0].equalsIgnoreCase("talent") || args[0].equalsIgnoreCase("talents")) {
+            if (!(sender instanceof Player player)) {
+                sender.sendMessage(Component.text("只有玩家可以開啟天賦樹。", NamedTextColor.RED));
+                return true;
+            }
+            if (this.plugin.getTalentGuiService() == null) {
+                sender.sendMessage(Component.text("天賦系統尚未初始化。", NamedTextColor.RED));
+                return true;
+            }
+            // /tech talent                  → 開 COMBAT 樹（預設）
+            // /tech talent <skillId>        → 開指定樹
+            // /tech talent reset <skillId>  → 重置指定樹（消耗科技經驗）
+            if (args.length >= 2 && args[1].equalsIgnoreCase("reset")) {
+                if (args.length < 3) {
+                    sender.sendMessage(Component.text("用法：/tech talent reset <skillId>",
+                            NamedTextColor.RED));
+                    return true;
+                }
+                final com.rui.techproject.service.SkillService.Skill resetSkill =
+                        com.rui.techproject.service.SkillService.Skill.byId(args[2]);
+                if (resetSkill == null) {
+                    sender.sendMessage(Component.text("未知的技能：" + args[2], NamedTextColor.RED));
+                    return true;
+                }
+                if (this.plugin.getTalentService() != null
+                        && this.plugin.getTalentService().resetTree(player, resetSkill)) {
+                    this.plugin.getTalentGuiService().openTree(player, resetSkill);
+                }
+                return true;
+            }
+            final com.rui.techproject.service.SkillService.Skill openSkill;
+            if (args.length >= 2) {
+                openSkill = com.rui.techproject.service.SkillService.Skill.byId(args[1]);
+                if (openSkill == null) {
+                    sender.sendMessage(Component.text("未知的技能：" + args[1], NamedTextColor.RED));
+                    return true;
+                }
+            } else {
+                openSkill = com.rui.techproject.service.SkillService.Skill.COMBAT;
+            }
+            this.plugin.getTalentGuiService().openTree(player, openSkill);
+            return true;
+        }
+        if (args[0].equalsIgnoreCase("talentpoint") || args[0].equalsIgnoreCase("tp")) {
+            // /tech talentpoint <player> <skill|all> <amount>
+            // 管理員發放天賦點。skill 可填 combat/exploration/gathering/engineering/research/resonance/all。
+            if (!sender.hasPermission("techproject.admin")) {
+                sender.sendMessage(Component.text("缺少權限。", NamedTextColor.RED));
+                return true;
+            }
+            if (this.plugin.getTalentService() == null) {
+                sender.sendMessage(Component.text("天賦系統尚未初始化。", NamedTextColor.RED));
+                return true;
+            }
+            if (args.length < 4) {
+                sender.sendMessage(Component.text(
+                        "用法：/tech talentpoint <玩家> <skill|all> <數量>",
+                        NamedTextColor.RED));
+                return true;
+            }
+            final Player target = Bukkit.getPlayerExact(args[1]);
+            if (target == null) {
+                sender.sendMessage(Component.text("找不到線上玩家：" + args[1], NamedTextColor.RED));
+                return true;
+            }
+            final int amount;
+            try {
+                amount = Integer.parseInt(args[3]);
+            } catch (final NumberFormatException ignored) {
+                sender.sendMessage(Component.text("數量必須是整數。", NamedTextColor.RED));
+                return true;
+            }
+            if (amount <= 0) {
+                sender.sendMessage(Component.text("數量必須大於 0（要扣點請用 /tech talent reset）。",
+                        NamedTextColor.RED));
+                return true;
+            }
+            final String skillArg = args[2];
+            if ("all".equalsIgnoreCase(skillArg) || "*".equals(skillArg)) {
+                for (final com.rui.techproject.service.SkillService.Skill s
+                        : com.rui.techproject.service.SkillService.Skill.values()) {
+                    this.plugin.getTalentService().grantPoint(target, s, amount);
+                }
+                sender.sendMessage(Component.text(
+                        "已為 " + target.getName() + " 每棵樹 +" + amount + " 天賦點（共 6 棵）",
+                        NamedTextColor.GREEN));
+            } else {
+                final com.rui.techproject.service.SkillService.Skill skill =
+                        com.rui.techproject.service.SkillService.Skill.byId(skillArg);
+                if (skill == null) {
+                    sender.sendMessage(Component.text("未知的技能：" + skillArg
+                            + "（可用：combat/exploration/gathering/engineering/research/resonance/all）",
+                            NamedTextColor.RED));
+                    return true;
+                }
+                this.plugin.getTalentService().grantPoint(target, skill, amount);
+                sender.sendMessage(Component.text(
+                        "已為 " + target.getName() + " 的 " + skill.displayName
+                                + " 樹 +" + amount + " 天賦點",
+                        NamedTextColor.GREEN));
+            }
+            return true;
+        }
+        if (args[0].equalsIgnoreCase("geo")) {
+            // /tech geo <player> — 發放地質掃描儀
+            if (!sender.hasPermission("techproject.admin")) {
+                sender.sendMessage(Component.text("缺少權限。", NamedTextColor.RED));
+                return true;
+            }
+            if (args.length < 2) {
+                sender.sendMessage(Component.text("用法：/tech geo <玩家>", NamedTextColor.RED));
+                return true;
+            }
+            final Player target = Bukkit.getPlayerExact(args[1]);
+            if (target == null) {
+                sender.sendMessage(Component.text("找不到線上玩家：" + args[1], NamedTextColor.RED));
+                return true;
+            }
+            final org.bukkit.inventory.ItemStack scanner = this.plugin.getItemFactory().buildGeoScanner();
+            final var overflow = target.getInventory().addItem(scanner);
+            for (final org.bukkit.inventory.ItemStack leftover : overflow.values()) {
+                target.getWorld().dropItemNaturally(target.getLocation(), leftover);
+            }
+            target.sendMessage(Component.text("◆ 你獲得了一把地質掃描儀。", NamedTextColor.AQUA));
+            sender.sendMessage(Component.text(
+                    "已發放地質掃描儀給 " + target.getName(), NamedTextColor.GREEN));
+            return true;
+        }
+        if (args[0].equalsIgnoreCase("hazmat")) {
+            // /tech hazmat <player> — 發放 Hazmat 四件套
+            if (!sender.hasPermission("techproject.admin")) {
+                sender.sendMessage(Component.text("缺少權限。", NamedTextColor.RED));
+                return true;
+            }
+            if (args.length < 2) {
+                sender.sendMessage(Component.text("用法：/tech hazmat <玩家>", NamedTextColor.RED));
+                return true;
+            }
+            final Player target = Bukkit.getPlayerExact(args[1]);
+            if (target == null) {
+                sender.sendMessage(Component.text("找不到線上玩家：" + args[1], NamedTextColor.RED));
+                return true;
+            }
+            final com.rui.techproject.util.ItemFactoryUtil factory = this.plugin.getItemFactory();
+            for (final String slotId : new String[] {
+                    com.rui.techproject.service.RadiationService.HELMET_ID,
+                    com.rui.techproject.service.RadiationService.CHESTPLATE_ID,
+                    com.rui.techproject.service.RadiationService.LEGGINGS_ID,
+                    com.rui.techproject.service.RadiationService.BOOTS_ID }) {
+                final org.bukkit.inventory.ItemStack piece = factory.buildHazmatPiece(slotId);
+                final var overflow = target.getInventory().addItem(piece);
+                for (final org.bukkit.inventory.ItemStack leftover : overflow.values()) {
+                    target.getWorld().dropItemNaturally(target.getLocation(), leftover);
+                }
+            }
+            target.sendMessage(Component.text("☢ 你獲得了一整套 Hazmat 防護衣。", NamedTextColor.YELLOW));
+            sender.sendMessage(Component.text(
+                    "已發放 Hazmat 四件套給 " + target.getName(), NamedTextColor.GREEN));
+            return true;
+        }
+        if (args[0].equalsIgnoreCase("quest") || args[0].equalsIgnoreCase("quests")) {
+            if (!(sender instanceof Player player)) {
+                sender.sendMessage(Component.text("只有玩家可以開啟任務選單。", NamedTextColor.RED));
+                return true;
+            }
+            if (this.plugin.getDailyQuestService() == null) {
+                sender.sendMessage(Component.text("任務系統尚未初始化。", NamedTextColor.RED));
+                return true;
+            }
+            this.plugin.getDailyQuestService().openQuestMenu(player);
+            return true;
+        }
+        if (args[0].equalsIgnoreCase("top") || args[0].equalsIgnoreCase("leaderboard")) {
+            if (!(sender instanceof Player player)) {
+                sender.sendMessage(Component.text("只有玩家可以查看排行榜。", NamedTextColor.RED));
+                return true;
+            }
+            if (this.plugin.getLeaderboardService() == null) {
+                sender.sendMessage(Component.text("排行榜尚未初始化。", NamedTextColor.RED));
+                return true;
+            }
+            this.plugin.getLeaderboardService().openLeaderboardMenu(player);
             return true;
         }
 
@@ -370,6 +568,29 @@ public final class TechCommand implements CommandExecutor, TabCompleter {
             return true;
         }
 
+        if (args[0].equalsIgnoreCase("maze")) {
+            if (!sender.hasPermission("techproject.admin")) {
+                sender.sendMessage(Component.text("缺少權限。", NamedTextColor.RED));
+                return true;
+            }
+            if (args.length < 2) {
+                sender.sendMessage(Component.text("用法：/tech maze <opengate|closegate>", NamedTextColor.RED));
+                return true;
+            }
+            if (args[1].equalsIgnoreCase("opengate")) {
+                this.plugin.getMazeService().forceOpenGates();
+                sender.sendMessage(Component.text("✔ 已強制開啟 Glade 大門（30 秒後自動關閉）。", NamedTextColor.GREEN));
+                return true;
+            }
+            if (args[1].equalsIgnoreCase("closegate")) {
+                this.plugin.getMazeService().forceCloseGates();
+                sender.sendMessage(Component.text("✔ 已強制關閉 Glade 大門。", NamedTextColor.GREEN));
+                return true;
+            }
+            sender.sendMessage(Component.text("未知子指令。用法：/tech maze <opengate|closegate>", NamedTextColor.RED));
+            return true;
+        }
+
         if (args[0].equalsIgnoreCase("give")) {
             if (!sender.hasPermission("techproject.admin")) {
                 sender.sendMessage(Component.text("缺少權限。", NamedTextColor.RED));
@@ -520,6 +741,124 @@ public final class TechCommand implements CommandExecutor, TabCompleter {
             return true;
         }
 
+        if (args[0].equalsIgnoreCase("android")) {
+            // /tech android program <add|set|remove|clear|list|help> [args...]
+            if (!(sender instanceof Player player)) {
+                sender.sendMessage(Component.text("只有玩家可以使用此指令。", NamedTextColor.RED));
+                return true;
+            }
+            if (args.length < 2 || !args[1].equalsIgnoreCase("program")) {
+                sender.sendMessage(Component.text("用法：/tech android program <add|set|remove|clear|list|help> ...", NamedTextColor.YELLOW));
+                return true;
+            }
+            final String action = args.length >= 3 ? args[2].toLowerCase(Locale.ROOT) : "list";
+            if (action.equals("help")) {
+                sender.sendMessage(Component.text("=== 自訂安卓程式 ===", NamedTextColor.GOLD));
+                sender.sendMessage(Component.text(com.rui.techproject.service.AndroidProgrammingService.helpText(), NamedTextColor.AQUA));
+                sender.sendMessage(Component.text("對準安卓工作站方塊後輸入：", NamedTextColor.GRAY));
+                sender.sendMessage(Component.text("  /tech android program list", NamedTextColor.GRAY));
+                sender.sendMessage(Component.text("  /tech android program add MOVE N", NamedTextColor.GRAY));
+                sender.sendMessage(Component.text("  /tech android program add HARVEST", NamedTextColor.GRAY));
+                sender.sendMessage(Component.text("  /tech android program set <行> <指令...>", NamedTextColor.GRAY));
+                sender.sendMessage(Component.text("  /tech android program remove <行>", NamedTextColor.GRAY));
+                sender.sendMessage(Component.text("  /tech android program clear", NamedTextColor.GRAY));
+                sender.sendMessage(Component.text("執行時把「安卓自訂程序」放入工作站程序槽。", NamedTextColor.GRAY));
+                return true;
+            }
+            final Block looked = player.getTargetBlockExact(8);
+            if (looked == null) {
+                sender.sendMessage(Component.text("請對準一個安卓工作站方塊（8 格內）。", NamedTextColor.RED));
+                return true;
+            }
+            final var placed = this.plugin.getMachineService().placedMachineAt(looked);
+            if (placed == null || !"android_station".equalsIgnoreCase(placed.machineId())) {
+                sender.sendMessage(Component.text("所指的方塊不是安卓工作站。", NamedTextColor.RED));
+                return true;
+            }
+            if (!placed.owner().equals(player.getUniqueId()) && !sender.hasPermission("techproject.admin")) {
+                sender.sendMessage(Component.text("這不是你的安卓工作站。", NamedTextColor.RED));
+                return true;
+            }
+            final var prog = this.plugin.getAndroidProgrammingService();
+            if (prog == null) {
+                sender.sendMessage(Component.text("自訂程式服務未啟用。", NamedTextColor.RED));
+                return true;
+            }
+            final var key = placed.locationKey();
+            switch (action) {
+                case "list" -> {
+                    final var lines = prog.getProgram(key);
+                    sender.sendMessage(Component.text("=== 自訂程式（" + lines.size() + "/" + com.rui.techproject.service.AndroidProgrammingService.MAX_LINES + "） ===", NamedTextColor.GOLD));
+                    if (lines.isEmpty()) {
+                        sender.sendMessage(Component.text("（空） 使用 /tech android program add 新增指令。", NamedTextColor.GRAY));
+                    } else {
+                        for (int i = 0; i < lines.size(); i++) {
+                            sender.sendMessage(Component.text(String.format("%02d: %s", i, lines.get(i)), NamedTextColor.AQUA));
+                        }
+                    }
+                }
+                case "add" -> {
+                    if (args.length < 4) {
+                        sender.sendMessage(Component.text("用法：/tech android program add <指令...>", NamedTextColor.RED));
+                        return true;
+                    }
+                    final StringBuilder sb = new StringBuilder();
+                    for (int i = 3; i < args.length; i++) {
+                        if (i > 3) sb.append(' ');
+                        sb.append(args[i]);
+                    }
+                    if (prog.addLine(key, sb.toString())) {
+                        sender.sendMessage(Component.text("✔ 已新增：" + com.rui.techproject.service.AndroidProgrammingService.normalizeLine(sb.toString()), NamedTextColor.GREEN));
+                    } else {
+                        sender.sendMessage(Component.text("✖ 指令無效或程式已滿。" + com.rui.techproject.service.AndroidProgrammingService.helpText(), NamedTextColor.RED));
+                    }
+                }
+                case "set" -> {
+                    if (args.length < 5) {
+                        sender.sendMessage(Component.text("用法：/tech android program set <行> <指令...>", NamedTextColor.RED));
+                        return true;
+                    }
+                    try {
+                        final int idx = Integer.parseInt(args[3]);
+                        final StringBuilder sb = new StringBuilder();
+                        for (int i = 4; i < args.length; i++) {
+                            if (i > 4) sb.append(' ');
+                            sb.append(args[i]);
+                        }
+                        if (prog.setLine(key, idx, sb.toString())) {
+                            sender.sendMessage(Component.text("✔ 第 " + idx + " 行已更新。", NamedTextColor.GREEN));
+                        } else {
+                            sender.sendMessage(Component.text("✖ 行號超出範圍或指令無效。", NamedTextColor.RED));
+                        }
+                    } catch (final NumberFormatException ex) {
+                        sender.sendMessage(Component.text("行號必須是整數。", NamedTextColor.RED));
+                    }
+                }
+                case "remove" -> {
+                    if (args.length < 4) {
+                        sender.sendMessage(Component.text("用法：/tech android program remove <行>", NamedTextColor.RED));
+                        return true;
+                    }
+                    try {
+                        final int idx = Integer.parseInt(args[3]);
+                        if (prog.removeLine(key, idx)) {
+                            sender.sendMessage(Component.text("✔ 第 " + idx + " 行已移除。", NamedTextColor.GREEN));
+                        } else {
+                            sender.sendMessage(Component.text("✖ 行號超出範圍。", NamedTextColor.RED));
+                        }
+                    } catch (final NumberFormatException ex) {
+                        sender.sendMessage(Component.text("行號必須是整數。", NamedTextColor.RED));
+                    }
+                }
+                case "clear" -> {
+                    prog.clear(key);
+                    sender.sendMessage(Component.text("✔ 已清空程式。", NamedTextColor.GREEN));
+                }
+                default -> sender.sendMessage(Component.text("未知動作：" + action + "（試試 help）", NamedTextColor.RED));
+            }
+            return true;
+        }
+
         sender.sendMessage(Component.text("未知子命令。", NamedTextColor.RED));
         return true;
     }
@@ -637,11 +976,53 @@ public final class TechCommand implements CommandExecutor, TabCompleter {
                                                 @NotNull final String alias,
                                                 @NotNull final String[] args) {
         if (args.length == 1) {
-            final List<String> base = new ArrayList<>(List.of("book", "wrench", "research", "list", "stats", "achievements", "title", "search", "trust", "untrust", "trustlist"));
+            final List<String> base = new ArrayList<>(List.of("book", "wrench", "research", "list", "stats", "achievements", "title", "search", "trust", "untrust", "trustlist", "skill", "talent", "quest", "top", "event", "android"));
             if (sender.hasPermission("techproject.admin")) {
-                base.addAll(List.of("planet", "xp", "give", "reload", "cleandisplay", "debugtree", "tool", "create", "region", "set"));
+                base.addAll(List.of("planet", "xp", "give", "talentpoint", "hazmat", "geo", "reload", "cleandisplay", "debugtree", "tool", "create", "region", "set"));
             }
             return base;
+        }
+        if (args[0].equalsIgnoreCase("talentpoint") || args[0].equalsIgnoreCase("tp")) {
+            if (!sender.hasPermission("techproject.admin")) return List.of();
+            if (args.length == 2) {
+                final List<String> names = new ArrayList<>();
+                for (final Player p : Bukkit.getOnlinePlayers()) names.add(p.getName());
+                return names;
+            }
+            if (args.length == 3) {
+                return List.of("combat", "exploration", "gathering", "engineering", "research", "resonance", "all");
+            }
+            if (args.length == 4) {
+                return List.of("1", "5", "10", "43", "50");
+            }
+        }
+        if (args.length == 2 && args[0].equalsIgnoreCase("event") && sender.hasPermission("techproject.admin")) {
+            return List.of("HUNTER_WAVE", "TREASURE_CHEST", "RESONANCE", "RIFT_ELITE", "SILENT_GUARDIAN");
+        }
+        if (args.length == 2 && args[0].equalsIgnoreCase("hazmat") && sender.hasPermission("techproject.admin")) {
+            final List<String> names = new ArrayList<>();
+            for (final Player p : Bukkit.getOnlinePlayers()) names.add(p.getName());
+            return names;
+        }
+        if (args.length == 2 && args[0].equalsIgnoreCase("geo") && sender.hasPermission("techproject.admin")) {
+            final List<String> names = new ArrayList<>();
+            for (final Player p : Bukkit.getOnlinePlayers()) names.add(p.getName());
+            return names;
+        }
+        if (args[0].equalsIgnoreCase("android")) {
+            if (args.length == 2) return List.of("program");
+            if (args.length == 3 && args[1].equalsIgnoreCase("program")) {
+                return List.of("list", "add", "set", "remove", "clear", "help");
+            }
+            if (args.length == 4 && args[1].equalsIgnoreCase("program")
+                    && (args[2].equalsIgnoreCase("add") || args[2].equalsIgnoreCase("set"))) {
+                return List.of("MOVE", "HARVEST", "CHOP", "ATTACK", "SALVAGE", "WAIT", "RESET", "JUMP");
+            }
+            if (args.length == 5 && args[1].equalsIgnoreCase("program")
+                    && (args[2].equalsIgnoreCase("add") || (args[2].equalsIgnoreCase("set") && args.length == 5))
+                    && args[args.length - 2].equalsIgnoreCase("MOVE")) {
+                return List.of("N", "E", "S", "W", "U", "D");
+            }
         }
         if (args.length == 2 && args[0].equalsIgnoreCase("wrench")) {
             return List.of("get");

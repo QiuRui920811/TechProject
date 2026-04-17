@@ -1,4 +1,4 @@
-# TechProject canonical metadata overlay
+# TechMC canonical metadata overlay
 # 這份檔案不取代 content 定義，而是提供第一階段重構所需的顯式 schema。
 # 可覆蓋欄位：guide-category / system-group / item-class / machine-archetype / visual-tier / acquisition-mode / family / role / tier / display-name
 
@@ -2446,6 +2446,14 @@ machines:
     family: labyrinth_suit
     role: cuisine-ward
   maze_blade:
+    guide-category: SPECIAL
+    system-group: ENDGAME
+    item-class: ENDGAME_EQUIPMENT
+    visual-tier: ENDGAME
+    acquisition-mode: FIELD_COLLECTION
+    family: labyrinth_suit
+    role: maze-weapon
+  echo_crossbow:
     guide-category: SPECIAL
     system-group: ENDGAME
     item-class: ENDGAME_EQUIPMENT

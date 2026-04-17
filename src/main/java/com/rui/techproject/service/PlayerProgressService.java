@@ -1,6 +1,6 @@
 package com.rui.techproject.service;
 
-import com.rui.techproject.TechProjectPlugin;
+import com.rui.techproject.TechMCPlugin;
 import com.rui.techproject.storage.StorageBackend;
 import org.bukkit.entity.Player;
 
@@ -17,12 +17,12 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 public final class PlayerProgressService {
-    private final TechProjectPlugin plugin;
+    private final TechMCPlugin plugin;
     private final TechRegistry registry;
     private StorageBackend storageBackend;
     private final Map<UUID, PlayerProgress> cache = new ConcurrentHashMap<>();
 
-    public PlayerProgressService(final TechProjectPlugin plugin, final TechRegistry registry) {
+    public PlayerProgressService(final TechMCPlugin plugin, final TechRegistry registry) {
         this.plugin = plugin;
         this.registry = registry;
     }
@@ -74,6 +74,22 @@ public final class PlayerProgressService {
 
     public boolean unlockMachine(final UUID uuid, final String machineId) {
         return this.progress(uuid).unlockedMachines.add(machineId);
+    }
+
+    public boolean markMachineBuilt(final UUID uuid, final String machineId) {
+        return this.progress(uuid).builtMachines.add(machineId);
+    }
+
+    public boolean hasMachineBuilt(final UUID uuid, final String machineId) {
+        return this.progress(uuid).builtMachines.contains(machineId);
+    }
+
+    public Set<String> builtMachines(final UUID uuid) {
+        return Set.copyOf(this.progress(uuid).builtMachines);
+    }
+
+    public int builtMachineCount(final UUID uuid) {
+        return this.progress(uuid).builtMachines.size();
     }
 
     public boolean unlockAchievement(final UUID uuid, final String achievementId) {
@@ -247,6 +263,11 @@ public final class PlayerProgressService {
         this.progress(uuid).stats.put(statKey, value);
     }
 
+    /** 提供給 LeaderboardService 等服務列舉已載入玩家。 */
+    public java.util.Collection<UUID> cachedPlayerIds() {
+        return java.util.List.copyOf(this.cache.keySet());
+    }
+
     public void save(final UUID uuid) {
         final PlayerProgress progress = this.cache.get(uuid);
         if (progress == null) {
@@ -256,6 +277,7 @@ public final class PlayerProgressService {
         final Map<String, Object> data = new LinkedHashMap<>();
         data.put("unlocked-items", new ArrayList<>(progress.unlockedItems));
         data.put("unlocked-machines", new ArrayList<>(progress.unlockedMachines));
+        data.put("built-machines", new ArrayList<>(progress.builtMachines));
         data.put("unlocked-achievements", new ArrayList<>(progress.unlockedAchievements));
         data.put("unlocked-interactions", new ArrayList<>(progress.unlockedInteractions));
         for (final Map.Entry<String, Long> stat : progress.stats.entrySet()) {
@@ -265,7 +287,12 @@ public final class PlayerProgressService {
         data.put("tech-xp.spent", progress.techXpSpent);
         data.put("selected-title", progress.selectedTitle);
         if (this.storageBackend == null) return;
-        this.storageBackend.savePlayerProgress(uuid, data);
+        try {
+            this.storageBackend.savePlayerProgress(uuid, data);
+        } catch (final Exception ex) {
+            this.plugin.getLogger().severe("無法儲存玩家進度 " + uuid + "：" + ex.getMessage());
+            ex.printStackTrace();
+        }
     }
 
     /**
@@ -285,7 +312,11 @@ public final class PlayerProgressService {
     public void unlockByRequirement(final UUID uuid, final String unlockKey) {
         final String normalizedTrigger = this.normalizeTriggerKey(unlockKey);
         boolean changed;
+        int depth = 0;
         do {
+            if (++depth > 64) {
+                break;
+            }
             changed = false;
             for (final var item : this.registry.allItems()) {
                 if (this.hasItemUnlocked(uuid, item.id())) {
@@ -449,6 +480,9 @@ public final class PlayerProgressService {
     @SuppressWarnings("unchecked")
     private PlayerProgress load(final UUID uuid) {
         final PlayerProgress progress = new PlayerProgress();
+        if (this.storageBackend == null) {
+            return progress;
+        }
         final Map<String, Object> data = this.storageBackend.loadPlayerProgress(uuid);
         if (data == null) {
             return progress;
@@ -459,6 +493,9 @@ public final class PlayerProgressService {
         }
         if (data.get("unlocked-machines") instanceof List<?> machines) {
             machines.forEach(v -> { if (v instanceof String s) progress.unlockedMachines.add(s); });
+        }
+        if (data.get("built-machines") instanceof List<?> built) {
+            built.forEach(v -> { if (v instanceof String s) progress.builtMachines.add(s); });
         }
         if (data.get("unlocked-achievements") instanceof List<?> achievements) {
             achievements.forEach(v -> { if (v instanceof String s) progress.unlockedAchievements.add(s); });
@@ -536,6 +573,7 @@ public final class PlayerProgressService {
     public static final class PlayerProgress {
         private final Set<String> unlockedItems = ConcurrentHashMap.newKeySet();
         private final Set<String> unlockedMachines = ConcurrentHashMap.newKeySet();
+        private final Set<String> builtMachines = ConcurrentHashMap.newKeySet();
         private final Set<String> unlockedAchievements = ConcurrentHashMap.newKeySet();
         private final Set<String> unlockedInteractions = ConcurrentHashMap.newKeySet();
         private final Map<String, Long> stats = new ConcurrentHashMap<>();

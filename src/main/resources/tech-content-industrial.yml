@@ -1,0 +1,1355 @@
+# ═══════════════════════════════════════════════════════════
+#  工業擴展內容包 — 多方塊結構 / 合金 / 熱量 / 核電 / 鑄造
+# ═══════════════════════════════════════════════════════════
+
+# ───────────────────────────────────────
+#  新材料 (基礎 + 中間 + 高級)
+# ───────────────────────────────────────
+items:
+  # ── 基礎粉末 / 原料（tin/lead 已在 core.yml 定義，不重複）──
+  tungsten_dust:
+    display-name: "鎢粉"
+    category: ADVANCED
+    icon: LIGHT_GRAY_DYE
+    description: "極高熔點的金屬粉末，需要高爐才能冶煉。"
+    unlock: "blast_furnace"
+    use-cases: ["碳化鎢", "耐熱零件"]
+  tungsten_ingot:
+    display-name: "鎢錠"
+    category: ADVANCED
+    icon: NETHERITE_INGOT
+    description: "鎢錠，最耐高溫的金屬之一。"
+    unlock: "blast_furnace"
+    use-cases: ["碳化鎢錠", "耐熱零件"]
+  chromium_dust:
+    display-name: "鉻粉"
+    category: ADVANCED
+    icon: LIGHT_BLUE_DYE
+    description: "鉻的粉末，鈷鉻合金必要原料。"
+    unlock: "centrifuge"
+    use-cases: ["鈷鉻合金"]
+  chromium_ingot:
+    display-name: "鉻錠"
+    category: ADVANCED
+    icon: IRON_INGOT
+    description: "鉻錠，耐腐蝕金屬。"
+    unlock: "electric_smelter"
+    use-cases: ["鈷鉻合金"]
+  cobalt_dust:
+    display-name: "鈷粉"
+    category: ADVANCED
+    icon: BLUE_DYE
+    description: "鈷的粉末，鈷鉻合金必要原料。"
+    unlock: "centrifuge"
+    use-cases: ["鈷鉻合金"]
+  cobalt_ingot:
+    display-name: "鈷錠"
+    category: ADVANCED
+    icon: IRON_INGOT
+    description: "鈷錠，磁性金屬。"
+    unlock: "electric_smelter"
+    use-cases: ["鈷鉻合金"]
+  uranium_ore_dust:
+    display-name: "鈾礦粉"
+    category: ADVANCED
+    tier: TIER3
+    icon: LIME_DYE
+    description: "放射性礦物粉末，需要離心機提純。"
+    unlock: "centrifuge"
+    use-cases: ["鈾燃料棒前置"]
+  # enriched_uranium 已在 expansion.yml 定義，不重複
+  plutonium:
+    display-name: "鈽"
+    category: ADVANCED
+    tier: TIER4
+    icon: MAGENTA_DYE
+    description: "核反應爐副產物，可再利用為燃料。"
+    unlock: "nuclear_reactor"
+    use-cases: ["鈽燃料棒", "終局配方"]
+  selenium_dust:
+    display-name: "硒粉"
+    category: ADVANCED
+    icon: RED_DYE
+    description: "半導體材料，太陽能與感光元件使用。"
+    unlock: "electrolytic_separator"
+    use-cases: ["太陽能板", "感光元件"]
+  carbon_dust:
+    display-name: "碳粉"
+    category: BASIC
+    icon: BLACK_DYE
+    description: "碳的粉末形態，鋼與碳化物的基礎。"
+    unlock: "crusher"
+    use-cases: ["鋼", "碳棒", "碳板"]
+  coke:
+    display-name: "焦炭"
+    category: BASIC
+    icon: CHARCOAL
+    item-model: "nexo:coke"
+    description: "木炭或煤在缺氧條件下燒成的高純碳，高爐的理想燃料。"
+    unlock: "coke_oven"
+    use-cases: ["高爐燃料", "鋼"]
+  creosote_oil:
+    display-name: "雜酚油"
+    category: BASIC
+    icon: HONEY_BOTTLE
+    item-model: "nexo:creosote_oil"
+    description: "焦化副產物，可作為柴油發電機燃料。"
+    unlock: "coke_oven"
+    use-cases: ["柴油發電機燃料"]
+  carbide_dust:
+    display-name: "碳化鎢粉"
+    category: ADVANCED
+    icon: GRAY_DYE
+    description: "鎢與碳的化合物粉末，需要加壓才能成錠。"
+    unlock: "blast_furnace"
+    use-cases: ["碳化鎢錠"]
+  carbide_ingot:
+    display-name: "碳化鎢錠"
+    category: ADVANCED
+    icon: NETHERITE_INGOT
+    description: "極度堅硬的碳化鎢，用於切削工具與裝甲。"
+    unlock: "pressure_chamber"
+    use-cases: ["硬化合金", "切削刃"]
+  hydrogen:
+    display-name: "氫氣瓶"
+    category: ADVANCED
+    icon: GLASS_BOTTLE
+    description: "電解水產生的氫氣，高能燃料。"
+    unlock: "electrolytic_separator"
+    use-cases: ["燃氣渦輪燃料", "氫冷卻"]
+  oxygen:
+    display-name: "氧氣瓶"
+    category: ADVANCED
+    icon: GLASS_BOTTLE
+    description: "電解水產生的氧氣。"
+    unlock: "electrolytic_separator"
+    use-cases: ["氧氣切割", "生命維持"]
+  # coolant_cell 已在 core.yml 定義，不重複
+  # bronze_ingot 已在 core.yml 定義，不重複
+
+  # ── 合金錠 ──
+  steel_ingot:
+    display-name: "鋼錠"
+    category: BASIC
+    icon: IRON_INGOT
+    item-model: "nexo:steel_ingot"
+    description: "鐵與碳的合金，工業核心材料。"
+    unlock: "blast_furnace"
+    use-cases: ["中階機器框架", "鋼工具/裝甲"]
+  damascus_steel_ingot:
+    display-name: "大馬士革鋼錠"
+    category: ADVANCED
+    icon: IRON_INGOT
+    description: "經反覆摺疊鍛造的高碳鋼，兼具韌性與硬度。"
+    unlock: "industrial_smeltery"
+    use-cases: ["高階武器", "T3 配方"]
+  hardened_alloy_ingot:
+    display-name: "硬化合金錠"
+    category: ADVANCED
+    tier: TIER3
+    icon: NETHERITE_INGOT
+    description: "大馬士革鋼與碳化鎢的超硬合金。"
+    unlock: "industrial_smeltery"
+    use-cases: ["T3 機器框架", "重型裝甲"]
+  reinforced_alloy_ingot:
+    display-name: "強化合金錠"
+    category: ADVANCED
+    tier: TIER4
+    icon: NETHERITE_INGOT
+    description: "最高等級的合金，終局製造的骨架。"
+    unlock: "industrial_smeltery"
+    use-cases: ["T4 機器框架", "終極裝甲"]
+  ferrosilicon_ingot:
+    display-name: "矽鐵錠"
+    category: ADVANCED
+    icon: IRON_INGOT
+    description: "鐵與矽的合金，電子元件基材。"
+    unlock: "alloy_furnace"
+    use-cases: ["電子元件", "精密電路"]
+  solder_ingot:
+    display-name: "焊錫錠"
+    category: BASIC
+    icon: IRON_INGOT
+    item-model: "nexo:solder_ingot"
+    description: "錫與鉛的低熔點合金，用於焊接電路。"
+    unlock: "alloy_furnace"
+    use-cases: ["電路板焊接"]
+  gilded_iron_ingot:
+    display-name: "鍍金鐵錠"
+    category: BASIC
+    icon: GOLD_INGOT
+    item-model: "nexo:gilded_iron_ingot"
+    description: "鐵表面鍍金，兼具導電與結構強度。"
+    unlock: "alloy_furnace"
+    use-cases: ["導電線路", "中階電路"]
+  conductive_alloy_ingot:
+    display-name: "導電合金錠"
+    category: ADVANCED
+    icon: GOLD_INGOT
+    description: "金、石英與紅石的導電合金，高級電路核心。"
+    unlock: "industrial_smeltery"
+    use-cases: ["進階電路板"]
+  cobalt_chrome_ingot:
+    display-name: "鈷鉻合金錠"
+    category: ADVANCED
+    tier: TIER3
+    icon: IRON_INGOT
+    description: "鈷與鉻的耐熱合金，用於高溫環境零件。"
+    unlock: "industrial_smeltery"
+    use-cases: ["耐熱零件", "核反應爐外殼"]
+
+  # ── 熔融金屬（中間物）──
+  molten_iron:
+    display-name: "熔融鐵"
+    category: ADVANCED
+    icon: ORANGE_DYE
+    description: "液態鐵，需要在鑄造台中成型。"
+    unlock: "industrial_smeltery"
+    use-cases: ["鑄造台 → 鐵錠/鐵板/鐵齒輪"]
+  molten_copper:
+    display-name: "熔融銅"
+    category: ADVANCED
+    icon: ORANGE_DYE
+    description: "液態銅，需要在鑄造台中成型。"
+    unlock: "industrial_smeltery"
+    use-cases: ["鑄造台 → 銅錠/銅板/銅線"]
+  molten_gold:
+    display-name: "熔融金"
+    category: ADVANCED
+    icon: YELLOW_DYE
+    description: "液態金，需要在鑄造台中成型。"
+    unlock: "industrial_smeltery"
+    use-cases: ["鑄造台 → 金錠/金板/金線"]
+  molten_steel:
+    display-name: "熔融鋼"
+    category: ADVANCED
+    icon: RED_DYE
+    description: "液態鋼，需要在鑄造台中成型。"
+    unlock: "industrial_smeltery"
+    use-cases: ["鑄造台 → 鋼錠/鋼板/鋼齒輪"]
+  molten_bronze:
+    display-name: "熔融青銅"
+    category: ADVANCED
+    icon: ORANGE_DYE
+    description: "液態青銅，需要在鑄造台中成型。"
+    unlock: "industrial_smeltery"
+    use-cases: ["鑄造台 → 青銅錠/青銅板"]
+
+  # ── 零件（板/齒輪/線/管/棒）──
+  # iron_plate 已在 core.yml 定義，不重複
+  copper_plate:
+    display-name: "銅板"
+    category: BASIC
+    icon: HEAVY_WEIGHTED_PRESSURE_PLATE
+    item-model: "nexo:copper_plate"
+    description: "壓製銅板，散熱與導電用途。"
+    unlock: "industrial_compressor"
+    use-cases: ["散熱片", "導電板"]
+  # steel_plate 已在 core.yml 定義，不重複
+  bronze_plate:
+    display-name: "青銅板"
+    category: BASIC
+    icon: HEAVY_WEIGHTED_PRESSURE_PLATE
+    item-model: "nexo:bronze_plate"
+    description: "壓製青銅板，耐用零件。"
+    unlock: "industrial_compressor"
+    use-cases: ["初階機器零件"]
+  iron_gear:
+    display-name: "鐵齒輪"
+    category: BASIC
+    icon: PRISMARINE_SHARD
+    item-model: "nexo:iron_gear"
+    description: "精密切削的鐵齒輪，機械傳動核心。"
+    unlock: "casting_table"
+    use-cases: ["機械傳動", "粉碎機升級"]
+  steel_gear:
+    display-name: "鋼齒輪"
+    category: ADVANCED
+    icon: PRISMARINE_SHARD
+    description: "高強度鋼齒輪。"
+    unlock: "casting_table"
+    use-cases: ["高階機械傳動"]
+  # copper_wire 已在 core.yml 定義，不重複
+  gold_wire:
+    display-name: "金線"
+    category: ADVANCED
+    icon: STRING
+    description: "高導電金線。"
+    unlock: "casting_table"
+    use-cases: ["進階電路板"]
+  iron_rod:
+    display-name: "鐵棒"
+    category: BASIC
+    icon: STICK
+    item-model: "nexo:iron_rod"
+    description: "機械結構支撐桿。"
+    unlock: "casting_table"
+    use-cases: ["機器結構", "工具手柄"]
+  steel_rod:
+    display-name: "鋼棒"
+    category: ADVANCED
+    icon: STICK
+    description: "高強度結構桿。"
+    unlock: "casting_table"
+    use-cases: ["高階機器結構"]
+  iron_pipe:
+    display-name: "鐵管"
+    category: BASIC
+    icon: LIGHTNING_ROD
+    item-model: "nexo:iron_pipe"
+    description: "流體管道組件。"
+    unlock: "casting_table"
+    use-cases: ["流體傳輸", "冷卻系統"]
+  steel_pipe:
+    display-name: "鋼管"
+    category: ADVANCED
+    icon: LIGHTNING_ROD
+    description: "耐壓鋼管。"
+    unlock: "casting_table"
+    use-cases: ["高壓管道", "核反應爐管線"]
+
+  # ── 電子元件 ──
+  basic_circuit:
+    display-name: "基礎電路板"
+    category: BASIC
+    icon: MAP
+    item-model: "nexo:basic_circuit_board"
+    description: "銅線與焊錫構成的簡單電路。"
+    unlock: "assembler"
+    use-cases: ["T1 機器", "基礎控制器"]
+  # advanced_circuit 已在 core.yml 定義，不重複
+  precision_processor:
+    display-name: "精密處理器"
+    category: ADVANCED
+    tier: TIER3
+    icon: MAP
+    description: "包含矽晶片與進階電路的處理單元。"
+    unlock: "assembler"
+    use-cases: ["T3 機器", "自動化"]
+  # quantum_processor 已在 core.yml 定義，不重複
+
+  # ── 鑄造模具 ──
+  ingot_mold:
+    display-name: "錠模"
+    category: BASIC
+    icon: BRICK
+    item-model: "nexo:ingot_mold"
+    description: "將熔融金屬鑄造成錠的模具。"
+    unlock: "casting_table"
+    use-cases: ["鑄造台"]
+  plate_mold:
+    display-name: "板模"
+    category: BASIC
+    icon: BRICK
+    item-model: "nexo:plate_mold"
+    description: "將熔融金屬鑄造成板的模具。"
+    unlock: "casting_table"
+    use-cases: ["鑄造台"]
+  gear_mold:
+    display-name: "齒輪模"
+    category: BASIC
+    icon: BRICK
+    item-model: "nexo:gear_mold"
+    description: "將熔融金屬鑄造成齒輪的模具。"
+    unlock: "casting_table"
+    use-cases: ["鑄造台"]
+  wire_mold:
+    display-name: "線模"
+    category: BASIC
+    icon: BRICK
+    item-model: "nexo:wire_mold"
+    description: "將熔融金屬鑄造成線的模具。"
+    unlock: "casting_table"
+    use-cases: ["鑄造台"]
+  rod_mold:
+    display-name: "棒模"
+    category: BASIC
+    icon: BRICK
+    item-model: "nexo:rod_mold"
+    description: "將熔融金屬鑄造成棒的模具。"
+    unlock: "casting_table"
+    use-cases: ["鑄造台"]
+  pipe_mold:
+    display-name: "管模"
+    category: BASIC
+    icon: BRICK
+    item-model: "nexo:pipe_mold"
+    description: "將熔融金屬鑄造成管的模具。"
+    unlock: "casting_table"
+    use-cases: ["鑄造台"]
+
+  # ── 核電材料 ──
+  uranium_fuel_rod:
+    display-name: "工業鈾燃料棒"
+    category: ADVANCED
+    tier: TIER3
+    icon: END_ROD
+    description: "工業級核反應爐的高效燃料，使用後變為廢鈾棒。"
+    unlock: "nuclear_reactor"
+    use-cases: ["核反應爐燃料（工業版）"]
+  depleted_uranium_rod:
+    display-name: "廢鈾棒"
+    category: ADVANCED
+    tier: TIER3
+    icon: END_ROD
+    description: "用完的鈾燃料棒，可透過工業離心機回收鈽。"
+    unlock: "nuclear_reactor"
+    use-cases: ["工業離心機 → 鈽"]
+  plutonium_fuel_rod:
+    display-name: "鈽燃料棒"
+    category: ADVANCED
+    tier: TIER4
+    icon: END_ROD
+    description: "鈽製成的燃料棒，比鈾更高效。"
+    unlock: "nuclear_reactor"
+    use-cases: ["核反應爐（高效）"]
+  reactor_casing:
+    display-name: "反應爐外殼"
+    category: ADVANCED
+    tier: TIER3
+    icon: IRON_BLOCK
+    description: "鈷鉻合金製成的耐輻射外殼。"
+    unlock: "nuclear_reactor"
+    use-cases: ["核反應爐多方塊結構"]
+  radiation_shield:
+    display-name: "輻射屏蔽板"
+    category: ADVANCED
+    tier: TIER3
+    icon: IRON_BLOCK
+    description: "鉛板製成的輻射屏蔽。"
+    unlock: "pressure_chamber"
+    use-cases: ["核反應爐安全設備"]
+  carbon_plate:
+    display-name: "碳板"
+    category: BASIC
+    icon: BLACK_CARPET
+    item-model: "nexo:carbon_plate"
+    description: "壓縮碳粉製成，輕量高強度。"
+    unlock: "industrial_compressor"
+    use-cases: ["輕量裝甲", "碳化物前置"]
+  carbon_rod:
+    display-name: "碳棒"
+    category: BASIC
+    icon: STICK
+    item-model: "nexo:carbon_rod"
+    description: "碳製成的導電棒。"
+    unlock: "industrial_compressor"
+    use-cases: ["電極", "機器零件"]
+  synthetic_diamond:
+    display-name: "合成鑽石"
+    category: ADVANCED
+    icon: DIAMOND
+    description: "高壓壓縮碳粉而成。"
+    unlock: "pressure_chamber"
+    use-cases: ["強化合金", "切削工具"]
+
+# ───────────────────────────────────────
+#  新機器
+# ───────────────────────────────────────
+machines:
+  # ── Phase 1：基礎工業 ──
+  coke_oven:
+    display-name: "焦爐"
+    category: BASIC
+    block: BRICKS
+    machine-archetype: PROCESSOR
+    inputs: ["coal", "charcoal"]
+    outputs: ["coke", "creosote_oil"]
+    energy-per-tick: 0
+    effect: "無需電力，緩慢碳化"
+    unlock: "initial"
+  alloy_furnace:
+    display-name: "合金爐"
+    category: INTERMEDIATE
+    block: BLAST_FURNACE
+    machine-archetype: PROCESSOR
+    inputs: ["copper_ingot", "tin_ingot"]
+    outputs: ["bronze_ingot", "solder_ingot", "gilded_iron_ingot", "ferrosilicon_ingot"]
+    energy-per-tick: 15
+    effect: "雙輸入合金配方"
+    unlock: "furnace"
+  industrial_washer:
+    display-name: "工業洗礦機"
+    category: INTERMEDIATE
+    block: CAULDRON
+    machine-archetype: PROCESSOR
+    inputs: ["iron_dust", "copper_dust"]
+    outputs: ["purified_iron", "purified_copper"]
+    energy-per-tick: 8
+    effect: "水洗淨化礦粉"
+    unlock: "crusher"
+  industrial_centrifuge:
+    display-name: "工業離心機"
+    category: ADVANCED
+    block: IRON_BLOCK
+    machine-archetype: PROCESSOR
+    inputs: ["purified_iron", "uranium_ore_dust"]
+    outputs: ["iron_dust", "enriched_uranium", "chromium_dust", "cobalt_dust"]
+    energy-per-tick: 20
+    effect: "高速離心分離"
+    unlock: "industrial_washer"
+  industrial_compressor:
+    display-name: "工業壓縮機"
+    category: INTERMEDIATE
+    block: PISTON
+    machine-archetype: PROCESSOR
+    inputs: ["iron_ingot", "carbon_dust"]
+    outputs: ["iron_plate", "carbon_plate", "carbon_rod"]
+    energy-per-tick: 12
+    effect: "高壓壓製"
+    unlock: "furnace"
+  electrolytic_separator:
+    display-name: "電解分離機"
+    category: ADVANCED
+    block: IRON_BLOCK
+    machine-archetype: PROCESSOR
+    inputs: ["water_bucket", "redstone"]
+    outputs: ["hydrogen", "oxygen", "selenium_dust", "silicon"]
+    energy-per-tick: 25
+    effect: "電解分離元素"
+    unlock: "industrial_centrifuge"
+  electric_smelter:
+    display-name: "電爐"
+    category: ADVANCED
+    block: FURNACE
+    machine-archetype: PROCESSOR
+    inputs: ["tungsten_dust", "chromium_dust", "cobalt_dust"]
+    outputs: ["tungsten_ingot", "chromium_ingot", "cobalt_ingot"]
+    energy-per-tick: 30
+    effect: "高溫電弧冶煉"
+    unlock: "centrifuge"
+
+  # ── Phase 2：多方塊結構 ──
+  blast_furnace:
+    display-name: "高爐"
+    category: ADVANCED
+    block: NETHER_BRICKS
+    machine-archetype: PROCESSOR
+    inputs: ["iron_ingot", "coke", "carbon_dust"]
+    outputs: ["steel_ingot", "tungsten_ingot", "carbide_dust"]
+    energy-per-tick: 40
+    effect: "3×3×3 磚塊結構，需要溫度 400+ 運作"
+    unlock: "coke_oven"
+  industrial_smeltery:
+    display-name: "工業冶煉爐"
+    category: ADVANCED
+    block: MAGMA_BLOCK
+    machine-archetype: PROCESSOR
+    inputs: ["steel_ingot", "damascus_steel_ingot", "tungsten_ingot"]
+    outputs: ["damascus_steel_ingot", "hardened_alloy_ingot", "reinforced_alloy_ingot", "conductive_alloy_ingot", "cobalt_chrome_ingot", "molten_iron", "molten_steel", "molten_copper", "molten_gold", "molten_bronze"]
+    energy-per-tick: 60
+    effect: "十字形多方塊，熔融合金爐，溫度 600+ 運作"
+    unlock: "blast_furnace"
+  pressure_chamber:
+    display-name: "加壓室"
+    category: ADVANCED
+    tier: TIER3
+    block: IRON_BLOCK
+    machine-archetype: PROCESSOR
+    inputs: ["carbon_dust", "carbide_dust"]
+    outputs: ["synthetic_diamond", "carbide_ingot"]
+    energy-per-tick: 50
+    effect: "3×3×3 鐵塊結構，超高壓合成"
+    unlock: "industrial_smeltery"
+  casting_table:
+    display-name: "鑄造台"
+    category: ADVANCED
+    block: SMOOTH_STONE_SLAB
+    machine-archetype: PROCESSOR
+    inputs: ["molten_iron", "molten_copper", "molten_gold", "molten_steel", "molten_bronze"]
+    outputs: ["iron_plate", "copper_plate", "steel_plate", "bronze_plate", "iron_gear", "steel_gear", "copper_wire", "gold_wire", "iron_rod", "steel_rod", "iron_pipe", "steel_pipe"]
+    energy-per-tick: 10
+    effect: "熔融金屬 + 模具 → 零件"
+    unlock: "industrial_smeltery"
+
+  # ── Phase 3：發電 + 冷卻 ──
+  steam_boiler:
+    display-name: "蒸汽鍋爐"
+    category: BASIC
+    block: FURNACE
+    machine-archetype: GENERATOR
+    inputs: ["coal", "coke", "water_bucket"]
+    outputs: []
+    energy-per-tick: 0
+    energy-generation: 8
+    effect: "燃燒產生蒸汽發電"
+    unlock: "coke_oven"
+  diesel_generator:
+    display-name: "柴油發電機"
+    category: ADVANCED
+    block: IRON_BLOCK
+    machine-archetype: GENERATOR
+    inputs: ["creosote_oil"]
+    outputs: []
+    energy-per-tick: 0
+    energy-generation: 24
+    effect: "雜酚油驅動發電"
+    unlock: "coke_oven"
+  gas_turbine:
+    display-name: "燃氣渦輪"
+    category: ADVANCED
+    tier: TIER3
+    block: IRON_BLOCK
+    machine-archetype: GENERATOR
+    inputs: ["hydrogen"]
+    outputs: []
+    energy-per-tick: 0
+    energy-generation: 50
+    effect: "氫燃料高功率發電"
+    unlock: "electrolytic_separator"
+  geothermal_generator:
+    display-name: "地熱發電機"
+    category: ADVANCED
+    block: OBSIDIAN
+    machine-archetype: GENERATOR
+    inputs: ["lava_bucket"]
+    outputs: []
+    energy-per-tick: 0
+    energy-generation: 16
+    effect: "岩漿桶穩定發電"
+    unlock: "furnace"
+  heat_sink:
+    display-name: "散熱片"
+    category: BASIC
+    block: IRON_TRAPDOOR
+    machine-archetype: FIELD
+    inputs: []
+    outputs: []
+    energy-per-tick: 0
+    effect: "被動冷卻相鄰機器 -3 熱/tick"
+    unlock: "industrial_compressor"
+  water_cooler:
+    display-name: "水冷散熱器"
+    category: ADVANCED
+    block: SEA_LANTERN
+    machine-archetype: PROCESSOR
+    inputs: ["water_bucket"]
+    outputs: []
+    energy-per-tick: 5
+    effect: "消耗水桶，冷卻相鄰機器 -8 熱/tick"
+    unlock: "industrial_compressor"
+  coolant_circulator:
+    display-name: "冷卻液循環器"
+    category: ADVANCED
+    tier: TIER3
+    block: DIAMOND_BLOCK
+    machine-archetype: PROCESSOR
+    inputs: ["coolant_cell"]
+    outputs: []
+    energy-per-tick: 15
+    effect: "消耗冷卻液，冷卻相鄰機器 -15 熱/tick"
+    unlock: "industrial_washer"
+  cryo_tower:
+    display-name: "低溫冷卻塔"
+    category: ADVANCED
+    tier: TIER3
+    block: PACKED_ICE
+    machine-archetype: FIELD
+    inputs: ["coolant_cell"]
+    outputs: []
+    energy-per-tick: 20
+    effect: "多方塊，範圍冷卻 3×3 區域 -20 熱/tick"
+    unlock: "coolant_circulator"
+
+  # ── Phase 4：核���（��反應爐沿用 expansion 定義，此處僅新增工業配方）──
+
+# ───────────────────────────────────────
+#  新配方
+# ───────────────────────────────────────
+recipes:
+  # ── 焦爐 ──
+  coke_from_coal:
+    machine: "coke_oven"
+    inputs: ["coal"]
+    input-amounts: [1]
+    output: "coke"
+    count: 1
+    energy: 0
+    guide: "煤 → 焦爐 → 焦炭"
+  coke_from_charcoal:
+    machine: "coke_oven"
+    inputs: ["charcoal"]
+    input-amounts: [1]
+    output: "coke"
+    count: 1
+    energy: 0
+    guide: "木炭 → 焦爐 → 焦炭"
+  creosote_from_coal:
+    machine: "coke_oven"
+    inputs: ["coal"]
+    input-amounts: [2]
+    output: "creosote_oil"
+    count: 1
+    energy: 0
+    guide: "煤×2 → 焦爐 → 雜酚油"
+
+  # ── 合金爐 ──
+  bronze_alloy:
+    machine: "alloy_furnace"
+    inputs: ["copper_ingot", "tin_ingot"]
+    input-amounts: [3, 1]
+    output: "bronze_ingot"
+    count: 4
+    energy: 20
+    guide: "銅×3 + 錫×1 → 青銅×4"
+  solder_alloy:
+    machine: "alloy_furnace"
+    inputs: ["tin_ingot", "lead_ingot"]
+    input-amounts: [1, 1]
+    output: "solder_ingot"
+    count: 2
+    energy: 15
+    guide: "錫 + 鉛 → 焊錫×2"
+  gilded_iron_alloy:
+    machine: "alloy_furnace"
+    inputs: ["iron_ingot", "gold_ingot"]
+    input-amounts: [1, 1]
+    output: "gilded_iron_ingot"
+    count: 2
+    energy: 18
+    guide: "鐵 + 金 → 鍍金鐵×2"
+  ferrosilicon_alloy:
+    machine: "alloy_furnace"
+    inputs: ["iron_ingot", "silicon"]
+    input-amounts: [1, 1]
+    output: "ferrosilicon_ingot"
+    count: 2
+    energy: 20
+    guide: "鐵 + 矽 → 矽鐵×2"
+
+  # ── 洗礦機 ──
+  wash_iron:
+    machine: "industrial_washer"
+    inputs: ["iron_dust", "water_bucket"]
+    input-amounts: [1, 1]
+    output: "tin_dust"
+    count: 1
+    energy: 10
+    guide: "鐵粉 + 水 → 錫粉（副產物）"
+  wash_copper:
+    machine: "industrial_washer"
+    inputs: ["copper_dust", "water_bucket"]
+    input-amounts: [1, 1]
+    output: "lead_dust"
+    count: 1
+    energy: 10
+    guide: "銅粉 + 水 → 鉛粉（副產物）"
+  make_coolant:
+    machine: "industrial_washer"
+    inputs: ["water_bucket", "redstone"]
+    input-amounts: [1, 4]
+    output: "coolant_cell"
+    count: 1
+    energy: 15
+    guide: "水桶 + 紅石×4 → 冷卻液"
+
+  # ── 離心機 ──
+  centrifuge_uranium:
+    machine: "industrial_centrifuge"
+    inputs: ["uranium_ore_dust"]
+    input-amounts: [4]
+    output: "enriched_uranium"
+    count: 1
+    energy: 40
+    guide: "鈾礦粉×4 → 離心機 → 濃縮鈾"
+  centrifuge_depleted:
+    machine: "industrial_centrifuge"
+    inputs: ["depleted_uranium_rod"]
+    input-amounts: [1]
+    output: "plutonium"
+    count: 1
+    energy: 60
+    guide: "廢鈾棒 → 離心機 → 鈽"
+  centrifuge_chromium:
+    machine: "industrial_centrifuge"
+    inputs: ["redstone"]
+    input-amounts: [8]
+    output: "chromium_dust"
+    count: 1
+    energy: 35
+    guide: "紅石×8 → 離心機 → 鉻粉"
+  centrifuge_cobalt:
+    machine: "industrial_centrifuge"
+    inputs: ["lapis_lazuli"]
+    input-amounts: [8]
+    output: "cobalt_dust"
+    count: 1
+    energy: 35
+    guide: "青金石×8 → 離心機 → 鈷粉"
+
+  # ── 壓縮機 ──
+  compress_iron_plate:
+    machine: "industrial_compressor"
+    inputs: ["iron_ingot"]
+    input-amounts: [3]
+    output: "iron_plate"
+    count: 2
+    energy: 15
+    guide: "鐵錠×3 → 壓縮機 → 鐵板×2"
+  compress_copper_plate:
+    machine: "industrial_compressor"
+    inputs: ["copper_ingot"]
+    input-amounts: [3]
+    output: "copper_plate"
+    count: 2
+    energy: 15
+    guide: "銅錠×3 → 壓縮機 → 銅板×2"
+  compress_steel_plate:
+    machine: "industrial_compressor"
+    inputs: ["steel_ingot"]
+    input-amounts: [3]
+    output: "steel_plate"
+    count: 2
+    energy: 20
+    guide: "鋼錠×3 → 壓縮機 → 鋼板×2"
+  compress_bronze_plate:
+    machine: "industrial_compressor"
+    inputs: ["bronze_ingot"]
+    input-amounts: [3]
+    output: "bronze_plate"
+    count: 2
+    energy: 15
+    guide: "青銅×3 → 壓縮機 → 青銅板×2"
+  compress_carbon_plate:
+    machine: "industrial_compressor"
+    inputs: ["carbon_dust"]
+    input-amounts: [9]
+    output: "carbon_plate"
+    count: 1
+    energy: 20
+    guide: "碳粉×9 → 壓縮機 → 碳板"
+  compress_carbon_rod:
+    machine: "industrial_compressor"
+    inputs: ["carbon_dust"]
+    input-amounts: [4]
+    output: "carbon_rod"
+    count: 2
+    energy: 12
+    guide: "碳粉×4 → 壓縮機 → 碳棒×2"
+
+  # ── 電解分離機 ──
+  electrolyze_water:
+    machine: "electrolytic_separator"
+    inputs: ["water_bucket"]
+    input-amounts: [1]
+    output: "hydrogen"
+    count: 2
+    energy: 30
+    guide: "水桶 → 電解 → 氫氣×2"
+  electrolyze_redstone:
+    machine: "electrolytic_separator"
+    inputs: ["redstone"]
+    input-amounts: [4]
+    output: "silicon"
+    count: 1
+    energy: 25
+    guide: "紅石×4 → 電解 → 矽晶"
+  electrolyze_glowstone:
+    machine: "electrolytic_separator"
+    inputs: ["glowstone_dust"]
+    input-amounts: [4]
+    output: "selenium_dust"
+    count: 1
+    energy: 25
+    guide: "螢石粉×4 → 電解 → 硒粉"
+
+  # ── 電爐 ──
+  smelt_tungsten:
+    machine: "electric_smelter"
+    inputs: ["tungsten_dust"]
+    input-amounts: [1]
+    output: "tungsten_ingot"
+    count: 1
+    energy: 40
+    guide: "鎢粉 → 電爐 → 鎢錠"
+  smelt_chromium:
+    machine: "electric_smelter"
+    inputs: ["chromium_dust"]
+    input-amounts: [1]
+    output: "chromium_ingot"
+    count: 1
+    energy: 35
+    guide: "鉻粉 → 電爐 → 鉻錠"
+  smelt_cobalt:
+    machine: "electric_smelter"
+    inputs: ["cobalt_dust"]
+    input-amounts: [1]
+    output: "cobalt_ingot"
+    count: 1
+    energy: 35
+    guide: "鈷粉 → 電爐 → 鈷錠"
+  smelt_tin:
+    machine: "electric_smelter"
+    inputs: ["tin_dust"]
+    input-amounts: [1]
+    output: "tin_ingot"
+    count: 1
+    energy: 10
+    guide: "錫粉 → 電爐 → 錫錠"
+  smelt_lead:
+    machine: "electric_smelter"
+    inputs: ["lead_dust"]
+    input-amounts: [1]
+    output: "lead_ingot"
+    count: 1
+    energy: 10
+    guide: "鉛粉 → 電爐 → 鉛錠"
+
+  # ── 高爐（需要溫度 400+）──
+  blast_steel:
+    machine: "blast_furnace"
+    inputs: ["iron_ingot", "coke"]
+    input-amounts: [1, 1]
+    output: "steel_ingot"
+    count: 1
+    energy: 50
+    guide: "鐵 + 焦炭 → 高爐(400°+) → 鋼錠"
+  blast_carbide:
+    machine: "blast_furnace"
+    inputs: ["tungsten_dust", "carbon_dust"]
+    input-amounts: [1, 1]
+    output: "carbide_dust"
+    count: 1
+    energy: 60
+    guide: "鎢粉 + 碳粉 → 高爐(600°+) → 碳化鎢粉"
+  blast_uranium_ore:
+    machine: "blast_furnace"
+    inputs: ["netherrack"]
+    input-amounts: [8]
+    output: "uranium_ore_dust"
+    count: 1
+    energy: 40
+    guide: "地獄石×8 → 高爐 → 鈾礦粉（稀有萃取）"
+
+  # ── 工業冶煉爐（需要溫度 600+）──
+  smelt_damascus:
+    machine: "industrial_smeltery"
+    inputs: ["steel_ingot", "iron_dust", "carbon_dust"]
+    input-amounts: [1, 1, 1]
+    output: "damascus_steel_ingot"
+    count: 1
+    energy: 80
+    guide: "鋼 + 鐵粉 + 碳粉 → 大馬士革鋼"
+  smelt_hardened:
+    machine: "industrial_smeltery"
+    inputs: ["damascus_steel_ingot", "carbide_ingot"]
+    input-amounts: [1, 1]
+    output: "hardened_alloy_ingot"
+    count: 1
+    energy: 100
+    guide: "大馬士革鋼 + 碳化鎢 → 硬化合金"
+  smelt_reinforced:
+    machine: "industrial_smeltery"
+    inputs: ["hardened_alloy_ingot", "synthetic_diamond", "enriched_uranium"]
+    input-amounts: [1, 1, 1]
+    output: "reinforced_alloy_ingot"
+    count: 1
+    energy: 150
+    guide: "硬化合金 + 合成鑽石 + 濃縮鈾 → 強化合金"
+  smelt_conductive:
+    machine: "industrial_smeltery"
+    inputs: ["gold_ingot", "quartz", "redstone"]
+    input-amounts: [1, 2, 4]
+    output: "conductive_alloy_ingot"
+    count: 2
+    energy: 60
+    guide: "金 + 石英×2 + 紅石×4 → 導電合金×2"
+  smelt_cobalt_chrome:
+    machine: "industrial_smeltery"
+    inputs: ["cobalt_ingot", "chromium_ingot"]
+    input-amounts: [1, 1]
+    output: "cobalt_chrome_ingot"
+    count: 2
+    energy: 70
+    guide: "鈷 + 鉻 → 鈷鉻合金×2"
+  molten_iron_recipe:
+    machine: "industrial_smeltery"
+    inputs: ["iron_ingot"]
+    input-amounts: [2]
+    output: "molten_iron"
+    count: 1
+    energy: 30
+    guide: "鐵錠×2 → 熔融鐵"
+  molten_copper_recipe:
+    machine: "industrial_smeltery"
+    inputs: ["copper_ingot"]
+    input-amounts: [2]
+    output: "molten_copper"
+    count: 1
+    energy: 25
+    guide: "銅錠×2 → 熔融銅"
+  molten_gold_recipe:
+    machine: "industrial_smeltery"
+    inputs: ["gold_ingot"]
+    input-amounts: [2]
+    output: "molten_gold"
+    count: 1
+    energy: 35
+    guide: "金錠×2 → 熔融金"
+  molten_steel_recipe:
+    machine: "industrial_smeltery"
+    inputs: ["steel_ingot"]
+    input-amounts: [2]
+    output: "molten_steel"
+    count: 1
+    energy: 40
+    guide: "鋼錠×2 → 熔融鋼"
+  molten_bronze_recipe:
+    machine: "industrial_smeltery"
+    inputs: ["bronze_ingot"]
+    input-amounts: [2]
+    output: "molten_bronze"
+    count: 1
+    energy: 25
+    guide: "青銅×2 → 熔融青銅"
+
+  # ── 加壓室 ──
+  press_diamond:
+    machine: "pressure_chamber"
+    inputs: ["carbon_dust"]
+    input-amounts: [16]
+    output: "synthetic_diamond"
+    count: 1
+    energy: 80
+    guide: "碳粉×16 → 加壓室 → 合成鑽石"
+  press_carbide:
+    machine: "pressure_chamber"
+    inputs: ["carbide_dust"]
+    input-amounts: [2]
+    output: "carbide_ingot"
+    count: 1
+    energy: 60
+    guide: "碳化鎢粉×2 → 加壓室 → 碳化鎢錠"
+
+  # ── 模具（裝配機燒製黏土）──
+  forge_ingot_mold:
+    machine: "assembler"
+    inputs: ["clay_ball", "iron_ingot"]
+    input-amounts: [4, 1]
+    output: "ingot_mold"
+    count: 1
+    energy: 10
+    guide: "黏土×4 + 鐵錠 → 裝配機 → 錠模（保持形狀）"
+    allow-stack-bonus: false
+  forge_plate_mold:
+    machine: "assembler"
+    inputs: ["clay_ball", "smooth_stone"]
+    input-amounts: [4, 1]
+    output: "plate_mold"
+    count: 1
+    energy: 10
+    guide: "黏土×4 + 平滑石 → 裝配機 → 板模"
+    allow-stack-bonus: false
+  forge_gear_mold:
+    machine: "assembler"
+    inputs: ["clay_ball", "iron_nugget"]
+    input-amounts: [4, 6]
+    output: "gear_mold"
+    count: 1
+    energy: 12
+    guide: "黏土×4 + 鐵粒×6 → 裝配機 → 齒輪模"
+    allow-stack-bonus: false
+  forge_wire_mold:
+    machine: "assembler"
+    inputs: ["clay_ball", "string"]
+    input-amounts: [4, 1]
+    output: "wire_mold"
+    count: 1
+    energy: 8
+    guide: "黏土×4 + 線 → 裝配機 → 線模"
+    allow-stack-bonus: false
+  forge_rod_mold:
+    machine: "assembler"
+    inputs: ["clay_ball", "stick"]
+    input-amounts: [4, 1]
+    output: "rod_mold"
+    count: 1
+    energy: 8
+    guide: "黏土×4 + 木棍 → 裝配機 → 棒模"
+    allow-stack-bonus: false
+  forge_pipe_mold:
+    machine: "assembler"
+    inputs: ["clay_ball", "bamboo"]
+    input-amounts: [4, 1]
+    output: "pipe_mold"
+    count: 1
+    energy: 8
+    guide: "黏土×4 + 竹子 → 裝配機 → 管模"
+    allow-stack-bonus: false
+
+  # ── 鑄造台（熔融金屬 + 模具）──
+  cast_iron_plate:
+    machine: "casting_table"
+    inputs: ["molten_iron", "plate_mold"]
+    input-amounts: [1, 0]
+    output: "iron_plate"
+    count: 3
+    energy: 8
+    guide: "熔融鐵 + 板模 → 鐵板×3"
+    allow-stack-bonus: false
+  cast_copper_plate:
+    machine: "casting_table"
+    inputs: ["molten_copper", "plate_mold"]
+    input-amounts: [1, 0]
+    output: "copper_plate"
+    count: 3
+    energy: 8
+    guide: "熔融銅 + 板模 → 銅板×3"
+    allow-stack-bonus: false
+  cast_steel_plate:
+    machine: "casting_table"
+    inputs: ["molten_steel", "plate_mold"]
+    input-amounts: [1, 0]
+    output: "steel_plate"
+    count: 3
+    energy: 10
+    guide: "熔融鋼 + 板模 → 鋼板×3"
+    allow-stack-bonus: false
+  cast_bronze_plate:
+    machine: "casting_table"
+    inputs: ["molten_bronze", "plate_mold"]
+    input-amounts: [1, 0]
+    output: "bronze_plate"
+    count: 3
+    energy: 8
+    guide: "熔融青銅 + 板模 → 青銅板×3"
+    allow-stack-bonus: false
+  cast_iron_gear:
+    machine: "casting_table"
+    inputs: ["molten_iron", "gear_mold"]
+    input-amounts: [1, 0]
+    output: "iron_gear"
+    count: 2
+    energy: 10
+    guide: "熔融鐵 + 齒輪模 → 鐵齒輪×2"
+    allow-stack-bonus: false
+  cast_steel_gear:
+    machine: "casting_table"
+    inputs: ["molten_steel", "gear_mold"]
+    input-amounts: [1, 0]
+    output: "steel_gear"
+    count: 2
+    energy: 12
+    guide: "熔融鋼 + 齒輪模 → 鋼齒輪×2"
+    allow-stack-bonus: false
+  cast_copper_wire:
+    machine: "casting_table"
+    inputs: ["molten_copper", "wire_mold"]
+    input-amounts: [1, 0]
+    output: "copper_wire"
+    count: 4
+    energy: 6
+    guide: "熔融銅 + 線模 → 銅線×4"
+    allow-stack-bonus: false
+  cast_gold_wire:
+    machine: "casting_table"
+    inputs: ["molten_gold", "wire_mold"]
+    input-amounts: [1, 0]
+    output: "gold_wire"
+    count: 4
+    energy: 8
+    guide: "熔融金 + 線模 → 金線×4"
+    allow-stack-bonus: false
+  cast_iron_rod:
+    machine: "casting_table"
+    inputs: ["molten_iron", "rod_mold"]
+    input-amounts: [1, 0]
+    output: "iron_rod"
+    count: 3
+    energy: 6
+    guide: "熔融鐵 + 棒模 → 鐵棒×3"
+    allow-stack-bonus: false
+  cast_steel_rod:
+    machine: "casting_table"
+    inputs: ["molten_steel", "rod_mold"]
+    input-amounts: [1, 0]
+    output: "steel_rod"
+    count: 3
+    energy: 8
+    guide: "熔融鋼 + 棒模 → 鋼棒×3"
+    allow-stack-bonus: false
+  cast_iron_pipe:
+    machine: "casting_table"
+    inputs: ["molten_iron", "pipe_mold"]
+    input-amounts: [1, 0]
+    output: "iron_pipe"
+    count: 2
+    energy: 8
+    guide: "熔融鐵 + 管模 → 鐵管×2"
+    allow-stack-bonus: false
+  cast_steel_pipe:
+    machine: "casting_table"
+    inputs: ["molten_steel", "pipe_mold"]
+    input-amounts: [1, 0]
+    output: "steel_pipe"
+    count: 2
+    energy: 10
+    guide: "熔融鋼 + 管模 → 鋼管×2"
+    allow-stack-bonus: false
+
+  # ── 電子元件（裝配機）──
+  assemble_basic_circuit:
+    machine: "assembler"
+    inputs: ["copper_wire", "solder_ingot", "iron_plate"]
+    input-amounts: [2, 1, 1]
+    output: "basic_circuit"
+    count: 1
+    energy: 25
+    guide: "銅線×2 + 焊錫 + 鐵板 → 基礎電路板"
+  assemble_advanced_circuit:
+    machine: "assembler"
+    inputs: ["basic_circuit", "conductive_alloy_ingot", "redstone"]
+    input-amounts: [1, 1, 4]
+    output: "advanced_circuit"
+    count: 1
+    energy: 50
+    guide: "基礎電路板 + 導電合金 + 紅石×4 → 進階電路板"
+  assemble_precision_processor:
+    machine: "assembler"
+    inputs: ["advanced_circuit", "silicon", "gold_wire"]
+    input-amounts: [1, 2, 2]
+    output: "precision_processor"
+    count: 1
+    energy: 80
+    guide: "進階電路板 + 矽晶×2 + 金線×2 → 精密處理器"
+  assemble_quantum_processor:
+    machine: "assembler"
+    inputs: ["precision_processor", "ender_pearl", "reinforced_alloy_ingot"]
+    input-amounts: [1, 2, 1]
+    output: "quantum_processor"
+    count: 1
+    energy: 120
+    guide: "精密處理器 + 終界珍珠×2 + 強化合金 → 量子處理器"
+
+  # ── 核電配方 ──
+  make_uranium_rod:
+    machine: "assembler"
+    inputs: ["enriched_uranium", "lead_ingot", "steel_rod"]
+    input-amounts: [4, 2, 1]
+    output: "uranium_fuel_rod"
+    count: 1
+    energy: 60
+    guide: "濃縮鈾×4 + 鉛×2 + 鋼棒 → 鈾燃料棒"
+  make_plutonium_rod:
+    machine: "assembler"
+    inputs: ["plutonium", "lead_ingot", "steel_rod"]
+    input-amounts: [4, 2, 1]
+    output: "plutonium_fuel_rod"
+    count: 1
+    energy: 80
+    guide: "鈽×4 + 鉛×2 + 鋼棒 → 鈽燃料棒"
+  make_reactor_casing:
+    machine: "assembler"
+    inputs: ["cobalt_chrome_ingot", "steel_plate", "lead_ingot"]
+    input-amounts: [2, 4, 2]
+    output: "reactor_casing"
+    count: 1
+    energy: 50
+    guide: "鈷鉻×2 + 鋼板×4 + 鉛×2 → 反應爐外殼"
+  make_radiation_shield:
+    machine: "industrial_compressor"
+    inputs: ["lead_ingot"]
+    input-amounts: [8]
+    output: "radiation_shield"
+    count: 1
+    energy: 30
+    guide: "鉛×8 → 壓縮機 → 輻射屏蔽板"
+  nuclear_generate:
+    machine: "nuclear_reactor"
+    inputs: ["uranium_fuel_rod"]
+    input-amounts: [1]
+    output: "depleted_uranium_rod"
+    count: 1
+    energy: 0
+    guide: "鈾燃料棒 → 核反應爐 → 廢鈾棒 + 大量電力"
+    allow-stack-bonus: false
+  nuclear_plutonium:
+    machine: "nuclear_reactor"
+    inputs: ["plutonium_fuel_rod"]
+    input-amounts: [1]
+    output: "depleted_uranium_rod"
+    count: 1
+    energy: 0
+    guide: "鈽燃料棒 → 核反應爐 → 廢鈾棒 + 超大量電力"
+    allow-stack-bonus: false
+
+  # ── 發電機燃料配方 ──
+  steam_coal:
+    machine: "steam_boiler"
+    inputs: ["coal", "water_bucket"]
+    input-amounts: [1, 1]
+    output: "coal_dust"
+    count: 0
+    energy: 0
+    guide: "煤 + 水 → 蒸汽發電（副產灰燼）"
+    allow-stack-bonus: false
+  steam_coke:
+    machine: "steam_boiler"
+    inputs: ["coke", "water_bucket"]
+    input-amounts: [1, 1]
+    output: "carbon_dust"
+    count: 1
+    energy: 0
+    guide: "焦炭 + 水 → 蒸汽發電（副產碳粉）"
+    allow-stack-bonus: false
+  diesel_creosote:
+    machine: "diesel_generator"
+    inputs: ["creosote_oil"]
+    input-amounts: [1]
+    output: "glass_bottle"
+    count: 1
+    energy: 0
+    guide: "雜酚油 → 柴油發電"
+    allow-stack-bonus: false
+  gas_hydrogen:
+    machine: "gas_turbine"
+    inputs: ["hydrogen"]
+    input-amounts: [1]
+    output: "glass_bottle"
+    count: 1
+    energy: 0
+    guide: "氫氣 → 燃氣渦輪發電"
+    allow-stack-bonus: false
+  geothermal_lava:
+    machine: "geothermal_generator"
+    inputs: ["lava_bucket"]
+    input-amounts: [1]
+    output: "bucket"
+    count: 1
+    energy: 0
+    guide: "岩漿桶 → 地熱發電（返回空桶）"
+    allow-stack-bonus: false
+
+  # ── 洗礦產出錫/鉛的同時也產純化礦（用 crusher 前置）──
+  crusher_tin_ore:
+    machine: "crusher"
+    inputs: ["raw_copper"]
+    input-amounts: [2]
+    output: "tin_dust"
+    count: 1
+    energy: 12
+    guide: "粗銅×2 → 粉碎機 → 錫粉（微量萃取）"
+  crusher_lead_ore:
+    machine: "crusher"
+    inputs: ["raw_iron"]
+    input-amounts: [2]
+    output: "lead_dust"
+    count: 1
+    energy: 12
+    guide: "粗鐵×2 → 粉碎機 → 鉛粉（微量萃取）"
+  crusher_tungsten:
+    machine: "crusher"
+    inputs: ["blackstone"]
+    input-amounts: [4]
+    output: "tungsten_dust"
+    count: 1
+    energy: 20
+    guide: "黑石×4 → 粉碎機 → 鎢粉（稀有萃取）"
+  crusher_uranium:
+    machine: "crusher"
+    inputs: ["ancient_debris"]
+    input-amounts: [1]
+    output: "uranium_ore_dust"
+    count: 2
+    energy: 25
+    guide: "遠古乃涅合金殘骸 → 粉碎機 → 鈾礦粉×2"

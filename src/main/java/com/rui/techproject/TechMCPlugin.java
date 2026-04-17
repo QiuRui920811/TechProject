@@ -11,6 +11,8 @@ import com.rui.techproject.service.AchievementGuiService;
 import com.rui.techproject.service.AchievementService;
 import com.rui.techproject.service.BlueprintService;
 import com.rui.techproject.service.CookingService;
+import com.rui.techproject.service.DailyQuestService;
+import com.rui.techproject.service.LeaderboardService;
 import com.rui.techproject.service.MeteorService;
 import com.rui.techproject.service.ItemSearchService;
 import com.rui.techproject.service.RegionService;
@@ -19,10 +21,19 @@ import com.rui.techproject.service.PlacedTechBlockService;
 import com.rui.techproject.service.MazeService;
 import com.rui.techproject.service.PlanetService;
 import com.rui.techproject.service.PlayerProgressService;
+
+import com.rui.techproject.service.SkillService;
 import com.rui.techproject.service.TechBookService;
 import com.rui.techproject.service.TechCropService;
 import com.rui.techproject.service.TechRegistry;
+import com.rui.techproject.service.TitleMsgService;
 import com.rui.techproject.service.TitleService;
+import com.rui.techproject.service.TutorialChainService;
+import com.rui.techproject.service.RadiationService;
+import com.rui.techproject.service.GeoResourceService;
+import com.rui.techproject.service.AltarService;
+import com.rui.techproject.service.AndroidProgrammingService;
+import com.rui.techproject.service.MultiblockCraftingService;
 import com.rui.techproject.storage.MigrationManager;
 import com.rui.techproject.storage.StorageManager;
 import com.rui.techproject.util.ItemFactoryUtil;
@@ -41,7 +52,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 
-public final class TechProjectPlugin extends JavaPlugin {
+public final class TechMCPlugin extends JavaPlugin {
     private static final String[] BUNDLED_DATAPACK_RESOURCES = {
             "datapacks/techproject_dimensions/pack.mcmeta",
             "datapacks/techproject_dimensions/data/techproject/dimension_type/aurelia_twilight.json",
@@ -104,7 +115,24 @@ public final class TechProjectPlugin extends JavaPlugin {
     private MeteorService meteorService;
     private StorageManager storageManager;
     private TitleService titleService;
+    private TitleMsgService titleMsgService;
     private RegionService regionService;
+    // 新增：技能 / 任務 / 排行 / 引導
+    private SkillService skillService;
+    private DailyQuestService dailyQuestService;
+    private LeaderboardService leaderboardService;
+    private TutorialChainService tutorialChainService;
+    private RadiationService radiationService;
+    private GeoResourceService geoResourceService;
+    private AltarService altarService;
+    private AndroidProgrammingService androidProgrammingService;
+    private MultiblockCraftingService multiblockCraftingService;
+    // 天賦樹 + 法術系統
+    private com.rui.techproject.service.talent.TalentService talentService;
+    private com.rui.techproject.service.talent.ManaService manaService;
+    private com.rui.techproject.service.talent.SpellExecutor spellExecutor;
+    private com.rui.techproject.service.talent.SpellCastService spellCastService;
+    private com.rui.techproject.service.talent.TalentGuiService talentGuiService;
     private com.rui.techproject.listener.DiscordSrvHook discordSrvHook;
 
     @Override
@@ -142,9 +170,37 @@ public final class TechProjectPlugin extends JavaPlugin {
         this.achievementGuiService = new AchievementGuiService(this, this.techRegistry, this.playerProgressService, this.itemFactory);
         this.titleService = new TitleService(this, this.playerProgressService);
         this.achievementGuiService.setTitleService(this.titleService);
+        this.titleMsgService = new TitleMsgService(this, this.safeScheduler);
         this.itemSearchService = new ItemSearchService(this);
         this.meteorService = new MeteorService(this, this.safeScheduler, this.itemFactory);
         this.regionService = new RegionService(this);
+
+        // 新增系統：技能 / 任務 / 排行 / 新手引導
+        this.skillService = new SkillService(this, this.playerProgressService, this.itemFactory);
+        this.dailyQuestService = new DailyQuestService(this, this.playerProgressService,
+                this.itemFactory, this.skillService);
+        this.leaderboardService = new LeaderboardService(this, this.playerProgressService,
+                this.skillService, this.itemFactory);
+        this.tutorialChainService = new TutorialChainService(this, this.playerProgressService,
+                this.skillService, this.itemFactory);
+        this.radiationService = new RadiationService(this, this.playerProgressService);
+        this.geoResourceService = new GeoResourceService(this);
+        this.altarService = new AltarService(this);
+        this.androidProgrammingService = new AndroidProgrammingService(this);
+        this.multiblockCraftingService = new MultiblockCraftingService(this);
+
+        // 天賦樹 + 法術系統（必須在 skillService 之後）
+        this.talentService = new com.rui.techproject.service.talent.TalentService(
+                this, this.playerProgressService, this.skillService);
+        this.skillService.setTalentService(this.talentService);
+        this.manaService = new com.rui.techproject.service.talent.ManaService(
+                this, this.playerProgressService, this.skillService);
+        this.spellExecutor = new com.rui.techproject.service.talent.SpellExecutor(
+                this, this.skillService);
+        this.spellCastService = new com.rui.techproject.service.talent.SpellCastService(
+                this, this.skillService, this.manaService, this.talentService, this.spellExecutor);
+        this.talentGuiService = new com.rui.techproject.service.talent.TalentGuiService(
+                this, this.talentService, this.playerProgressService, this.skillService);
 
         final com.rui.techproject.storage.StorageBackend backend = this.storageManager.getBackend();
         this.playerProgressService.setStorageBackend(backend);
@@ -154,6 +210,8 @@ public final class TechProjectPlugin extends JavaPlugin {
         this.machineService.setStorageBackend(backend);
 
         this.getServer().getPluginManager().registerEvents(new TechListener(this), this);
+        this.getServer().getPluginManager().registerEvents(
+                new com.rui.techproject.listener.SpellCastListener(this.spellCastService), this);
         final TechCommand techCommand = new TechCommand(this, this.techRegistry, this.itemFactory);
         if (this.getCommand("tech") != null) {
             this.getCommand("tech").setExecutor(techCommand);
@@ -169,6 +227,10 @@ public final class TechProjectPlugin extends JavaPlugin {
         this.planetService.start();
         this.mazeService.startTimers();
         this.meteorService.start();
+        this.manaService.start();
+        this.radiationService.start();
+        this.geoResourceService.start();
+        this.altarService.start();
 
         if (this.getServer().getPluginManager().getPlugin("PlaceholderAPI") != null) {
             new com.rui.techproject.service.TechPlaceholderExpansion(this).register();
@@ -194,7 +256,7 @@ public final class TechProjectPlugin extends JavaPlugin {
         final long autoSaveInterval = 20L * 60L * 5L; // 6000 ticks = 5 分鐘
         this.safeScheduler.runGlobalTimer(task -> this.autoSave(), autoSaveInterval, autoSaveInterval);
 
-        this.getLogger().info("TechProject enabled: " + this.techRegistry.summaryLine());
+        this.getLogger().info("TechMC enabled: " + this.techRegistry.summaryLine());
     }
 
     private void hookBeaconAPI() {
@@ -354,8 +416,11 @@ public final class TechProjectPlugin extends JavaPlugin {
     }
 
     /**
-     * 執行完整熱重載：複製新 JAR → 委託 PlugManX 卸載+重載。
+     * 執行完整熱重載：廣播通知 → 安全關閉 GUI → 儲存資料 → 複製新 JAR → 委託 PlugManX 卸載+重載。
      * 若 hot-swap-jar 未設定，回退成僅重載設定檔。
+     *
+     * <p>搭配 TechGuard 插件使用：TechGuard 會在偵測到 TechProject 卸載時
+     * 凍結所有玩家互動（方塊破壞/放置/互動），直到 TechProject 重新啟用。</p>
      */
     public void performHotReload(final CommandSender sender) {
         final String jarPath = this.getConfig().getString("hot-swap-jar", "");
@@ -364,7 +429,7 @@ public final class TechProjectPlugin extends JavaPlugin {
             this.reloadProjectData();
             if (this.planetService != null) this.planetService.reloadRuntimeConfig();
             sender.sendMessage(net.kyori.adventure.text.Component.text(
-                    "科技專案設定已重新載入（未設定 hot-swap-jar，僅重載設定）。",
+                    "TechMC 設定已重新載入（未設定 hot-swap-jar，僅重載設定）。",
                     net.kyori.adventure.text.format.NamedTextColor.GREEN));
             return;
         }
@@ -390,7 +455,47 @@ public final class TechProjectPlugin extends JavaPlugin {
             return;
         }
 
-        // 複製新 JAR 覆蓋舊 JAR
+        // ── 第 1 步：全服廣播 TitleMsg 通知 ──
+        final net.kyori.adventure.text.Component titleComp = net.kyori.adventure.text.Component.text(
+                "⚙ 科技熱重啟", net.kyori.adventure.text.format.NamedTextColor.GOLD,
+                net.kyori.adventure.text.format.TextDecoration.BOLD);
+        final net.kyori.adventure.text.Component subtitleComp = net.kyori.adventure.text.Component.text(
+                "正在安全卸載，請稍候…", net.kyori.adventure.text.format.NamedTextColor.GRAY);
+        if (this.titleMsgService != null) {
+            for (final org.bukkit.entity.Player player : this.getServer().getOnlinePlayers()) {
+                this.titleMsgService.send(player, titleComp, subtitleComp, 40L,
+                        org.bukkit.Sound.BLOCK_NOTE_BLOCK_IRON_XYLOPHONE);
+            }
+        }
+
+        // ── 第 2 步：安全關閉所有科技 GUI ──
+        if (this.techBookService != null) {
+            this.techBookService.closeAllBookViews();
+        }
+        if (this.machineService != null) {
+            this.machineService.closeAllMachineViews();
+        }
+        // 關閉其他科技介面（成就、搜尋）
+        for (final org.bukkit.entity.Player player : this.getServer().getOnlinePlayers()) {
+            if (this.achievementGuiService != null) {
+                this.achievementGuiService.clearState(player.getUniqueId());
+            }
+            if (this.itemSearchService != null) {
+                this.itemSearchService.clearState(player.getUniqueId());
+            }
+        }
+
+        // ── 第 3 步：儲存所有資料 ──
+        sender.sendMessage(net.kyori.adventure.text.Component.text(
+                "正在儲存所有資料…", net.kyori.adventure.text.format.NamedTextColor.YELLOW));
+        if (this.machineService != null) this.machineService.saveAll();
+        if (this.placedTechBlockService != null) this.placedTechBlockService.saveAll();
+        if (this.techCropService != null) this.techCropService.saveAll();
+        if (this.planetService != null) this.planetService.saveAll();
+        if (this.playerProgressService != null) this.playerProgressService.saveAll();
+        if (this.androidProgrammingService != null) this.androidProgrammingService.save();
+
+        // ── 第 4 步：複製新 JAR 覆蓋舊 JAR ──
         try {
             Files.copy(source, currentJar.toPath(), StandardCopyOption.REPLACE_EXISTING);
         } catch (final IOException exception) {
@@ -401,10 +506,11 @@ public final class TechProjectPlugin extends JavaPlugin {
         }
 
         sender.sendMessage(net.kyori.adventure.text.Component.text(
-                "已更新 JAR，正在透過 PlugManX 重載…",
+                "已更新 JAR，正在透過 PlugManX 重載… (TechGuard 將凍結玩家操作)",
                 net.kyori.adventure.text.format.NamedTextColor.YELLOW));
 
-        // 委託 PlugManX 執行卸載+重載（必須在 global tick thread 上跑）
+        // ── 第 5 步：委託 PlugManX 執行卸載+重載 ──
+        // TechGuard 會在 PluginDisableEvent 時自動啟動凍結保護
         this.safeScheduler.runGlobal(task -> {
             try {
                 this.getServer().dispatchCommand(
@@ -443,7 +549,8 @@ public final class TechProjectPlugin extends JavaPlugin {
             this.planetService.shutdown();
         }
         if (this.machineService != null) {
-            this.machineService.removeAllDisplays();
+            // Folia: onDisable 在主控台線程，無法操作實體，Display 實體伺服器關閉後自動消失
+            // this.machineService.removeAllDisplays();
             this.machineService.saveAll();
         }
         if (this.placedTechBlockService != null) {
@@ -457,6 +564,12 @@ public final class TechProjectPlugin extends JavaPlugin {
         }
         if (this.playerProgressService != null) {
             this.playerProgressService.saveAll();
+        }
+        if (this.geoResourceService != null) {
+            this.geoResourceService.shutdown();
+        }
+        if (this.androidProgrammingService != null) {
+            this.androidProgrammingService.save();
         }
         if (this.storageManager != null) {
             this.storageManager.shutdown();
@@ -558,8 +671,68 @@ public final class TechProjectPlugin extends JavaPlugin {
         return this.titleService;
     }
 
+    public TitleMsgService getTitleMsgService() {
+        return this.titleMsgService;
+    }
+
     public RegionService getRegionService() {
         return this.regionService;
+    }
+
+public SkillService getSkillService() {
+        return this.skillService;
+    }
+
+    public DailyQuestService getDailyQuestService() {
+        return this.dailyQuestService;
+    }
+
+    public LeaderboardService getLeaderboardService() {
+        return this.leaderboardService;
+    }
+
+    public TutorialChainService getTutorialChainService() {
+        return this.tutorialChainService;
+    }
+
+    public com.rui.techproject.service.talent.TalentService getTalentService() {
+        return this.talentService;
+    }
+
+    public com.rui.techproject.service.talent.ManaService getManaService() {
+        return this.manaService;
+    }
+
+    public RadiationService getRadiationService() {
+        return this.radiationService;
+    }
+
+    public GeoResourceService getGeoResourceService() {
+        return this.geoResourceService;
+    }
+
+    public AltarService getAltarService() {
+        return this.altarService;
+    }
+
+    public AndroidProgrammingService getAndroidProgrammingService() {
+        return this.androidProgrammingService;
+    }
+
+    public MultiblockCraftingService getMultiblockCraftingService() {
+        return this.multiblockCraftingService;
+    }
+
+    public com.rui.techproject.service.talent.SpellExecutor getSpellExecutor() {
+        return this.spellExecutor;
+    }
+
+    public com.rui.techproject.service.talent.SpellCastService getSpellCastService() {
+        return this.spellCastService;
+    }
+
+    public com.rui.techproject.service.talent.TalentGuiService getTalentGuiService() {
+        return this.talentGuiService;
     }
 
     @Override
