@@ -45,6 +45,9 @@ import org.bukkit.entity.Mob;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Tameable;
 import org.bukkit.entity.TextDisplay;
+import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
@@ -2967,6 +2970,11 @@ public final class MachineService {
             this.setRuntimeState(machine, MachineRuntimeState.NO_INPUT, "不可破壞科技機器");
             return;
         }
+        // 領地保護檢查
+        if (!this.canMachineBreakBlock(machine.owner(), target)) {
+            this.setRuntimeState(machine, MachineRuntimeState.STANDBY, "無權破壞（領地保護）");
+            return;
+        }
         // 收集掉落物
         final java.util.Collection<ItemStack> drops = target.getDrops();
         // 檢查輸出空間
@@ -3165,6 +3173,7 @@ public final class MachineService {
                     if (!this.canStoreAllOutputs(machine, List.of(drop))) {
                         break;
                     }
+                    if (!this.canMachineBreakBlock(machine.owner(), target)) continue;
                     target.setType(Material.AIR, true);
                     this.storeOutputs(machine, List.of(drop));
                     harvested++;
@@ -3200,6 +3209,7 @@ public final class MachineService {
                         continue;
                     }
                 }
+                if (!this.canMachineBreakBlock(machine.owner(), crop)) continue;
                 final List<ItemStack> outputs = customCrop
                         ? this.techCropService.harvest(crop, true)
                         : this.harvestOutputsFor(crop.getType());
@@ -3313,6 +3323,7 @@ public final class MachineService {
                         }
                         final List<Block> logs = this.collectConnectedLogs(origin, maxLogs);
                         logs.removeIf(b -> this.machines.containsKey(LocationKey.from(b.getLocation())));
+                        logs.removeIf(b -> !this.canMachineBreakBlock(machine.owner(), b));
                         if (logs.isEmpty()) {
                             continue;
                         }
@@ -3380,6 +3391,7 @@ public final class MachineService {
                 if (!(entity instanceof LivingEntity living) || living instanceof Player || !this.isCollectableMob(living.getType()) || !this.isSafeMobTarget(living)) {
                     continue;
                 }
+                if (!this.canMachineDamageEntity(machine.owner(), living)) continue;
                 final List<ItemStack> outputs = this.mobDropsFor(living.getType());
                 if (outputs.isEmpty() || !this.canStoreAllOutputs(machine, outputs)) {
                     continue;
@@ -3785,6 +3797,7 @@ public final class MachineService {
             case "HARVEST": {
                 final Block crop = world.getBlockAt(target.getBlockX(), target.getBlockY(), target.getBlockZ());
                 if (!this.isSafeCropTarget(crop)) return false;
+                if (!this.canMachineBreakBlock(machine.owner(), crop)) return false;
                 final BlockData data = crop.getBlockData();
                 if (!(data instanceof Ageable ageable) || ageable.getAge() < ageable.getMaximumAge()) return false;
                 final boolean customCrop = this.techCropService.isTrackedCrop(crop);
@@ -3806,8 +3819,10 @@ public final class MachineService {
             case "CHOP": {
                 final Block origin = world.getBlockAt(target.getBlockX(), target.getBlockY(), target.getBlockZ());
                 if (!this.isTreeLog(origin.getType()) || !this.isSafeTreeTarget(origin)) return false;
+                if (!this.canMachineBreakBlock(machine.owner(), origin)) return false;
                 final int maxLogs = 12 + this.countUpgrade(machine, "stack_upgrade") * 8;
                 final List<Block> logs = this.collectConnectedLogs(origin, maxLogs);
+                logs.removeIf(b -> !this.canMachineBreakBlock(machine.owner(), b));
                 if (logs.isEmpty()) return false;
                 final Material logType = logs.get(0).getType();
                 final List<ItemStack> outputs = new ArrayList<>();
@@ -3830,6 +3845,7 @@ public final class MachineService {
                 for (final Entity entity : world.getNearbyEntities(center, 2.0D, 2.0D, 2.0D)) {
                     if (!(entity instanceof LivingEntity living) || living instanceof Player) continue;
                     if (!this.isCollectableMob(living.getType()) || !this.isSafeMobTarget(living)) continue;
+                    if (!this.canMachineDamageEntity(machine.owner(), living)) continue;
                     final List<ItemStack> outputs = this.mobDropsFor(living.getType());
                     if (outputs.isEmpty() || !this.canStoreAllOutputs(machine, outputs)) continue;
                     if (!this.consumeAndroidRuntime(machine, location, script.baseEnergyCost() + outputs.stream().mapToInt(ItemStack::getAmount).sum(), this.androidFuelCost(script, machine))) return false;
@@ -5191,6 +5207,10 @@ public final class MachineService {
         }
         final QuarryDrop drop = this.quarryDropFor(target.getType());
         if (drop == null) {
+            return false;
+        }
+        // 領地保護檢查
+        if (!this.canMachineBreakBlock(machine.owner(), target)) {
             return false;
         }
         final ItemStack output = this.buildStackForId(drop.outputId(), drop.amount() + this.rollStackBonus(machine) + this.quarryOutputBonus(machine.machineId()));
@@ -10413,6 +10433,39 @@ public final class MachineService {
             return Math.min(1, total);
         }
         return total;
+    }
+
+    // ── Residence / 領地保護 helpers ──
+
+    /**
+     * 模擬 BlockBreakEvent 檢查機器主人是否有權破壞該方塊。
+     * 主人離線時一律回傳 false（不允許），避免繞過領地保護。
+     */
+    private boolean canMachineBreakBlock(final UUID owner, final Block block) {
+        final Player player = Bukkit.getPlayer(owner);
+        if (player == null) return false; // 主人離線，安全起見不允許
+        final long threadId = Thread.currentThread().getId();
+        com.rui.techproject.listener.TechListener.simulatingBreakThreads.add(threadId);
+        try {
+            final BlockBreakEvent simulated = new BlockBreakEvent(block, player);
+            Bukkit.getPluginManager().callEvent(simulated);
+            return !simulated.isCancelled();
+        } finally {
+            com.rui.techproject.listener.TechListener.simulatingBreakThreads.remove(threadId);
+        }
+    }
+
+    /**
+     * 模擬 EntityDamageByEntityEvent 檢查機器主人是否有權傷害該實體。
+     * 主人離線時一律回傳 false。
+     */
+    private boolean canMachineDamageEntity(final UUID owner, final org.bukkit.entity.Entity target) {
+        final Player player = Bukkit.getPlayer(owner);
+        if (player == null) return false;
+        final EntityDamageByEntityEvent simulated = new EntityDamageByEntityEvent(
+                player, target, EntityDamageEvent.DamageCause.ENTITY_ATTACK, 0.0);
+        Bukkit.getPluginManager().callEvent(simulated);
+        return !simulated.isCancelled();
     }
 
     // ── 紅石集成電路 helpers ──
