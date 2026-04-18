@@ -2630,15 +2630,20 @@ public final class TechBookService {
         } else {
             stationStack = this.clickableReference(recipe.machineId(), false);
         }
+        final int outCount = Math.max(1, recipe.outputCount());
+        final ItemStack resultStack = this.clickableReference(recipe.outputId(), false);
+        resultStack.setAmount(Math.min(64, outCount));
+        final String outputName = this.itemFactory.displayNameForId(recipe.outputId());
         return new RecipeView(
-                this.itemFactory.displayNameForId(recipe.outputId()),
+                outputName + (outCount > 1 ? " ×" + outCount : ""),
                 inputs,
-            this.clickableReference(recipe.outputId(), false),
+            resultStack,
             stationStack,
                 this.itemFactory.displayNameForId(recipe.machineId()) + " • " + recipe.energyCost() + " EU",
                 List.of(
                         "製作站：" + this.itemFactory.displayNameForId(recipe.machineId()),
                         "輸入：" + this.joinInputDisplayNames(recipe),
+                    "產出：" + outputName + (outCount > 1 ? " ×" + outCount : " ×1"),
                     "耗能：" + recipe.energyCost() + " EU",
                     this.describeRecipeFlow(recipe)
                 )
@@ -2646,9 +2651,11 @@ public final class TechBookService {
     }
 
             private String describeRecipeFlow(final MachineRecipe recipe) {
+            final int outCount = Math.max(1, recipe.outputCount());
+            final String outputName = this.itemFactory.displayNameForId(recipe.outputId());
             return this.joinInputDisplayNames(recipe) + " → "
                 + this.itemFactory.displayNameForId(recipe.machineId()) + " → "
-                + this.itemFactory.displayNameForId(recipe.outputId());
+                + outputName + (outCount > 1 ? "×" + outCount : "");
             }
 
     private String joinInputDisplayNames(final MachineRecipe recipe) {
