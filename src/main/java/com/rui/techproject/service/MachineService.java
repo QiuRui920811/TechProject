@@ -2975,10 +2975,17 @@ public final class MachineService {
             this.setRuntimeState(machine, MachineRuntimeState.STANDBY, "無權破壞（領地保護）");
             return;
         }
-        // 收集掉落物
-        final java.util.Collection<ItemStack> drops = target.getDrops();
+        // 收集掉落物（精準採集類方塊直接掉落自身）
+        final List<ItemStack> drops = new ArrayList<>(target.getDrops());
+        if (drops.isEmpty() && this.isSilkTouchBlock(target.getType())) {
+            drops.add(new ItemStack(target.getType(), 1));
+        }
+        if (drops.isEmpty()) {
+            this.setRuntimeState(machine, MachineRuntimeState.NO_INPUT, "前方無可採集方塊");
+            return;
+        }
         // 檢查輸出空間
-        boolean hasSpace = drops.isEmpty();
+        boolean hasSpace = false;
         for (final ItemStack drop : drops) {
             if (this.canStoreOutput(machine, drop)) {
                 hasSpace = true;
@@ -3195,10 +3202,10 @@ public final class MachineService {
         for (int dx = -radius; dx <= radius; dx++) {
             for (int dz = -radius; dz <= radius; dz++) {
                 final Block crop = world.getBlockAt(location.getBlockX() + dx, location.getBlockY(), location.getBlockZ() + dz);
-                if (!this.isSafeCropTarget(crop)) {
+                final boolean customCrop = this.techCropService.isTrackedCrop(crop);
+                if (!customCrop && !this.isSafeCropTarget(crop)) {
                     continue;
                 }
-                final boolean customCrop = this.techCropService.isTrackedCrop(crop);
                 if (customCrop) {
                     if (!this.techCropService.isMature(crop)) {
                         continue;
@@ -3842,22 +3849,23 @@ public final class MachineService {
             }
             case "ATTACK": {
                 final Location center = target.clone().add(0.5, 0.5, 0.5);
+                boolean anyKilled = false;
                 for (final Entity entity : world.getNearbyEntities(center, 2.0D, 2.0D, 2.0D)) {
                     if (!(entity instanceof LivingEntity living) || living instanceof Player) continue;
                     if (!this.isCollectableMob(living.getType()) || !this.isSafeMobTarget(living)) continue;
                     if (!this.canMachineDamageEntity(machine.owner(), living)) continue;
                     final List<ItemStack> outputs = this.mobDropsFor(living.getType());
                     if (outputs.isEmpty() || !this.canStoreAllOutputs(machine, outputs)) continue;
-                    if (!this.consumeAndroidRuntime(machine, location, script.baseEnergyCost() + outputs.stream().mapToInt(ItemStack::getAmount).sum(), this.androidFuelCost(script, machine))) return false;
+                    if (!this.consumeAndroidRuntime(machine, location, script.baseEnergyCost() + outputs.stream().mapToInt(ItemStack::getAmount).sum(), this.androidFuelCost(script, machine))) break;
                     final Location el = living.getLocation();
                     this.safeRemoveEntity(living);
                     this.storeOutputs(machine, outputs);
                     this.progressService.incrementStat(machine.owner(), "android_custom_kills", 1L);
                     world.spawnParticle(Particle.SOUL, el.getX(), el.getY() + 0.7, el.getZ(), 10, 0.22, 0.28, 0.22, 0.02);
                     world.playSound(el, Sound.ENTITY_PLAYER_ATTACK_SWEEP, 0.35f, 0.8f);
-                    return true;
+                    anyKilled = true;
                 }
-                return false;
+                return anyKilled;
             }
             case "SALVAGE": {
                 final Location center = target.clone().add(0.5, 0.5, 0.5);
@@ -10433,6 +10441,24 @@ public final class MachineService {
             return Math.min(1, total);
         }
         return total;
+    }
+
+    // ── 方塊破壞器：精準採集類方塊判定 ──
+
+    /** 原版 getDrops() 為空但應以精準採集形式掉落自身的方塊。 */
+    private boolean isSilkTouchBlock(final Material mat) {
+        if (mat == null) return false;
+        final String name = mat.name();
+        // 冰系列
+        if (name.contains("ICE")) return true;
+        // 雪
+        if (mat == Material.SNOW_BLOCK || mat == Material.SNOW) return true;
+        // 玻璃系列
+        if (name.contains("GLASS")) return true;
+        // 海龜蛋、菌絲、草方塊等
+        if (mat == Material.TURTLE_EGG || mat == Material.MYCELIUM
+                || mat == Material.GRASS_BLOCK) return true;
+        return false;
     }
 
     // ── Residence / 領地保護 helpers ──

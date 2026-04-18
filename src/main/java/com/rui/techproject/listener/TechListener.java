@@ -678,9 +678,11 @@ public final class TechListener implements Listener {
             return;
         }
         // ── 多方塊結構合成：右鍵發射器 → 偵測結構並合成 ──
+        // 蹲下且手持方塊時跳過（允許 shift+右鍵放置機器）
         if (event.getAction() == Action.RIGHT_CLICK_BLOCK
                 && event.getClickedBlock() != null
                 && event.getClickedBlock().getType() == Material.DISPENSER
+                && !event.getPlayer().isSneaking()
                 && this.plugin.getMultiblockCraftingService() != null
                 && this.plugin.getMultiblockCraftingService().tryCraft(event.getPlayer(), event.getClickedBlock())) {
             event.setCancelled(true);
