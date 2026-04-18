@@ -38,7 +38,9 @@ public final class PlacedTechBlockService {
             return false;
         }
         final TechItemDefinition definition = this.registry.getItem(techItemId);
-        return definition != null && definition.icon().isBlock();
+        // 使用顯示材質（經重映射後）判斷，而非原始 icon；
+        // 只有顯示材質仍為方塊的物品（古代祭壇、果樹樹苗等）才允許放置追蹤
+        return this.itemFactory.isPlaceableTechBlock(definition);
     }
 
     public void registerPlacedBlock(final Block block, final String techItemId) {

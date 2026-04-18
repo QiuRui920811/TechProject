@@ -101,9 +101,11 @@ public final class TechListener implements Listener {
     private static final long THRUSTER_ENERGY_COST = 8L;
     private static final long JETPACK_ENERGY_COST = 6L;
 
-    /** 右鍵會觸發原版行為的材質（末影珍珠、終界之眼、玻璃瓶） */
+    /** 右鍵會觸發原版行為的材質（末影珍珠、終界之眼、玻璃瓶、礦車系列等） */
     private static final Set<Material> VANILLA_INTERACT_MATERIALS = Set.of(
-            Material.ENDER_PEARL, Material.ENDER_EYE, Material.GLASS_BOTTLE, Material.WIND_CHARGE
+            Material.ENDER_PEARL, Material.ENDER_EYE, Material.GLASS_BOTTLE, Material.WIND_CHARGE,
+            Material.MINECART, Material.CHEST_MINECART, Material.HOPPER_MINECART,
+            Material.TNT_MINECART, Material.FURNACE_MINECART, Material.COMMAND_BLOCK_MINECART
     );
 
     private final TechMCPlugin plugin;

@@ -569,6 +569,10 @@ public final class ItemFactoryUtil {
         if (definition == null) {
             return Material.PAPER;
         }
+        // 古代祭壇是唯一需要玩家手動放置的非機器科技方塊，保留原始方塊材質
+        if ("ancient_altar".equalsIgnoreCase(definition.id())) {
+            return this.safeItemMaterial(definition.icon());
+        }
         if (definition.headTexture() != null && !definition.headTexture().isBlank()) {
             return Material.PLAYER_HEAD;
         }
@@ -609,7 +613,7 @@ public final class ItemFactoryUtil {
             case DIAMOND_BLOCK -> Material.DIAMOND;
             case EMERALD_BLOCK -> Material.EMERALD;
             case LAPIS_BLOCK -> Material.LAPIS_LAZULI;
-            case LODESTONE -> Material.LODESTONE; // 古代祭壇需要實際可放置
+            case LODESTONE -> Material.RECOVERY_COMPASS; // 古代祭壇已在 techDisplayMaterial 特判
             case REDSTONE_BLOCK -> Material.REDSTONE;
             case COPPER_BLOCK -> Material.COPPER_INGOT;
             case NETHERITE_BLOCK -> Material.NETHERITE_INGOT;
@@ -670,6 +674,14 @@ public final class ItemFactoryUtil {
                 || material == Material.SUGAR_CANE
                 || material == Material.CACTUS
                 || material == Material.SEA_PICKLE;
+    }
+
+    /**
+     * 判斷指定科技物品的顯示材質是否為方塊（即玩家手持時可觸發 BlockPlaceEvent）。
+     * 用於 {@link com.rui.techproject.service.PlacedTechBlockService#shouldTrackPlacement} 的防禦性檢查。
+     */
+    public boolean isPlaceableTechBlock(final TechItemDefinition definition) {
+        return definition != null && this.techDisplayMaterial(definition).isBlock();
     }
 
     public ItemStack buildTechBook() {
@@ -2849,8 +2861,9 @@ public final class ItemFactoryUtil {
     }
 
     private boolean refreshTechItemLore(final ItemStack stack, final TechItemDefinition definition, final int newVersion) {
-        // 修正底層材質（例如 IRON_NUGGET → IRON_INGOT）
-        final Material expectedType = definition.icon();
+        // 修正底層材質：必須使用 techDisplayMaterial 而非原始 icon，
+        // 否則方塊型 icon（如 CHEST）會覆蓋重映射，導致玩家可以放置非機器的科技物品
+        final Material expectedType = this.techDisplayMaterial(definition);
         if (expectedType != null && stack.getType() != expectedType) {
             stack.setType(expectedType);
         }
