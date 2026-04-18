@@ -2975,10 +2975,17 @@ public final class MachineService {
             this.setRuntimeState(machine, MachineRuntimeState.STANDBY, "無權破壞（領地保護）");
             return;
         }
-        // 收集掉落物（精準採集類方塊直接掉落自身）
+        // 收集掉落物（精準採集類方塊直接掉落自身；雪層特殊處理為雪球）
         final List<ItemStack> drops = new ArrayList<>(target.getDrops());
-        if (drops.isEmpty() && this.isSilkTouchBlock(target.getType())) {
-            drops.add(new ItemStack(target.getType(), 1));
+        if (drops.isEmpty()) {
+            if (target.getType() == Material.SNOW) {
+                // 雪層：依層數掉落雪球（與原版鏟子一致），而非精準採集掉雪片
+                final int layers = target.getBlockData() instanceof org.bukkit.block.data.type.Snow snow
+                        ? snow.getLayers() : 1;
+                drops.add(new ItemStack(Material.SNOWBALL, layers));
+            } else if (this.isSilkTouchBlock(target.getType())) {
+                drops.add(new ItemStack(target.getType(), 1));
+            }
         }
         if (drops.isEmpty()) {
             this.setRuntimeState(machine, MachineRuntimeState.NO_INPUT, "前方無可採集方塊");
@@ -10451,8 +10458,8 @@ public final class MachineService {
         final String name = mat.name();
         // 冰系列
         if (name.contains("ICE")) return true;
-        // 雪
-        if (mat == Material.SNOW_BLOCK || mat == Material.SNOW) return true;
+        // 雪塊（雪層在 tickBlockBreaker 中已特殊處理為雪球）
+        if (mat == Material.SNOW_BLOCK) return true;
         // 玻璃系列
         if (name.contains("GLASS")) return true;
         // 海龜蛋、菌絲、草方塊等

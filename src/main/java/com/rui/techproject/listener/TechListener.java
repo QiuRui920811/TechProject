@@ -972,6 +972,11 @@ public final class TechListener implements Listener {
             if (event.getPlayer().isSneaking() && stack != null && stack.getType().isBlock()
                     && !this.plugin.getMachineService().isQuarryBlock(machineBlock)
                     && !this.plugin.getMachineService().isTeleportPadBlock(machineBlock)) {
+                // 若早期攔截已將 useInteractedBlock 設為 DENY（防開原版容器 GUI），
+                // 須明確放行 useItemInHand，否則部分伺服器實作會連方塊放置一併阻擋
+                if (earlyMachineDeny) {
+                    event.setUseItemInHand(Result.ALLOW);
+                }
                 return;
             }
             event.setUseInteractedBlock(Result.DENY);
@@ -1230,6 +1235,33 @@ public final class TechListener implements Listener {
                     this.plugin.getMachineService().handleTeleportPadMenuClick(player, event.getRawSlot());
                 }
             }
+            // ── 科技背包：禁止放入科技背包或界伏盒（防 NBT 遞迴爆炸） ──
+            if (title.equals("科技背包") && event.getWhoClicked() instanceof Player backpackPlayer) {
+                final int topSize = event.getView().getTopInventory().getSize();
+                ItemStack incoming = null;
+                if (event.isShiftClick() && event.getRawSlot() >= topSize) {
+                    incoming = event.getCurrentItem();
+                } else if (event.getRawSlot() < topSize) {
+                    incoming = event.getCursor();
+                }
+                if (event.getClick() == ClickType.NUMBER_KEY && event.getRawSlot() < topSize) {
+                    final ItemStack hotbar = backpackPlayer.getInventory().getItem(event.getHotbarButton());
+                    if (hotbar != null && this.isBackpackForbiddenItem(hotbar)) {
+                        incoming = hotbar;
+                    }
+                }
+                if (event.getClick() == ClickType.SWAP_OFFHAND && event.getRawSlot() < topSize) {
+                    final ItemStack offhand = backpackPlayer.getInventory().getItemInOffHand();
+                    if (this.isBackpackForbiddenItem(offhand)) {
+                        incoming = offhand;
+                    }
+                }
+                if (incoming != null && this.isBackpackForbiddenItem(incoming)) {
+                    event.setCancelled(true);
+                    backpackPlayer.sendActionBar(this.plugin.getItemFactory().warning("此物品不可放入背包。"));
+                    return;
+                }
+            }
             return;
         }
         event.setCancelled(true);
@@ -1278,6 +1310,16 @@ public final class TechListener implements Listener {
         if (bookViewOpen || this.plugin.getTechBookService().isBookView(title)) {
             for (final int rawSlot : event.getRawSlots()) {
                 if (rawSlot < event.getView().getTopInventory().getSize()) {
+                    event.setCancelled(true);
+                    return;
+                }
+            }
+        }
+        // ── 科技背包：禁止拖曳放入科技背包或界伏盒 ──
+        if (title.equals("科技背包") && event.getOldCursor() != null && this.isBackpackForbiddenItem(event.getOldCursor())) {
+            final int topSize = event.getView().getTopInventory().getSize();
+            for (final int rawSlot : event.getRawSlots()) {
+                if (rawSlot < topSize) {
                     event.setCancelled(true);
                     return;
                 }
@@ -4624,6 +4666,14 @@ public final class TechListener implements Listener {
 
     public boolean hasOpenBackpack(final UUID uuid) {
         return this.openBackpacks.containsKey(uuid);
+    }
+
+    /** 科技背包或界伏盒不可放入背包，避免 NBT 遞迴導致資料爆炸。 */
+    private boolean isBackpackForbiddenItem(final ItemStack item) {
+        if (item == null || item.getType() == Material.AIR) return false;
+        if (item.getType().name().contains("SHULKER_BOX")) return true;
+        final String techId = this.plugin.getItemFactory().getTechItemId(item);
+        return "tech_backpack".equalsIgnoreCase(techId);
     }
 
     /**
