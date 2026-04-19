@@ -134,6 +134,7 @@ public final class TechMCPlugin extends JavaPlugin {
     private com.rui.techproject.service.talent.SpellCastService spellCastService;
     private com.rui.techproject.service.talent.TalentGuiService talentGuiService;
     private com.rui.techproject.listener.DiscordSrvHook discordSrvHook;
+    private TechListener techListener;
 
     @Override
     public void onEnable() {
@@ -209,7 +210,9 @@ public final class TechMCPlugin extends JavaPlugin {
         this.planetService.setStorageBackend(backend);
         this.machineService.setStorageBackend(backend);
 
-        this.getServer().getPluginManager().registerEvents(new TechListener(this), this);
+        this.techListener = new TechListener(this);
+        this.techListener.loadBackpackStorage();
+        this.getServer().getPluginManager().registerEvents(this.techListener, this);
         this.getServer().getPluginManager().registerEvents(
                 new com.rui.techproject.listener.SpellCastListener(this.spellCastService), this);
         final TechCommand techCommand = new TechCommand(this, this.techRegistry, this.itemFactory);
@@ -488,6 +491,7 @@ public final class TechMCPlugin extends JavaPlugin {
         // ── 第 3 步：儲存所有資料 ──
         sender.sendMessage(net.kyori.adventure.text.Component.text(
                 "正在儲存所有資料…", net.kyori.adventure.text.format.NamedTextColor.YELLOW));
+        if (this.techListener != null) this.techListener.saveBackpackStorage();
         if (this.machineService != null) this.machineService.saveAll();
         if (this.placedTechBlockService != null) this.placedTechBlockService.saveAll();
         if (this.techCropService != null) this.techCropService.saveAll();
@@ -547,6 +551,10 @@ public final class TechMCPlugin extends JavaPlugin {
         }
         if (this.planetService != null) {
             this.planetService.shutdown();
+        }
+        if (this.techListener != null) {
+            this.techListener.forceCloseAllBackpacks();
+            this.techListener.saveBackpackStorage();
         }
         if (this.machineService != null) {
             // Folia: onDisable 在主控台線程，無法操作實體，Display 實體伺服器關閉後自動消失
