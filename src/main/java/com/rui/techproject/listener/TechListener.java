@@ -1237,6 +1237,15 @@ public final class TechListener implements Listener {
             }
             // ── 科技背包：禁止放入科技背包或界伏盒（防 NBT 遞迴爆炸） ──
             if (title.equals("科技背包") && event.getWhoClicked() instanceof Player backpackPlayer) {
+                // DOUBLE_CLICK（收集至游標）可能從頂部欄位收集禁止物品，直接攔截
+                if (event.getClick() == ClickType.DOUBLE_CLICK) {
+                    final ItemStack cursor = event.getCursor();
+                    if (cursor != null && this.isBackpackForbiddenItem(cursor)) {
+                        event.setCancelled(true);
+                        backpackPlayer.sendActionBar(this.plugin.getItemFactory().warning("此物品不可放入背包。"));
+                        return;
+                    }
+                }
                 final int topSize = event.getView().getTopInventory().getSize();
                 ItemStack incoming = null;
                 if (event.isShiftClick() && event.getRawSlot() >= topSize) {
@@ -1608,6 +1617,10 @@ public final class TechListener implements Listener {
         if (event.getItem() == null || (event.getAction() != Action.RIGHT_CLICK_AIR && event.getAction() != Action.RIGHT_CLICK_BLOCK)) {
             return false;
         }
+        // ★ 副手觸發的食物事件一律忽略，防止副手食物免費吃（消耗邏輯只處理主手）
+        if (event.getHand() == EquipmentSlot.OFF_HAND) {
+            return false;
+        }
         // 若玩家右鍵的是烹調站，優先交給烹調系統處理，不要直接吃掉食材
         if (event.getClickedBlock() != null
                 && this.plugin.getCookingService().isCookingStation(event.getClickedBlock().getType())) {
@@ -1628,8 +1641,8 @@ public final class TechListener implements Listener {
 
         if (player.getGameMode() != GameMode.CREATIVE) {
             final ItemStack hand = player.getInventory().getItemInMainHand();
-            if (hand == null || hand.getAmount() <= 0) {
-                return true;
+            if (hand == null || hand.getAmount() <= 0 || !techItemId.equalsIgnoreCase(this.plugin.getItemFactory().getTechItemId(hand))) {
+                return true; // 主手物品與偵測到的食物不符（理論上不會發生），安全跳過
             }
             if (hand.getAmount() <= 1) {
                 player.getInventory().setItemInMainHand(null);
@@ -2442,6 +2455,10 @@ public final class TechListener implements Listener {
         for (int dx = -1; dx <= 1; dx++) {
             for (int dz = -1; dz <= 1; dz++) {
                 final Block crop = center.getWorld().getBlockAt(center.getX() + dx, center.getY(), center.getZ() + dz);
+                // ★ 逐格領地檢查，防止在邊界催熟別人的作物
+                if ((dx != 0 || dz != 0) && !this.canModifyBlock(event.getPlayer(), crop)) {
+                    continue;
+                }
                 if (this.plugin.getTechCropService().grow(crop, 2)) {
                     grown++;
                     continue;
@@ -2720,8 +2737,8 @@ public final class TechListener implements Listener {
         for (int dx = -1; dx <= 1; dx++) {
             for (int dz = -1; dz <= 1; dz++) {
                 final Block crop = origin.getWorld().getBlockAt(origin.getX() + dx, origin.getY(), origin.getZ() + dz);
-                // 領地保護：跳過無權操作的方塊
-                if ((dx != 0 || dz != 0) && !this.canModifyBlock(event.getPlayer(), crop)) {
+                // 領地保護：逐格檢查（含中心方塊）
+                if (!this.canModifyBlock(event.getPlayer(), crop)) {
                     continue;
                 }
                 if (this.plugin.getTechCropService().isTrackedCrop(crop)) {
@@ -2795,7 +2812,12 @@ public final class TechListener implements Listener {
                     if (this.plugin.getMachineService().resolveManagedMachineBlock(target) != null) {
                         continue;
                     }
-                    if ((dx != 0 || dy != 0 || dz != 0) && !this.canModifyBlock(player, target)) {
+                    // ★ 跳過追蹤的科技方塊（古代祭壇、果樹等）
+                    if (this.plugin.getPlacedTechBlockService().isTrackedBlock(target)) {
+                        continue;
+                    }
+                    // ★ 含中心方塊在內逐格檢查領地保護
+                    if (!this.canModifyBlock(player, target)) {
                         continue;
                     }
                     for (final ItemStack drop : target.getDrops(tool, player)) {
@@ -2852,10 +2874,13 @@ public final class TechListener implements Listener {
             if (!visited.add(key) || current.getType() != oreType) {
                 continue;
             }
-            if (current != origin && !this.canModifyBlock(player, current)) {
+            if (!this.canModifyBlock(player, current)) {
                 continue;
             }
             if (this.plugin.getMachineService().resolveManagedMachineBlock(current) != null) {
+                continue;
+            }
+            if (this.plugin.getPlacedTechBlockService().isTrackedBlock(current)) {
                 continue;
             }
             vein.add(current);
@@ -3179,26 +3204,31 @@ public final class TechListener implements Listener {
                     player.sendMessage(this.plugin.getItemFactory().warning("請先清空滑鼠上的物品，再從進階工作台取出成品。"));
                     return true;
                 }
+            }
+            // ★ 先消耗材料，再給物品（防止 TOCTOU 複製）
+            final ItemStack[] matrix = craftingInventory.getMatrix();
+            for (int index = 0; index < matrix.length; index++) {
+                final ItemStack ingredient = matrix[index];
+                if (ingredient == null || ingredient.getType() == Material.AIR) {
+                    continue;
+                }
+                if (ingredient.getAmount() <= 1) {
+                    matrix[index] = null;
+                } else {
+                    ingredient.setAmount(ingredient.getAmount() - 1);
+                    matrix[index] = ingredient;
+                }
+            }
+            craftingInventory.setMatrix(matrix);
+            // 材料已消耗，安全地給予產物
+            if (cursor != null && cursor.getType() != Material.AIR) {
                 cursor.setAmount(cursor.getAmount() + 1);
                 player.setItemOnCursor(cursor);
             } else {
                 player.setItemOnCursor(result);
             }
         }
-        final ItemStack[] matrix = craftingInventory.getMatrix();
-        for (int index = 0; index < matrix.length; index++) {
-            final ItemStack ingredient = matrix[index];
-            if (ingredient == null || ingredient.getType() == Material.AIR) {
-                continue;
-            }
-            if (ingredient.getAmount() <= 1) {
-                matrix[index] = null;
-            } else {
-                ingredient.setAmount(ingredient.getAmount() - 1);
-                matrix[index] = ingredient;
-            }
-        }
-        craftingInventory.setMatrix(matrix);
+        // matrix already consumed above
         final var nextMatch = this.plugin.getBlueprintService().matchCraftingMatrix(craftingInventory.getMatrix());
         if (nextMatch != null && this.plugin.getBlueprintService().isAdvancedWorkbench(craftingInventory.getLocation())) {
             craftingInventory.setResult(nextMatch.isItemBlueprint()
@@ -3523,22 +3553,31 @@ public final class TechListener implements Listener {
                 }
             }
         }
-        // 虛空之鏡 — 反彈投射物
+        // 虛空之鏡 — 反彈投射物（限制最多反彈 3 次，防止雙方鏡面無限迴圈）
         if (event.getEntity() instanceof Player victim && event.getDamager() instanceof Projectile projectile) {
             final Long expiry = this.voidMirrorActive.get(victim.getUniqueId());
             if (expiry != null && System.currentTimeMillis() < expiry) {
-                event.setCancelled(true);
-                projectile.remove();
-                // 反射：朝投射物來源方向發射同類投射物
-                if (projectile.getShooter() instanceof LivingEntity shooter) {
-                    final org.bukkit.util.Vector direction = shooter.getLocation().toVector()
-                            .subtract(victim.getLocation().toVector()).normalize().multiply(projectile.getVelocity().length());
-                    final Projectile reflected = victim.launchProjectile(projectile.getClass(), direction);
-                    reflected.setShooter(victim);
-                    victim.getWorld().playSound(victim.getLocation(), Sound.ITEM_SHIELD_BLOCK, 0.7f, 1.6f);
-                    victim.getWorld().spawnParticle(Particle.END_ROD, victim.getLocation().add(0, 1, 0), 8, 0.3, 0.3, 0.3, 0.02);
+                // 檢查反彈次數
+                final org.bukkit.NamespacedKey bounceKey = new org.bukkit.NamespacedKey(this.plugin, "mirror_bounces");
+                final int bounces = projectile.getPersistentDataContainer()
+                        .getOrDefault(bounceKey, org.bukkit.persistence.PersistentDataType.INTEGER, 0);
+                if (bounces >= 3) {
+                    // 超過上限，不再反彈，正常受傷
                 } else {
-                    victim.getWorld().playSound(victim.getLocation(), Sound.ITEM_SHIELD_BLOCK, 0.7f, 1.6f);
+                    event.setCancelled(true);
+                    projectile.remove();
+                    if (projectile.getShooter() instanceof LivingEntity shooter) {
+                        final org.bukkit.util.Vector direction = shooter.getLocation().toVector()
+                                .subtract(victim.getLocation().toVector()).normalize().multiply(projectile.getVelocity().length());
+                        final Projectile reflected = victim.launchProjectile(projectile.getClass(), direction);
+                        reflected.setShooter(victim);
+                        reflected.getPersistentDataContainer().set(bounceKey,
+                                org.bukkit.persistence.PersistentDataType.INTEGER, bounces + 1);
+                        victim.getWorld().playSound(victim.getLocation(), Sound.ITEM_SHIELD_BLOCK, 0.7f, 1.6f);
+                        victim.getWorld().spawnParticle(Particle.END_ROD, victim.getLocation().add(0, 1, 0), 8, 0.3, 0.3, 0.3, 0.02);
+                    } else {
+                        victim.getWorld().playSound(victim.getLocation(), Sound.ITEM_SHIELD_BLOCK, 0.7f, 1.6f);
+                    }
                 }
             }
         }
@@ -4138,6 +4177,9 @@ public final class TechListener implements Listener {
         final String id = this.plugin.getItemFactory().getTechItemId(chestplate);
         if (!"quantum_chestplate".equalsIgnoreCase(id)) { return; }
         if (event.getDamager() instanceof LivingEntity attacker) {
+            // ★ 同時鎖定 victim 和 attacker 的 UUID，防止兩個穿量子胸甲的玩家互毆造成無限遞迴
+            final UUID attackerUid = attacker instanceof Player ap ? ap.getUniqueId() : null;
+            if (attackerUid != null && this.thornsProcessing.contains(attackerUid)) { return; }
             this.thornsProcessing.add(uid);
             try {
                 attacker.damage(event.getDamage() * 0.25, victim);
@@ -4441,8 +4483,9 @@ public final class TechListener implements Listener {
         }
         if (chargerSlot < 0) return;
         final ItemStack charger = contents[chargerSlot];
-        long chargerEnergy = factory.getItemStoredEnergy(charger);
-        if (chargerEnergy <= 0L) return;
+        final long originalEnergy = factory.getItemStoredEnergy(charger);
+        if (originalEnergy <= 0L) return;
+        long chargerEnergy = originalEnergy;
         // 掃描所有電力工具並充電
         for (int i = 0; i < contents.length; i++) {
             if (i == chargerSlot || chargerEnergy <= 0L) continue;
@@ -4459,8 +4502,7 @@ public final class TechListener implements Listener {
             factory.setItemStoredEnergy(tool, toolCurrent + transfer);
             chargerEnergy -= transfer;
         }
-        // 更新充電器自身電量
-        final long originalEnergy = factory.getItemStoredEnergy(charger);
+        // 更新充電器自身電量（使用迴圈前保存的原始值比較，避免重複讀取 PDC）
         if (chargerEnergy != originalEnergy) {
             factory.setItemStoredEnergy(charger, chargerEnergy);
         }
@@ -4646,6 +4688,16 @@ public final class TechListener implements Listener {
     void saveBackpackOnClose(final Player player, final org.bukkit.inventory.Inventory inv) {
         final ItemStack backpackItem = this.openBackpacks.remove(player.getUniqueId());
         if (backpackItem == null) return;
+        // ★ 游標上若有物品，先歸還到背包格內再序列化，防止複製
+        final ItemStack cursor = player.getItemOnCursor();
+        if (cursor != null && cursor.getType() != Material.AIR) {
+            player.setItemOnCursor(null);
+            final java.util.HashMap<Integer, ItemStack> overflow = inv.addItem(cursor);
+            // 背包格裝不下的掉到地上，絕不允許憑空消失或複製
+            for (final ItemStack leftover : overflow.values()) {
+                player.getWorld().dropItemNaturally(player.getLocation(), leftover);
+            }
+        }
         try {
             final java.io.ByteArrayOutputStream bos = new java.io.ByteArrayOutputStream();
             final org.bukkit.util.io.BukkitObjectOutputStream oos = new org.bukkit.util.io.BukkitObjectOutputStream(bos);

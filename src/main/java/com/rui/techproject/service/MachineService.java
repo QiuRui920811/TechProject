@@ -1676,6 +1676,12 @@ public final class MachineService {
                 return;
             }
 
+            // DOUBLE_CLICK（收集至游標）會從頂部機器欄位收集物品，繞過輸出保護
+            if (event.getClick() == ClickType.DOUBLE_CLICK) {
+                event.setCancelled(true);
+                return;
+            }
+
             event.setCancelled(false);
             return;
         }
@@ -2672,8 +2678,15 @@ public final class MachineService {
         // 減 1 tick；循環結束時輸出乏燃料棒
         remaining--;
         if (remaining <= 0) {
+            // 檢查輸出空間——若滿則保持 remaining=1，下一 tick 重試，避免乏燃料棒消失
+            final ItemStack spentRod = this.buildStackForId("spent_fuel_rod", 1);
+            if (!this.canStoreOutput(machine, spentRod)) {
+                this.nuclearFuelTicks.put(key, 1);
+                this.setRuntimeState(machine, MachineRuntimeState.OUTPUT_BLOCKED, "輸出欄已滿，等待空間回收乏燃料棒");
+                return;
+            }
             this.nuclearFuelTicks.remove(key);
-            this.storeOutputs(machine, List.of(this.buildStackForId("spent_fuel_rod", 1)));
+            this.storeOutputs(machine, List.of(spentRod));
             if (this.isChunkViewable(key)) {
                 world.playSound(location, Sound.BLOCK_RESPAWN_ANCHOR_DEPLETE, 0.5f, 0.9f);
             }
@@ -2991,16 +3004,12 @@ public final class MachineService {
             this.setRuntimeState(machine, MachineRuntimeState.NO_INPUT, "前方無可採集方塊");
             return;
         }
-        // 檢查輸出空間
-        boolean hasSpace = false;
+        // 檢查輸出空間 — 所有掉落物都必須能存入，否則不破壞方塊
         for (final ItemStack drop : drops) {
-            if (this.canStoreOutput(machine, drop)) {
-                hasSpace = true;
+            if (!this.canStoreOutput(machine, drop)) {
+                this.setRuntimeState(machine, MachineRuntimeState.OUTPUT_BLOCKED, "輸出欄已滿");
+                return;
             }
-        }
-        if (!hasSpace) {
-            this.setRuntimeState(machine, MachineRuntimeState.OUTPUT_BLOCKED, "輸出欄已滿");
-            return;
         }
         // 破壞方塊
         target.setType(Material.AIR);
@@ -10831,20 +10840,18 @@ public final class MachineService {
                     continue;
                 }
                 if (current == null || current.getType() == Material.AIR) {
-                    machine.setUpgradeAt(slot, remaining);
-                    return new ItemStack(Material.AIR);
-                }
-                if (!current.isSimilar(remaining) || current.getAmount() >= current.getMaxStackSize()) {
+                    // 升級每格最多 1 個，只放入 1 個，剩餘退回
+                    final ItemStack single = remaining.clone();
+                    single.setAmount(1);
+                    machine.setUpgradeAt(slot, single);
+                    remaining.setAmount(remaining.getAmount() - 1);
+                    if (remaining.getAmount() <= 0) {
+                        return new ItemStack(Material.AIR);
+                    }
                     continue;
                 }
-                final int room = current.getMaxStackSize() - current.getAmount();
-                final int move = Math.min(room, remaining.getAmount());
-                current.setAmount(current.getAmount() + move);
-                machine.setUpgradeAt(slot, current);
-                remaining.setAmount(remaining.getAmount() - move);
-                if (remaining.getAmount() <= 0) {
-                    return new ItemStack(Material.AIR);
-                }
+                // 升級每格最多 1 個，已有物品時不可堆疊
+                continue;
             }
             return remaining;
         }

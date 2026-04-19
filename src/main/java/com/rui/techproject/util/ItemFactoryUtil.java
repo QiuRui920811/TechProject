@@ -2861,6 +2861,14 @@ public final class ItemFactoryUtil {
     }
 
     private boolean refreshTechItemLore(final ItemStack stack, final TechItemDefinition definition, final int newVersion) {
+        // ★ 必須在 setType 之前讀取 PDC，因為 setType() 會清空 ItemMeta
+        final Long energy;
+        {
+            final ItemMeta oldMeta = stack.getItemMeta();
+            energy = oldMeta != null
+                    ? oldMeta.getPersistentDataContainer().get(this.techItemEnergyKey, PersistentDataType.LONG)
+                    : null;
+        }
         // 修正底層材質：必須使用 techDisplayMaterial 而非原始 icon，
         // 否則方塊型 icon（如 CHEST）會覆蓋重映射，導致玩家可以放置非機器的科技物品
         final Material expectedType = this.techDisplayMaterial(definition);
@@ -2868,8 +2876,6 @@ public final class ItemFactoryUtil {
             stack.setType(expectedType);
         }
         final ItemMeta meta = stack.getItemMeta();
-        // 保留儲能
-        final Long energy = meta.getPersistentDataContainer().get(this.techItemEnergyKey, PersistentDataType.LONG);
 
         // 重新套用標題
         meta.displayName(this.schemaTitle(definition.tier(), definition.visualTier(), "✦ " + this.displayNameForId(definition.id())));
@@ -2908,8 +2914,14 @@ public final class ItemFactoryUtil {
         lore.add(this.colored("└─────────────────────────┘", MUTED));
         meta.lore(lore);
 
-        // 更新版本戳
+        // 還原 PDC 標籤（setType 可能已清空）
+        meta.getPersistentDataContainer().set(this.techItemKey, PersistentDataType.STRING, definition.id());
         meta.getPersistentDataContainer().set(this.dataVersionKey, PersistentDataType.INTEGER, newVersion);
+        if (energy != null && this.maxItemEnergy(definition.id()) > 0L) {
+            meta.getPersistentDataContainer().set(this.techItemEnergyKey, PersistentDataType.LONG, energy);
+        }
+        this.applyConfiguredItemModel(meta, definition.itemModel());
+        meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
         stack.setItemMeta(meta);
         return true;
     }
@@ -3061,10 +3073,11 @@ public final class ItemFactoryUtil {
             return;
         }
         final ItemMeta meta = stack.getItemMeta();
-        final long clamped = Math.max(0L, energy);
-        meta.getPersistentDataContainer().set(this.techItemEnergyKey, PersistentDataType.LONG, clamped);
         final String itemId = this.getTechItemId(stack);
         final long maxEnergy = this.maxItemEnergy(itemId);
+        // 同時夾住下限 0 與上限 maxEnergy，防止溢出或負值
+        final long clamped = maxEnergy > 0L ? Math.min(Math.max(0L, energy), maxEnergy) : Math.max(0L, energy);
+        meta.getPersistentDataContainer().set(this.techItemEnergyKey, PersistentDataType.LONG, clamped);
         if (maxEnergy > 0L) {
             this.refreshItemEnergyLore(meta, clamped, maxEnergy);
         }
