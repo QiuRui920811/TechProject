@@ -1512,13 +1512,16 @@ public final class PlanetService {
     }
 
     private void purgeManagedPlanetEntities(final World world) {
+        // Folia: 存取實體狀態（getScoreboardTags 等）必須在該實體所屬的 region 執行緒上執行
         for (final Entity entity : new ArrayList<>(world.getEntities())) {
-            try {
-                if (this.isManagedPlanetEntity(entity)) {
-                    entity.remove();
+            this.scheduler.runEntity(entity, () -> {
+                try {
+                    if (this.isManagedPlanetEntity(entity)) {
+                        entity.remove();
+                    }
+                } catch (final Exception ignored) {
                 }
-            } catch (final IllegalStateException ignored) {
-            }
+            });
         }
     }
 

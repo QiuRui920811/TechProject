@@ -4684,8 +4684,28 @@ public final class TechListener implements Listener {
 
     /** 關閉背包時序列化內容到物品 PDC。 */
     void saveBackpackOnClose(final Player player, final org.bukkit.inventory.Inventory inv) {
-        final ItemStack backpackItem = this.openBackpacks.remove(player.getUniqueId());
+        ItemStack backpackItem = this.openBackpacks.remove(player.getUniqueId());
         if (backpackItem == null) return;
+        // 背包物品可能已被移動/清空，若 meta 為 null 嘗試從玩家背包中重新定位
+        if (backpackItem.getType() == Material.AIR || backpackItem.getItemMeta() == null) {
+            backpackItem = null;
+            for (final ItemStack item : player.getInventory().getContents()) {
+                if (item != null && "tech_backpack".equalsIgnoreCase(this.plugin.getItemFactory().getTechItemId(item))) {
+                    backpackItem = item;
+                    break;
+                }
+            }
+            if (backpackItem == null) {
+                this.plugin.getLogger().warning("玩家 " + player.getName() + " 關閉背包時找不到背包物品，內容物已掉落。");
+                for (int i = 0; i < inv.getSize(); i++) {
+                    final ItemStack leftover = inv.getItem(i);
+                    if (leftover != null && leftover.getType() != Material.AIR) {
+                        player.getWorld().dropItemNaturally(player.getLocation(), leftover);
+                    }
+                }
+                return;
+            }
+        }
         // ★ 游標上若有物品，先歸還到背包格內再序列化，防止複製
         final ItemStack cursor = player.getItemOnCursor();
         if (cursor != null && cursor.getType() != Material.AIR) {
