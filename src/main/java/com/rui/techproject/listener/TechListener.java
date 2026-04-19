@@ -972,11 +972,9 @@ public final class TechListener implements Listener {
             if (event.getPlayer().isSneaking() && stack != null && stack.getType().isBlock()
                     && !this.plugin.getMachineService().isQuarryBlock(machineBlock)
                     && !this.plugin.getMachineService().isTeleportPadBlock(machineBlock)) {
-                // 若早期攔截已將 useInteractedBlock 設為 DENY（防開原版容器 GUI），
-                // 須明確放行 useItemInHand，否則部分伺服器實作會連方塊放置一併阻擋
-                if (earlyMachineDeny) {
-                    event.setUseItemInHand(Result.ALLOW);
-                }
+                // 明確放行方塊放置；阻擋容器 GUI（BEACON / ANVIL 等）
+                event.setUseInteractedBlock(Result.DENY);
+                event.setUseItemInHand(Result.ALLOW);
                 return;
             }
             event.setUseInteractedBlock(Result.DENY);
@@ -4718,6 +4716,14 @@ public final class TechListener implements Listener {
 
     public boolean hasOpenBackpack(final UUID uuid) {
         return this.openBackpacks.containsKey(uuid);
+    }
+
+    /** 背包開啟中禁止丟出物品，防止丟出背包本體導致內容物複製。 */
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    public void onPlayerDropItem(final PlayerDropItemEvent event) {
+        if (this.openBackpacks.containsKey(event.getPlayer().getUniqueId())) {
+            event.setCancelled(true);
+        }
     }
 
     /** 科技背包或界伏盒不可放入背包，避免 NBT 遞迴導致資料爆炸。 */

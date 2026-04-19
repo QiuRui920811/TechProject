@@ -576,6 +576,10 @@ public final class ItemFactoryUtil {
         if (definition.headTexture() != null && !definition.headTexture().isBlank()) {
             return Material.PLAYER_HEAD;
         }
+        // ★ 機器需要保留方塊材質才能正常放置（BlockPlaceEvent 需要方塊型物品）
+        if (this.registry.getMachine(definition.id()) != null) {
+            return this.safeItemMaterial(definition.icon());
+        }
         final Material material = this.safeItemMaterial(definition.icon());
         if ((definition.nexoId() != null && !definition.nexoId().isBlank())
                 || (definition.itemModel() != null && !definition.itemModel().isBlank() && !definition.itemModel().trim().equals("-1"))) {
