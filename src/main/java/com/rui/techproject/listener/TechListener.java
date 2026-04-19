@@ -1233,40 +1233,54 @@ public final class TechListener implements Listener {
                     this.plugin.getMachineService().handleTeleportPadMenuClick(player, event.getRawSlot());
                 }
             }
-            // ── 科技背包：禁止放入科技背包或界伏盒（防 NBT 遞迴爆炸） ──
+            // ═══ 科技背包：白名單制點擊處理 + slot 鎖定 ═══
             if (title.equals("科技背包") && event.getWhoClicked() instanceof Player backpackPlayer) {
-                // DOUBLE_CLICK（收集至游標）可能從頂部欄位收集禁止物品，直接攔截
-                if (event.getClick() == ClickType.DOUBLE_CLICK) {
-                    final ItemStack cursor = event.getCursor();
-                    if (cursor != null && this.isBackpackForbiddenItem(cursor)) {
+                final int topSize = event.getView().getTopInventory().getSize();
+                final int backpackSlot = this.getBackpackSlot(backpackPlayer.getUniqueId());
+                // ── 鎖定背包本體所在 slot：任何涉及該 slot 的操作一律取消 ──
+                if (backpackSlot >= 0) {
+                    // 玩家背包 slot 在 InventoryView 中的 rawSlot = topSize + backpackSlot
+                    final int lockedRawSlot = topSize + backpackSlot;
+                    if (event.getRawSlot() == lockedRawSlot) {
+                        event.setCancelled(true);
+                        return;
+                    }
+                    if (event.getClick() == ClickType.NUMBER_KEY && event.getHotbarButton() == backpackSlot) {
+                        event.setCancelled(true);
+                        return;
+                    }
+                }
+                // ── 一律阻擋的操作 ──
+                // DOUBLE_CLICK 會從所有可見 slot 收集物品，行為不可控
+                // SWAP_OFFHAND / NUMBER_KEY 到背包區會繞過禁止物品檢查
+                final ClickType click = event.getClick();
+                if (click == ClickType.DOUBLE_CLICK) {
+                    event.setCancelled(true);
+                    return;
+                }
+                // ── 點擊背包區（top inventory）：白名單制 ──
+                if (event.getRawSlot() < topSize) {
+                    // 只允許：普通左/右鍵（放置/撿取/交換）、Shift 點擊（移出到玩家背包）
+                    if (click != ClickType.LEFT && click != ClickType.RIGHT && click != ClickType.SHIFT_LEFT && click != ClickType.SHIFT_RIGHT) {
+                        event.setCancelled(true);
+                        return;
+                    }
+                    // 放入背包的物品檢查（游標物品、NUMBER_KEY 對應物品等）
+                    ItemStack incoming = event.getCursor();
+                    if (incoming != null && this.isBackpackForbiddenItem(incoming)) {
                         event.setCancelled(true);
                         backpackPlayer.sendActionBar(this.plugin.getItemFactory().warning("此物品不可放入背包。"));
                         return;
                     }
                 }
-                final int topSize = event.getView().getTopInventory().getSize();
-                ItemStack incoming = null;
-                if (event.isShiftClick() && event.getRawSlot() >= topSize) {
-                    incoming = event.getCurrentItem();
-                } else if (event.getRawSlot() < topSize) {
-                    incoming = event.getCursor();
-                }
-                if (event.getClick() == ClickType.NUMBER_KEY && event.getRawSlot() < topSize) {
-                    final ItemStack hotbar = backpackPlayer.getInventory().getItem(event.getHotbarButton());
-                    if (hotbar != null && this.isBackpackForbiddenItem(hotbar)) {
-                        incoming = hotbar;
+                // ── 點擊玩家背包區（bottom inventory）：Shift 點擊放入背包時檢查禁止物品 ──
+                if (event.getRawSlot() >= topSize && event.isShiftClick()) {
+                    final ItemStack incoming = event.getCurrentItem();
+                    if (incoming != null && this.isBackpackForbiddenItem(incoming)) {
+                        event.setCancelled(true);
+                        backpackPlayer.sendActionBar(this.plugin.getItemFactory().warning("此物品不可放入背包。"));
+                        return;
                     }
-                }
-                if (event.getClick() == ClickType.SWAP_OFFHAND && event.getRawSlot() < topSize) {
-                    final ItemStack offhand = backpackPlayer.getInventory().getItemInOffHand();
-                    if (this.isBackpackForbiddenItem(offhand)) {
-                        incoming = offhand;
-                    }
-                }
-                if (incoming != null && this.isBackpackForbiddenItem(incoming)) {
-                    event.setCancelled(true);
-                    backpackPlayer.sendActionBar(this.plugin.getItemFactory().warning("此物品不可放入背包。"));
-                    return;
                 }
             }
             return;
@@ -1322,13 +1336,17 @@ public final class TechListener implements Listener {
                 }
             }
         }
-        // ── 科技背包：禁止拖曳放入科技背包或界伏盒 ──
-        if (title.equals("科技背包") && event.getOldCursor() != null && this.isBackpackForbiddenItem(event.getOldCursor())) {
+        // ── 科技背包：拖曳至背包區一律檢查禁止物品 ──
+        if (title.equals("科技背包")) {
             final int topSize = event.getView().getTopInventory().getSize();
             for (final int rawSlot : event.getRawSlots()) {
                 if (rawSlot < topSize) {
-                    event.setCancelled(true);
-                    return;
+                    // 任何拖曳到背包區的操作：檢查禁止物品
+                    if (event.getOldCursor() != null && this.isBackpackForbiddenItem(event.getOldCursor())) {
+                        event.setCancelled(true);
+                        return;
+                    }
+                    break;
                 }
             }
         }
@@ -4640,9 +4658,12 @@ public final class TechListener implements Listener {
         return true;
     }
 
-    // ── 科技背包：便攜儲物空間 ──
+    // ══════════════════════════════════════════════════════════════
+    //  科技背包：便攜儲物空間（slot-based 追蹤 + 白名單制點擊）
+    // ══════════════════════════════════════════════════════════════
     private static final org.bukkit.NamespacedKey BACKPACK_DATA_KEY = new org.bukkit.NamespacedKey("techproject", "backpack_data");
-    private final Map<UUID, ItemStack> openBackpacks = new java.util.concurrent.ConcurrentHashMap<>();
+    /** 記錄玩家→背包所在的玩家背包 slot（非 ItemStack 引用），避免引用失效 */
+    private final Map<UUID, Integer> openBackpackSlots = new java.util.concurrent.ConcurrentHashMap<>();
 
     private boolean handleTechBackpack(final PlayerInteractEvent event) {
         if (event.getItem() == null) return false;
@@ -4654,7 +4675,11 @@ public final class TechListener implements Listener {
         event.setUseItemInHand(Result.DENY);
         event.setCancelled(true);
 
-        final ItemStack backpackItem = event.getItem();
+        final int heldSlot = player.getInventory().getHeldItemSlot();
+        final ItemStack backpackItem = player.getInventory().getItem(heldSlot);
+        if (backpackItem == null || !"tech_backpack".equalsIgnoreCase(this.plugin.getItemFactory().getTechItemId(backpackItem))) {
+            return true; // 防禦：slot 裡已不是背包
+        }
         final org.bukkit.inventory.Inventory backpackInv = Bukkit.createInventory(null, 27,
                 net.kyori.adventure.text.Component.text("科技背包"));
         // 讀取已存的物品
@@ -4676,7 +4701,7 @@ public final class TechListener implements Listener {
                 }
             }
         }
-        this.openBackpacks.put(player.getUniqueId(), backpackItem);
+        this.openBackpackSlots.put(player.getUniqueId(), heldSlot);
         player.openInventory(backpackInv);
         player.playSound(player.getLocation(), Sound.BLOCK_CHEST_OPEN, 0.5f, 1.2f);
         return true;
@@ -4684,10 +4709,21 @@ public final class TechListener implements Listener {
 
     /** 關閉背包時序列化內容到物品 PDC。 */
     void saveBackpackOnClose(final Player player, final org.bukkit.inventory.Inventory inv) {
-        ItemStack backpackItem = this.openBackpacks.remove(player.getUniqueId());
-        if (backpackItem == null) return;
-        // 背包物品可能已被移動/清空，若 meta 為 null 嘗試從玩家背包中重新定位
-        if (backpackItem.getType() == Material.AIR || backpackItem.getItemMeta() == null) {
+        final Integer slot = this.openBackpackSlots.remove(player.getUniqueId());
+        if (slot == null) return;
+        // ★ 游標上若有物品，先歸還到背包格內再序列化，防止複製
+        final ItemStack cursor = player.getItemOnCursor();
+        if (cursor != null && cursor.getType() != Material.AIR) {
+            player.setItemOnCursor(null);
+            final java.util.HashMap<Integer, ItemStack> overflow = inv.addItem(cursor);
+            for (final ItemStack leftover : overflow.values()) {
+                player.getWorld().dropItemNaturally(player.getLocation(), leftover);
+            }
+        }
+        // 從記錄的 slot 重新讀取背包物品（非引用），保證拿到的是當前真正的物品
+        ItemStack backpackItem = player.getInventory().getItem(slot);
+        if (backpackItem == null || !"tech_backpack".equalsIgnoreCase(this.plugin.getItemFactory().getTechItemId(backpackItem))) {
+            // slot 裡已不是背包（極端情況），掃描整個背包找
             backpackItem = null;
             for (final ItemStack item : player.getInventory().getContents()) {
                 if (item != null && "tech_backpack".equalsIgnoreCase(this.plugin.getItemFactory().getTechItemId(item))) {
@@ -4695,26 +4731,17 @@ public final class TechListener implements Listener {
                     break;
                 }
             }
-            if (backpackItem == null) {
-                this.plugin.getLogger().warning("玩家 " + player.getName() + " 關閉背包時找不到背包物品，內容物已掉落。");
-                for (int i = 0; i < inv.getSize(); i++) {
-                    final ItemStack leftover = inv.getItem(i);
-                    if (leftover != null && leftover.getType() != Material.AIR) {
-                        player.getWorld().dropItemNaturally(player.getLocation(), leftover);
-                    }
-                }
-                return;
-            }
         }
-        // ★ 游標上若有物品，先歸還到背包格內再序列化，防止複製
-        final ItemStack cursor = player.getItemOnCursor();
-        if (cursor != null && cursor.getType() != Material.AIR) {
-            player.setItemOnCursor(null);
-            final java.util.HashMap<Integer, ItemStack> overflow = inv.addItem(cursor);
-            // 背包格裝不下的掉到地上，絕不允許憑空消失或複製
-            for (final ItemStack leftover : overflow.values()) {
-                player.getWorld().dropItemNaturally(player.getLocation(), leftover);
+        if (backpackItem == null) {
+            // 完全找不到，將內容物掉落地上（不靜默丟失）
+            this.plugin.getLogger().warning("玩家 " + player.getName() + " 關閉背包時找不到背包物品，內容物已掉落。");
+            for (int i = 0; i < inv.getSize(); i++) {
+                final ItemStack leftover = inv.getItem(i);
+                if (leftover != null && leftover.getType() != Material.AIR) {
+                    player.getWorld().dropItemNaturally(player.getLocation(), leftover);
+                }
             }
+            return;
         }
         try {
             final java.io.ByteArrayOutputStream bos = new java.io.ByteArrayOutputStream();
@@ -4726,6 +4753,16 @@ public final class TechListener implements Listener {
             oos.close();
             final String base64 = java.util.Base64.getEncoder().encodeToString(bos.toByteArray());
             final org.bukkit.inventory.meta.ItemMeta meta = backpackItem.getItemMeta();
+            if (meta == null) {
+                this.plugin.getLogger().warning("玩家 " + player.getName() + " 背包物品 meta 為 null，內容物已掉落。");
+                for (int i = 0; i < inv.getSize(); i++) {
+                    final ItemStack leftover = inv.getItem(i);
+                    if (leftover != null && leftover.getType() != Material.AIR) {
+                        player.getWorld().dropItemNaturally(player.getLocation(), leftover);
+                    }
+                }
+                return;
+            }
             meta.getPersistentDataContainer().set(BACKPACK_DATA_KEY, org.bukkit.persistence.PersistentDataType.STRING, base64);
             backpackItem.setItemMeta(meta);
         } catch (final Exception ex) {
@@ -4735,13 +4772,22 @@ public final class TechListener implements Listener {
     }
 
     public boolean hasOpenBackpack(final UUID uuid) {
-        return this.openBackpacks.containsKey(uuid);
+        return this.openBackpackSlots.containsKey(uuid);
+    }
+
+    /**
+     * 取得背包物品所在的玩家背包 slot（用於鎖定）。
+     * 找不到則回傳 -1。
+     */
+    int getBackpackSlot(final UUID uuid) {
+        final Integer slot = this.openBackpackSlots.get(uuid);
+        return slot != null ? slot : -1;
     }
 
     /** 背包開啟中禁止丟出物品，防止丟出背包本體導致內容物複製。 */
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onPlayerDropItem(final PlayerDropItemEvent event) {
-        if (this.openBackpacks.containsKey(event.getPlayer().getUniqueId())) {
+        if (this.openBackpackSlots.containsKey(event.getPlayer().getUniqueId())) {
             event.setCancelled(true);
         }
     }
