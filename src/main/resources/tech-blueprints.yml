@@ -1081,3 +1081,90 @@ blueprints:
       - 四件組合完全免疫核反應堆與鈾礦輻射。
     placement:
       - 穿戴在腳部裝備欄位。
+  # ═══ 迷途星裝備（迷宮套裝） ═══
+  maze_blade:
+    register-recipe: false
+    ingredient-lines:
+      - 製作站：行星鍛造台
+      - 主材料：守衛者核心×2 + 迷宮遺物×3 + 迷宮碎片×8
+    tutorial:
+      - 迷途星最強近戰武器，需要擊敗迷宮魔像兩次才能收集足夠的守衛者核心。
+      - 右鍵回聲震擊會消耗 12 EU，但扇形擊飛加盲視在牆壁會動的環境裡非常實用。
+      - 迷宮碎片和遺物需要反覆進入迷宮深層採集，不要指望一趟刷完。
+    placement:
+      - 穿戴在主手。需要行動充電器或回迷途星前哨充電。
+  echo_crossbow:
+    register-recipe: false
+    ingredient-lines:
+      - 製作站：行星鍛造台
+      - 主材料：守衛者核心×1 + 迷宮遺物×2 + 迷宮碎片×6 + 迷宮蔓藤×4
+    tutorial:
+      - 迷途星專屬遠程武器，0.8 秒內連射 5 發穿透箭矢。
+      - 蔓藤充當弓弦，碎片做主體，遺物與核心做共鳴模組。
+      - 和迷途刃搭配形成迷途星遠近雙線輸出。
+    placement:
+      - 穿戴在主手或副手。消耗 10 EU。
+  maze_pickaxe:
+    register-recipe: false
+    ingredient-lines:
+      - 製作站：行星鍛造台
+      - 主材料：守衛者核心×1 + 迷宮遺物×2 + 迷宮碎片×6
+    tutorial:
+      - 特化迷宮採集鎬，提升深岩類節點效率。
+      - 材料需求和武器接近，但不需要蔓藤。
+      - 在迷途星做長期採集前建議先做這把。
+    placement:
+      - 穿戴在主手。
+  maze_helmet:
+    register-recipe: false
+    ingredient-lines:
+      - 製作站：行星鍛造台
+      - 主材料：守衛者核心×1 + 迷宮碎片×6 + 迷宮蔓藤×4 + 迷宮遺物×1
+    tutorial:
+      - 內建回聲雷達，穿戴時自帶夜視，在瘴氣中也不會失去視野。
+      - 四件迷宮套合在一起會大幅提升迷途星生存力。
+      - 碎片和蔓藤是主耗材，每趟迷宮優先收集。
+    placement:
+      - 穿戴在頭部裝備欄位。
+  maze_chestplate:
+    register-recipe: false
+    ingredient-lines:
+      - 製作站：行星鍛造台
+      - 主材料：守衛者核心×1 + 迷宮碎片×10 + 迷宮蔓藤×6 + 迷宮遺物×2
+    tutorial:
+      - 四件套中最貴的一件，碎片需求量最高。
+      - 自帶被動瘴氣過濾，穿上後瘴氣傷害大幅下降。
+      - 建議先做頭盔和靴，最後攢夠材料再做胸甲。
+    placement:
+      - 穿戴在胸部裝備欄位。
+  maze_leggings:
+    register-recipe: false
+    ingredient-lines:
+      - 製作站：行星鍛造台
+      - 主材料：守衛者核心×1 + 迷宮碎片×8 + 迷宮蔓藤×5 + 迷宮遺物×1
+    tutorial:
+      - 嵌入空間穩定器，在牆壁移動時維持行動穩定。
+      - 材料介於頭盔和胸甲之間，是第二貴的部位。
+    placement:
+      - 穿戴在腿部裝備欄位。
+  maze_boots:
+    register-recipe: false
+    ingredient-lines:
+      - 製作站：行星鍛造台
+      - 主材料：守衛者核心×1 + 迷宮碎片×5 + 迷宮蔓藤×3 + 迷宮遺物×1
+    tutorial:
+      - 底部回聲紋路可偵測附近牆壁結構變化，算是最便宜的入門件。
+      - 和頭盔一起是建議最先做的兩件。
+    placement:
+      - 穿戴在腳部裝備欄位。
+  maze_compass:
+    register-recipe: false
+    ingredient-lines:
+      - 製作站：行星鍛造台
+      - 主材料：迷宮遺物×1 + 迷宮碎片×4 + 迷宮蔓藤×2
+    tutorial:
+      - 指向迷宮中心的特殊羅盤，不需要守衛者核心，但仍需要深層遺物。
+      - 在瘴氣中也能保持方向感，是迷途星探索的基礎工具。
+      - 建議第一件做這個，再靠它引導找到更多深層材料。
+    placement:
+      - 放在副手或快捷欄使用。

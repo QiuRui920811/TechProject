@@ -5132,6 +5132,64 @@ recipes:
     energy: 24
     guide: 機殼 + 高級電路×2 + 電路板×4 + 鋼板×4 → 合成器 → 萬用合成站
 
+  # ── 迷途星裝備（迷宮套裝）──────────────────────────
+  craft_maze_blade:
+    machine: planetary_forge
+    inputs: [guardian_core, labyrinth_relic, labyrinth_fragment]
+    input-amounts: [2, 3, 8]
+    output: maze_blade
+    energy: 40
+    guide: 守衛者核心×2 + 迷宮遺物×3 + 迷宮碎片×8 → 行星鍛造台 → 迷途刃
+  craft_echo_crossbow:
+    machine: planetary_forge
+    inputs: [guardian_core, labyrinth_relic, labyrinth_fragment, maze_vine]
+    input-amounts: [1, 2, 6, 4]
+    output: echo_crossbow
+    energy: 38
+    guide: 守衛者核心 + 迷宮遺物×2 + 迷宮碎片×6 + 迷宮蔓藤×4 → 行星鍛造台 → 回聲連弩
+  craft_maze_pickaxe:
+    machine: planetary_forge
+    inputs: [guardian_core, labyrinth_relic, labyrinth_fragment]
+    input-amounts: [1, 2, 6]
+    output: maze_pickaxe
+    energy: 36
+    guide: 守衛者核心 + 迷宮遺物×2 + 迷宮碎片×6 → 行星鍛造台 → 回聲鎬
+  craft_maze_helmet:
+    machine: planetary_forge
+    inputs: [guardian_core, labyrinth_fragment, maze_vine, labyrinth_relic]
+    input-amounts: [1, 6, 4, 1]
+    output: maze_helmet
+    energy: 36
+    guide: 守衛者核心 + 迷宮碎片×6 + 迷宮蔓藤×4 + 迷宮遺物 → 行星鍛造台 → 迷宮頭盔
+  craft_maze_chestplate:
+    machine: planetary_forge
+    inputs: [guardian_core, labyrinth_fragment, maze_vine, labyrinth_relic]
+    input-amounts: [1, 10, 6, 2]
+    output: maze_chestplate
+    energy: 40
+    guide: 守衛者核心 + 迷宮碎片×10 + 迷宮蔓藤×6 + 迷宮遺物×2 → 行星鍛造台 → 迷宮胸甲
+  craft_maze_leggings:
+    machine: planetary_forge
+    inputs: [guardian_core, labyrinth_fragment, maze_vine, labyrinth_relic]
+    input-amounts: [1, 8, 5, 1]
+    output: maze_leggings
+    energy: 38
+    guide: 守衛者核心 + 迷宮碎片×8 + 迷宮蔓藤×5 + 迷宮遺物 → 行星鍛造台 → 迷宮護腿
+  craft_maze_boots:
+    machine: planetary_forge
+    inputs: [guardian_core, labyrinth_fragment, maze_vine, labyrinth_relic]
+    input-amounts: [1, 5, 3, 1]
+    output: maze_boots
+    energy: 34
+    guide: 守衛者核心 + 迷宮碎片×5 + 迷宮蔓藤×3 + 迷宮遺物 → 行星鍛造台 → 迷宮靴
+  craft_maze_compass:
+    machine: planetary_forge
+    inputs: [labyrinth_relic, labyrinth_fragment, maze_vine]
+    input-amounts: [1, 4, 2]
+    output: maze_compass
+    energy: 32
+    guide: 迷宮遺物 + 迷宮碎片×4 + 迷宮蔓藤×2 → 行星鍛造台 → 迷宮羅盤
+
 achievements:
   network_architect:
     display-name: 物流架構師
