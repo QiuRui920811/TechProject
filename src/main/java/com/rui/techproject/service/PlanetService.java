@@ -4114,10 +4114,15 @@ public final class PlanetService {
     private void applyPlanetHazard(final PlanetDefinition definition, final Player player) {
         this.enforcePlanetBoundary(player);
         final boolean cuisineWard = this.hasCuisineWard(player, definition.hazardType());
-        if (!cuisineWard || this.ambientRandom.nextBoolean()) {
-            player.setFoodLevel(Math.max(0, player.getFoodLevel() - 1));
+        final int protectionLevel = this.getProtectionLevel(player, definition);
+        // 飢餓：前線套=免疫，對應套=免疫，部分防護/無防護=消耗
+        if (protectionLevel < 2) {
+            if (!cuisineWard || this.ambientRandom.nextBoolean()) {
+                player.setFoodLevel(Math.max(0, player.getFoodLevel() - 1));
+            }
         }
-        if (this.hasProtection(player, definition.suitIds())) {
+        // ═══ 等級 2-3：完全防護（對應套裝 or 前線套裝）═══
+        if (protectionLevel >= 2) {
             switch (definition.hazardType()) {
                 case RADIATION -> {
                     player.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE, 60, 0, false, false, true));
@@ -4144,8 +4149,44 @@ public final class PlanetService {
                     player.addPotionEffect(new PotionEffect(PotionEffectType.NIGHT_VISION, 60, 0, false, false, true));
                 }
             }
+            // ── 前線套裝獨有加成：再生 + 力量，明顯優於單星球套裝 ──
+            if (protectionLevel == 3) {
+                player.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, 60, 0, false, false, true));
+                player.addPotionEffect(new PotionEffect(PotionEffectType.STRENGTH, 60, 0, false, false, true));
+            }
             return;
         }
+        // ═══ 等級 1：部分防護（前線星球穿前置套裝）═══
+        // 可以活，但不舒服：輕微 debuff + 偶爾小傷害 + 粒子提醒
+        if (protectionLevel == 1) {
+            switch (definition.hazardType()) {
+                case SOLAR -> {
+                    player.addPotionEffect(new PotionEffect(PotionEffectType.WEAKNESS, 60, 0, false, true, true));
+                    player.setFireTicks(Math.max(player.getFireTicks(), 30));
+                    if (this.ambientRandom.nextInt(3) == 0) player.damage(0.5D);
+                    player.getWorld().spawnParticle(Particle.FLAME, player.getLocation().add(0.0, 1.0, 0.0), 5, 0.25, 0.35, 0.25, 0.008);
+                }
+                case STORM -> {
+                    player.addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS, 60, 0, false, true, true));
+                    if (this.ambientRandom.nextInt(6) == 0) {
+                        player.setVelocity(player.getVelocity().add(new Vector((this.ambientRandom.nextDouble() - 0.5D) * 0.12D, 0.04D, (this.ambientRandom.nextDouble() - 0.5D) * 0.12D)));
+                    }
+                    if (this.ambientRandom.nextInt(3) == 0) player.damage(0.5D);
+                    player.getWorld().spawnParticle(Particle.ELECTRIC_SPARK, player.getLocation().add(0.0, 1.0, 0.0), 5, 0.25, 0.35, 0.25, 0.01);
+                }
+                case MIASMA -> {
+                    player.addPotionEffect(new PotionEffect(PotionEffectType.MINING_FATIGUE, 60, 0, false, true, true));
+                    if (this.ambientRandom.nextInt(3) == 0) player.damage(0.5D);
+                    player.getWorld().spawnParticle(Particle.SCULK_SOUL, player.getLocation().add(0.0, 1.0, 0.0), 4, 0.25, 0.35, 0.25, 0.01);
+                }
+                default -> {
+                    // 其他前線星球的 fallback
+                    if (this.ambientRandom.nextInt(3) == 0) player.damage(0.5D);
+                }
+            }
+            return;
+        }
+        // ═══ 等級 0：無防護 — 完整 debuff + 傷害 ═══
         switch (definition.hazardType()) {
             case RADIATION -> {
                 player.addPotionEffect(new PotionEffect(PotionEffectType.GLOWING, 80, 0, false, true, true));
@@ -4226,7 +4267,6 @@ public final class PlanetService {
                 } else {
                     player.addPotionEffect(new PotionEffect(PotionEffectType.WITHER, 80, 0, false, true, true));
                     player.addPotionEffect(new PotionEffect(PotionEffectType.MINING_FATIGUE, 90, 0, false, true, true));
-                    // 視覺 debuff（DARKNESS）已移除 — 迷途星主要靠氛圍與敵人壓迫感，不再強制黑屏
                     player.damage(1.0D);
                 }
                 player.getWorld().spawnParticle(Particle.SCULK_SOUL, player.getLocation().add(0.0, 1.0, 0.0), 10, 0.35, 0.45, 0.35, 0.02);
@@ -4320,11 +4360,14 @@ public final class PlanetService {
         }
     }
 
-    private boolean hasProtection(final Player player, final List<String> expected) {
-        if (this.hasSuit(player, expected) || this.hasSuit(player, FRONTIER_SUIT)) {
-            return true;
-        }
-        return expected.equals(FRONTIER_SUIT) && this.hasAnyPreFrontierSuit(player);
+    /**
+     * 防護等級：3=前線套裝, 2=對應星球套裝, 1=前線星穿前置套（部分防護）, 0=無防護
+     */
+    private int getProtectionLevel(final Player player, final PlanetDefinition definition) {
+        if (this.hasSuit(player, FRONTIER_SUIT)) return 3;
+        if (this.hasSuit(player, definition.suitIds())) return 2;
+        if (definition.suitIds().equals(FRONTIER_SUIT) && this.hasAnyPreFrontierSuit(player)) return 1;
+        return 0;
     }
 
     private boolean hasAnyPreFrontierSuit(final Player player) {

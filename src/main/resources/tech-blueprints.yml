@@ -1028,6 +1028,327 @@ blueprints:
     placement:
       - 建議放置在離心機產線後方，進一步精煉材料。
       - 此機器每 tick 消耗 25 電力，是高耗能設備。
+  # ═══ 補齊缺配方機器（BASIC） ═══
+  lava_generator:
+    shape:
+      - "IBI"
+      - "CMC"
+      - "IRI"
+    ingredients:
+      I: IRON_INGOT
+      B: BUCKET
+      C: COBBLESTONE
+      M: MAGMA_BLOCK
+      R: REDSTONE
+    tutorial:
+      - 先做好煤炭發電機後再來做岩漿發電機。
+      - 放好後吃岩漿桶發電，效率比燃煤高。
+    placement:
+      - 放在煤炭發電機旁邊當備用電力。
+      - 岩漿桶消耗後會還空桶。
+  ore_washer:
+    shape:
+      - "CIC"
+      - "BHB"
+      - "CRC"
+    ingredients:
+      C: COBBLESTONE
+      I: IRON_INGOT
+      B: BUCKET
+      H: HOPPER
+      R: REDSTONE
+    tutorial:
+      - 先做好粉碎機後再來做洗礦機。
+      - 洗礦機把鐵粉洗成礦漿，是進入中階加工的關鍵。
+    placement:
+      - 放在粉碎機後面，接收粉末進行水洗。
+      - 礦漿可以繼續送進淨化器做進一步提純。
+  wire_mill:
+    shape:
+      - "ISI"
+      - "CPC"
+      - "IRI"
+    ingredients:
+      I: IRON_INGOT
+      S: tech:steel_plate
+      C: COPPER_INGOT
+      P: PISTON
+      R: REDSTONE
+    tutorial:
+      - 先用壓縮機做出鋼板。
+      - 拉線機可以把銅錠拉成銅線、鋼板拉成鋼線。
+      - 銅線與鋼線是中期科技的關鍵材料。
+    placement:
+      - 放在壓縮機旁邊延伸金屬加工線。
+      - 後面可以接絕緣壓製台做進一步加工。
+  # ═══ 補齊缺配方機器（INTERMEDIATE） ═══
+  bio_lab:
+    shape:
+      - "GSG"
+      - "IBI"
+      - "SRS"
+    ingredients:
+      G: GLASS
+      S: tech:steel_plate
+      I: IRON_INGOT
+      B: BREWING_STAND
+      R: REDSTONE
+    tutorial:
+      - 先把自動農場跑穩產出作物，再來做生質實驗室。
+      - 中央放原版釀造台。
+      - 可以把作物與木屑轉成生質樹脂與生質纖維。
+    placement:
+      - 放在自動農場與電鋸旁邊。
+      - 生質樹脂是化學反應器與精煉塔的前置材料。
+  bio_reactor:
+    shape:
+      - "SCS"
+      - "IPI"
+      - "SRS"
+    ingredients:
+      S: tech:steel_plate
+      C: COPPER_INGOT
+      I: IRON_INGOT
+      P: COMPOSTER
+      R: REDSTONE
+    tutorial:
+      - 用壓縮機先做好鋼板，中央放原版堆肥桶。
+      - 生質反應爐可以把作物轉成電力。
+    placement:
+      - 適合接在自動農場旁邊當中期主力電源。
+      - 作物充足時電力非常穩定。
+  polymer_press:
+    shape:
+      - "SPS"
+      - "IHI"
+      - "SRS"
+    ingredients:
+      S: tech:steel_plate
+      P: PISTON
+      I: IRON_INGOT
+      H: HONEY_BLOCK
+      R: REDSTONE
+    tutorial:
+      - 先把生質實驗室跑穩，確保有生質樹脂。
+      - 中央放原版蜂蜜方塊。
+      - 聚合壓床可以做出處理塑膠等聚合物。
+    placement:
+      - 放在生質實驗室旁邊，形成聚合加工線。
+      - 處理塑膠是複合面板與進階材料的前置。
+  wind_turbine:
+    shape:
+      - "ISI"
+      - "GCG"
+      - "IBI"
+    ingredients:
+      I: IRON_INGOT
+      S: tech:steel_plate
+      G: tech:bronze_gear
+      C: tech:circuit_board
+      B: tech:bronze_ingot
+    tutorial:
+      - 先用製造機做好電路板，用合金熔煉爐做青銅齒輪。
+      - 風力渦輪機高度越高效率越好，下雨打雷時更強。
+    placement:
+      - 需要露天高處放置，建議放在屋頂或高塔頂端。
+      - 後面建議接電池庫做峰值儲能。
+  solar_array:
+    shape:
+      - "GGG"
+      - "SDS"
+      - "ICI"
+    ingredients:
+      G: GLASS
+      S: tech:steel_plate
+      D: DAYLIGHT_DETECTOR
+      I: IRON_INGOT
+      C: tech:circuit_board
+    tutorial:
+      - 先做好電池庫穩定電力。
+      - 太陽能陣列比單一太陽能發電機效率更高。
+    placement:
+      - 需要露天放置，白天自動發電。
+      - 建議後面接電池庫儲能，補足夜間缺電。
+  refinery:
+    shape:
+      - "ICI"
+      - "SBS"
+      - "IRI"
+    ingredients:
+      I: IRON_INGOT
+      C: COPPER_INGOT
+      S: tech:steel_plate
+      B: SMOKER
+      R: REDSTONE
+    tutorial:
+      - 先做好生質實驗室與洗礦機。
+      - 中央放原版燻製爐。
+      - 精煉塔可以把生質樹脂與礦漿精煉成精煉油。
+    placement:
+      - 放在生質實驗室與洗礦機旁邊。
+      - 精煉油是冷卻混合液與後期材料的重要前置。
+  insulation_press:
+    shape:
+      - "SCS"
+      - "ILI"
+      - "SPS"
+    ingredients:
+      S: tech:steel_plate
+      C: COPPER_INGOT
+      I: IRON_INGOT
+      L: LOOM
+      P: tech:plastic
+    tutorial:
+      - 先做好拉線機確保有銅線與鋼線。
+      - 中央放原版織布機。
+      - 絕緣壓製台可以做出絕緣線材、感測陣列與伺服模組束。
+    placement:
+      - 放在拉線機旁邊。
+      - 絕緣線材是許多中後期自動化機器的關鍵材料。
+  # ═══ 補齊缺配方機器（ADVANCED） ═══
+  centrifuge:
+    shape:
+      - "CPC"
+      - "SHS"
+      - "CRC"
+    ingredients:
+      C: tech:circuit_board
+      P: tech:pressure_tube
+      S: tech:steel_plate
+      H: HOPPER
+      R: REDSTONE
+    tutorial:
+      - 先做好淨化器確保有淨化碎晶。
+      - 離心機可以把淨化碎晶拆出離子粉、磁環、離心轉子。
+    placement:
+      - 放在淨化器後面，形成高階材料產線。
+      - 離子粉與磁環是進入頂級科技的關鍵。
+  chemical_reactor:
+    shape:
+      - "SRS"
+      - "IGI"
+      - "SCS"
+    ingredients:
+      S: tech:steel_plate
+      R: REDSTONE
+      I: IRON_INGOT
+      G: tech:reinforced_glass
+      C: COPPER_INGOT
+    tutorial:
+      - 先確保生質實驗室已經穩定產出生質樹脂。
+      - 化學反應器可以把生質樹脂與煤粉轉成聚合樹脂、合成纖維、精密噴嘴。
+    placement:
+      - 放在生質實驗室旁邊。
+      - 聚合樹脂是處理塑膠線的前置，合成纖維用於高階裝備。
+  crystal_growth_chamber:
+    shape:
+      - "GCG"
+      - "SAS"
+      - "GRG"
+    ingredients:
+      G: tech:reinforced_glass
+      C: tech:coolant_cell
+      S: tech:steel_plate
+      A: AMETHYST_BLOCK
+      R: tech:circuit_board
+    tutorial:
+      - 先做好冷卻混合器確保有冷卻混合液。
+      - 中央放原版紫水晶方塊。
+      - 晶體培育艙可以從晶種培育出培育晶體。
+    placement:
+      - 放在冷卻混合器旁邊。
+      - 培育晶體是物質編譯器與頂級科技的前置材料。
+  field_forge:
+    shape:
+      - "AFA"
+      - "NLN"
+      - "ACA"
+    ingredients:
+      A: tech:advanced_circuit
+      F: tech:field_emitter
+      N: tech:nano_coating
+      L: LODESTONE
+      C: tech:control_unit
+    tutorial:
+      - 先用量子處理器做好場發射器與高級電路。
+      - 中央放原版磁石。
+      - 力場鍛造台可以做出場板，也是所有 TIER3 法杖和特殊工具的製作站。
+    placement:
+      - 放在量子處理器與進階製造機旁邊。
+      - 這台是通往頂級武器與工具的關鍵閘門。
+  matter_compiler:
+    shape:
+      - "QGQ"
+      - "NMN"
+      - "QCQ"
+    ingredients:
+      Q: tech:quantum_chip
+      G: tech:grown_crystal
+      N: tech:nano_coating
+      M: SCULK_CATALYST
+      C: tech:control_unit
+    tutorial:
+      - 先用晶體培育艙做好培育晶體，量子處理器做好量子晶片。
+      - 中央放原版伏聯催化器。
+      - 物質編譯器可以做出物質團與奇點碎片，是終局科技的最後製造站。
+    placement:
+      - 建議獨立區域放置，確保高供電量。
+      - 虛空套裝、終局武器、異界傳送門全都需要這台。
+  drone_bay:
+    shape:
+      - "ACA"
+      - "NSN"
+      - "AMA"
+    ingredients:
+      A: tech:advanced_circuit
+      C: tech:circuit_board
+      N: tech:nano_coating
+      S: SHULKER_BOX
+      M: tech:servo_motor
+    tutorial:
+      - 先用進階製造機做好奈米塗層。
+      - 中央放原版界伏盒。
+      - 無人機艙可以做出無人機外殼與框架。
+    placement:
+      - 放在進階製造機旁邊。
+      - 無人機是自動化產線的高階擴充。
+  biosynth_vat:
+    shape:
+      - "GBG"
+      - "ACA"
+      - "GRG"
+    ingredients:
+      G: tech:reinforced_glass
+      B: tech:bio_fiber
+      A: tech:advanced_circuit
+      C: CAULDRON
+      R: tech:coolant_cell
+    tutorial:
+      - 先做好基因切片台確保有基因模板與生質催化劑。
+      - 中央放原版煉藥鍋。
+      - 生質合成槽可以量產合成肉、蛋白質口糧與各種高級料理。
+    placement:
+      - 放在基因切片台旁邊。
+      - 後期食物線的核心機器，搭配大豆與水果線效果最好。
+  photon_weaver:
+    shape:
+      - "OGO"
+      - "SLS"
+      - "OAO"
+    ingredients:
+      O: tech:optic_lens
+      G: tech:reinforced_glass
+      S: tech:starlight_plate
+      L: SEA_LANTERN
+      A: tech:advanced_circuit
+    tutorial:
+      - 先用雷射雕刻機做好光學鏡片與雷射鏡。
+      - 中央放原版海磷石。
+      - 光子織構機可以做出光子碎片、光子板與觀測鏡片。
+    placement:
+      - 放在雷射雕刻機旁邊。
+      - 觀測鏡片是軌道觀測台的前置，開啟行星探索線。
+  # ═══ 防輻射裝備 ═══
   hazmat_helmet:
     shape:
       - "LNL"
