@@ -6649,11 +6649,12 @@ public final class MachineService {
                 return;
             }
         }
+        final int maxPull = 4 + 4 * this.countUpgrade(machine, "speed_upgrade");
         int pulled = 0;
         final int[][] offsets = {{1, 0, 0}, {-1, 0, 0}, {0, 0, 1}, {0, 0, -1}, {0, 1, 0}, {0, -1, 0}};
         final String dirFilter = machine.inputDirection();
         for (final int[] offset : offsets) {
-            if (pulled >= 4) {
+            if (pulled >= maxPull) {
                 break;
             }
             if (!dirFilter.equalsIgnoreCase("ALL") && !this.matchesDirection(dirFilter, this.directionForOffset(offset))) {
@@ -6668,7 +6669,7 @@ public final class MachineService {
             if (inventory == null) {
                 continue;
             }
-            while (pulled < 4) {
+            while (pulled < maxPull) {
                 final ItemStack oneItem = this.peekExtractableItem(inventory);
                 if (oneItem == null || oneItem.getType() == Material.AIR) {
                     break;
@@ -6706,12 +6707,13 @@ public final class MachineService {
                 return;
             }
         }
-        final int moved = this.moveInputToOutput(machine, 0, null, false, 4);
+        final int maxPush = 4 + 4 * this.countUpgrade(machine, "speed_upgrade");
+        final int moved = this.moveInputToOutput(machine, 0, null, false, maxPush);
         int pushed = 0;
         final int[][] offsets = {{1, 0, 0}, {-1, 0, 0}, {0, 0, 1}, {0, 0, -1}, {0, 1, 0}, {0, -1, 0}};
         final String dirFilter = machine.outputDirection();
         for (final int[] offset : offsets) {
-            if (pushed >= 4) {
+            if (pushed >= maxPush) {
                 break;
             }
             if (!dirFilter.equalsIgnoreCase("ALL") && !this.matchesDirection(dirFilter, this.directionForOffset(offset))) {
@@ -6726,8 +6728,8 @@ public final class MachineService {
             if (inventory == null) {
                 continue;
             }
-            for (int slot = 0; slot < OUTPUT_SLOTS.length && pushed < 4; slot++) {
-                while (pushed < 4) {
+            for (int slot = 0; slot < OUTPUT_SLOTS.length && pushed < maxPush; slot++) {
+                while (pushed < maxPush) {
                     final ItemStack outStack = machine.outputAt(slot);
                     if (outStack == null || outStack.getType() == Material.AIR) {
                         break;
