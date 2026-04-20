@@ -1241,8 +1241,8 @@ public final class TechListener implements Listener {
                 final int backpackSlot = this.getBackpackSlot(backpackPlayer.getUniqueId());
                 // ── 鎖定背包本體所在 slot：任何涉及該 slot 的操作一律取消 ──
                 if (backpackSlot >= 0) {
-                    // 玩家背包 slot 在 InventoryView 中的 rawSlot = topSize + backpackSlot
-                    final int lockedRawSlot = topSize + backpackSlot;
+                    // 玩家熱鍵欄 slot 在 InventoryView 中的 rawSlot = topSize + 27 + backpackSlot
+                    final int lockedRawSlot = topSize + 27 + backpackSlot;
                     if (event.getRawSlot() == lockedRawSlot) {
                         event.setCancelled(true);
                         return;
@@ -4755,11 +4755,11 @@ public final class TechListener implements Listener {
         this.openBackpackSlots.remove(player.getUniqueId());
         if (backpackId == null) return;
         this.backpackSessions.remove(backpackId);
-        // 游標上若有物品，先歸還再儲存
+        // 游標上若有物品，歸還到玩家背包（非科技背包 GUI）
         final ItemStack cursor = player.getItemOnCursor();
         if (cursor != null && cursor.getType() != Material.AIR) {
             player.setItemOnCursor(null);
-            final java.util.HashMap<Integer, ItemStack> overflow = inv.addItem(cursor);
+            final java.util.HashMap<Integer, ItemStack> overflow = player.getInventory().addItem(cursor);
             for (final ItemStack leftover : overflow.values()) {
                 player.getWorld().dropItemNaturally(player.getLocation(), leftover);
             }
