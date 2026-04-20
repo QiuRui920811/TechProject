@@ -594,7 +594,7 @@ public final class TechRegistry {
                 || normalized.contains("cinnamon") || normalized.contains("honey") || normalized.contains("cheese")
                 || normalized.contains("stuffed") || normalized.contains("sparkling") || normalized.contains("glaze")
                 || normalized.contains("gel") || normalized.contains("veggie") || normalized.contains("vegetable")
-                || normalized.contains("fish") || normalized.contains("breakfast")) {
+                || normalized.contains("fish") || normalized.contains("breakfast") || normalized.contains("punch")) {
             return GuideCategory.FOOD;
         }
         if (normalized.contains("seed") || normalized.contains("crop") || normalized.contains("sapling") || normalized.contains("bloom")

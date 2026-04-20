@@ -96,6 +96,8 @@ public final class PlanetService {
     private static final String HARVEST_NODE_DISPLAY_TAG = "techproject:harvest_node";
     private static final String TRAVEL_VESSEL_TAG = "techproject:travel_vessel";
     private static final String TRAVEL_VESSEL_PART_TAG = "techproject:travel_vessel_part";
+    private static final String PLANET_MOB_TAG = "techproject:planet_mob";
+    private static final String PLANET_MOB_TAG_PREFIX = "techproject:planet_mob_";
     private static final String PLANET_ELITE_TAG = "techproject:planet_elite";
     private static final String PLANET_ELITE_TAG_PREFIX = "techproject:planet_elite_";
     private static final long PERSONAL_NODE_TICK_INTERVAL = 20L;
@@ -158,6 +160,9 @@ public final class PlanetService {
     private final Map<String, ItemStack> techItemStackCache = new ConcurrentHashMap<>();
     /** 精英技能冷卻：entityUUID → 下次可施放時間 (ms) */
     private final Map<java.util.UUID, Long> eliteSkillCooldowns = new ConcurrentHashMap<>();
+    /** 普通怪物技能冷卻：entityUUID → 下次可施放時間 (ms) */
+    private final Map<java.util.UUID, Long> mobSkillCooldowns = new ConcurrentHashMap<>();
+    private static final long MOB_SKILL_COOLDOWN_MS = 6000L;
     private final Random ambientRandom = new Random();
     private final NamespacedKey lootBarrelPlanetKey;
     private final NamespacedKey lootBarrelTierKey;
@@ -1026,6 +1031,40 @@ public final class PlanetService {
             return;
         }
 
+        // ── 標記為星球怪物（供技能系統辨識） ──
+        monster.addScoreboardTag(PLANET_MOB_TAG);
+        monster.addScoreboardTag(PLANET_MOB_TAG_PREFIX + definition.id());
+
+        // ── 基礎屬性加成：所有星球怪物都比原版強 ──
+        // 星球越後面 → 怪物越強：aurelia(1) < cryon(2) < nyx(3) < helion(4) < tempest(5) < labyrinth(6)
+        final double baseMobHpMul = switch (definition.id()) {
+            case "aurelia"   -> 1.25D;
+            case "cryon"     -> 1.35D;
+            case "nyx"       -> 1.45D;
+            case "helion"    -> 1.55D;
+            case "tempest"   -> 1.65D;
+            case "labyrinth" -> 1.50D; // 迷途星基礎值較溫和，靠分層額外加
+            default -> 1.0D;
+        };
+        final double baseMobAtkAdd = switch (definition.id()) {
+            case "aurelia"   -> 1.0D;
+            case "cryon"     -> 1.5D;
+            case "nyx"       -> 2.0D;
+            case "helion"    -> 2.5D;
+            case "tempest"   -> 2.0D;
+            case "labyrinth" -> 1.5D;
+            default -> 0.0D;
+        };
+        final double baseMobSpdAdd = switch (definition.id()) {
+            case "aurelia"   -> 0.005D;
+            case "cryon"     -> 0.008D;
+            case "nyx"       -> 0.012D;
+            case "helion"    -> 0.010D;
+            case "tempest"   -> 0.015D;
+            case "labyrinth" -> 0.008D;
+            default -> 0.0D;
+        };
+
         // ── 迷途星分層：越外圈精英率越高，強度越強 ──
         double labyrinthStrengthBonus = 0.0; // 額外屬性倍率（加成到 profile 上）
         int eliteChanceDenominator = 8;      // 預設 1/8 精英率
@@ -1033,7 +1072,12 @@ public final class PlanetService {
             final int zone = this.plugin.getMazeService().getMazeZoneForLocation(entity.getLocation());
             switch (zone) {
                 case 0, 1 -> {
-                    // Glade / 內圈：普通怪（不精英化）
+                    // Glade / 內圈：有基礎加成但不精英化
+                    this.adjustAttribute(monster, Attribute.MAX_HEALTH, baseMobHpMul, 0.0D, 4.0D);
+                    final var baseHp = monster.getAttribute(Attribute.MAX_HEALTH);
+                    if (baseHp != null) monster.setHealth(Math.max(1.0D, baseHp.getValue()));
+                    this.adjustAttribute(monster, Attribute.ATTACK_DAMAGE, 1.0D, baseMobAtkAdd, 1.5D);
+                    this.adjustAttribute(monster, Attribute.MOVEMENT_SPEED, 1.0D, baseMobSpdAdd, 0.2D);
                     return;
                 }
                 case 2 -> {
@@ -1049,15 +1093,23 @@ public final class PlanetService {
                 default -> {
                 }
             }
-            // 全迷途星：對 Zone 2/3 普通怪也加基礎屬性加成（不管是否精英化）
-            if (zone >= 2) {
-                this.adjustAttribute(monster, Attribute.MAX_HEALTH, 1.0 + labyrinthStrengthBonus, 0.0D, 4.0D);
-                final var hp = monster.getAttribute(Attribute.MAX_HEALTH);
-                if (hp != null) {
-                    monster.setHealth(Math.max(1.0D, hp.getValue()));
-                }
-                this.adjustAttribute(monster, Attribute.ATTACK_DAMAGE, 1.0 + labyrinthStrengthBonus, 0.0D, 1.5D);
+            // 全迷途星 Zone 2/3：基礎加成 + 分層加成（不管是否精英化）
+            this.adjustAttribute(monster, Attribute.MAX_HEALTH, baseMobHpMul + labyrinthStrengthBonus, 0.0D, 4.0D);
+            final var hp = monster.getAttribute(Attribute.MAX_HEALTH);
+            if (hp != null) {
+                monster.setHealth(Math.max(1.0D, hp.getValue()));
             }
+            this.adjustAttribute(monster, Attribute.ATTACK_DAMAGE, 1.0D, baseMobAtkAdd + labyrinthStrengthBonus * 2.0D, 1.5D);
+            this.adjustAttribute(monster, Attribute.MOVEMENT_SPEED, 1.0D, baseMobSpdAdd + labyrinthStrengthBonus * 0.01D, 0.2D);
+        } else {
+            // 非迷途星：套用基礎屬性加成
+            this.adjustAttribute(monster, Attribute.MAX_HEALTH, baseMobHpMul, 0.0D, 4.0D);
+            final var baseHp = monster.getAttribute(Attribute.MAX_HEALTH);
+            if (baseHp != null) {
+                monster.setHealth(Math.max(1.0D, baseHp.getValue()));
+            }
+            this.adjustAttribute(monster, Attribute.ATTACK_DAMAGE, 1.0D, baseMobAtkAdd, 1.5D);
+            this.adjustAttribute(monster, Attribute.MOVEMENT_SPEED, 1.0D, baseMobSpdAdd, 0.2D);
         }
 
         if (this.ambientRandom.nextInt(eliteChanceDenominator) != 0) {
@@ -1369,6 +1421,126 @@ public final class PlanetService {
             }
         }
         return null;
+    }
+
+    /**
+     * 辨識普通星球怪物所屬星球 id。
+     */
+    private String identifyMobPlanet(final LivingEntity entity) {
+        for (final String tag : entity.getScoreboardTags()) {
+            if (tag.startsWith(PLANET_MOB_TAG_PREFIX)) {
+                return tag.substring(PLANET_MOB_TAG_PREFIX.length());
+            }
+        }
+        return null;
+    }
+
+    // ──────────────────────────────────────────────────────────────
+    //  普通怪物技能系統 — 攻擊觸發（比精英弱，觸發率低）
+    // ──────────────────────────────────────────────────────────────
+
+    /**
+     * 當星球普通怪攻擊玩家時觸發簡化技能。
+     * 由 TechListener#onEntityDamageByEntity 呼叫。
+     * 精英怪不走此方法（精英走 handleEliteSkillOnAttack）。
+     */
+    public void handlePlanetMobSkillOnAttack(final Monster attacker, final Player victim) {
+        if (attacker.getScoreboardTags().contains(PLANET_ELITE_TAG)) {
+            return;
+        }
+        if (!attacker.getScoreboardTags().contains(PLANET_MOB_TAG)) {
+            return;
+        }
+        // 30% 觸發率
+        if (this.ambientRandom.nextInt(100) >= 30) {
+            return;
+        }
+        final long now = System.currentTimeMillis();
+        final Long nextAllowed = this.mobSkillCooldowns.get(attacker.getUniqueId());
+        if (nextAllowed != null && now < nextAllowed) {
+            return;
+        }
+        final String planetId = this.identifyMobPlanet(attacker);
+        if (planetId == null) {
+            return;
+        }
+        boolean fired = switch (planetId) {
+            case "aurelia" -> this.mobSkillAurelia(attacker, victim);
+            case "cryon" -> this.mobSkillCryon(attacker, victim);
+            case "nyx" -> this.mobSkillNyx(attacker, victim);
+            case "helion" -> this.mobSkillHelion(attacker, victim);
+            case "tempest" -> this.mobSkillTempest(attacker, victim);
+            case "labyrinth" -> this.mobSkillLabyrinth(attacker, victim);
+            default -> false;
+        };
+        if (fired) {
+            this.mobSkillCooldowns.put(attacker.getUniqueId(), now + MOB_SKILL_COOLDOWN_MS);
+        }
+    }
+
+    /* ── Aurelia 普通怪：輻射灼傷 — 中毒 2 秒 ── */
+    private boolean mobSkillAurelia(final Monster attacker, final Player victim) {
+        victim.addPotionEffect(new PotionEffect(PotionEffectType.POISON, 50, 0, true, true, true));
+        final World world = attacker.getWorld();
+        world.spawnParticle(Particle.SPORE_BLOSSOM_AIR, victim.getLocation().add(0, 1, 0), 12, 0.4, 0.6, 0.4, 0.01);
+        world.playSound(victim.getLocation(), Sound.ENTITY_PUFFER_FISH_BLOW_UP, SoundCategory.HOSTILE, 0.5f, 0.8f);
+        victim.sendActionBar(this.itemFactory.danger("輻射灼傷！"));
+        return true;
+    }
+
+    /* ── Cryon 普通怪：寒霜觸碰 — 緩速 + 輕微冰凍 ── */
+    private boolean mobSkillCryon(final Monster attacker, final Player victim) {
+        victim.addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS, 60, 1, true, true, true));
+        victim.setFreezeTicks(Math.min(victim.getMaxFreezeTicks(), victim.getFreezeTicks() + 60));
+        final World world = attacker.getWorld();
+        world.spawnParticle(Particle.SNOWFLAKE, victim.getLocation().add(0, 1, 0), 10, 0.3, 0.5, 0.3, 0.03);
+        world.playSound(victim.getLocation(), Sound.ENTITY_PLAYER_HURT_FREEZE, SoundCategory.HOSTILE, 0.5f, 1.0f);
+        victim.sendActionBar(this.itemFactory.danger("寒霜觸碰！"));
+        return true;
+    }
+
+    /* ── Nyx 普通怪：相位干擾 — 短暫失明 ── */
+    private boolean mobSkillNyx(final Monster attacker, final Player victim) {
+        victim.addPotionEffect(new PotionEffect(PotionEffectType.DARKNESS, 40, 0, true, true, true));
+        final World world = attacker.getWorld();
+        world.spawnParticle(Particle.REVERSE_PORTAL, victim.getLocation().add(0, 1, 0), 10, 0.3, 0.5, 0.3, 0.04);
+        world.playSound(victim.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, SoundCategory.HOSTILE, 0.4f, 1.5f);
+        victim.sendActionBar(this.itemFactory.danger("相位干擾！"));
+        return true;
+    }
+
+    /* ── Helion 普通怪：灼熱爪擊 — 點燃 ── */
+    private boolean mobSkillHelion(final Monster attacker, final Player victim) {
+        victim.setFireTicks(Math.max(victim.getFireTicks(), 60));
+        final World world = attacker.getWorld();
+        world.spawnParticle(Particle.FLAME, victim.getLocation().add(0, 0.5, 0), 12, 0.3, 0.4, 0.3, 0.04);
+        world.playSound(victim.getLocation(), Sound.ENTITY_BLAZE_HURT, SoundCategory.HOSTILE, 0.5f, 0.8f);
+        victim.sendActionBar(this.itemFactory.danger("灼熱爪擊！"));
+        return true;
+    }
+
+    /* ── Tempest 普通怪：靜電放電 — 短暫虛弱 + 擊退 ── */
+    private boolean mobSkillTempest(final Monster attacker, final Player victim) {
+        victim.addPotionEffect(new PotionEffect(PotionEffectType.WEAKNESS, 40, 0, true, true, true));
+        final Vector kb = victim.getLocation().toVector().subtract(attacker.getLocation().toVector()).normalize().multiply(0.6);
+        kb.setY(0.3);
+        victim.setVelocity(kb);
+        final World world = attacker.getWorld();
+        world.spawnParticle(Particle.ELECTRIC_SPARK, victim.getLocation().add(0, 1, 0), 8, 0.3, 0.5, 0.3, 0.06);
+        world.playSound(victim.getLocation(), Sound.ENTITY_LIGHTNING_BOLT_IMPACT, SoundCategory.HOSTILE, 0.4f, 1.5f);
+        victim.sendActionBar(this.itemFactory.danger("靜電放電！"));
+        return true;
+    }
+
+    /* ── Labyrinth 普通怪：瘴氣侵蝕 — 飢餓 + 挖掘疲勞 ── */
+    private boolean mobSkillLabyrinth(final Monster attacker, final Player victim) {
+        victim.addPotionEffect(new PotionEffect(PotionEffectType.HUNGER, 60, 1, true, true, true));
+        victim.addPotionEffect(new PotionEffect(PotionEffectType.MINING_FATIGUE, 40, 0, true, true, true));
+        final World world = attacker.getWorld();
+        world.spawnParticle(Particle.SMOKE, victim.getLocation().add(0, 0.8, 0), 10, 0.3, 0.4, 0.3, 0.02);
+        world.playSound(victim.getLocation(), Sound.ENTITY_HUSK_AMBIENT, SoundCategory.HOSTILE, 0.5f, 0.6f);
+        victim.sendActionBar(this.itemFactory.danger("瘴氣侵蝕！"));
+        return true;
     }
 
     /**
@@ -4483,39 +4655,39 @@ public final class PlanetService {
                                                    final boolean includeRelics) {
         return switch (definition.id()) {
             case "aurelia" -> switch (material) {
-                case AMETHYST_CLUSTER -> new PlanetHarvestProfile("irradiated_shard", 1, null, 0, 180L, 260L, true);
-                case SCULK_CATALYST -> new PlanetHarvestProfile("void_bloom", 2, "void_bloom_seeds", 1, 260L, 340L, true);
-                case CRYING_OBSIDIAN, RESPAWN_ANCHOR -> includeRelics ? new PlanetHarvestProfile("planetary_relic", 1, null, 0, 720L, 900L, true) : null;
+                case AMETHYST_CLUSTER -> new PlanetHarvestProfile("irradiated_shard", 1, null, 0, 360L, 500L, true);
+                case SCULK_CATALYST -> new PlanetHarvestProfile("void_bloom", 1, "void_bloom_seeds", 1, 500L, 660L, true);
+                case CRYING_OBSIDIAN, RESPAWN_ANCHOR -> includeRelics ? new PlanetHarvestProfile("planetary_relic", 1, null, 0, 1400L, 1800L, true) : null;
                 default -> null;
             };
             case "cryon" -> switch (material) {
-                case ICE -> new PlanetHarvestProfile("cryonite_crystal", 1, null, 0, 190L, 270L, true);
-                case WHITE_TULIP -> new PlanetHarvestProfile("frostbloom", 2, "frostbloom_seeds", 1, 260L, 340L, true);
-                case LODESTONE, CHISELED_POLISHED_BLACKSTONE -> includeRelics ? new PlanetHarvestProfile("cryon_relic", 1, null, 0, 720L, 900L, true) : null;
+                case ICE -> new PlanetHarvestProfile("cryonite_crystal", 1, null, 0, 380L, 520L, true);
+                case WHITE_TULIP -> new PlanetHarvestProfile("frostbloom", 1, "frostbloom_seeds", 1, 500L, 660L, true);
+                case LODESTONE, CHISELED_POLISHED_BLACKSTONE -> includeRelics ? new PlanetHarvestProfile("cryon_relic", 1, null, 0, 1400L, 1800L, true) : null;
                 default -> null;
             };
             case "nyx" -> switch (material) {
-                case CRYING_OBSIDIAN -> new PlanetHarvestProfile("voidglass_fragment", 1, null, 0, 190L, 270L, true);
-                case CHORUS_FLOWER -> new PlanetHarvestProfile("echo_spore", 2, "echo_spore_seeds", 1, 270L, 350L, true);
-                case END_PORTAL_FRAME, ENDER_CHEST -> includeRelics ? new PlanetHarvestProfile("nyx_relic", 1, null, 0, 740L, 920L, true) : null;
+                case CRYING_OBSIDIAN -> new PlanetHarvestProfile("voidglass_fragment", 1, null, 0, 380L, 520L, true);
+                case CHORUS_FLOWER -> new PlanetHarvestProfile("echo_spore", 1, "echo_spore_seeds", 1, 520L, 680L, true);
+                case END_PORTAL_FRAME, ENDER_CHEST -> includeRelics ? new PlanetHarvestProfile("nyx_relic", 1, null, 0, 1460L, 1860L, true) : null;
                 default -> null;
             };
             case "helion" -> switch (material) {
-                case SHROOMLIGHT -> new PlanetHarvestProfile("solarite_shard", 1, null, 0, 190L, 270L, true);
-                case CRIMSON_ROOTS -> new PlanetHarvestProfile("emberroot", 2, "emberroot_seeds", 1, 260L, 340L, true);
-                case BEACON, GILDED_BLACKSTONE -> includeRelics ? new PlanetHarvestProfile("helion_relic", 1, null, 0, 740L, 920L, true) : null;
+                case SHROOMLIGHT -> new PlanetHarvestProfile("solarite_shard", 1, null, 0, 380L, 520L, true);
+                case CRIMSON_ROOTS -> new PlanetHarvestProfile("emberroot", 1, "emberroot_seeds", 1, 500L, 660L, true);
+                case BEACON, GILDED_BLACKSTONE -> includeRelics ? new PlanetHarvestProfile("helion_relic", 1, null, 0, 1460L, 1860L, true) : null;
                 default -> null;
             };
             case "tempest" -> switch (material) {
-                case SEA_LANTERN -> new PlanetHarvestProfile("stormglass_shard", 1, null, 0, 190L, 270L, true);
-                case LIGHTNING_ROD -> new PlanetHarvestProfile("ion_fern", 2, "ion_fern_seeds", 1, 260L, 340L, true);
-                case EXPOSED_COPPER -> includeRelics ? new PlanetHarvestProfile("tempest_relic", 1, null, 0, 740L, 920L, true) : null;
+                case SEA_LANTERN -> new PlanetHarvestProfile("stormglass_shard", 1, null, 0, 380L, 520L, true);
+                case LIGHTNING_ROD -> new PlanetHarvestProfile("ion_fern", 1, "ion_fern_seeds", 1, 500L, 660L, true);
+                case EXPOSED_COPPER -> includeRelics ? new PlanetHarvestProfile("tempest_relic", 1, null, 0, 1460L, 1860L, true) : null;
                 default -> null;
             };
             case "labyrinth" -> switch (material) {
-                case SCULK -> new PlanetHarvestProfile("labyrinth_fragment", 1, null, 0, 190L, 270L, true);
-                case MOSS_BLOCK -> new PlanetHarvestProfile("maze_vine", 2, "maze_vine_seeds", 1, 260L, 340L, true);
-                case REINFORCED_DEEPSLATE -> includeRelics ? new PlanetHarvestProfile("labyrinth_relic", 1, null, 0, 740L, 920L, true) : null;
+                case SCULK -> new PlanetHarvestProfile("labyrinth_fragment", 1, null, 0, 540L, 720L, true);
+                case MOSS_BLOCK -> new PlanetHarvestProfile("maze_vine", 1, "maze_vine_seeds", 1, 660L, 840L, true);
+                case REINFORCED_DEEPSLATE -> includeRelics ? new PlanetHarvestProfile("labyrinth_relic", 1, null, 0, 2000L, 2600L, true) : null;
                 default -> null;
             };
             default -> null;
@@ -5446,12 +5618,12 @@ public final class PlanetService {
             return null;
         }
         return switch (definition.id()) {
-            case "aurelia" -> new PlanetEliteProfile("輻塵寄生體", "aurelia_parasite_gland", "irradiated_shard", 1.65D, 2.0D, 0.02D);
-            case "cryon" -> new PlanetEliteProfile("霜脊潛獵者", "cryon_ice_heart", "cryonite_crystal", 1.75D, 1.0D, 0.015D);
-            case "nyx" -> new PlanetEliteProfile("虛響觀測者", "nyx_phase_tissue", "voidglass_fragment", 1.55D, 2.5D, 0.03D);
-            case "helion" -> new PlanetEliteProfile("日灼焰獸", "helion_cinder_core", "solarite_shard", 1.9D, 3.0D, 0.02D);
-            case "tempest" -> new PlanetEliteProfile("雷殼追獵者", "tempest_capacitor", "stormglass_shard", 1.7D, 2.0D, 0.04D);
-            case "labyrinth" -> new PlanetEliteProfile("迷宮守衛者", "guardian_core", "labyrinth_fragment", 1.8D, 2.5D, 0.025D);
+            case "aurelia" -> new PlanetEliteProfile("輻塵寄生體", "aurelia_parasite_gland", "irradiated_shard", 2.2D, 3.0D, 0.025D);
+            case "cryon" -> new PlanetEliteProfile("霜脊潛獵者", "cryon_ice_heart", "cryonite_crystal", 2.4D, 2.5D, 0.02D);
+            case "nyx" -> new PlanetEliteProfile("虛響觀測者", "nyx_phase_tissue", "voidglass_fragment", 2.1D, 3.5D, 0.035D);
+            case "helion" -> new PlanetEliteProfile("日灼焰獸", "helion_cinder_core", "solarite_shard", 2.6D, 4.0D, 0.025D);
+            case "tempest" -> new PlanetEliteProfile("雷殼追獵者", "tempest_capacitor", "stormglass_shard", 2.3D, 3.0D, 0.045D);
+            case "labyrinth" -> new PlanetEliteProfile("迷宮守衛者", "guardian_core", "labyrinth_fragment", 2.5D, 3.5D, 0.03D);
             default -> null;
         };
     }

@@ -77,6 +77,7 @@ items:
     display-name: "碳粉"
     category: BASIC
     icon: BLACK_DYE
+    item-model: "nexo:carbon_dust"
     description: "碳的粉末形態，鋼與碳化物的基礎。"
     unlock: "crusher"
     use-cases: ["鋼", "碳棒", "碳板"]

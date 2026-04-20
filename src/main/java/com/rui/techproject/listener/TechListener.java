@@ -3582,9 +3582,10 @@ public final class TechListener implements Listener {
                 }
             }
         }
-        // 精英技能觸發 — 怪物攻擊玩家時
+        // 怪物技能觸發 — 怪物攻擊玩家時
         if (event.getDamager() instanceof Monster monster && event.getEntity() instanceof Player target) {
             this.plugin.getPlanetService().handleEliteSkillOnAttack(monster, target);
+            this.plugin.getPlanetService().handlePlanetMobSkillOnAttack(monster, target);
         }
     }
 
