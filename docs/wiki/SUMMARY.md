@@ -7,12 +7,14 @@
 
 - [新手入門](getting-started/README.md)
 - [第一步：搭建進階工作台](getting-started/first-steps.md)
+- [第一座電網 — 5 分鐘搭好](getting-started/first-power-grid.md)
 - [研究系統](getting-started/research-system.md)
 - [能源基礎](getting-started/energy-basics.md)
 
 # ⚙️ 機器百科
 
 - [機器總覽](machines/README.md)
+- [🔍 機器全索引](machines/index.md)
 - [一階 — 基礎機器](machines/tier-1.md)
 - [二階 — 中階機器](machines/tier-2.md)
 - [三階 — 高階機器](machines/tier-3.md)
@@ -24,6 +26,7 @@
 # 🧱 物品百科
 
 - [物品總覽](items/README.md)
+- [🔍 物品全索引](items/index.md)
 - [基礎材料](items/basic-materials.md)
 - [合金材料](items/alloy-materials.md)
 - [進階材料](items/advanced-materials.md)
@@ -78,6 +81,7 @@
 - [能源網路](logistics/energy-network.md)
 - [物品傳輸](logistics/item-transport.md)
 - [貨物系統](logistics/cargo-system.md)
+- [信號系統](logistics/signal-system.md)
 
 # 🤖 自動化
 
