@@ -66,6 +66,7 @@
 # 🪐 星球系統
 
 - [星球系統總覽](planets/README.md)
+- [⭐ 星球資源用途總覽](planets/resources.md)
 - [奧蕾莉亞](planets/aurelia.md)
 - [克里昂](planets/cryon.md)
 - [倪克斯](planets/nyx.md)
