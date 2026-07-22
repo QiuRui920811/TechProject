@@ -62,6 +62,7 @@
 - [護甲套裝](combat/armor.md)
 - [護符](combat/talismans.md)
 - [工具](combat/tools.md)
+- [✨ 特殊附魔系統](combat/enchants.md)
 
 # 🪐 星球系統
 

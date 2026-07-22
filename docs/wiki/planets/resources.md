@@ -6,6 +6,22 @@
 
 ---
 
+## 🪨 核心產物：地表樣本 & 戰鬥樣本
+
+每顆星球都有一條「**地表樣本（地面採集）→ 戰鬥樣本（菁英怪掉落）→ 遺物（遺跡挑戰）**」的資源鏈。這三層丟進**異星精煉槽**（`xeno_refinery`）就能精煉出**異星合金**與各**防護模組**，是行星防護裝的根本材料。地表樣本也可用**行星採集機**（`planetary_harvester`）自動回收。
+
+| 星球 | 地表樣本 | 戰鬥樣本 | 遺物 | 精煉出的防護模組 |
+|---|---|---|---|---|
+| 奧蕾莉亞 | 輻照碎晶 `irradiated_shard` | 輻塵腺體 `aurelia_parasite_gland` | 星核遺物 `planetary_relic` | 輻射網層 `radiation_mesh` |
+| 克里昂 | 霜核晶簇 `cryonite_crystal` | 冰脈核心 `cryon_ice_heart` | 霜境遺物 `cryon_relic` | 低溫內襯 `thermal_lining` |
+| 倪克斯 | 虛璃碎片 `voidglass_fragment` | 相位膜組織 `nyx_phase_tissue` | 倪克斯遺核 `nyx_relic` | 壓差膜層 `pressure_membrane` |
+| 赫利昂 | 日耀碎晶 `solarite_shard` | 灰燼燃核 `helion_cinder_core` | 赫利昂炎核遺物 `helion_relic` | 日灼屏蔽層 `flare_shielding` |
+| 坦佩斯特 | 風暴玻片 `stormglass_shard` | 風暴電容核 `tempest_capacitor` | 坦佩斯特雷核遺物 `tempest_relic` | 風暴偏轉層 `storm_baffle` |
+
+> 遺物解析：星球遺物送進**遺物解析儀**（`relic_analyzer`）可抽出**古訊號片段**（`ancient_signal`），這是進階星球遺跡的啟動門票，也是每一片防護模組的必備材料。
+
+---
+
 ## 🌿 星球作物加工（A 系列）
 
 每顆星球的特色作物都有專屬轉換配方，把作物變成科技材料：
