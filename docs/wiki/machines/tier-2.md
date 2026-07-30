@@ -13,55 +13,55 @@
 
 | 中文名 | 英文 ID | 說明 | 輸入 → 輸出 | 耗能 |
 |---|---|---|---|---|
-| 合金爐 | `alloy_furnace` | 雙輸入合金配方 | copper_ingot, tin_ingot → bronze_ingot, solder_ingot, gilded_iron_ingot, ferrosilicon_ingot | 15 EU/t |
-| 合金熔煉爐 | `smeltery` | 熔岩流動 | iron_dust, coal_dust → titanium_alloy | 12 EU/t |
-| 工業壓縮機 | `industrial_compressor` | 高壓壓製 | iron_ingot, carbon_dust → iron_plate, carbon_plate, carbon_rod | 12 EU/t |
-| 工業洗礦機 | `industrial_washer` | 水洗淨化礦粉 | iron_dust, copper_dust → purified_iron, purified_copper | 8 EU/t |
-| 工業窯爐 | `kiln` | 陶材燒結 | clay_ball, ceramic_plate, heat_coil → ceramic_plate, thermal_ceramic | 12 EU/t |
-| 洗礦機 | `ore_washer` | 水流翻騰 | iron_dust → ore_slurry | 7 EU/t |
-| 淨化器 | `purifier` | 淨化泡沫 | ore_slurry → purified_shard, coolant_cell, purifier_membrane | 9 EU/t |
-| 精煉塔 | `refinery` | 蒸餾氣柱 | bio_resin, ore_slurry → refined_oil | 10 EU/t |
-| 聚合壓床 | `polymer_press` | 黏性壓製 | rubber_sheet, polymer_resin → rubber_sheet, polymer_resin, treated_plastic | 10 EU/t |
-| 冷卻混合器 | `coolant_mixer` | 低溫氣霧 | coolant_cell, hydro_gel → coolant_mix | 7 EU/t |
-| 絕緣壓製台 | `insulation_press` | 線材包覆壓製 | copper_wire, plastic, logic_gate, servo_motor → insulated_wire, sensor_array, servo_bundle | 11 EU/t |
+| 合金爐 | `alloy_furnace` | 雙輸入合金配方 | 銅錠, 錫錠 → 青銅錠, 焊錫錠, 鍍金鐵錠, 矽鐵錠 | 15 EU/秒 |
+| 合金熔煉爐 | `smeltery` | 熔岩流動 | 鐵粉, 煤粉 → 鈦合金 | 12 EU/秒 |
+| 工業壓縮機 | `industrial_compressor` | 高壓壓製 | 鐵錠, 碳粉 → 鐵板, 碳板, 碳棒 | 12 EU/秒 |
+| 工業洗礦機 | `industrial_washer` | 水洗淨化礦粉 | 鐵粉, 銅粉 → 鐵粉, 銅粉 | 8 EU/秒 |
+| 工業窯爐 | `kiln` | 陶材燒結 | 黏土球, 陶瓷板, 熱線圈 → 陶瓷板, 熱穩陶瓷 | 12 EU/秒 |
+| 洗礦機 | `ore_washer` | 水流翻騰 | 鐵粉 → 礦漿 | 7 EU/秒 |
+| 淨化器 | `purifier` | 淨化泡沫 | 礦漿 → 淨化碎晶, 冷卻電池, 淨化膜片 | 9 EU/秒 |
+| 精煉塔 | `refinery` | 蒸餾氣柱 | 生質樹脂, 礦漿 → 精煉油 | 10 EU/秒 |
+| 聚合壓床 | `polymer_press` | 黏性壓製 | 橡膠片, 聚合樹脂 → 橡膠片, 聚合樹脂, 處理塑膠 | 10 EU/秒 |
+| 冷卻混合器 | `coolant_mixer` | 低溫氣霧 | 冷卻電池, 水凝膠 → 冷卻混合液 | 7 EU/秒 |
+| 絕緣壓製台 | `insulation_press` | 線材包覆壓製 | 銅線, plastic, 邏輯閘, 伺服馬達 → 絕緣線材, 感測陣列, 伺服模組束 | 11 EU/秒 |
 
 ### 🏭 組裝·合成
 
 | 中文名 | 英文 ID | 說明 | 輸入 → 輸出 | 耗能 |
 |---|---|---|---|---|
-| 製造機 | `assembler` | 光束組裝 | circuit_board, steel_plate, tin_ingot → machine_component | 15 EU/t |
-| 萬用合成站 | `auto_crafter` | 聚合所有加工配方，耗能加倍 | — | 20 EU/t |
+| 製造機 | `assembler` | 光束組裝 | 電路板, 鋼板, 錫錠 → 機械零件 | 15 EU/秒 |
+| 萬用合成站 | `auto_crafter` | 聚合所有加工配方，耗能加倍 | — | 20 EU/秒 |
 
 ### 🌱 生態·生質
 
 | 中文名 | 英文 ID | 說明 | 輸入 → 輸出 | 耗能 |
 |---|---|---|---|---|
-| 生質實驗室 | `bio_lab` | 綠色培養動畫 | crops, wood_dust → bio_resin, bio_fiber | 11 EU/t |
-| 溫室培育艙 | `greenhouse` | 綠光培育 | seed_cluster, fertilizer_mix → growth_lamp, hydro_gel | 8 EU/t |
-| 作物收割機 | `crop_harvester` | 收割附近成熟作物並自動重植 | harvest_matrix, agri_module → crops, crop_seeds, bio_fiber | 8 EU/t |
-| 自動釣台 | `fishing_dock` | 依附近水域持續取得漁獲 | bait_module, dock_frame → cod, salmon, tropical_fish, pufferfish, nautilus_shell, string | 7 EU/t |
-| 伐木機 | `tree_feller` | 搜尋附近樹幹並整株砍伐 | logging_blade, arbor_frame → oak_log, birch_log, spruce_log, jungle_log, acacia_log, dark_oak_log, cherry_log, mangrove_log, oak_sapling | 12 EU/t |
+| 生質實驗室 | `bio_lab` | 綠色培養動畫 | crops, 木屑 → 生質樹脂, 生質纖維 | 11 EU/秒 |
+| 溫室培育艙 | `greenhouse` | 綠光培育 | 種子簇, 肥料混合物 → 生長燈, 水凝膠 | 8 EU/秒 |
+| 作物收割機 | `crop_harvester` | 收割附近成熟作物並自動重植 | 收割矩陣, 農業模組 → crops, 作物種子, 生質纖維 | 8 EU/秒 |
+| 自動釣台 | `fishing_dock` | 依附近水域持續取得漁獲 | 誘餌模組, 碼頭骨架 → cod, salmon, 熱帶魚, pufferfish, 鸚鵡螺殼, string | 7 EU/秒 |
+| 伐木機 | `tree_feller` | 搜尋附近樹幹並整株砍伐 | 伐木刀組, 林業機架 → 橡木原木, 樺木原木, 杉木原木, 叢林木原木, 相思木原木, 黑橡木原木, 櫻花木原木, 紅樹林木原木, 橡木樹苗 | 12 EU/秒 |
 
 ### 🔋 發電·儲能
 
 | 中文名 | 英文 ID | 說明 | 輸入 → 輸出 | 耗能 |
 |---|---|---|---|---|
-| 生質反應爐 | `bio_reactor` | 生質發酵 | crops → energy_cell | 發電 4 |
-| 風力渦輪機 | `wind_turbine` | 風力發電（高空效率更佳） | wind → energy_cell | 發電 3 |
-| 太陽能陣列 | `solar_array` | 多段光能動畫 | starlight_plate → energy_cell | 發電 3 |
-| 電池庫 | `battery_bank` | 能源儲存與充放電站，放在發電區與耗能區之間當緩衝最有效 | energy_cell, lithium_cell, tin_plate → capacitor_bank | 2 EU/t |
+| 生質反應爐 | `bio_reactor` | 生質發酵 | crops → 能源電池 | 發電 4 |
+| 風力渦輪機 | `wind_turbine` | 風力發電（高空效率更佳） | wind → 能源電池 | 發電 3 |
+| 太陽能陣列 | `solar_array` | 多段光能動畫 | 星光板 → 能源電池 | 發電 3 |
+| 電池庫 | `battery_bank` | 能源儲存與充放電站，放在發電區與耗能區之間當緩衝最有效 | 能源電池, 鋰電池, 錫板 → 電容組 | 2 EU/秒 |
 
 ### 🔌 能源·物流
 
 | 中文名 | 英文 ID | 說明 | 輸入 → 輸出 | 耗能 |
 |---|---|---|---|---|
-| 導能線纜 | `energy_cable` | 能量穿透傳輸 | flux_link → flux_link | — |
-| 能源節點 | `energy_node` | 遠距能量橋接 | energy_cell → energy_cell | — |
-| 物流導管 | `item_tube` | 物品穿透傳輸 | pressure_tube → pressure_tube | — |
-| 物流節點 | `logistics_node` | 遠距物流橋接 | machine_component → machine_component | — |
-| 倉儲匯流站 | `storage_hub` | 接收任意物流並作為中型緩衝倉 | storage_crate, machine_casing, wiring_bundle → machine_component, steel_plate, circuit_board, crops, plastic | — |
-| 真空吸入口 | `vacuum_inlet` | 將周圍掉落物直接吸入產線 | vacuum_core, pressure_tube → junk, crops, iron_dust, copper_dust, plastic, circuit_board | 3 EU/t |
-| 銷毀節點 | `trash_node` | 永久銷毀所有匯入的物品 | machine_casing, lava_bucket → — | — |
+| 導能線纜 | `energy_cable` | 能量穿透傳輸 | 通量連結 → 通量連結 | — |
+| 能源節點 | `energy_node` | 遠距能量橋接 | 能源電池 → 能源電池 | — |
+| 物流導管 | `item_tube` | 物品穿透傳輸 | 壓力導管 → 壓力導管 | — |
+| 物流節點 | `logistics_node` | 遠距物流橋接 | 機械零件 → 機械零件 | — |
+| 倉儲匯流站 | `storage_hub` | 接收任意物流並作為中型緩衝倉 | 儲物箱, 機械外殼, 工業線束 → 機械零件, 鋼板, 電路板, crops, plastic | — |
+| 真空吸入口 | `vacuum_inlet` | 將周圍掉落物直接吸入產線 | 真空核心, 壓力導管 → junk, crops, 鐵粉, 銅粉, plastic, 電路板 | 3 EU/秒 |
+| 銷毀節點 | `trash_node` | 永久銷毀所有匯入的物品 | 機械外殼, 熔岩桶 → — | — |
 | 漏斗介面 | `hopper_interface` | 原版漏斗/箱子 ↔ 科技機器物品橋接 | — | — |
 | 溢出處理器 | `overflow_handler` | 主路滿載自動轉送備用路線 | — | — |
 
@@ -69,11 +69,11 @@
 
 | 中文名 | 英文 ID | 說明 | 輸入 → 輸出 | 耗能 |
 |---|---|---|---|---|
-| 信號線 | `signal_wire` | 傳輸信號（0-15），連接信號設備 | signal_relay → signal_relay | — |
-| 信號發射器 | `signal_emitter` | 讀取相鄰機器狀態 → 輸出信號 0-15 | signal_relay → signal_relay | 1 EU/t |
-| 信號接收器 | `signal_receiver` | 接收信號 → 控制相鄰機器開關 | signal_relay → signal_relay | 1 EU/t |
-| 信號反轉器 | `signal_inverter` | 反轉信號（NOT 邏輯閘）：輸出 = 15 - 輸入 | signal_relay → signal_relay | — |
-| 紅石轉接器 | `redstone_adapter` | 紅石 ↔ 科技信號雙向橋接（方塊自身發 0-15 紅石） | signal_relay → signal_relay | — |
+| 信號線 | `signal_wire` | 傳輸信號（0-15），連接信號設備 | 訊號中繼器 → 訊號中繼器 | — |
+| 信號發射器 | `signal_emitter` | 讀取相鄰機器狀態 → 輸出信號 0-15 | 訊號中繼器 → 訊號中繼器 | 1 EU/秒 |
+| 信號接收器 | `signal_receiver` | 接收信號 → 控制相鄰機器開關 | 訊號中繼器 → 訊號中繼器 | 1 EU/秒 |
+| 信號反轉器 | `signal_inverter` | 反轉信號（NOT 邏輯閘）：輸出 = 15 - 輸入 | 訊號中繼器 → 訊號中繼器 | — |
+| 紅石轉接器 | `redstone_adapter` | 紅石 ↔ 科技信號雙向橋接（方塊自身發 0-15 紅石） | 訊號中繼器 → 訊號中繼器 | — |
 
 ---
 

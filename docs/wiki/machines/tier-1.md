@@ -13,37 +13,37 @@
 
 | 中文名 | 英文 ID | 說明 | 輸入 → 輸出 | 耗能 |
 |---|---|---|---|---|
-| 粉碎機 | `crusher` | 旋轉渦輪 | iron_ore, copper_ore → iron_dust, copper_dust | 5 EU/t |
-| 熔爐 | `furnace` | 火焰動畫 | iron_dust, copper_dust → iron_ingot, copper_ingot | 10 EU/t |
-| 壓縮機 | `compressor` | 金屬壓縮動畫 | iron_ingot, iron_plate, tin_ingot → iron_plate, steel_plate, compressed_iron_bundle, dense_carbon_block, tin_plate | 8 EU/t |
-| 拉線機 | `wire_mill` | 高速牽引 | copper_ingot, steel_plate, tin_ingot → copper_wire, steel_wire, wiring_bundle, tin_wire | 9 EU/t |
-| 電鋸 | `electric_saw` | 鋸片旋轉 | oak_planks → wood_dust | 4 EU/t |
-| 回收機 | `recycler` | 回收動畫 | wood_dust, paper, coal_dust → recycled_material, plastic, rust_filter | 3 EU/t |
-| 自動農場 | `auto_farm` | 作物生長動畫 | crop_seeds → crops | 3 EU/t |
-| 焦爐 | `coke_oven` | 無需電力，緩慢碳化 | coal, charcoal → coke, creosote_oil | — |
+| 粉碎機 | `crusher` | 旋轉渦輪 | 鐵礦, 銅礦 → 鐵粉, 銅粉 | 5 EU/秒 |
+| 熔爐 | `furnace` | 火焰動畫 | 鐵粉, 銅粉 → 鐵錠, 銅錠 | 10 EU/秒 |
+| 壓縮機 | `compressor` | 金屬壓縮動畫 | 鐵錠, 鐵板, 錫錠 → 鐵板, 鋼板, 壓實鐵胚, 高密碳塊, 錫板 | 8 EU/秒 |
+| 拉線機 | `wire_mill` | 高速牽引 | 銅錠, 鋼板, 錫錠 → 銅線, 鋼線, 工業線束, 錫線 | 9 EU/秒 |
+| 電鋸 | `electric_saw` | 鋸片旋轉 | 橡木材 → 木屑 | 4 EU/秒 |
+| 回收機 | `recycler` | 回收動畫 | 木屑, paper, 煤粉 → 回收材料, plastic, 鏽蝕濾芯 | 3 EU/秒 |
+| 自動農場 | `auto_farm` | 作物生長動畫 | 作物種子 → crops | 3 EU/秒 |
+| 焦爐 | `coke_oven` | 無需電力，緩慢碳化 | coal, charcoal → coke, 雜酚油 | — |
 
 ### 🔋 發電機
 
 | 中文名 | 英文 ID | 說明 | 輸入 → 輸出 | 發電 |
 |---|---|---|---|---|
-| 煤炭發電機 | `coal_generator` | 火焰 + 蒸氣 | coal → energy_cell | 2 EU/t |
-| 岩漿發電機 | `lava_generator` | 岩漿燃燒 | lava_bucket → energy_cell | 5 EU/t |
-| 太陽能發電機 | `solar_generator` | 太陽光束 | sunlight → energy_cell | 3 EU/t |
-| 蒸汽鍋爐 | `steam_boiler` | 燃燒產生蒸汽發電 | coal, coke, water_bucket → — | 8 EU/t |
+| 煤炭發電機 | `coal_generator` | 火焰 + 蒸氣 | coal → 能源電池 | 2 EU/秒 |
+| 岩漿發電機 | `lava_generator` | 岩漿燃燒 | 熔岩桶 → 能源電池 | 5 EU/秒 |
+| 太陽能發電機 | `solar_generator` | 太陽光束 | sunlight → 能源電池 | 3 EU/秒 |
+| 蒸汽鍋爐 | `steam_boiler` | 燃燒產生蒸汽發電 | coal, coke, 水桶 → — | 8 EU/秒 |
 
 ### 🐔 基因·養殖
 
 | 中文名 | 英文 ID | 說明 | 輸入 → 輸出 | 耗能 |
 |---|---|---|---|---|
-| 基因定序器 | `genetic_sequencer` | 分析 DNA 序列 | pocket_chicken → pocket_chicken | 3 EU/t |
-| 私人雞舍 | `private_coop` | 基因繁殖 | pocket_chicken, pocket_chicken → pocket_chicken | 2 EU/t |
-| 激發室 | `excitation_chamber` | 激發基因產出資源 | pocket_chicken → — | 4 EU/t |
+| 基因定序器 | `genetic_sequencer` | 分析 DNA 序列 | 口袋雞 → 口袋雞 | 3 EU/秒 |
+| 私人雞舍 | `private_coop` | 基因繁殖 | 口袋雞, 口袋雞 → 口袋雞 | 2 EU/秒 |
+| 激發室 | `excitation_chamber` | 激發基因產出資源 | 口袋雞 → — | 4 EU/秒 |
 
 ### 🛠️ 研究·輔助
 
 | 中文名 | 英文 ID | 說明 | 輸入 → 輸出 | 耗能 |
 |---|---|---|---|---|
-| 研究台 | `research_desk` | 研究場（8 格內 +1 科技經驗/秒） | tech_book, copper_ingot → — | — |
+| 研究台 | `research_desk` | 研究場（8 格內 +1 科技經驗/秒） | 科技書, 銅錠 → — | — |
 | 散熱片 | `heat_sink` | 被動冷卻相鄰機器 -3 熱/秒 | — | — |
 | 方塊破壞器 | `block_breaker` | 收到紅石訊號時破壞前方一格方塊，掉落物存入內部容器 | — | — |
 

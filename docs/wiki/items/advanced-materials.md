@@ -1,8 +1,8 @@
 # 進階材料
 
-三/四階（ADVANCED）機器產出的高階材料，共收錄本頁 **179 種**核心元件、防護裝備、武器、食物與自動機零件。
+三/四階（）機器產出的高階材料，共收錄本頁 **179 種**核心元件、防護裝備、武器、食物與自動機零件。
 
-> ADVANCED 分類中另有專門主題頁：[魔法物品](magical-items.md)（結晶/符文/卷軸）、[升級模組](upgrades.md)、[工業擴展](industrial-materials.md)（冶金/核電）、[終局材料](endgame-materials.md)（虛空/暗物質/反物質）。本頁不重複列出那些內容。
+> 三階 分類中另有專門主題頁：[魔法物品](magical-items.md)（結晶/符文/卷軸）、[升級模組](upgrades.md)、[工業擴展](industrial-materials.md)（冶金/核電）、[終局材料](endgame-materials.md)（虛空/暗物質/反物質）。本頁不重複列出那些內容。
 
 ---
 

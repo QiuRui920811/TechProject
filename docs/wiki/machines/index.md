@@ -5,184 +5,184 @@
 
 | 階級 | 對應分類 | 數量 |
 |---|---|---|
-| 一階 | BASIC | 18 台 |
-| 二階 | INTERMEDIATE | 36 台 |
-| 三階 | ADVANCED | 66 台 |
-| 四階 | TIER4 | 32 台 |
+| 一階 | 一階 | 18 台 |
+| 二階 | 二階 | 36 台 |
+| 三階 | 三階 | 66 台 |
+| 四階 | 四階 | 32 台 |
 | **合計** | | **152 台** |
 
 > 💡「輸入 → 輸出」與「英文 ID」欄位使用機器的內部識別碼，方便對照配方與指令；一般遊玩時看中文名即可。
 
 ---
 
-## 一階（BASIC，18 台）
+## 一階（18 台）
 
 | 中文名 | 英文 ID | 說明 | 輸入 → 輸出 | 耗能 |
 |---|---|---|---|---|
-| 自動農場 | `auto_farm` | 作物生長動畫 | crop_seeds → crops | 3 EU/t |
+| 自動農場 | `auto_farm` | 作物生長動畫 | 作物種子 → crops | 3 EU/秒 |
 | 方塊破壞器 | `block_breaker` | 收到紅石訊號時破壞前方一格方塊，掉落物存入內部容器 | — | — |
-| 煤炭發電機 | `coal_generator` | 火焰 + 蒸氣 | coal → energy_cell | 發電 2 |
-| 焦爐 | `coke_oven` | 無需電力，緩慢碳化 | coal, charcoal → coke, creosote_oil | — |
-| 壓縮機 | `compressor` | 金屬壓縮動畫 | iron_ingot, iron_plate, tin_ingot → iron_plate, steel_plate, compressed_iron_bundle, dense_carbon_block, tin_plate | 8 EU/t |
-| 粉碎機 | `crusher` | 旋轉渦輪 | iron_ore, copper_ore → iron_dust, copper_dust | 5 EU/t |
-| 電鋸 | `electric_saw` | 鋸片旋轉 | oak_planks → wood_dust | 4 EU/t |
-| 激發室 | `excitation_chamber` | 激發基因產出資源 | pocket_chicken → — | 4 EU/t |
-| 熔爐 | `furnace` | 火焰動畫 | iron_dust, copper_dust → iron_ingot, copper_ingot | 10 EU/t |
-| 基因定序器 | `genetic_sequencer` | 分析 DNA 序列 | pocket_chicken → pocket_chicken | 3 EU/t |
+| 煤炭發電機 | `coal_generator` | 火焰 + 蒸氣 | coal → 能源電池 | 發電 2 |
+| 焦爐 | `coke_oven` | 無需電力，緩慢碳化 | coal, charcoal → coke, 雜酚油 | — |
+| 壓縮機 | `compressor` | 金屬壓縮動畫 | 鐵錠, 鐵板, 錫錠 → 鐵板, 鋼板, 壓實鐵胚, 高密碳塊, 錫板 | 8 EU/秒 |
+| 粉碎機 | `crusher` | 旋轉渦輪 | 鐵礦, 銅礦 → 鐵粉, 銅粉 | 5 EU/秒 |
+| 電鋸 | `electric_saw` | 鋸片旋轉 | 橡木材 → 木屑 | 4 EU/秒 |
+| 激發室 | `excitation_chamber` | 激發基因產出資源 | 口袋雞 → — | 4 EU/秒 |
+| 熔爐 | `furnace` | 火焰動畫 | 鐵粉, 銅粉 → 鐵錠, 銅錠 | 10 EU/秒 |
+| 基因定序器 | `genetic_sequencer` | 分析 DNA 序列 | 口袋雞 → 口袋雞 | 3 EU/秒 |
 | 散熱片 | `heat_sink` | 被動冷卻相鄰機器 -3 熱/秒 | — | — |
-| 岩漿發電機 | `lava_generator` | 岩漿燃燒 | lava_bucket → energy_cell | 發電 5 |
-| 私人雞舍 | `private_coop` | 基因繁殖 | pocket_chicken, pocket_chicken → pocket_chicken | 2 EU/t |
-| 回收機 | `recycler` | 回收動畫 | wood_dust, paper, coal_dust → recycled_material, plastic, rust_filter | 3 EU/t |
-| 研究台 | `research_desk` | 研究場（8 格內 +1 科技經驗/秒） | tech_book, copper_ingot → — | — |
-| 太陽能發電機 | `solar_generator` | 太陽光束 | sunlight → energy_cell | 發電 3 |
-| 蒸汽鍋爐 | `steam_boiler` | 燃燒產生蒸汽發電 | coal, coke, water_bucket → — | 發電 8 |
-| 拉線機 | `wire_mill` | 高速牽引 | copper_ingot, steel_plate, tin_ingot → copper_wire, steel_wire, wiring_bundle, tin_wire | 9 EU/t |
+| 岩漿發電機 | `lava_generator` | 岩漿燃燒 | 熔岩桶 → 能源電池 | 發電 5 |
+| 私人雞舍 | `private_coop` | 基因繁殖 | 口袋雞, 口袋雞 → 口袋雞 | 2 EU/秒 |
+| 回收機 | `recycler` | 回收動畫 | 木屑, paper, 煤粉 → 回收材料, plastic, 鏽蝕濾芯 | 3 EU/秒 |
+| 研究台 | `research_desk` | 研究場（8 格內 +1 科技經驗/秒） | 科技書, 銅錠 → — | — |
+| 太陽能發電機 | `solar_generator` | 太陽光束 | sunlight → 能源電池 | 發電 3 |
+| 蒸汽鍋爐 | `steam_boiler` | 燃燒產生蒸汽發電 | coal, coke, 水桶 → — | 發電 8 |
+| 拉線機 | `wire_mill` | 高速牽引 | 銅錠, 鋼板, 錫錠 → 銅線, 鋼線, 工業線束, 錫線 | 9 EU/秒 |
 
-## 二階（INTERMEDIATE，36 台）
+## 二階（36 台）
 
 | 中文名 | 英文 ID | 說明 | 輸入 → 輸出 | 耗能 |
 |---|---|---|---|---|
-| 合金爐 | `alloy_furnace` | 雙輸入合金配方 | copper_ingot, tin_ingot → bronze_ingot, solder_ingot, gilded_iron_ingot, ferrosilicon_ingot | 15 EU/t |
-| 製造機 | `assembler` | 光束組裝 | circuit_board, steel_plate, tin_ingot → machine_component | 15 EU/t |
-| 萬用合成站 | `auto_crafter` | 聚合所有加工配方，耗能加倍 | — | 20 EU/t |
-| 電池庫 | `battery_bank` | 能源儲存與充放電站。將機器物品放入輸入槽可吸收其殘餘電量；將科技裝備放入輸入槽可從電池庫充電至滿。放在發電區與耗能區之間當緩衝最有效。 | energy_cell, lithium_cell, tin_plate → capacitor_bank | 2 EU/t |
-| 生質實驗室 | `bio_lab` | 綠色培養動畫 | crops, wood_dust → bio_resin, bio_fiber | 11 EU/t |
-| 生質反應爐 | `bio_reactor` | 生質發酵 | crops → energy_cell | 發電 4 |
-| 冷卻混合器 | `coolant_mixer` | 低溫氣霧 | coolant_cell, hydro_gel → coolant_mix | 7 EU/t |
-| 作物收割機 | `crop_harvester` | 收割附近成熟作物並自動重植 | harvest_matrix, agri_module → crops, crop_seeds, bio_fiber | 8 EU/t |
-| 導能線纜 | `energy_cable` | 能量穿透傳輸 | flux_link → flux_link | — |
-| 能源節點 | `energy_node` | 遠距能量橋接 | energy_cell → energy_cell | — |
-| 自動釣台 | `fishing_dock` | 依附近水域持續取得漁獲 | bait_module, dock_frame → cod, salmon, tropical_fish, pufferfish, nautilus_shell, string | 7 EU/t |
-| 溫室培育艙 | `greenhouse` | 綠光培育 | seed_cluster, fertilizer_mix → growth_lamp, hydro_gel | 8 EU/t |
+| 合金爐 | `alloy_furnace` | 雙輸入合金配方 | 銅錠, 錫錠 → 青銅錠, 焊錫錠, 鍍金鐵錠, 矽鐵錠 | 15 EU/秒 |
+| 製造機 | `assembler` | 光束組裝 | 電路板, 鋼板, 錫錠 → 機械零件 | 15 EU/秒 |
+| 萬用合成站 | `auto_crafter` | 聚合所有加工配方，耗能加倍 | — | 20 EU/秒 |
+| 電池庫 | `battery_bank` | 能源儲存與充放電站。將機器物品放入輸入槽可吸收其殘餘電量；將科技裝備放入輸入槽可從電池庫充電至滿。放在發電區與耗能區之間當緩衝最有效。 | 能源電池, 鋰電池, 錫板 → 電容組 | 2 EU/秒 |
+| 生質實驗室 | `bio_lab` | 綠色培養動畫 | crops, 木屑 → 生質樹脂, 生質纖維 | 11 EU/秒 |
+| 生質反應爐 | `bio_reactor` | 生質發酵 | crops → 能源電池 | 發電 4 |
+| 冷卻混合器 | `coolant_mixer` | 低溫氣霧 | 冷卻電池, 水凝膠 → 冷卻混合液 | 7 EU/秒 |
+| 作物收割機 | `crop_harvester` | 收割附近成熟作物並自動重植 | 收割矩陣, 農業模組 → crops, 作物種子, 生質纖維 | 8 EU/秒 |
+| 導能線纜 | `energy_cable` | 能量穿透傳輸 | 通量連結 → 通量連結 | — |
+| 能源節點 | `energy_node` | 遠距能量橋接 | 能源電池 → 能源電池 | — |
+| 自動釣台 | `fishing_dock` | 依附近水域持續取得漁獲 | 誘餌模組, 碼頭骨架 → cod, salmon, 熱帶魚, pufferfish, 鸚鵡螺殼, string | 7 EU/秒 |
+| 溫室培育艙 | `greenhouse` | 綠光培育 | 種子簇, 肥料混合物 → 生長燈, 水凝膠 | 8 EU/秒 |
 | 漏斗介面 | `hopper_interface` | 原版漏斗/箱子 ↔ 科技機器物品橋接 | — | — |
-| 工業壓縮機 | `industrial_compressor` | 高壓壓製 | iron_ingot, carbon_dust → iron_plate, carbon_plate, carbon_rod | 12 EU/t |
-| 工業洗礦機 | `industrial_washer` | 水洗淨化礦粉 | iron_dust, copper_dust → purified_iron, purified_copper | 8 EU/t |
-| 絕緣壓製台 | `insulation_press` | 線材包覆壓製 | copper_wire, plastic, logic_gate, servo_motor → insulated_wire, sensor_array, servo_bundle | 11 EU/t |
-| 物流導管 | `item_tube` | 物品穿透傳輸 | pressure_tube → pressure_tube | — |
-| 工業窯爐 | `kiln` | 陶材燒結 | clay_ball, ceramic_plate, heat_coil → ceramic_plate, thermal_ceramic | 12 EU/t |
-| 物流節點 | `logistics_node` | 遠距物流橋接 | machine_component → machine_component | — |
-| 洗礦機 | `ore_washer` | 水流翻騰 | iron_dust → ore_slurry | 7 EU/t |
+| 工業壓縮機 | `industrial_compressor` | 高壓壓製 | 鐵錠, 碳粉 → 鐵板, 碳板, 碳棒 | 12 EU/秒 |
+| 工業洗礦機 | `industrial_washer` | 水洗淨化礦粉 | 鐵粉, 銅粉 → 鐵粉, 銅粉 | 8 EU/秒 |
+| 絕緣壓製台 | `insulation_press` | 線材包覆壓製 | 銅線, plastic, 邏輯閘, 伺服馬達 → 絕緣線材, 感測陣列, 伺服模組束 | 11 EU/秒 |
+| 物流導管 | `item_tube` | 物品穿透傳輸 | 壓力導管 → 壓力導管 | — |
+| 工業窯爐 | `kiln` | 陶材燒結 | 黏土球, 陶瓷板, 熱線圈 → 陶瓷板, 熱穩陶瓷 | 12 EU/秒 |
+| 物流節點 | `logistics_node` | 遠距物流橋接 | 機械零件 → 機械零件 | — |
+| 洗礦機 | `ore_washer` | 水流翻騰 | 鐵粉 → 礦漿 | 7 EU/秒 |
 | 溢出處理器 | `overflow_handler` | 主路滿載自動轉送備用路線 | — | — |
-| 聚合壓床 | `polymer_press` | 黏性壓製 | rubber_sheet, polymer_resin → rubber_sheet, polymer_resin, treated_plastic | 10 EU/t |
-| 淨化器 | `purifier` | 淨化泡沫 | ore_slurry → purified_shard, coolant_cell, purifier_membrane | 9 EU/t |
-| 紅石轉接器 | `redstone_adapter` | 紅石 ↔ 科技信號雙向橋接（方塊自身發 0-15 紅石） | signal_relay → signal_relay | — |
-| 精煉塔 | `refinery` | 蒸餾氣柱 | bio_resin, ore_slurry → refined_oil | 10 EU/t |
-| 信號發射器 | `signal_emitter` | 讀取相鄰機器狀態 → 輸出信號 0-15 | signal_relay → signal_relay | 1 EU/t |
-| 信號反轉器 | `signal_inverter` | 反轉信號（NOT 邏輯閘）：輸出 = 15 - 輸入 | signal_relay → signal_relay | — |
-| 信號接收器 | `signal_receiver` | 接收信號 → 控制相鄰機器開關 | signal_relay → signal_relay | 1 EU/t |
-| 信號線 | `signal_wire` | 傳輸信號（0-15），連接信號設備 | signal_relay → signal_relay | — |
-| 合金熔煉爐 | `smeltery` | 熔岩流動 | iron_dust, coal_dust → titanium_alloy | 12 EU/t |
-| 太陽能陣列 | `solar_array` | 多段光能動畫 | starlight_plate → energy_cell | 發電 3 |
-| 倉儲匯流站 | `storage_hub` | 接收任意物流並作為中型緩衝倉 | storage_crate, machine_casing, wiring_bundle → machine_component, steel_plate, circuit_board, crops, plastic | — |
-| 銷毀節點 | `trash_node` | 永久銷毀所有匯入的物品 | machine_casing, lava_bucket → — | — |
-| 伐木機 | `tree_feller` | 搜尋附近樹幹並整株砍伐 | logging_blade, arbor_frame → oak_log, birch_log, spruce_log, jungle_log, acacia_log, dark_oak_log, cherry_log, mangrove_log, oak_sapling | 12 EU/t |
-| 真空吸入口 | `vacuum_inlet` | 將周圍掉落物直接吸入產線 | vacuum_core, pressure_tube → junk, crops, iron_dust, copper_dust, plastic, circuit_board | 3 EU/t |
-| 風力渦輪機 | `wind_turbine` | 風力發電（高空效率更佳） | wind → energy_cell | 發電 3 |
+| 聚合壓床 | `polymer_press` | 黏性壓製 | 橡膠片, 聚合樹脂 → 橡膠片, 聚合樹脂, 處理塑膠 | 10 EU/秒 |
+| 淨化器 | `purifier` | 淨化泡沫 | 礦漿 → 淨化碎晶, 冷卻電池, 淨化膜片 | 9 EU/秒 |
+| 紅石轉接器 | `redstone_adapter` | 紅石 ↔ 科技信號雙向橋接（方塊自身發 0-15 紅石） | 訊號中繼器 → 訊號中繼器 | — |
+| 精煉塔 | `refinery` | 蒸餾氣柱 | 生質樹脂, 礦漿 → 精煉油 | 10 EU/秒 |
+| 信號發射器 | `signal_emitter` | 讀取相鄰機器狀態 → 輸出信號 0-15 | 訊號中繼器 → 訊號中繼器 | 1 EU/秒 |
+| 信號反轉器 | `signal_inverter` | 反轉信號（NOT 邏輯閘）：輸出 = 15 - 輸入 | 訊號中繼器 → 訊號中繼器 | — |
+| 信號接收器 | `signal_receiver` | 接收信號 → 控制相鄰機器開關 | 訊號中繼器 → 訊號中繼器 | 1 EU/秒 |
+| 信號線 | `signal_wire` | 傳輸信號（0-15），連接信號設備 | 訊號中繼器 → 訊號中繼器 | — |
+| 合金熔煉爐 | `smeltery` | 熔岩流動 | 鐵粉, 煤粉 → 鈦合金 | 12 EU/秒 |
+| 太陽能陣列 | `solar_array` | 多段光能動畫 | 星光板 → 能源電池 | 發電 3 |
+| 倉儲匯流站 | `storage_hub` | 接收任意物流並作為中型緩衝倉 | 儲物箱, 機械外殼, 工業線束 → 機械零件, 鋼板, 電路板, crops, plastic | — |
+| 銷毀節點 | `trash_node` | 永久銷毀所有匯入的物品 | 機械外殼, 熔岩桶 → — | — |
+| 伐木機 | `tree_feller` | 搜尋附近樹幹並整株砍伐 | 伐木刀組, 林業機架 → 橡木原木, 樺木原木, 杉木原木, 叢林木原木, 相思木原木, 黑橡木原木, 櫻花木原木, 紅樹林木原木, 橡木樹苗 | 12 EU/秒 |
+| 真空吸入口 | `vacuum_inlet` | 將周圍掉落物直接吸入產線 | 真空核心, 壓力導管 → junk, crops, 鐵粉, 銅粉, plastic, 電路板 | 3 EU/秒 |
+| 風力渦輪機 | `wind_turbine` | 風力發電（高空效率更佳） | wind → 能源電池 | 發電 3 |
 
-## 三階（ADVANCED，66 台）
+## 三階（66 台）
 
 | 中文名 | 英文 ID | 說明 | 輸入 → 輸出 | 耗能 |
 |---|---|---|---|---|
-| 進階製造機 | `advanced_assembler` | 脈衝光場 | machine_component, advanced_circuit → nano_coating | 24 EU/t |
-| 紫水晶培養機 | `amethyst_grower` | 消耗冷卻混合液培養紫水晶碎片 | coolant_mix → amethyst_shard | 16 EU/t |
-| 安卓艙 | `android_bay` | 程序裝配 | android_core, machine_casing → android_shell, android_frame, android_memory_matrix | 20 EU/t |
-| 安卓燃料介面 | `android_fuel_interface` | 燃料補給 | emitter_node, pressure_tube → — | 4 EU/t |
-| 安卓物品介面 | `android_item_interface` | 物資回收 | signal_relay, machine_casing → — | 4 EU/t |
-| 安卓工作站 | `android_station` | 部署與巡檢 | android_frame, android_memory_matrix → android_item_interface, android_fuel_interface | 12 EU/t |
-| 生質合成槽 | `biosynth_vat` | 生質批次培養 | gene_template, bio_catalyst, soybean_pods → synth_meat, protein_ration | 16 EU/t |
-| 高爐 | `blast_furnace` | 3×3×3 磚塊結構，需要溫度 400+ 運作 | iron_ingot, coke, carbon_dust → steel_ingot, tungsten_ingot, carbide_dust | 40 EU/t |
-| 量子倉儲抽屜 | `cargo_drawer` | 單一類型大容量倉儲；容量 50,000，可配合貨物網路自動進出 | storage_crate, routing_chip → storage_crate | — |
-| 貨物抽取節點 | `cargo_input_node` | 從相鄰原版容器（箱子/桶/漏斗）抽取物品送入產線 | routing_chip, servo_motor, storage_crate → machine_component, steel_plate, circuit_board, crops, plastic | 2 EU/t |
-| 貨物管理站 | `cargo_manager` | 無線掃描範圍內同主人機器並抽取輸出物品 | bus_frame, routing_chip, control_unit, signal_relay → machine_component, steel_plate, circuit_board, crops, plastic | 5 EU/t |
-| 貨物驅動器 | `cargo_motor` | 高速物流中繼站，每次傳輸最多 8 件物品 | bus_frame, servo_motor, routing_chip → machine_component, steel_plate, circuit_board, crops, plastic | 1 EU/t |
-| 貨物輸出節點 | `cargo_output_node` | 將輸入物品推送至相鄰原版容器（箱子/桶/漏斗） | routing_chip, servo_motor, storage_crate → machine_component, steel_plate, circuit_board, crops, plastic | 2 EU/t |
-| 鑄造台 | `casting_table` | 熔融金屬 + 模具 → 零件 | molten_iron, molten_copper, molten_gold, molten_steel, molten_bronze → iron_plate, copper_plate, steel_plate, bronze_plate, iron_gear, steel_gear, copper_wire, gold_wire, iron_rod, steel_rod, iron_pipe, steel_pipe | 10 EU/t |
-| 離心機 | `centrifuge` | 高速旋轉 | purified_shard → ion_dust, magnetic_ring, centrifuge_rotor | 18 EU/t |
-| 化學反應器 | `chemical_reactor` | 化學煙霧 | bio_resin, coal_dust → polymer_resin, synthetic_fiber, precision_nozzle | 16 EU/t |
-| 冷卻液循環器 | `coolant_circulator` | 消耗冷卻液，冷卻相鄰機器 -15 熱/秒 | coolant_cell → — | 15 EU/t |
-| 低溫蒸餾器 | `cryo_distiller` | 低溫相變蒸餾 | coolant_mix, refined_oil, hydro_gel, coolant_cell, grown_crystal → coolant_canister, cryo_gel, cryo_core | 18 EU/t |
-| 低溫冷卻塔 | `cryo_tower` | 多方塊，範圍冷卻 3×3 區域 -20 熱/秒 | coolant_cell → — | 20 EU/t |
-| 晶體培育艙 | `crystal_growth_chamber` | 晶簇成長 | crystal_seed, coolant_mix → grown_crystal | 19 EU/t |
-| 資料封存庫 | `data_archive` | 壓縮封存資料 | data_core, gravitic_bearing → archive_plate | 20 EU/t |
-| 柴油發電機 | `diesel_generator` | 雜酚油驅動發電 | creosote_oil → — | 發電 24 |
-| 無人機艙 | `drone_bay` | 飛行裝配 | drone_core, machine_casing → drone_shell, drone_frame | 18 EU/t |
-| 電動生質實驗室 | `electric_bio_lab` | 自動培養循環 | crops, wood_dust → bio_resin, bio_fiber | 24 EU/t |
-| 電動離心機 | `electric_centrifuge` | 超高速離心 | purified_shard → ion_dust, magnetic_ring, centrifuge_rotor | 38 EU/t |
-| 電動化學反應器 | `electric_chemical_reactor` | 自動化學反應 | bio_resin, coal_dust → polymer_resin, synthetic_fiber, precision_nozzle | 34 EU/t |
-| 電動壓縮機 | `electric_compressor` | 電動壓縮衝程 | iron_ingot, iron_plate, tin_ingot → iron_plate, steel_plate, compressed_iron_bundle, dense_carbon_block, tin_plate | 18 EU/t |
-| 電動粉碎機 | `electric_crusher` | 高速旋轉渦輪 | iron_ore, copper_ore → iron_dust, copper_dust | 12 EU/t |
-| 電動洗礦機 | `electric_ore_washer` | 高壓水流翻騰 | iron_dust → ore_slurry | 16 EU/t |
-| 電動淨化器 | `electric_purifier` | 加壓淨化脈衝 | ore_slurry → purified_shard, coolant_cell, purifier_membrane | 22 EU/t |
-| 電動篩礦機 | `electric_sifter` | 自動篩礦循環 | gravel, soul_sand → iron_dust, copper_dust, tin_dust, zinc_dust, sifted_ore, silicon, lead_dust | 10 EU/t |
-| 電爐 | `electric_smelter` | 高溫電弧冶煉 | tungsten_dust, chromium_dust, cobalt_dust → tungsten_ingot, chromium_ingot, cobalt_ingot | 30 EU/t |
-| 電動拉線機 | `electric_wire_mill` | 自動高速牽引 | copper_ingot, steel_plate, tin_ingot → copper_wire, steel_wire, wiring_bundle, tin_wire | 20 EU/t |
-| 電解分離機 | `electrolytic_separator` | 電解分離元素 | water_bucket, redstone → hydrogen, oxygen, selenium_dust, silicon | 25 EU/t |
-| 力場鍛造台 | `field_forge` | 藍色場域波動 | field_emitter, phase_plate → field_plate | 22 EU/t |
-| 過濾路由器 | `filter_router` | 用第 1 格樣本物品做精準過濾匯流 | filter_mesh_core, routing_chip, purifier_membrane → machine_component, steel_plate, circuit_board, crops, plastic | — |
+| 進階製造機 | `advanced_assembler` | 脈衝光場 | 機械零件, 高級電路 → 奈米塗層 | 24 EU/秒 |
+| 紫水晶培養機 | `amethyst_grower` | 消耗冷卻混合液培養紫水晶碎片 | 冷卻混合液 → 紫水晶碎片 | 16 EU/秒 |
+| 安卓艙 | `android_bay` | 程序裝配 | 安卓核心, 機械外殼 → 安卓外殼, 安卓框架, 安卓記憶矩陣 | 20 EU/秒 |
+| 安卓燃料介面 | `android_fuel_interface` | 燃料補給 | 發射節點, 壓力導管 → — | 4 EU/秒 |
+| 安卓物品介面 | `android_item_interface` | 物資回收 | 訊號中繼器, 機械外殼 → — | 4 EU/秒 |
+| 安卓工作站 | `android_station` | 部署與巡檢 | 安卓框架, 安卓記憶矩陣 → 安卓物品介面, 安卓燃料介面 | 12 EU/秒 |
+| 生質合成槽 | `biosynth_vat` | 生質批次培養 | 基因樣板, 生質觸媒, 大豆莢 → 合成肉塊, 蛋白口糧包 | 16 EU/秒 |
+| 高爐 | `blast_furnace` | 3×3×3 磚塊結構，需要溫度 400+ 運作 | 鐵錠, coke, 碳粉 → 鋼錠, 鎢錠, 碳化鎢粉 | 40 EU/秒 |
+| 量子倉儲抽屜 | `cargo_drawer` | 單一類型大容量倉儲；容量 50,000，可配合貨物網路自動進出 | 儲物箱, 路由晶片 → 儲物箱 | — |
+| 貨物抽取節點 | `cargo_input_node` | 從相鄰原版容器（箱子/桶/漏斗）抽取物品送入產線 | 路由晶片, 伺服馬達, 儲物箱 → 機械零件, 鋼板, 電路板, crops, plastic | 2 EU/秒 |
+| 貨物管理站 | `cargo_manager` | 無線掃描範圍內同主人機器並抽取輸出物品 | 總線機架, 路由晶片, 控制單元, 訊號中繼器 → 機械零件, 鋼板, 電路板, crops, plastic | 5 EU/秒 |
+| 貨物驅動器 | `cargo_motor` | 高速物流中繼站，每次傳輸最多 8 件物品 | 總線機架, 伺服馬達, 路由晶片 → 機械零件, 鋼板, 電路板, crops, plastic | 1 EU/秒 |
+| 貨物輸出節點 | `cargo_output_node` | 將輸入物品推送至相鄰原版容器（箱子/桶/漏斗） | 路由晶片, 伺服馬達, 儲物箱 → 機械零件, 鋼板, 電路板, crops, plastic | 2 EU/秒 |
+| 鑄造台 | `casting_table` | 熔融金屬 + 模具 → 零件 | 熔融鐵, 熔融銅, 熔融金, 熔融鋼, 熔融青銅 → 鐵板, 銅板, 鋼板, 青銅板, 鐵齒輪, 鋼齒輪, 銅線, 金線, 鐵棒, 鋼棒, 鐵管, 鋼管 | 10 EU/秒 |
+| 離心機 | `centrifuge` | 高速旋轉 | 淨化碎晶 → 離子粉, 磁環, 離心轉子 | 18 EU/秒 |
+| 化學反應器 | `chemical_reactor` | 化學煙霧 | 生質樹脂, 煤粉 → 聚合樹脂, 合成纖維, 精密噴嘴 | 16 EU/秒 |
+| 冷卻液循環器 | `coolant_circulator` | 消耗冷卻液，冷卻相鄰機器 -15 熱/秒 | 冷卻電池 → — | 15 EU/秒 |
+| 低溫蒸餾器 | `cryo_distiller` | 低溫相變蒸餾 | 冷卻混合液, 精煉油, 水凝膠, 冷卻電池, 培育晶體 → 冷卻罐, 低溫凝膠, 低溫核心 | 18 EU/秒 |
+| 低溫冷卻塔 | `cryo_tower` | 多方塊，範圍冷卻 3×3 區域 -20 熱/秒 | 冷卻電池 → — | 20 EU/秒 |
+| 晶體培育艙 | `crystal_growth_chamber` | 晶簇成長 | 晶種, 冷卻混合液 → 培育晶體 | 19 EU/秒 |
+| 資料封存庫 | `data_archive` | 壓縮封存資料 | 資料核心, 重力軸承 → 封存板 | 20 EU/秒 |
+| 柴油發電機 | `diesel_generator` | 雜酚油驅動發電 | 雜酚油 → — | 發電 24 |
+| 無人機艙 | `drone_bay` | 飛行裝配 | 無人機核心, 機械外殼 → 無人機外殼, 無人機框架 | 18 EU/秒 |
+| 電動生質實驗室 | `electric_bio_lab` | 自動培養循環 | crops, 木屑 → 生質樹脂, 生質纖維 | 24 EU/秒 |
+| 電動離心機 | `electric_centrifuge` | 超高速離心 | 淨化碎晶 → 離子粉, 磁環, 離心轉子 | 38 EU/秒 |
+| 電動化學反應器 | `electric_chemical_reactor` | 自動化學反應 | 生質樹脂, 煤粉 → 聚合樹脂, 合成纖維, 精密噴嘴 | 34 EU/秒 |
+| 電動壓縮機 | `electric_compressor` | 電動壓縮衝程 | 鐵錠, 鐵板, 錫錠 → 鐵板, 鋼板, 壓實鐵胚, 高密碳塊, 錫板 | 18 EU/秒 |
+| 電動粉碎機 | `electric_crusher` | 高速旋轉渦輪 | 鐵礦, 銅礦 → 鐵粉, 銅粉 | 12 EU/秒 |
+| 電動洗礦機 | `electric_ore_washer` | 高壓水流翻騰 | 鐵粉 → 礦漿 | 16 EU/秒 |
+| 電動淨化器 | `electric_purifier` | 加壓淨化脈衝 | 礦漿 → 淨化碎晶, 冷卻電池, 淨化膜片 | 22 EU/秒 |
+| 電動篩礦機 | `electric_sifter` | 自動篩礦循環 | gravel, 靈魂砂 → 鐵粉, 銅粉, 錫粉, 鋅粉, 篩出礦砂, silicon, 鉛粉 | 10 EU/秒 |
+| 電爐 | `electric_smelter` | 高溫電弧冶煉 | 鎢粉, 鉻粉, 鈷粉 → 鎢錠, 鉻錠, 鈷錠 | 30 EU/秒 |
+| 電動拉線機 | `electric_wire_mill` | 自動高速牽引 | 銅錠, 鋼板, 錫錠 → 銅線, 鋼線, 工業線束, 錫線 | 20 EU/秒 |
+| 電解分離機 | `electrolytic_separator` | 電解分離元素 | 水桶, redstone → hydrogen, oxygen, 硒粉, silicon | 25 EU/秒 |
+| 力場鍛造台 | `field_forge` | 藍色場域波動 | 力場發射器, 相位板 → 力場板 | 22 EU/秒 |
+| 過濾路由器 | `filter_router` | 用第 1 格樣本物品做精準過濾匯流 | 過濾網核心, 路由晶片, 淨化膜片 → 機械零件, 鋼板, 電路板, crops, plastic | — |
 | 燃氣渦輪 | `gas_turbine` | 氫燃料高功率發電 | hydrogen → — | 發電 50 |
-| 基因切片台 | `gene_splicer` | 基因樣板切片 | bio_resin, fertilizer_mix, crops, etched_circuit, synthetic_fiber, steel_plate, precision_nozzle → bio_catalyst, gene_template, neural_resin, splicer_blade | 20 EU/t |
-| 地質抽取機 | `geo_extractor` | 持續抽取腳下區塊的地質資源，需先用地質掃描儀勘探 | drill_head, precision_frame → crude_oil, rock_salt, sulfur_dust, uranium_ore_raw, copper_dust | 18 EU/t |
-| 地質掃描器 | `geo_scanner` | 利用探針與定位標記掃描區塊地質資料 | geo_scanner_probe, gps_marker → data_matrix | 12 EU/t |
-| 地熱發電機 | `geothermal_generator` | 岩漿桶穩定發電 | lava_bucket → — | 發電 16 |
-| GPS 控制塔 | `gps_control_tower` | 將定位標記與訊號中繼器整合為衛星模組 | gps_marker, signal_relay → satellite_module | 14 EU/t |
-| GPS 網路節點 | `gps_network_node` | 利用衛星模組與資料核心合成傳送矩陣 | satellite_module, data_core → teleport_matrix | 20 EU/t |
-| GPS 發射器 | `gps_transmitter` | 消耗定位電路產生定位標記 | gps_circuit → gps_marker | 8 EU/t |
-| 工業總線 | `industrial_bus` | 高吞吐量遠距物流骨幹與中繼站 | bus_frame, routing_chip, storage_crate, centrifuge_rotor → machine_component, steel_plate, circuit_board, crops, plastic | — |
-| 工業離心機 | `industrial_centrifuge` | 高速離心分離 | purified_iron, uranium_ore_dust → iron_dust, enriched_uranium, chromium_dust, cobalt_dust | 20 EU/t |
-| 工業冶煉爐 | `industrial_smeltery` | 十字形多方塊，熔融合金爐，溫度 600+ 運作 | steel_ingot, damascus_steel_ingot, tungsten_ingot → damascus_steel_ingot, hardened_alloy_ingot, reinforced_alloy_ingot, conductive_alloy_ingot, cobalt_chrome_ingot, molten_iron, molten_steel, molten_copper, molten_gold, molten_bronze | 60 EU/t |
-| 雷射雕刻機 | `laser_engraver` | 雷射掃描 | silicon, optic_lens → laser_lens, etched_circuit, control_unit | 18 EU/t |
-| 物質編譯器 | `matter_compiler` | 物質編譯脈衝 | quantum_fluid, grown_crystal → matter_blob, singularity_fragment | 26 EU/t |
-| 生物收集器 | `mob_collector` | 收集附近生物並轉化為掉落物 | net_launcher, field_processor → leather, beef, white_wool, mutton, porkchop, chicken, feather, rotten_flesh, bone, gunpowder, string, spider_eye, slime_ball, blaze_rod, magma_cream, ghast_tear, coal, gold_nugget | 14 EU/t |
-| 核反應堆 | `nuclear_reactor` | 反應堆冷卻液為【永久催化劑】，放入一次後永不消耗；每根鈾燃料棒可運轉 40 秒，穩定輸出 200 EU/秒（加速模組額外 +60 EU），循環結束自動輸出乏燃料棒（可於物質編譯器回收為新燃料棒）。無燃料時完全不發電。 | uranium_rod, reactor_coolant → spent_fuel_rod | 發電 |
-| 軌道觀測台 | `observatory` | 軌道資料測繪 | observatory_lens, data_matrix, magnetic_ring, graviton_lens, vacuum_tube, control_unit → star_chart, gravitic_bearing, vacuum_module, data_core | 22 EU/t |
-| 光子織構機 | `photon_weaver` | 光束編織成形 | laser_lens, starlight_plate, reinforced_glass, optic_lens → photon_shard, photon_plate, observatory_lens | 24 EU/t |
-| 加壓室 | `pressure_chamber` | 3×3×3 鐵塊結構，超高壓合成 | carbon_dust, carbide_dust → synthetic_diamond, carbide_ingot | 50 EU/t |
+| 基因切片台 | `gene_splicer` | 基因樣板切片 | 生質樹脂, 肥料混合物, crops, 蝕刻電路, 合成纖維, 鋼板, 精密噴嘴 → 生質觸媒, 基因樣板, 神經樹脂, 切片刀組 | 20 EU/秒 |
+| 地質抽取機 | `geo_extractor` | 持續抽取腳下區塊的地質資源，需先用地質掃描儀勘探 | 鑽頭組, 精密框架 → 原油, 岩鹽, 硫磺粉, 鈾礦原礦, 銅粉 | 18 EU/秒 |
+| 地質掃描器 | `geo_scanner` | 利用探針與定位標記掃描區塊地質資料 | 地質掃描探針, 定位標記 → 數據矩陣 | 12 EU/秒 |
+| 地熱發電機 | `geothermal_generator` | 岩漿桶穩定發電 | 熔岩桶 → — | 發電 16 |
+| GPS 控制塔 | `gps_control_tower` | 將定位標記與訊號中繼器整合為衛星模組 | 定位標記, 訊號中繼器 → 衛星模組 | 14 EU/秒 |
+| GPS 網路節點 | `gps_network_node` | 利用衛星模組與資料核心合成傳送矩陣 | 衛星模組, 資料核心 → 傳送矩陣 | 20 EU/秒 |
+| GPS 發射器 | `gps_transmitter` | 消耗定位電路產生定位標記 | 定位電路 → 定位標記 | 8 EU/秒 |
+| 工業總線 | `industrial_bus` | 高吞吐量遠距物流骨幹與中繼站 | 總線機架, 路由晶片, 儲物箱, 離心轉子 → 機械零件, 鋼板, 電路板, crops, plastic | — |
+| 工業離心機 | `industrial_centrifuge` | 高速離心分離 | 鐵粉, 鈾礦粉 → 鐵粉, 濃縮鈾, 鉻粉, 鈷粉 | 20 EU/秒 |
+| 工業冶煉爐 | `industrial_smeltery` | 十字形多方塊，熔融合金爐，溫度 600+ 運作 | 鋼錠, 大馬士革鋼錠, 鎢錠 → 大馬士革鋼錠, 硬化合金錠, 強化合金錠, 導電合金錠, 鈷鉻合金錠, 熔融鐵, 熔融鋼, 熔融銅, 熔融金, 熔融青銅 | 60 EU/秒 |
+| 雷射雕刻機 | `laser_engraver` | 雷射掃描 | silicon, 光學鏡片 → 雷射鏡, 蝕刻電路, 控制單元 | 18 EU/秒 |
+| 物質編譯器 | `matter_compiler` | 物質編譯脈衝 | 量子流體, 培育晶體 → 物質團, 奇點碎片 | 26 EU/秒 |
+| 生物收集器 | `mob_collector` | 收集附近生物並轉化為掉落物 | 捕網發射器, 戶外處理器 → leather, beef, 白色羊毛, mutton, porkchop, chicken, feather, 腐肉, bone, gunpowder, string, 蜘蛛眼, 史萊姆球, 烈焰桿, 岩漿球, 幽靈之淚, coal, 金粒 | 14 EU/秒 |
+| 核反應堆 | `nuclear_reactor` | 反應堆冷卻液為【永久催化劑】，放入一次後永不消耗；每根鈾燃料棒可運轉 40 秒，穩定輸出 200 EU/秒（加速模組額外 +60 EU），循環結束自動輸出乏燃料棒（可於物質編譯器回收為新燃料棒）。無燃料時完全不發電。 | 鈾燃料棒, 反應堆冷卻液 → 乏燃料棒 | 發電 |
+| 軌道觀測台 | `observatory` | 軌道資料測繪 | 觀測透鏡, 數據矩陣, 磁環, 重力子透鏡, 真空管, 控制單元 → 星圖, 重力軸承, 真空模組, 資料核心 | 22 EU/秒 |
+| 光子織構機 | `photon_weaver` | 光束編織成形 | 雷射鏡, 星光板, 強化玻璃, 光學鏡片 → 光子碎晶, 光子板, 觀測透鏡 | 24 EU/秒 |
+| 加壓室 | `pressure_chamber` | 3×3×3 鐵塊結構，超高壓合成 | 碳粉, 碳化鎢粉 → 合成鑽石, 碳化鎢錠 | 50 EU/秒 |
 | 優先路由器 | `priority_router` | 依過濾欄優先級分流物品（匹配→主路，不匹配→備路） | — | — |
-| 量子處理器 | `quantum_processor` | 閃爍光束 / 能量流 | advanced_circuit, nano_coating → quantum_chip | 20 EU/t |
-| 採礦鑽機 | `quarry_drill` | 區塊級向下抽取礦脈 | — | 24 EU/t |
-| 採礦鑽機二型 | `quarry_drill_mk2` | 區塊級高速抽取礦脈 | — | 48 EU/t |
+| 量子處理器 | `quantum_processor` | 閃爍光束 / 能量流 | 高級電路, 奈米塗層 → 量子晶片 | 20 EU/秒 |
+| 採礦鑽機 | `quarry_drill` | 區塊級向下抽取礦脈 | — | 24 EU/秒 |
+| 採礦鑽機二型 | `quarry_drill_mk2` | 區塊級高速抽取礦脈 | — | 48 EU/秒 |
 | 輪流分配器 | `round_robin` | 平均分配物品到多台下游機器 | — | — |
-| 信號比較器 | `signal_comparator` | 比較或相減兩路信號（A≥B→A / A-B） | signal_relay → signal_relay | 1 EU/t |
-| 信號計數器 | `signal_counter` | 計算輸入信號上升沿次數（輸出 = 計數 mod 16） | signal_relay → signal_relay | 1 EU/t |
-| 信號計時器 | `signal_timer` | 週期性脈衝信號（可設定 1-60 秒間隔） | signal_relay → signal_relay | 1 EU/t |
-| 分流節點 | `splitter_node` | 將同一輸出平均拆往多條產線 | splitter_core, routing_chip, servo_motor → machine_component, steel_plate, circuit_board, crops, plastic | — |
-| 風暴渦輪機 | `storm_turbine` | 暴雨與雷暴時會大幅增加發電量（晴天 2 EU/刻，風暴 8 EU/刻） | storm_rotor, weather_sensor → energy_cell | 發電 2 |
-| 傳送面板 | `teleport_pad` | 消耗背包中的原版末影珍珠與能量執行空間跳躍 | teleport_matrix → — | 28 EU/t |
-| 水冷散熱器 | `water_cooler` | 消耗水桶，冷卻相鄰機器 -8 熱/秒 | water_bucket → — | 5 EU/t |
+| 信號比較器 | `signal_comparator` | 比較或相減兩路信號（A≥B→A / A-B） | 訊號中繼器 → 訊號中繼器 | 1 EU/秒 |
+| 信號計數器 | `signal_counter` | 計算輸入信號上升沿次數（輸出 = 計數 mod 16） | 訊號中繼器 → 訊號中繼器 | 1 EU/秒 |
+| 信號計時器 | `signal_timer` | 週期性脈衝信號（可設定 1-60 秒間隔） | 訊號中繼器 → 訊號中繼器 | 1 EU/秒 |
+| 分流節點 | `splitter_node` | 將同一輸出平均拆往多條產線 | 分流核心, 路由晶片, 伺服馬達 → 機械零件, 鋼板, 電路板, crops, plastic | — |
+| 風暴渦輪機 | `storm_turbine` | 暴雨與雷暴時會大幅增加發電量（晴天 2 EU/刻，風暴 8 EU/刻） | 風暴轉子, 天候感測器 → 能源電池 | 發電 2 |
+| 傳送面板 | `teleport_pad` | 消耗背包中的原版末影珍珠與能量執行空間跳躍 | 傳送矩陣 → — | 28 EU/秒 |
+| 水冷散熱器 | `water_cooler` | 消耗水桶，冷卻相鄰機器 -8 熱/秒 | 水桶 → — | 5 EU/秒 |
 
-## 四階（TIER4 終局，32 台）
+## 四階（終局，32 台）
 
 | 中文名 | 英文 ID | 說明 | 輸入 → 輸出 | 耗能 |
 |---|---|---|---|---|
-| 錨定鍛造台 | `anchor_forge` | 空間錨定鍛造 | singularity_casing, void_beacon_core, warp_coil, graviton_core → dimension_anchor, cluster_manifold | 46 EU/t |
-| 反物質合成器 | `antimatter_synthesizer` | 反相粒子聚合 | dark_matter_dust, singularity_mesh → antimatter_cluster, antimatter_cell | 34 EU/t |
-| 巔峰鍛成儀 | `apex_forge` | 巔峰核心壓縮 | cosmic_matrix, archive_core, continuum_shell, relic_data → omega_matrix, apex_core, omega_archive | 52 EU/t |
-| 天穹裝配機 | `celestial_assembler` | 天穹構裝 | stellar_glass, orbit_frame → cosmic_matrix, cosmic_panel | 34 EU/t |
-| 時序引擎 | `chrono_engine` | 時流脈動 | orbit_processor, void_crystal → chrono_thread, chrono_core | 38 EU/t |
-| 連續體車床 | `continuum_lathe` | 時空精密切削 | chrono_core, reactor_lattice, vacuum_glass, harmonic_crystal, photon_plate → chrono_lattice, continuum_shell, aurora_plate | 40 EU/t |
-| 暗物質織機 | `dark_matter_loom` | 暗紋編織 | dark_matter_dust, quantum_fabric → dark_matter_sheet | 26 EU/t |
-| 熵穩定艙 | `entropy_chamber` | 熵場鎖定 | chrono_core, antimatter_cell → entropy_plate, entropy_core | 40 EU/t |
-| 事件視界鍛台 | `event_horizon_smith` | 視界鍛壓 | singularity_core, entropy_plate, dark_matter_sheet, neutronium_plate → event_horizon_plate, singularity_casing | 44 EU/t |
-| 聚變反應爐 | `fusion_reactor` | 聚變環流 | fusion_mesh, stability_core → fusion_core | 28 EU/t |
-| 重力穩定器 | `graviton_stabilizer` | 重力場收束 | magnetic_ring, grown_crystal → graviton_lens, graviton_core | 24 EU/t |
-| 奈米鑄造廠 | `nanite_foundry` | 奈米聚合霧化 | synthetic_fiber, quantum_fluid → nanite_slurry, nanite_cluster | 24 EU/t |
-| 終極製核儀 | `omega_fabricator` | 終局核心鍛成 | cosmic_matrix, entropy_core → omega_core | 48 EU/t |
-| 軌道列印機 | `orbital_printer` | 真空列印 | stellar_alloy, graviton_lens → orbit_frame, orbit_processor | 28 EU/t |
-| 軌道中繼站 | `orbital_relay_station` | 利用聚變能量與軌道中繼單元批量生產衛星模組 | orbital_relay_unit, fusion_core → satellite_module | 32 EU/t |
-| 異界傳送門 | `otherworld_portal` | 手持魔力隕石右鍵啟動，消耗 1 顆隕石將玩家投送至異世界；探索結束後由撤離點自動送回。 | mana_meteorite → — | — |
-| 行星鍛造台 | `planetary_forge` | 生產模組化行星防護裝與高階探索骨架 | xeno_alloy, seal_fabric, exo_frame, radiation_mesh, thermal_lining, pressure_membrane → anti_radiation_chestplate, thermal_chestplate, pressure_chestplate, frontier_chestplate | 30 EU/t |
-| 行星星門 | `planetary_gate` | 平時維持 12 EU 吸能，啟動躍遷時額外消耗 1200 EU 將玩家投送至目標星球 | survey_data, gravitic_bearing, quantum_frame, data_core → survey_data | 12 EU/t |
-| 行星採集機 | `planetary_harvester` | 自動回收行星地表樣本與異星生質 | harvest_unit, sensor_array, servo_bundle, xeno_alloy → irradiated_shard, cryonite_crystal, voidglass_fragment, solarite_shard, stormglass_shard | 20 EU/t |
-| 等離子精煉爐 | `plasma_refiner` | 等離子穩定化 | ion_dust, refined_oil, titanium_alloy, alloy_frame → plasma_dust, plasma_ingot, reactor_lattice | 28 EU/t |
-| 採礦鑽機三型 | `quarry_drill_mk3` | 區塊級終局抽礦平台 | — | 96 EU/t |
-| 遺物解析儀 | `relic_analyzer` | 解析異星遺物並抽出古訊號片段 | survey_data, planetary_relic, cryon_relic, nyx_relic → ancient_signal | 26 EU/t |
-| 遺產掃描儀 | `relic_scanner` | 遺跡資料解析 | star_chart, void_beacon_core, data_core, archive_plate → relic_data, archive_core | 30 EU/t |
-| 奇點壓縮台 | `singularity_press` | 奇點級壓縮 | dark_matter_sheet, neutronium_ingot → singularity_mesh, singularity_core | 32 EU/t |
-| 星鋼鑄造廠 | `starsteel_foundry` | 星鋼熔鑄 | stellar_alloy, neutronium_ingot, orbit_frame → starsteel_ingot, starsteel_frame | 38 EU/t |
-| 星核熔鍛爐 | `stellar_forge` | 星核熔流 | antimatter_cluster, neutronium_plate → stellar_alloy, stellar_glass | 36 EU/t |
-| 行星測繪信標 | `survey_beacon` | 將觀測資料轉成可用的星球測繪樣本 | survey_chip, star_chart, data_core → survey_data | 24 EU/t |
-| 真空工藝艙 | `vacuum_chamber` | 真空穩定製程 | stellar_glass, void_crystal, graviton_lens, quantum_fabric, dark_matter_sheet → vacuum_glass, harmonic_crystal, celestial_lens, nebula_fiber | 34 EU/t |
-| 虛空信標 | `void_beacon` | 虛空穩定場 | void_shard, graviton_core → void_crystal, void_beacon_core | 22 EU/t |
-| 虛空抽取器 | `void_extractor` | 虛空脈動抽取 | quantum_fluid, grown_crystal → void_shard, dark_matter_dust | 30 EU/t |
-| 曲率裝配機 | `warp_assembler` | 曲率場裝配 | antimatter_cell, chrono_thread, magnetic_ring, orbit_processor, celestial_lens → warp_cell, warp_coil, astral_circuit | 42 EU/t |
-| 異星精煉槽 | `xeno_refinery` | 將地表樣本、戰鬥樣本與遺跡資料精煉成防護模組與異星合金 | ancient_signal, irradiated_shard, cryonite_crystal, voidglass_fragment, aurelia_parasite_gland, cryon_ice_heart, nyx_phase_tissue → xeno_alloy, radiation_mesh, thermal_lining, pressure_membrane, flare_shielding, storm_baffle | 28 EU/t |
+| 錨定鍛造台 | `anchor_forge` | 空間錨定鍛造 | 奇點外殼, 虛空信標核心, 曲率線圈, 重力子核心 → 維度錨, 叢集匯流核心 | 46 EU/秒 |
+| 反物質合成器 | `antimatter_synthesizer` | 反相粒子聚合 | 暗物質粉, 奇點網格 → 反物質團簇, 反物質電池 | 34 EU/秒 |
+| 巔峰鍛成儀 | `apex_forge` | 巔峰核心壓縮 | 宇宙矩陣, 封存核心, 連續體外殼, 遺產資料 → 終極矩陣, 巔峰核心, 終極檔案庫 | 52 EU/秒 |
+| 天穹裝配機 | `celestial_assembler` | 天穹構裝 | 星輝玻璃, 軌道框架 → 宇宙矩陣, 宇宙面板 | 34 EU/秒 |
+| 時序引擎 | `chrono_engine` | 時流脈動 | 軌道處理器, 虛空晶體 → 時序線束, 時序核心 | 38 EU/秒 |
+| 連續體車床 | `continuum_lathe` | 時空精密切削 | 時序核心, 反應爐格架, 真空玻璃, 諧振晶體, 光子板 → 時序格架, 連續體外殼, 極光板 | 40 EU/秒 |
+| 暗物質織機 | `dark_matter_loom` | 暗紋編織 | 暗物質粉, 量子織布 → 暗物質薄片 | 26 EU/秒 |
+| 熵穩定艙 | `entropy_chamber` | 熵場鎖定 | 時序核心, 反物質電池 → 熵穩板, 熵穩核心 | 40 EU/秒 |
+| 事件視界鍛台 | `event_horizon_smith` | 視界鍛壓 | 奇點核心, 熵穩板, 暗物質薄片, 中子合金板 → 事件視界板, 奇點外殼 | 44 EU/秒 |
+| 聚變反應爐 | `fusion_reactor` | 聚變環流 | 聚變網, 穩定核心 → 聚變核心 | 28 EU/秒 |
+| 重力穩定器 | `graviton_stabilizer` | 重力場收束 | 磁環, 培育晶體 → 重力子透鏡, 重力子核心 | 24 EU/秒 |
+| 奈米鑄造廠 | `nanite_foundry` | 奈米聚合霧化 | 合成纖維, 量子流體 → 奈米漿液, 奈米簇團 | 24 EU/秒 |
+| 終極製核儀 | `omega_fabricator` | 終局核心鍛成 | 宇宙矩陣, 熵穩核心 → 終極核心 | 48 EU/秒 |
+| 軌道列印機 | `orbital_printer` | 真空列印 | 星核合金, 重力子透鏡 → 軌道框架, 軌道處理器 | 28 EU/秒 |
+| 軌道中繼站 | `orbital_relay_station` | 利用聚變能量與軌道中繼單元批量生產衛星模組 | 軌道中繼單元, 聚變核心 → 衛星模組 | 32 EU/秒 |
+| 異界傳送門 | `otherworld_portal` | 手持魔力隕石右鍵啟動，消耗 1 顆隕石將玩家投送至異世界；探索結束後由撤離點自動送回。 | 魔力隕石 → — | — |
+| 行星鍛造台 | `planetary_forge` | 生產模組化行星防護裝與高階探索骨架 | 異星合金, 氣密織層, 外骨骼框架, 輻射網層, 低溫內襯, 壓差膜層 → 抗輻射胸甲, 抗寒胸甲, 抗壓胸甲, 前線探勘胸甲 | 30 EU/秒 |
+| 行星星門 | `planetary_gate` | 平時維持 12 EU 吸能，啟動躍遷時額外消耗 1200 EU 將玩家投送至目標星球 | 行星測繪資料, 重力軸承, 量子框架, 資料核心 → 行星測繪資料 | 12 EU/秒 |
+| 行星採集機 | `planetary_harvester` | 自動回收行星地表樣本與異星生質 | 收割單元, 感測陣列, 伺服模組束, 異星合金 → 輻照碎晶, 霜核晶簇, 虛璃碎片, 日耀碎晶, 風暴玻片 | 20 EU/秒 |
+| 等離子精煉爐 | `plasma_refiner` | 等離子穩定化 | 離子粉, 精煉油, 鈦合金, 合金框架 → 等離子粉, 等離子錠, 反應爐格架 | 28 EU/秒 |
+| 採礦鑽機三型 | `quarry_drill_mk3` | 區塊級終局抽礦平台 | — | 96 EU/秒 |
+| 遺物解析儀 | `relic_analyzer` | 解析異星遺物並抽出古訊號片段 | 行星測繪資料, 星核遺物, 霜境遺物, 倪克斯遺核 → 古訊號片段 | 26 EU/秒 |
+| 遺產掃描儀 | `relic_scanner` | 遺跡資料解析 | 星圖, 虛空信標核心, 資料核心, 封存板 → 遺產資料, 封存核心 | 30 EU/秒 |
+| 奇點壓縮台 | `singularity_press` | 奇點級壓縮 | 暗物質薄片, 中子合金錠 → 奇點網格, 奇點核心 | 32 EU/秒 |
+| 星鋼鑄造廠 | `starsteel_foundry` | 星鋼熔鑄 | 星核合金, 中子合金錠, 軌道框架 → 星鋼錠, 星鋼框架 | 38 EU/秒 |
+| 星核熔鍛爐 | `stellar_forge` | 星核熔流 | 反物質團簇, 中子合金板 → 星核合金, 星輝玻璃 | 36 EU/秒 |
+| 行星測繪信標 | `survey_beacon` | 將觀測資料轉成可用的星球測繪樣本 | 星圖測繪晶片, 星圖, 資料核心 → 行星測繪資料 | 24 EU/秒 |
+| 真空工藝艙 | `vacuum_chamber` | 真空穩定製程 | 星輝玻璃, 虛空晶體, 重力子透鏡, 量子織布, 暗物質薄片 → 真空玻璃, 諧振晶體, 天穹透鏡, 星雲纖維 | 34 EU/秒 |
+| 虛空信標 | `void_beacon` | 虛空穩定場 | 虛空碎片, 重力子核心 → 虛空晶體, 虛空信標核心 | 22 EU/秒 |
+| 虛空抽取器 | `void_extractor` | 虛空脈動抽取 | 量子流體, 培育晶體 → 虛空碎片, 暗物質粉 | 30 EU/秒 |
+| 曲率裝配機 | `warp_assembler` | 曲率場裝配 | 反物質電池, 時序線束, 磁環, 軌道處理器, 天穹透鏡 → 曲率電池, 曲率線圈, 星界電路 | 42 EU/秒 |
+| 異星精煉槽 | `xeno_refinery` | 將地表樣本、戰鬥樣本與遺跡資料精煉成防護模組與異星合金 | 古訊號片段, 輻照碎晶, 霜核晶簇, 虛璃碎片, 輻塵腺體, 冰脈核心, 相位膜組織 → 異星合金, 輻射網層, 低溫內襯, 壓差膜層, 日灼屏蔽層, 風暴偏轉層 | 28 EU/秒 |
