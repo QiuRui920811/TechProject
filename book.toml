@@ -7,6 +7,13 @@ src = "docs/wiki"
 
 [build]
 build-dir = "book"
+# 關掉 mdBook 預設的 index preprocessor。
+# 它會把 README.md 改名成 index.html，但 SUMMARY 裡的連結不會跟著改寫 →
+# 13 個資料夾的總覽頁全部 404（線上線下都一樣）。
+# 另外 machines/ 和 items/ 底下同時有 README.md 和 index.md，
+# 轉換後會撞成同一個 index.html 互相覆蓋。
+# 本 wiki 沒有用到 {{#include}} 之類的指令，關掉預設 preprocessor 沒有副作用。
+use-default-preprocessors = false
 
 [output.html]
 default-theme = "navy"
