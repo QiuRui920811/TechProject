@@ -93,7 +93,7 @@ DNA 以 12 字元顯示，例如 `[Bb] [CC] [Dd] [FF] [SS] [Ww]`。
 | `DrDDDD` | 2 | 鵝卵石 |
 | `DDrDDD` | 4 | 泥土 |
 | `DDDrDD` | 8 | 燧石 |
-| `DDDDrD` | 16 | 沙子 |
+| `DDDDrD` | 16 | 沙 |
 | `DDDDDr` | 32 | 水桶 |
 
 ### Tier 2 — 2 個隱性位點（15 種）
@@ -114,7 +114,7 @@ DNA 以 12 字元顯示，例如 `[Bb] [CC] [Dd] [FF] [SS] [Ww]`。
 | `DrDDDr` | 34 | 冰 |
 | `DDrDDr` | 36 | 橡木原木 |
 | `DDDrDr` | 40 | 海帶 |
-| `DDDDrr` | 48 | 黏液球 |
+| `DDDDrr` | 48 | 史萊姆球 |
 
 ### Tier 3 — 3 個隱性位點（20 種）
 
@@ -129,7 +129,7 @@ DNA 以 12 字元顯示，例如 `[Bb] [CC] [Dd] [FF] [SS] [Ww]`。
 | `DrrDrD` | 22 | 銅粉 |
 | `rDDrrD` | 25 | 銅原礦 |
 | `DrDrrD` | 26 | 熔岩桶 |
-| `DDrrrD` | 28 | 紅石 |
+| `DDrrrD` | 28 | 紅石粉 |
 | `rrDDDr` | 35 | 青金石 |
 | `rDrDDr` | 37 | 金粒 |
 | `DrrDDr` | 38 | 紫水晶碎片 |
@@ -147,19 +147,19 @@ DNA 以 12 字元顯示，例如 `[Bb] [CC] [Dd] [FF] [SS] [Ww]`。
 |---|---|---|
 | `rrrrDD` | 15 | 黑石 |
 | `rrrDrD` | 23 | 靈魂土 |
-| `rrDrrD` | 27 | 烈焰棒 |
+| `rrDrrD` | 27 | 烈焰桿 |
 | `rDrrrD` | 29 | 幽靈之淚 |
 | `DrrrrD` | 30 | 黃色染料 |
 | `rrrDDr` | 39 | 蕈光體 |
 | `rrDrDr` | 43 | 地獄石英 |
 | `rDrrDr` | 45 | 玄武岩 |
-| `DrrrDr` | 46 | 哭泣黑曜石 |
+| `DrrrDr` | 46 | 哭泣的黑曜石 |
 | `rrDDrr` | 51 | 靈魂砂 |
 | `rDrDrr` | 53 | 終界珍珠 |
-| `DrrDrr` | 54 | 地獄疣 |
-| `rDDrrr` | 57 | 夜魅之膜 |
+| `DrrDrr` | 54 | 地獄疙瘩 |
+| `rDDrrr` | 57 | 夜魅皮膜 |
 | `DrDrrr` | 58 | 岩漿球 |
-| `DDrrrr` | 60 | 螢光粉 |
+| `DDrrrr` | 60 | 螢石粉 |
 
 ### Tier 5 — 5 個隱性位點（6 種）
 
@@ -167,8 +167,8 @@ DNA 以 12 字元顯示，例如 `[Bb] [CC] [Dd] [FF] [SS] [Ww]`。
 |---|---|---|
 | `rrrrrD` | 31 | 鑽石 |
 | `rrrrDr` | 47 | 終界石 |
-| `rrrDrr` | 55 | 海晶碎片 |
-| `rrDrrr` | 59 | 海晶砂粒 |
+| `rrrDrr` | 55 | 海磷晶體 |
+| `rrDrrr` | 59 | 海磷碎片 |
 | `rDrrrr` | 61 | 經驗瓶 |
 | `Drrrrr` | 62 | 綠寶石 |
 
@@ -177,8 +177,6 @@ DNA 以 12 字元顯示，例如 `[Bb] [CC] [Dd] [FF] [SS] [Ww]`。
 | 簡碼 | 編號 | 資源 |
 |---|---|---|
 | `rrrrrr` | 63 | 獄髓錠 |
-
----
 
 ## 物品
 
