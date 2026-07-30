@@ -103,6 +103,3 @@
 
 - [指令一覽](commands/README.md)
 
-# 🧩 插件教學
-
-- [副本插件教學](plugins/dungeon-plugin-guide.md)
