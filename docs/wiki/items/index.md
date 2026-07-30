@@ -1,6 +1,6 @@
 # 🔍 物品全索引
 
-> 由 content YAML 自動彙整的完整物品清單，共 **613** 種。每列：中文名 / 英文 ID / 階級 / 說明。
+> 由 content 設定檔 自動彙整的完整物品清單，共 **613** 種。每列：中文名 / 英文 ID / 階級 / 說明。
 > 分類細節見：[基礎材料](basic-materials.md)、[合金材料](alloy-materials.md)、[進階材料](advanced-materials.md)、[工業擴展](industrial-materials.md)、[終局材料](endgame-materials.md)、[魔法物品](magical-items.md)、[升級模組](upgrades.md)。
 
 ---

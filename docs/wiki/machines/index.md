@@ -29,7 +29,7 @@
 | 激發室 | `excitation_chamber` | 激發基因產出資源 | pocket_chicken → — | 4 EU/t |
 | 熔爐 | `furnace` | 火焰動畫 | iron_dust, copper_dust → iron_ingot, copper_ingot | 10 EU/t |
 | 基因定序器 | `genetic_sequencer` | 分析 DNA 序列 | pocket_chicken → pocket_chicken | 3 EU/t |
-| 散熱片 | `heat_sink` | 被動冷卻相鄰機器 -3 熱/tick | — | — |
+| 散熱片 | `heat_sink` | 被動冷卻相鄰機器 -3 熱/秒 | — | — |
 | 岩漿發電機 | `lava_generator` | 岩漿燃燒 | lava_bucket → energy_cell | 發電 5 |
 | 私人雞舍 | `private_coop` | 基因繁殖 | pocket_chicken, pocket_chicken → pocket_chicken | 2 EU/t |
 | 回收機 | `recycler` | 回收動畫 | wood_dust, paper, coal_dust → recycled_material, plastic, rust_filter | 3 EU/t |
@@ -99,9 +99,9 @@
 | 鑄造台 | `casting_table` | 熔融金屬 + 模具 → 零件 | molten_iron, molten_copper, molten_gold, molten_steel, molten_bronze → iron_plate, copper_plate, steel_plate, bronze_plate, iron_gear, steel_gear, copper_wire, gold_wire, iron_rod, steel_rod, iron_pipe, steel_pipe | 10 EU/t |
 | 離心機 | `centrifuge` | 高速旋轉 | purified_shard → ion_dust, magnetic_ring, centrifuge_rotor | 18 EU/t |
 | 化學反應器 | `chemical_reactor` | 化學煙霧 | bio_resin, coal_dust → polymer_resin, synthetic_fiber, precision_nozzle | 16 EU/t |
-| 冷卻液循環器 | `coolant_circulator` | 消耗冷卻液，冷卻相鄰機器 -15 熱/tick | coolant_cell → — | 15 EU/t |
+| 冷卻液循環器 | `coolant_circulator` | 消耗冷卻液，冷卻相鄰機器 -15 熱/秒 | coolant_cell → — | 15 EU/t |
 | 低溫蒸餾器 | `cryo_distiller` | 低溫相變蒸餾 | coolant_mix, refined_oil, hydro_gel, coolant_cell, grown_crystal → coolant_canister, cryo_gel, cryo_core | 18 EU/t |
-| 低溫冷卻塔 | `cryo_tower` | 多方塊，範圍冷卻 3×3 區域 -20 熱/tick | coolant_cell → — | 20 EU/t |
+| 低溫冷卻塔 | `cryo_tower` | 多方塊，範圍冷卻 3×3 區域 -20 熱/秒 | coolant_cell → — | 20 EU/t |
 | 晶體培育艙 | `crystal_growth_chamber` | 晶簇成長 | crystal_seed, coolant_mix → grown_crystal | 19 EU/t |
 | 資料封存庫 | `data_archive` | 壓縮封存資料 | data_core, gravitic_bearing → archive_plate | 20 EU/t |
 | 柴油發電機 | `diesel_generator` | 雜酚油驅動發電 | creosote_oil → — | 發電 24 |
@@ -148,7 +148,7 @@
 | 分流節點 | `splitter_node` | 將同一輸出平均拆往多條產線 | splitter_core, routing_chip, servo_motor → machine_component, steel_plate, circuit_board, crops, plastic | — |
 | 風暴渦輪機 | `storm_turbine` | 暴雨與雷暴時會大幅增加發電量（晴天 2 EU/刻，風暴 8 EU/刻） | storm_rotor, weather_sensor → energy_cell | 發電 2 |
 | 傳送面板 | `teleport_pad` | 消耗背包中的原版末影珍珠與能量執行空間跳躍 | teleport_matrix → — | 28 EU/t |
-| 水冷散熱器 | `water_cooler` | 消耗水桶，冷卻相鄰機器 -8 熱/tick | water_bucket → — | 5 EU/t |
+| 水冷散熱器 | `water_cooler` | 消耗水桶，冷卻相鄰機器 -8 熱/秒 | water_bucket → — | 5 EU/t |
 
 ## 四階（TIER4 終局，32 台）
 

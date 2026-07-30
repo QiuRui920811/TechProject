@@ -64,9 +64,9 @@
 
 | 中文名 | 英文 ID | 說明 | 輸入 → 輸出 | 耗能 |
 |---|---|---|---|---|
-| 冷卻液循環器 | `coolant_circulator` | 消耗冷卻液，冷卻相鄰機器 -15 熱/tick | coolant_cell → — | 15 EU/t |
-| 低溫冷卻塔 | `cryo_tower` | 多方塊，範圍冷卻 3×3 區域 -20 熱/tick | coolant_cell → — | 20 EU/t |
-| 水冷散熱器 | `water_cooler` | 消耗水桶，冷卻相鄰機器 -8 熱/tick | water_bucket → — | 5 EU/t |
+| 冷卻液循環器 | `coolant_circulator` | 消耗冷卻液，冷卻相鄰機器 -15 熱/秒 | coolant_cell → — | 15 EU/t |
+| 低溫冷卻塔 | `cryo_tower` | 多方塊，範圍冷卻 3×3 區域 -20 熱/秒 | coolant_cell → — | 20 EU/t |
+| 水冷散熱器 | `water_cooler` | 消耗水桶，冷卻相鄰機器 -8 熱/秒 | water_bucket → — | 5 EU/t |
 
 ### 🔋 發電
 
