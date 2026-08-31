@@ -16,6 +16,11 @@ build-dir = "book"
 use-default-preprocessors = false
 
 [output.html]
+# 中文搜尋補丁：mdBook 的搜尋引擎（elasticlunr）以空白切詞，中文句子沒有空白，
+# 整段會被當成一個超長的詞 → 索引裡一個中文詞都沒有，任何中文查詢都是 0 筆。
+# 這支 JS 在查詢含中文時改用子字串比對（原文本來就在 documentStore 裡送到瀏覽器了），
+# 英數字查詢完全不介入，行為不變。
+additional-js = ["theme/cjk-search.js"]
 default-theme = "navy"
 preferred-dark-theme = "navy"
 git-repository-url = "https://github.com/QiuRui920811/TechProject"
