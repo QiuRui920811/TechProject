@@ -201,16 +201,6 @@
 | `/tech title` | 查看已解鎖的稱號 |
 | `/tech title clear` | 取消目前稱號 |
 
-### 稱號佔位符
-
-| 佔位符 | 說明 |
-|---|---|
-| `%techproject_title%` | 玩家目前套用的稱號 |
-| `%techproject_title_raw%` | 不含色碼的純文字稱號 |
-| `%techproject_title_id%` | 目前套用的成就 ID |
-| `%techproject_title_count%` | 已解鎖的稱號數量 |
-| `%techproject_title_total%` | 稱號總數 |
-
 ### 稱號色彩分類
 
 | 類別 | 色系 |
