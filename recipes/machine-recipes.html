@@ -1,0 +1,1847 @@
+<!DOCTYPE HTML>
+<html lang="zh-TW" class="navy sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>機器配方一覽 - TechMC 科技百科</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="TechMC Minecraft 科技模組插件百科全書">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon-de23e50b.svg">
+        <link rel="shortcut icon" href="../favicon-8114d1fc.png">
+        <link rel="stylesheet" href="../css/variables-8adf115d.css">
+        <link rel="stylesheet" href="../css/general-e96d0476.css">
+        <link rel="stylesheet" href="../css/chrome-d279d366.css">
+        <link rel="stylesheet" href="../css/print-9e4910d8.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../fonts/fonts-9644e21d.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="mdbook-highlight-css" href="../highlight-493f70e1.css">
+        <link rel="stylesheet" id="mdbook-tomorrow-night-css" href="../tomorrow-night-4c0ae647.css">
+        <link rel="stylesheet" id="mdbook-ayu-highlight-css" href="../ayu-highlight-3fdfc3ac.css">
+
+        <!-- Custom theme stylesheets -->
+
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "../";
+            const default_light_theme = "navy";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "../searchindex-be974765.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="../toc-588afc34.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="mdbook-body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('navy')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="mdbook-sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("mdbook-sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="mdbook-sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="../toc.html"></iframe>
+            </noscript>
+            <div id="mdbook-sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="mdbook-page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="mdbook-menu-bar-hover-placeholder"></div>
+                <div id="mdbook-menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="mdbook-sidebar-toggle" class="icon-button" for="mdbook-sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="mdbook-sidebar">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M0 96C0 78.3 14.3 64 32 64H416c17.7 0 32 14.3 32 32s-14.3 32-32 32H32C14.3 128 0 113.7 0 96zM0 256c0-17.7 14.3-32 32-32H416c17.7 0 32 14.3 32 32s-14.3 32-32 32H32c-17.7 0-32-14.3-32-32zM448 416c0 17.7-14.3 32-32 32H32c-17.7 0-32-14.3-32-32s14.3-32 32-32H416c17.7 0 32 14.3 32 32z"/></svg></span>
+                        </label>
+                        <button id="mdbook-theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="mdbook-theme-list">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M371.3 367.1c27.3-3.9 51.9-19.4 67.2-42.9L600.2 74.1c12.6-19.5 9.4-45.3-7.6-61.2S549.7-4.4 531.1 9.6L294.4 187.2c-24 18-38.2 46.1-38.4 76.1L371.3 367.1zm-19.6 25.4l-116-104.4C175.9 290.3 128 339.6 128 400c0 3.9 .2 7.8 .6 11.6c1.8 17.5-10.2 36.4-27.8 36.4H96c-17.7 0-32 14.3-32 32s14.3 32 32 32H240c61.9 0 112-50.1 112-112c0-2.5-.1-5-.2-7.5z"/></svg></span>
+                        </button>
+                        <ul id="mdbook-theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-ayu">Ayu</button></li>
+                        </ul>
+                        <button id="mdbook-search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="mdbook-searchbar">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M416 208c0 45.9-14.9 88.3-40 122.7L502.6 457.4c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L330.7 376c-34.4 25.2-76.8 40-122.7 40C93.1 416 0 322.9 0 208S93.1 0 208 0S416 93.1 416 208zM208 352c79.5 0 144-64.5 144-144s-64.5-144-144-144S64 128.5 64 208s64.5 144 144 144z"/></svg></span>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">TechMC 科技百科</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <span class=fa-svg id="print-button"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M128 0C92.7 0 64 28.7 64 64v96h64V64H354.7L384 93.3V160h64V93.3c0-17-6.7-33.3-18.7-45.3L400 18.7C388 6.7 371.7 0 354.7 0H128zM384 352v32 64H128V384 368 352H384zm64 32h32c17.7 0 32-14.3 32-32V256c0-35.3-28.7-64-64-64H64c-35.3 0-64 28.7-64 64v96c0 17.7 14.3 32 32 32H64v64c0 35.3 28.7 64 64 64H384c35.3 0 64-28.7 64-64V384zm-16-88c-13.3 0-24-10.7-24-24s10.7-24 24-24s24 10.7 24 24s-10.7 24-24 24z"/></svg></span>
+                        </a>
+                        <a href="https://github.com/QiuRui920811/TechProject" title="Git repository" aria-label="Git repository">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"/></svg></span>
+                        </a>
+                        <a href="https://github.com/QiuRui920811/TechProject/edit/main/docs/wiki/docs/wiki/recipes/machine-recipes.md" title="Suggest an edit" aria-label="Suggest an edit" rel="edit">
+                            <span class=fa-svg id="git-edit-button"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M421.7 220.3l-11.3 11.3-22.6 22.6-205 205c-6.6 6.6-14.8 11.5-23.8 14.1L30.8 511c-8.4 2.5-17.5 .2-23.7-6.1S-1.5 489.7 1 481.2L38.7 353.1c2.6-9 7.5-17.2 14.1-23.8l205-205 22.6-22.6 11.3-11.3 33.9 33.9 62.1 62.1 33.9 33.9zM96 353.9l-9.3 9.3c-.9 .9-1.6 2.1-2 3.4l-25.3 86 86-25.3c1.3-.4 2.5-1.1 3.4-2l9.3-9.3H112c-8.8 0-16-7.2-16-16V353.9zM453.3 19.3l39.4 39.4c25 25 25 65.5 0 90.5l-14.5 14.5-22.6 22.6-11.3 11.3-33.9-33.9-62.1-62.1L314.3 67.7l11.3-11.3 22.6-22.6 14.5-14.5c25-25 65.5-25 90.5 0z"/></svg></span>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="mdbook-search-wrapper" class="hidden">
+                    <form id="mdbook-searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="mdbook-searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="mdbook-searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <span class=fa-svg id="fa-spin"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M304 48c0-26.5-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48s48-21.5 48-48zm0 416c0-26.5-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48s48-21.5 48-48zM48 304c26.5 0 48-21.5 48-48s-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48zm464-48c0-26.5-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48s48-21.5 48-48zM142.9 437c18.7-18.7 18.7-49.1 0-67.9s-49.1-18.7-67.9 0s-18.7 49.1 0 67.9s49.1 18.7 67.9 0zm0-294.2c18.7-18.7 18.7-49.1 0-67.9S93.7 56.2 75 75s-18.7 49.1 0 67.9s49.1 18.7 67.9 0zM369.1 437c18.7 18.7 49.1 18.7 67.9 0s18.7-49.1 0-67.9s-49.1-18.7-67.9 0s-18.7 49.1 0 67.9z"/></svg></span>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="mdbook-searchresults-outer" class="searchresults-outer hidden">
+                        <div id="mdbook-searchresults-header" class="searchresults-header"></div>
+                        <ul id="mdbook-searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('mdbook-sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('mdbook-sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#mdbook-sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="mdbook-content" class="content">
+                    <main>
+                        <h1 id="-機器配方一覽"><a class="header" href="#-機器配方一覽">🧪 機器配方一覽</a></h1>
+<blockquote>
+<p>共 <strong>661</strong> 道，依機器分組。想用搜尋的請看 <a href="browser.html">工藝資料庫</a>。</p>
+</blockquote>
+<hr>
+<h2 id="gps-控制塔1-道"><a class="header" href="#gps-控制塔1-道">GPS 控制塔（1 道）</a></h2>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>產物</th><th>材料</th><th>電力</th></tr>
+</thead>
+<tbody>
+<tr><td>衛星模組</td><td>定位標記 ×2、訊號中繼器</td><td>14</td></tr>
+</tbody>
+</table>
+</div>
+<h2 id="gps-發射器1-道"><a class="header" href="#gps-發射器1-道">GPS 發射器（1 道）</a></h2>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>產物</th><th>材料</th><th>電力</th></tr>
+</thead>
+<tbody>
+<tr><td>定位標記</td><td>定位電路</td><td>8</td></tr>
+</tbody>
+</table>
+</div>
+<h2 id="gps-網路節點1-道"><a class="header" href="#gps-網路節點1-道">GPS 網路節點（1 道）</a></h2>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>產物</th><th>材料</th><th>電力</th></tr>
+</thead>
+<tbody>
+<tr><td>傳送矩陣</td><td>衛星模組、資料核心</td><td>20</td></tr>
+</tbody>
+</table>
+</div>
+<h2 id="事件視界鍛台2-道"><a class="header" href="#事件視界鍛台2-道">事件視界鍛台（2 道）</a></h2>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>產物</th><th>材料</th><th>電力</th></tr>
+</thead>
+<tbody>
+<tr><td>事件視界板</td><td>奇點核心 ×3、熵穩板 ×3</td><td>44</td></tr>
+<tr><td>奇點外殼</td><td>暗物質薄片 ×2、中子合金板</td><td>45</td></tr>
+</tbody>
+</table>
+</div>
+<h2 id="低溫蒸餾器6-道"><a class="header" href="#低溫蒸餾器6-道">低溫蒸餾器（6 道）</a></h2>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>產物</th><th>材料</th><th>電力</th></tr>
+</thead>
+<tbody>
+<tr><td>低溫凝膠</td><td>水凝膠 ×2、冷卻電池</td><td>16</td></tr>
+<tr><td>低溫核心</td><td>冷卻罐 ×2、培育晶體</td><td>20</td></tr>
+<tr><td>冷卻罐</td><td>冷卻混合液 ×2、精煉油</td><td>17</td></tr>
+<tr><td>冷卻電池</td><td>霜綻花 ×4、水凝膠</td><td>16</td></tr>
+<tr><td>日冕雪酪</td><td>曜焰無花果 ×2、日耀碎晶</td><td>18</td></tr>
+<tr><td>香草冰淇淋</td><td>椰子 ×2、異星果泥</td><td>18</td></tr>
+</tbody>
+</table>
+</div>
+<h2 id="光子織構機3-道"><a class="header" href="#光子織構機3-道">光子織構機（3 道）</a></h2>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>產物</th><th>材料</th><th>電力</th></tr>
+</thead>
+<tbody>
+<tr><td>光子板</td><td>光子碎晶 ×2、強化玻璃</td><td>25</td></tr>
+<tr><td>光子碎晶</td><td>雷射鏡 ×2、星光板</td><td>23</td></tr>
+<tr><td>觀測透鏡</td><td>光子碎晶 ×2、光學鏡片</td><td>24</td></tr>
+</tbody>
+</table>
+</div>
+<h2 id="冷卻混合器22-道"><a class="header" href="#冷卻混合器22-道">冷卻混合器（22 道）</a></h2>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>產物</th><th>材料</th><th>電力</th></tr>
+</thead>
+<tbody>
+<tr><td>冰紅茶</td><td>科技茶葉、冷卻混合液</td><td>12</td></tr>
+<tr><td>冷卻混合液</td><td>冷卻電池、水凝膠</td><td>7</td></tr>
+<tr><td>星霧果飲</td><td>霜蘋果、流明果</td><td>12</td></tr>
+<tr><td>曙光茶飲</td><td>科技茶葉、水凝膠</td><td>10</td></tr>
+<tr><td>果園奶昔</td><td>蜜桃、青梨</td><td>11</td></tr>
+<tr><td>椰子水</td><td>椰子、水凝膠</td><td>12</td></tr>
+<tr><td>檸果汁</td><td>黃檸果、水凝膠</td><td>10</td></tr>
+<tr><td>櫻桃汁</td><td>櫻桃、水凝膠</td><td>10</td></tr>
+<tr><td>氣泡檸橙飲</td><td>黃檸果、香橙</td><td>11</td></tr>
+<tr><td>熱帶水果賓治</td><td>鳳梨、芒果</td><td>14</td></tr>
+<tr><td>相位凝露</td><td>幽影莓串、虛璃碎片</td><td>18</td></tr>
+<tr><td>綜合莓果汁</td><td>草莓、藍莓</td><td>14</td></tr>
+<tr><td>芒果奶昔</td><td>芒果、椰子</td><td>14</td></tr>
+<tr><td>草莓奶昔</td><td>草莓、椰子</td><td>14</td></tr>
+<tr><td>葡萄汁</td><td>葡萄串、水凝膠</td><td>14</td></tr>
+<tr><td>薑汁汽水</td><td>科技西瓜片、水凝膠</td><td>12</td></tr>
+<tr><td>蘋果醋飲</td><td>青梨、冷卻混合液</td><td>12</td></tr>
+<tr><td>蜜桃汁</td><td>蜜桃、水凝膠</td><td>10</td></tr>
+<tr><td>雷雲汽泡飲</td><td>雷莓李、風暴玻片</td><td>18</td></tr>
+<tr><td>青梨汁</td><td>青梨、水凝膠</td><td>10</td></tr>
+<tr><td>香橙汁</td><td>香橙、水凝膠</td><td>10</td></tr>
+<tr><td>香草奶昔</td><td>香蕉、椰子</td><td>14</td></tr>
+</tbody>
+</table>
+</div>
+<h2 id="力場鍛造台29-道"><a class="header" href="#力場鍛造台29-道">力場鍛造台（29 道）</a></h2>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>產物</th><th>材料</th><th>電力</th></tr>
+</thead>
+<tbody>
+<tr><td>伐木斧</td><td>鋼錠 ×3、鐵板 ×2</td><td>20</td></tr>
+<tr><td>傳送矩陣</td><td>衛星模組、資料核心、相位板</td><td>28</td></tr>
+<tr><td>冰晶權杖</td><td>冷卻電池 ×2、高級電路</td><td>20</td></tr>
+<tr><td>力場板</td><td>力場發射器 ×2、相位板</td><td>22</td></tr>
+<tr><td>合成潛影殼</td><td>魔法結晶 - II、鐵錠、末影結晶 - I</td><td>16</td></tr>
+<tr><td>吸血刃</td><td>高級電路、生質觸媒 ×2</td><td>24</td></tr>
+<tr><td>地震斧</td><td>高級電路、高密碳塊 ×2</td><td>24</td></tr>
+<tr><td>基礎護符</td><td>魔法結晶 - II、魔法結晶 - II、金錠、末影結晶 - I</td><td>16</td></tr>
+<tr><td>天使護符</td><td>電路板 ×2、橡膠片</td><td>12</td></tr>
+<tr><td>太陽能頭盔</td><td>鐵板 ×3、電路板、日光感測器</td><td>18</td></tr>
+<tr><td>岩漿水晶</td><td>魔法結晶 - I、古代符文 [火]、烈焰粉</td><td>16</td></tr>
+<tr><td>戰士護符</td><td>電路板 ×2、高密碳塊</td><td>14</td></tr>
+<tr><td>斬首劍</td><td>高級電路、鋼板 ×2</td><td>24</td></tr>
+<tr><td>旅者護符</td><td>電路板 ×2、銅線</td><td>12</td></tr>
+<tr><td>曲速球</td><td>量子晶片 ×2、重力子透鏡</td><td>24</td></tr>
+<tr><td>末影結晶 - II</td><td>末影結晶 - I、末影結晶 - I、末影結晶 - I、末影結晶 - I</td><td>14</td></tr>
+<tr><td>深海護符</td><td>電路板 ×2、水凝膠</td><td>14</td></tr>
+<tr><td>熔煉鎬</td><td>高級電路、熱線圈 ×2</td><td>22</td></tr>
+<tr><td>爆破鎬</td><td>高級電路、鋼板 ×2</td><td>22</td></tr>
+<tr><td>界伏盒</td><td>合成潛影殼、合成潛影殼、儲物箱</td><td>18</td></tr>
+<tr><td>礦脈鎬</td><td>高級電路、鋼板 ×2</td><td>22</td></tr>
+<tr><td>脈衝法杖</td><td>高級電路 ×2、高密碳塊</td><td>20</td></tr>
+<tr><td>農夫護符</td><td>電路板 ×2、生質觸媒</td><td>14</td></tr>
+<tr><td>重力法杖</td><td>重力子透鏡 ×2、高級電路</td><td>22</td></tr>
+<tr><td>防焰護符</td><td>電路板 ×2、熱線圈</td><td>14</td></tr>
+<tr><td>風暴法杖</td><td>高級電路 ×2、熱線圈</td><td>22</td></tr>
+<tr><td>魔法書皮</td><td>魔法結晶 - II、魔法結晶 - II、書、魔法結晶 - II</td><td>14</td></tr>
+<tr><td>魔法玻璃</td><td>魔法結晶 - II、銅粉、玻璃片</td><td>14</td></tr>
+<tr><td>魔法結晶 - II</td><td>魔法結晶 - I、魔法結晶 - I、魔法結晶 - I、魔法結晶 - I</td><td>12</td></tr>
+</tbody>
+</table>
+</div>
+<h2 id="加壓室2-道"><a class="header" href="#加壓室2-道">加壓室（2 道）</a></h2>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>產物</th><th>材料</th><th>電力</th></tr>
+</thead>
+<tbody>
+<tr><td>合成鑽石</td><td>碳粉 ×16</td><td>80</td></tr>
+<tr><td>碳化鎢錠</td><td>碳化鎢粉 ×2</td><td>60</td></tr>
+</tbody>
+</table>
+</div>
+<h2 id="化學反應器4-道"><a class="header" href="#化學反應器4-道">化學反應器（4 道）</a></h2>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>產物</th><th>材料</th><th>電力</th></tr>
+</thead>
+<tbody>
+<tr><td>合成纖維</td><td>聚合樹脂 ×2、生質纖維</td><td>16</td></tr>
+<tr><td>火藥 ×2</td><td>硫磺粉、煤粉</td><td>16</td></tr>
+<tr><td>精密噴嘴</td><td>壓力導管 ×2、鋼線</td><td>15</td></tr>
+<tr><td>紅石粉 ×3</td><td>焰綻簇 ×4、紅石粉</td><td>18</td></tr>
+</tbody>
+</table>
+</div>
+<h2 id="反物質合成器2-道"><a class="header" href="#反物質合成器2-道">反物質合成器（2 道）</a></h2>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>產物</th><th>材料</th><th>電力</th></tr>
+</thead>
+<tbody>
+<tr><td>反物質團簇</td><td>暗物質粉 ×2、奇點網格 ×2</td><td>51</td></tr>
+<tr><td>反物質電池</td><td>反物質團簇、電容組</td><td>54</td></tr>
+</tbody>
+</table>
+</div>
+<h2 id="合金熔煉爐6-道"><a class="header" href="#合金熔煉爐6-道">合金熔煉爐（6 道）</a></h2>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>產物</th><th>材料</th><th>電力</th></tr>
+</thead>
+<tbody>
+<tr><td>合金框架</td><td>鈦合金、鋼線</td><td>22</td></tr>
+<tr><td>焊錫合金</td><td>鉛粉、錫粉</td><td>16</td></tr>
+<tr><td>鈦合金</td><td>鐵粉、煤粉</td><td>20</td></tr>
+<tr><td>隔熱外殼</td><td>熱線圈、鋼板</td><td>22</td></tr>
+<tr><td>青銅錠</td><td>銅粉、錫粉</td><td>16</td></tr>
+<tr><td>黃銅錠</td><td>銅粉、鋅粉</td><td>16</td></tr>
+</tbody>
+</table>
+</div>
+<h2 id="合金爐5-道"><a class="header" href="#合金爐5-道">合金爐（5 道）</a></h2>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>產物</th><th>材料</th><th>電力</th></tr>
+</thead>
+<tbody>
+<tr><td>焊錫錠 ×2</td><td>錫錠、鉛錠</td><td>15</td></tr>
+<tr><td>矽鐵錠 ×2</td><td>鐵錠、矽晶</td><td>20</td></tr>
+<tr><td>鍍金鐵錠 ×2</td><td>鐵粉、金粉</td><td>18</td></tr>
+<tr><td>鍍金鐵錠 ×2</td><td>鐵錠、金錠</td><td>18</td></tr>
+<tr><td>青銅錠 ×4</td><td>銅錠 ×3、錫錠</td><td>20</td></tr>
+</tbody>
+</table>
+</div>
+<h2 id="回收機4-道"><a class="header" href="#回收機4-道">回收機（4 道）</a></h2>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>產物</th><th>材料</th><th>電力</th></tr>
+</thead>
+<tbody>
+<tr><td>回收材料</td><td>雜物 ×2</td><td>4</td></tr>
+<tr><td>回收材料</td><td>木屑</td><td>6</td></tr>
+<tr><td>塑膠</td><td>木屑、回收材料</td><td>10</td></tr>
+<tr><td>鏽蝕濾芯</td><td>紙、煤粉</td><td>9</td></tr>
+</tbody>
+</table>
+</div>
+<h2 id="地熱發電機1-道"><a class="header" href="#地熱發電機1-道">地熱發電機（1 道）</a></h2>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>產物</th><th>材料</th><th>電力</th></tr>
+</thead>
+<tbody>
+<tr><td>鐵桶</td><td>熔岩桶</td><td>0</td></tr>
+</tbody>
+</table>
+</div>
+<h2 id="地質掃描儀1-道"><a class="header" href="#地質掃描儀1-道">地質掃描儀（1 道）</a></h2>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>產物</th><th>材料</th><th>電力</th></tr>
+</thead>
+<tbody>
+<tr><td>數據矩陣</td><td>地質掃描探針、定位標記</td><td>12</td></tr>
+</tbody>
+</table>
+</div>
+<h2 id="基因切片台4-道"><a class="header" href="#基因切片台4-道">基因切片台（4 道）</a></h2>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>產物</th><th>材料</th><th>電力</th></tr>
+</thead>
+<tbody>
+<tr><td>切片刀組</td><td>鋼板 ×2、精密噴嘴</td><td>17</td></tr>
+<tr><td>基因樣板</td><td>作物 ×2、蝕刻電路</td><td>20</td></tr>
+<tr><td>生質觸媒</td><td>生質樹脂 ×2、肥料混合物</td><td>18</td></tr>
+<tr><td>神經樹脂</td><td>生質樹脂 ×2、合成纖維</td><td>19</td></tr>
+</tbody>
+</table>
+</div>
+<h2 id="壓縮機8-道"><a class="header" href="#壓縮機8-道">壓縮機（8 道）</a></h2>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>產物</th><th>材料</th><th>電力</th></tr>
+</thead>
+<tbody>
+<tr><td>壓力導管</td><td>銅錠、玻璃面板</td><td>15</td></tr>
+<tr><td>壓實鐵胚</td><td>鐵板、鐵板</td><td>18</td></tr>
+<tr><td>碳纖網</td><td>煤粉 ×2</td><td>12</td></tr>
+<tr><td>複合面板</td><td>鋼板、塑膠</td><td>15</td></tr>
+<tr><td>鋼板</td><td>鐵板、煤粉</td><td>14</td></tr>
+<tr><td>錫板</td><td>錫錠</td><td>14</td></tr>
+<tr><td>鐵板</td><td>鐵錠 ×2</td><td>12</td></tr>
+<tr><td>高密碳塊</td><td>碳纖網、碳纖網</td><td>18</td></tr>
+</tbody>
+</table>
+</div>
+<h2 id="天穹裝配機2-道"><a class="header" href="#天穹裝配機2-道">天穹裝配機（2 道）</a></h2>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>產物</th><th>材料</th><th>電力</th></tr>
+</thead>
+<tbody>
+<tr><td>宇宙矩陣</td><td>星輝玻璃 ×2、軌道框架 ×2</td><td>51</td></tr>
+<tr><td>宇宙面板</td><td>宇宙矩陣 ×2、中子合金板 ×2</td><td>51</td></tr>
+</tbody>
+</table>
+</div>
+<h2 id="太陽能陣列2-道"><a class="header" href="#太陽能陣列2-道">太陽能陣列（2 道）</a></h2>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>產物</th><th>材料</th><th>電力</th></tr>
+</thead>
+<tbody>
+<tr><td>星光板</td><td>玻璃面板、能源電池</td><td>10</td></tr>
+<tr><td>網格模組</td><td>星光板、銅線</td><td>12</td></tr>
+</tbody>
+</table>
+</div>
+<h2 id="奇點壓縮台3-道"><a class="header" href="#奇點壓縮台3-道">奇點壓縮台（3 道）</a></h2>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>產物</th><th>材料</th><th>電力</th></tr>
+</thead>
+<tbody>
+<tr><td>中子合金板</td><td>中子合金錠 ×2、中子合金錠 ×2</td><td>48</td></tr>
+<tr><td>奇點核心</td><td>奇點網格 ×2、重力子核心 ×2</td><td>51</td></tr>
+<tr><td>奇點網格</td><td>暗物質薄片、中子合金錠</td><td>48</td></tr>
+</tbody>
+</table>
+</div>
+<h2 id="奈米鑄造廠2-道"><a class="header" href="#奈米鑄造廠2-道">奈米鑄造廠（2 道）</a></h2>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>產物</th><th>材料</th><th>電力</th></tr>
+</thead>
+<tbody>
+<tr><td>奈米漿液</td><td>合成纖維 ×2、聚合樹脂 ×2</td><td>33</td></tr>
+<tr><td>奈米簇團</td><td>奈米漿液 ×2、量子流體 ×2</td><td>36</td></tr>
+</tbody>
+</table>
+</div>
+<h2 id="安卓艙3-道"><a class="header" href="#安卓艙3-道">安卓艙（3 道）</a></h2>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>產物</th><th>材料</th><th>電力</th></tr>
+</thead>
+<tbody>
+<tr><td>安卓外殼</td><td>處理塑膠 ×2、機械外殼</td><td>18</td></tr>
+<tr><td>安卓框架</td><td>安卓外殼 ×2、合成纖維</td><td>19</td></tr>
+<tr><td>安卓記憶矩陣</td><td>安卓核心 ×2、數據矩陣</td><td>20</td></tr>
+</tbody>
+</table>
+</div>
+<h2 id="巔峰鍛成儀3-道"><a class="header" href="#巔峰鍛成儀3-道">巔峰鍛成儀（3 道）</a></h2>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>產物</th><th>材料</th><th>電力</th></tr>
+</thead>
+<tbody>
+<tr><td>巔峰核心</td><td>終極矩陣 ×2、連續體外殼 ×2</td><td>52</td></tr>
+<tr><td>終極檔案庫</td><td>巔峰核心 ×2、遺產資料 ×3</td><td>54</td></tr>
+<tr><td>終極矩陣</td><td>宇宙矩陣 ×2、封存核心 ×2</td><td>50</td></tr>
+</tbody>
+</table>
+</div>
+<h2 id="工業冶煉爐11-道"><a class="header" href="#工業冶煉爐11-道">工業冶煉爐（11 道）</a></h2>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>產物</th><th>材料</th><th>電力</th></tr>
+</thead>
+<tbody>
+<tr><td>大馬士革鋼錠</td><td>鋼錠、鐵粉、碳粉</td><td>80</td></tr>
+<tr><td>導電合金錠 ×2</td><td>金錠、地獄石英 ×2、紅石粉 ×4</td><td>60</td></tr>
+<tr><td>強化合金錠</td><td>硬化合金錠、合成鑽石、濃縮鈾</td><td>150</td></tr>
+<tr><td>強化合金錠 ×2</td><td>硬化合金錠、合成鑽石、濃縮鈾、坦佩斯特雷核遺物</td><td>180</td></tr>
+<tr><td>熔融金</td><td>金錠 ×2</td><td>35</td></tr>
+<tr><td>熔融銅</td><td>銅錠 ×2</td><td>25</td></tr>
+<tr><td>熔融鋼</td><td>鋼錠 ×2</td><td>40</td></tr>
+<tr><td>熔融鐵</td><td>鐵錠 ×2</td><td>30</td></tr>
+<tr><td>熔融青銅</td><td>青銅錠 ×2</td><td>25</td></tr>
+<tr><td>硬化合金錠</td><td>大馬士革鋼錠、碳化鎢錠</td><td>100</td></tr>
+<tr><td>鈷鉻合金錠 ×2</td><td>鈷錠、鉻錠</td><td>70</td></tr>
+</tbody>
+</table>
+</div>
+<h2 id="工業壓縮機7-道"><a class="header" href="#工業壓縮機7-道">工業壓縮機（7 道）</a></h2>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>產物</th><th>材料</th><th>電力</th></tr>
+</thead>
+<tbody>
+<tr><td>碳板</td><td>碳粉 ×9</td><td>20</td></tr>
+<tr><td>碳棒 ×2</td><td>碳粉 ×4</td><td>12</td></tr>
+<tr><td>輻射屏蔽板</td><td>鉛錠 ×8</td><td>30</td></tr>
+<tr><td>銅板 ×2</td><td>銅錠 ×3</td><td>15</td></tr>
+<tr><td>鋼板 ×2</td><td>鋼錠 ×3</td><td>20</td></tr>
+<tr><td>鐵板 ×2</td><td>鐵錠 ×3</td><td>15</td></tr>
+<tr><td>青銅板 ×2</td><td>青銅錠 ×3</td><td>15</td></tr>
+</tbody>
+</table>
+</div>
+<h2 id="工業洗礦機3-道"><a class="header" href="#工業洗礦機3-道">工業洗礦機（3 道）</a></h2>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>產物</th><th>材料</th><th>電力</th></tr>
+</thead>
+<tbody>
+<tr><td>冷卻電池</td><td>水桶、紅石粉 ×4</td><td>15</td></tr>
+<tr><td>鉛粉</td><td>銅粉、水桶</td><td>10</td></tr>
+<tr><td>錫粉</td><td>鐵粉、水桶</td><td>10</td></tr>
+</tbody>
+</table>
+</div>
+<h2 id="工業窯爐2-道"><a class="header" href="#工業窯爐2-道">工業窯爐（2 道）</a></h2>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>產物</th><th>材料</th><th>電力</th></tr>
+</thead>
+<tbody>
+<tr><td>熱穩陶瓷</td><td>陶瓷板、熱線圈</td><td>14</td></tr>
+<tr><td>陶瓷板</td><td>黏土球 ×2</td><td>12</td></tr>
+</tbody>
+</table>
+</div>
+<h2 id="工業離心機4-道"><a class="header" href="#工業離心機4-道">工業離心機（4 道）</a></h2>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>產物</th><th>材料</th><th>電力</th></tr>
+</thead>
+<tbody>
+<tr><td>濃縮鈾</td><td>鈾礦粉 ×4</td><td>40</td></tr>
+<tr><td>鈷粉</td><td>青金石 ×8</td><td>35</td></tr>
+<tr><td>鈽</td><td>廢鈾棒</td><td>60</td></tr>
+<tr><td>鉻粉</td><td>紅石粉 ×8</td><td>35</td></tr>
+</tbody>
+</table>
+</div>
+<h2 id="拉線機7-道"><a class="header" href="#拉線機7-道">拉線機（7 道）</a></h2>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>產物</th><th>材料</th><th>電力</th></tr>
+</thead>
+<tbody>
+<tr><td>工業線束</td><td>銅線、鋼線</td><td>12</td></tr>
+<tr><td>物流導管</td><td>壓力導管、鋼線</td><td>11</td></tr>
+<tr><td>總線機架</td><td>鋼線、銅線、離心轉子</td><td>20</td></tr>
+<tr><td>銅線</td><td>銅錠 ×2</td><td>14</td></tr>
+<tr><td>鋼線</td><td>鋼板 ×2</td><td>11</td></tr>
+<tr><td>錫線</td><td>錫錠</td><td>12</td></tr>
+<tr><td>風暴轉子</td><td>鋼線、磁環</td><td>16</td></tr>
+</tbody>
+</table>
+</div>
+<h2 id="星核熔鍛爐3-道"><a class="header" href="#星核熔鍛爐3-道">星核熔鍛爐（3 道）</a></h2>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>產物</th><th>材料</th><th>電力</th></tr>
+</thead>
+<tbody>
+<tr><td>中子合金錠</td><td>聚變核心、鈦合金</td><td>51</td></tr>
+<tr><td>星核合金</td><td>反物質團簇 ×2、中子合金板 ×2</td><td>54</td></tr>
+<tr><td>星輝玻璃</td><td>強化玻璃 ×2、星光板 ×2</td><td>42</td></tr>
+</tbody>
+</table>
+</div>
+<h2 id="星鋼鑄造廠2-道"><a class="header" href="#星鋼鑄造廠2-道">星鋼鑄造廠（2 道）</a></h2>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>產物</th><th>材料</th><th>電力</th></tr>
+</thead>
+<tbody>
+<tr><td>星鋼框架</td><td>星鋼錠 ×3、軌道框架 ×2</td><td>40</td></tr>
+<tr><td>星鋼錠</td><td>星核合金 ×2、中子合金錠 ×2</td><td>38</td></tr>
+</tbody>
+</table>
+</div>
+<h2 id="時序引擎2-道"><a class="header" href="#時序引擎2-道">時序引擎（2 道）</a></h2>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>產物</th><th>材料</th><th>電力</th></tr>
+</thead>
+<tbody>
+<tr><td>時序核心</td><td>時序線束 ×2、重力子核心 ×2</td><td>60</td></tr>
+<tr><td>時序線束</td><td>軌道處理器、虛空晶體</td><td>57</td></tr>
+</tbody>
+</table>
+</div>
+<h2 id="晶體培育艙2-道"><a class="header" href="#晶體培育艙2-道">晶體培育艙（2 道）</a></h2>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>產物</th><th>材料</th><th>電力</th></tr>
+</thead>
+<tbody>
+<tr><td>培育晶體</td><td>晶種 ×2、量子流體</td><td>19</td></tr>
+<tr><td>晶種</td><td>紫水晶碎片 ×2、冷卻混合液</td><td>18</td></tr>
+</tbody>
+</table>
+</div>
+<h2 id="暗物質織機2-道"><a class="header" href="#暗物質織機2-道">暗物質織機（2 道）</a></h2>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>產物</th><th>材料</th><th>電力</th></tr>
+</thead>
+<tbody>
+<tr><td>暗物質薄片</td><td>暗物質粉 ×2、量子織布 ×2</td><td>39</td></tr>
+<tr><td>量子織布</td><td>合成纖維 ×2、奈米塗層 ×2</td><td>36</td></tr>
+</tbody>
+</table>
+</div>
+<h2 id="曲率裝配機3-道"><a class="header" href="#曲率裝配機3-道">曲率裝配機（3 道）</a></h2>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>產物</th><th>材料</th><th>電力</th></tr>
+</thead>
+<tbody>
+<tr><td>星界電路</td><td>軌道處理器 ×2、天穹透鏡 ×2</td><td>41</td></tr>
+<tr><td>曲率線圈</td><td>曲率電池 ×2、磁環 ×3</td><td>43</td></tr>
+<tr><td>曲率電池</td><td>反物質電池、時序線束</td><td>42</td></tr>
+</tbody>
+</table>
+</div>
+<h2 id="柴油發電機1-道"><a class="header" href="#柴油發電機1-道">柴油發電機（1 道）</a></h2>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>產物</th><th>材料</th><th>電力</th></tr>
+</thead>
+<tbody>
+<tr><td>玻璃瓶</td><td>雜酚油</td><td>0</td></tr>
+</tbody>
+</table>
+</div>
+<h2 id="核反應堆2-道"><a class="header" href="#核反應堆2-道">核反應堆（2 道）</a></h2>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>產物</th><th>材料</th><th>電力</th></tr>
+</thead>
+<tbody>
+<tr><td>廢鈾棒</td><td>工業鈾燃料棒</td><td>0</td></tr>
+<tr><td>廢鈾棒</td><td>鈽燃料棒</td><td>0</td></tr>
+</tbody>
+</table>
+</div>
+<h2 id="洗礦機2-道"><a class="header" href="#洗礦機2-道">洗礦機（2 道）</a></h2>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>產物</th><th>材料</th><th>電力</th></tr>
+</thead>
+<tbody>
+<tr><td>生質粉碎物</td><td>作物 ×2</td><td>10</td></tr>
+<tr><td>礦漿</td><td>鐵粉 ×2</td><td>12</td></tr>
+</tbody>
+</table>
+</div>
+<h2 id="淨化器4-道"><a class="header" href="#淨化器4-道">淨化器（4 道）</a></h2>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>產物</th><th>材料</th><th>電力</th></tr>
+</thead>
+<tbody>
+<tr><td>冷卻電池</td><td>雪球、玻璃面板、淨化膜片</td><td>16</td></tr>
+<tr><td>淨化碎晶</td><td>礦漿 ×2</td><td>15</td></tr>
+<tr><td>淨化膜片</td><td>鏽蝕濾芯、纖維網</td><td>16</td></tr>
+<tr><td>輻射濾芯</td><td>鏽蝕濾芯、奈米塗層</td><td>14</td></tr>
+</tbody>
+</table>
+</div>
+<h2 id="溫室培育艙13-道"><a class="header" href="#溫室培育艙13-道">溫室培育艙（13 道）</a></h2>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>產物</th><th>材料</th><th>電力</th></tr>
+</thead>
+<tbody>
+<tr><td>椰子苗</td><td>種子簇、基因樣板</td><td>8</td></tr>
+<tr><td>水凝膠</td><td>生質樹脂、作物</td><td>14</td></tr>
+<tr><td>洋蔥球根</td><td>種子簇、基因樣板</td><td>8</td></tr>
+<tr><td>玉米粒種</td><td>種子簇、生質觸媒</td><td>8</td></tr>
+<tr><td>生長燈</td><td>玻璃面板、農業模組</td><td>14</td></tr>
+<tr><td>芒果樹苗</td><td>種子簇、水凝膠</td><td>8</td></tr>
+<tr><td>茶葉苗種</td><td>種子簇、水凝膠</td><td>8</td></tr>
+<tr><td>草莓苗</td><td>種子簇、肥料混合物</td><td>8</td></tr>
+<tr><td>葡萄架苗</td><td>種子簇、肥料混合物</td><td>8</td></tr>
+<tr><td>蕉苗</td><td>種子簇、生質觸媒</td><td>8</td></tr>
+<tr><td>藍莓苗</td><td>種子簇、水凝膠</td><td>8</td></tr>
+<tr><td>覆盆子苗</td><td>種子簇、生質觸媒</td><td>8</td></tr>
+<tr><td>香辛莓種子</td><td>種子簇、肥料混合物</td><td>8</td></tr>
+</tbody>
+</table>
+</div>
+<h2 id="無人機艙2-道"><a class="header" href="#無人機艙2-道">無人機艙（2 道）</a></h2>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>產物</th><th>材料</th><th>電力</th></tr>
+</thead>
+<tbody>
+<tr><td>無人機外殼</td><td>處理塑膠 ×2、機械外殼</td><td>18</td></tr>
+<tr><td>無人機框架</td><td>無人機外殼 ×2、合成纖維</td><td>19</td></tr>
+</tbody>
+</table>
+</div>
+<h2 id="焦爐3-道"><a class="header" href="#焦爐3-道">焦爐（3 道）</a></h2>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>產物</th><th>材料</th><th>電力</th></tr>
+</thead>
+<tbody>
+<tr><td>焦炭</td><td>煤炭</td><td>0</td></tr>
+<tr><td>焦炭</td><td>木炭</td><td>0</td></tr>
+<tr><td>雜酚油</td><td>煤炭 ×2</td><td>0</td></tr>
+</tbody>
+</table>
+</div>
+<h2 id="熔爐16-道"><a class="header" href="#熔爐16-道">熔爐（16 道）</a></h2>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>產物</th><th>材料</th><th>電力</th></tr>
+</thead>
+<tbody>
+<tr><td>光學鏡片</td><td>玻璃面板、矽晶</td><td>18</td></tr>
+<tr><td>強化玻璃</td><td>玻璃面板、碳纖網</td><td>18</td></tr>
+<tr><td>焊錫合金</td><td>焊錫合金粉</td><td>14</td></tr>
+<tr><td>熱線圈</td><td>銅線、烈焰粉</td><td>16</td></tr>
+<tr><td>玻璃面板</td><td>玻璃</td><td>14</td></tr>
+<tr><td>真空管</td><td>玻璃面板、銅線</td><td>14</td></tr>
+<tr><td>金錠</td><td>金粉</td><td>16</td></tr>
+<tr><td>鉛錠</td><td>鉛粉</td><td>12</td></tr>
+<tr><td>銅錠</td><td>銅粉</td><td>16</td></tr>
+<tr><td>鋅錠</td><td>鋅粉</td><td>12</td></tr>
+<tr><td>錫錠</td><td>錫粉</td><td>12</td></tr>
+<tr><td>鐵錠</td><td>鐵粉</td><td>16</td></tr>
+<tr><td>鐵錠</td><td>篩出礦砂</td><td>14</td></tr>
+<tr><td>青銅錠</td><td>青銅粉</td><td>14</td></tr>
+<tr><td>青銅錠</td><td>銅粉、錫粉</td><td>18</td></tr>
+<tr><td>黃銅錠</td><td>黃銅粉</td><td>14</td></tr>
+</tbody>
+</table>
+</div>
+<h2 id="熵穩定艙2-道"><a class="header" href="#熵穩定艙2-道">熵穩定艙（2 道）</a></h2>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>產物</th><th>材料</th><th>電力</th></tr>
+</thead>
+<tbody>
+<tr><td>熵穩板</td><td>時序核心 ×2、反物質電池 ×2</td><td>60</td></tr>
+<tr><td>熵穩核心</td><td>熵穩板 ×2、奇點核心 ×2</td><td>63</td></tr>
+</tbody>
+</table>
+</div>
+<h2 id="燃氣渦輪1-道"><a class="header" href="#燃氣渦輪1-道">燃氣渦輪（1 道）</a></h2>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>產物</th><th>材料</th><th>電力</th></tr>
+</thead>
+<tbody>
+<tr><td>玻璃瓶</td><td>氫氣瓶</td><td>0</td></tr>
+</tbody>
+</table>
+</div>
+<h2 id="物質編譯器21-道"><a class="header" href="#物質編譯器21-道">物質編譯器（21 道）</a></h2>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>產物</th><th>材料</th><th>電力</th></tr>
+</thead>
+<tbody>
+<tr><td>修復信標</td><td>資料核心 ×2、聚變核心</td><td>34</td></tr>
+<tr><td>傳送面板</td><td>傳送矩陣 ×2、量子框架、力場板</td><td>36</td></tr>
+<tr><td>奇點碎片</td><td>物質團 ×2、聚變核心</td><td>27</td></tr>
+<tr><td>奧術權杖</td><td>魔力隕石 ×2、量子晶片 ×2、光子板</td><td>50</td></tr>
+<tr><td>時間膨脹器</td><td>量子晶片 ×2、控制單元</td><td>30</td></tr>
+<tr><td>核反應堆</td><td>反應爐格架 ×2、反應堆冷卻液 ×2、聚變核心</td><td>38</td></tr>
+<tr><td>熵變權杖</td><td>虛空信標核心 ×2、電漿電池</td><td>36</td></tr>
+<tr><td>物質團</td><td>量子流體 ×2、培育晶體</td><td>26</td></tr>
+<tr><td>異界傳送門</td><td>魔力隕石 ×4、重力軸承 ×2、量子框架 ×2</td><td>60</td></tr>
+<tr><td>虛空之冠</td><td>虛空信標核心 ×2、光子板</td><td>34</td></tr>
+<tr><td>虛空之鏡</td><td>光子板 ×2、重力子透鏡</td><td>32</td></tr>
+<tr><td>虛空戰靴</td><td>虛空信標核心 ×2、重力子透鏡</td><td>34</td></tr>
+<tr><td>虛空護脛</td><td>虛空信標核心 ×2、碳纖網</td><td>34</td></tr>
+<tr><td>虛空鎧甲</td><td>虛空信標核心 ×2、鈦合金</td><td>36</td></tr>
+<tr><td>裂空劍</td><td>魔力隕石 ×2、虛璃碎片 ×2、鈦合金</td><td>48</td></tr>
+<tr><td>軌道中繼單元</td><td>衛星模組 ×2、訊號中繼器、聚變核心</td><td>34</td></tr>
+<tr><td>軌道中繼站</td><td>軌道中繼單元 ×2、聚變核心、量子晶片</td><td>40</td></tr>
+<tr><td>雷霆戰錘</td><td>魔力隕石 ×2、重力子透鏡 ×2、鈦合金 ×2</td><td>52</td></tr>
+<tr><td>電漿長矛</td><td>電漿電池 ×2、鈦合金</td><td>30</td></tr>
+<tr><td>霜淵之弓</td><td>魔力隕石 ×2、低溫核心 ×2、光子板</td><td>48</td></tr>
+<tr><td>魔力隕石</td><td>虛璃碎片 ×2、輻照碎晶 ×2、日耀碎晶</td><td>40</td></tr>
+</tbody>
+</table>
+</div>
+<h2 id="生質合成槽11-道"><a class="header" href="#生質合成槽11-道">生質合成槽（11 道）</a></h2>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>產物</th><th>材料</th><th>電力</th></tr>
+</thead>
+<tbody>
+<tr><td>合成肉塊</td><td>基因樣板 ×2、生質觸媒</td><td>16</td></tr>
+<tr><td>巧克力蛋糕</td><td>異星果泥 ×2、香辛莓</td><td>16</td></tr>
+<tr><td>晨光果派</td><td>香橙 ×2、蜜桃</td><td>16</td></tr>
+<tr><td>果園後勤口糧</td><td>異星果泥 ×2、大豆莢</td><td>18</td></tr>
+<tr><td>漿果塔派</td><td>幽影莓串 ×2、香辛莓</td><td>16</td></tr>
+<tr><td>科技營養棒</td><td>曜焰無花果 ×2、異星果泥</td><td>16</td></tr>
+<tr><td>蛋白口糧包</td><td>合成肉塊 ×2、大豆莢</td><td>18</td></tr>
+<tr><td>蜜桃派盆</td><td>蜜桃 ×2、甜玉米</td><td>16</td></tr>
+<tr><td>起司蛋糕</td><td>異星果泥 ×2、生質觸媒</td><td>16</td></tr>
+<tr><td>霜芯暖鍋</td><td>霜蘋果 ×2、霜核晶簇</td><td>18</td></tr>
+<tr><td>青梨脆派</td><td>青梨 ×2、玉米麵包</td><td>16</td></tr>
+</tbody>
+</table>
+</div>
+<h2 id="生質實驗室20-道"><a class="header" href="#生質實驗室20-道">生質實驗室（20 道）</a></h2>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>產物</th><th>材料</th><th>電力</th></tr>
+</thead>
+<tbody>
+<tr><td>壽司捲</td><td>甜玉米、熟番茄</td><td>16</td></tr>
+<tr><td>拉麵</td><td>大豆莢、甜玉米</td><td>18</td></tr>
+<tr><td>捲心菜捲</td><td>高麗菜球、洋蔥</td><td>12</td></tr>
+<tr><td>早安捲餅</td><td>甜椒、甜玉米</td><td>16</td></tr>
+<tr><td>曙光茶飲</td><td>雷莓李、水凝膠</td><td>11</td></tr>
+<tr><td>果園沙拉</td><td>熟番茄、高麗菜球</td><td>11</td></tr>
+<tr><td>柑橘沙拉</td><td>香橙、黃檸果</td><td>11</td></tr>
+<tr><td>水果帕菲</td><td>草莓、藍莓</td><td>12</td></tr>
+<tr><td>玉米麵包</td><td>甜玉米、大豆莢</td><td>12</td></tr>
+<tr><td>生質樹脂</td><td>作物、木屑</td><td>18</td></tr>
+<tr><td>生質纖維</td><td>生質粉碎物、纖維網</td><td>16</td></tr>
+<tr><td>番茄燉鍋</td><td>熟番茄、洋蔥</td><td>11</td></tr>
+<tr><td>異星果泥</td><td>流明果、幽影莓串</td><td>14</td></tr>
+<tr><td>科技營養棒</td><td>大豆莢、香辛莓</td><td>12</td></tr>
+<tr><td>蔬菜咖哩</td><td>洋蔥、甜椒</td><td>18</td></tr>
+<tr><td>蔬菜捲餅</td><td>生菜、熟番茄</td><td>14</td></tr>
+<tr><td>誘餌模組</td><td>生質樹脂、作物</td><td>12</td></tr>
+<tr><td>起司披薩</td><td>熟番茄、大蒜</td><td>18</td></tr>
+<tr><td>輻射濾除劑</td><td>生質觸媒、神經樹脂</td><td>14</td></tr>
+<tr><td>輻晶蜜凍</td><td>流明果、輻照碎晶</td><td>18</td></tr>
+</tbody>
+</table>
+</div>
+<h2 id="異星精煉槽6-道"><a class="header" href="#異星精煉槽6-道">異星精煉槽（6 道）</a></h2>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>產物</th><th>材料</th><th>電力</th></tr>
+</thead>
+<tbody>
+<tr><td>低溫內襯</td><td>異星合金、霜核晶簇、冰脈核心</td><td>29</td></tr>
+<tr><td>壓差膜層</td><td>異星合金、虛璃碎片、相位膜組織</td><td>29</td></tr>
+<tr><td>日灼屏蔽層</td><td>異星合金、日耀碎晶、灰燼燃核</td><td>31</td></tr>
+<tr><td>異星合金</td><td>古訊號片段 ×2、輻照碎晶</td><td>28</td></tr>
+<tr><td>輻射網層</td><td>異星合金、輻照碎晶、輻塵腺體</td><td>29</td></tr>
+<tr><td>風暴偏轉層</td><td>異星合金、風暴玻片、風暴電容核</td><td>31</td></tr>
+</tbody>
+</table>
+</div>
+<h2 id="真空工藝艙4-道"><a class="header" href="#真空工藝艙4-道">真空工藝艙（4 道）</a></h2>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>產物</th><th>材料</th><th>電力</th></tr>
+</thead>
+<tbody>
+<tr><td>天穹透鏡</td><td>重力子透鏡 ×2、真空玻璃 ×2</td><td>36</td></tr>
+<tr><td>星雲纖維</td><td>量子織布 ×2、暗物質薄片 ×2</td><td>37</td></tr>
+<tr><td>真空玻璃</td><td>星輝玻璃 ×2、虛空晶體 ×2</td><td>34</td></tr>
+<tr><td>諧振晶體</td><td>真空玻璃 ×2、虛空晶體 ×3</td><td>35</td></tr>
+</tbody>
+</table>
+</div>
+<h2 id="等離子精煉爐3-道"><a class="header" href="#等離子精煉爐3-道">等離子精煉爐（3 道）</a></h2>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>產物</th><th>材料</th><th>電力</th></tr>
+</thead>
+<tbody>
+<tr><td>反應爐格架</td><td>等離子錠 ×2、合金框架</td><td>29</td></tr>
+<tr><td>等離子粉</td><td>離子粉 ×2、精煉油</td><td>26</td></tr>
+<tr><td>等離子錠</td><td>鈦合金 ×2、等離子粉</td><td>28</td></tr>
+</tbody>
+</table>
+</div>
+<h2 id="粉碎機21-道"><a class="header" href="#粉碎機21-道">粉碎機（21 道）</a></h2>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>產物</th><th>材料</th><th>電力</th></tr>
+</thead>
+<tbody>
+<tr><td>焊錫合金粉</td><td>焊錫合金</td><td>8</td></tr>
+<tr><td>煤粉 ×2</td><td>煤炭</td><td>8</td></tr>
+<tr><td>矽晶 ×2</td><td>地獄石英</td><td>10</td></tr>
+<tr><td>碳粉 ×2</td><td>焰根束 ×4</td><td>12</td></tr>
+<tr><td>金粉 ×2</td><td>金原礦</td><td>8</td></tr>
+<tr><td>金粉</td><td>金錠</td><td>8</td></tr>
+<tr><td>鈾礦粉 ×2</td><td>遠古遺骸</td><td>25</td></tr>
+<tr><td>鉛粉</td><td>鉛錠</td><td>8</td></tr>
+<tr><td>鉛粉</td><td>鐵原礦 ×2</td><td>12</td></tr>
+<tr><td>銅粉 ×2</td><td>銅礦</td><td>8</td></tr>
+<tr><td>銅粉 ×2</td><td>銅原礦</td><td>8</td></tr>
+<tr><td>銅粉</td><td>銅錠</td><td>8</td></tr>
+<tr><td>鋅粉</td><td>鋅錠</td><td>8</td></tr>
+<tr><td>錫粉</td><td>錫錠</td><td>8</td></tr>
+<tr><td>錫粉</td><td>銅原礦 ×2</td><td>12</td></tr>
+<tr><td>鎢粉</td><td>黑石 ×4</td><td>20</td></tr>
+<tr><td>鐵粉 ×2</td><td>鐵礦</td><td>8</td></tr>
+<tr><td>鐵粉 ×2</td><td>鐵原礦</td><td>8</td></tr>
+<tr><td>鐵粉</td><td>鐵錠</td><td>8</td></tr>
+<tr><td>青銅粉</td><td>青銅錠</td><td>8</td></tr>
+<tr><td>黃銅粉</td><td>黃銅錠</td><td>8</td></tr>
+</tbody>
+</table>
+</div>
+<h2 id="精煉塔4-道"><a class="header" href="#精煉塔4-道">精煉塔（4 道）</a></h2>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>產物</th><th>材料</th><th>電力</th></tr>
+</thead>
+<tbody>
+<tr><td>硫磺粉 ×2</td><td>原油、礦漿</td><td>14</td></tr>
+<tr><td>精煉油</td><td>生質樹脂、礦漿</td><td>10</td></tr>
+<tr><td>精煉油 ×2</td><td>原油 ×2</td><td>12</td></tr>
+<tr><td>鈾粉</td><td>鈾礦原礦 ×2、礦漿</td><td>18</td></tr>
+</tbody>
+</table>
+</div>
+<h2 id="紫水晶培養機1-道"><a class="header" href="#紫水晶培養機1-道">紫水晶培養機（1 道）</a></h2>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>產物</th><th>材料</th><th>電力</th></tr>
+</thead>
+<tbody>
+<tr><td>紫水晶碎片 ×4</td><td>冷卻混合液</td><td>16</td></tr>
+</tbody>
+</table>
+</div>
+<h2 id="終極製核儀1-道"><a class="header" href="#終極製核儀1-道">終極製核儀（1 道）</a></h2>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>產物</th><th>材料</th><th>電力</th></tr>
+</thead>
+<tbody>
+<tr><td>終極核心</td><td>宇宙矩陣 ×2、熵穩核心 ×2</td><td>72</td></tr>
+</tbody>
+</table>
+</div>
+<h2 id="絕緣壓製台4-道"><a class="header" href="#絕緣壓製台4-道">絕緣壓製台（4 道）</a></h2>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>產物</th><th>材料</th><th>電力</th></tr>
+</thead>
+<tbody>
+<tr><td>伺服模組束</td><td>伺服馬達、絕緣線材</td><td>13</td></tr>
+<tr><td>天候感測器</td><td>感測陣列、絕緣線材</td><td>15</td></tr>
+<tr><td>感測陣列</td><td>絕緣線材、邏輯閘</td><td>13</td></tr>
+<tr><td>絕緣線材</td><td>銅線、塑膠</td><td>11</td></tr>
+</tbody>
+</table>
+</div>
+<h2 id="聚合壓床3-道"><a class="header" href="#聚合壓床3-道">聚合壓床（3 道）</a></h2>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>產物</th><th>材料</th><th>電力</th></tr>
+</thead>
+<tbody>
+<tr><td>橡膠片</td><td>生質樹脂 ×2</td><td>15</td></tr>
+<tr><td>聚合樹脂</td><td>生質樹脂、煤粉</td><td>15</td></tr>
+<tr><td>處理塑膠</td><td>塑膠、聚合樹脂</td><td>16</td></tr>
+</tbody>
+</table>
+</div>
+<h2 id="聚變反應爐4-道"><a class="header" href="#聚變反應爐4-道">聚變反應爐（4 道）</a></h2>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>產物</th><th>材料</th><th>電力</th></tr>
+</thead>
+<tbody>
+<tr><td>穩定核心</td><td>磁環 ×2、反應爐核心</td><td>26</td></tr>
+<tr><td>聚變核心</td><td>聚變網 ×2、穩定核心</td><td>42</td></tr>
+<tr><td>聚變核心 ×2</td><td>聚變網 ×2、穩定核心、倪克斯遺核</td><td>56</td></tr>
+<tr><td>聚變網</td><td>隔熱外殼 ×2、力場板</td><td>38</td></tr>
+</tbody>
+</table>
+</div>
+<h2 id="自動農場7-道"><a class="header" href="#自動農場7-道">自動農場（7 道）</a></h2>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>產物</th><th>材料</th><th>電力</th></tr>
+</thead>
+<tbody>
+<tr><td>作物</td><td>作物種子</td><td>6</td></tr>
+<tr><td>大豆種子</td><td>作物種子、肥料混合物</td><td>4</td></tr>
+<tr><td>番茄種子</td><td>作物種子、生質觸媒</td><td>4</td></tr>
+<tr><td>種子簇</td><td>作物種子、骨粉</td><td>6</td></tr>
+<tr><td>肥料混合物</td><td>作物、骨粉</td><td>6</td></tr>
+<tr><td>農業模組</td><td>作物、水凝膠</td><td>7</td></tr>
+<tr><td>高麗菜種子</td><td>作物種子、水凝膠</td><td>4</td></tr>
+</tbody>
+</table>
+</div>
+<h2 id="蒸汽鍋爐2-道"><a class="header" href="#蒸汽鍋爐2-道">蒸汽鍋爐（2 道）</a></h2>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>產物</th><th>材料</th><th>電力</th></tr>
+</thead>
+<tbody>
+<tr><td>煤粉</td><td>煤炭、水桶</td><td>0</td></tr>
+<tr><td>碳粉</td><td>焦炭、水桶</td><td>0</td></tr>
+</tbody>
+</table>
+</div>
+<h2 id="虛空信標2-道"><a class="header" href="#虛空信標2-道">虛空信標（2 道）</a></h2>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>產物</th><th>材料</th><th>電力</th></tr>
+</thead>
+<tbody>
+<tr><td>虛空信標核心</td><td>虛空晶體 ×2、能源節點 ×2</td><td>36</td></tr>
+<tr><td>虛空晶體</td><td>虛空碎片 ×2、重力子透鏡 ×2</td><td>33</td></tr>
+</tbody>
+</table>
+</div>
+<h2 id="虛空抽取器2-道"><a class="header" href="#虛空抽取器2-道">虛空抽取器（2 道）</a></h2>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>產物</th><th>材料</th><th>電力</th></tr>
+</thead>
+<tbody>
+<tr><td>暗物質粉</td><td>量子流體 ×2、培育晶體 ×2</td><td>45</td></tr>
+<tr><td>虛空碎片</td><td>量子流體 ×2、離子粉 ×2</td><td>42</td></tr>
+</tbody>
+</table>
+</div>
+<h2 id="行星測繪信標1-道"><a class="header" href="#行星測繪信標1-道">行星測繪信標（1 道）</a></h2>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>產物</th><th>材料</th><th>電力</th></tr>
+</thead>
+<tbody>
+<tr><td>行星測繪資料</td><td>星圖測繪晶片 ×2、星圖</td><td>24</td></tr>
+</tbody>
+</table>
+</div>
+<h2 id="行星鍛造台29-道"><a class="header" href="#行星鍛造台29-道">行星鍛造台（29 道）</a></h2>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>產物</th><th>材料</th><th>電力</th></tr>
+</thead>
+<tbody>
+<tr><td>前線探勘胸甲</td><td>前線防護核心、日灼屏蔽層、風暴偏轉層、碳纖網</td><td>38</td></tr>
+<tr><td>前線探勘護腿</td><td>前線防護核心、日灼屏蔽層、風暴偏轉層、絕緣線材</td><td>37</td></tr>
+<tr><td>前線探勘靴</td><td>前線防護核心、日灼屏蔽層、風暴偏轉層、橡膠片</td><td>35</td></tr>
+<tr><td>前線探勘頭盔</td><td>前線防護核心、日灼屏蔽層、風暴偏轉層、玻璃面板</td><td>36</td></tr>
+<tr><td>前線防護核心</td><td>前線核心碎片、異星合金、灰燼燃核、風暴電容核</td><td>34</td></tr>
+<tr><td>回聲連弩</td><td>守衛者核心、迷宮遺物 ×2、迷宮碎片 ×6、迷宮蔓藤 ×4</td><td>38</td></tr>
+<tr><td>回聲鎬</td><td>守衛者核心、迷宮遺物 ×2、迷宮碎片 ×6</td><td>36</td></tr>
+<tr><td>外骨骼框架</td><td>異星合金 ×2、複合面板</td><td>30</td></tr>
+<tr><td>抗壓胸甲</td><td>外骨骼框架、氣密織層、壓差膜層、碳纖網</td><td>34</td></tr>
+<tr><td>抗壓護腿</td><td>外骨骼框架、氣密織層、壓差膜層、絕緣線材</td><td>33</td></tr>
+<tr><td>抗壓靴</td><td>外骨骼框架、氣密織層、壓差膜層、橡膠片</td><td>31</td></tr>
+<tr><td>抗壓頭盔</td><td>外骨骼框架、氣密織層、壓差膜層、玻璃面板</td><td>32</td></tr>
+<tr><td>抗寒胸甲</td><td>外骨骼框架、氣密織層、低溫內襯、碳纖網</td><td>34</td></tr>
+<tr><td>抗寒護腿</td><td>外骨骼框架、氣密織層、低溫內襯、絕緣線材</td><td>33</td></tr>
+<tr><td>抗寒靴</td><td>外骨骼框架、氣密織層、低溫內襯、橡膠片</td><td>31</td></tr>
+<tr><td>抗寒頭盔</td><td>外骨骼框架、氣密織層、低溫內襯、玻璃面板</td><td>32</td></tr>
+<tr><td>抗輻射胸甲</td><td>外骨骼框架、氣密織層、輻射網層、碳纖網</td><td>34</td></tr>
+<tr><td>抗輻射護腿</td><td>外骨骼框架、氣密織層、輻射網層、絕緣線材</td><td>33</td></tr>
+<tr><td>抗輻射靴</td><td>外骨骼框架、氣密織層、輻射網層、橡膠片</td><td>31</td></tr>
+<tr><td>抗輻射頭盔</td><td>外骨骼框架、氣密織層、輻射網層、玻璃面板</td><td>32</td></tr>
+<tr><td>氣密織層</td><td>合成纖維 ×2、虛域花簇</td><td>28</td></tr>
+<tr><td>行動充電器</td><td>高級電路 ×2、能源電池 ×4、風暴電容核、鋼板 ×4</td><td>50</td></tr>
+<tr><td>迷宮羅盤</td><td>迷宮遺物、迷宮碎片 ×4、迷宮蔓藤 ×2</td><td>32</td></tr>
+<tr><td>迷宮胸甲</td><td>守衛者核心、迷宮碎片 ×10、迷宮蔓藤 ×6、迷宮遺物 ×2</td><td>40</td></tr>
+<tr><td>迷宮護腿</td><td>守衛者核心、迷宮碎片 ×8、迷宮蔓藤 ×5、迷宮遺物</td><td>38</td></tr>
+<tr><td>迷宮靴</td><td>守衛者核心、迷宮碎片 ×5、迷宮蔓藤 ×3、迷宮遺物</td><td>34</td></tr>
+<tr><td>迷宮頭盔</td><td>守衛者核心、迷宮碎片 ×6、迷宮蔓藤 ×4、迷宮遺物</td><td>36</td></tr>
+<tr><td>迷途刃</td><td>守衛者核心 ×2、迷宮遺物 ×3、迷宮碎片 ×8</td><td>40</td></tr>
+<tr><td>風暴噴射背包</td><td>前線防護核心、風暴偏轉層、無人機框架、精密噴嘴</td><td>40</td></tr>
+</tbody>
+</table>
+</div>
+<h2 id="製造機121-道"><a class="header" href="#製造機121-道">製造機（121 道）</a></h2>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>產物</th><th>材料</th><th>電力</th></tr>
+</thead>
+<tbody>
+<tr><td>GPS 天線</td><td>絕緣線材 ×2、訊號中繼器、鋼板</td><td>16</td></tr>
+<tr><td>GPS 發射器</td><td>定位電路 ×2、GPS 天線、機械零件</td><td>18</td></tr>
+<tr><td>伐木刀組</td><td>鋼板、伺服馬達</td><td>16</td></tr>
+<tr><td>伐木機</td><td>伐木刀組、林業機架</td><td>18</td></tr>
+<tr><td>伺服馬達</td><td>鋼線、機械零件</td><td>24</td></tr>
+<tr><td>作物收割機</td><td>收割矩陣、農業模組</td><td>18</td></tr>
+<tr><td>便攜合成台</td><td>鋼板 ×2、電路板</td><td>14</td></tr>
+<tr><td>便攜垃圾桶</td><td>鋼板 ×2、電路板</td><td>14</td></tr>
+<tr><td>信號反轉器</td><td>信號核心、邏輯閘 ×3</td><td>22</td></tr>
+<tr><td>信號接收器</td><td>信號核心、邏輯閘 ×2、伺服馬達</td><td>24</td></tr>
+<tr><td>信號核心</td><td>訊號中繼器、電路板、邏輯閘</td><td>24</td></tr>
+<tr><td>信號比較器</td><td>信號核心、高級電路、邏輯閘 ×2</td><td>28</td></tr>
+<tr><td>信號發射器</td><td>信號核心、邏輯閘 ×2、銅線 ×2</td><td>24</td></tr>
+<tr><td>信號線</td><td>信號核心、錫線 ×2</td><td>20</td></tr>
+<tr><td>信號計數器</td><td>信號核心、高級電路、伺服馬達</td><td>30</td></tr>
+<tr><td>信號計時器</td><td>信號核心、伺服馬達、邏輯閘 ×2</td><td>28</td></tr>
+<tr><td>倉儲匯流站</td><td>儲物箱、機械外殼、工業線束</td><td>17</td></tr>
+<tr><td>優先級模組</td><td>路由晶片 ×2、邏輯閘 ×2、訊號中繼器</td><td>28</td></tr>
+<tr><td>優先路由器</td><td>優先級模組、分流核心、訊號中繼器 ×2</td><td>30</td></tr>
+<tr><td>儲物箱</td><td>機械外殼、塑膠、工業線束</td><td>15</td></tr>
+<tr><td>分流核心</td><td>路由晶片、訊號中繼器、伺服馬達</td><td>18</td></tr>
+<tr><td>分流節點</td><td>分流核心、路由晶片、伺服馬達</td><td>20</td></tr>
+<tr><td>分配齒輪</td><td>路由晶片、伺服馬達、青銅齒輪 ×2</td><td>28</td></tr>
+<tr><td>反應爐外殼</td><td>鈷鉻合金錠 ×2、鋼板 ×4、鉛錠 ×2</td><td>50</td></tr>
+<tr><td>古代祭壇</td><td>磁石、機械外殼、高級電路 ×2</td><td>60</td></tr>
+<tr><td>向量抓鉤</td><td>伺服模組束、絕緣線材、感測陣列</td><td>18</td></tr>
+<tr><td>地質掃描儀</td><td>地質掃描探針、定位電路、感測陣列</td><td>16</td></tr>
+<tr><td>基因定序器</td><td>玻璃、鐵錠、紅石粉</td><td>8</td></tr>
+<tr><td>基礎電路板</td><td>銅線 ×2、焊錫錠、鐵板</td><td>25</td></tr>
+<tr><td>安卓伐木程序</td><td>收割單元、伺服馬達</td><td>15</td></tr>
+<tr><td>安卓回收程序</td><td>訊號中繼器、發射節點</td><td>15</td></tr>
+<tr><td>安卓燃料介面</td><td>發射節點、壓力導管</td><td>16</td></tr>
+<tr><td>安卓物品介面</td><td>訊號中繼器、機械外殼</td><td>16</td></tr>
+<tr><td>安卓農務程序</td><td>農業模組、邏輯閘</td><td>14</td></tr>
+<tr><td>定位標記</td><td>定位電路、終界珍珠</td><td>12</td></tr>
+<tr><td>定位電路</td><td>電路板、邏輯閘、絕緣線材 ×2</td><td>14</td></tr>
+<tr><td>導能線纜</td><td>銅線、鐵板</td><td>10</td></tr>
+<tr><td>工業鈾燃料棒</td><td>濃縮鈾 ×4、鉛錠 ×2、鋼棒</td><td>60</td></tr>
+<tr><td>採礦機架</td><td>機械零件、合金框架</td><td>16</td></tr>
+<tr><td>收割單元</td><td>伺服馬達、鐵板</td><td>16</td></tr>
+<tr><td>收割矩陣</td><td>農業模組、訊號中繼器</td><td>15</td></tr>
+<tr><td>收田鐮刀</td><td>收割單元、鋼板</td><td>14</td></tr>
+<tr><td>方塊破壞器</td><td>鐵板 ×2、機械零件、投擲器</td><td>12</td></tr>
+<tr><td>末影結晶 - I</td><td>鐵粉、終界珍珠</td><td>8</td></tr>
+<tr><td>板模</td><td>黏土球 ×4、平滑石頭</td><td>10</td></tr>
+<tr><td>林業機架</td><td>機械零件、處理塑膠</td><td>15</td></tr>
+<tr><td>棒模</td><td>黏土球 ×4、木棒</td><td>8</td></tr>
+<tr><td>機械外殼</td><td>精密框架、玻璃面板</td><td>28</td></tr>
+<tr><td>機械零件</td><td>壓實鐵胚、電路板、青銅齒輪</td><td>24</td></tr>
+<tr><td>機殼</td><td>鐵板 ×4、鐵齒輪 ×2</td><td>12</td></tr>
+<tr><td>水培鏟</td><td>農業模組、伺服馬達</td><td>14</td></tr>
+<tr><td>泰坦胸甲</td><td>複合面板、碳纖網</td><td>16</td></tr>
+<tr><td>泰坦護腿</td><td>複合面板、銅線</td><td>14</td></tr>
+<tr><td>泰坦靴子</td><td>複合面板、橡膠片</td><td>12</td></tr>
+<tr><td>泰坦頭盔</td><td>複合面板、電路板</td><td>14</td></tr>
+<tr><td>溢出處理器</td><td>溢出閥、分流核心</td><td>26</td></tr>
+<tr><td>溢出閥</td><td>路由晶片、壓力導管 ×2、訊號中繼器</td><td>26</td></tr>
+<tr><td>漏斗介面</td><td>漏斗轉接模組、機械零件</td><td>22</td></tr>
+<tr><td>漏斗轉接模組</td><td>機械零件、鐵板 ×2、銅線 ×2</td><td>22</td></tr>
+<tr><td>激發室</td><td>鐵錠、玻璃、電路板</td><td>10</td></tr>
+<tr><td>物流扳手</td><td>鐵板、銅錠、邏輯閘</td><td>22</td></tr>
+<tr><td>物流節點</td><td>訊號中繼器、機械零件</td><td>14</td></tr>
+<tr><td>真空吸入口</td><td>真空核心、機械外殼</td><td>17</td></tr>
+<tr><td>真空核心</td><td>訊號中繼器、壓力導管</td><td>15</td></tr>
+<tr><td>碼頭骨架</td><td>壓力導管、複合面板</td><td>15</td></tr>
+<tr><td>私人雞舍</td><td>橡木材、乾草捆</td><td>5</td></tr>
+<tr><td>科技磁石</td><td>磁環、能源電池、銅線</td><td>14</td></tr>
+<tr><td>科技背包</td><td>機械零件、電路板、皮革 ×4</td><td>16</td></tr>
+<tr><td>管模</td><td>黏土球 ×4、竹子</td><td>8</td></tr>
+<tr><td>精密框架</td><td>機械零件、高密碳塊</td><td>28</td></tr>
+<tr><td>精密處理器</td><td>高級電路、矽晶 ×2、金線 ×2</td><td>80</td></tr>
+<tr><td>紅石介面</td><td>訊號中繼器、銅線 ×2、紅石粉 ×4</td><td>22</td></tr>
+<tr><td>紅石轉接器</td><td>紅石介面、信號核心</td><td>22</td></tr>
+<tr><td>紅石集成電路</td><td>電路板、紅石粉</td><td>10</td></tr>
+<tr><td>紫水晶培養機</td><td>紫水晶方塊 ×4、冷卻混合液 ×2、機殼</td><td>18</td></tr>
+<tr><td>線模</td><td>黏土球 ×4、線</td><td>8</td></tr>
+<tr><td>能源節點</td><td>發射節點、機械外殼</td><td>14</td></tr>
+<tr><td>能源電池</td><td>錫錠、紅石粉</td><td>22</td></tr>
+<tr><td>自動釣台</td><td>誘餌模組、碼頭骨架</td><td>18</td></tr>
+<tr><td>萬用合成站</td><td>機械外殼、高級電路 ×2、電路板 ×4、鋼板 ×4</td><td>24</td></tr>
+<tr><td>訊號中繼器</td><td>邏輯閘、錫線</td><td>20</td></tr>
+<tr><td>訊號中繼器</td><td>回響孢子 ×4、邏輯閘、銅線 ×2</td><td>22</td></tr>
+<tr><td>貨物抽取節點</td><td>路由晶片、伺服馬達、儲物箱</td><td>20</td></tr>
+<tr><td>貨物輸出節點</td><td>路由晶片、伺服馬達、壓力導管</td><td>20</td></tr>
+<tr><td>貨物驅動器</td><td>總線機架、伺服馬達、路由晶片</td><td>22</td></tr>
+<tr><td>輪流分配器</td><td>分配齒輪、分流核心、訊號中繼器 ×2</td><td>30</td></tr>
+<tr><td>邏輯閘</td><td>銅線、矽晶</td><td>22</td></tr>
+<tr><td>量子處理器</td><td>精密處理器、終界珍珠 ×2、強化合金錠</td><td>120</td></tr>
+<tr><td>鈽燃料棒</td><td>鈽 ×4、鉛錠 ×2、鋼棒</td><td>—</td></tr>
+<tr><td>鈽燃料棒 ×2</td><td>鈽 ×3、鉛錠 ×2、鋼棒、赫利昂炎核遺物</td><td>80</td></tr>
+<tr><td>鈾燃料棒</td><td>濃縮鈾 ×2、鋼板</td><td>20</td></tr>
+<tr><td>銷毀節點</td><td>機械外殼、熔岩桶</td><td>12</td></tr>
+<tr><td>錠模</td><td>黏土球 ×4、鐵錠</td><td>10</td></tr>
+<tr><td>鑽頭組</td><td>鋼板、鈦合金</td><td>18</td></tr>
+<tr><td>附魔卷軸：不死鳥涅槃</td><td>電路板 ×2、共鳴寶石、書、不死圖騰</td><td>40</td></tr>
+<tr><td>附魔卷軸：冰封</td><td>電路板 ×2、共鳴寶石、書、藍冰</td><td>40</td></tr>
+<tr><td>附魔卷軸：噬魂</td><td>電路板 ×2、共鳴寶石、書、靈魂砂</td><td>40</td></tr>
+<tr><td>附魔卷軸：地脈共鳴</td><td>電路板 ×2、共鳴寶石、書、回聲碎片</td><td>40</td></tr>
+<tr><td>附魔卷軸：奈米修復</td><td>電路板 ×2、共鳴寶石、書、經驗瓶</td><td>40</td></tr>
+<tr><td>附魔卷軸：幻影步</td><td>電路板 ×2、共鳴寶石、書、夜魅皮膜</td><td>40</td></tr>
+<tr><td>附魔卷軸：數據採集</td><td>電路板 ×2、共鳴寶石、書、紫水晶碎片</td><td>40</td></tr>
+<tr><td>附魔卷軸：死神審判</td><td>電路板 ×2、共鳴寶石、書、凋零骷髏頭顱</td><td>40</td></tr>
+<tr><td>附魔卷軸：煉金之觸</td><td>電路板 ×2、共鳴寶石、書、地獄疙瘩</td><td>40</td></tr>
+<tr><td>附魔卷軸：爆裂符文</td><td>電路板 ×2、共鳴寶石、書、TNT</td><td>40</td></tr>
+<tr><td>附魔卷軸：生命之樹</td><td>電路板 ×2、共鳴寶石、書、金蘋果</td><td>40</td></tr>
+<tr><td>附魔卷軸：荊棘鏡壁</td><td>電路板 ×2、共鳴寶石、書、遮光玻璃</td><td>40</td></tr>
+<tr><td>附魔卷軸：虛空奇點</td><td>電路板 ×2、共鳴寶石、書、終界之眼</td><td>40</td></tr>
+<tr><td>附魔卷軸：虛空收納</td><td>電路板 ×2、共鳴寶石、書、界伏殼</td><td>40</td></tr>
+<tr><td>附魔卷軸：裂傷</td><td>電路板 ×2、共鳴寶石、書、鐘乳石</td><td>40</td></tr>
+<tr><td>附魔卷軸：超頻</td><td>電路板 ×2、共鳴寶石、書、紅石方塊</td><td>40</td></tr>
+<tr><td>附魔卷軸：追魂箭</td><td>電路板 ×2、共鳴寶石、書、追跡之箭</td><td>40</td></tr>
+<tr><td>附魔卷軸：雷霆連鎖</td><td>電路板 ×2、共鳴寶石、書、避雷針</td><td>40</td></tr>
+<tr><td>附魔基座</td><td>石磚 ×4、共鳴寶石</td><td>20</td></tr>
+<tr><td>雞網 ×4</td><td>線、線、木棒</td><td>3</td></tr>
+<tr><td>電路板</td><td>銅錠、矽晶、焊錫合金</td><td>20</td></tr>
+<tr><td>電路板 ×2</td><td>硒粉、銅粉、矽晶</td><td>20</td></tr>
+<tr><td>青銅齒輪</td><td>青銅錠、鐵板</td><td>20</td></tr>
+<tr><td>高級電路</td><td>電路板、邏輯閘、工業線束、黃銅錠</td><td>26</td></tr>
+<tr><td>高級電路</td><td>基礎電路板、導電合金錠、紅石粉 ×4</td><td>50</td></tr>
+<tr><td>魔法結晶 - I</td><td>鐵粉、金粒</td><td>6</td></tr>
+<tr><td>齒輪模</td><td>黏土球 ×4、鐵粒 ×6</td><td>12</td></tr>
+</tbody>
+</table>
+</div>
+<h2 id="資料封存庫1-道"><a class="header" href="#資料封存庫1-道">資料封存庫（1 道）</a></h2>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>產物</th><th>材料</th><th>電力</th></tr>
+</thead>
+<tbody>
+<tr><td>封存板</td><td>資料核心 ×2、重力軸承</td><td>20</td></tr>
+</tbody>
+</table>
+</div>
+<h2 id="軌道中繼站1-道"><a class="header" href="#軌道中繼站1-道">軌道中繼站（1 道）</a></h2>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>產物</th><th>材料</th><th>電力</th></tr>
+</thead>
+<tbody>
+<tr><td>衛星模組 ×3</td><td>軌道中繼單元、聚變核心</td><td>32</td></tr>
+</tbody>
+</table>
+</div>
+<h2 id="軌道列印機3-道"><a class="header" href="#軌道列印機3-道">軌道列印機（3 道）</a></h2>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>產物</th><th>材料</th><th>電力</th></tr>
+</thead>
+<tbody>
+<tr><td>工業總線</td><td>物流導管 ×2、虛空晶體 ×2</td><td>24</td></tr>
+<tr><td>軌道框架</td><td>星核合金 ×2、重力子透鏡 ×2</td><td>42</td></tr>
+<tr><td>軌道處理器</td><td>高級電路 ×2、重力子核心 ×2</td><td>45</td></tr>
+</tbody>
+</table>
+</div>
+<h2 id="軌道觀測台5-道"><a class="header" href="#軌道觀測台5-道">軌道觀測台（5 道）</a></h2>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>產物</th><th>材料</th><th>電力</th></tr>
+</thead>
+<tbody>
+<tr><td>星圖</td><td>觀測透鏡 ×2、數據矩陣</td><td>22</td></tr>
+<tr><td>星圖測繪晶片</td><td>星圖 ×2、資料核心</td><td>24</td></tr>
+<tr><td>真空模組</td><td>星圖 ×2、真空管</td><td>22</td></tr>
+<tr><td>資料核心</td><td>星圖 ×2、控制單元</td><td>23</td></tr>
+<tr><td>重力軸承</td><td>磁環 ×2、重力子透鏡</td><td>24</td></tr>
+</tbody>
+</table>
+</div>
+<h2 id="連續體車床3-道"><a class="header" href="#連續體車床3-道">連續體車床（3 道）</a></h2>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>產物</th><th>材料</th><th>電力</th></tr>
+</thead>
+<tbody>
+<tr><td>時序格架</td><td>時序核心 ×3、反應爐格架 ×2</td><td>40</td></tr>
+<tr><td>極光板</td><td>諧振晶體 ×3、光子板 ×2</td><td>39</td></tr>
+<tr><td>連續體外殼</td><td>時序格架 ×2、真空玻璃 ×3</td><td>41</td></tr>
+</tbody>
+</table>
+</div>
+<h2 id="進階製造機38-道"><a class="header" href="#進階製造機38-道">進階製造機（38 道）</a></h2>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>產物</th><th>材料</th><th>電力</th></tr>
+</thead>
+<tbody>
+<tr><td>GPS 控制塔</td><td>GPS 天線 ×2、衛星模組、高級電路</td><td>24</td></tr>
+<tr><td>GPS 網路節點</td><td>衛星模組 ×2、資料核心、高級電路 ×2</td><td>30</td></tr>
+<tr><td>反應爐核心</td><td>控制單元 ×2、熱線圈</td><td>36</td></tr>
+<tr><td>地質掃描探針</td><td>感測陣列、定位電路、精密框架</td><td>18</td></tr>
+<tr><td>堆疊升級</td><td>機械外殼 ×2、複合面板</td><td>18</td></tr>
+<tr><td>奈米塗層</td><td>精密框架 ×2、高級電路</td><td>38</td></tr>
+<tr><td>安卓工作站</td><td>安卓框架 ×2、安卓記憶矩陣</td><td>24</td></tr>
+<tr><td>安卓核心</td><td>控制單元 ×2、伺服馬達</td><td>34</td></tr>
+<tr><td>安卓節能卡</td><td>效率升級 ×2、安卓記憶矩陣</td><td>20</td></tr>
+<tr><td>安卓超頻卡</td><td>速度升級 ×2、安卓記憶矩陣</td><td>20</td></tr>
+<tr><td>工業總線</td><td>總線機架、儲物箱、路由晶片、離心轉子</td><td>26</td></tr>
+<tr><td>微型處理器</td><td>高級電路、高密碳塊、工業線束</td><td>36</td></tr>
+<tr><td>戶外處理器</td><td>控制單元 ×2、邏輯閘</td><td>22</td></tr>
+<tr><td>捕網發射器</td><td>戶外處理器 ×2、伺服馬達</td><td>22</td></tr>
+<tr><td>採礦鑽機</td><td>鑽頭組 ×2、採礦機架</td><td>24</td></tr>
+<tr><td>採礦鑽機二型</td><td>採礦鑽機、電容組、控制單元</td><td>38</td></tr>
+<tr><td>效率升級</td><td>奈米塗層 ×2、電容組</td><td>18</td></tr>
+<tr><td>無人機核心</td><td>控制單元 ×2、發射節點</td><td>34</td></tr>
+<tr><td>生物收集器</td><td>捕網發射器 ×2、戶外處理器</td><td>24</td></tr>
+<tr><td>脈衝推進器</td><td>壓差膜層、電漿電池、精密噴嘴</td><td>24</td></tr>
+<tr><td>自動化模組</td><td>高級電路、機械零件、速度升級</td><td>28</td></tr>
+<tr><td>行星星門</td><td>重力軸承、量子框架、資料核心</td><td>34</td></tr>
+<tr><td>衛星模組</td><td>定位電路 ×2、GPS 天線、訊號中繼器</td><td>22</td></tr>
+<tr><td>貨物管理站</td><td>總線機架、路由晶片、控制單元、訊號中繼器</td><td>28</td></tr>
+<tr><td>速度升級</td><td>伺服馬達 ×2、微型處理器</td><td>18</td></tr>
+<tr><td>過濾網核心</td><td>路由晶片、奈米塗層、淨化膜片</td><td>24</td></tr>
+<tr><td>過濾路由器</td><td>過濾網核心、路由晶片、淨化膜片</td><td>25</td></tr>
+<tr><td>電動化學反應器</td><td>化學反應器、自動化模組、精密噴嘴、冷卻電池、能源電池</td><td>72</td></tr>
+<tr><td>電動壓縮機</td><td>壓縮機、自動化模組、伺服馬達、壓力導管、鋼板</td><td>58</td></tr>
+<tr><td>電動拉線機</td><td>拉線機、自動化模組、伺服馬達、工業線束、青銅齒輪</td><td>60</td></tr>
+<tr><td>電動洗礦機</td><td>洗礦機、自動化模組、壓力導管、冷卻電池、合金框架</td><td>55</td></tr>
+<tr><td>電動淨化器</td><td>淨化器、自動化模組、冷卻電池、精密噴嘴、合金框架</td><td>62</td></tr>
+<tr><td>電動生質實驗室</td><td>生質實驗室、自動化模組、生質纖維、冷卻電池、電路板</td><td>60</td></tr>
+<tr><td>電動篩礦機</td><td>淘金盤、自動化模組、青銅齒輪、工業線束、合金框架</td><td>52</td></tr>
+<tr><td>電動粉碎機</td><td>粉碎機、自動化模組、工業線束、伺服馬達、鋼板</td><td>55</td></tr>
+<tr><td>電動離心機</td><td>離心機、自動化模組、磁環、伺服馬達、能源電池</td><td>70</td></tr>
+<tr><td>電漿電池</td><td>熱線圈 ×2、離子粉</td><td>22</td></tr>
+<tr><td>風暴渦輪機</td><td>風暴轉子 ×2、天候感測器</td><td>26</td></tr>
+</tbody>
+</table>
+</div>
+<h2 id="遺物解析儀5-道"><a class="header" href="#遺物解析儀5-道">遺物解析儀（5 道）</a></h2>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>產物</th><th>材料</th><th>電力</th></tr>
+</thead>
+<tbody>
+<tr><td>前線核心碎片</td><td>古訊號片段 ×2、赫利昂炎核遺物</td><td>30</td></tr>
+<tr><td>前線核心碎片</td><td>古訊號片段 ×2、坦佩斯特雷核遺物</td><td>30</td></tr>
+<tr><td>古訊號片段</td><td>行星測繪資料 ×2、星核遺物</td><td>26</td></tr>
+<tr><td>古訊號片段</td><td>行星測繪資料 ×2、霜境遺物</td><td>26</td></tr>
+<tr><td>古訊號片段</td><td>行星測繪資料 ×2、倪克斯遺核</td><td>26</td></tr>
+</tbody>
+</table>
+</div>
+<h2 id="遺產掃描儀2-道"><a class="header" href="#遺產掃描儀2-道">遺產掃描儀（2 道）</a></h2>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>產物</th><th>材料</th><th>電力</th></tr>
+</thead>
+<tbody>
+<tr><td>封存核心</td><td>資料核心 ×2、封存板 ×2</td><td>32</td></tr>
+<tr><td>遺產資料</td><td>星圖 ×2、虛空信標核心 ×2</td><td>30</td></tr>
+</tbody>
+</table>
+</div>
+<h2 id="重力穩定器2-道"><a class="header" href="#重力穩定器2-道">重力穩定器（2 道）</a></h2>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>產物</th><th>材料</th><th>電力</th></tr>
+</thead>
+<tbody>
+<tr><td>重力子核心</td><td>通量連結 ×2、力場板 ×2</td><td>39</td></tr>
+<tr><td>重力子透鏡</td><td>磁環 ×2、培育晶體 ×2</td><td>36</td></tr>
+</tbody>
+</table>
+</div>
+<h2 id="量子處理器19-道"><a class="header" href="#量子處理器19-道">量子處理器（19 道）</a></h2>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>產物</th><th>材料</th><th>電力</th></tr>
+</thead>
+<tbody>
+<tr><td>來世精華</td><td>壞死顱骨、末影結晶 - III、地獄之星</td><td>32</td></tr>
+<tr><td>力場發射器</td><td>通量連結 ×2、控制單元</td><td>35</td></tr>
+<tr><td>安卓探索程序</td><td>量子框架 ×2、安卓記憶矩陣 ×2</td><td>38</td></tr>
+<tr><td>安卓擴域卡</td><td>範圍升級 ×2、安卓記憶矩陣</td><td>33</td></tr>
+<tr><td>安卓自訂程序</td><td>安卓記憶矩陣 ×2、邏輯閘 ×4</td><td>42</td></tr>
+<tr><td>安卓行星採樣程序</td><td>量子框架 ×2、力場發射器</td><td>35</td></tr>
+<tr><td>採礦鑽機三型</td><td>採礦鑽機二型、聚變核心、量子框架</td><td>56</td></tr>
+<tr><td>數據矩陣</td><td>控制單元 ×2、量子晶片</td><td>32</td></tr>
+<tr><td>晶體矩陣</td><td>培育晶體 ×2、數據矩陣</td><td>32</td></tr>
+<tr><td>相位板</td><td>量子框架 ×2、培育晶體</td><td>33</td></tr>
+<tr><td>範圍升級</td><td>通量連結 ×2、感測陣列</td><td>30</td></tr>
+<tr><td>通量連結</td><td>磁環 ×2、能源電池</td><td>30</td></tr>
+<tr><td>量子晶片</td><td>高級電路 ×2、奈米塗層</td><td>30</td></tr>
+<tr><td>量子框架</td><td>通量連結 ×2、強化玻璃</td><td>33</td></tr>
+<tr><td>量子流體</td><td>離子粉 ×2、通量連結</td><td>30</td></tr>
+<tr><td>量子胸甲</td><td>量子晶片 ×2、光子板</td><td>26</td></tr>
+<tr><td>量子護腿</td><td>量子晶片 ×2、碳纖網</td><td>24</td></tr>
+<tr><td>量子靴子</td><td>量子晶片 ×2、重力子透鏡</td><td>24</td></tr>
+<tr><td>量子頭盔</td><td>量子晶片 ×2、鈦合金</td><td>24</td></tr>
+</tbody>
+</table>
+</div>
+<h2 id="錨定鍛造台2-道"><a class="header" href="#錨定鍛造台2-道">錨定鍛造台（2 道）</a></h2>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>產物</th><th>材料</th><th>電力</th></tr>
+</thead>
+<tbody>
+<tr><td>叢集匯流核心</td><td>維度錨 ×2、重力子核心 ×3</td><td>47</td></tr>
+<tr><td>維度錨</td><td>奇點外殼 ×3、虛空信標核心 ×2</td><td>46</td></tr>
+</tbody>
+</table>
+</div>
+<h2 id="鑄造台12-道"><a class="header" href="#鑄造台12-道">鑄造台（12 道）</a></h2>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>產物</th><th>材料</th><th>電力</th></tr>
+</thead>
+<tbody>
+<tr><td>金線 ×4</td><td>熔融金、線模（不消耗）</td><td>8</td></tr>
+<tr><td>銅板 ×3</td><td>熔融銅、板模（不消耗）</td><td>8</td></tr>
+<tr><td>銅線 ×4</td><td>熔融銅、線模（不消耗）</td><td>6</td></tr>
+<tr><td>鋼板 ×3</td><td>熔融鋼、板模（不消耗）</td><td>10</td></tr>
+<tr><td>鋼棒 ×3</td><td>熔融鋼、棒模（不消耗）</td><td>8</td></tr>
+<tr><td>鋼管 ×2</td><td>熔融鋼、管模（不消耗）</td><td>10</td></tr>
+<tr><td>鋼齒輪 ×2</td><td>熔融鋼、齒輪模（不消耗）</td><td>12</td></tr>
+<tr><td>鐵板 ×3</td><td>熔融鐵、板模（不消耗）</td><td>8</td></tr>
+<tr><td>鐵棒 ×3</td><td>熔融鐵、棒模（不消耗）</td><td>6</td></tr>
+<tr><td>鐵管 ×2</td><td>熔融鐵、管模（不消耗）</td><td>8</td></tr>
+<tr><td>鐵齒輪 ×2</td><td>熔融鐵、齒輪模（不消耗）</td><td>10</td></tr>
+<tr><td>青銅板 ×3</td><td>熔融青銅、板模（不消耗）</td><td>8</td></tr>
+</tbody>
+</table>
+</div>
+<h2 id="離心機3-道"><a class="header" href="#離心機3-道">離心機（3 道）</a></h2>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>產物</th><th>材料</th><th>電力</th></tr>
+</thead>
+<tbody>
+<tr><td>磁環</td><td>離子粉、鋼線、離心轉子</td><td>30</td></tr>
+<tr><td>離子粉</td><td>淨化碎晶 ×2</td><td>28</td></tr>
+<tr><td>離心轉子</td><td>離子粉 ×2、合金框架</td><td>30</td></tr>
+</tbody>
+</table>
+</div>
+<h2 id="雷射雕刻機22-道"><a class="header" href="#雷射雕刻機22-道">雷射雕刻機（22 道）</a></h2>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>產物</th><th>材料</th><th>電力</th></tr>
+</thead>
+<tbody>
+<tr><td>再生護符</td><td>高級電路 ×2、數據矩陣</td><td>20</td></tr>
+<tr><td>古代符文 [地]</td><td>魔法結晶 - II、末影結晶 - II、黑曜石、苔蘚方塊</td><td>22</td></tr>
+<tr><td>古代符文 [村民]</td><td>魔法結晶 - II、末影結晶 - II、綠寶石、異界凝膠</td><td>22</td></tr>
+<tr><td>古代符文 [水]</td><td>魔法結晶 - II、末影結晶 - II、海磷碎片、水桶</td><td>22</td></tr>
+<tr><td>古代符文 [火]</td><td>魔法結晶 - II、末影結晶 - II、烈焰粉、熔岩桶</td><td>22</td></tr>
+<tr><td>古代符文 [終]</td><td>魔法結晶 - II、末影結晶 - II、歌萊果、終界之眼</td><td>24</td></tr>
+<tr><td>古代符文 [虹]</td><td>魔法結晶 - II、末影結晶 - II、螢光墨囊、紫水晶碎片</td><td>24</td></tr>
+<tr><td>古代符文 [雷]</td><td>魔法結晶 - II、末影結晶 - II、銅錠、避雷針</td><td>22</td></tr>
+<tr><td>古代符文 [靈魂綁定]</td><td>魔法結晶 - III、末影結晶 - III、靈魂燈籠、壞死顱骨</td><td>28</td></tr>
+<tr><td>古代符文 [風]</td><td>魔法結晶 - II、末影結晶 - II、羽毛、夜魅皮膜</td><td>22</td></tr>
+<tr><td>壞死顱骨</td><td>魔法結晶 - III ×2、凋零骷髏頭顱</td><td>24</td></tr>
+<tr><td>控制單元</td><td>蝕刻電路 ×2、邏輯閘</td><td>27</td></tr>
+<tr><td>旋風護符</td><td>高級電路 ×2、高密碳塊</td><td>20</td></tr>
+<tr><td>末影結晶 - III</td><td>末影結晶 - II、末影結晶 - II、末影結晶 - II、末影結晶 - II</td><td>22</td></tr>
+<tr><td>獵人護符</td><td>高級電路 ×2、光學鏡片</td><td>20</td></tr>
+<tr><td>礦工護符</td><td>高級電路 ×2、熱線圈</td><td>20</td></tr>
+<tr><td>蝕刻電路</td><td>雷射鏡 ×2、高級電路</td><td>27</td></tr>
+<tr><td>路由晶片</td><td>蝕刻電路、邏輯閘、工業線束</td><td>20</td></tr>
+<tr><td>鐵砧護符</td><td>高級電路 ×2、鈦合金</td><td>22</td></tr>
+<tr><td>雷射鏡</td><td>光學鏡片 ×2、強化玻璃</td><td>26</td></tr>
+<tr><td>騎士護符</td><td>高級電路 ×2、複合面板</td><td>20</td></tr>
+<tr><td>魔法結晶 - III</td><td>魔法結晶 - II、魔法結晶 - II、魔法結晶 - II、魔法結晶 - II</td><td>20</td></tr>
+</tbody>
+</table>
+</div>
+<h2 id="電動化學反應器4-道"><a class="header" href="#電動化學反應器4-道">電動化學反應器（4 道）</a></h2>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>產物</th><th>材料</th><th>電力</th></tr>
+</thead>
+<tbody>
+<tr><td>反應堆冷卻液 ×2</td><td>冷卻罐、低溫凝膠</td><td>14</td></tr>
+<tr><td>合成纖維</td><td>聚合樹脂 ×2、生質纖維</td><td>48</td></tr>
+<tr><td>精密噴嘴</td><td>壓力導管 ×2、鋼線</td><td>45</td></tr>
+<tr><td>聚合樹脂</td><td>生質樹脂 ×2、煤粉</td><td>48</td></tr>
+</tbody>
+</table>
+</div>
+<h2 id="電動壓縮機8-道"><a class="header" href="#電動壓縮機8-道">電動壓縮機（8 道）</a></h2>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>產物</th><th>材料</th><th>電力</th></tr>
+</thead>
+<tbody>
+<tr><td>壓力導管</td><td>銅錠 ×2、玻璃面板</td><td>27</td></tr>
+<tr><td>壓實鐵胚</td><td>鐵板 ×2、鐵板</td><td>36</td></tr>
+<tr><td>碳纖網</td><td>煤粉 ×2</td><td>21</td></tr>
+<tr><td>複合面板</td><td>鋼板 ×2、塑膠</td><td>27</td></tr>
+<tr><td>鋼板</td><td>鐵板 ×2、煤粉</td><td>24</td></tr>
+<tr><td>錫板</td><td>錫錠</td><td>24</td></tr>
+<tr><td>鐵板</td><td>鐵錠 ×2</td><td>21</td></tr>
+<tr><td>高密碳塊</td><td>碳纖網 ×2、碳纖網</td><td>33</td></tr>
+</tbody>
+</table>
+</div>
+<h2 id="電動拉線機5-道"><a class="header" href="#電動拉線機5-道">電動拉線機（5 道）</a></h2>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>產物</th><th>材料</th><th>電力</th></tr>
+</thead>
+<tbody>
+<tr><td>工業線束</td><td>銅線 ×2、鋼線</td><td>36</td></tr>
+<tr><td>物流導管</td><td>壓力導管 ×2、鋼線</td><td>33</td></tr>
+<tr><td>銅線</td><td>銅錠 ×2</td><td>27</td></tr>
+<tr><td>鋼線</td><td>鋼板 ×2</td><td>33</td></tr>
+<tr><td>錫線</td><td>錫錠</td><td>22</td></tr>
+</tbody>
+</table>
+</div>
+<h2 id="電動洗礦機2-道"><a class="header" href="#電動洗礦機2-道">電動洗礦機（2 道）</a></h2>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>產物</th><th>材料</th><th>電力</th></tr>
+</thead>
+<tbody>
+<tr><td>生質粉碎物</td><td>作物 ×2</td><td>18</td></tr>
+<tr><td>礦漿</td><td>鐵粉 ×2</td><td>21</td></tr>
+</tbody>
+</table>
+</div>
+<h2 id="電動淨化器3-道"><a class="header" href="#電動淨化器3-道">電動淨化器（3 道）</a></h2>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>產物</th><th>材料</th><th>電力</th></tr>
+</thead>
+<tbody>
+<tr><td>冷卻電池</td><td>雪球、玻璃面板、淨化膜片</td><td>30</td></tr>
+<tr><td>淨化碎晶</td><td>礦漿 ×2</td><td>27</td></tr>
+<tr><td>淨化膜片</td><td>鏽蝕濾芯 ×2、纖維網</td><td>30</td></tr>
+</tbody>
+</table>
+</div>
+<h2 id="電動生質實驗室2-道"><a class="header" href="#電動生質實驗室2-道">電動生質實驗室（2 道）</a></h2>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>產物</th><th>材料</th><th>電力</th></tr>
+</thead>
+<tbody>
+<tr><td>生質樹脂</td><td>作物 ×2、木屑</td><td>33</td></tr>
+<tr><td>生質纖維</td><td>生質粉碎物 ×2、纖維網</td><td>30</td></tr>
+</tbody>
+</table>
+</div>
+<h2 id="電動篩礦機12-道"><a class="header" href="#電動篩礦機12-道">電動篩礦機（12 道）</a></h2>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>產物</th><th>材料</th><th>電力</th></tr>
+</thead>
+<tbody>
+<tr><td>地獄石英</td><td>靈魂砂 ×2</td><td>10</td></tr>
+<tr><td>矽晶</td><td>礫石 ×2</td><td>10</td></tr>
+<tr><td>篩出礦砂</td><td>礫石 ×2</td><td>10</td></tr>
+<tr><td>篩出礦砂</td><td>靈魂砂 ×2</td><td>10</td></tr>
+<tr><td>金粒</td><td>靈魂砂 ×2</td><td>10</td></tr>
+<tr><td>鉛粉</td><td>靈魂砂 ×2</td><td>10</td></tr>
+<tr><td>銅粉</td><td>礫石 ×2</td><td>10</td></tr>
+<tr><td>鋅粉</td><td>礫石 ×2</td><td>10</td></tr>
+<tr><td>鋅粉</td><td>靈魂砂 ×2</td><td>10</td></tr>
+<tr><td>錫粉</td><td>礫石 ×2</td><td>10</td></tr>
+<tr><td>鐵粉</td><td>礫石 ×2</td><td>10</td></tr>
+<tr><td>鐵粉</td><td>靈魂砂 ×2</td><td>10</td></tr>
+</tbody>
+</table>
+</div>
+<h2 id="電動粉碎機8-道"><a class="header" href="#電動粉碎機8-道">電動粉碎機（8 道）</a></h2>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>產物</th><th>材料</th><th>電力</th></tr>
+</thead>
+<tbody>
+<tr><td>煤粉 ×2</td><td>煤炭</td><td>15</td></tr>
+<tr><td>矽晶 ×2</td><td>地獄石英</td><td>18</td></tr>
+<tr><td>鈾粉 ×2</td><td>綠寶石礦</td><td>12</td></tr>
+<tr><td>鈾粉</td><td>綠寶石</td><td>14</td></tr>
+<tr><td>銅粉 ×2</td><td>銅礦</td><td>15</td></tr>
+<tr><td>銅粉 ×2</td><td>銅原礦</td><td>15</td></tr>
+<tr><td>鐵粉 ×2</td><td>鐵礦</td><td>15</td></tr>
+<tr><td>鐵粉 ×2</td><td>鐵原礦</td><td>15</td></tr>
+</tbody>
+</table>
+</div>
+<h2 id="電動離心機5-道"><a class="header" href="#電動離心機5-道">電動離心機（5 道）</a></h2>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>產物</th><th>材料</th><th>電力</th></tr>
+</thead>
+<tbody>
+<tr><td>濃縮鈾</td><td>鈾粉 ×3</td><td>18</td></tr>
+<tr><td>磁環</td><td>離子粉、鋼線、離心轉子</td><td>60</td></tr>
+<tr><td>鈾燃料棒</td><td>乏燃料棒 ×2</td><td>26</td></tr>
+<tr><td>離子粉</td><td>淨化碎晶 ×2</td><td>54</td></tr>
+<tr><td>離心轉子</td><td>離子粉 ×2、合金框架</td><td>60</td></tr>
+</tbody>
+</table>
+</div>
+<h2 id="電池庫3-道"><a class="header" href="#電池庫3-道">電池庫（3 道）</a></h2>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>產物</th><th>材料</th><th>電力</th></tr>
+</thead>
+<tbody>
+<tr><td>發射節點</td><td>能源電池、邏輯閘</td><td>14</td></tr>
+<tr><td>鋰電池</td><td>能源電池、錫板</td><td>15</td></tr>
+<tr><td>電容組</td><td>鋰電池、發射節點</td><td>18</td></tr>
+</tbody>
+</table>
+</div>
+<h2 id="電爐5-道"><a class="header" href="#電爐5-道">電爐（5 道）</a></h2>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>產物</th><th>材料</th><th>電力</th></tr>
+</thead>
+<tbody>
+<tr><td>鈷錠</td><td>鈷粉</td><td>35</td></tr>
+<tr><td>鉛錠</td><td>鉛粉</td><td>10</td></tr>
+<tr><td>鉻錠</td><td>鉻粉</td><td>35</td></tr>
+<tr><td>錫錠</td><td>錫粉</td><td>10</td></tr>
+<tr><td>鎢錠</td><td>鎢粉</td><td>40</td></tr>
+</tbody>
+</table>
+</div>
+<h2 id="電解分離機3-道"><a class="header" href="#電解分離機3-道">電解分離機（3 道）</a></h2>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>產物</th><th>材料</th><th>電力</th></tr>
+</thead>
+<tbody>
+<tr><td>氫氣瓶 ×2</td><td>水桶</td><td>30</td></tr>
+<tr><td>矽晶</td><td>紅石粉 ×4</td><td>25</td></tr>
+<tr><td>硒粉</td><td>螢石粉 ×4</td><td>25</td></tr>
+</tbody>
+</table>
+</div>
+<h2 id="電鋸2-道"><a class="header" href="#電鋸2-道">電鋸（2 道）</a></h2>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>產物</th><th>材料</th><th>電力</th></tr>
+</thead>
+<tbody>
+<tr><td>木屑</td><td>橡木材</td><td>7</td></tr>
+<tr><td>纖維網</td><td>竹子</td><td>7</td></tr>
+</tbody>
+</table>
+</div>
+<h2 id="高爐3-道"><a class="header" href="#高爐3-道">高爐（3 道）</a></h2>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>產物</th><th>材料</th><th>電力</th></tr>
+</thead>
+<tbody>
+<tr><td>碳化鎢粉</td><td>鎢粉、碳粉</td><td>60</td></tr>
+<tr><td>鈾礦粉</td><td>地獄石 ×8</td><td>40</td></tr>
+<tr><td>鋼錠</td><td>鐵錠、焦炭</td><td>50</td></tr>
+</tbody>
+</table>
+</div>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../recipes/workbench.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
+                            </a>
+
+                            <a rel="next prefetch" href="../recipes/cooking.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../recipes/workbench.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
+                    </a>
+
+                    <a rel="next prefetch" href="../recipes/cooking.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
+                    </a>
+            </nav>
+
+        </div>
+
+        <template id=fa-eye><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M288 32c-80.8 0-145.5 36.8-192.6 80.6C48.6 156 17.3 208 2.5 243.7c-3.3 7.9-3.3 16.7 0 24.6C17.3 304 48.6 356 95.4 399.4C142.5 443.2 207.2 480 288 480s145.5-36.8 192.6-80.6c46.8-43.5 78.1-95.4 93-131.1c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C433.5 68.8 368.8 32 288 32zM432 256c0 79.5-64.5 144-144 144s-144-64.5-144-144s64.5-144 144-144s144 64.5 144 144zM288 192c0 35.3-28.7 64-64 64c-11.5 0-22.3-3-31.6-8.4c-.2 2.8-.4 5.5-.4 8.4c0 53 43 96 96 96s96-43 96-96s-43-96-96-96c-2.8 0-5.6 .1-8.4 .4c5.3 9.3 8.4 20.1 8.4 31.6z"/></svg></span></template>
+        <template id=fa-eye-slash><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M38.8 5.1C28.4-3.1 13.3-1.2 5.1 9.2S-1.2 34.7 9.2 42.9l592 464c10.4 8.2 25.5 6.3 33.7-4.1s6.3-25.5-4.1-33.7L525.6 386.7c39.6-40.6 66.4-86.1 79.9-118.4c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C465.5 68.8 400.8 32 320 32c-68.2 0-125 26.3-169.3 60.8L38.8 5.1zM223.1 149.5C248.6 126.2 282.7 112 320 112c79.5 0 144 64.5 144 144c0 24.9-6.3 48.3-17.4 68.7L408 294.5c5.2-11.8 8-24.8 8-38.5c0-53-43-96-96-96c-2.8 0-5.6 .1-8.4 .4c5.3 9.3 8.4 20.1 8.4 31.6c0 10.2-2.4 19.8-6.6 28.3l-90.3-70.8zm223.1 298L373 389.9c-16.4 6.5-34.3 10.1-53 10.1c-79.5 0-144-64.5-144-144c0-6.9 .5-13.6 1.4-20.2L83.1 161.5C60.3 191.2 44 220.8 34.5 243.7c-3.3 7.9-3.3 16.7 0 24.6c14.9 35.7 46.2 87.7 93 131.1C174.5 443.2 239.2 480 320 480c47.8 0 89.9-12.9 126.2-32.5z"/></svg></span></template>
+        <template id=fa-copy><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M502.6 70.63l-61.25-61.25C435.4 3.371 427.2 0 418.7 0H255.1c-35.35 0-64 28.66-64 64l.0195 256C192 355.4 220.7 384 256 384h192c35.2 0 64-28.8 64-64V93.25C512 84.77 508.6 76.63 502.6 70.63zM464 320c0 8.836-7.164 16-16 16H255.1c-8.838 0-16-7.164-16-16L239.1 64.13c0-8.836 7.164-16 16-16h128L384 96c0 17.67 14.33 32 32 32h47.1V320zM272 448c0 8.836-7.164 16-16 16H63.1c-8.838 0-16-7.164-16-16L47.98 192.1c0-8.836 7.164-16 16-16H160V128H63.99c-35.35 0-64 28.65-64 64l.0098 256C.002 483.3 28.66 512 64 512h192c35.2 0 64-28.8 64-64v-32h-47.1L272 448z"/></svg></span></template>
+        <template id=fa-play><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M73 39c-14.8-9.1-33.4-9.4-48.5-.9S0 62.6 0 80V432c0 17.4 9.4 33.4 24.5 41.9s33.7 8.1 48.5-.9L361 297c14.3-8.7 23-24.2 23-41s-8.7-32.2-23-41L73 39z"/></svg></span></template>
+        <template id=fa-clock-rotate-left><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M75 75L41 41C25.9 25.9 0 36.6 0 57.9V168c0 13.3 10.7 24 24 24H134.1c21.4 0 32.1-25.9 17-41l-30.8-30.8C155 85.5 203 64 256 64c106 0 192 86 192 192s-86 192-192 192c-40.8 0-78.6-12.7-109.7-34.4c-14.5-10.1-34.4-6.6-44.6 7.9s-6.6 34.4 7.9 44.6C151.2 495 201.7 512 256 512c141.4 0 256-114.6 256-256S397.4 0 256 0C185.3 0 121.3 28.7 75 75zm181 53c-13.3 0-24 10.7-24 24V256c0 6.4 2.5 12.5 7 17l72 72c9.4 9.4 24.6 9.4 33.9 0s9.4-24.6 0-33.9l-65-65V152c0-13.3-10.7-24-24-24z"/></svg></span></template>
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../elasticlunr-ef4e11c1.min.js"></script>
+        <script src="../mark-09e88c2c.min.js"></script>
+        <script src="../searcher-09f2665d.js"></script>
+
+        <script src="../clipboard-1626706a.min.js"></script>
+        <script src="../highlight-abc7f01d.js"></script>
+        <script src="../book-609e4cb8.js"></script>
+
+        <!-- Custom JS scripts -->
+        <script src="../theme/cjk-search-2989e841.js"></script>
+
+
+
+    </div>
+    </body>
+</html>

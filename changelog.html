@@ -1,0 +1,1304 @@
+<!DOCTYPE HTML>
+<html lang="zh-TW" class="navy sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>📋 更新日記 - TechMC 科技百科</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="TechMC Minecraft 科技模組插件百科全書">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="favicon-de23e50b.svg">
+        <link rel="shortcut icon" href="favicon-8114d1fc.png">
+        <link rel="stylesheet" href="css/variables-8adf115d.css">
+        <link rel="stylesheet" href="css/general-e96d0476.css">
+        <link rel="stylesheet" href="css/chrome-d279d366.css">
+        <link rel="stylesheet" href="css/print-9e4910d8.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="fonts/fonts-9644e21d.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="mdbook-highlight-css" href="highlight-493f70e1.css">
+        <link rel="stylesheet" id="mdbook-tomorrow-night-css" href="tomorrow-night-4c0ae647.css">
+        <link rel="stylesheet" id="mdbook-ayu-highlight-css" href="ayu-highlight-3fdfc3ac.css">
+
+        <!-- Custom theme stylesheets -->
+
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "";
+            const default_light_theme = "navy";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "searchindex-be974765.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="toc-588afc34.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="mdbook-body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('navy')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="mdbook-sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("mdbook-sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="mdbook-sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="toc.html"></iframe>
+            </noscript>
+            <div id="mdbook-sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="mdbook-page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="mdbook-menu-bar-hover-placeholder"></div>
+                <div id="mdbook-menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="mdbook-sidebar-toggle" class="icon-button" for="mdbook-sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="mdbook-sidebar">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M0 96C0 78.3 14.3 64 32 64H416c17.7 0 32 14.3 32 32s-14.3 32-32 32H32C14.3 128 0 113.7 0 96zM0 256c0-17.7 14.3-32 32-32H416c17.7 0 32 14.3 32 32s-14.3 32-32 32H32c-17.7 0-32-14.3-32-32zM448 416c0 17.7-14.3 32-32 32H32c-17.7 0-32-14.3-32-32s14.3-32 32-32H416c17.7 0 32 14.3 32 32z"/></svg></span>
+                        </label>
+                        <button id="mdbook-theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="mdbook-theme-list">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M371.3 367.1c27.3-3.9 51.9-19.4 67.2-42.9L600.2 74.1c12.6-19.5 9.4-45.3-7.6-61.2S549.7-4.4 531.1 9.6L294.4 187.2c-24 18-38.2 46.1-38.4 76.1L371.3 367.1zm-19.6 25.4l-116-104.4C175.9 290.3 128 339.6 128 400c0 3.9 .2 7.8 .6 11.6c1.8 17.5-10.2 36.4-27.8 36.4H96c-17.7 0-32 14.3-32 32s14.3 32 32 32H240c61.9 0 112-50.1 112-112c0-2.5-.1-5-.2-7.5z"/></svg></span>
+                        </button>
+                        <ul id="mdbook-theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-ayu">Ayu</button></li>
+                        </ul>
+                        <button id="mdbook-search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="mdbook-searchbar">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M416 208c0 45.9-14.9 88.3-40 122.7L502.6 457.4c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L330.7 376c-34.4 25.2-76.8 40-122.7 40C93.1 416 0 322.9 0 208S93.1 0 208 0S416 93.1 416 208zM208 352c79.5 0 144-64.5 144-144s-64.5-144-144-144S64 128.5 64 208s64.5 144 144 144z"/></svg></span>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">TechMC 科技百科</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <span class=fa-svg id="print-button"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M128 0C92.7 0 64 28.7 64 64v96h64V64H354.7L384 93.3V160h64V93.3c0-17-6.7-33.3-18.7-45.3L400 18.7C388 6.7 371.7 0 354.7 0H128zM384 352v32 64H128V384 368 352H384zm64 32h32c17.7 0 32-14.3 32-32V256c0-35.3-28.7-64-64-64H64c-35.3 0-64 28.7-64 64v96c0 17.7 14.3 32 32 32H64v64c0 35.3 28.7 64 64 64H384c35.3 0 64-28.7 64-64V384zm-16-88c-13.3 0-24-10.7-24-24s10.7-24 24-24s24 10.7 24 24s-10.7 24-24 24z"/></svg></span>
+                        </a>
+                        <a href="https://github.com/QiuRui920811/TechProject" title="Git repository" aria-label="Git repository">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"/></svg></span>
+                        </a>
+                        <a href="https://github.com/QiuRui920811/TechProject/edit/main/docs/wiki/docs/wiki/changelog.md" title="Suggest an edit" aria-label="Suggest an edit" rel="edit">
+                            <span class=fa-svg id="git-edit-button"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M421.7 220.3l-11.3 11.3-22.6 22.6-205 205c-6.6 6.6-14.8 11.5-23.8 14.1L30.8 511c-8.4 2.5-17.5 .2-23.7-6.1S-1.5 489.7 1 481.2L38.7 353.1c2.6-9 7.5-17.2 14.1-23.8l205-205 22.6-22.6 11.3-11.3 33.9 33.9 62.1 62.1 33.9 33.9zM96 353.9l-9.3 9.3c-.9 .9-1.6 2.1-2 3.4l-25.3 86 86-25.3c1.3-.4 2.5-1.1 3.4-2l9.3-9.3H112c-8.8 0-16-7.2-16-16V353.9zM453.3 19.3l39.4 39.4c25 25 25 65.5 0 90.5l-14.5 14.5-22.6 22.6-11.3 11.3-33.9-33.9-62.1-62.1L314.3 67.7l11.3-11.3 22.6-22.6 14.5-14.5c25-25 65.5-25 90.5 0z"/></svg></span>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="mdbook-search-wrapper" class="hidden">
+                    <form id="mdbook-searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="mdbook-searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="mdbook-searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <span class=fa-svg id="fa-spin"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M304 48c0-26.5-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48s48-21.5 48-48zm0 416c0-26.5-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48s48-21.5 48-48zM48 304c26.5 0 48-21.5 48-48s-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48zm464-48c0-26.5-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48s48-21.5 48-48zM142.9 437c18.7-18.7 18.7-49.1 0-67.9s-49.1-18.7-67.9 0s-18.7 49.1 0 67.9s49.1 18.7 67.9 0zm0-294.2c18.7-18.7 18.7-49.1 0-67.9S93.7 56.2 75 75s-18.7 49.1 0 67.9s49.1 18.7 67.9 0zM369.1 437c18.7 18.7 49.1 18.7 67.9 0s18.7-49.1 0-67.9s-49.1-18.7-67.9 0s-18.7 49.1 0 67.9z"/></svg></span>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="mdbook-searchresults-outer" class="searchresults-outer hidden">
+                        <div id="mdbook-searchresults-header" class="searchresults-header"></div>
+                        <ul id="mdbook-searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('mdbook-sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('mdbook-sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#mdbook-sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="mdbook-content" class="content">
+                    <main>
+                        <h1 id="-更新日記"><a class="header" href="#-更新日記">📋 更新日記</a></h1>
+<blockquote>
+<p>此頁記錄每次版本更新的修復與新增內容，方便玩家查閱。</p>
+<p>⚠️ <strong>這是歷史紀錄，不是現行數值表。</strong> 舊條目裡的數字是「當時」的設定，之後可能被調整過。
+要查現在的實際數值，請看各系統的專頁（例如 <a href="chickens/README.html">雞隻系統</a>、<a href="logistics/energy-network.html">能源網路</a>），
+不要拿舊的更新日記當答案。</p>
+</blockquote>
+<hr>
+<h2 id="20260904"><a class="header" href="#20260904">2026/09/04</a></h2>
+<h3 id="吸血改成機率觸發"><a class="header" href="#吸血改成機率觸發">吸血改成機率觸發</a></h3>
+<p>吸血刃跟噬魂附魔原本都是「每刀固定回一點血」，疊在一起之後續航太硬。改成低機率、觸發時吸一大口：</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th></th><th>舊</th><th>新</th></tr>
+</thead>
+<tbody>
+<tr><td><strong>吸血刃</strong></td><td>每刀回傷害 25%，沒有上限</td><td><strong>15% 機率</strong>回傷害 <strong>50%</strong>，單次上限 8 血</td></tr>
+<tr><td><strong>噬魂 I</strong></td><td>每刀回 8%（上限 6）</td><td><strong>5% 機率</strong>回 40%（上限 6）</td></tr>
+<tr><td><strong>噬魂 II</strong></td><td>每刀回 14%（上限 6）</td><td><strong>10% 機率</strong>回 50%（上限 6）</td></tr>
+<tr><td><strong>噬魂 III</strong></td><td>每刀回 20%（上限 6）</td><td><strong>15% 機率</strong>回 60%（上限 6）</td></tr>
+</tbody>
+</table>
+</div>
+<p>平均回血量約降到原本的三分之一，但觸發時會有紅霧與吸取音效，看得出來哪一刀吸到了。</p>
+<h3 id="順手修掉兩個漏洞"><a class="header" href="#順手修掉兩個漏洞">順手修掉兩個漏洞</a></h3>
+<ul>
+<li><strong>吸血刃打盔甲座、展示框、畫、船、礦車也會回血</strong> —— 現在只認活著的生物。</li>
+<li><strong>橫掃一次算五份吸血</strong> —— 橫掃攻擊不再觸發吸血刃。</li>
+</ul>
+<hr>
+<h2 id="20260908"><a class="header" href="#20260908">2026/09/08</a></h2>
+<h3 id="基因雞頁整個重寫"><a class="header" href="#基因雞頁整個重寫">基因雞頁整個重寫</a></h3>
+<p>玩家回饋照單全收：資源表拿掉 0–63 編號和位點字母（遊戲裡看不到那些），每種資源配圖，範例改照真表（<code>DrrDDD</code> 是閃長岩，不是礫石），全部是 D 或 H 的雞寫清楚「不能進激發室」。</p>
+<h3 id="私人雞舍冷卻數字"><a class="header" href="#私人雞舍冷卻數字">私人雞舍冷卻數字</a></h3>
+<p>繁殖冷卻 180 秒，速度升級每張 −40 秒；雞舍第三格升級槽只收堆疊升級，所以速度升級最多放兩張：0 張 180 秒、1 張 140 秒、2 張 100 秒。</p>
+<hr>
+<h2 id="20260903"><a class="header" href="#20260903">2026/09/03</a></h2>
+<h3 id="說明更正--堆疊升級機制沒有改動是文件寫錯"><a class="header" href="#說明更正--堆疊升級機制沒有改動是文件寫錯">說明更正 — 堆疊升級（機制沒有改動，是文件寫錯）</a></h3>
+<p>之前雞隻頁面跟升級模組頁面各講一套，看起來互相矛盾。查證後確認<strong>兩邊講的是不同機器</strong>：</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th></th><th>一般加工機（粉碎機、電動熔爐…）</th><th>激發室（口袋雞）</th></tr>
+</thead>
+<tbody>
+<tr><td>堆疊升級效果</td><td>35% 機率 +1</td><td><strong>必定 +1</strong>（產出 1 → 2）</td></tr>
+<tr><td>放第 2、3 個</td><td>沒作用</td><td>沒作用</td></tr>
+</tbody>
+</table>
+</div>
+<p>兩頁都已補上「這條在講哪種機器」，不會再看起來打架。</p>
+<h2 id="20260803"><a class="header" href="#20260803">2026/08/03</a></h2>
+<h3 id="-說明書全面對齊遊戲"><a class="header" href="#-說明書全面對齊遊戲">📖 說明書全面對齊遊戲</a></h3>
+<p>把整份說明書拿去跟遊戲逐條核對，修掉一批「說明書寫的」跟「遊戲裡的」對不上的地方。<strong>只動說明書，遊戲一個字都沒改。</strong> 以下每一項都是照著做會做錯的：</p>
+<ul>
+<li><strong>堆疊升級</strong>：說明書寫「3 個槽各放 1 個 → 平均 +1.5 產出」，實際上<strong>只認 1 個</strong>，第 2、3 個完全沒作用；機率也不是 50% 而是 <strong>35%</strong>，效果是「該次產出 +1」不是加倍。另外有 43 道配方吃不到這個加成（可以逆向還原的那些，例如熔爐燒錠、粉碎機碎粉）。</li>
+<li><strong>加熱線圈不能加熱</strong>：它只是合成材料。高爐和工業冶煉爐是<strong>接電後自己升溫</strong>（高爐 1.4 度/秒、冶煉爐 2 度/秒），高爐約 4 分 45 秒、冶煉爐約 5 分鐘到門檻。</li>
+<li><strong>過熱</strong>：以前完全沒寫。溫度到了之後運轉中每秒 +8 度，冶煉爐<strong>約 50 秒就會撞到 1000 度停機</strong>。四種冷卻機的實際降溫量與換算也補上了。</li>
+<li><strong>多方塊怎麼蓋</strong>：高爐是「周圍 26 格裡至少 17 格地獄磚」；工業冶煉爐是「貼著的六個面裡至少 4 面岩漿塊」；<strong>加壓室不用蓋 3×3×3</strong>，一樣是六面貼 4 個鐵方塊就好（照舊說明書會多花 22 個鐵方塊）；<strong>鑄造台根本不需要結構</strong>。中間空一格就不算。</li>
+<li><strong>烹飪產物名</strong>：說明書寫「烤牛排／烤豬排／烤羊排／乾海帶」，實際拿到的是「牛排／烤豬肉／烤羊肉／海帶乾」；「合成肉塊 → 合成肉排」實際產出是<strong>牛排</strong>，遊戲裡沒有「合成肉排」這個東西。</li>
+<li><strong>巨構名字全錯</strong>：真空室→真空工藝艙、曲速裝配台→曲率裝配機、錨定鍛台→錨定鍛造台、巔峰鍛台→巔峰鍛成儀。</li>
+<li><strong>行星採集機的產出全錯</strong>：寒晶結晶→霜核晶簇、虛空玻璃碎片→虛璃碎片、暴風玻璃碎片→風暴玻片、日耀碎片→日耀碎晶。</li>
+<li><strong>一字之差的錯名</strong>（會讓你搜不到東西）：機器外殼→機械外殼、高階電路→高級電路、能量電池→能源電池、總線框架→總線機架、物品節點→物流節點、遺物掃描儀→遺產掃描儀、異星精煉台→異星精煉槽、生物合成槽→生質合成槽、基因模板→基因樣板、星球遺物→星核遺物、倪克斯遺物→倪克斯遺核、作物收割器→作物收割機。</li>
+<li><strong>數量重新數過</strong>：物品 613→615、機器 152→153、藍圖 91→92、成就 89→74；護甲原本寫「9 套 36 件」，實際是 <strong>8 套完整（32 件）＋太陽能頭盔單品</strong>，合計 33 件。</li>
+<li><strong>機器狀態一覽</strong>：看到「⚠ 電力不足」「⚠ 輸出滿載」「✖ 結構不完整」時該做什麼，以前沒有任何地方寫。</li>
+<li>表格裡直接露出英文代號的 <strong>64 處</strong>（coal、coke、crops、plastic、silicon…）換成中文名；電力單位統一成 <strong>EU/秒</strong>（原本一半頁面寫 EU/刻）。</li>
+</ul>
+<h3 id="-以後不會再漂"><a class="header" href="#-以後不會再漂">🔧 以後不會再漂</a></h3>
+<p>新增兩支比對工具，接進說明書的同步流程 —— <strong>對不上就拒絕同步，不會再把錯的內容餵給 AI 幫手</strong>：</p>
+<ul>
+<li>總數、661 道加工配方、74 項成就、35 道烹飪、指令是否存在</li>
+<li>物品／機器的中文名、耗電數字、反引號裡的 id</li>
+<li>「跟遊戲內名稱只差一個字」的寫法（上面那批就是這樣抓出來的）</li>
+</ul>
+<p>工具只檢查說明書，<strong>不檢查遊戲</strong> —— 遊戲是答案，說明書照著答案寫。</p>
+<hr>
+<h2 id="20260802"><a class="header" href="#20260802">2026/08/02</a></h2>
+<h3 id="-修復"><a class="header" href="#-修復">🐛 修復</a></h3>
+<ul>
+<li><strong>採礦鑽機挖到礦，同一條礦脈剩下的會消失</strong>：鑽機動手前會借主人的身分發一個「這格能不能挖」的詢問給領地插件。防透視插件收到之後分不出真假，以為玩家真的敲了那顆礦，就把周圍還沒露臉的整條礦脈換成石頭 —— 於是一條 9 顆的鐵礦脈，鑽機只拿得到 1 顆，產量剩零頭。現在詢問時會標明「這只是問路，不是真的挖」，防透視插件看到就放行。<strong>產量恢復正常，一條礦脈整條都拿得到。</strong></li>
+<li><strong>漏斗介面不把東西送進箱子</strong>：三個問題疊在一起。① 物流網路（伐木機、物品節點）推進來的東西全堆在漏斗介面自己身上，而它只搬「隔壁機器的產出」，自己的貨完全沒有出口 —— 塞滿之後上游就再也推不進來，整條線像突然斷掉，拿走一組又活過來。② 進料成功的那一輪就不出料，旁邊只要有個一直供料的箱子，出料永遠輪不到。③ 介面裡設的輸出方向根本沒被讀，設「全方向」也沒用。現在一輪三件事同時做，輸出方向也真的生效了。</li>
+<li><strong>電池庫做出來的東西送不出去</strong>：電池庫被歸類成「純能源機器，不產物品」，但它其實有自己的配方（能源電池 + 鋰電池 + 錫板 → 電容組）。成品永遠卡在輸出格，物品節點、工業總線怎麼接都拉不走。同樣被誤判的還有太陽能陣列、融合反應爐、時序引擎、熵室，一併修好。</li>
+<li><strong>普通工作台做得出機器</strong>：上次為了讓配方書看得到科技配方，把「必須用進階工作台」的檢查一起關掉了，等於整個進階工作台的設計被繞過。現在分開了：<strong>配方書照樣看得到、點一下會自動排好材料</strong>，但要做出來還是得在工作台下方放鐵方塊。</li>
+</ul>
+<h3 id="-調整"><a class="header" href="#-調整">⚡ 調整</a></h3>
+<ul>
+<li><strong>漏斗介面變快</strong>：一輪搬 16 個（原本 1 個），每片速度模組再 +16，插滿 3 片是 64 個。而且以前整段程式根本沒讀速度模組，插了也沒用。</li>
+<li><strong>真空吸入口變快</strong>：插速度模組會真的變快（每片 -1 刻），而且一次會把範圍內的掉落物全收，不是收一個就收工。</li>
+</ul>
+<hr>
+<h2 id="20260730"><a class="header" href="#20260730">2026/07/30</a></h2>
+<h3 id="-修復-1"><a class="header" href="#-修復-1">🐛 修復</a></h3>
+<ul>
+<li><strong>太陽能頭盔幾乎不會充電</strong>：它以前掛在「玩家移動」上偵測，外層最快 3 秒才檢查一次，裡面卻要求剛好對上某個時間點——命中機率只有 <strong>1%</strong>，而且<strong>站著曬太陽完全不會充</strong>。現在改成獨立計時，準時每 5 秒充一次，站著也會充。</li>
+<li><strong>太陽能頭盔改成「每件都充」</strong>：以前是每次隨機挑一件裝備充 1 EU，帶越多裝備每件越慢（帶 5 件的話一件要等 25 秒才 +1）。現在背包裡<strong>每一件</strong>沒充飽的能源裝備各充 <strong>3 EU</strong>，帶多少件都一樣快。充飽風暴法杖（80 EU）約 2.2 分鐘。充電時頭上會冒白色光點，看得出來它在運作。</li>
+<li><strong>鐵砧合併會吃掉一邊的特殊附魔</strong>：兩件都有特殊附魔的裝備放進鐵砧合併時，原版附魔正常合併，但<strong>右邊那件的特殊附魔會整組消失</strong>（鐵砧的結果只從左邊那件帶自訂資料）。現在兩邊會取聯集、同一個附魔取較高階，跟原版附魔的行為一致。</li>
+<li><strong>超級烽火台可以無限複製</strong>：科技的化學反應器、電動化學反應器、軌道中繼站是拿原版烽火台當機器方塊，放下去會被超級烽火台系統誤認成一座新的烽火台，拆掉時<strong>機器和超級烽火台各拿一個</strong>。現在其他插件的烽火台方塊會被正確略過。</li>
+</ul>
+<hr>
+<h2 id="20260728"><a class="header" href="#20260728">2026/07/28</a></h2>
+<h3 id="-新增"><a class="header" href="#-新增">✨ 新增</a></h3>
+<ul>
+<li><strong>手搖採礦機</strong>（前期）：不吃電、燒燃料的手動採礦裝置。結構是「兩側鐵方塊、上面各一個活塞，中間高爐、高爐上方箱子」，<strong>對高爐右鍵</strong>就往下挖一格，高爐會亮起、兩側活塞一高一低地抽動。燃料放上方箱子：煤炭／木炭 8 格、煤炭塊 72 格、烈焰桿 12 格、熔岩桶 100 格。挖到的東西也進同一個箱子。結構跟後期的採礦鑽機同款，升級不用重學。</li>
+<li><strong>採礦機可以擴大範圍</strong>：採礦鑽機（含二型、三型）現在吃「範圍升級」——預設只挖腳下 1 個區塊，插 1 個變 3×3 區塊，插 2 個或 1 個量子範圍升級變 5×5 區塊（上限）。由內往外一圈一圈挖。</li>
+<li><strong>大麻／大麻種子</strong>：打草有機率撿到種子，種在耕地上，成熟採收得到大麻與種子。右鍵抽會消耗，60 秒內頭暈、講話語無倫次、嘴邊冒煙。</li>
+</ul>
+<h3 id="-修復-2"><a class="header" href="#-修復-2">🐛 修復</a></h3>
+<ul>
+<li><strong>10 台機器待機時完全不啟動（焦爐、風力發電機、研究桌…）</strong>：這是「材料丟進去毫無反應」的真正原因。系統為了效能，會讓待機中的機器每 0.25 秒才動一次，但<strong>計時器的對時算錯了一格</strong>——機器內部設定「每 2 秒加工一次」之類的節奏，永遠對不到那個被放行的時間點，等於<strong>一次都不會執行</strong>。
+受影響：焦爐、風力發電機、研究桌、地質抽取機、水冷機、冷卻循環泵、壓力室、量子抽屜、安卓工作站、星球傳送門。以前是靠一份「不准降頻」的名單一台一台補，補一台漏一台；現在改成把對時修正，任何節奏的機器都不會再漏掉。</li>
+<li><strong>不用電的機器不再顯示「⚡0」</strong>：焦爐這種完全不吃電的機器，狀態列以前也掛著閃電和 0，害人以為它在等電、跑去接線。現在不用電的機器只顯示運轉狀態。</li>
+<li><strong>重載插件會讓機器「退回幾分鐘前」</strong>：機器裡的電量、燃料、加工進度平常每 5 分鐘存一次檔，關閉插件時本來會補存最後一次。但這道「補存」被自家的防覆蓋機制誤判成非法寫入擋掉了，結果每次重載都退回上一次存檔——<strong>明明沒人碰過的機器，卻自己變回舊狀態</strong>。現在關閉流程會正常存檔，事後殘留的寫入照樣擋。</li>
+<li><strong>電力幾乎不會流動（電池庫、能源節點都受影響）</strong>：這是電網長期「感覺壞掉」的真正原因，一次修好三件事。</li>
+</ul>
+<ol>
+<li><strong>搬電速度太慢</strong>：以前不管哪台機器，每次只搬 2～6 點電，可是電池庫容量有 24000 點——把一台電池庫灌滿要接近一小時，看起來就像「發電機放旁邊完全沒反應」。現在每台機器的傳輸速度改成跟自己的容量掛勾，<strong>約 3 秒就能填滿一格容量</strong>。</li>
+<li><strong>電池庫沒辦法供電給能源節點</strong>：電池庫走的是另一條沒有「5 格輻射」的送電流程，所以「節點旁邊放電池庫」永遠沒作用。現在電池庫和發電機用同一條流程，<strong>節點放在電池庫 5 格內就會自動充飽，再輻射給周圍機器</strong>。</li>
+<li><strong>電池庫和能源節點被降頻</strong>：這兩台是電網的搬運工，卻跟一般機器一樣每 0.25 秒才動一次，等於全服送電速度再砍五分之一。現在它們每秒都搬電。</li>
+</ol>
+<ul>
+<li><strong>電池庫會把加工機器的存電吸乾</strong>：電池庫以前對旁邊所有機器一視同仁地抽電，機器好不容易存的電又被抽回去，永遠湊不滿一次加工。現在電池庫<strong>只從發電機和其他電池庫收電</strong>。</li>
+<li><strong>配電不公平</strong>：一台發電機接多台機器時，排在前面的那台會把電整碗端走。現在存量不夠時<strong>平均分給每台機器</strong>。</li>
+<li><strong>電動篩礦機鎖定配方沒有作用</strong>：介面可以鎖、也會回「配方已鎖定為 XX」，但機器照樣隨機吐東西。現在鎖了就照鎖的產出。</li>
+<li><strong>進階工作台照書擺好材料卻做不出來</strong>：以前材料全對還是顯示「未解鎖」，要另外花研究點。現在<strong>擺對材料就等於學會了，直接做得出來</strong>（機器配方本來就是這個規則，工作台漏掉了）。</li>
+<li><strong>煤炭發電機不吃木炭</strong>：木炭是前期唯一可再生的燃料，現在收了。</li>
+<li><strong>科技書 14 台機器寫的投入／產出跟實際配方不符</strong>：改成直接從真實配方推導，以後不會再對不上。</li>
+<li><strong>配方頁把產出顯示成原版方塊</strong>：科技熔爐的 id 跟原版方塊撞名，導致產出畫成原版熔爐。現在產出一律優先顯示科技物品。</li>
+<li><strong>合金冶煉爐點不開</strong>：結構圖裡的「火」不能做成物品，整頁開不起來，現在用打火石圖示代替。</li>
+</ul>
+<h3 id="-科技書改版"><a class="header" href="#-科技書改版">📖 科技書改版</a></h3>
+<ul>
+<li><strong>點物品直接看配方</strong>，不用先過一層詳情頁。</li>
+<li>配方頁<strong>只留必要的東西</strong>：3×3 材料、機台、產出、返回、翻頁；說明併進產出物品的文字裡；背景只鋪最上排。槽位對齊 Slimefun（返回@1、機台@10、產出@16、翻頁@28/34）。</li>
+<li><strong>多方塊結構改用真方塊排出來</strong>（研磨石、合金冶煉爐、壓力室、護甲鍛造台），不再是「放在發射器上方」這種文字。</li>
+<li>機器頁新增「<strong>這台機器能做什麼</strong>」清單，點任一個直接看做法（以前只能反過來查產物）。</li>
+<li>機器資訊會寫清楚<strong>要電還是要燃料</strong>。</li>
+<li><strong>能源節點／導能線纜補上數字</strong>：節點周圍 5 格自動供電、自己不耗電、儲能 6000；線纜網路深度 8，每個範圍升級 +6，<strong>節點會重置深度</strong>（超過 8 段就中間插一個節點）。</li>
+</ul>
+<hr>
+<h2 id="20260726"><a class="header" href="#20260726">2026/07/26</a></h2>
+<h3 id="-追加修正同日"><a class="header" href="#-追加修正同日">🔧 追加修正（同日）</a></h3>
+<ul>
+<li><strong>電路板配方顯示</strong>：科技書原本把新加的硒粉配方排在第一頁，讓人誤以為原配方被改掉。現在「銅錠 + 矽晶 + 焊錫合金」回到預設顯示，硒粉那條列為後期替代配方。<strong>原始配方從頭到尾沒有更動。</strong></li>
+<li><strong>18 種附魔卷軸各自獨立</strong>：原本 18 種卷軸的材料完全相同，製造機只做得出其中一種。現在每種卷軸都有專屬材料（例：死神審判＝凋零骷髏頭顱、雷霆連鎖＝避雷針、不死鳥涅槃＝不死圖騰），全部都做得出來。</li>
+</ul>
+<h3 id="-修復-3"><a class="header" href="#-修復-3">🐛 修復</a></h3>
+<ul>
+<li><strong>豬靈農場壞掉</strong>：豬靈撿東西時系統會出錯（log 中出現 223 次），連帶影響自動化農場，已修好。</li>
+<li><strong>戰鬥中噴錯</strong>：荊棘反傷、護符、特殊附魔的音效與粒子在在多人同時觸發時會出錯，共 25 處已修正。</li>
+<li><strong>傳送面板永遠充不飽</strong>：面板待機時每秒白燒 700 電，邊充邊燒。現在待機不耗電。</li>
+<li><strong>自動農場餵不動</strong>：唯一入料「作物種子」以前只有作物收割機做得出來，而作物收割機又要自動農場的產物，形成死循環。現在進階工作台可直接做作物種子（小麥種子×4 + 骨粉）。</li>
+<li><strong>機器訊息重複兩行</strong>：開機、改方向的提示會跳兩次，現在一次一條。</li>
+<li><strong>雞網對其他動物變成栓繩</strong>：雞網現在只對雞有效。</li>
+<li><strong>合金冶煉爐／壓力室說明</strong>：原本寫「台階」，害玩家去放樓梯。正確是<strong>半磚</strong>（地獄磚半磚、平滑石頭半磚）。</li>
+<li><strong>能源電池說明錯誤</strong>：它不能充電也不能吸電，只是做機器的零件；要充電請用電池庫。</li>
+</ul>
+<h3 id="-新增-1"><a class="header" href="#-新增-1">✨ 新增</a></h3>
+<ul>
+<li><strong>禁音科技</strong>：完全關閉所有科技訊息（含新手引導）。科技書 → ☰ 更多選單 → 鈴鐺，或 <code>/tech mute</code>。</li>
+<li><strong>科技機器防爆</strong>：苦力怕、TNT、床爆炸都炸不壞放置的科技機器。</li>
+<li><strong>粉末有了用途</strong>：</li>
+<li>粗金 → 粉碎機 → 金粉×2（礦物加倍）；金粉 → 熔爐 → 金錠</li>
+<li>鐵粉 + 金粉 → 合金爐 → 鍍金鐵錠×2</li>
+<li>硫磺粉 + 煤粉 → 化學反應器 → 火藥×2</li>
+<li>硒粉 + 銅粉 + 矽晶 → 製造機 → 電路板×2（後期效率配方，原本的銅錠+矽晶+焊錫合金配方不變）</li>
+<li><strong>科技書「可以做什麼」</strong>：查看任何材料時，會依照真實配方列出它能放進哪台機器、做出什麼。</li>
+<li><strong>新手引導精簡</strong>：縮短為 11 關，只教操作。老玩家不會被重置。</li>
+</ul>
+<hr>
+<h2 id="20260418"><a class="header" href="#20260418">2026/04/18</a></h2>
+<h3 id="-多方塊結構進選單"><a class="header" href="#-多方塊結構進選單">🧱 多方塊結構進選單</a></h3>
+<ul>
+<li>四種多方塊結構（研磨石、合金冶煉爐、壓力室、護甲鍛造台）現在<strong>直接出現在科技選單</strong>的「製程/製造 → 第一階」分類中。</li>
+<li>點進去可以看到<strong>搭建方式</strong>（哪個方塊放在發射器上方）和<strong>完整配方列表</strong>。</li>
+<li>零門檻解鎖（<code>initial</code>），新玩家打開科技書就能看到。</li>
+</ul>
+<h3 id="-方塊破壞器"><a class="header" href="#-方塊破壞器">⚙️ 方塊破壞器</a></h3>
+<ul>
+<li><strong>新機器：方塊破壞器</strong>（方塊破壞器）——唯一不需要電力、純紅石驅動的科技機器。</li>
+<li>方塊材質為投擲器（DROPPER），放置後朝向即為破壞方向。</li>
+<li>收到紅石訊號時自動破壞前方一格方塊，掉落物存入輸出欄。</li>
+<li>可接物流節點自動搬出產物。</li>
+<li>不可破壞基岩、屏障、刷怪籠、科技機器等受保護方塊。</li>
+<li>搭配時鐘電路 / 觀察者 / 活塞 = 全自動刷石機、自動挖礦線。</li>
+<li>合成方式：組裝機（鐵板×2 + 機器零件 + 投擲器）。</li>
+</ul>
+<hr>
+<h2 id="20260417"><a class="header" href="#20260417">2026/04/17</a></h2>
+<h3 id="-多方塊結構合成系統"><a class="header" href="#-多方塊結構合成系統">⚒️ 多方塊結構合成系統</a></h3>
+<ul>
+<li><strong>全新 Slimefun 風格多方塊合成</strong>：用原版方塊在世界中搭出結構，把材料放進發射器，右鍵即可合成。不需要電力、不需要打開 GUI。</li>
+<li><strong>研磨石</strong>（橡木柵欄 + 發射器）：原礦 → 粉（鐵粉、銅粉、金粉、碳粉、硫磺等）</li>
+<li><strong>合金冶煉爐</strong>（地獄磚台階 + 發射器 + 旁邊點火）：青銅錠、鋼錠、焊錫錠、鍍金鐵錠、矽鐵錠</li>
+<li><strong>壓力室</strong>（平滑石頭台階 + 發射器）：鐵板、銅板、鋼板、青銅板、碳板、錫板</li>
+<li><strong>護甲鍛造台</strong>（鐵砧 + 發射器）：泰坦護甲套裝、伐木斧、太陽能頭盔</li>
+<li>多方塊結構不需要註冊或放置，搭好即用、拆掉即失效。提供前期零門檻的合成路徑。</li>
+</ul>
+<h3 id="-新工具"><a class="header" href="#-新工具">🔧 新工具</a></h3>
+<ul>
+<li><strong>伐木斧</strong>：砍一根原木即連鎖砍倒整棵樹（最多 128 根），每根消耗 1 耐久。 搜索，支援所有原木/菌柄類型。</li>
+<li><strong>太陽能頭盔</strong>：戴在頭上時，在露天白天每 5 秒為背包中<strong>每一件</strong>能源裝備各充入 3 EU。</li>
+<li><strong>科技背包</strong>：右鍵打開 27 格便攜儲物空間，關閉時自動存進到物品物品內建資料，物品跟著背包走。</li>
+</ul>
+<h3 id="-機器輸入過濾"><a class="header" href="#-機器輸入過濾">🔩 機器輸入過濾</a></h3>
+<ul>
+<li>所有加工型機器 GUI 右上角新增「輸入過濾」按鈕：</li>
+<li>左鍵：切換模式（關閉 → 白名單 → 黑名單）</li>
+<li>右鍵 + 手持物品：新增/移除過濾項</li>
+<li>Shift+右鍵：清空過濾清單</li>
+<li>物流/發電機類機器不顯示此按鈕（有專用過濾）。</li>
+<li>過濾資料完整持久化，重啟後保留。</li>
+</ul>
+<h3 id="-平衡調整"><a class="header" href="#-平衡調整">⚖️ 平衡調整</a></h3>
+<ul>
+<li>合金爐、工業洗礦機、工業壓縮機分類從一階改為 <strong>INTERMEDIATE</strong>。</li>
+<li>壓縮機、拉線機分類從二階改為 <strong>BASIC</strong>。</li>
+</ul>
+<h3 id="-其他改進"><a class="header" href="#-其他改進">📝 其他改進</a></h3>
+<ul>
+<li><strong>未研究配方標示</strong>：機器配方列表中未研究的配方現在顯示 BARRIER + 🔒 未研究狀態，避免玩家困惑。</li>
+<li><strong>活塞推擠保護</strong>：活塞不再能把機器方塊推成普通方塊。</li>
+<li><strong>Android MOVE 指令</strong>：支援 <code>MOVE x y z</code> 相對座標語法，偏移上限改為使用有效巡邏半徑。</li>
+<li><strong>輻射衣合成表</strong>：新增 4 件 hazmat 套裝藍圖。</li>
+<li><strong>重複合成表修正</strong>：工業離心機、電解分離器各自擁有獨立藍圖。</li>
+</ul>
+<hr>
+<h2 id="20260410"><a class="header" href="#20260410">2026/04/10</a></h2>
+<h3 id="-核反應堆重構"><a class="header" href="#-核反應堆重構">⚛️ 核反應堆重構</a></h3>
+<ul>
+<li><strong>燃料循環機制</strong>：核反應堆不再「每秒吃燃料」的舊行為，改為每組燃料穩定運轉 <strong>20 秒</strong> 的完整循環。</li>
+<li>每組：1 × 鈾燃料棒 + 1 × 反應堆冷卻液</li>
+<li>循環期間每秒固定產出 <strong>20 EU/秒</strong>，循環結束才輸出 <strong>1 根乏燃料棒</strong> 到緩衝區</li>
+<li><code>speed_upgrade</code> 每級 <strong>+8 EU/秒</strong>（線性加成）</li>
+<li>冷卻液不足會<strong>退還鈾燃料棒</strong>並中斷循環，避免燃料浪費</li>
+<li><strong>關鍵 Bug 修正</strong>：修正過去<strong>無燃料仍能發電</strong>的嚴重漏洞。現在沒有燃料時完全不發電，符合物理直覺。</li>
+<li><strong>乏燃料棒回收</strong>（新配方）：</li>
+<li><strong>電動離心機</strong>：乏燃料棒 ×1 → 鈾粉 ×1（22 EU）</li>
+<li><strong>電動化學反應器</strong>：乏燃料棒 ×2 + 反應堆冷卻液 → 濃縮鈾 ×1（32 EU），跳過粉碎+離心兩步的進階再處理路徑</li>
+</ul>
+<h3 id="-新星球迷途星-labyrinth"><a class="header" href="#-新星球迷途星-labyrinth">🪐 新星球：迷途星 (Labyrinth)</a></h3>
+<ul>
+<li><strong>第 6 顆星球上線</strong>：由午夜黑森林組成的瘴氣世界，整顆星球是一座無盡迷宮。</li>
+<li><strong>世界邊界</strong>：2000 × 2000（中心 0,0）</li>
+<li><strong>時間固定</strong>：永久午夜 + 厚雲層遮蔽</li>
+<li><strong>危害類型</strong>：🌫️ 瘴氣 (MIASMA)，需<strong>前線套裝</strong>抵禦</li>
+<li><strong>啟動物品</strong>：古代訊號；遺跡核心為<strong>監守尖嘯器</strong></li>
+<li><strong>The Glade — 倖存者基地</strong>：中心 100 × 100，三格厚石牆完全封閉，四方各一座鍍金黑石門，中央篝火廣場。</li>
+<li><strong>無盡迷宮</strong>：9×9 格、3 格厚牆、100 格高牆，由生成，約 15% 額外隨機通道避免過多死路。</li>
+<li>地板採多層隨機混色（苔蘚、菌絲、靈魂沙、骸骨、深板岩磚/瓦/裂磚等）製造詭譎氛圍</li>
+<li>牆壁多重質感：苔蘚、監守塊、骸骨、靈魂土壤、深板岩磚變體</li>
+<li>中段稀疏發光苔蘚，避免完全黑暗但保留危險感</li>
+<li><strong>地形</strong>：黑森林，原版怪物會自然出現，數量比一般世界多約 7 成</li>
+<li><strong>獨有資源</strong>：迷宮碎片（SCULK 節點）、迷宮遺物（強化深岩節點）、守衛者核心（菁英掉落）、瘴氣藥膏（反食物）</li>
+<li><strong>遺跡挑戰怪物池</strong>（地面限定，避免飛行單位越牆）：殭屍 40% / 洞穴蜘蛛 30% / 骷髏 20% / 蠹魚 10%</li>
+</ul>
+<h3 id="-修正"><a class="header" href="#-修正">🐛 修正</a></h3>
+<ul>
+<li><strong>星球遺跡挑戰跳波 Bug</strong>：修正高併發下波次推進競態條件，偶爾會跳過波次直接結束挑戰的問題。改用 <code>AtomicBoolean waveAdvancing</code> 守衛，確保每波僅觸發一次推進。</li>
+<li><strong>赫利昂遺跡飛行怪物</strong>：移除挑戰波中的<strong>烈焰人</strong>，改為凋零骷髏 / 屍殼 / 岩漿怪三種地面單位。</li>
+<li><strong>倪克斯遺跡飛行怪物</strong>：移除挑戰波中的<strong>幻翼</strong>，改為末影人 / 骷髏 / 苦力怕三種地面單位。</li>
+<li><strong>迷途星裝飾生成</strong>：關閉迷途星的原版裝飾 / 結構 / 洞穴生成，避免破壞迷宮結構；但<strong>保留怪物生成</strong>維持詭譎氛圍。</li>
+<li><strong>玩家狀態記憶體洩漏</strong>：修正玩家退出時部分狀態（虛空鏡開啟、地震斧冷卻、扳手冷卻、反傷處理中）未清除的問題。</li>
+</ul>
+<hr>
+<h2 id="20260409"><a class="header" href="#20260409">2026/04/09</a></h2>
+<h3 id="-平衡"><a class="header" href="#-平衡">⚖️ 平衡</a></h3>
+<ul>
+<li><strong>電動粉碎機礦石加倍</strong>：修正粉碎機配方效率——原本需要 2 礦石才出 2 粉，現在正確為 1 礦石 → 2 粉（鐵、金、銅、錫、鋰、鉛）。</li>
+<li><strong>合金冶煉堆疊升級</strong>：修正青銅、焊錫、黃銅合金冶煉配方無法享受堆疊升級加成的問題。合金錠無法逆向還原為兩種粉，因此應適用堆疊升級。</li>
+</ul>
+<h3 id="-修正-1"><a class="header" href="#-修正-1">🐛 修正</a></h3>
+<ul>
+<li><strong>星球遺跡計時器</strong>：修正 3 波挑戰共用同一個 90 秒倒數導致後期波次幾乎不剩時間的問題。現在每波獨立計時 90 秒，波間延遲不計入倒數。</li>
+</ul>
+<hr>
+<h2 id="20260408晚間更新"><a class="header" href="#20260408晚間更新">2026/04/08（晚間更新）</a></h2>
+<h3 id="-安卓機器人--探索程序"><a class="header" href="#-安卓機器人--探索程序">🤖 安卓機器人 — 探索程序</a></h3>
+<ul>
+<li><strong>新程序腳本「探索程序」</strong>：安卓獨有能力，沒有其他機器能替代。</li>
+<li>可在<strong>任何世界</strong>運作（包含地獄、末地），每次巡邏約 12% 機率探勘到稀有資源。</li>
+<li><strong>主世界深層（Y&lt;16）</strong>：鑽石、綠寶石原礦、粗金、青金石、粗銅。</li>
+<li><strong>主世界淺層</strong>：鑽石、綠寶石原礦、紫水晶碎片、粗鐵、粗銅。</li>
+<li><strong>地獄</strong>：古代碎片（8%）、石英、金粒、螢石粉、岩漿球。</li>
+<li><strong>末地</strong>：末影珍珠、歌萊果、乕牻殼、終界石。</li>
+<li>合成：量子框架×2 + 安卓記憶矩陣×2 → 量子處理器 → 探索程序。</li>
+<li><strong>安卓工作站世界限制解除</strong>：安卓機器人不再受「允許世界」限制，可在地獄、末地等世界自由部署。</li>
+</ul>
+<h3 id="-鈾燃料自動化"><a class="header" href="#-鈾燃料自動化">⛏️ 鈾燃料自動化</a></h3>
+<ul>
+<li><strong>新配方</strong>：綠寶石 → 電動粉碎機 → 鈾粉×1（原礦仍為×2）。</li>
+<li>搭配安卓探索程序可自動取得綠寶石原礦，實現鈾燃料全自動化生產。</li>
+</ul>
+<h3 id="-科技百科網站"><a class="header" href="#-科技百科網站">🌐 科技百科網站</a></h3>
+<ul>
+<li><strong>科技書主頁新增「科技百科網站」按鈕</strong>：點擊後在聊天出現可點擊的連結，直接開啟網頁版科技百科。</li>
+</ul>
+<h3 id="-修正-2"><a class="header" href="#-修正-2">🐛 修正</a></h3>
+<ul>
+<li><strong>地獄機器限制</strong>：修正生物收集器、作物收割機、伐木機、真空管、釣台等機器在地獄無法放置的問題。現在只有採礦鑽機受世界限制。</li>
+<li><strong>篩礦機產出遺漏</strong>：砂礫篩選新增鉛粉（14%）、靈魂砂篩選新增矽晶（12%）。</li>
+<li><strong>新玩家成就級聯</strong>：修正新玩家首次登入時幾乎解鎖所有成就的問題。</li>
+<li><strong>AI 幫手入口</strong>：科技書主頁新增 AI 科技幫手按鈕，可直接在聊天輸入問題查詢。</li>
+</ul>
+<hr>
+<h2 id="20260408"><a class="header" href="#20260408">2026/04/08</a></h2>
+<h3 id="-錫材料擴展"><a class="header" href="#-錫材料擴展">🔩 錫材料擴展</a></h3>
+<ul>
+<li><strong>新物品</strong>：錫板（壓縮機）、錫線（拉線機）——錫在電力系統中的用途大幅增加。</li>
+<li><strong>焊錫合金配方調整</strong>：鉛粉 + <del>鋅粉</del> → 鉛粉 + <strong>錫粉</strong>（更貼近真實焊錫成分）。</li>
+<li><strong>能源電池配方調整</strong>：<del>銅錠</del> + 紅石 → <strong>錫錠</strong> + 紅石（錫製電極）。</li>
+<li><strong>鋰電池配方調整</strong>：能源電池 + <del>銅錠</del> → 能源電池 + <strong>錫板</strong>（錫製外殼）。</li>
+<li><strong>訊號中繼器配方調整</strong>：邏輯閘 + <del>銅線</del> → 邏輯閘 + <strong>錫線</strong>（低損耗信號傳輸）。</li>
+<li>壓縮機 / 拉線機 / 電動壓縮機 / 電動拉線機均新增對應錫材配方。</li>
+</ul>
+<h3 id="-成就系統"><a class="header" href="#-成就系統">🏆 成就系統</a></h3>
+<ul>
+<li><strong>工業成就全服廣播</strong>：解鎖成就時，訊息會以類似原版進度的格式顯示給所有線上玩家，滑鼠懸停可查看成就描述。</li>
+</ul>
+<h3 id="-傳送面板改版"><a class="header" href="#-傳送面板改版">🚀 傳送面板改版</a></h3>
+<ul>
+<li><strong>珍珠改為背包消耗</strong>：傳送不再需要把珍珠放進機器輸入欄，改為從背包扣除原版末影珍珠×1（不會誤扣科技物品）。</li>
+<li><strong>3 秒吟唱</strong>：選擇目的地後需靜止 3 秒才會傳送，移動會取消。附帶粒子與音效。</li>
+<li><strong>任何人都能使用</strong>：不再限擁有者，公共設施也能用。</li>
+<li><strong>公開 / 私人模式</strong>：擁有者蹲下右鍵可命名、切換公開或私人。公開面板所有玩家都能看到；私人面板僅擁有者與受信任玩家可見。</li>
+</ul>
+<h3 id="-科技物品原版行為修正"><a class="header" href="#-科技物品原版行為修正">🛡️ 科技物品原版行為修正</a></h3>
+<ul>
+<li><strong>末影珍珠 / 終界之眼 / 玻璃瓶</strong>：以這些材質為底的科技物品右鍵不再觸發原版行為（投擲、飛出、裝水）。</li>
+<li><strong>不死圖騰</strong>：科技不死圖騰不再觸發復活效果。</li>
+<li><strong>村民 / 遊商交易</strong>：手持科技物品右鍵村民不會開啟交易；科技物品無法放入交易格。</li>
+<li><strong>豬靈以物易物</strong>：豬靈不會撿起掉落的科技物品。</li>
+</ul>
+<h3 id="-修正-3"><a class="header" href="#-修正-3">🐛 修正</a></h3>
+<ul>
+<li><strong>傳送面板過濾關機</strong>：已關機的傳送面板不再出現在其他面板的傳送選單中；傳送時也會檢查目的地是否開機。</li>
+<li><strong>機器防水桶</strong>：水桶與熔岩桶無法在機器方塊上放置液體，避免沖掉機器。</li>
+</ul>
+<hr>
+<h2 id="20260407"><a class="header" href="#20260407">2026/04/07</a></h2>
+<h3 id="-新機器"><a class="header" href="#-新機器">🏭 新機器</a></h3>
+<ul>
+<li><strong>萬用合成站</strong>：聚合所有加工類機器的配方，能耗為原配方的 2 倍，適合中期過渡或臨時生產。合成需要機器外殼、進階電路×2、電路基板×4、鋼板×4。</li>
+</ul>
+<h3 id="-能源系統"><a class="header" href="#-能源系統">⚡ 能源系統</a></h3>
+<ul>
+<li><strong>機器待機耗電</strong>：所有加工類機器在通電狀態下會持續消耗約 1/4 滿載電力作為待機成本，電力不足會顯示「缺少電力」並停止運作。</li>
+<li><strong>機器啟停功能</strong>：所有機器 GUI 右下角新增啟停按鈕（綠色＝運行中、灰色＝已暫停）；暫停後不再消耗電力與材料。</li>
+</ul>
+<h3 id="-科技扳手"><a class="header" href="#-科技扳手">🔧 科技扳手</a></h3>
+<ul>
+<li><strong>啟停功能</strong>：左鍵機器→關機、右鍵機器→開機、蹲下右鍵→拆卸（與原本相同）。</li>
+<li><strong>多方塊清除修復</strong>：修復扳手拆卸多方塊機器（粉碎機、拉線機等）時，上方的鐵柵欄、壓力板等配件方塊沒被清除的問題。</li>
+<li><strong>拆卸冷卻</strong>：扳手拆卸冷卻時間 500ms，防止快速連點誤拆其他機器。</li>
+</ul>
+<h3 id="-平衡-1"><a class="header" href="#-平衡-1">⚖️ 平衡</a></h3>
+<ul>
+<li>熔爐鐵粉／銅粉熔煉配方能耗從 16 降為 8 EU。</li>
+</ul>
+<h3 id="-修復-4"><a class="header" href="#-修復-4">🐛 修復</a></h3>
+<ul>
+<li>爆破鎬不再破壞容器類方塊（箱子、漏斗、木桶等），避免內容物消失。</li>
+</ul>
+<h3 id="-格式"><a class="header" href="#-格式">📝 格式</a></h3>
+<ul>
+<li>材料數量顯示統一為後綴格式：「物品名×N」取代原本的「N× 物品名」。</li>
+</ul>
+<hr>
+<h2 id="20260405"><a class="header" href="#20260405">2026/04/05</a></h2>
+<h3 id="-特殊工具--武器"><a class="header" href="#-特殊工具--武器">⚒️ 特殊工具 &amp; 武器</a></h3>
+<p>新增 6 種特殊工具，全部由力場鍛造台製作：</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>工具</th><th>效果</th></tr>
+</thead>
+<tbody>
+<tr><td>爆破鎬</td><td>3×3×3 範圍破壞</td></tr>
+<tr><td>礦脈鎬</td><td>連鎖同類礦石（最多 64 塊）</td></tr>
+<tr><td>熔煉鎬</td><td>自動熔煉掉落物</td></tr>
+<tr><td>斬首劍</td><td>40% 頭顱掉落</td></tr>
+<tr><td>吸血刃</td><td>25% 生命偷取</td></tr>
+<tr><td>地震斧</td><td>前方 4 格 AoE + 擊飛</td></tr>
+</tbody>
+</table>
+</div>
+<p>特殊工具會消耗耐久，並尊重耐久附魔。</p>
+<h3 id="-核分裂發電線"><a class="header" href="#-核分裂發電線">☢️ 核分裂發電線</a></h3>
+<p>新增完整核燃料鏈 + 核反應堆發電機：</p>
+<ul>
+<li>鈾粉（電動粉碎機：綠寶石礦 → 鈾粉 ×2）</li>
+<li>濃縮鈾（電動離心機：鈾粉 ×3 → 濃縮鈾）</li>
+<li>鈾燃料棒（合成器：濃縮鈾 ×2 + 鋼板）</li>
+<li>反應堆冷卻液（電動化學反應器：冷卻罐 + 低溫凝膠 → ×2）</li>
+<li>乏燃料棒（核反應堆副產物）</li>
+<li><strong>核反應堆</strong>（T3 發電機）— 每 1 秒消耗鈾燃料棒 + 冷卻液，產生 64 EU</li>
+</ul>
+<h3 id="-便攜工具"><a class="header" href="#-便攜工具">🧰 便攜工具</a></h3>
+<ul>
+<li><strong>便攜合成台</strong> — 右鍵打開隨身 3×3 合成台</li>
+<li><strong>便攜垃圾桶</strong> — 54 格收納箱，關閉自動銷毀所有物品</li>
+</ul>
+<h3 id="-紫水晶培養機"><a class="header" href="#-紫水晶培養機">🔮 紫水晶培養機</a></h3>
+<ul>
+<li>新增 T2 機器：消耗冷卻混合液 → 紫水晶碎片 ×4</li>
+<li>解決巨構配方需要 60+ 組紫水晶的產線瓶頸</li>
+</ul>
+<h3 id="-修復-5"><a class="header" href="#-修復-5">🐛 修復</a></h3>
+<ul>
+<li>修復爆破鎬導致的 StackOverflow 崩潰（canModifyBlock 無限遞迴）</li>
+<li>修復採礦機 mk2/mk3 儲能上限與 mk1 相同的問題</li>
+<li>修復特殊工具不消耗耐久的問題</li>
+</ul>
+<hr>
+<h2 id="20260403"><a class="header" href="#20260403">2026/04/03</a></h2>
+<h3 id="-配方投入量分級"><a class="header" href="#-配方投入量分級">⚖️ 配方投入量分級</a></h3>
+<p>所有 458 條機器配方加入分級投入量系統，不再全部 1:1：</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>機器等級</th><th>單輸入</th><th>雙輸入</th><th>三輸入</th></tr>
+</thead>
+<tbody>
+<tr><td>BASIC（一階）</td><td>×1</td><td>×1, ×1</td><td>—</td></tr>
+<tr><td>INTERMEDIATE（二階）</td><td>×2</td><td>×1, ×1</td><td>×1, ×1, ×1</td></tr>
+<tr><td>ADVANCED（三階）</td><td>×2</td><td>×2, ×1</td><td>×1, ×1, ×1</td></tr>
+<tr><td>TIER4（四階/巨構）</td><td>×3</td><td>×2, ×2</td><td>×2, ×1, ×1</td></tr>
+</tbody>
+</table>
+</div>
+<h3 id="-水果苗新增配方"><a class="header" href="#-水果苗新增配方">🌿 水果苗新增配方</a></h3>
+<p>7 種水果苗/灌木現在可透過<strong>溫室培育艙</strong>合成：</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>產出</th><th>配方</th></tr>
+</thead>
+<tbody>
+<tr><td>葡萄架苗</td><td>種子簇 + 肥料混合物</td></tr>
+<tr><td>蕉苗</td><td>種子簇 + 生質催化劑</td></tr>
+<tr><td>芒果樹苗</td><td>種子簇 + 水凝膠</td></tr>
+<tr><td>椰子苗</td><td>種子簇 + 基因模板</td></tr>
+<tr><td>草莓苗</td><td>種子簇 + 肥料混合物</td></tr>
+<tr><td>藍莓苗</td><td>種子簇 + 水凝膠</td></tr>
+<tr><td>覆盆子苗</td><td>種子簇 + 生質催化劑</td></tr>
+</tbody>
+</table>
+</div>
+<h3 id="-新增輻射濾除劑"><a class="header" href="#-新增輻射濾除劑">💊 新增輻射濾除劑</a></h3>
+<p>解決首次登陸奧蕾莉亞沒有輻射防護的死循環問題：</p>
+<ul>
+<li><strong>輻射濾除劑</strong> — 在生質實驗室用「生質催化劑 + 神經樹脂」合成</li>
+<li>提供 90 秒輻射防護（輻晶蜜凍為 180 秒）</li>
+<li>全部材料在地球就能取得，作為首次登陸的消耗品</li>
+</ul>
+<h3 id="-修復-6"><a class="header" href="#-修復-6">🐛 修復</a></h3>
+<ul>
+<li>修復<strong>激發室</strong>堆疊模組無效的問題 — 現在每個堆疊模組 +1 產出量</li>
+<li>修復<strong>熵變權杖</strong>可以在別人領地內殺死生物的問題 — 加入領地權限檢查</li>
+<li>修復<strong>伐木機/安卓伐木</strong>砍樹後殘留樹葉的問題 — 砍完樹幹後自動清除浮空樹葉</li>
+<li>修復<strong>安卓伐木</strong>只掃描正下方單格的問題 — 改為 3×3 範圍掃描</li>
+<li>修復<strong>互動烹飪</strong>完成 2 次 QTE 後進度條直接滿、無法觸發第 3 次的問題</li>
+<li>修復<strong>虛域花簇種子</strong>無法種植的問題 — 改為農地種植（不再需要靈魂沙）</li>
+<li>修復<strong>星球探索成就</strong>只計算登陸次數而非不同星球數的問題</li>
+<li>刪除<strong>能源節點</strong>的重複四階配方（保留製造機的二階便宜版本）</li>
+<li>修復<strong>生物收集器</strong>缺少常見生電生物的問題</li>
+</ul>
+<h3 id="-生物收集器擴充"><a class="header" href="#-生物收集器擴充">🤖 生物收集器擴充</a></h3>
+<p>新增支援以下生物：</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>生物</th><th>掉落物</th></tr>
+</thead>
+<tbody>
+<tr><td>鐵傀儡</td><td>鐵錠 ×4 + 罌粟</td></tr>
+<tr><td>女巫</td><td>螢石粉 ×2 + 紅石 ×2</td></tr>
+<tr><td>末影人</td><td>末影珍珠</td></tr>
+<tr><td>掠奪者</td><td>箭 ×3</td></tr>
+<tr><td>衛道士</td><td>綠寶石</td></tr>
+<tr><td>喚魔者</td><td>不死圖騰</td></tr>
+<tr><td>劫毀獸</td><td>鞍</td></tr>
+<tr><td>守衛者</td><td>海磷碎片 ×2 + 鱈魚</td></tr>
+<tr><td>遠古守衛者</td><td>海磷碎片 ×3 + 海綿</td></tr>
+</tbody>
+</table>
+</div>
+<hr>
+<h2 id="20260401"><a class="header" href="#20260401">2026/04/01</a></h2>
+<h3 id="-新增-20-項自訂材質"><a class="header" href="#-新增-20-項自訂材質">🎨 新增 20 項自訂材質</a></h3>
+<p>以下科技材料新增專屬圖示，不再借用原版外觀：</p>
+<p>伺服馬達、工業線束、淨化膜、隔熱外殼、鈦合金、合成纖維、強化玻璃、加熱線圈、高分子樹脂、耐熱塑膠、合金框架、機器外殼、生長燈、精密框架、複合面板、壓縮鐵束、精煉碎片、緻密碳塊、銅線、鋼線</p>
+<h3 id="-穩定性大幅提升"><a class="header" href="#-穩定性大幅提升">🛡️ 穩定性大幅提升</a></h3>
+<p>針對多人同時在線場景進行全面優化，大幅減少卡頓、報錯與資料異常：</p>
+<ul>
+<li>修復多人同時操作機器時偶爾出現的物品消失或重複問題</li>
+<li>修復多人環境下機器能源偶爾計算錯誤的問題</li>
+<li>修復物流導管、貨物管理員、安卓機器人搬運物品時的衝突問題</li>
+<li>修復機器顯示模型偶爾殘留在世界中無法消失的問題</li>
+<li>修復開啟機器介面時偶爾閃退或報錯的問題</li>
+<li>修復離線後機器介面狀態未正確清理的問題</li>
+</ul>
+<h3 id="-修復-7"><a class="header" href="#-修復-7">🐛 修復</a></h3>
+<ul>
+<li>修復科技物品（如壓縮鐵束、緻密碳塊等）可以被放置在地上的問題</li>
+<li>修復暴風渦輪誤報「需要露天」的警告（暴風渦輪只需要下雨，不需要露天）</li>
+<li>修復儲存集線器的距離升級無效的問題 — 現在升級後能正確拉取更遠範圍的機器產物</li>
+<li>修復怪物收集器無法收集幼年殭屍化豬布林等幼年敵對生物的問題</li>
+<li>修復科技物品可以被熔爐當作燃料燒掉的問題</li>
+<li>修復 <code>/tech reload</code> 指令偶爾報錯的問題</li>
+<li>修復真空入口無法拾取超過容量上限的掉落物（現在會盡量裝滿）</li>
+</ul>
+<hr>
+<h2 id="20260329-b"><a class="header" href="#20260329-b">2026/03/29 (b)</a></h2>
+<h3 id="-堆疊升級再平衡"><a class="header" href="#-堆疊升級再平衡">⚖️ 堆疊升級再平衡</a></h3>
+<p>堆疊升級效果仍然過於強大，進行第二輪修正：</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>項目</th><th>前版 (a)</th><th>本版 (b)</th></tr>
+</thead>
+<tbody>
+<tr><td>物品堆疊</td><td>可堆疊至 64</td><td><strong>不可堆疊</strong>（每格僅能放 1 個）</td></tr>
+<tr><td>單台上限</td><td>+9（每槽 3 × 3 槽）</td><td><strong>+3</strong>（每槽 1 × 3 槽）</td></tr>
+<tr><td>觸發方式</td><td>確定性（每次 +N）</td><td><strong>機率性</strong>（每個升級 50% 觸發）</td></tr>
+<tr><td>滿配平均加成</td><td>+9</td><td><strong>平均約 +1.5</strong></td></tr>
+</tbody>
+</table>
+</div>
+<ul>
+<li>所有升級物品（速度 / 效率 / 堆疊 / 範圍）皆改為不可堆疊</li>
+<li>堆疊升級每個有 50% 機率觸發 +1 產出</li>
+<li>伐木機、安卓機器人伐木、傳輸匯流排等容量性用途維持確定性計算（不受機率影響）</li>
+</ul>
+<hr>
+<h2 id="20260329"><a class="header" href="#20260329">2026/03/29</a></h2>
+<h3 id="-升級模組平衡調整"><a class="header" href="#-升級模組平衡調整">⚖️ 升級模組平衡調整</a></h3>
+<p>堆疊升級的效果被大幅修正，避免產量爆炸：</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>項目</th><th>舊版</th><th>新版</th></tr>
+</thead>
+<tbody>
+<tr><td>每槽效果計算</td><td>按物品數量（最多 64）</td><td>每槽最多算 <strong>3 個</strong>，超過無效</td></tr>
+<tr><td>3 槽全滿上限</td><td>+192 產出</td><td><strong>+9 產出</strong></td></tr>
+</tbody>
+</table>
+</div>
+<ul>
+<li>此變更影響所有升級類型（速度 / 效率 / 堆疊 / 範圍）</li>
+<li>每個升級槽放 1~3 個有效果，多放不再額外加成</li>
+<li>每台機器最多只會吃滿 3 格升級效果，不需要再往同一格塞更多</li>
+</ul>
+<h3 id="-純電力版機器配方再平衡"><a class="header" href="#-純電力版機器配方再平衡">⚡ 純電力版機器配方再平衡</a></h3>
+<p>9 台純電力版機器的合成配方從「3 輸入」大幅提升為「5 輸入」，並提高能源消耗，增加自動化進程的門檻：</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>純電力版機器</th><th>新配方（5 輸入）</th><th>能源</th></tr>
+</thead>
+<tbody>
+<tr><td>電動粉碎機</td><td>粉碎機 + 自動化模組 + 工業線束 + 伺服馬達 + 鋼板</td><td>55 EU</td></tr>
+<tr><td>電動壓縮機</td><td>壓縮機 + 自動化模組 + 伺服馬達 + 壓力導管 + 鋼板</td><td>58 EU</td></tr>
+<tr><td>電動洗礦機</td><td>洗礦機 + 自動化模組 + 壓力導管 + 冷卻電池 + 合金框架</td><td>55 EU</td></tr>
+<tr><td>電動拉線機</td><td>拉線機 + 自動化模組 + 伺服馬達 + 工業線束 + 青銅齒輪</td><td>60 EU</td></tr>
+<tr><td>電動淨化器</td><td>淨化器 + 自動化模組 + 冷卻電池 + 精密噴嘴 + 合金框架</td><td>62 EU</td></tr>
+<tr><td>電動離心機</td><td>離心機 + 自動化模組 + 磁環 + 伺服馬達 + 能量電池</td><td>70 EU</td></tr>
+<tr><td>電動生質實驗室</td><td>生質實驗室 + 自動化模組 + 生質纖維 + 冷卻電池 + 電路板</td><td>60 EU</td></tr>
+<tr><td>電動化學反應器</td><td>化學反應器 + 自動化模組 + 精密噴嘴 + 冷卻電池 + 能量電池</td><td>72 EU</td></tr>
+<tr><td>電動篩礦機</td><td>淘金盤 + 自動化模組 + 青銅齒輪 + 工業線束 + 合金框架</td><td>52 EU</td></tr>
+</tbody>
+</table>
+</div>
+<h3 id="-合成潛影盒"><a class="header" href="#-合成潛影盒">🐚 合成潛影盒</a></h3>
+<p>新增不需要前往終界的潛影盒合成路線：</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>配方</th><th>機器</th><th>輸入</th><th>能源</th></tr>
+</thead>
+<tbody>
+<tr><td>合成潛影殼</td><td>力場鍛造台</td><td>魔法結晶 II + 鐵錠 + 末影結晶 I</td><td>16 EU</td></tr>
+<tr><td>潛影盒</td><td>力場鍛造台</td><td>合成潛影殼 ×2 + 儲物箱</td><td>18 EU</td></tr>
+</tbody>
+</table>
+</div>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>怪物</th><th>血量</th><th>攻擊</th><th>特色</th></tr>
+</thead>
+<tbody>
+<tr><td>🧙 藍焰法師</td><td>120</td><td>6</td><td>冰霜彈 / 暴風雪 / 受傷瞬移</td></tr>
+<tr><td>🗡️ 惡魔騎士</td><td>280</td><td>14</td><td>震地猛擊 / 衝鋒 / 盾牌猛擊 / 格擋</td></tr>
+</tbody>
+</table>
+</div>
+<ul>
+<li>使用 HUSK 為基底，全身裝備隱藏，靜音</li>
+<li>具備待機、移動、死亡與多種攻擊動作</li>
+</ul>
+<h3 id="-修復-8"><a class="header" href="#-修復-8">🐛 修復</a></h3>
+<ul>
+<li>修復副本偶爾傳送失敗的問題，進出副本更穩定</li>
+<li>修復玩家加入副本時偶爾出現狀態異常或傳送失敗的問題</li>
+<li>修正惡魔騎士衝鋒判定異常</li>
+</ul>
+<hr>
+<h2 id="20260325-b"><a class="header" href="#20260325-b">2026/03/25 (b)</a></h2>
+<h3 id="-電動篩礦機"><a class="header" href="#-電動篩礦機">⚡ 電動篩礦機</a></h3>
+<p>新增淘金盤的全自動升級版 — <strong>電動篩礦機</strong>！</p>
+<ul>
+<li>在進階製造機中用「淘金盤 + 自動化模組 + 青銅齒輪」合成</li>
+<li>放入礫石或靈魂沙，接上電源即自動篩礦</li>
+<li><strong>100% 產出</strong>（手動淘金盤有 30% 空手率）</li>
+<li>支援速度升級與堆疊升級，適合中後期大量生產金屬粉塵</li>
+<li>耗能 10 EU/秒，解鎖需要「淘金盤 + 進階製造機」</li>
+</ul>
+<h3 id="-新增自訂材質"><a class="header" href="#-新增自訂材質">🎨 新增自訂材質</a></h3>
+<p>以下物品新增了專屬圖示，辨識度更高：</p>
+<ul>
+<li>淘金盤</li>
+<li>篩出礦砂</li>
+<li>錫粉、錫錠</li>
+<li>鉛粉、鉛錠</li>
+<li>鋅粉、鋅錠</li>
+<li>口袋雞</li>
+</ul>
+<h3 id="-修復-9"><a class="header" href="#-修復-9">🐛 修復</a></h3>
+<ul>
+<li>修復多人同時觸發時偶發的報錯與不穩定</li>
+<li>修復淘金盤描述文字「碎石」→「礫石」（共 11 處）</li>
+<li>修復淘金盤配方不顯示在科技書的問題（藍圖配方未納入判斷）</li>
+</ul>
+<hr>
+<h2 id="20260325"><a class="header" href="#20260325">2026/03/25</a></h2>
+<h3 id="-淘金盤系統"><a class="header" href="#-淘金盤系統">⛏️ 淘金盤系統</a></h3>
+<p>新增 Slimefun4 風格的前期手動研磨機制！</p>
+<ul>
+<li>新增 <strong>淘金盤</strong> 工具 — 在進階工作台用 4 鐵錠 + 1 碗合成</li>
+<li>手持淘金盤右鍵<strong>礫石</strong>可篩出：鐵粉(12%)、銅粉(10%)、錫粉(8%)、鋅粉(6%)、矽晶(4%)、篩出礦砂(15%)、燧石(15%)</li>
+<li>手持淘金盤右鍵<strong>靈魂沙</strong>可篩出：鉛粉(18%)、金粒(12%)、石英(10%)、鋅粉(8%)、鐵粉(7%)、篩出礦砂(15%)</li>
+<li>30% 機率什麼都篩不到（增加肝度）</li>
+<li>每次使用消耗方塊、1 秒冷卻、水花音效與粒子效果</li>
+</ul>
+<h3 id="-合金材料系統"><a class="header" href="#-合金材料系統">🧪 合金材料系統</a></h3>
+<p>新增 11 種新物品與完整合金冶煉鏈：</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>新物品</th><th>取得方式</th></tr>
+</thead>
+<tbody>
+<tr><td>錫粉</td><td>淘金盤（碎石）</td></tr>
+<tr><td>鉛粉</td><td>淘金盤（靈魂沙）</td></tr>
+<tr><td>鋅粉</td><td>淘金盤（碎石/靈魂沙）</td></tr>
+<tr><td>篩出礦砂</td><td>淘金盤（碎石/靈魂沙）→ 熔爐 → 鐵錠</td></tr>
+<tr><td>錫錠</td><td>熔爐（錫粉）</td></tr>
+<tr><td>鉛錠</td><td>熔爐（鉛粉）</td></tr>
+<tr><td>鋅錠</td><td>熔爐（鋅粉）</td></tr>
+<tr><td>青銅錠</td><td>合金熔煉爐（銅粉 + 錫粉）</td></tr>
+<tr><td>焊錫合金</td><td>合金熔煉爐（鉛粉 + 鋅粉）</td></tr>
+<tr><td>黃銅錠</td><td>合金熔煉爐（銅粉 + 鋅粉）</td></tr>
+</tbody>
+</table>
+</div>
+<h3 id="-配方難度大幅提升"><a class="header" href="#-配方難度大幅提升">📈 配方難度大幅提升</a></h3>
+<p><strong>核心配方修改</strong>（新增合金門檻）：</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>配方</th><th>變更</th></tr>
+</thead>
+<tbody>
+<tr><td>電路板</td><td>新增需要<strong>焊錫合金</strong></td></tr>
+<tr><td>青銅齒輪</td><td>銅錠改為<strong>青銅錠</strong></td></tr>
+<tr><td>機械零件</td><td>新增需要<strong>青銅齒輪</strong></td></tr>
+<tr><td>鋼板</td><td>新增需要<strong>煤粉</strong></td></tr>
+<tr><td>進階電路</td><td>新增需要<strong>黃銅錠</strong></td></tr>
+</tbody>
+</table>
+</div>
+<p><strong>藍圖材料加重</strong>：</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>機器</th><th>變更</th></tr>
+</thead>
+<tbody>
+<tr><td>粉碎機</td><td>底排改需 2 鋼板</td></tr>
+<tr><td>壓縮機</td><td>頂排改需 2 鋼板</td></tr>
+<tr><td>製造機</td><td>中排改需 2 青銅齒輪</td></tr>
+<tr><td>進階製造機</td><td>中排改需 2 奈米塗層</td></tr>
+</tbody>
+</table>
+</div>
+<p><strong>新增合金熔煉爐藍圖</strong>：地獄磚 + 鐵錠 + 岩漿塊 + 青銅錠</p>
+<h3 id="-全面能源成本提升"><a class="header" href="#-全面能源成本提升">⚡ 全面能源成本提升</a></h3>
+<p>所有配方能源需求提升 <strong>50~80%</strong>，涵蓋 110+ 條配方：</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>機器類別</th><th>舊能源範圍</th><th>新能源範圍</th></tr>
+</thead>
+<tbody>
+<tr><td>粉碎機</td><td>5 EU</td><td>8 EU</td></tr>
+<tr><td>熔爐</td><td>8–12 EU</td><td>14–18 EU</td></tr>
+<tr><td>壓縮機</td><td>7–12 EU</td><td>12–18 EU</td></tr>
+<tr><td>製造機</td><td>10–18 EU</td><td>16–28 EU</td></tr>
+<tr><td>進階製造機</td><td>22–26 EU</td><td>34–38 EU</td></tr>
+<tr><td>量子處理器</td><td>20–23 EU</td><td>30–35 EU</td></tr>
+<tr><td>聚變反應爐</td><td>25–28 EU</td><td>38–42 EU</td></tr>
+<tr><td>電動機器</td><td>×2 手動版</td><td>全線 +50%</td></tr>
+<tr><td>四階終局</td><td>16–48 EU</td><td>24–72 EU</td></tr>
+</tbody>
+</table>
+</div>
+<hr>
+<h2 id="20260323"><a class="header" href="#20260323">2026/03/23</a></h2>
+<h3 id="-互動烹飪動畫系統"><a class="header" href="#-互動烹飪動畫系統">🍳 互動烹飪動畫系統</a></h3>
+<p>烹飪系統全面升級！加入互動式翻面/攪拌/調味機制：</p>
+<ul>
+<li>烹調進度達 <strong>30% / 55% / 80%</strong> 時會觸發互動提示（🔔 點擊翻面！等）</li>
+<li>在 3 秒內對準烹飪台右鍵即可成功互動，獲得 <strong>烹調加速</strong> + 翻轉動畫</li>
+<li>三次互動都成功可觸發「🌟 完美烹調」特效，大量煙花粒子</li>
+<li>食物旋轉速度隨進度加快，互動提示期間脈動閃爍 + 光環粒子</li>
+<li>增加蒸氣、油爆、星光等更豐富的階段性粒子效果</li>
+<li>新增環境音效：定期播放爐火噼啪音效，增強沉浸感</li>
+</ul>
+<h3 id="-騎士護符修復"><a class="header" href="#-騎士護符修復">🛡️ 騎士護符修復</a></h3>
+<p>修復騎士護符在戰鬥中完全不觸發的問題：</p>
+<ul>
+<li><strong>血量判定修復</strong>：改為計算「受擊後血量」而非「受擊前血量」，確保 50% 以下才觸發</li>
+<li><strong>傷害類型擴展</strong>：除近戰攻擊外，現在橫掃攻擊、爆炸、投射物、魔法傷害也能觸發</li>
+</ul>
+<h3 id="-物流中繼需求修復"><a class="header" href="#-物流中繼需求修復">🔗 物流中繼需求修復</a></h3>
+<p>修復加工機器之間直接相鄰就會自動傳輸物品的問題（不需物流基礎設施）：</p>
+<ul>
+<li>加工機器（如雷射雕刻機、量子加速器等）現在 <strong>必須</strong> 通過至少一個物流中繼（物品管道、物流節點等）才能將物品傳入其他加工機器</li>
+<li>採集機器（自動農場、採石鑽頭等）不受此限制，可直接推送至相鄰機器</li>
+<li>物流終端節點（儲存中心、分類路由器等）可直接接收任何來源的物品</li>
+</ul>
+<h3 id="-機器裝飾放置"><a class="header" href="#-機器裝飾放置">🪧 機器裝飾放置</a></h3>
+<p>新增機器上放置裝飾物的功能：</p>
+<ul>
+<li><strong>蹲下 + 手持裝飾物</strong>（告示牌、物品展示框、畫框等）時，右鍵機器不會開啟 GUI</li>
+<li>允許正常放置裝飾物在機器方塊上，方便標記與備註機台用途</li>
+</ul>
+<h3 id="-指南與百科審計"><a class="header" href="#-指南與百科審計">📖 指南與百科審計</a></h3>
+<ul>
+<li>9 份指南文件全面校對：移除空白條目、修正段落編號、補齊遺漏內容</li>
+<li>方向指示 UX 改進：改善了導航與方塊放置的方向準確度</li>
+<li>DiscordSRV 搜尋介面修復</li>
+</ul>
+<hr>
+<h2 id="20260322"><a class="header" href="#20260322">2026/03/22</a></h2>
+<h3 id="-成就自動補發"><a class="header" href="#-成就自動補發">🏆 成就自動補發</a></h3>
+<ul>
+<li>修復玩家已達成條件但成就未解鎖的問題</li>
+<li>打開成就選單（<code>/tech achievements</code>）時，系統會自動掃描所有成就並補發已達成但未解鎖的項目</li>
+<li>玩家登入時也會延遲 2 秒自動檢查一次，確保離線期間達成的條件不會漏掉</li>
+</ul>
+<h3 id="-成就統計遺漏大修"><a class="header" href="#-成就統計遺漏大修">🐛 成就統計遺漏大修</a></h3>
+<p>修復 <strong>8 個成就統計值從未被追蹤</strong> 的嚴重 bug，導致大量成就永遠無法解鎖：</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>成就</th><th>統計鍵</th><th>問題</th></tr>
+</thead>
+<tbody>
+<tr><td>合成學徒</td><td><code>items_crafted</code></td><td>從未遞增</td></tr>
+<tr><td>初始電力</td><td><code>generators_placed</code></td><td>從未遞增</td></tr>
+<tr><td>首次研究</td><td><code>research_spent</code></td><td>從未遞增</td></tr>
+<tr><td>冶煉先行</td><td><code>smelter_cycles</code></td><td>機器 ID 是 smeltery，但查詢 smelter → 永遠 0</td></tr>
+<tr><td>加工里程碑 ×3</td><td><code>total_processed</code></td><td>從未遞增</td></tr>
+<tr><td>儲存大師</td><td><code>storage_units_placed</code></td><td>從未遞增</td></tr>
+<tr><td>果園管理員</td><td><code>crop_varieties</code></td><td>從未遞增</td></tr>
+<tr><td>首次造訪星球</td><td><code>planets_visited</code></td><td>從未遞增</td></tr>
+<tr><td>巨構建造者</td><td><code>megastructures_built</code></td><td>從未遞增</td></tr>
+</tbody>
+</table>
+</div>
+<p>修復內容：</p>
+<ul>
+<li>在配方完成時遞增 <code>items_crafted</code> 和 <code>total_processed</code>（手動 + 自動管線）</li>
+<li>在放置機器時根據類型遞增 <code>generators_placed</code>、<code>storage_units_placed</code>、<code>megastructures_built</code></li>
+<li>在研究科技時遞增 <code>research_spent</code></li>
+<li>在抵達星球時遞增 <code>planets_visited</code></li>
+<li>修正 <code>smelter_cycles</code> → <code>smeltery_cycles</code> 的名稱不匹配</li>
+<li>所有成就條件新增<strong>回溯判定</strong>：基於玩家已解鎖的物品/機器數量推斷歷史成就，現有玩家重新登入或開選單即可自動補發</li>
+</ul>
+<h3 id="-貨物輸出節點"><a class="header" href="#-貨物輸出節點">📦 貨物輸出節點</a></h3>
+<ul>
+<li>新增 <strong>貨物輸出節點</strong> <code>cargo_output_node</code> — 自動將產線物品推送到相鄰原版容器（箱子/桶/漏斗/熔爐等）</li>
+<li>與 Slimefun4 的 Cargo Output Node 功能對齊，物流系統現在雙向都支援原版容器</li>
+<li>可透過 outputDirection 設定推送方向（預設 ALL = 六向）</li>
+<li>每秒最多推送 4 件物品</li>
+<li>配方：路由晶片 + 伺服馬達 + 儲物箱 → 製造機（耗能 20 EU）</li>
+<li>貨運架構師成就描述已更新</li>
+</ul>
+<p>用法範例：</p>
+<pre><code>機器產出 → [物流鏈] → [貨物輸出節點] → 原版箱子
+原版箱子 → [貨物抽取節點] → [物流鏈] → 機器輸入
+</code></pre>
+<h3 id="-配方圖示修復"><a class="header" href="#-配方圖示修復">🎨 配方圖示修復</a></h3>
+<ul>
+<li>配方列表與配方詳情頁圖示現在正確顯示自訂外觀</li>
+</ul>
+<h3 id="-銅錠通用性統一"><a class="header" href="#-銅錠通用性統一">🔧 銅錠通用性統一</a></h3>
+<ul>
+<li><strong>所有</strong>藍圖與配方現在統一接受<strong>原版銅錠</strong>和<strong>科技銅錠</strong></li>
+<li>修復淨化器、冷卻混合器的藍圖原本只接受科技銅錠，與其他藍圖不一致的問題</li>
+<li>銅錠說明更新：「可用科技熔爐把銅粉加工取得，也可直接使用原版銅錠替代」</li>
+</ul>
+<h3 id="-口袋雞資訊強化"><a class="header" href="#-口袋雞資訊強化">🐔 口袋雞資訊強化</a></h3>
+<ul>
+<li><strong>繁殖冷卻即時壽命</strong>：私人雞舍冷卻期間顯示「冷卻 Xs ┃ 壽命 Y/30」，不再只顯示秒數（※ 當時上限是 30 次，<strong>後來調整為 10 次</strong>，現行數值請看 <a href="chickens/README.html">雞隻系統</a>）</li>
+<li><strong>激發速度顯示</strong>：激發室狀態列新增速率資訊，格式為「激發：XX% ┃ 30s/個 ┃ 壽命 Y/Z」</li>
+</ul>
+<p>各 Tier 激發速率參考：</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>等級</th><th>週期</th><th>速率顯示</th></tr>
+</thead>
+<tbody>
+<tr><td>Tier 1</td><td>30 秒</td><td>30s/個</td></tr>
+<tr><td>Tier 2</td><td>60 秒</td><td>1m0s/個</td></tr>
+<tr><td>Tier 3</td><td>120 秒</td><td>2m0s/個</td></tr>
+<tr><td>Tier 4</td><td>180 秒</td><td>3m0s/個</td></tr>
+<tr><td>Tier 5</td><td>300 秒</td><td>5m0s/個</td></tr>
+<tr><td>Tier 6</td><td>600 秒</td><td>10m0s/個</td></tr>
+</tbody>
+</table>
+</div>
+<h3 id="-配方列表圖示視覺化"><a class="header" href="#-配方列表圖示視覺化">🎨 配方列表圖示視覺化</a></h3>
+<ul>
+<li>機器配方列表中每個配方的圖示改為<strong>輸出物品的實際材質</strong>，不再統一使用紙張圖示</li>
+<li>配方詳細頁的說明欄也同步改用實際物品圖示</li>
+<li>配方頁更加直覺，一眼就能辨識產出</li>
+</ul>
+<h3 id="-修復-10"><a class="header" href="#-修復-10">🐛 修復</a></h3>
+<ul>
+<li>修復<strong>生質實驗室</strong>「材料不符配方」的問題 — 自動農場產出的「作物」是科技物品，但配方比對錯誤地把 <code>crops</code> 解析為原版小麥</li>
+</ul>
+<h3 id="-能量管線資源生成器"><a class="header" href="#-能量管線資源生成器">🛠️ 能量管線資源生成器</a></h3>
+<ul>
+<li>4×4 細管設計，6 種連接變體（直管 / L彎 / T三通 / 十字 / 死端）</li>
+<li>全不透明 16×16 材質，金屬漸層 + 青色能量流核心</li>
+</ul>
+<hr>
+<h2 id="20260321"><a class="header" href="#20260321">2026/03/21</a></h2>
+<h3 id="-基因雞工程平衡性大修"><a class="header" href="#-基因雞工程平衡性大修">🐔 基因雞工程平衡性大修</a></h3>
+<p>原先基因雞系統存在嚴重平衡問題：繁殖無冷卻（每秒 1 隻）、激發室無間隔（所有等級每秒 1 個資源）、雞永遠不會消耗。現已全面修正：</p>
+<h4 id="a-私人雞舍--繁殖冷卻"><a class="header" href="#a-私人雞舍--繁殖冷卻">A. 私人雞舍 — 繁殖冷卻</a></h4>
+<ul>
+<li>每 <strong>120 秒</strong>繁殖一次（原先每秒一次）→ 約 <strong>30 隻/小時</strong></li>
+<li>冷卻中顯示剩餘秒數</li>
+</ul>
+<h4 id="b-激發室--等級間隔--進度累積"><a class="header" href="#b-激發室--等級間隔--進度累積">B. 激發室 — 等級間隔 + 進度累積</a></h4>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>等級</th><th>基礎週期</th><th>預估產出/小時</th><th>資源範例</th></tr>
+</thead>
+<tbody>
+<tr><td>Tier 1</td><td>30 秒</td><td>120</td><td>骨頭、泥土、沙子</td></tr>
+<tr><td>Tier 2</td><td>60 秒</td><td>60</td><td>煤炭、線、海綿</td></tr>
+<tr><td>Tier 3</td><td>90 秒</td><td>40</td><td>金錠、鐵錠、銅錠</td></tr>
+<tr><td>Tier 4</td><td>150 秒</td><td>24</td><td>烈焰桿、終界珍珠</td></tr>
+<tr><td>Tier 5</td><td>300 秒</td><td>12</td><td>鑽石、綠寶石</td></tr>
+<tr><td>Tier 6</td><td>600 秒</td><td>6</td><td>獄髓錠</td></tr>
+</tbody>
+</table>
+</div>
+<ul>
+<li>純度加成：異型（一顯一隱）越少、實際間隔越短（最多加速 10%）</li>
+<li>激發進度在機器狀態列即時顯示百分比</li>
+</ul>
+<h4 id="c-口袋雞壽命機制"><a class="header" href="#c-口袋雞壽命機制">C. 口袋雞壽命機制</a></h4>
+<p>口袋雞不再永生，使用一定次數後會<strong>消失</strong>並顯示煙霧 + 死亡音效：</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>用途</th><th>壽命上限</th></tr>
+</thead>
+<tbody>
+<tr><td>繁殖（私人雞舍）</td><td>每隻親代 30 次</td></tr>
+<tr><td>激發（Tier 1）</td><td>1000 次</td></tr>
+<tr><td>激發（Tier 2）</td><td>500 次</td></tr>
+<tr><td>激發（Tier 3）</td><td>200 次</td></tr>
+<tr><td>激發（Tier 4）</td><td>120 次</td></tr>
+<tr><td>激發（Tier 5）</td><td>60 次</td></tr>
+<tr><td>激發（Tier 6）</td><td>30 次</td></tr>
+</tbody>
+</table>
+</div>
+<ul>
+<li>口袋雞 lore 上顯示繁殖壽命與激發壽命</li>
+<li>機器運行時即時顯示剩餘壽命（如 <code>壽命 28/30</code>）（※ 當時的繁殖上限，<strong>現行為 10 次</strong>）</li>
+<li>壽命耗盡的雞會自動從機器中移除</li>
+</ul>
+<hr>
+<h2 id="20260321-1"><a class="header" href="#20260321-1">2026/03/21</a></h2>
+<h3 id="-全域信任共享系統v2-重構"><a class="header" href="#-全域信任共享系統v2-重構">🤝 全域信任共享系統（v2 重構）</a></h3>
+<p>信任系統從「逐台機器」改為<strong>全域玩家級</strong>，一次設定即可適用於所有現有與未來機器。</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>指令</th><th>說明</th></tr>
+</thead>
+<tbody>
+<tr><td><code>/tech trust &lt;玩家&gt;</code></td><td>將該玩家加入你的全域信任清單</td></tr>
+<tr><td><code>/tech untrust &lt;玩家&gt;</code></td><td>將該玩家從全域信任清單移除</td></tr>
+<tr><td><code>/tech trustlist</code></td><td>查看你的全域信任清單</td></tr>
+</tbody>
+</table>
+</div>
+<ul>
+<li>被信任的玩家可以打開/操作你的<strong>所有</strong>機器，但<strong>不能拆除</strong></li>
+<li>不需要對準機器，隨時隨地都可以執行</li>
+<li>信任清單重啟後仍保留</li>
+<li>舊版逐台信任資料會自動遷移至全域</li>
+</ul>
+<h3 id="-電網--物流支援信任玩家互連"><a class="header" href="#-電網--物流支援信任玩家互連">⚡ 電網 / 物流支援信任玩家互連</a></h3>
+<ul>
+<li>**修復：**你放發電機、朋友放機台 → 原先吃不到電</li>
+<li>現在只要任一方 <code>/tech trust</code> 對方，兩人的機器即可互連電網與物流</li>
+<li>雙向信任都能生效（A 信任 B 或 B 信任 A 皆可）</li>
+</ul>
+<h3 id="-修復-11"><a class="header" href="#-修復-11">🐛 修復</a></h3>
+<ul>
+<li>修復機器 GUI 中左鍵拖曳均分會造成<strong>物品複製</strong>的重大 bug（原因：Bukkit 取消事件後會自動還原游標，導致物品同時存入機器又回到手上）</li>
+<li>修復<strong>激發室</strong>與基因定序器配方完全相同的問題（激發室紅石改為電路板）</li>
+<li>修復<strong>淨化器</strong>與<strong>冷卻混合器</strong>合成表完全相同的問題（兩者皆使用鍋釜 + 二階自動生成相同預設配方）</li>
+<li>✅ 淨化器新增專用藍圖：玻璃 + 水桶 + 鍋釜 + 銅錠 + 鐵錠 + 紅石</li>
+<li>✅ 冷卻混合器新增專用藍圖：冰磚 + 鋼板 + 鍋釜 + 銅錠 + 活塞</li>
+</ul>
+<h3 id="-材料名稱歧義修正"><a class="header" href="#-材料名稱歧義修正">🔧 材料名稱歧義修正</a></h3>
+<ul>
+<li>當配方材料名稱與科技機器同名時（例如「熔爐」同時指原版熔爐與科技熔爐），配方顯示自動加上**（原版）**標記</li>
+<li>放入科技機器物品到需要原版方塊的配方格時，會顯示明確提示：「放入了科技機器，但配方要原版方塊」</li>
+<li>受影響配方：煤炭發電機的 <code>F = 熔爐（原版）</code>（8 個鵝卵石合成的原版熔爐，不是科技熔爐）</li>
+</ul>
+<h3 id="-全域合成鏈審計與修復"><a class="header" href="#-全域合成鏈審計與修復">🔍 全域合成鏈審計與修復</a></h3>
+<p>對整個插件的藍圖、配方、解鎖鏈進行完整交叉審計，修復所有影響遊戲進程的邏輯問題。</p>
+<h4 id="-p0循環死鎖修復"><a class="header" href="#-p0循環死鎖修復">🔴 P0：循環死鎖修復</a></h4>
+<ul>
+<li><strong>雷射雕刻機</strong>缺少藍圖 → 蝕刻電路 / 控制單元無法取得 → 量子處理器無法建造</li>
+<li>✅ 新增雷射雕刻機藍圖（光學鏡片×2 + 強化玻璃 + 矽晶×2 + 末地燭 + 進階電路×2 + 精密框架）</li>
+<li><strong>行星測繪信標</strong>解鎖條件要求 <code>抗輻射頭盔</code>，但頭盔只能在行星鍛造台製作 → 行星鍛造台又在信標下游 → 整條星球探索鏈無法進入</li>
+<li>✅ 將解鎖條件從 <code>anti_radiation_helmet</code> 改為 <code>radiation_filter</code>（淨化器可製作，不依賴下游機器）</li>
+</ul>
+<h4 id="-p015-台機器無法合成"><a class="header" href="#-p015-台機器無法合成">🔴 P0：15 台機器無法合成</a></h4>
+<p>以下 15 台機器原先僅有文字描述式藍圖（<code>register-recipe: false</code> + <code>ingredient-lines</code>），玩家無法在進階工作台實際合成：</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>機器</th><th>新增藍圖方塊</th><th>主要材料</th></tr>
+</thead>
+<tbody>
+<tr><td>工業窯爐</td><td>BRICKS</td><td>磚塊 + 黏土球 + 鐵錠 + 紅石</td></tr>
+<tr><td>低溫蒸餾器</td><td>裝粉雪的鍋釜</td><td>玻璃 + 鋼板 + 鐵錠 + 紅石</td></tr>
+<tr><td>基因切片台</td><td>釀造台</td><td>鋼板 + 電路板 + 精密框架 + 紅石</td></tr>
+<tr><td>等離子精煉爐</td><td>高爐</td><td>鈦合金 + 反應堆核心 + 量子晶片 + 場板</td></tr>
+<tr><td>軌道觀測台</td><td>LECTERN</td><td>量子晶片 + 蝕刻電路 + 控制單元 + 奈米塗層</td></tr>
+<tr><td>行星測繪信標</td><td>BEACON</td><td>量子晶片 + 蝕刻電路 + 進階電路 + 控制單元</td></tr>
+<tr><td>遺物解析儀</td><td>校準伏聆振測器</td><td>量子晶片 + 進階電路 + 蝕刻電路</td></tr>
+<tr><td>異星精煉槽</td><td>鍛造台</td><td>量子晶片 + 控制單元 + 蝕刻電路</td></tr>
+<tr><td>行星鍛造台</td><td>獄髓方塊</td><td>量子晶片 + 場板 + 控制單元</td></tr>
+<tr><td>行星採集機</td><td>OBSERVER</td><td>量子晶片 + 進階電路 + 控制單元</td></tr>
+<tr><td>虛空抽取器</td><td>哭泣的黑曜石</td><td>奈米塗層 + 控制單元 + 量子晶片 + 場板</td></tr>
+<tr><td>奇點壓縮台</td><td>ANVIL</td><td>量子晶片 + 場板 + 控制單元 + 反應堆核心</td></tr>
+<tr><td>時序引擎</td><td>CLOCK</td><td>量子晶片 + 反應堆核心 + 場板 + 奈米塗層</td></tr>
+<tr><td>星鋼鑄造廠</td><td>鍛造台</td><td>場板 + 反應堆核心 + 量子晶片 + 奈米塗層</td></tr>
+<tr><td>巔峰鍛成儀</td><td>附魔台</td><td>量子晶片 + 場板 + 反應堆核心</td></tr>
+</tbody>
+</table>
+</div>
+<h3 id="-新增系統基因雞工程"><a class="header" href="#-新增系統基因雞工程">�🐔 新增系統：基因雞工程</a></h3>
+<p>全新的資源生產系統！透過捕捉野生雞、分析 DNA、選擇性繁殖，培育出能持續產出稀有資源的特殊品種雞。</p>
+<ul>
+<li><strong>雞網</strong>：右鍵野生雞捕捉為口袋雞（合成器製作：線×2 + 木棍）</li>
+<li><strong>口袋雞</strong>：被捕獲的雞以雞頭顱形式存在，帶有 6 個基因位點的隱藏 DNA</li>
+<li><strong>基因定序器</strong>：揭示雞的 DNA 序列（切石機，3 J/秒）</li>
+<li><strong>私人雞舍</strong>：放入兩隻已定序雞繁殖後代，古典遺傳學（堆肥桶，2 J/秒）</li>
+<li><strong>激發室</strong>：放入有隱性位點的雞持續產出資源（釀造台，4 J/秒）</li>
+<li>共 <strong>64 種資源雞</strong>，從羽毛到獄髓錠，分 7 個等級（Tier 0–6）</li>
+<li>詳細說明請見 <a href="chickens/README.html"><strong>基因雞工程專頁</strong></a></li>
+</ul>
+<h3 id="-修復-12"><a class="header" href="#-修復-12">🐛 修復</a></h3>
+<ul>
+<li>修復<strong>電池庫</strong>無法放入材料進行合成的問題（鋰電池、發射節點、電容庫三個配方現在可正常運作）</li>
+<li>修復<strong>太陽能陣列</strong>無法放入材料進行合成的問題（星光板、網格模組兩個配方現在可正常運作）</li>
+</ul>
+<hr>
+<h2 id="20260320"><a class="header" href="#20260320">2026/03/20</a></h2>
+<h3 id="-科技扳手改為可合成工具"><a class="header" href="#-科技扳手改為可合成工具">🔧 科技扳手改為可合成工具</a></h3>
+<ul>
+<li>科技扳手不再免費贈送，改為在<strong>合成器</strong>中製作（鐵板 + 銅錠，12 J）</li>
+<li>歸入科技書「工具 / 機動」分類，解鎖前置：合成器</li>
+</ul>
+<hr>
+<h2 id="20260319"><a class="header" href="#20260319">2026/03/19</a></h2>
+<h3 id="-機器頭顱材質"><a class="header" href="#-機器頭顱材質">🎨 機器頭顱材質</a></h3>
+<ul>
+<li>為 <strong>54 台機器</strong> 新增自訂頭顱材質，物品欄中每台機器都有獨特外觀圖示</li>
+<li>使用結構預覽放置的機器（碎礦機、壓縮器、淨化器等）仍維持原版方塊外觀</li>
+<li>已放置的舊機器不受影響</li>
+</ul>
+<h3 id="-科技百科手冊改進"><a class="header" href="#-科技百科手冊改進">📖 科技百科手冊改進</a></h3>
+<ul>
+<li>新增 <strong>可自訂 Lore 文字</strong></li>
+<li>新增 <strong>左鍵指令觸發</strong> — 手持手冊左鍵可執行自訂指令</li>
+</ul>
+<h3 id="-修復-13"><a class="header" href="#-修復-13">🐛 修復</a></h3>
+<ul>
+<li>修復邏輯閘合成配方中光學鏡片判定問題</li>
+<li>全面修正原版材料在配方中顯示英文的問題</li>
+<li>修復部分機器 GUI 中提示文字未替換的問題</li>
+<li>修復使用頭顱材質的食物無法堆疊的問題</li>
+</ul>
+<hr>
+<h2 id="20260317"><a class="header" href="#20260317">2026/03/17</a></h2>
+<h3 id="-配方鎖定功能"><a class="header" href="#-配方鎖定功能">🔒 配方鎖定功能</a></h3>
+<ul>
+<li>新增 <strong>配方鎖定</strong> — 當機器有多個配方使用相同材料時，GUI 中會出現鎖定按鈕</li>
+<li>點擊可在配方間循環切換，鎖定後機器只執行該配方</li>
+<li>受影響機器：壓縮機、電動壓縮機、自動農場、回收機</li>
+<li>鎖定狀態持久化儲存，重啟保留</li>
+</ul>
+<h3 id="-修復-14"><a class="header" href="#-修復-14">🐛 修復</a></h3>
+<ul>
+<li>修復電爐產出的鐵錠/銅錠無法匹配藍圖的問題</li>
+<li>修復配方顯示中部分原版物品名稱顯示英文的問題</li>
+</ul>
+<hr>
+<h2 id="20260316"><a class="header" href="#20260316">2026/03/16</a></h2>
+<h3 id="-純電力版機器"><a class="header" href="#-純電力版機器">⚡ 純電力版機器</a></h3>
+<p>新增 <strong>8 台純電力版機器</strong>，將手動機器升級為全自動。放下即自動加工，不需手動右鍵觸發。</p>
+<ul>
+<li>電動粉碎機、電動壓縮機、電動洗礦機、電動拉線機</li>
+<li>電動淨化器、電動離心機、電動生質實驗室、電動化學反應器</li>
+<li>新物品：<strong>自動化模組</strong> — 升級手動機器的關鍵元件</li>
+<li>耗能約手動版的 2 倍，建議搭配效率升級</li>
+</ul>
+<h3 id="-介面文字全面中文化"><a class="header" href="#-介面文字全面中文化">🌐 介面文字全面中文化</a></h3>
+<ul>
+<li>將所有 GUI 中殘留的英文替換為中文</li>
+</ul>
+<hr>
+<h2 id="20260315"><a class="header" href="#20260315">2026/03/15</a></h2>
+<h3 id="-修復-15"><a class="header" href="#-修復-15">🐛 修復</a></h3>
+<ul>
+<li>修復使用瞬移寶珠時伺服器報錯的問題</li>
+<li>修復磁石吸取物品時可能導致的錯誤</li>
+<li>修復將種子丟入自動農場時全部變成種子簇的問題。現在種子單獨放入產出作物，種子＋骨粉才會產出種子簇</li>
+</ul>
+<h3 id="-新增-2"><a class="header" href="#-新增-2">✨ 新增</a></h3>
+<ul>
+<li><strong>科技磁石</strong>：自動吸取周圍 5 格內的掉落物品，蹲下＋右鍵可切換開關</li>
+</ul>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="README.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
+                            </a>
+
+                            <a rel="next prefetch" href="getting-started/README.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="README.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
+                    </a>
+
+                    <a rel="next prefetch" href="getting-started/README.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
+                    </a>
+            </nav>
+
+        </div>
+
+        <template id=fa-eye><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M288 32c-80.8 0-145.5 36.8-192.6 80.6C48.6 156 17.3 208 2.5 243.7c-3.3 7.9-3.3 16.7 0 24.6C17.3 304 48.6 356 95.4 399.4C142.5 443.2 207.2 480 288 480s145.5-36.8 192.6-80.6c46.8-43.5 78.1-95.4 93-131.1c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C433.5 68.8 368.8 32 288 32zM432 256c0 79.5-64.5 144-144 144s-144-64.5-144-144s64.5-144 144-144s144 64.5 144 144zM288 192c0 35.3-28.7 64-64 64c-11.5 0-22.3-3-31.6-8.4c-.2 2.8-.4 5.5-.4 8.4c0 53 43 96 96 96s96-43 96-96s-43-96-96-96c-2.8 0-5.6 .1-8.4 .4c5.3 9.3 8.4 20.1 8.4 31.6z"/></svg></span></template>
+        <template id=fa-eye-slash><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M38.8 5.1C28.4-3.1 13.3-1.2 5.1 9.2S-1.2 34.7 9.2 42.9l592 464c10.4 8.2 25.5 6.3 33.7-4.1s6.3-25.5-4.1-33.7L525.6 386.7c39.6-40.6 66.4-86.1 79.9-118.4c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C465.5 68.8 400.8 32 320 32c-68.2 0-125 26.3-169.3 60.8L38.8 5.1zM223.1 149.5C248.6 126.2 282.7 112 320 112c79.5 0 144 64.5 144 144c0 24.9-6.3 48.3-17.4 68.7L408 294.5c5.2-11.8 8-24.8 8-38.5c0-53-43-96-96-96c-2.8 0-5.6 .1-8.4 .4c5.3 9.3 8.4 20.1 8.4 31.6c0 10.2-2.4 19.8-6.6 28.3l-90.3-70.8zm223.1 298L373 389.9c-16.4 6.5-34.3 10.1-53 10.1c-79.5 0-144-64.5-144-144c0-6.9 .5-13.6 1.4-20.2L83.1 161.5C60.3 191.2 44 220.8 34.5 243.7c-3.3 7.9-3.3 16.7 0 24.6c14.9 35.7 46.2 87.7 93 131.1C174.5 443.2 239.2 480 320 480c47.8 0 89.9-12.9 126.2-32.5z"/></svg></span></template>
+        <template id=fa-copy><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M502.6 70.63l-61.25-61.25C435.4 3.371 427.2 0 418.7 0H255.1c-35.35 0-64 28.66-64 64l.0195 256C192 355.4 220.7 384 256 384h192c35.2 0 64-28.8 64-64V93.25C512 84.77 508.6 76.63 502.6 70.63zM464 320c0 8.836-7.164 16-16 16H255.1c-8.838 0-16-7.164-16-16L239.1 64.13c0-8.836 7.164-16 16-16h128L384 96c0 17.67 14.33 32 32 32h47.1V320zM272 448c0 8.836-7.164 16-16 16H63.1c-8.838 0-16-7.164-16-16L47.98 192.1c0-8.836 7.164-16 16-16H160V128H63.99c-35.35 0-64 28.65-64 64l.0098 256C.002 483.3 28.66 512 64 512h192c35.2 0 64-28.8 64-64v-32h-47.1L272 448z"/></svg></span></template>
+        <template id=fa-play><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M73 39c-14.8-9.1-33.4-9.4-48.5-.9S0 62.6 0 80V432c0 17.4 9.4 33.4 24.5 41.9s33.7 8.1 48.5-.9L361 297c14.3-8.7 23-24.2 23-41s-8.7-32.2-23-41L73 39z"/></svg></span></template>
+        <template id=fa-clock-rotate-left><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M75 75L41 41C25.9 25.9 0 36.6 0 57.9V168c0 13.3 10.7 24 24 24H134.1c21.4 0 32.1-25.9 17-41l-30.8-30.8C155 85.5 203 64 256 64c106 0 192 86 192 192s-86 192-192 192c-40.8 0-78.6-12.7-109.7-34.4c-14.5-10.1-34.4-6.6-44.6 7.9s-6.6 34.4 7.9 44.6C151.2 495 201.7 512 256 512c141.4 0 256-114.6 256-256S397.4 0 256 0C185.3 0 121.3 28.7 75 75zm181 53c-13.3 0-24 10.7-24 24V256c0 6.4 2.5 12.5 7 17l72 72c9.4 9.4 24.6 9.4 33.9 0s9.4-24.6 0-33.9l-65-65V152c0-13.3-10.7-24-24-24z"/></svg></span></template>
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="elasticlunr-ef4e11c1.min.js"></script>
+        <script src="mark-09e88c2c.min.js"></script>
+        <script src="searcher-09f2665d.js"></script>
+
+        <script src="clipboard-1626706a.min.js"></script>
+        <script src="highlight-abc7f01d.js"></script>
+        <script src="book-609e4cb8.js"></script>
+
+        <!-- Custom JS scripts -->
+        <script src="theme/cjk-search-2989e841.js"></script>
+
+
+
+    </div>
+    </body>
+</html>

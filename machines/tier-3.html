@@ -1,0 +1,513 @@
+<!DOCTYPE HTML>
+<html lang="zh-TW" class="navy sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>三階 — 高階機器 - TechMC 科技百科</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="TechMC Minecraft 科技模組插件百科全書">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon-de23e50b.svg">
+        <link rel="shortcut icon" href="../favicon-8114d1fc.png">
+        <link rel="stylesheet" href="../css/variables-8adf115d.css">
+        <link rel="stylesheet" href="../css/general-e96d0476.css">
+        <link rel="stylesheet" href="../css/chrome-d279d366.css">
+        <link rel="stylesheet" href="../css/print-9e4910d8.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../fonts/fonts-9644e21d.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="mdbook-highlight-css" href="../highlight-493f70e1.css">
+        <link rel="stylesheet" id="mdbook-tomorrow-night-css" href="../tomorrow-night-4c0ae647.css">
+        <link rel="stylesheet" id="mdbook-ayu-highlight-css" href="../ayu-highlight-3fdfc3ac.css">
+
+        <!-- Custom theme stylesheets -->
+
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "../";
+            const default_light_theme = "navy";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "../searchindex-be974765.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="../toc-588afc34.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="mdbook-body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('navy')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="mdbook-sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("mdbook-sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="mdbook-sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="../toc.html"></iframe>
+            </noscript>
+            <div id="mdbook-sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="mdbook-page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="mdbook-menu-bar-hover-placeholder"></div>
+                <div id="mdbook-menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="mdbook-sidebar-toggle" class="icon-button" for="mdbook-sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="mdbook-sidebar">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M0 96C0 78.3 14.3 64 32 64H416c17.7 0 32 14.3 32 32s-14.3 32-32 32H32C14.3 128 0 113.7 0 96zM0 256c0-17.7 14.3-32 32-32H416c17.7 0 32 14.3 32 32s-14.3 32-32 32H32c-17.7 0-32-14.3-32-32zM448 416c0 17.7-14.3 32-32 32H32c-17.7 0-32-14.3-32-32s14.3-32 32-32H416c17.7 0 32 14.3 32 32z"/></svg></span>
+                        </label>
+                        <button id="mdbook-theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="mdbook-theme-list">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M371.3 367.1c27.3-3.9 51.9-19.4 67.2-42.9L600.2 74.1c12.6-19.5 9.4-45.3-7.6-61.2S549.7-4.4 531.1 9.6L294.4 187.2c-24 18-38.2 46.1-38.4 76.1L371.3 367.1zm-19.6 25.4l-116-104.4C175.9 290.3 128 339.6 128 400c0 3.9 .2 7.8 .6 11.6c1.8 17.5-10.2 36.4-27.8 36.4H96c-17.7 0-32 14.3-32 32s14.3 32 32 32H240c61.9 0 112-50.1 112-112c0-2.5-.1-5-.2-7.5z"/></svg></span>
+                        </button>
+                        <ul id="mdbook-theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-ayu">Ayu</button></li>
+                        </ul>
+                        <button id="mdbook-search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="mdbook-searchbar">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M416 208c0 45.9-14.9 88.3-40 122.7L502.6 457.4c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L330.7 376c-34.4 25.2-76.8 40-122.7 40C93.1 416 0 322.9 0 208S93.1 0 208 0S416 93.1 416 208zM208 352c79.5 0 144-64.5 144-144s-64.5-144-144-144S64 128.5 64 208s64.5 144 144 144z"/></svg></span>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">TechMC 科技百科</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <span class=fa-svg id="print-button"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M128 0C92.7 0 64 28.7 64 64v96h64V64H354.7L384 93.3V160h64V93.3c0-17-6.7-33.3-18.7-45.3L400 18.7C388 6.7 371.7 0 354.7 0H128zM384 352v32 64H128V384 368 352H384zm64 32h32c17.7 0 32-14.3 32-32V256c0-35.3-28.7-64-64-64H64c-35.3 0-64 28.7-64 64v96c0 17.7 14.3 32 32 32H64v64c0 35.3 28.7 64 64 64H384c35.3 0 64-28.7 64-64V384zm-16-88c-13.3 0-24-10.7-24-24s10.7-24 24-24s24 10.7 24 24s-10.7 24-24 24z"/></svg></span>
+                        </a>
+                        <a href="https://github.com/QiuRui920811/TechProject" title="Git repository" aria-label="Git repository">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"/></svg></span>
+                        </a>
+                        <a href="https://github.com/QiuRui920811/TechProject/edit/main/docs/wiki/docs/wiki/machines/tier-3.md" title="Suggest an edit" aria-label="Suggest an edit" rel="edit">
+                            <span class=fa-svg id="git-edit-button"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M421.7 220.3l-11.3 11.3-22.6 22.6-205 205c-6.6 6.6-14.8 11.5-23.8 14.1L30.8 511c-8.4 2.5-17.5 .2-23.7-6.1S-1.5 489.7 1 481.2L38.7 353.1c2.6-9 7.5-17.2 14.1-23.8l205-205 22.6-22.6 11.3-11.3 33.9 33.9 62.1 62.1 33.9 33.9zM96 353.9l-9.3 9.3c-.9 .9-1.6 2.1-2 3.4l-25.3 86 86-25.3c1.3-.4 2.5-1.1 3.4-2l9.3-9.3H112c-8.8 0-16-7.2-16-16V353.9zM453.3 19.3l39.4 39.4c25 25 25 65.5 0 90.5l-14.5 14.5-22.6 22.6-11.3 11.3-33.9-33.9-62.1-62.1L314.3 67.7l11.3-11.3 22.6-22.6 14.5-14.5c25-25 65.5-25 90.5 0z"/></svg></span>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="mdbook-search-wrapper" class="hidden">
+                    <form id="mdbook-searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="mdbook-searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="mdbook-searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <span class=fa-svg id="fa-spin"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M304 48c0-26.5-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48s48-21.5 48-48zm0 416c0-26.5-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48s48-21.5 48-48zM48 304c26.5 0 48-21.5 48-48s-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48zm464-48c0-26.5-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48s48-21.5 48-48zM142.9 437c18.7-18.7 18.7-49.1 0-67.9s-49.1-18.7-67.9 0s-18.7 49.1 0 67.9s49.1 18.7 67.9 0zm0-294.2c18.7-18.7 18.7-49.1 0-67.9S93.7 56.2 75 75s-18.7 49.1 0 67.9s49.1 18.7 67.9 0zM369.1 437c18.7 18.7 49.1 18.7 67.9 0s18.7-49.1 0-67.9s-49.1-18.7-67.9 0s-18.7 49.1 0 67.9z"/></svg></span>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="mdbook-searchresults-outer" class="searchresults-outer hidden">
+                        <div id="mdbook-searchresults-header" class="searchresults-header"></div>
+                        <ul id="mdbook-searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('mdbook-sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('mdbook-sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#mdbook-sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="mdbook-content" class="content">
+                    <main>
+                        <h1 id="三階--高階機器"><a class="header" href="#三階--高階機器">三階 — 高階機器</a></h1>
+<p>三階機器是科技線的主體，共 <strong>66 台</strong>，帶來量子科技、雷射技術、純電力全自動化、機器人、GPS 傳送與貨物物流網路，並涵蓋高壓冶煉、核能與地質開採。</p>
+<blockquote>
+<p>🎨 大部分機器在物品欄中顯示為自訂頭顱材質，讓每台機器都有獨特外觀。
+💡「輸入 → 輸出」欄位使用物品的內部識別碼，方便對照配方。</p>
+</blockquote>
+<hr>
+<h2 id="完整機器一覽"><a class="header" href="#完整機器一覽">完整機器一覽</a></h2>
+<h3 id="-高階加工量子"><a class="header" href="#-高階加工量子">🔬 高階加工·量子</a></h3>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>中文名</th><th>英文 ID</th><th>說明</th><th>輸入 → 輸出</th><th>耗能</th></tr>
+</thead>
+<tbody>
+<tr><td>量子處理器</td><td><code>quantum_processor</code></td><td>閃爍光束 / 能量流</td><td>高級電路, 奈米塗層 → 量子晶片</td><td>20 EU/秒</td></tr>
+<tr><td>進階製造機</td><td><code>advanced_assembler</code></td><td>脈衝光場</td><td>機械零件, 高級電路 → 奈米塗層</td><td>24 EU/秒</td></tr>
+<tr><td>雷射雕刻機</td><td><code>laser_engraver</code></td><td>雷射掃描</td><td>矽晶, 光學鏡片 → 雷射鏡, 蝕刻電路, 控制單元</td><td>18 EU/秒</td></tr>
+<tr><td>物質編譯器</td><td><code>matter_compiler</code></td><td>物質編譯脈衝</td><td>量子流體, 培育晶體 → 物質團, 奇點碎片</td><td>26 EU/秒</td></tr>
+<tr><td>力場鍛造台</td><td><code>field_forge</code></td><td>藍色場域波動</td><td>力場發射器, 相位板 → 力場板</td><td>22 EU/秒</td></tr>
+<tr><td>光子織構機</td><td><code>photon_weaver</code></td><td>光束編織成形</td><td>雷射鏡, 星光板, 強化玻璃, 光學鏡片 → 光子碎晶, 光子板, 觀測透鏡</td><td>24 EU/秒</td></tr>
+<tr><td>離心機</td><td><code>centrifuge</code></td><td>高速旋轉</td><td>淨化碎晶 → 離子粉, 磁環, 離心轉子</td><td>18 EU/秒</td></tr>
+<tr><td>化學反應器</td><td><code>chemical_reactor</code></td><td>化學煙霧</td><td>生質樹脂, 煤粉 → 聚合樹脂, 合成纖維, 精密噴嘴</td><td>16 EU/秒</td></tr>
+<tr><td>晶體培育艙</td><td><code>crystal_growth_chamber</code></td><td>晶簇成長</td><td>晶種, 冷卻混合液 → 培育晶體</td><td>19 EU/秒</td></tr>
+<tr><td>紫水晶培養機</td><td><code>amethyst_grower</code></td><td>消耗冷卻混合液培養紫水晶碎片</td><td>冷卻混合液 → 紫水晶碎片</td><td>16 EU/秒</td></tr>
+<tr><td>資料封存庫</td><td><code>data_archive</code></td><td>壓縮封存資料</td><td>資料核心, 重力軸承 → 封存板</td><td>20 EU/秒</td></tr>
+<tr><td>軌道觀測台</td><td><code>observatory</code></td><td>軌道資料測繪</td><td>觀測透鏡, 數據矩陣, 磁環, 重力子透鏡, 真空管, 控制單元 → 星圖, 重力軸承, 真空模組, 資料核心</td><td>22 EU/秒</td></tr>
+</tbody>
+</table>
+</div>
+<h3 id="-純電力版手動機自動升級"><a class="header" href="#-純電力版手動機自動升級">⚡ 純電力版（手動機自動升級）</a></h3>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>中文名</th><th>英文 ID</th><th>說明</th><th>輸入 → 輸出</th><th>耗能</th></tr>
+</thead>
+<tbody>
+<tr><td>電動粉碎機</td><td><code>electric_crusher</code></td><td>高速旋轉渦輪</td><td>鐵礦, 銅礦 → 鐵粉, 銅粉</td><td>12 EU/秒</td></tr>
+<tr><td>電動壓縮機</td><td><code>electric_compressor</code></td><td>電動壓縮衝程</td><td>鐵錠, 鐵板, 錫錠 → 鐵板, 鋼板, 壓實鐵胚, 高密碳塊, 錫板</td><td>18 EU/秒</td></tr>
+<tr><td>電動洗礦機</td><td><code>electric_ore_washer</code></td><td>高壓水流翻騰</td><td>鐵粉 → 礦漿</td><td>16 EU/秒</td></tr>
+<tr><td>電動拉線機</td><td><code>electric_wire_mill</code></td><td>自動高速牽引</td><td>銅錠, 鋼板, 錫錠 → 銅線, 鋼線, 工業線束, 錫線</td><td>20 EU/秒</td></tr>
+<tr><td>電動淨化器</td><td><code>electric_purifier</code></td><td>加壓淨化脈衝</td><td>礦漿 → 淨化碎晶, 冷卻電池, 淨化膜片</td><td>22 EU/秒</td></tr>
+<tr><td>電動離心機</td><td><code>electric_centrifuge</code></td><td>超高速離心</td><td>淨化碎晶 → 離子粉, 磁環, 離心轉子</td><td>38 EU/秒</td></tr>
+<tr><td>電動生質實驗室</td><td><code>electric_bio_lab</code></td><td>自動培養循環</td><td>作物, 木屑 → 生質樹脂, 生質纖維</td><td>24 EU/秒</td></tr>
+<tr><td>電動化學反應器</td><td><code>electric_chemical_reactor</code></td><td>自動化學反應</td><td>生質樹脂, 煤粉 → 聚合樹脂, 合成纖維, 精密噴嘴</td><td>34 EU/秒</td></tr>
+<tr><td>電動篩礦機</td><td><code>electric_sifter</code></td><td>自動篩礦循環</td><td>礫石, 靈魂砂 → 鐵粉, 銅粉, 錫粉, 鋅粉, 篩出礦砂, 矽晶, 鉛粉</td><td>10 EU/秒</td></tr>
+<tr><td>電爐</td><td><code>electric_smelter</code></td><td>高溫電弧冶煉</td><td>鎢粉, 鉻粉, 鈷粉 → 鎢錠, 鉻錠, 鈷錠</td><td>30 EU/秒</td></tr>
+</tbody>
+</table>
+</div>
+<h3 id="-高壓冶煉多方塊"><a class="header" href="#-高壓冶煉多方塊">🔥 高壓冶煉·多方塊</a></h3>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>中文名</th><th>英文 ID</th><th>說明</th><th>輸入 → 輸出</th><th>耗能</th></tr>
+</thead>
+<tbody>
+<tr><td>高爐</td><td><code>blast_furnace</code></td><td>周圍 26 格中 ≥17 格地獄磚包住，溫度 400 度以上運作</td><td>鐵錠, 焦炭, 碳粉 → 鋼錠, 鎢錠, 碳化鎢粉</td><td>40 EU/秒</td></tr>
+<tr><td>工業冶煉爐</td><td><code>industrial_smeltery</code></td><td>六個貼面中 ≥4 面岩漿塊，溫度 600 度以上運作</td><td>鋼錠, 大馬士革鋼錠, 鎢錠 → 大馬士革鋼錠, 硬化合金錠, 強化合金錠, 導電合金錠, 鈷鉻合金錠, 熔融鐵, 熔融鋼, 熔融銅, 熔融金, 熔融青銅</td><td>60 EU/秒</td></tr>
+<tr><td>鑄造台</td><td><code>casting_table</code></td><td>熔融金屬 + 模具 → 零件</td><td>熔融鐵, 熔融銅, 熔融金, 熔融鋼, 熔融青銅 → 鐵板, 銅板, 鋼板, 青銅板, 鐵齒輪, 鋼齒輪, 銅線, 金線, 鐵棒, 鋼棒, 鐵管, 鋼管</td><td>10 EU/秒</td></tr>
+<tr><td>加壓室</td><td><code>pressure_chamber</code></td><td>六個貼面中 ≥4 面鐵方塊（不用蓋 3×3×3），超高壓合成</td><td>碳粉, 碳化鎢粉 → 合成鑽石, 碳化鎢錠</td><td>50 EU/秒</td></tr>
+<tr><td>工業離心機</td><td><code>industrial_centrifuge</code></td><td>高速離心分離</td><td>鐵粉, 鈾礦粉 → 鐵粉, 濃縮鈾, 鉻粉, 鈷粉</td><td>20 EU/秒</td></tr>
+<tr><td>電解分離機</td><td><code>electrolytic_separator</code></td><td>電解分離元素</td><td>水桶, 紅石粉 → 氫氣瓶, 氧氣瓶, 硒粉, 矽晶</td><td>25 EU/秒</td></tr>
+</tbody>
+</table>
+</div>
+<h3 id="-生質基因"><a class="header" href="#-生質基因">🧬 生質·基因</a></h3>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>中文名</th><th>英文 ID</th><th>說明</th><th>輸入 → 輸出</th><th>耗能</th></tr>
+</thead>
+<tbody>
+<tr><td>基因切片台</td><td><code>gene_splicer</code></td><td>基因樣板切片</td><td>生質樹脂, 肥料混合物, 作物, 蝕刻電路, 合成纖維, 鋼板, 精密噴嘴 → 生質觸媒, 基因樣板, 神經樹脂, 切片刀組</td><td>20 EU/秒</td></tr>
+<tr><td>生質合成槽</td><td><code>biosynth_vat</code></td><td>生質批次培養</td><td>基因樣板, 生質觸媒, 大豆莢 → 合成肉塊, 蛋白口糧包</td><td>16 EU/秒</td></tr>
+<tr><td>低溫蒸餾器</td><td><code>cryo_distiller</code></td><td>低溫相變蒸餾</td><td>冷卻混合液, 精煉油, 水凝膠, 冷卻電池, 培育晶體 → 冷卻罐, 低溫凝膠, 低溫核心</td><td>18 EU/秒</td></tr>
+</tbody>
+</table>
+</div>
+<h3 id="-冷卻散熱"><a class="header" href="#-冷卻散熱">❄️ 冷卻·散熱</a></h3>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>中文名</th><th>英文 ID</th><th>說明</th><th>輸入 → 輸出</th><th>耗能</th></tr>
+</thead>
+<tbody>
+<tr><td>冷卻液循環器</td><td><code>coolant_circulator</code></td><td>消耗冷卻液，冷卻相鄰機器 -15 熱/秒</td><td>冷卻電池 → —</td><td>15 EU/秒</td></tr>
+<tr><td>低溫冷卻塔</td><td><code>cryo_tower</code></td><td>多方塊，範圍冷卻 3×3 區域 -20 熱/秒</td><td>冷卻電池 → —</td><td>20 EU/秒</td></tr>
+<tr><td>水冷散熱器</td><td><code>water_cooler</code></td><td>消耗水桶，冷卻相鄰機器 -8 熱/秒</td><td>水桶 → —</td><td>5 EU/秒</td></tr>
+</tbody>
+</table>
+</div>
+<h3 id="-發電"><a class="header" href="#-發電">🔋 發電</a></h3>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>中文名</th><th>英文 ID</th><th>說明</th><th>輸入 → 輸出</th><th>發電</th></tr>
+</thead>
+<tbody>
+<tr><td>柴油發電機</td><td><code>diesel_generator</code></td><td>雜酚油驅動發電</td><td>雜酚油 → —</td><td>24 EU/秒</td></tr>
+<tr><td>地熱發電機</td><td><code>geothermal_generator</code></td><td>岩漿桶穩定發電</td><td>熔岩桶 → —</td><td>16 EU/秒</td></tr>
+<tr><td>燃氣渦輪</td><td><code>gas_turbine</code></td><td>氫燃料高功率發電</td><td>氫氣瓶 → —</td><td>50 EU/秒</td></tr>
+<tr><td>風暴渦輪機</td><td><code>storm_turbine</code></td><td>暴雨與雷暴時會大幅增加發電量（晴天 2 EU/秒，風暴 8 EU/秒）</td><td>風暴轉子, 天候感測器 → 能源電池</td><td>2 EU/秒</td></tr>
+<tr><td>核反應堆</td><td><code>nuclear_reactor</code></td><td>鈾燃料棒 + 反應堆冷卻液，穩定輸出 200 EU/秒，詳見下方說明</td><td>鈾燃料棒, 反應堆冷卻液 → 乏燃料棒</td><td>高功率</td></tr>
+</tbody>
+</table>
+</div>
+<h3 id="-機器人安卓"><a class="header" href="#-機器人安卓">🤖 機器人·安卓</a></h3>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>中文名</th><th>英文 ID</th><th>說明</th><th>輸入 → 輸出</th><th>耗能</th></tr>
+</thead>
+<tbody>
+<tr><td>無人機艙</td><td><code>drone_bay</code></td><td>飛行裝配</td><td>無人機核心, 機械外殼 → 無人機外殼, 無人機框架</td><td>18 EU/秒</td></tr>
+<tr><td>安卓艙</td><td><code>android_bay</code></td><td>程序裝配</td><td>安卓核心, 機械外殼 → 安卓外殼, 安卓框架, 安卓記憶矩陣</td><td>20 EU/秒</td></tr>
+<tr><td>安卓工作站</td><td><code>android_station</code></td><td>部署與巡檢</td><td>安卓框架, 安卓記憶矩陣 → 安卓物品介面, 安卓燃料介面</td><td>12 EU/秒</td></tr>
+<tr><td>安卓物品介面</td><td><code>android_item_interface</code></td><td>物資回收</td><td>訊號中繼器, 機械外殼 → —</td><td>4 EU/秒</td></tr>
+<tr><td>安卓燃料介面</td><td><code>android_fuel_interface</code></td><td>燃料補給</td><td>發射節點, 壓力導管 → —</td><td>4 EU/秒</td></tr>
+</tbody>
+</table>
+</div>
+<h3 id="-採礦地質"><a class="header" href="#-採礦地質">⛏️ 採礦·地質</a></h3>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>中文名</th><th>英文 ID</th><th>說明</th><th>輸入 → 輸出</th><th>耗能</th></tr>
+</thead>
+<tbody>
+<tr><td>採礦鑽機</td><td><code>quarry_drill</code></td><td>區塊級向下抽取礦脈</td><td>—</td><td>24 EU/秒</td></tr>
+<tr><td>採礦鑽機二型</td><td><code>quarry_drill_mk2</code></td><td>區塊級高速抽取礦脈</td><td>—</td><td>48 EU/秒</td></tr>
+<tr><td>地質抽取機</td><td><code>geo_extractor</code></td><td>持續抽取腳下區塊的地質資源，需先用地質掃描儀勘探</td><td>鑽頭組, 精密框架 → 原油, 岩鹽, 硫磺粉, 鈾礦原礦, 銅粉</td><td>18 EU/秒</td></tr>
+<tr><td>地質掃描儀</td><td><code>geo_scanner</code></td><td>利用探針與定位標記掃描區塊地質資料</td><td>地質掃描探針, 定位標記 → 數據矩陣</td><td>12 EU/秒</td></tr>
+</tbody>
+</table>
+</div>
+<h3 id="-gps傳送"><a class="header" href="#-gps傳送">🛰️ GPS·傳送</a></h3>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>中文名</th><th>英文 ID</th><th>說明</th><th>輸入 → 輸出</th><th>耗能</th></tr>
+</thead>
+<tbody>
+<tr><td>GPS 發射器</td><td><code>gps_transmitter</code></td><td>消耗定位電路產生定位標記</td><td>定位電路 → 定位標記</td><td>8 EU/秒</td></tr>
+<tr><td>GPS 控制塔</td><td><code>gps_control_tower</code></td><td>將定位標記與訊號中繼器整合為衛星模組</td><td>定位標記, 訊號中繼器 → 衛星模組</td><td>14 EU/秒</td></tr>
+<tr><td>GPS 網路節點</td><td><code>gps_network_node</code></td><td>利用衛星模組與資料核心合成傳送矩陣</td><td>衛星模組, 資料核心 → 傳送矩陣</td><td>20 EU/秒</td></tr>
+<tr><td>傳送面板</td><td><code>teleport_pad</code></td><td>消耗背包中的原版末影珍珠與能量執行空間跳躍</td><td>傳送矩陣 → —</td><td>28 EU/秒</td></tr>
+</tbody>
+</table>
+</div>
+<h3 id="-貨物物流路由"><a class="header" href="#-貨物物流路由">📦 貨物·物流路由</a></h3>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>中文名</th><th>英文 ID</th><th>說明</th><th>輸入 → 輸出</th><th>耗能</th></tr>
+</thead>
+<tbody>
+<tr><td>量子倉儲抽屜</td><td><code>cargo_drawer</code></td><td>單一類型大容量倉儲；容量 50,000，可配合貨物網路自動進出</td><td>儲物箱, 路由晶片 → 儲物箱</td><td>—</td></tr>
+<tr><td>貨物抽取節點</td><td><code>cargo_input_node</code></td><td>從相鄰原版容器（箱子/桶/漏斗）抽取物品送入產線</td><td>路由晶片, 伺服馬達, 儲物箱 → 機械零件, 鋼板, 電路板, 作物, 塑膠</td><td>2 EU/秒</td></tr>
+<tr><td>貨物輸出節點</td><td><code>cargo_output_node</code></td><td>將輸入物品推送至相鄰原版容器（箱子/桶/漏斗）</td><td>路由晶片, 伺服馬達, 儲物箱 → 機械零件, 鋼板, 電路板, 作物, 塑膠</td><td>2 EU/秒</td></tr>
+<tr><td>貨物管理站</td><td><code>cargo_manager</code></td><td>無線掃描範圍內同主人機器並抽取輸出物品</td><td>總線機架, 路由晶片, 控制單元, 訊號中繼器 → 機械零件, 鋼板, 電路板, 作物, 塑膠</td><td>5 EU/秒</td></tr>
+<tr><td>貨物驅動器</td><td><code>cargo_motor</code></td><td>高速物流中繼站，每次傳輸最多 8 件物品</td><td>總線機架, 伺服馬達, 路由晶片 → 機械零件, 鋼板, 電路板, 作物, 塑膠</td><td>1 EU/秒</td></tr>
+<tr><td>工業總線</td><td><code>industrial_bus</code></td><td>高吞吐量遠距物流骨幹與中繼站</td><td>總線機架, 路由晶片, 儲物箱, 離心轉子 → 機械零件, 鋼板, 電路板, 作物, 塑膠</td><td>—</td></tr>
+<tr><td>分流節點</td><td><code>splitter_node</code></td><td>將同一輸出平均拆往多條產線</td><td>分流核心, 路由晶片, 伺服馬達 → 機械零件, 鋼板, 電路板, 作物, 塑膠</td><td>—</td></tr>
+<tr><td>過濾路由器</td><td><code>filter_router</code></td><td>用第 1 格樣本物品做精準過濾匯流</td><td>過濾網核心, 路由晶片, 淨化膜片 → 機械零件, 鋼板, 電路板, 作物, 塑膠</td><td>—</td></tr>
+<tr><td>優先路由器</td><td><code>priority_router</code></td><td>依過濾欄優先級分流物品（匹配→主路，不匹配→備路）</td><td>—</td><td>—</td></tr>
+<tr><td>輪流分配器</td><td><code>round_robin</code></td><td>平均分配物品到多台下游機器</td><td>—</td><td>—</td></tr>
+</tbody>
+</table>
+</div>
+<h3 id="-進階信號"><a class="header" href="#-進階信號">🚦 進階信號</a></h3>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>中文名</th><th>英文 ID</th><th>說明</th><th>輸入 → 輸出</th><th>耗能</th></tr>
+</thead>
+<tbody>
+<tr><td>信號比較器</td><td><code>signal_comparator</code></td><td>比較或相減兩路信號（A≥B→A / A-B）</td><td>訊號中繼器 → 訊號中繼器</td><td>1 EU/秒</td></tr>
+<tr><td>信號計數器</td><td><code>signal_counter</code></td><td>計算輸入信號上升沿次數（輸出 = 計數 mod 16）</td><td>訊號中繼器 → 訊號中繼器</td><td>1 EU/秒</td></tr>
+<tr><td>信號計時器</td><td><code>signal_timer</code></td><td>週期性脈衝信號（可設定 1-60 秒間隔）</td><td>訊號中繼器 → 訊號中繼器</td><td>1 EU/秒</td></tr>
+</tbody>
+</table>
+</div>
+<h3 id="-生物採集"><a class="header" href="#-生物採集">🕸️ 生物採集</a></h3>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>中文名</th><th>英文 ID</th><th>說明</th><th>輸入 → 輸出</th><th>耗能</th></tr>
+</thead>
+<tbody>
+<tr><td>生物收集器</td><td><code>mob_collector</code></td><td>收集附近生物並轉化為掉落物</td><td>捕網發射器, 戶外處理器 → 皮革, 生牛肉, 白色羊毛, 生羊肉, 生豬肉, 生雞肉, 羽毛, 腐肉, 骨頭, 火藥, 線, 蜘蛛眼, 史萊姆球, 烈焰桿, 岩漿球, 幽靈之淚, 煤炭, 金粒</td><td>14 EU/秒</td></tr>
+</tbody>
+</table>
+</div>
+<hr>
+<h2 id="重點提示"><a class="header" href="#重點提示">重點提示</a></h2>
+<h3 id="純電力版手動機的全自動升級"><a class="header" href="#純電力版手動機的全自動升級">純電力版：手動機的全自動升級</a></h3>
+<p><code>electric_*</code> 系列是一階手動結構機（粉碎機、壓縮機、洗礦機、拉線機、淨化器、離心機、化學反應器等）的全自動版本：不需要在上方放觸發方塊，通電後自動連續加工，代價是耗能明顯提高（約 2×）。中後期產線鋪好電網後，用純電力版取代手動機是關鍵的自動化升級。</p>
+<h3 id="核反應堆"><a class="header" href="#核反應堆">核反應堆</a></h3>
+<p><code>nuclear_reactor</code>（核反應堆）是三階的高功率發電支柱：</p>
+<ul>
+<li><strong>反應堆冷卻液為永久催化劑</strong>，放入一次後永不消耗</li>
+<li>每根 <strong>鈾燃料棒可運轉 40 秒</strong>，期間穩定輸出 <strong>200 EU/秒</strong>（加速模組額外 +60 EU）</li>
+<li>循環結束自動輸出 <strong>乏燃料棒</strong>，可於物質編譯器回收成新的鈾燃料棒</li>
+<li><strong>無燃料時完全不發電</strong></li>
+</ul>
+<p>配合安卓工作站與自動倉儲，可組成閉環長期供電。</p>
+<h3 id="高溫多方塊冶煉"><a class="header" href="#高溫多方塊冶煉">高溫多方塊冶煉</a></h3>
+<p>高爐、工業冶煉爐、加壓室都要先把結構蓋對才會動，但<strong>三台的蓋法不一樣</strong>：</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>機器</th><th>方塊</th><th>怎麼算完成</th></tr>
+</thead>
+<tbody>
+<tr><td>高爐</td><td>地獄磚</td><td>周圍 3×3×3 的 26 格裡 ≥ <strong>17 格</strong></td></tr>
+<tr><td>工業冶煉爐</td><td>岩漿塊</td><td>貼著的六個面裡 ≥ <strong>4 面</strong></td></tr>
+<tr><td>加壓室</td><td>鐵方塊</td><td>貼著的六個面裡 ≥ <strong>4 面</strong>（<strong>不用</strong>蓋 3×3×3）</td></tr>
+</tbody>
+</table>
+</div>
+<p>「貼著」是直接相鄰、共用一個面，中間空一格就不算。詳細蓋法看 <a href="industrial.html#多方塊結構">工業機器</a>。高階合金與合成鑽石都出自這條線。</p>
+<h3 id="溫度怎麼來"><a class="header" href="#溫度怎麼來">溫度怎麼來</a></h3>
+<p><strong>不用你動手加。</strong> 機器接上電就會一邊吃電一邊自己升溫，介面上會即時顯示現在幾度。</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th></th><th>升溫速度</th><th>到達門檻要多久</th></tr>
+</thead>
+<tbody>
+<tr><td>高爐（400 度）</td><td>1.4 度/秒</td><td>約 <strong>4 分 45 秒</strong></td></tr>
+<tr><td>工業冶煉爐（600 度）</td><td>2 度/秒</td><td>約 <strong>5 分鐘</strong></td></tr>
+</tbody>
+</table>
+</div>
+<p>升溫時吃的電是正常耗電的一半（高爐 20、冶煉爐 30）。<strong>電不夠就完全不升溫</strong>，溫度數字會卡住不動 —— 半天沒變先檢查供電。</p>
+<blockquote>
+<p>⚠️ 沒有任何「加熱裝置」可以放。<strong>加熱線圈是合成材料，不是加熱器</strong> —— 它只用來做風暴法杖、熔煉鎬那些東西，放進機器不會讓它變熱。</p>
+</blockquote>
+<h3 id="-溫度到了之後會繼續往上燒一定要配冷卻"><a class="header" href="#-溫度到了之後會繼續往上燒一定要配冷卻">⚠️ 溫度到了之後會繼續往上燒，一定要配冷卻</a></h3>
+<p>開始運轉後升溫會<strong>變快到每秒 +8 度</strong>（運轉中不受待機降頻限制），而自然散熱只有每 4 秒 -1 度。</p>
+<p>所以工業冶煉爐從 600 度開始跑，<strong>大約 50 秒就會撞到 1000 度</strong>，跳「過熱！需要冷卻」停機。<strong>不接冷卻機的話它連一分鐘都跑不完。</strong></p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>冷卻機</th><th>降溫</th><th>範圍</th><th>頻率</th></tr>
+</thead>
+<tbody>
+<tr><td>散熱片</td><td>-3 度</td><td>貼著的 6 面</td><td>每 4 秒</td></tr>
+<tr><td>水冷散熱器</td><td>-8 度</td><td>貼著的 6 面</td><td>每 4 秒，要餵水桶</td></tr>
+<tr><td>冷卻液循環器</td><td>-15 度</td><td>貼著的 6 面</td><td>每 4 秒，要餵冷卻液</td></tr>
+<tr><td>低溫冷卻塔</td><td>-20 度</td><td>周圍 3×3×3（26 格）</td><td>上下要有至少 2 個浮冰</td></tr>
+</tbody>
+</table>
+</div>
+<p>冶煉爐每秒產 8 度，各冷卻機換算成每秒是：</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>冷卻機</th><th>每秒降溫</th><th>壓得住冶煉爐（每秒 +8 度）嗎</th></tr>
+</thead>
+<tbody>
+<tr><td>散熱片</td><td>0.75 度</td><td>✘ 差太遠</td></tr>
+<tr><td>水冷散熱器</td><td>2 度</td><td>✘</td></tr>
+<tr><td>冷卻液循環器</td><td>3.75 度</td><td>✘ 單台不夠，兩台勉強</td></tr>
+<tr><td>低溫冷卻塔</td><td>5 度</td><td>✘ 單台仍不足，但範圍 3×3×3 可以同時罩住多台機器</td></tr>
+</tbody>
+</table>
+</div>
+<p><strong>單一台冷卻機都壓不住連續運轉的冶煉爐</strong>，實務上不是擺多台冷卻機，就是讓它燒到接近 1000 度時暫停一下再開。</p>
+<h3 id="gps-傳送網"><a class="header" href="#gps-傳送網">GPS 傳送網</a></h3>
+<p>依序組裝 <code>gps_transmitter</code> → <code>gps_control_tower</code> → <code>gps_network_node</code>，最終產出 <strong>傳送矩陣</strong> 供 <code>teleport_pad</code>（傳送面板）啟動跨地圖傳送；<code>geo_scanner</code>（地質掃描儀）則為 <code>geo_extractor</code>（地質抽取機）事先勘探腳下區塊的地質資源。</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../machines/tier-2.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
+                            </a>
+
+                            <a rel="next prefetch" href="../machines/tier-4.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../machines/tier-2.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
+                    </a>
+
+                    <a rel="next prefetch" href="../machines/tier-4.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
+                    </a>
+            </nav>
+
+        </div>
+
+        <template id=fa-eye><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M288 32c-80.8 0-145.5 36.8-192.6 80.6C48.6 156 17.3 208 2.5 243.7c-3.3 7.9-3.3 16.7 0 24.6C17.3 304 48.6 356 95.4 399.4C142.5 443.2 207.2 480 288 480s145.5-36.8 192.6-80.6c46.8-43.5 78.1-95.4 93-131.1c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C433.5 68.8 368.8 32 288 32zM432 256c0 79.5-64.5 144-144 144s-144-64.5-144-144s64.5-144 144-144s144 64.5 144 144zM288 192c0 35.3-28.7 64-64 64c-11.5 0-22.3-3-31.6-8.4c-.2 2.8-.4 5.5-.4 8.4c0 53 43 96 96 96s96-43 96-96s-43-96-96-96c-2.8 0-5.6 .1-8.4 .4c5.3 9.3 8.4 20.1 8.4 31.6z"/></svg></span></template>
+        <template id=fa-eye-slash><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M38.8 5.1C28.4-3.1 13.3-1.2 5.1 9.2S-1.2 34.7 9.2 42.9l592 464c10.4 8.2 25.5 6.3 33.7-4.1s6.3-25.5-4.1-33.7L525.6 386.7c39.6-40.6 66.4-86.1 79.9-118.4c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C465.5 68.8 400.8 32 320 32c-68.2 0-125 26.3-169.3 60.8L38.8 5.1zM223.1 149.5C248.6 126.2 282.7 112 320 112c79.5 0 144 64.5 144 144c0 24.9-6.3 48.3-17.4 68.7L408 294.5c5.2-11.8 8-24.8 8-38.5c0-53-43-96-96-96c-2.8 0-5.6 .1-8.4 .4c5.3 9.3 8.4 20.1 8.4 31.6c0 10.2-2.4 19.8-6.6 28.3l-90.3-70.8zm223.1 298L373 389.9c-16.4 6.5-34.3 10.1-53 10.1c-79.5 0-144-64.5-144-144c0-6.9 .5-13.6 1.4-20.2L83.1 161.5C60.3 191.2 44 220.8 34.5 243.7c-3.3 7.9-3.3 16.7 0 24.6c14.9 35.7 46.2 87.7 93 131.1C174.5 443.2 239.2 480 320 480c47.8 0 89.9-12.9 126.2-32.5z"/></svg></span></template>
+        <template id=fa-copy><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M502.6 70.63l-61.25-61.25C435.4 3.371 427.2 0 418.7 0H255.1c-35.35 0-64 28.66-64 64l.0195 256C192 355.4 220.7 384 256 384h192c35.2 0 64-28.8 64-64V93.25C512 84.77 508.6 76.63 502.6 70.63zM464 320c0 8.836-7.164 16-16 16H255.1c-8.838 0-16-7.164-16-16L239.1 64.13c0-8.836 7.164-16 16-16h128L384 96c0 17.67 14.33 32 32 32h47.1V320zM272 448c0 8.836-7.164 16-16 16H63.1c-8.838 0-16-7.164-16-16L47.98 192.1c0-8.836 7.164-16 16-16H160V128H63.99c-35.35 0-64 28.65-64 64l.0098 256C.002 483.3 28.66 512 64 512h192c35.2 0 64-28.8 64-64v-32h-47.1L272 448z"/></svg></span></template>
+        <template id=fa-play><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M73 39c-14.8-9.1-33.4-9.4-48.5-.9S0 62.6 0 80V432c0 17.4 9.4 33.4 24.5 41.9s33.7 8.1 48.5-.9L361 297c14.3-8.7 23-24.2 23-41s-8.7-32.2-23-41L73 39z"/></svg></span></template>
+        <template id=fa-clock-rotate-left><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M75 75L41 41C25.9 25.9 0 36.6 0 57.9V168c0 13.3 10.7 24 24 24H134.1c21.4 0 32.1-25.9 17-41l-30.8-30.8C155 85.5 203 64 256 64c106 0 192 86 192 192s-86 192-192 192c-40.8 0-78.6-12.7-109.7-34.4c-14.5-10.1-34.4-6.6-44.6 7.9s-6.6 34.4 7.9 44.6C151.2 495 201.7 512 256 512c141.4 0 256-114.6 256-256S397.4 0 256 0C185.3 0 121.3 28.7 75 75zm181 53c-13.3 0-24 10.7-24 24V256c0 6.4 2.5 12.5 7 17l72 72c9.4 9.4 24.6 9.4 33.9 0s9.4-24.6 0-33.9l-65-65V152c0-13.3-10.7-24-24-24z"/></svg></span></template>
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../elasticlunr-ef4e11c1.min.js"></script>
+        <script src="../mark-09e88c2c.min.js"></script>
+        <script src="../searcher-09f2665d.js"></script>
+
+        <script src="../clipboard-1626706a.min.js"></script>
+        <script src="../highlight-abc7f01d.js"></script>
+        <script src="../book-609e4cb8.js"></script>
+
+        <!-- Custom JS scripts -->
+        <script src="../theme/cjk-search-2989e841.js"></script>
+
+
+
+    </div>
+    </body>
+</html>

@@ -1,0 +1,524 @@
+<!DOCTYPE HTML>
+<html lang="zh-TW" class="navy sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>進階材料 - TechMC 科技百科</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="TechMC Minecraft 科技模組插件百科全書">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon-de23e50b.svg">
+        <link rel="shortcut icon" href="../favicon-8114d1fc.png">
+        <link rel="stylesheet" href="../css/variables-8adf115d.css">
+        <link rel="stylesheet" href="../css/general-e96d0476.css">
+        <link rel="stylesheet" href="../css/chrome-d279d366.css">
+        <link rel="stylesheet" href="../css/print-9e4910d8.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../fonts/fonts-9644e21d.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="mdbook-highlight-css" href="../highlight-493f70e1.css">
+        <link rel="stylesheet" id="mdbook-tomorrow-night-css" href="../tomorrow-night-4c0ae647.css">
+        <link rel="stylesheet" id="mdbook-ayu-highlight-css" href="../ayu-highlight-3fdfc3ac.css">
+
+        <!-- Custom theme stylesheets -->
+
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "../";
+            const default_light_theme = "navy";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "../searchindex-be974765.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="../toc-588afc34.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="mdbook-body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('navy')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="mdbook-sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("mdbook-sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="mdbook-sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="../toc.html"></iframe>
+            </noscript>
+            <div id="mdbook-sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="mdbook-page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="mdbook-menu-bar-hover-placeholder"></div>
+                <div id="mdbook-menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="mdbook-sidebar-toggle" class="icon-button" for="mdbook-sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="mdbook-sidebar">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M0 96C0 78.3 14.3 64 32 64H416c17.7 0 32 14.3 32 32s-14.3 32-32 32H32C14.3 128 0 113.7 0 96zM0 256c0-17.7 14.3-32 32-32H416c17.7 0 32 14.3 32 32s-14.3 32-32 32H32c-17.7 0-32-14.3-32-32zM448 416c0 17.7-14.3 32-32 32H32c-17.7 0-32-14.3-32-32s14.3-32 32-32H416c17.7 0 32 14.3 32 32z"/></svg></span>
+                        </label>
+                        <button id="mdbook-theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="mdbook-theme-list">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M371.3 367.1c27.3-3.9 51.9-19.4 67.2-42.9L600.2 74.1c12.6-19.5 9.4-45.3-7.6-61.2S549.7-4.4 531.1 9.6L294.4 187.2c-24 18-38.2 46.1-38.4 76.1L371.3 367.1zm-19.6 25.4l-116-104.4C175.9 290.3 128 339.6 128 400c0 3.9 .2 7.8 .6 11.6c1.8 17.5-10.2 36.4-27.8 36.4H96c-17.7 0-32 14.3-32 32s14.3 32 32 32H240c61.9 0 112-50.1 112-112c0-2.5-.1-5-.2-7.5z"/></svg></span>
+                        </button>
+                        <ul id="mdbook-theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-ayu">Ayu</button></li>
+                        </ul>
+                        <button id="mdbook-search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="mdbook-searchbar">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M416 208c0 45.9-14.9 88.3-40 122.7L502.6 457.4c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L330.7 376c-34.4 25.2-76.8 40-122.7 40C93.1 416 0 322.9 0 208S93.1 0 208 0S416 93.1 416 208zM208 352c79.5 0 144-64.5 144-144s-64.5-144-144-144S64 128.5 64 208s64.5 144 144 144z"/></svg></span>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">TechMC 科技百科</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <span class=fa-svg id="print-button"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M128 0C92.7 0 64 28.7 64 64v96h64V64H354.7L384 93.3V160h64V93.3c0-17-6.7-33.3-18.7-45.3L400 18.7C388 6.7 371.7 0 354.7 0H128zM384 352v32 64H128V384 368 352H384zm64 32h32c17.7 0 32-14.3 32-32V256c0-35.3-28.7-64-64-64H64c-35.3 0-64 28.7-64 64v96c0 17.7 14.3 32 32 32H64v64c0 35.3 28.7 64 64 64H384c35.3 0 64-28.7 64-64V384zm-16-88c-13.3 0-24-10.7-24-24s10.7-24 24-24s24 10.7 24 24s-10.7 24-24 24z"/></svg></span>
+                        </a>
+                        <a href="https://github.com/QiuRui920811/TechProject" title="Git repository" aria-label="Git repository">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"/></svg></span>
+                        </a>
+                        <a href="https://github.com/QiuRui920811/TechProject/edit/main/docs/wiki/docs/wiki/items/advanced-materials.md" title="Suggest an edit" aria-label="Suggest an edit" rel="edit">
+                            <span class=fa-svg id="git-edit-button"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M421.7 220.3l-11.3 11.3-22.6 22.6-205 205c-6.6 6.6-14.8 11.5-23.8 14.1L30.8 511c-8.4 2.5-17.5 .2-23.7-6.1S-1.5 489.7 1 481.2L38.7 353.1c2.6-9 7.5-17.2 14.1-23.8l205-205 22.6-22.6 11.3-11.3 33.9 33.9 62.1 62.1 33.9 33.9zM96 353.9l-9.3 9.3c-.9 .9-1.6 2.1-2 3.4l-25.3 86 86-25.3c1.3-.4 2.5-1.1 3.4-2l9.3-9.3H112c-8.8 0-16-7.2-16-16V353.9zM453.3 19.3l39.4 39.4c25 25 25 65.5 0 90.5l-14.5 14.5-22.6 22.6-11.3 11.3-33.9-33.9-62.1-62.1L314.3 67.7l11.3-11.3 22.6-22.6 14.5-14.5c25-25 65.5-25 90.5 0z"/></svg></span>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="mdbook-search-wrapper" class="hidden">
+                    <form id="mdbook-searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="mdbook-searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="mdbook-searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <span class=fa-svg id="fa-spin"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M304 48c0-26.5-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48s48-21.5 48-48zm0 416c0-26.5-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48s48-21.5 48-48zM48 304c26.5 0 48-21.5 48-48s-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48zm464-48c0-26.5-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48s48-21.5 48-48zM142.9 437c18.7-18.7 18.7-49.1 0-67.9s-49.1-18.7-67.9 0s-18.7 49.1 0 67.9s49.1 18.7 67.9 0zm0-294.2c18.7-18.7 18.7-49.1 0-67.9S93.7 56.2 75 75s-18.7 49.1 0 67.9s49.1 18.7 67.9 0zM369.1 437c18.7 18.7 49.1 18.7 67.9 0s18.7-49.1 0-67.9s-49.1-18.7-67.9 0s-18.7 49.1 0 67.9z"/></svg></span>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="mdbook-searchresults-outer" class="searchresults-outer hidden">
+                        <div id="mdbook-searchresults-header" class="searchresults-header"></div>
+                        <ul id="mdbook-searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('mdbook-sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('mdbook-sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#mdbook-sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="mdbook-content" class="content">
+                    <main>
+                        <h1 id="進階材料"><a class="header" href="#進階材料">進階材料</a></h1>
+<p>三/四階（）機器產出的高階材料，共收錄本頁 <strong>179 種</strong>核心元件、防護裝備、武器、食物與自動機零件。</p>
+<blockquote>
+<p>三階分類中另有專門主題頁：<a href="magical-items.html">魔法物品</a>（結晶/符文/卷軸）、<a href="upgrades.html">升級模組</a>、<a href="industrial-materials.html">工業擴展</a>（冶金/核電）、<a href="endgame-materials.html">終局材料</a>（虛空/暗物質/反物質）。本頁不重複列出那些內容。</p>
+</blockquote>
+<hr>
+<h2 id="核心元件與處理器39-種"><a class="header" href="#核心元件與處理器39-種">核心元件與處理器（39 種）</a></h2>
+<p>高階機器的運算核心、力場、光子與感測元件。</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>中文名</th><th>英文 ID</th><th>階</th><th>說明</th></tr>
+</thead>
+<tbody>
+<tr><td>天候感測器</td><td><code>weather_sensor</code></td><td>T2</td><td>可監測風暴與降雨變化的感測器。</td></tr>
+<tr><td>星光板</td><td><code>starlight_plate</code></td><td>T2</td><td>光能面板。</td></tr>
+<tr><td>熱穩陶瓷</td><td><code>thermal_ceramic</code></td><td>T2</td><td>經過熱處理的陶瓷材料，可承受極端溫差。</td></tr>
+<tr><td>電容組</td><td><code>capacitor_bank</code></td><td>T2</td><td>大容量電容模組。</td></tr>
+<tr><td>風暴轉子</td><td><code>storm_rotor</code></td><td>T2</td><td>風暴轉子，在惡劣天氣下可大幅提升發電效率。</td></tr>
+<tr><td>低溫核心</td><td><code>cryo_core</code></td><td>—</td><td>冷凍鏈核心，可保護高壓與高能製程。</td></tr>
+<tr><td>傳送矩陣</td><td><code>teleport_matrix</code></td><td>—</td><td>將座標訊號轉換為空間跳躍場的核心矩陣。</td></tr>
+<tr><td>光子板</td><td><code>photon_plate</code></td><td>—</td><td>將光子束固定為結構板後得到的材料。</td></tr>
+<tr><td>光子碎晶</td><td><code>photon_shard</code></td><td>—</td><td>光子碎晶，常用於高精密光學與星圖製作。</td></tr>
+<tr><td>力場板</td><td><code>field_plate</code></td><td>—</td><td>力場結構板。</td></tr>
+<tr><td>力場發射器</td><td><code>field_emitter</code></td><td>—</td><td>力場發射器。</td></tr>
+<tr><td>反應爐核心</td><td><code>reactor_core</code></td><td>—</td><td>高階能源核心。</td></tr>
+<tr><td>培育晶體</td><td><code>grown_crystal</code></td><td>—</td><td>培育完成的高純度晶體。</td></tr>
+<tr><td>基因樣板</td><td><code>gene_template</code></td><td>—</td><td>已編碼的基因樣板，可導向更高階生物工藝。</td></tr>
+<tr><td>奈米塗層</td><td><code>nano_coating</code></td><td>—</td><td>高階機器薄膜材料。</td></tr>
+<tr><td>戶外處理器</td><td><code>field_processor</code></td><td>—</td><td>戶外設備控制處理器，適合農場與礦區機台。</td></tr>
+<tr><td>捕網發射器</td><td><code>net_launcher</code></td><td>—</td><td>捕獲網模組，安裝到生物收集器後可自動捕捉範圍內的生物；本身不可手持使用，是生物收集器的核心組件。</td></tr>
+<tr><td>控制單元</td><td><code>control_unit</code></td><td>—</td><td>高階控制單元。</td></tr>
+<tr><td>數據矩陣</td><td><code>data_matrix</code></td><td>—</td><td>數據矩陣核心。</td></tr>
+<tr><td>星圖</td><td><code>star_chart</code></td><td>—</td><td>記錄軌道與星流資料的高精度星圖。</td></tr>
+<tr><td>晶體矩陣</td><td><code>crystal_matrix</code></td><td>—</td><td>晶體陣列核心。</td></tr>
+<tr><td>無人機核心</td><td><code>drone_core</code></td><td>—</td><td>自動化核心模組。</td></tr>
+<tr><td>無人機框架</td><td><code>drone_frame</code></td><td>—</td><td>飛行載具骨架。</td></tr>
+<tr><td>物質團</td><td><code>matter_blob</code></td><td>—</td><td>物質編譯中間體。</td></tr>
+<tr><td>相位板</td><td><code>phase_plate</code></td><td>—</td><td>相位強化材料。</td></tr>
+<tr><td>真空模組</td><td><code>vacuum_module</code></td><td>—</td><td>真空環境維持模組，可協助後續宇宙級加工。</td></tr>
+<tr><td>神經樹脂</td><td><code>neural_resin</code></td><td>—</td><td>神經樣本聚合樹脂，可用於高階感測與資料結構。</td></tr>
+<tr><td>衛星模組</td><td><code>satellite_module</code></td><td>—</td><td>可部署至軌道的微型衛星，提供座標解算能力。</td></tr>
+<tr><td>觀測透鏡</td><td><code>observatory_lens</code></td><td>—</td><td>天文觀測級透鏡，可用於高階資料擷取。</td></tr>
+<tr><td>資料核心</td><td><code>data_core</code></td><td>—</td><td>壓縮高密度工業資料的運算核心。</td></tr>
+<tr><td>軌道中繼單元</td><td><code>orbital_relay_unit</code></td><td>—</td><td>高頻率軌道信號中繼裝置，大幅擴大 GPS 覆蓋範圍。</td></tr>
+<tr><td>輻射濾芯</td><td><code>radiation_filter</code></td><td>—</td><td>抗輻射裝備使用的核心濾芯，能隔絕星球環境污染。</td></tr>
+<tr><td>通量連結</td><td><code>flux_link</code></td><td>—</td><td>高頻能源連接器。</td></tr>
+<tr><td>重力軸承</td><td><code>gravitic_bearing</code></td><td>—</td><td>穩定重力軸承，適用於重力與軌道機械。</td></tr>
+<tr><td>量子框架</td><td><code>quantum_frame</code></td><td>—</td><td>量子框架結構。</td></tr>
+<tr><td>量子流體</td><td><code>quantum_fluid</code></td><td>—</td><td>量子流體。</td></tr>
+<tr><td>離子粉</td><td><code>ion_dust</code></td><td>—</td><td>高能離子粉末。</td></tr>
+<tr><td>離心轉子</td><td><code>centrifuge_rotor</code></td><td>—</td><td>能承受高速旋轉的離心總成。</td></tr>
+<tr><td>電漿電池</td><td><code>plasma_cell</code></td><td>—</td><td>高溫等離子容器。</td></tr>
+</tbody>
+</table>
+</div>
+<hr>
+<h2 id="聚變與電漿6-種"><a class="header" href="#聚變與電漿6-種">聚變與電漿（6 種）</a></h2>
+<p>跨入四階前的能量骨幹，也是終局鏈的門票。</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>中文名</th><th>英文 ID</th><th>階</th><th>說明</th></tr>
+</thead>
+<tbody>
+<tr><td>反應爐格架</td><td><code>reactor_lattice</code></td><td>T4</td><td>反應爐用支撐格架，適合時間與能量設備。</td></tr>
+<tr><td>穩定核心</td><td><code>stability_core</code></td><td>T4</td><td>高階穩定核心。</td></tr>
+<tr><td>等離子粉</td><td><code>plasma_dust</code></td><td>T4</td><td>高能等離子粉塵，是聚變後工藝的重要基底。</td></tr>
+<tr><td>等離子錠</td><td><code>plasma_ingot</code></td><td>T4</td><td>經穩定後的等離子錠，可用於高熱高壓設備骨架。</td></tr>
+<tr><td>聚變核心</td><td><code>fusion_core</code></td><td>T4</td><td>聚變能源核心。</td></tr>
+<tr><td>聚變網</td><td><code>fusion_mesh</code></td><td>T4</td><td>聚變級耐熱網。</td></tr>
+</tbody>
+</table>
+</div>
+<hr>
+<h2 id="自動機系統6-種"><a class="header" href="#自動機系統6-種">自動機系統（6 種）</a></h2>
+<p>安卓（自動機）的骨架、記憶矩陣與行為程序。升級卡見 <a href="upgrades.html">升級模組</a>。</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>中文名</th><th>英文 ID</th><th>階</th><th>說明</th></tr>
+</thead>
+<tbody>
+<tr><td>安卓探索程序</td><td><code>android_explore_script</code></td><td>—</td><td>讓自動機在任何世界中探索稀有資源，包含古代碎片、綠寶石礦等。</td></tr>
+<tr><td>安卓核心</td><td><code>android_core</code></td><td>—</td><td>可部署自動機的控制核心。</td></tr>
+<tr><td>安卓框架</td><td><code>android_frame</code></td><td>—</td><td>自動機骨架與伺服結構。</td></tr>
+<tr><td>安卓自訂程序</td><td><code>android_custom_script</code></td><td>—</td><td>可編寫的自訂程式模組。使用 /tech android program add &lt;指令&gt; 編寫 MOVE/HARVEST/CHOP/ATTACK/SALVAGE/WAIT/JUMP/RESET 等自訂程序指令。</td></tr>
+<tr><td>安卓行星採樣程序</td><td><code>android_planet_script</code></td><td>—</td><td>讓自動機在星球環境中執行採樣。</td></tr>
+<tr><td>安卓記憶矩陣</td><td><code>android_memory_matrix</code></td><td>—</td><td>承載自動化程序與任務配置。</td></tr>
+</tbody>
+</table>
+</div>
+<hr>
+<h2 id="星球資源與樣本37-種"><a class="header" href="#星球資源與樣本37-種">星球資源與樣本（37 種）</a></h2>
+<p>各星球（奧蕾莉亞／克里昂／倪克斯／赫利昂／坦佩斯特／迷途星）的地表樣本、戰鬥樣本、遺產資料與植株。</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>中文名</th><th>英文 ID</th><th>階</th><th>說明</th></tr>
+</thead>
+<tbody>
+<tr><td>倪克斯遺核</td><td><code>nyx_relic</code></td><td>T4</td><td>來自倪克斯遺址的壓差穩定核心，是深空遺跡層研究的關鍵物件。</td></tr>
+<tr><td>冰脈核心</td><td><code>cryon_ice_heart</code></td><td>T4</td><td>由克里昂特殊怪體內取出的低溫穩定核心，是寒域戰鬥樣本。</td></tr>
+<tr><td>前線核心碎片</td><td><code>frontier_core_fragment</code></td><td>T4</td><td>由赫利昂 / 坦佩斯特高階遺跡釋出的碎片，是前線裝研究的遺跡層頂點材料。</td></tr>
+<tr><td>前線防護核心</td><td><code>frontier_core</code></td><td>T4</td><td>整合多顆星球遺跡成果後得到的全域防護核心。</td></tr>
+<tr><td>古訊號片段</td><td><code>ancient_signal</code></td><td>T4</td><td>從遺跡層資料解譯出的高階訊號，是後段星球與前線裝的真正門票。</td></tr>
+<tr><td>回響孢子</td><td><code>echo_spore</code></td><td>T4</td><td>漂浮在倪克斯虛空中的異常孢子樣本。</td></tr>
+<tr><td>回響孢子囊</td><td><code>echo_spore_seeds</code></td><td>T4</td><td>經穩定封存後可帶回種植的倪克斯孢子囊。</td></tr>
+<tr><td>坦佩斯特雷核遺物</td><td><code>tempest_relic</code></td><td>T4</td><td>由坦佩斯特遺跡核心取回的帶電穩壓裝置，屬於高階遺跡層物件。</td></tr>
+<tr><td>守衛者核心</td><td><code>guardian_core</code></td><td>T4</td><td>迷宮守衛者體內的力量核心，蘊含高密度空間能量。</td></tr>
+<tr><td>日耀碎晶</td><td><code>solarite_shard</code></td><td>T4</td><td>由赫利昂高熱岩層回收的基礎熱障樣本，用於前線熱防護研究。</td></tr>
+<tr><td>星圖測繪晶片</td><td><code>survey_chip</code></td><td>T4</td><td>行星研究鏈的第一個核心資料晶片。</td></tr>
+<tr><td>星核遺物</td><td><code>planetary_relic</code></td><td>T4</td><td>從奧蕾莉亞遺跡核心回收的遺物，是高一階的遺跡層研究資料。</td></tr>
+<tr><td>灰燼燃核</td><td><code>helion_cinder_core</code></td><td>T4</td><td>由赫利昂特殊怪遺留的高熱戰鬥樣本，可支撐日灼屏蔽層。</td></tr>
+<tr><td>焰根束</td><td><code>emberroot</code></td><td>T4</td><td>能承受赫利昂高熱地表的根系材料，可製作前線裝備補強層。</td></tr>
+<tr><td>焰根種子</td><td><code>emberroot_seeds</code></td><td>T4</td><td>從赫利昂地表取得的耐熱植種，可帶回基地培育。</td></tr>
+<tr><td>焰綻簇</td><td><code>emberbloom</code></td><td>T4</td><td>來自赫利昂的耐高熱生質簇，可支援前線防護層。</td></tr>
+<tr><td>異星合金</td><td><code>xeno_alloy</code></td><td>T4</td><td>由地表樣本、戰鬥樣本與遺產資料共同精煉出的高韌性異星合金。</td></tr>
+<tr><td>相位膜組織</td><td><code>nyx_phase_tissue</code></td><td>T4</td><td>來自倪克斯特殊怪的相位膜組織，可用於壓差膜層穩定。</td></tr>
+<tr><td>虛域花簇</td><td><code>void_bloom</code></td><td>T4</td><td>生長在虛域污染區的異常花簇，能作為外星生質素材。</td></tr>
+<tr><td>虛域花簇種子</td><td><code>void_bloom_seeds</code></td><td>T4</td><td>從奧蕾莉亞污染地表回收的特殊植種，可帶回基地培育。</td></tr>
+<tr><td>虛璃碎片</td><td><code>voidglass_fragment</code></td><td>T4</td><td>取自倪克斯真空殘骸的基礎壓差樣本，是深空研究的地表層材料。</td></tr>
+<tr><td>行星測繪資料</td><td><code>survey_data</code></td><td>T4</td><td>經由 Survey Beacon 整理的地表層資料，用於啟動低階遺跡與研究分支。</td></tr>
+<tr><td>赫利昂炎核遺物</td><td><code>helion_relic</code></td><td>T4</td><td>從赫利昂焦灼遺跡解出的高熱穩定核心，是高階遺跡層資料。</td></tr>
+<tr><td>輻塵腺體</td><td><code>aurelia_parasite_gland</code></td><td>T4</td><td>從奧蕾莉亞特殊怪回收的戰鬥樣本，夾帶高濃度污染與適應訊號。</td></tr>
+<tr><td>輻照碎晶</td><td><code>irradiated_shard</code></td><td>T4</td><td>來自奧蕾莉亞地表的基礎地質樣本，是整條星球研究線的第一層素材。</td></tr>
+<tr><td>迷宮碎片</td><td><code>labyrinth_fragment</code></td><td>T4</td><td>從迷途星地穴深層採集的回聲碎片，殘留古代迷宮的共振記憶。</td></tr>
+<tr><td>迷宮蔓藤</td><td><code>maze_vine</code></td><td>T4</td><td>在瘴氣中頑強蔓生的生物蔓藤，可用於合成瘴氣藥膏。</td></tr>
+<tr><td>迷宮蔓藤種子</td><td><code>maze_vine_seeds</code></td><td>T4</td><td>迷宮蔓藤的種子，在特定深岩環境下可重新生長。</td></tr>
+<tr><td>迷宮遺物</td><td><code>labyrinth_relic</code></td><td>T4</td><td>從迷途星最深處的強化深岩中取得的古代遺物，散發不穩定的空間頻率。</td></tr>
+<tr><td>離子蕨束</td><td><code>ion_fern</code></td><td>T4</td><td>在坦佩斯特高壓氣旋中存活的導電植株樣本。</td></tr>
+<tr><td>離子蕨芽孢</td><td><code>ion_fern_seeds</code></td><td>T4</td><td>來自坦佩斯特的導電蕨類芽孢，可培育成獨有作物。</td></tr>
+<tr><td>霜境遺物</td><td><code>cryon_relic</code></td><td>T4</td><td>克里昂遺跡中回收的古導航核心，屬於遺跡層資料物件。</td></tr>
+<tr><td>霜核晶簇</td><td><code>cryonite_crystal</code></td><td>T4</td><td>從克里昂冰層取得的基礎寒域樣本，用於低溫研究線。</td></tr>
+<tr><td>霜綻花</td><td><code>frostbloom</code></td><td>T4</td><td>能在極寒環境中保有活性的異星植株樣本。</td></tr>
+<tr><td>霜綻花種子</td><td><code>frostbloom_seeds</code></td><td>T4</td><td>適合在農地培育的克里昂寒性植株種子。</td></tr>
+<tr><td>風暴玻片</td><td><code>stormglass_shard</code></td><td>T4</td><td>坦佩斯特帶電地層冷凝出的基礎導電樣本，是電暴研究的地表層素材。</td></tr>
+<tr><td>風暴電容核</td><td><code>tempest_capacitor</code></td><td>T4</td><td>從坦佩斯特特殊怪殘骸中取得的高壓電容樣本，可製作風暴偏轉層。</td></tr>
+</tbody>
+</table>
+</div>
+<hr>
+<h2 id="環境防護裝備41-種"><a class="header" href="#環境防護裝備41-種">環境防護裝備（41 種）</a></h2>
+<p>抗輻射、抗寒、抗壓、日灼與全域前線套裝，以及量子與虛空系護甲。</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>中文名</th><th>英文 ID</th><th>階</th><th>說明</th></tr>
+</thead>
+<tbody>
+<tr><td>量子胸甲</td><td><code>quantum_chestplate</code></td><td>T3</td><td>量子材質胸甲。穿戴時承受傷害降低 15%，受擊時反傷攻擊者。</td></tr>
+<tr><td>量子護腿</td><td><code>quantum_leggings</code></td><td>T3</td><td>量子材質護腿。穿戴時獲得速度 II。</td></tr>
+<tr><td>量子靴子</td><td><code>quantum_boots</code></td><td>T3</td><td>量子材質靴子。穿戴時完全免疫摔落傷害，水下高速移動。</td></tr>
+<tr><td>量子頭盔</td><td><code>quantum_helmet</code></td><td>T3</td><td>量子材質頭盔。穿戴時自動獲得夜視及水下呼吸。</td></tr>
+<tr><td>低溫內襯</td><td><code>thermal_lining</code></td><td>T4</td><td>可維持體溫的極寒作業內襯，適合克里昂探索。</td></tr>
+<tr><td>前線探勘胸甲</td><td><code>frontier_chestplate</code></td><td>T4</td><td>內建多層防護模組的全域胸甲，是前線套裝主體。</td></tr>
+<tr><td>前線探勘護腿</td><td><code>frontier_leggings</code></td><td>T4</td><td>維持極端行動穩定性的全域下身防護組件。</td></tr>
+<tr><td>前線探勘靴</td><td><code>frontier_boots</code></td><td>T4</td><td>適應低重力、極寒冰面與高熱地表的全域探索靴。</td></tr>
+<tr><td>前線探勘頭盔</td><td><code>frontier_helmet</code></td><td>T4</td><td>可同時對抗輻射、極寒、真空、熱浪與電暴的全域頭盔。</td></tr>
+<tr><td>回聲鎬</td><td><code>maze_pickaxe</code></td><td>T4</td><td>特化迷宮採集用鎬，提升深岩類節點採集效率。</td></tr>
+<tr><td>壓差膜層</td><td><code>pressure_membrane</code></td><td>T4</td><td>能穩定外殼內外壓差的柔性膜層，適合倪克斯真空作業。</td></tr>
+<tr><td>外骨骼框架</td><td><code>exo_frame</code></td><td>T4</td><td>模組化環境防護裝的共同骨架，用於所有行星裝備。</td></tr>
+<tr><td>抗壓胸甲</td><td><code>pressure_chestplate</code></td><td>T4</td><td>抗壓作業核心胸甲，負責維持內部作業環境。</td></tr>
+<tr><td>抗壓護腿</td><td><code>pressure_leggings</code></td><td>T4</td><td>減少真空與壓差環境對移動造成的負擔。</td></tr>
+<tr><td>抗壓靴</td><td><code>pressure_boots</code></td><td>T4</td><td>適合倪克斯低重力地形的密封靴具。</td></tr>
+<tr><td>抗壓頭盔</td><td><code>pressure_helmet</code></td><td>T4</td><td>倪克斯真空探索用頭盔，可穩定內外壓差與視野。</td></tr>
+<tr><td>抗寒胸甲</td><td><code>thermal_chestplate</code></td><td>T4</td><td>內建保溫層與穩定器的胸甲，是克里昂套裝主體。</td></tr>
+<tr><td>抗寒護腿</td><td><code>thermal_leggings</code></td><td>T4</td><td>降低低溫環境對行動效率的影響。</td></tr>
+<tr><td>抗寒靴</td><td><code>thermal_boots</code></td><td>T4</td><td>適合踩踏冰面與極低溫地形的封閉式靴具。</td></tr>
+<tr><td>抗寒頭盔</td><td><code>thermal_helmet</code></td><td>T4</td><td>克里昂星球探索用頭盔，對極寒與冰霜風暴有抗性。</td></tr>
+<tr><td>抗輻射胸甲</td><td><code>anti_radiation_chestplate</code></td><td>T4</td><td>隔絕強輻射與毒性微粒的核心護甲部件。</td></tr>
+<tr><td>抗輻射護腿</td><td><code>anti_radiation_leggings</code></td><td>T4</td><td>長時間星球步行時的重要抗污染下身護具。</td></tr>
+<tr><td>抗輻射靴</td><td><code>anti_radiation_boots</code></td><td>T4</td><td>保護雙腳不受奧蕾莉亞星塵與污染地表侵蝕。</td></tr>
+<tr><td>抗輻射頭盔</td><td><code>anti_radiation_helmet</code></td><td>T4</td><td>奧蕾莉亞星球探索用頭盔，需與整套裝備一起使用。</td></tr>
+<tr><td>日灼屏蔽層</td><td><code>flare_shielding</code></td><td>T4</td><td>專門對抗高溫、火焰與熱浪衝擊的前線模組。</td></tr>
+<tr><td>氣密織層</td><td><code>seal_fabric</code></td><td>T4</td><td>隔絕粉塵、低溫與壓差的多層氣密織物。</td></tr>
+<tr><td>虛空之冠</td><td><code>void_crown</code></td><td>T4</td><td>虛空材質王冠。穿戴時減傷 20%，並獲得夜視與潮湧能量。</td></tr>
+<tr><td>虛空戰靴</td><td><code>void_sabatons</code></td><td>T4</td><td>虛空材質戰靴。穿戴時完全免疫摔落及火焰傷害。</td></tr>
+<tr><td>虛空護脛</td><td><code>void_greaves</code></td><td>T4</td><td>虛空材質護脛。穿戴時獲得速度 III。</td></tr>
+<tr><td>虛空鎧甲</td><td><code>void_cuirass</code></td><td>T4</td><td>虛空材質鎧甲。穿戴時自動再生，減傷 20%。</td></tr>
+<tr><td>輻射網層</td><td><code>radiation_mesh</code></td><td>T4</td><td>專門阻隔高輻射微粒與污染粒子的防護網層。</td></tr>
+<tr><td>迷宮羅盤</td><td><code>maze_compass</code></td><td>T4</td><td>指向迷宮中心的特殊羅盤，在瘴氣中也能保持精確方向感。</td></tr>
+<tr><td>迷宮胸甲</td><td><code>maze_chestplate</code></td><td>T4</td><td>以迷宮碎片為核心骨架的重型胸甲，自帶被動瘴氣過濾系統。</td></tr>
+<tr><td>迷宮護腿</td><td><code>maze_leggings</code></td><td>T4</td><td>嵌入空間穩定器的護腿，在迷宮牆壁移動時維持行動穩定。</td></tr>
+<tr><td>迷宮靴</td><td><code>maze_boots</code></td><td>T4</td><td>底部刻有回聲紋路的靴具，可偵測附近牆壁結構變化。</td></tr>
+<tr><td>迷宮頭盔</td><td><code>maze_helmet</code></td><td>T4</td><td>內建回聲定位雷達的頭盔，可在瘴氣中維持視野。穿戴時獲得夜視效果。</td></tr>
+<tr><td>風暴偏轉層</td><td><code>storm_baffle</code></td><td>T4</td><td>用於抵銷帶電風暴與高壓亂流的前線偏轉模組。</td></tr>
+<tr><td>防輻射胸甲</td><td><code>hazmat_chestplate</code></td><td>—</td><td>覆蓋胸腹要害的鉛合金胸甲。與其他 3 件套組合時完全阻斷輻射傷害。</td></tr>
+<tr><td>防輻射護腿</td><td><code>hazmat_leggings</code></td><td>—</td><td>附加鉛箔的防輻射護腿。四件組合可完全免疫核反應堆與鈾礦輻射。</td></tr>
+<tr><td>防輻射靴</td><td><code>hazmat_boots</code></td><td>—</td><td>能在輻射污染區域安全行走的鉛合金靴。四件組合可完全免疫輻射。</td></tr>
+<tr><td>防輻射頭盔</td><td><code>hazmat_helmet</code></td><td>—</td><td>鉛合金內襯的防輻射頭盔。單件防禦 25%，集齊四件套可完全免疫輻射。</td></tr>
+</tbody>
+</table>
+</div>
+<hr>
+<h2 id="武器法杖與機動裝備15-種"><a class="header" href="#武器法杖與機動裝備15-種">武器、法杖與機動裝備（15 種）</a></h2>
+<p>科技法杖、能量武器與噴射/推進機動裝。</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>中文名</th><th>英文 ID</th><th>階</th><th>說明</th></tr>
+</thead>
+<tbody>
+<tr><td>冰晶權杖</td><td><code>cryo_wand</code></td><td>T3</td><td>右鍵冰封 8 格內所有生物，附加緩速 5 秒。消耗 6 EU。</td></tr>
+<tr><td>曲速球</td><td><code>warp_orb</code></td><td>T3</td><td>右鍵瞬移至準心方向 8 格前方。消耗 10 EU。</td></tr>
+<tr><td>脈衝法杖</td><td><code>pulse_staff</code></td><td>T3</td><td>右鍵釋放脈衝波，擊退 8 格內所有生物。消耗 5 EU。</td></tr>
+<tr><td>行動充電器</td><td><code>portable_charger</code></td><td>T3</td><td>高容量攜帶式充電裝置，放在背包中會自動為所有電力工具補充電量。</td></tr>
+<tr><td>重力法杖</td><td><code>gravity_staff</code></td><td>T3</td><td>右鍵令 8 格內所有生物浮空 4 秒。消耗 6 EU。</td></tr>
+<tr><td>風暴法杖</td><td><code>storm_staff</code></td><td>T3</td><td>右鍵召喚落雷打擊準心目標。消耗 8 EU。</td></tr>
+<tr><td>修復信標</td><td><code>heal_beacon</code></td><td>T4</td><td>右鍵立即回復 6 顆心並附加再生 10 秒。消耗 12 EU。</td></tr>
+<tr><td>回聲連弩</td><td><code>echo_crossbow</code></td><td>T4</td><td>搭載回聲共鳴模組的科技連弩，右鍵發動「回聲連射」：0.8 秒內連續射出 5 發穿透強化箭矢。改善原版十字弩只能單發的節奏。消耗 10 EU。</td></tr>
+<tr><td>時間膨脹器</td><td><code>time_dilator</code></td><td>T4</td><td>右鍵令 8 格內所有生物減速 6 秒。消耗 8 EU。</td></tr>
+<tr><td>熵變權杖</td><td><code>entropy_scepter</code></td><td>T4</td><td>右鍵令 6 格內所有生物凋零 4 秒並受 4 顆心傷害。消耗 10 EU。</td></tr>
+<tr><td>脈衝推進器</td><td><code>pulse_thruster</code></td><td>T4</td><td>短時間輸出高推力的手持推進器，可作為橫向空橋、低重力地形與真空作業的機動補助。每次使用消耗電量，對準儲能機器蹲下 + 右鍵可充電。</td></tr>
+<tr><td>虛空之鏡</td><td><code>void_mirror</code></td><td>T4</td><td>右鍵啟動抗性 III 護盾 5 秒，期間反彈投射物。消耗 10 EU。</td></tr>
+<tr><td>迷途刃</td><td><code>maze_blade</code></td><td>T4</td><td>以守衛者核心鍛造的科技劍刃，劍身閃爍幽藍回聲光紋。右鍵發動「回聲震擊」，向前方揮出扇形聲波，擊飛敵人並有機率施加深淵盲視。消耗 12 EU。</td></tr>
+<tr><td>電漿長矛</td><td><code>plasma_lance</code></td><td>T4</td><td>右鍵發射電漿直線光束，對路徑生物造成 6 顆心傷害。消耗 8 EU。</td></tr>
+<tr><td>風暴噴射背包</td><td><code>storm_jetpack</code></td><td>T4</td><td>以前線核心與風暴偏轉層整合而成的背負式飛行包，穿上後可用雙跳進行高功率空中噴射。每次噴射消耗電量，對準儲能機器蹲下 + 右鍵可充電。</td></tr>
+</tbody>
+</table>
+</div>
+<hr>
+<h2 id="護符6-種"><a class="header" href="#護符6-種">護符（6 種）</a></h2>
+<p>放進背包即被動觸發的三階護符。更多護符見 <a href="../combat/talismans.html">護符</a>。</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>中文名</th><th>英文 ID</th><th>階</th><th>說明</th></tr>
+</thead>
+<tbody>
+<tr><td>再生護符</td><td><code>talisman_heal</code></td><td>T3</td><td>放在背包中，血量低於 30% 時自動獲得再生 II 持續 5 秒。冷卻 90 秒。</td></tr>
+<tr><td>旋風護符</td><td><code>talisman_whirlwind</code></td><td>T3</td><td>放在背包中，被近戰攻擊時自動擊退周圍生物。冷卻 20 秒。</td></tr>
+<tr><td>獵人護符</td><td><code>talisman_hunter</code></td><td>T3</td><td>放在背包中，擊殺生物時 25% 機率雙倍掉落。</td></tr>
+<tr><td>礦工護符</td><td><code>talisman_miner</code></td><td>T3</td><td>放在背包中，挖礦時自動燒煉礦石掉落。</td></tr>
+<tr><td>鐵砧護符</td><td><code>talisman_anvil</code></td><td>T3</td><td>放在背包中，工具即將損壞時自動保護（殘餘 1 耐久）。冷卻 120 秒。</td></tr>
+<tr><td>騎士護符</td><td><code>talisman_knight</code></td><td>T3</td><td>放在背包中，血量低於 50% 被擊時自動獲得抗性 II 持續 5 秒。冷卻 60 秒。</td></tr>
+</tbody>
+</table>
+</div>
+<hr>
+<h2 id="高階食物與飲品29-種"><a class="header" href="#高階食物與飲品29-種">高階食物與飲品（29 種）</a></h2>
+<p>戰鬥增益料理、星球適應飲品與長效口糧。</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>中文名</th><th>英文 ID</th><th>階</th><th>說明</th></tr>
+</thead>
+<tbody>
+<tr><td>奧術茶</td><td><code>arcane_tea</code></td><td>T3</td><td>以紅石與螢石粉注入的魔力茶飲，食用後短暫獲得極速採集與移動力。效果僅持續 10-20 秒，冷卻 3.5 分鐘。</td></tr>
+<tr><td>巧克力蛋糕</td><td><code>chocolate_cake</code></td><td>—</td><td>濃郁巧克力淋面蛋糕，是基地慶祝活動的人氣甜品。</td></tr>
+<tr><td>抹茶拿鐵</td><td><code>matcha_latte</code></td><td>—</td><td>濃厚抹茶與鮮奶拉出的綿密飲品，能提供持久的專注效果。</td></tr>
+<tr><td>拉麵</td><td><code>ramen</code></td><td>—</td><td>濃郁豚骨湯底搭配彈牙麵條與配料，令人大快朵頤。</td></tr>
+<tr><td>日冕雪酪</td><td><code>helion_sorbet</code></td><td>—</td><td>以烈陽無花果與日灼碎片急冷成的雪酪，能暫時壓低赫利昂的灼熱負荷。</td></tr>
+<tr><td>星輝燉飯</td><td><code>stellar_risotto</code></td><td>T4</td><td>以鑽石與綠寶石融入的頂級燉飯，食用後短暫獲得極強吸收盾與回復力。效果僅持續 8-10 秒，冷卻 6 分鐘。</td></tr>
+<tr><td>星霧果飲</td><td><code>nebula_juice</code></td><td>—</td><td>以霜蘋與流明果調成的探索飲品，可提供夜視、加速與緩降，適合長距離星球作業。</td></tr>
+<tr><td>晨光果派</td><td><code>sunrise_pie</code></td><td>—</td><td>由香橙與蜜桃做成的簡單甜派，適合長距離出門前先補滿肚子。</td></tr>
+<tr><td>曙光茶飲</td><td><code>radiant_tea</code></td><td>—</td><td>以茶葉與水凝膠穩定出的機能飲，能提升夜視與工作效率。</td></tr>
+<tr><td>果園後勤口糧</td><td><code>orchard_ration</code></td><td>—</td><td>由果泥、豆類與高糖果實壓製的耐久口糧，可提供飽食、抗性與工作效率，適合長時間冒險。</td></tr>
+<tr><td>漿果塔派</td><td><code>berry_tart</code></td><td>—</td><td>以影莓與香辛莓做成的小型塔派，甜中帶刺激感。</td></tr>
+<tr><td>熱帶水果賓治</td><td><code>tropical_punch</code></td><td>—</td><td>鳳梨、芒果與香橙混合的大杯水果飲，適合工地慶功用。</td></tr>
+<tr><td>異星果泥</td><td><code>fruit_puree</code></td><td>—</td><td>把多種星球水果壓縮後得到的穩定果泥，可直接恢復狀態，也是後續飲食加工基底。</td></tr>
+<tr><td>瘴氣藥膏</td><td><code>labyrinth_salve</code></td><td>T4</td><td>以迷宮蔓藤調製的護肤藥膏，暫時抵抗迷途星的瘴氣侵蝕。</td></tr>
+<tr><td>相位凝露</td><td><code>nyx_phase_gel</code></td><td>—</td><td>影莓與虛璃碎片製成的凝露，能暫時穩定倪克斯的相位失壓。</td></tr>
+<tr><td>蔬菜咖哩</td><td><code>vegetable_curry</code></td><td>—</td><td>多種蔬菜與辛香料燉煮的濃厚咖哩，配飯或麵皆宜。</td></tr>
+<tr><td>蘑菇燉飯</td><td><code>mushroom_risotto</code></td><td>—</td><td>蘑菇與穀物慢燉而成的濃郁飯食，口感綿密。</td></tr>
+<tr><td>虛空拉麵</td><td><code>void_ramen</code></td><td>T3</td><td>以乾海帶與乾海帶、末影珍珠和乾海帶浸泡的神秘拉麵，食用後短暫獲得極致移動力。效果僅持續 8-15 秒，冷卻 4 分鐘。</td></tr>
+<tr><td>蛋白口糧包</td><td><code>protein_ration</code></td><td>—</td><td>高強度後勤口糧，適合長時間戶外作業與高壓探索。</td></tr>
+<tr><td>蜜桃派盆</td><td><code>peach_cobbler</code></td><td>—</td><td>用蜜桃與玉米烤成的大份量甜點，飽足感和恢復量都更高。</td></tr>
+<tr><td>起司披薩</td><td><code>cheese_pizza</code></td><td>—</td><td>鋪滿拉絲起司的圓形大餅，是基地聚餐首選。</td></tr>
+<tr><td>起司蛋糕</td><td><code>cheesecake</code></td><td>—</td><td>細膩綿滑的起司蛋糕，是基地下午茶的奢華選項。</td></tr>
+<tr><td>輻射濾除劑</td><td><code>rad_filter_pill</code></td><td>—</td><td>以生質催化劑與神經樹脂調配的粗製藥劑，能在短時間內緩和輻射灰蝕。</td></tr>
+<tr><td>輻晶蜜凍</td><td><code>aurelia_glaze</code></td><td>—</td><td>以流明果與輻照碎晶調成的果凍，能暫時緩和奧蕾莉亞的輻晶灼蝕。</td></tr>
+<tr><td>雷雲汽泡飲</td><td><code>tempest_fizz</code></td><td>—</td><td>風暴李與暴嵐玻片調出的汽泡飲，能暫時降低坦佩斯特的導電亂流壓力。</td></tr>
+<tr><td>霜芯暖鍋</td><td><code>cryon_hotpot</code></td><td>—</td><td>以霜蘋果和低溫晶體做出的熱鍋，能在克里昂暫時壓住凍骨寒流。</td></tr>
+<tr><td>青梨脆派</td><td><code>pear_crisp</code></td><td>—</td><td>將青梨烘成果香脆派，適合當作長距離探索用的甜點乾糧。</td></tr>
+<tr><td>鳳凰湯</td><td><code>phoenix_soup</code></td><td>T3</td><td>以烈焰粉與地獄乳草燉煮的火熱濃湯，食用後短暫獲得火焰免疫與強力回復。效果僅持續 6-15 秒，冷卻 4.5 分鐘。</td></tr>
+<tr><td>龍炎牛排</td><td><code>dragon_steak</code></td><td>T3</td><td>以烈焰粉與金錠精煉的極品牛排，食用後短時間內大幅提升戰鬥力與防禦力。效果僅持續 10 秒，冷卻 5 分鐘。</td></tr>
+</tbody>
+</table>
+</div>
+<blockquote>
+<p>📖 各物品的合成配方請見 <a href="../recipes/README.html">配方總覽</a>。</p>
+</blockquote>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../items/alloy-materials.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
+                            </a>
+
+                            <a rel="next prefetch" href="../items/magical-items.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../items/alloy-materials.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
+                    </a>
+
+                    <a rel="next prefetch" href="../items/magical-items.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
+                    </a>
+            </nav>
+
+        </div>
+
+        <template id=fa-eye><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M288 32c-80.8 0-145.5 36.8-192.6 80.6C48.6 156 17.3 208 2.5 243.7c-3.3 7.9-3.3 16.7 0 24.6C17.3 304 48.6 356 95.4 399.4C142.5 443.2 207.2 480 288 480s145.5-36.8 192.6-80.6c46.8-43.5 78.1-95.4 93-131.1c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C433.5 68.8 368.8 32 288 32zM432 256c0 79.5-64.5 144-144 144s-144-64.5-144-144s64.5-144 144-144s144 64.5 144 144zM288 192c0 35.3-28.7 64-64 64c-11.5 0-22.3-3-31.6-8.4c-.2 2.8-.4 5.5-.4 8.4c0 53 43 96 96 96s96-43 96-96s-43-96-96-96c-2.8 0-5.6 .1-8.4 .4c5.3 9.3 8.4 20.1 8.4 31.6z"/></svg></span></template>
+        <template id=fa-eye-slash><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M38.8 5.1C28.4-3.1 13.3-1.2 5.1 9.2S-1.2 34.7 9.2 42.9l592 464c10.4 8.2 25.5 6.3 33.7-4.1s6.3-25.5-4.1-33.7L525.6 386.7c39.6-40.6 66.4-86.1 79.9-118.4c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C465.5 68.8 400.8 32 320 32c-68.2 0-125 26.3-169.3 60.8L38.8 5.1zM223.1 149.5C248.6 126.2 282.7 112 320 112c79.5 0 144 64.5 144 144c0 24.9-6.3 48.3-17.4 68.7L408 294.5c5.2-11.8 8-24.8 8-38.5c0-53-43-96-96-96c-2.8 0-5.6 .1-8.4 .4c5.3 9.3 8.4 20.1 8.4 31.6c0 10.2-2.4 19.8-6.6 28.3l-90.3-70.8zm223.1 298L373 389.9c-16.4 6.5-34.3 10.1-53 10.1c-79.5 0-144-64.5-144-144c0-6.9 .5-13.6 1.4-20.2L83.1 161.5C60.3 191.2 44 220.8 34.5 243.7c-3.3 7.9-3.3 16.7 0 24.6c14.9 35.7 46.2 87.7 93 131.1C174.5 443.2 239.2 480 320 480c47.8 0 89.9-12.9 126.2-32.5z"/></svg></span></template>
+        <template id=fa-copy><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M502.6 70.63l-61.25-61.25C435.4 3.371 427.2 0 418.7 0H255.1c-35.35 0-64 28.66-64 64l.0195 256C192 355.4 220.7 384 256 384h192c35.2 0 64-28.8 64-64V93.25C512 84.77 508.6 76.63 502.6 70.63zM464 320c0 8.836-7.164 16-16 16H255.1c-8.838 0-16-7.164-16-16L239.1 64.13c0-8.836 7.164-16 16-16h128L384 96c0 17.67 14.33 32 32 32h47.1V320zM272 448c0 8.836-7.164 16-16 16H63.1c-8.838 0-16-7.164-16-16L47.98 192.1c0-8.836 7.164-16 16-16H160V128H63.99c-35.35 0-64 28.65-64 64l.0098 256C.002 483.3 28.66 512 64 512h192c35.2 0 64-28.8 64-64v-32h-47.1L272 448z"/></svg></span></template>
+        <template id=fa-play><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M73 39c-14.8-9.1-33.4-9.4-48.5-.9S0 62.6 0 80V432c0 17.4 9.4 33.4 24.5 41.9s33.7 8.1 48.5-.9L361 297c14.3-8.7 23-24.2 23-41s-8.7-32.2-23-41L73 39z"/></svg></span></template>
+        <template id=fa-clock-rotate-left><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M75 75L41 41C25.9 25.9 0 36.6 0 57.9V168c0 13.3 10.7 24 24 24H134.1c21.4 0 32.1-25.9 17-41l-30.8-30.8C155 85.5 203 64 256 64c106 0 192 86 192 192s-86 192-192 192c-40.8 0-78.6-12.7-109.7-34.4c-14.5-10.1-34.4-6.6-44.6 7.9s-6.6 34.4 7.9 44.6C151.2 495 201.7 512 256 512c141.4 0 256-114.6 256-256S397.4 0 256 0C185.3 0 121.3 28.7 75 75zm181 53c-13.3 0-24 10.7-24 24V256c0 6.4 2.5 12.5 7 17l72 72c9.4 9.4 24.6 9.4 33.9 0s9.4-24.6 0-33.9l-65-65V152c0-13.3-10.7-24-24-24z"/></svg></span></template>
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../elasticlunr-ef4e11c1.min.js"></script>
+        <script src="../mark-09e88c2c.min.js"></script>
+        <script src="../searcher-09f2665d.js"></script>
+
+        <script src="../clipboard-1626706a.min.js"></script>
+        <script src="../highlight-abc7f01d.js"></script>
+        <script src="../book-609e4cb8.js"></script>
+
+        <!-- Custom JS scripts -->
+        <script src="../theme/cjk-search-2989e841.js"></script>
+
+
+
+    </div>
+    </body>
+</html>

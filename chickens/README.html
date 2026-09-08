@@ -1,0 +1,498 @@
+<!DOCTYPE HTML>
+<html lang="zh-TW" class="navy sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>基因雞工程總覽 - TechMC 科技百科</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="TechMC Minecraft 科技模組插件百科全書">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon-de23e50b.svg">
+        <link rel="shortcut icon" href="../favicon-8114d1fc.png">
+        <link rel="stylesheet" href="../css/variables-8adf115d.css">
+        <link rel="stylesheet" href="../css/general-e96d0476.css">
+        <link rel="stylesheet" href="../css/chrome-d279d366.css">
+        <link rel="stylesheet" href="../css/print-9e4910d8.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../fonts/fonts-9644e21d.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="mdbook-highlight-css" href="../highlight-493f70e1.css">
+        <link rel="stylesheet" id="mdbook-tomorrow-night-css" href="../tomorrow-night-4c0ae647.css">
+        <link rel="stylesheet" id="mdbook-ayu-highlight-css" href="../ayu-highlight-3fdfc3ac.css">
+
+        <!-- Custom theme stylesheets -->
+
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "../";
+            const default_light_theme = "navy";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "../searchindex-be974765.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="../toc-588afc34.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="mdbook-body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('navy')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="mdbook-sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("mdbook-sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="mdbook-sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="../toc.html"></iframe>
+            </noscript>
+            <div id="mdbook-sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="mdbook-page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="mdbook-menu-bar-hover-placeholder"></div>
+                <div id="mdbook-menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="mdbook-sidebar-toggle" class="icon-button" for="mdbook-sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="mdbook-sidebar">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M0 96C0 78.3 14.3 64 32 64H416c17.7 0 32 14.3 32 32s-14.3 32-32 32H32C14.3 128 0 113.7 0 96zM0 256c0-17.7 14.3-32 32-32H416c17.7 0 32 14.3 32 32s-14.3 32-32 32H32c-17.7 0-32-14.3-32-32zM448 416c0 17.7-14.3 32-32 32H32c-17.7 0-32-14.3-32-32s14.3-32 32-32H416c17.7 0 32 14.3 32 32z"/></svg></span>
+                        </label>
+                        <button id="mdbook-theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="mdbook-theme-list">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M371.3 367.1c27.3-3.9 51.9-19.4 67.2-42.9L600.2 74.1c12.6-19.5 9.4-45.3-7.6-61.2S549.7-4.4 531.1 9.6L294.4 187.2c-24 18-38.2 46.1-38.4 76.1L371.3 367.1zm-19.6 25.4l-116-104.4C175.9 290.3 128 339.6 128 400c0 3.9 .2 7.8 .6 11.6c1.8 17.5-10.2 36.4-27.8 36.4H96c-17.7 0-32 14.3-32 32s14.3 32 32 32H240c61.9 0 112-50.1 112-112c0-2.5-.1-5-.2-7.5z"/></svg></span>
+                        </button>
+                        <ul id="mdbook-theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-ayu">Ayu</button></li>
+                        </ul>
+                        <button id="mdbook-search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="mdbook-searchbar">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M416 208c0 45.9-14.9 88.3-40 122.7L502.6 457.4c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L330.7 376c-34.4 25.2-76.8 40-122.7 40C93.1 416 0 322.9 0 208S93.1 0 208 0S416 93.1 416 208zM208 352c79.5 0 144-64.5 144-144s-64.5-144-144-144S64 128.5 64 208s64.5 144 144 144z"/></svg></span>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">TechMC 科技百科</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <span class=fa-svg id="print-button"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M128 0C92.7 0 64 28.7 64 64v96h64V64H354.7L384 93.3V160h64V93.3c0-17-6.7-33.3-18.7-45.3L400 18.7C388 6.7 371.7 0 354.7 0H128zM384 352v32 64H128V384 368 352H384zm64 32h32c17.7 0 32-14.3 32-32V256c0-35.3-28.7-64-64-64H64c-35.3 0-64 28.7-64 64v96c0 17.7 14.3 32 32 32H64v64c0 35.3 28.7 64 64 64H384c35.3 0 64-28.7 64-64V384zm-16-88c-13.3 0-24-10.7-24-24s10.7-24 24-24s24 10.7 24 24s-10.7 24-24 24z"/></svg></span>
+                        </a>
+                        <a href="https://github.com/QiuRui920811/TechProject" title="Git repository" aria-label="Git repository">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"/></svg></span>
+                        </a>
+                        <a href="https://github.com/QiuRui920811/TechProject/edit/main/docs/wiki/docs/wiki/chickens/README.md" title="Suggest an edit" aria-label="Suggest an edit" rel="edit">
+                            <span class=fa-svg id="git-edit-button"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M421.7 220.3l-11.3 11.3-22.6 22.6-205 205c-6.6 6.6-14.8 11.5-23.8 14.1L30.8 511c-8.4 2.5-17.5 .2-23.7-6.1S-1.5 489.7 1 481.2L38.7 353.1c2.6-9 7.5-17.2 14.1-23.8l205-205 22.6-22.6 11.3-11.3 33.9 33.9 62.1 62.1 33.9 33.9zM96 353.9l-9.3 9.3c-.9 .9-1.6 2.1-2 3.4l-25.3 86 86-25.3c1.3-.4 2.5-1.1 3.4-2l9.3-9.3H112c-8.8 0-16-7.2-16-16V353.9zM453.3 19.3l39.4 39.4c25 25 25 65.5 0 90.5l-14.5 14.5-22.6 22.6-11.3 11.3-33.9-33.9-62.1-62.1L314.3 67.7l11.3-11.3 22.6-22.6 14.5-14.5c25-25 65.5-25 90.5 0z"/></svg></span>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="mdbook-search-wrapper" class="hidden">
+                    <form id="mdbook-searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="mdbook-searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="mdbook-searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <span class=fa-svg id="fa-spin"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M304 48c0-26.5-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48s48-21.5 48-48zm0 416c0-26.5-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48s48-21.5 48-48zM48 304c26.5 0 48-21.5 48-48s-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48zm464-48c0-26.5-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48s48-21.5 48-48zM142.9 437c18.7-18.7 18.7-49.1 0-67.9s-49.1-18.7-67.9 0s-18.7 49.1 0 67.9s49.1 18.7 67.9 0zm0-294.2c18.7-18.7 18.7-49.1 0-67.9S93.7 56.2 75 75s-18.7 49.1 0 67.9s49.1 18.7 67.9 0zM369.1 437c18.7 18.7 49.1 18.7 67.9 0s18.7-49.1 0-67.9s-49.1-18.7-67.9 0s-18.7 49.1 0 67.9z"/></svg></span>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="mdbook-searchresults-outer" class="searchresults-outer hidden">
+                        <div id="mdbook-searchresults-header" class="searchresults-header"></div>
+                        <ul id="mdbook-searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('mdbook-sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('mdbook-sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#mdbook-sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="mdbook-content" class="content">
+                    <main>
+                        <h1 id="-基因雞"><a class="header" href="#-基因雞">🐔 基因雞</a></h1>
+<style>.dna{font-family:ui-monospace,Consolas,monospace;font-size:1.05em;letter-spacing:.12em}.dna b{display:inline-block;width:1.25em;text-align:center;border-radius:3px;font-weight:700}.dna .gD{background:#3b4557;color:#cbd5e1}.dna .gr{background:#166534;color:#dcfce7}.dna .gH{background:#854d0e;color:#fef3c7}.ck img{width:24px;height:24px;image-rendering:pixelated;vertical-align:-6px;margin-right:.35rem}</style>
+<p>捕捉野生雞、定序基因、育種出目標品系，再交由激發室持續產出資源。</p>
+<h2 id="入門流程"><a class="header" href="#入門流程">入門流程</a></h2>
+<div class="flow"><img src="/wiki/img/chicken/ui_chicken_net.png" alt="">雞網 <span class="ar">→</span> <img src="/wiki/img/chicken/ui_pocket_chicken.png" alt="">口袋雞 <span class="ar">→</span> <img src="/wiki/img/chicken/iron_ingot.png" alt="">目標資源（例：鐵錠）</div>
+
+<ol class="steps">
+<li class="step"><img src="/wiki/img/chicken/ui_chicken_net.png" alt="">
+<div>
+<h3>製作雞網</h3>
+<p>於製造機放入線 ×2 與木棍 ×1，耗費 3 EU 可一次製作 4 個。</p>
+</div>
+</li>
+
+<li class="step"><img src="/wiki/img/chicken/ui_pocket_chicken.png" alt="">
+<div>
+<h3>捕捉野生雞</h3>
+<p>手持雞網對野生雞按右鍵，即可將其捕獲並轉化為背包中的「口袋雞」（每次消耗 1 個雞網）。</p>
+</div>
+</li>
+
+<li class="step"><img src="/wiki/img/chicken/ui_genetic_sequencer.png" alt="">
+<div>
+<h3>定序基因</h3>
+<p>將口袋雞放入基因定序器；定序完成後，物品說明將顯示其六碼基因、階級與可產出的資源。</p>
+</div>
+</li>
+
+<li class="step"><img src="/wiki/img/chicken/ui_private_coop.png" alt="">
+<div>
+<h3>育種</h3>
+<p>將兩隻完成定序的雞放入私人雞舍，並依目標資源篩選基因，保留優良後代進行後續育種。</p>
+</div>
+</li>
+
+<li class="step"><img src="/wiki/img/chicken/ui_excitation_chamber.png" alt="">
+<div>
+<h3>開始生產</h3>
+<p>將基因帶有 r 的雞放入激發室，通電後即可定時生產資源；輸出格可連接貨物輸出節點實現自動收集。</p>
+</div>
+</li>
+
+</ol>
+
+<div class="note"><b>並非每隻雞都能生產。</b>六碼中沒有任何 r 的雞為普通雞，激發室不會接受；每隻雞最多可作為親代繁殖 10 次，請預留種雞。</div>
+
+<h2 id="看懂基因"><a class="header" href="#看懂基因">看懂基因</a></h2>
+<p>定序後，雞的物品說明會顯示六碼基因，例如 <span class="dna"><b class="gD">D</b><b class="gD">D</b><b class="gr">r</b><b class="gD">D</b><b class="gH">H</b><b class="gD">D</b></span>。六碼對應六個基因位置，每個位置為下列三種狀態之一：</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>字母</th><th>意思</th><th>會不會產資源</th></tr>
+</thead>
+<tbody>
+<tr><td><span class="dna"><b class="gD">D</b></span></td><td>兩個基因皆為顯性</td><td>不計</td></tr>
+<tr><td><span class="dna"><b class="gH">H</b></span></td><td>一顯一隱，帶有隱性基因但未表現</td><td>不計，但<strong>可育出 r 的後代</strong></td></tr>
+<tr><td><span class="dna"><b class="gr">r</b></span></td><td>兩個基因皆為隱性</td><td><strong>計入</strong>，即育種目標</td></tr>
+</tbody>
+</table>
+</div>
+<p>r 的數量即為階級，r 所在的位置則決定產出的資源種類；完全沒有 r 的雞為普通雞，無法用於激發室。</p>
+<h2 id="野生雞的基因分布"><a class="header" href="#野生雞的基因分布">野生雞的基因分布</a></h2>
+<p>每個位置獨立隨機決定：<strong>80%</strong> 為 D、<strong>15%</strong> 為 H、<strong>5%</strong> 為 r，因此野生雞多為整排 D，偶有一兩個 H 或 r。建議多捕捉並全數定序，保留帶有 H 或 r 的個體作為育種起點。</p>
+<h2 id="育種"><a class="header" href="#育種">育種</a></h2>
+<p>後代的每個位置各自從雙親隨機取得一個基因，機率如下：</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>雙親（同一位置）</th><th>後代為 r 的機率</th></tr>
+</thead>
+<tbody>
+<tr><td>H × H</td><td>25%</td></tr>
+<tr><td>H × r</td><td>50%</td></tr>
+<tr><td>r × r</td><td><strong>100%</strong></td></tr>
+<tr><td>D × 任意</td><td>0%（D 不帶隱性基因）</td></tr>
+</tbody>
+</table>
+</div>
+<p>育種策略是先在各位置分別培育出 r，再讓不同位置帶 r 的個體互相配種，逐代累積 r 的數量。</p>
+<p>每隻雞最多可作為親代繁殖 <strong>10 次</strong>，次數用盡後即消失；繁殖不消耗親代，雙親會留在雞舍中。</p>
+<h3 id="私人雞舍的冷卻"><a class="header" href="#私人雞舍的冷卻">私人雞舍的冷卻</a></h3>
+<p>每 <strong>180 秒</strong>繁殖一次。速度升級每張縮短 <strong>40 秒</strong>；雞舍三格升級槽中的最後一格僅接受堆疊升級，因此速度升級<strong>最多放置兩張</strong>：</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>速度升級</th><th>冷卻</th></tr>
+</thead>
+<tbody>
+<tr><td>0 張</td><td>180 秒</td></tr>
+<tr><td>1 張</td><td>140 秒</td></tr>
+<tr><td>2 張</td><td>100 秒</td></tr>
+</tbody>
+</table>
+</div>
+<p>雞舍狀態列顯示為「冷卻 剩餘/週期 s」，例如「冷卻 60/100s」代表整輪 100 秒、目前還剩 60 秒；倒數中的數字並非週期本身。</p>
+<h2 id="激發室"><a class="header" href="#激發室">激發室</a></h2>
+<p>放入至少帶有一個 r 的雞後，激發室會定時產出一個資源。階級越高，產出間隔越長、壽命也越短：</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>階級</th><th>r 數量</th><th>基礎產出間隔</th><th>壽命（產出次數）</th></tr>
+</thead>
+<tbody>
+<tr><td>1</td><td>1</td><td>60 秒</td><td>300 次</td></tr>
+<tr><td>2</td><td>2</td><td>120 秒</td><td>150 次</td></tr>
+<tr><td>3</td><td>3</td><td>240 秒</td><td>80 次</td></tr>
+<tr><td>4</td><td>4</td><td>360 秒</td><td>50 次</td></tr>
+<tr><td>5</td><td>5</td><td>600 秒</td><td>25 次</td></tr>
+<tr><td>6</td><td>6</td><td>1200 秒</td><td>12 次</td></tr>
+</tbody>
+</table>
+</div>
+<ul>
+<li><strong>速度升級</strong>：每張使產出速度 +100%（1 張為 2 倍、2 張為 3 倍），最多兩張</li>
+<li><strong>堆疊升級</strong>：放置 1 張後每次產出由 1 個變為 2 個，<strong>必定生效</strong>；僅認第一張</li>
+<li><strong>純度</strong>：上表為基礎間隔，實際間隔會依 H 的數量縮短——每少一個 H 快 1.5%，六個位置都不是 H 時最快，較六個都是 H 快 9%。例如 1 階基礎 60 秒，<span class="dna"><b class="gr">r</b><b class="gD">D</b><b class="gD">D</b><b class="gD">D</b><b class="gD">D</b><b class="gD">D</b></span> 約 56 秒、<span class="dna"><b class="gr">r</b><b class="gH">H</b><b class="gH">H</b><b class="gH">H</b><b class="gH">H</b><b class="gH">H</b></span> 約 60 秒。</li>
+</ul>
+<h2 id="六十三種資源"><a class="header" href="#六十三種資源">六十三種資源</a></h2>
+<p>依雞的六碼中 r 所在的位置，對照下表即可得知產出資源。</p>
+<h3 id="1-階--1-個-r6-種"><a class="header" href="#1-階--1-個-r6-種">1 階 — 1 個 r（6 種）</a></h3>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>基因</th><th>資源</th></tr>
+</thead>
+<tbody>
+<tr><td><span class="dna"><b class="gD">D</b><b class="gD">D</b><b class="gD">D</b><b class="gD">D</b><b class="gD">D</b><b class="gr">r</b></span></td><td><span class="ck"><img src="/wiki/img/chicken/water_bucket.png" alt="">水桶</span></td></tr>
+<tr><td><span class="dna"><b class="gD">D</b><b class="gD">D</b><b class="gD">D</b><b class="gD">D</b><b class="gr">r</b><b class="gD">D</b></span></td><td><span class="ck"><img src="/wiki/img/chicken/sand.png" alt="">沙</span></td></tr>
+<tr><td><span class="dna"><b class="gD">D</b><b class="gD">D</b><b class="gD">D</b><b class="gr">r</b><b class="gD">D</b><b class="gD">D</b></span></td><td><span class="ck"><img src="/wiki/img/chicken/flint.png" alt="">燧石</span></td></tr>
+<tr><td><span class="dna"><b class="gD">D</b><b class="gD">D</b><b class="gr">r</b><b class="gD">D</b><b class="gD">D</b><b class="gD">D</b></span></td><td><span class="ck"><img src="/wiki/img/chicken/dirt.png" alt="">泥土</span></td></tr>
+<tr><td><span class="dna"><b class="gD">D</b><b class="gr">r</b><b class="gD">D</b><b class="gD">D</b><b class="gD">D</b><b class="gD">D</b></span></td><td><span class="ck"><img src="/wiki/img/chicken/cobblestone.png" alt="">鵝卵石</span></td></tr>
+<tr><td><span class="dna"><b class="gr">r</b><b class="gD">D</b><b class="gD">D</b><b class="gD">D</b><b class="gD">D</b><b class="gD">D</b></span></td><td><span class="ck"><img src="/wiki/img/chicken/bone.png" alt="">骨頭</span></td></tr>
+</tbody>
+</table>
+</div>
+<h3 id="2-階--2-個-r15-種"><a class="header" href="#2-階--2-個-r15-種">2 階 — 2 個 r（15 種）</a></h3>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>基因</th><th>資源</th></tr>
+</thead>
+<tbody>
+<tr><td><span class="dna"><b class="gD">D</b><b class="gD">D</b><b class="gD">D</b><b class="gD">D</b><b class="gr">r</b><b class="gr">r</b></span></td><td><span class="ck"><img src="/wiki/img/chicken/slime_ball.png" alt="">史萊姆球</span></td></tr>
+<tr><td><span class="dna"><b class="gD">D</b><b class="gD">D</b><b class="gD">D</b><b class="gr">r</b><b class="gD">D</b><b class="gr">r</b></span></td><td><span class="ck"><img src="/wiki/img/chicken/kelp.png" alt="">海帶</span></td></tr>
+<tr><td><span class="dna"><b class="gD">D</b><b class="gD">D</b><b class="gD">D</b><b class="gr">r</b><b class="gr">r</b><b class="gD">D</b></span></td><td><span class="ck"><img src="/wiki/img/chicken/gunpowder.png" alt="">火藥</span></td></tr>
+<tr><td><span class="dna"><b class="gD">D</b><b class="gD">D</b><b class="gr">r</b><b class="gD">D</b><b class="gD">D</b><b class="gr">r</b></span></td><td><span class="ck"><img src="/wiki/img/chicken/oak_log.png" alt="">橡木原木</span></td></tr>
+<tr><td><span class="dna"><b class="gD">D</b><b class="gD">D</b><b class="gr">r</b><b class="gD">D</b><b class="gr">r</b><b class="gD">D</b></span></td><td><span class="ck"><img src="/wiki/img/chicken/clay_ball.png" alt="">黏土球</span></td></tr>
+<tr><td><span class="dna"><b class="gD">D</b><b class="gD">D</b><b class="gr">r</b><b class="gr">r</b><b class="gD">D</b><b class="gD">D</b></span></td><td><span class="ck"><img src="/wiki/img/chicken/granite.png" alt="">花崗岩</span></td></tr>
+<tr><td><span class="dna"><b class="gD">D</b><b class="gr">r</b><b class="gD">D</b><b class="gD">D</b><b class="gD">D</b><b class="gr">r</b></span></td><td><span class="ck"><img src="/wiki/img/chicken/ice.png" alt="">冰</span></td></tr>
+<tr><td><span class="dna"><b class="gD">D</b><b class="gr">r</b><b class="gD">D</b><b class="gD">D</b><b class="gr">r</b><b class="gD">D</b></span></td><td><span class="ck"><img src="/wiki/img/chicken/gravel.png" alt="">礫石</span></td></tr>
+<tr><td><span class="dna"><b class="gD">D</b><b class="gr">r</b><b class="gD">D</b><b class="gr">r</b><b class="gD">D</b><b class="gD">D</b></span></td><td><span class="ck"><img src="/wiki/img/chicken/andesite.png" alt="">安山岩</span></td></tr>
+<tr><td><span class="dna"><b class="gD">D</b><b class="gr">r</b><b class="gr">r</b><b class="gD">D</b><b class="gD">D</b><b class="gD">D</b></span></td><td><span class="ck"><img src="/wiki/img/chicken/diorite.png" alt="">閃長岩</span></td></tr>
+<tr><td><span class="dna"><b class="gr">r</b><b class="gD">D</b><b class="gD">D</b><b class="gD">D</b><b class="gD">D</b><b class="gr">r</b></span></td><td><span class="ck"><img src="/wiki/img/chicken/sponge.png" alt="">海綿</span></td></tr>
+<tr><td><span class="dna"><b class="gr">r</b><b class="gD">D</b><b class="gD">D</b><b class="gD">D</b><b class="gr">r</b><b class="gD">D</b></span></td><td><span class="ck"><img src="/wiki/img/chicken/sugar.png" alt="">糖</span></td></tr>
+<tr><td><span class="dna"><b class="gr">r</b><b class="gD">D</b><b class="gD">D</b><b class="gr">r</b><b class="gD">D</b><b class="gD">D</b></span></td><td><span class="ck"><img src="/wiki/img/chicken/leather.png" alt="">皮革</span></td></tr>
+<tr><td><span class="dna"><b class="gr">r</b><b class="gD">D</b><b class="gr">r</b><b class="gD">D</b><b class="gD">D</b><b class="gD">D</b></span></td><td><span class="ck"><img src="/wiki/img/chicken/string.png" alt="">線</span></td></tr>
+<tr><td><span class="dna"><b class="gr">r</b><b class="gr">r</b><b class="gD">D</b><b class="gD">D</b><b class="gD">D</b><b class="gD">D</b></span></td><td><span class="ck"><img src="/wiki/img/chicken/coal.png" alt="">煤炭</span></td></tr>
+</tbody>
+</table>
+</div>
+<h3 id="3-階--3-個-r20-種"><a class="header" href="#3-階--3-個-r20-種">3 階 — 3 個 r（20 種）</a></h3>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>基因</th><th>資源</th></tr>
+</thead>
+<tbody>
+<tr><td><span class="dna"><b class="gD">D</b><b class="gD">D</b><b class="gD">D</b><b class="gr">r</b><b class="gr">r</b><b class="gr">r</b></span></td><td><span class="ck"><img src="/wiki/img/chicken/gray_dye.png" alt="">灰色染料</span></td></tr>
+<tr><td><span class="dna"><b class="gD">D</b><b class="gD">D</b><b class="gr">r</b><b class="gD">D</b><b class="gr">r</b><b class="gr">r</b></span></td><td><span class="ck"><img src="/wiki/img/chicken/iron_nugget.png" alt="">鐵粒</span></td></tr>
+<tr><td><span class="dna"><b class="gD">D</b><b class="gD">D</b><b class="gr">r</b><b class="gr">r</b><b class="gD">D</b><b class="gr">r</b></span></td><td><span class="ck"><img src="/wiki/img/chicken/cactus.png" alt="">仙人掌</span></td></tr>
+<tr><td><span class="dna"><b class="gD">D</b><b class="gD">D</b><b class="gr">r</b><b class="gr">r</b><b class="gr">r</b><b class="gD">D</b></span></td><td><span class="ck"><img src="/wiki/img/chicken/redstone.png" alt="">紅石粉</span></td></tr>
+<tr><td><span class="dna"><b class="gD">D</b><b class="gr">r</b><b class="gD">D</b><b class="gD">D</b><b class="gr">r</b><b class="gr">r</b></span></td><td><span class="ck"><img src="/wiki/img/chicken/snowball.png" alt="">雪球</span></td></tr>
+<tr><td><span class="dna"><b class="gD">D</b><b class="gr">r</b><b class="gD">D</b><b class="gr">r</b><b class="gD">D</b><b class="gr">r</b></span></td><td><span class="ck"><img src="/wiki/img/chicken/raw_iron.png" alt="">鐵原礦</span></td></tr>
+<tr><td><span class="dna"><b class="gD">D</b><b class="gr">r</b><b class="gD">D</b><b class="gr">r</b><b class="gr">r</b><b class="gD">D</b></span></td><td><span class="ck"><img src="/wiki/img/chicken/lava_bucket.png" alt="">熔岩桶</span></td></tr>
+<tr><td><span class="dna"><b class="gD">D</b><b class="gr">r</b><b class="gr">r</b><b class="gD">D</b><b class="gD">D</b><b class="gr">r</b></span></td><td><span class="ck"><img src="/wiki/img/chicken/amethyst_shard.png" alt="">紫水晶碎片</span></td></tr>
+<tr><td><span class="dna"><b class="gD">D</b><b class="gr">r</b><b class="gr">r</b><b class="gD">D</b><b class="gr">r</b><b class="gD">D</b></span></td><td><span class="ck"><img src="/wiki/img/chicken/copper_dust.png" alt="">銅粉</span></td></tr>
+<tr><td><span class="dna"><b class="gD">D</b><b class="gr">r</b><b class="gr">r</b><b class="gr">r</b><b class="gD">D</b><b class="gD">D</b></span></td><td><span class="ck"><img src="/wiki/img/chicken/obsidian.png" alt="">黑曜石</span></td></tr>
+<tr><td><span class="dna"><b class="gr">r</b><b class="gD">D</b><b class="gD">D</b><b class="gD">D</b><b class="gr">r</b><b class="gr">r</b></span></td><td><span class="ck"><img src="/wiki/img/chicken/cake.png" alt="">蛋糕</span></td></tr>
+<tr><td><span class="dna"><b class="gr">r</b><b class="gD">D</b><b class="gD">D</b><b class="gr">r</b><b class="gD">D</b><b class="gr">r</b></span></td><td><span class="ck"><img src="/wiki/img/chicken/copper_ingot.png" alt="">銅錠</span></td></tr>
+<tr><td><span class="dna"><b class="gr">r</b><b class="gD">D</b><b class="gD">D</b><b class="gr">r</b><b class="gr">r</b><b class="gD">D</b></span></td><td><span class="ck"><img src="/wiki/img/chicken/raw_copper.png" alt="">銅原礦</span></td></tr>
+<tr><td><span class="dna"><b class="gr">r</b><b class="gD">D</b><b class="gr">r</b><b class="gD">D</b><b class="gD">D</b><b class="gr">r</b></span></td><td><span class="ck"><img src="/wiki/img/chicken/gold_nugget.png" alt="">金粒</span></td></tr>
+<tr><td><span class="dna"><b class="gr">r</b><b class="gD">D</b><b class="gr">r</b><b class="gD">D</b><b class="gr">r</b><b class="gD">D</b></span></td><td><span class="ck"><img src="/wiki/img/chicken/iron_dust.png" alt="">鐵粉</span></td></tr>
+<tr><td><span class="dna"><b class="gr">r</b><b class="gD">D</b><b class="gr">r</b><b class="gr">r</b><b class="gD">D</b><b class="gD">D</b></span></td><td><span class="ck"><img src="/wiki/img/chicken/iron_ingot.png" alt="">鐵錠</span></td></tr>
+<tr><td><span class="dna"><b class="gr">r</b><b class="gr">r</b><b class="gD">D</b><b class="gD">D</b><b class="gD">D</b><b class="gr">r</b></span></td><td><span class="ck"><img src="/wiki/img/chicken/lapis_lazuli.png" alt="">青金石</span></td></tr>
+<tr><td><span class="dna"><b class="gr">r</b><b class="gr">r</b><b class="gD">D</b><b class="gD">D</b><b class="gr">r</b><b class="gD">D</b></span></td><td><span class="ck"><img src="/wiki/img/chicken/glass.png" alt="">玻璃</span></td></tr>
+<tr><td><span class="dna"><b class="gr">r</b><b class="gr">r</b><b class="gD">D</b><b class="gr">r</b><b class="gD">D</b><b class="gD">D</b></span></td><td><span class="ck"><img src="/wiki/img/chicken/netherrack.png" alt="">地獄石</span></td></tr>
+<tr><td><span class="dna"><b class="gr">r</b><b class="gr">r</b><b class="gr">r</b><b class="gD">D</b><b class="gD">D</b><b class="gD">D</b></span></td><td><span class="ck"><img src="/wiki/img/chicken/gold_ingot.png" alt="">金錠</span></td></tr>
+</tbody>
+</table>
+</div>
+<h3 id="4-階--4-個-r15-種"><a class="header" href="#4-階--4-個-r15-種">4 階 — 4 個 r（15 種）</a></h3>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>基因</th><th>資源</th></tr>
+</thead>
+<tbody>
+<tr><td><span class="dna"><b class="gD">D</b><b class="gD">D</b><b class="gr">r</b><b class="gr">r</b><b class="gr">r</b><b class="gr">r</b></span></td><td><span class="ck"><img src="/wiki/img/chicken/glowstone_dust.png" alt="">螢石粉</span></td></tr>
+<tr><td><span class="dna"><b class="gD">D</b><b class="gr">r</b><b class="gD">D</b><b class="gr">r</b><b class="gr">r</b><b class="gr">r</b></span></td><td><span class="ck"><img src="/wiki/img/chicken/magma_cream.png" alt="">岩漿球</span></td></tr>
+<tr><td><span class="dna"><b class="gD">D</b><b class="gr">r</b><b class="gr">r</b><b class="gD">D</b><b class="gr">r</b><b class="gr">r</b></span></td><td><span class="ck"><img src="/wiki/img/chicken/nether_wart.png" alt="">地獄疙瘩</span></td></tr>
+<tr><td><span class="dna"><b class="gD">D</b><b class="gr">r</b><b class="gr">r</b><b class="gr">r</b><b class="gD">D</b><b class="gr">r</b></span></td><td><span class="ck"><img src="/wiki/img/chicken/crying_obsidian.png" alt="">哭泣的黑曜石</span></td></tr>
+<tr><td><span class="dna"><b class="gD">D</b><b class="gr">r</b><b class="gr">r</b><b class="gr">r</b><b class="gr">r</b><b class="gD">D</b></span></td><td><span class="ck"><img src="/wiki/img/chicken/yellow_dye.png" alt="">黃色染料</span></td></tr>
+<tr><td><span class="dna"><b class="gr">r</b><b class="gD">D</b><b class="gD">D</b><b class="gr">r</b><b class="gr">r</b><b class="gr">r</b></span></td><td><span class="ck"><img src="/wiki/img/chicken/phantom_membrane.png" alt="">夜魅皮膜</span></td></tr>
+<tr><td><span class="dna"><b class="gr">r</b><b class="gD">D</b><b class="gr">r</b><b class="gD">D</b><b class="gr">r</b><b class="gr">r</b></span></td><td><span class="ck"><img src="/wiki/img/chicken/ender_pearl.png" alt="">終界珍珠</span></td></tr>
+<tr><td><span class="dna"><b class="gr">r</b><b class="gD">D</b><b class="gr">r</b><b class="gr">r</b><b class="gD">D</b><b class="gr">r</b></span></td><td><span class="ck"><img src="/wiki/img/chicken/basalt.png" alt="">玄武岩</span></td></tr>
+<tr><td><span class="dna"><b class="gr">r</b><b class="gD">D</b><b class="gr">r</b><b class="gr">r</b><b class="gr">r</b><b class="gD">D</b></span></td><td><span class="ck"><img src="/wiki/img/chicken/ghast_tear.png" alt="">幽靈之淚</span></td></tr>
+<tr><td><span class="dna"><b class="gr">r</b><b class="gr">r</b><b class="gD">D</b><b class="gD">D</b><b class="gr">r</b><b class="gr">r</b></span></td><td><span class="ck"><img src="/wiki/img/chicken/soul_sand.png" alt="">靈魂砂</span></td></tr>
+<tr><td><span class="dna"><b class="gr">r</b><b class="gr">r</b><b class="gD">D</b><b class="gr">r</b><b class="gD">D</b><b class="gr">r</b></span></td><td><span class="ck"><img src="/wiki/img/chicken/quartz.png" alt="">地獄石英</span></td></tr>
+<tr><td><span class="dna"><b class="gr">r</b><b class="gr">r</b><b class="gD">D</b><b class="gr">r</b><b class="gr">r</b><b class="gD">D</b></span></td><td><span class="ck"><img src="/wiki/img/chicken/blaze_rod.png" alt="">烈焰桿</span></td></tr>
+<tr><td><span class="dna"><b class="gr">r</b><b class="gr">r</b><b class="gr">r</b><b class="gD">D</b><b class="gD">D</b><b class="gr">r</b></span></td><td><span class="ck"><img src="/wiki/img/chicken/shroomlight.png" alt="">蕈光體</span></td></tr>
+<tr><td><span class="dna"><b class="gr">r</b><b class="gr">r</b><b class="gr">r</b><b class="gD">D</b><b class="gr">r</b><b class="gD">D</b></span></td><td><span class="ck"><img src="/wiki/img/chicken/soul_soil.png" alt="">靈魂土</span></td></tr>
+<tr><td><span class="dna"><b class="gr">r</b><b class="gr">r</b><b class="gr">r</b><b class="gr">r</b><b class="gD">D</b><b class="gD">D</b></span></td><td><span class="ck"><img src="/wiki/img/chicken/blackstone.png" alt="">黑石</span></td></tr>
+</tbody>
+</table>
+</div>
+<h3 id="5-階--5-個-r6-種"><a class="header" href="#5-階--5-個-r6-種">5 階 — 5 個 r（6 種）</a></h3>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>基因</th><th>資源</th></tr>
+</thead>
+<tbody>
+<tr><td><span class="dna"><b class="gD">D</b><b class="gr">r</b><b class="gr">r</b><b class="gr">r</b><b class="gr">r</b><b class="gr">r</b></span></td><td><span class="ck"><img src="/wiki/img/chicken/emerald.png" alt="">綠寶石</span></td></tr>
+<tr><td><span class="dna"><b class="gr">r</b><b class="gD">D</b><b class="gr">r</b><b class="gr">r</b><b class="gr">r</b><b class="gr">r</b></span></td><td><span class="ck"><img src="/wiki/img/chicken/experience_bottle.png" alt="">經驗瓶</span></td></tr>
+<tr><td><span class="dna"><b class="gr">r</b><b class="gr">r</b><b class="gD">D</b><b class="gr">r</b><b class="gr">r</b><b class="gr">r</b></span></td><td><span class="ck"><img src="/wiki/img/chicken/prismarine_shard.png" alt="">海磷碎片</span></td></tr>
+<tr><td><span class="dna"><b class="gr">r</b><b class="gr">r</b><b class="gr">r</b><b class="gD">D</b><b class="gr">r</b><b class="gr">r</b></span></td><td><span class="ck"><img src="/wiki/img/chicken/prismarine_crystals.png" alt="">海磷晶體</span></td></tr>
+<tr><td><span class="dna"><b class="gr">r</b><b class="gr">r</b><b class="gr">r</b><b class="gr">r</b><b class="gD">D</b><b class="gr">r</b></span></td><td><span class="ck"><img src="/wiki/img/chicken/end_stone.png" alt="">終界石</span></td></tr>
+<tr><td><span class="dna"><b class="gr">r</b><b class="gr">r</b><b class="gr">r</b><b class="gr">r</b><b class="gr">r</b><b class="gD">D</b></span></td><td><span class="ck"><img src="/wiki/img/chicken/diamond.png" alt="">鑽石</span></td></tr>
+</tbody>
+</table>
+</div>
+<h3 id="6-階--6-個-r1-種"><a class="header" href="#6-階--6-個-r1-種">6 階 — 6 個 r（1 種）</a></h3>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>基因</th><th>資源</th></tr>
+</thead>
+<tbody>
+<tr><td><span class="dna"><b class="gr">r</b><b class="gr">r</b><b class="gr">r</b><b class="gr">r</b><b class="gr">r</b><b class="gr">r</b></span></td><td><span class="ck"><img src="/wiki/img/chicken/netherite_ingot.png" alt="">獄髓錠</span></td></tr>
+</tbody>
+</table>
+</div>
+<h2 id="機器與物品"><a class="header" href="#機器與物品">機器與物品</a></h2>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th></th><th>怎麼做</th><th>做什麼</th></tr>
+</thead>
+<tbody>
+<tr><td>雞網</td><td>製造機：線 ×2 + 木棍，一次 4 個</td><td>對野生雞右鍵即可捕獲為口袋雞，一次性消耗</td></tr>
+<tr><td>基因定序器</td><td>製造機：玻璃 + 鐵錠 + 紅石</td><td>放入口袋雞，定序後即可查看基因</td></tr>
+<tr><td>私人雞舍</td><td>製造機：橡木材 + 乾草捆</td><td>放入兩隻已定序的雞進行繁殖</td></tr>
+<tr><td>激發室</td><td>製造機：鐵錠 + 玻璃 + 電路板</td><td>放入帶 r 的雞定時產出資源，輸出格可接貨物輸出節點</td></tr>
+</tbody>
+</table>
+</div>
+<p>以上物品與機器皆收錄於科技書的「<strong>基因雞 / 培育</strong>」分頁。</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../automation/android.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
+                            </a>
+
+                            <a rel="next prefetch" href="../achievements/README.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../automation/android.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
+                    </a>
+
+                    <a rel="next prefetch" href="../achievements/README.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
+                    </a>
+            </nav>
+
+        </div>
+
+        <template id=fa-eye><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M288 32c-80.8 0-145.5 36.8-192.6 80.6C48.6 156 17.3 208 2.5 243.7c-3.3 7.9-3.3 16.7 0 24.6C17.3 304 48.6 356 95.4 399.4C142.5 443.2 207.2 480 288 480s145.5-36.8 192.6-80.6c46.8-43.5 78.1-95.4 93-131.1c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C433.5 68.8 368.8 32 288 32zM432 256c0 79.5-64.5 144-144 144s-144-64.5-144-144s64.5-144 144-144s144 64.5 144 144zM288 192c0 35.3-28.7 64-64 64c-11.5 0-22.3-3-31.6-8.4c-.2 2.8-.4 5.5-.4 8.4c0 53 43 96 96 96s96-43 96-96s-43-96-96-96c-2.8 0-5.6 .1-8.4 .4c5.3 9.3 8.4 20.1 8.4 31.6z"/></svg></span></template>
+        <template id=fa-eye-slash><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M38.8 5.1C28.4-3.1 13.3-1.2 5.1 9.2S-1.2 34.7 9.2 42.9l592 464c10.4 8.2 25.5 6.3 33.7-4.1s6.3-25.5-4.1-33.7L525.6 386.7c39.6-40.6 66.4-86.1 79.9-118.4c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C465.5 68.8 400.8 32 320 32c-68.2 0-125 26.3-169.3 60.8L38.8 5.1zM223.1 149.5C248.6 126.2 282.7 112 320 112c79.5 0 144 64.5 144 144c0 24.9-6.3 48.3-17.4 68.7L408 294.5c5.2-11.8 8-24.8 8-38.5c0-53-43-96-96-96c-2.8 0-5.6 .1-8.4 .4c5.3 9.3 8.4 20.1 8.4 31.6c0 10.2-2.4 19.8-6.6 28.3l-90.3-70.8zm223.1 298L373 389.9c-16.4 6.5-34.3 10.1-53 10.1c-79.5 0-144-64.5-144-144c0-6.9 .5-13.6 1.4-20.2L83.1 161.5C60.3 191.2 44 220.8 34.5 243.7c-3.3 7.9-3.3 16.7 0 24.6c14.9 35.7 46.2 87.7 93 131.1C174.5 443.2 239.2 480 320 480c47.8 0 89.9-12.9 126.2-32.5z"/></svg></span></template>
+        <template id=fa-copy><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M502.6 70.63l-61.25-61.25C435.4 3.371 427.2 0 418.7 0H255.1c-35.35 0-64 28.66-64 64l.0195 256C192 355.4 220.7 384 256 384h192c35.2 0 64-28.8 64-64V93.25C512 84.77 508.6 76.63 502.6 70.63zM464 320c0 8.836-7.164 16-16 16H255.1c-8.838 0-16-7.164-16-16L239.1 64.13c0-8.836 7.164-16 16-16h128L384 96c0 17.67 14.33 32 32 32h47.1V320zM272 448c0 8.836-7.164 16-16 16H63.1c-8.838 0-16-7.164-16-16L47.98 192.1c0-8.836 7.164-16 16-16H160V128H63.99c-35.35 0-64 28.65-64 64l.0098 256C.002 483.3 28.66 512 64 512h192c35.2 0 64-28.8 64-64v-32h-47.1L272 448z"/></svg></span></template>
+        <template id=fa-play><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M73 39c-14.8-9.1-33.4-9.4-48.5-.9S0 62.6 0 80V432c0 17.4 9.4 33.4 24.5 41.9s33.7 8.1 48.5-.9L361 297c14.3-8.7 23-24.2 23-41s-8.7-32.2-23-41L73 39z"/></svg></span></template>
+        <template id=fa-clock-rotate-left><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M75 75L41 41C25.9 25.9 0 36.6 0 57.9V168c0 13.3 10.7 24 24 24H134.1c21.4 0 32.1-25.9 17-41l-30.8-30.8C155 85.5 203 64 256 64c106 0 192 86 192 192s-86 192-192 192c-40.8 0-78.6-12.7-109.7-34.4c-14.5-10.1-34.4-6.6-44.6 7.9s-6.6 34.4 7.9 44.6C151.2 495 201.7 512 256 512c141.4 0 256-114.6 256-256S397.4 0 256 0C185.3 0 121.3 28.7 75 75zm181 53c-13.3 0-24 10.7-24 24V256c0 6.4 2.5 12.5 7 17l72 72c9.4 9.4 24.6 9.4 33.9 0s9.4-24.6 0-33.9l-65-65V152c0-13.3-10.7-24-24-24z"/></svg></span></template>
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../elasticlunr-ef4e11c1.min.js"></script>
+        <script src="../mark-09e88c2c.min.js"></script>
+        <script src="../searcher-09f2665d.js"></script>
+
+        <script src="../clipboard-1626706a.min.js"></script>
+        <script src="../highlight-abc7f01d.js"></script>
+        <script src="../book-609e4cb8.js"></script>
+
+        <!-- Custom JS scripts -->
+        <script src="../theme/cjk-search-2989e841.js"></script>
+
+
+
+    </div>
+    </body>
+</html>

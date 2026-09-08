@@ -1,0 +1,2037 @@
+<!DOCTYPE HTML>
+<html lang="zh-TW" class="navy sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>工作台藍圖 - TechMC 科技百科</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="TechMC Minecraft 科技模組插件百科全書">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon-de23e50b.svg">
+        <link rel="shortcut icon" href="../favicon-8114d1fc.png">
+        <link rel="stylesheet" href="../css/variables-8adf115d.css">
+        <link rel="stylesheet" href="../css/general-e96d0476.css">
+        <link rel="stylesheet" href="../css/chrome-d279d366.css">
+        <link rel="stylesheet" href="../css/print-9e4910d8.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../fonts/fonts-9644e21d.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="mdbook-highlight-css" href="../highlight-493f70e1.css">
+        <link rel="stylesheet" id="mdbook-tomorrow-night-css" href="../tomorrow-night-4c0ae647.css">
+        <link rel="stylesheet" id="mdbook-ayu-highlight-css" href="../ayu-highlight-3fdfc3ac.css">
+
+        <!-- Custom theme stylesheets -->
+
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "../";
+            const default_light_theme = "navy";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "../searchindex-be974765.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="../toc-588afc34.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="mdbook-body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('navy')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="mdbook-sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("mdbook-sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="mdbook-sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="../toc.html"></iframe>
+            </noscript>
+            <div id="mdbook-sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="mdbook-page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="mdbook-menu-bar-hover-placeholder"></div>
+                <div id="mdbook-menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="mdbook-sidebar-toggle" class="icon-button" for="mdbook-sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="mdbook-sidebar">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M0 96C0 78.3 14.3 64 32 64H416c17.7 0 32 14.3 32 32s-14.3 32-32 32H32C14.3 128 0 113.7 0 96zM0 256c0-17.7 14.3-32 32-32H416c17.7 0 32 14.3 32 32s-14.3 32-32 32H32c-17.7 0-32-14.3-32-32zM448 416c0 17.7-14.3 32-32 32H32c-17.7 0-32-14.3-32-32s14.3-32 32-32H416c17.7 0 32 14.3 32 32z"/></svg></span>
+                        </label>
+                        <button id="mdbook-theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="mdbook-theme-list">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M371.3 367.1c27.3-3.9 51.9-19.4 67.2-42.9L600.2 74.1c12.6-19.5 9.4-45.3-7.6-61.2S549.7-4.4 531.1 9.6L294.4 187.2c-24 18-38.2 46.1-38.4 76.1L371.3 367.1zm-19.6 25.4l-116-104.4C175.9 290.3 128 339.6 128 400c0 3.9 .2 7.8 .6 11.6c1.8 17.5-10.2 36.4-27.8 36.4H96c-17.7 0-32 14.3-32 32s14.3 32 32 32H240c61.9 0 112-50.1 112-112c0-2.5-.1-5-.2-7.5z"/></svg></span>
+                        </button>
+                        <ul id="mdbook-theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-ayu">Ayu</button></li>
+                        </ul>
+                        <button id="mdbook-search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="mdbook-searchbar">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M416 208c0 45.9-14.9 88.3-40 122.7L502.6 457.4c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L330.7 376c-34.4 25.2-76.8 40-122.7 40C93.1 416 0 322.9 0 208S93.1 0 208 0S416 93.1 416 208zM208 352c79.5 0 144-64.5 144-144s-64.5-144-144-144S64 128.5 64 208s64.5 144 144 144z"/></svg></span>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">TechMC 科技百科</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <span class=fa-svg id="print-button"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M128 0C92.7 0 64 28.7 64 64v96h64V64H354.7L384 93.3V160h64V93.3c0-17-6.7-33.3-18.7-45.3L400 18.7C388 6.7 371.7 0 354.7 0H128zM384 352v32 64H128V384 368 352H384zm64 32h32c17.7 0 32-14.3 32-32V256c0-35.3-28.7-64-64-64H64c-35.3 0-64 28.7-64 64v96c0 17.7 14.3 32 32 32H64v64c0 35.3 28.7 64 64 64H384c35.3 0 64-28.7 64-64V384zm-16-88c-13.3 0-24-10.7-24-24s10.7-24 24-24s24 10.7 24 24s-10.7 24-24 24z"/></svg></span>
+                        </a>
+                        <a href="https://github.com/QiuRui920811/TechProject" title="Git repository" aria-label="Git repository">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"/></svg></span>
+                        </a>
+                        <a href="https://github.com/QiuRui920811/TechProject/edit/main/docs/wiki/docs/wiki/recipes/workbench.md" title="Suggest an edit" aria-label="Suggest an edit" rel="edit">
+                            <span class=fa-svg id="git-edit-button"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M421.7 220.3l-11.3 11.3-22.6 22.6-205 205c-6.6 6.6-14.8 11.5-23.8 14.1L30.8 511c-8.4 2.5-17.5 .2-23.7-6.1S-1.5 489.7 1 481.2L38.7 353.1c2.6-9 7.5-17.2 14.1-23.8l205-205 22.6-22.6 11.3-11.3 33.9 33.9 62.1 62.1 33.9 33.9zM96 353.9l-9.3 9.3c-.9 .9-1.6 2.1-2 3.4l-25.3 86 86-25.3c1.3-.4 2.5-1.1 3.4-2l9.3-9.3H112c-8.8 0-16-7.2-16-16V353.9zM453.3 19.3l39.4 39.4c25 25 25 65.5 0 90.5l-14.5 14.5-22.6 22.6-11.3 11.3-33.9-33.9-62.1-62.1L314.3 67.7l11.3-11.3 22.6-22.6 14.5-14.5c25-25 65.5-25 90.5 0z"/></svg></span>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="mdbook-search-wrapper" class="hidden">
+                    <form id="mdbook-searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="mdbook-searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="mdbook-searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <span class=fa-svg id="fa-spin"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M304 48c0-26.5-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48s48-21.5 48-48zm0 416c0-26.5-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48s48-21.5 48-48zM48 304c26.5 0 48-21.5 48-48s-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48zm464-48c0-26.5-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48s48-21.5 48-48zM142.9 437c18.7-18.7 18.7-49.1 0-67.9s-49.1-18.7-67.9 0s-18.7 49.1 0 67.9s49.1 18.7 67.9 0zm0-294.2c18.7-18.7 18.7-49.1 0-67.9S93.7 56.2 75 75s-18.7 49.1 0 67.9s49.1 18.7 67.9 0zM369.1 437c18.7 18.7 49.1 18.7 67.9 0s18.7-49.1 0-67.9s-49.1-18.7-67.9 0s-18.7 49.1 0 67.9z"/></svg></span>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="mdbook-searchresults-outer" class="searchresults-outer hidden">
+                        <div id="mdbook-searchresults-header" class="searchresults-header"></div>
+                        <ul id="mdbook-searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('mdbook-sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('mdbook-sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#mdbook-sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="mdbook-content" class="content">
+                    <main>
+                        <h1 id="-進階工作台藍圖"><a class="header" href="#-進階工作台藍圖">🔨 進階工作台藍圖</a></h1>
+<blockquote>
+<p>共 <strong>92</strong> 張。把工作台放在鐵方塊上方就是進階工作台。</p>
+</blockquote>
+<hr>
+<h3 id="伐木機"><a class="header" href="#伐木機">伐木機</a></h3>
+<ul>
+<li>先讓電鋸穩定供木材線。</li>
+<li>做好伐木刀組與林業機架後，再組出伐木機。</li>
+</ul>
+<h3 id="低溫蒸餾器"><a class="header" href="#低溫蒸餾器">低溫蒸餾器</a></h3>
+<pre><code>GSG
+IPI
+IRI
+</code></pre>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>代號</th><th>材料</th><th>需要</th></tr>
+</thead>
+<tbody>
+<tr><td><code>G</code></td><td>玻璃</td><td>2</td></tr>
+<tr><td><code>I</code></td><td>鐵錠</td><td>4</td></tr>
+<tr><td><code>P</code></td><td>粉雪桶</td><td>1</td></tr>
+<tr><td><code>R</code></td><td>紅石粉</td><td>1</td></tr>
+<tr><td><code>S</code></td><td>鋼板</td><td>1</td></tr>
+</tbody>
+</table>
+</div>
+<ul>
+<li>低溫蒸餾器代表你正式進入保護層與相變化材料線。</li>
+<li>先把農業線、生質線、精煉塔都跑穩，不然冷卻材料會斷供。</li>
+<li>低溫核心是後面高熱與終局設備的重要穩定件，不是一次性道具。</li>
+</ul>
+<h3 id="作物收割機"><a class="header" href="#作物收割機">作物收割機</a></h3>
+<ul>
+<li>先把自動農場穩定化，再做收割矩陣。</li>
+<li>用製造機合成後，就能升級成真正的自動收成線。</li>
+<li>很適合搭配大豆、香辛莓、茶葉這類手種科技作物。</li>
+</ul>
+<h3 id="作物種子"><a class="header" href="#作物種子">作物種子</a></h3>
+<pre><code>_S_
+SBS
+_S_
+</code></pre>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>代號</th><th>材料</th><th>需要</th></tr>
+</thead>
+<tbody>
+<tr><td><code>B</code></td><td>骨粉</td><td>1</td></tr>
+<tr><td><code>S</code></td><td>小麥種子</td><td>4</td></tr>
+</tbody>
+</table>
+</div>
+<ul>
+<li>打草就會掉小麥種子，骨頭磨成骨粉。</li>
+<li>用進階工作台照配方擺出「作物種子」。</li>
+<li>作物種子放進自動農場，就能一直產出作物。</li>
+</ul>
+<h3 id="倉儲匯流站"><a class="header" href="#倉儲匯流站">倉儲匯流站</a></h3>
+<ul>
+<li>多條線交會時，先做一台倉儲匯流站當緩衝。</li>
+<li>它能讓中間件先堆住，再繼續往外分流。</li>
+</ul>
+<h3 id="光子織構機"><a class="header" href="#光子織構機">光子織構機</a></h3>
+<pre><code>OGO
+SLS
+OAO
+</code></pre>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>代號</th><th>材料</th><th>需要</th></tr>
+</thead>
+<tbody>
+<tr><td><code>A</code></td><td>高級電路</td><td>1</td></tr>
+<tr><td><code>G</code></td><td>強化玻璃</td><td>1</td></tr>
+<tr><td><code>L</code></td><td>海燈籠</td><td>1</td></tr>
+<tr><td><code>O</code></td><td>光學鏡片</td><td>4</td></tr>
+<tr><td><code>S</code></td><td>星光板</td><td>2</td></tr>
+</tbody>
+</table>
+</div>
+<ul>
+<li>先用雷射雕刻機做好光學鏡片與雷射鏡。</li>
+<li>中央放原版海磷石。</li>
+<li>光子織構機可以做出光子碎片、光子板與觀測鏡片。</li>
+</ul>
+<h3 id="冷卻混合器"><a class="header" href="#冷卻混合器">冷卻混合器</a></h3>
+<pre><code>ISI
+CKC
+SPS
+</code></pre>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>代號</th><th>材料</th><th>需要</th></tr>
+</thead>
+<tbody>
+<tr><td><code>C</code></td><td>銅錠</td><td>2</td></tr>
+<tr><td><code>I</code></td><td>冰磚</td><td>2</td></tr>
+<tr><td><code>K</code></td><td>鍋釜</td><td>1</td></tr>
+<tr><td><code>P</code></td><td>活塞</td><td>1</td></tr>
+<tr><td><code>S</code></td><td>鋼板</td><td>3</td></tr>
+</tbody>
+</table>
+</div>
+<ul>
+<li>先準備冰磚、鋼板、鍋釜、銅錠與活塞。</li>
+<li>先在地上放鐵方塊，再把工作台放在上方形成進階工作台。</li>
+<li>用進階工作台照配方擺出冷卻混合器。</li>
+<li>放下後右鍵開啟介面，可將冷卻元件與水凝膠混合為冷卻液。</li>
+</ul>
+<h3 id="分流節點"><a class="header" href="#分流節點">分流節點</a></h3>
+<ul>
+<li>單一輸出要平均分給多條線時就用這台。</li>
+<li>很適合把主冶煉產物分到裝配、倉儲、回收三區。</li>
+</ul>
+<h3 id="力場鍛造台"><a class="header" href="#力場鍛造台">力場鍛造台</a></h3>
+<pre><code>AFA
+NLN
+ACA
+</code></pre>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>代號</th><th>材料</th><th>需要</th></tr>
+</thead>
+<tbody>
+<tr><td><code>A</code></td><td>高級電路</td><td>4</td></tr>
+<tr><td><code>C</code></td><td>控制單元</td><td>1</td></tr>
+<tr><td><code>F</code></td><td>力場發射器</td><td>1</td></tr>
+<tr><td><code>L</code></td><td>磁石</td><td>1</td></tr>
+<tr><td><code>N</code></td><td>奈米塗層</td><td>2</td></tr>
+</tbody>
+</table>
+</div>
+<ul>
+<li>先用量子處理器做好場發射器與高級電路。</li>
+<li>中央放原版磁石。</li>
+<li>力場鍛造台可以做出場板，也是所有 TIER3 法杖和特殊工具的製作站。</li>
+</ul>
+<h3 id="化學反應器"><a class="header" href="#化學反應器">化學反應器</a></h3>
+<pre><code>SRS
+IGI
+SCS
+</code></pre>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>代號</th><th>材料</th><th>需要</th></tr>
+</thead>
+<tbody>
+<tr><td><code>C</code></td><td>銅錠</td><td>1</td></tr>
+<tr><td><code>G</code></td><td>強化玻璃</td><td>1</td></tr>
+<tr><td><code>I</code></td><td>鐵錠</td><td>2</td></tr>
+<tr><td><code>R</code></td><td>紅石粉</td><td>1</td></tr>
+<tr><td><code>S</code></td><td>鋼板</td><td>4</td></tr>
+</tbody>
+</table>
+</div>
+<ul>
+<li>先確保生質實驗室已經穩定產出生質樹脂。</li>
+<li>化學反應器可以把生質樹脂與煤粉轉成聚合樹脂、合成纖維、精密噴嘴。</li>
+</ul>
+<h3 id="合金熔煉爐"><a class="header" href="#合金熔煉爐">合金熔煉爐</a></h3>
+<pre><code>NIN
+IMI
+CIC
+</code></pre>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>代號</th><th>材料</th><th>需要</th></tr>
+</thead>
+<tbody>
+<tr><td><code>C</code></td><td>青銅錠</td><td>2</td></tr>
+<tr><td><code>I</code></td><td>鐵錠</td><td>4</td></tr>
+<tr><td><code>M</code></td><td>岩漿塊</td><td>1</td></tr>
+<tr><td><code>N</code></td><td>地獄磚</td><td>2</td></tr>
+</tbody>
+</table>
+</div>
+<ul>
+<li>先用淘金盤篩礫石取得錫粉，再搭配銅粉用熔爐取得青銅錠。</li>
+<li>準備地獄磚、鐵錠與岩漿塊。</li>
+<li>先在地上放鐵方塊，再把工作台放在上方形成進階工作台。</li>
+<li>用進階工作台照配方擺出合金熔煉爐。</li>
+<li>合金熔煉爐可以把鐵粉+煤粉做成鈦合金，也可熔煉青銅、焊錫、黃銅。</li>
+</ul>
+<h3 id="回收機"><a class="header" href="#回收機">回收機</a></h3>
+<pre><code>IRI
+HBH
+III
+</code></pre>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>代號</th><th>材料</th><th>需要</th></tr>
+</thead>
+<tbody>
+<tr><td><code>B</code></td><td>木桶</td><td>1</td></tr>
+<tr><td><code>H</code></td><td>漏斗</td><td>2</td></tr>
+<tr><td><code>I</code></td><td>鐵錠</td><td>5</td></tr>
+<tr><td><code>R</code></td><td>紅石粉</td><td>1</td></tr>
+</tbody>
+</table>
+</div>
+<ul>
+<li>先做木桶與漏斗。</li>
+<li>再挖鐵與紅石做出回收機。</li>
+<li>可把回收料與木屑轉成可再利用材料。</li>
+<li>中期塑膠線會很常用到它。</li>
+</ul>
+<h3 id="回聲連弩"><a class="header" href="#回聲連弩">回聲連弩</a></h3>
+<ul>
+<li>迷途星專屬遠程武器，0.8 秒內連射 5 發穿透箭矢。</li>
+<li>蔓藤充當弓弦，碎片做主體，遺物與核心做共鳴模組。</li>
+<li>和迷途刃搭配形成迷途星遠近雙線輸出。</li>
+</ul>
+<h3 id="回聲鎬"><a class="header" href="#回聲鎬">回聲鎬</a></h3>
+<ul>
+<li>特化迷宮採集鎬，提升深岩類節點效率。</li>
+<li>材料需求和武器接近，但不需要蔓藤。</li>
+<li>在迷途星做長期採集前建議先做這把。</li>
+</ul>
+<h3 id="基因切片台"><a class="header" href="#基因切片台">基因切片台</a></h3>
+<pre><code>SCS
+RBR
+SPS
+</code></pre>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>代號</th><th>材料</th><th>需要</th></tr>
+</thead>
+<tbody>
+<tr><td><code>B</code></td><td>釀造台</td><td>1</td></tr>
+<tr><td><code>C</code></td><td>電路板</td><td>1</td></tr>
+<tr><td><code>P</code></td><td>精密框架</td><td>1</td></tr>
+<tr><td><code>R</code></td><td>紅石粉</td><td>2</td></tr>
+<tr><td><code>S</code></td><td>鋼板</td><td>4</td></tr>
+</tbody>
+</table>
+</div>
+<ul>
+<li>基因切片台是農業線升級成真正工業生質線的轉折點。</li>
+<li>先補穩作物、生質樹脂、精密電路，再來碰基因樣板。</li>
+<li>如果這台常斷料，多半不是機器問題，而是前面的農線與精密線都還太弱。</li>
+</ul>
+<h3 id="壓縮機"><a class="header" href="#壓縮機">壓縮機</a></h3>
+<pre><code>NPN
+RPR
+ICI
+</code></pre>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>代號</th><th>材料</th><th>需要</th></tr>
+</thead>
+<tbody>
+<tr><td><code>C</code></td><td>銅錠</td><td>1</td></tr>
+<tr><td><code>I</code></td><td>鐵錠</td><td>2</td></tr>
+<tr><td><code>N</code></td><td>鐵方塊</td><td>2</td></tr>
+<tr><td><code>P</code></td><td>活塞</td><td>2</td></tr>
+<tr><td><code>R</code></td><td>紅石粉</td><td>2</td></tr>
+</tbody>
+</table>
+</div>
+<ul>
+<li>準備鐵方塊×2、活塞×2、鐵錠×2、紅石×2、銅錠×1。</li>
+<li>先在地上放鐵方塊，再把工作台放在上方形成進階工作台。</li>
+<li>用進階工作台照配方擺出壓縮機。</li>
+<li>壓縮機可以把鐵板壓成鋼板、壓實鐵胚、碳纖網等進階材料。</li>
+<li>這是製作鋼板的唯一方法，也是邁入中階科技的關鍵機器。</li>
+</ul>
+<h3 id="太陽能發電機"><a class="header" href="#太陽能發電機">太陽能發電機</a></h3>
+<pre><code>GGG
+CRC
+III
+</code></pre>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>代號</th><th>材料</th><th>需要</th></tr>
+</thead>
+<tbody>
+<tr><td><code>C</code></td><td>銅錠</td><td>2</td></tr>
+<tr><td><code>G</code></td><td>玻璃</td><td>3</td></tr>
+<tr><td><code>I</code></td><td>鐵錠</td><td>3</td></tr>
+<tr><td><code>R</code></td><td>紅石粉</td><td>1</td></tr>
+</tbody>
+</table>
+</div>
+<ul>
+<li>先用原版熔爐把沙子燒成玻璃。</li>
+<li>去挖銅礦與鐵礦，原版熔煉成錠。</li>
+<li>先在地上放鐵方塊，再把工作台放在上方形成進階工作台。</li>
+<li>用進階工作台照配方擺出太陽能發電機。</li>
+<li>合成後放在露天，有天空才會穩定發電。</li>
+</ul>
+<h3 id="太陽能陣列"><a class="header" href="#太陽能陣列">太陽能陣列</a></h3>
+<pre><code>GGG
+SDS
+ICI
+</code></pre>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>代號</th><th>材料</th><th>需要</th></tr>
+</thead>
+<tbody>
+<tr><td><code>C</code></td><td>電路板</td><td>1</td></tr>
+<tr><td><code>D</code></td><td>日光感測器</td><td>1</td></tr>
+<tr><td><code>G</code></td><td>玻璃</td><td>3</td></tr>
+<tr><td><code>I</code></td><td>鐵錠</td><td>2</td></tr>
+<tr><td><code>S</code></td><td>鋼板</td><td>2</td></tr>
+</tbody>
+</table>
+</div>
+<ul>
+<li>先做好電池庫穩定電力。</li>
+<li>太陽能陣列比單一太陽能發電機效率更高。</li>
+</ul>
+<h3 id="奇點壓縮台"><a class="header" href="#奇點壓縮台">奇點壓縮台</a></h3>
+<pre><code>QFQ
+CVC
+QRQ
+</code></pre>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>代號</th><th>材料</th><th>需要</th></tr>
+</thead>
+<tbody>
+<tr><td><code>C</code></td><td>控制單元</td><td>2</td></tr>
+<tr><td><code>F</code></td><td>力場板</td><td>1</td></tr>
+<tr><td><code>Q</code></td><td>量子晶片</td><td>4</td></tr>
+<tr><td><code>R</code></td><td>反應爐核心</td><td>1</td></tr>
+<tr><td><code>V</code></td><td>鐵砧</td><td>1</td></tr>
+</tbody>
+</table>
+</div>
+<ul>
+<li>奇點壓縮台是從高階材料邁向真正終局結構的分水嶺。</li>
+<li>在碰這台之前，請先確保虛空、星核、中子合金線都已經能持續供貨。</li>
+<li>奇點核心之後會一路牽動反物質、事件視界、錨定與巔峰鍛造。</li>
+</ul>
+<h3 id="安卓艙"><a class="header" href="#安卓艙">安卓艙</a></h3>
+<pre><code>SAS
+CMC
+SRS
+</code></pre>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>代號</th><th>材料</th><th>需要</th></tr>
+</thead>
+<tbody>
+<tr><td><code>A</code></td><td>安卓核心</td><td>1</td></tr>
+<tr><td><code>C</code></td><td>控制單元</td><td>2</td></tr>
+<tr><td><code>M</code></td><td>機械外殼</td><td>1</td></tr>
+<tr><td><code>R</code></td><td>紅石粉</td><td>1</td></tr>
+<tr><td><code>S</code></td><td>鋼板</td><td>4</td></tr>
+</tbody>
+</table>
+</div>
+<ul>
+<li>安卓艙是安卓自動化體系的起點，負責將安卓核心與外殼裝配成可部署的安卓元件。</li>
+<li>產出安卓外殼、安卓框架與安卓記憶矩陣，這些都是建造安卓工作站的關鍵前置。</li>
+<li>若想推安卓自動化農場或伐木，先把這台穩定運轉再說。</li>
+</ul>
+<h3 id="導能線纜"><a class="header" href="#導能線纜">導能線纜</a></h3>
+<pre><code>IRI
+ICI
+IRI
+</code></pre>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>代號</th><th>材料</th><th>需要</th></tr>
+</thead>
+<tbody>
+<tr><td><code>C</code></td><td>銅錠</td><td>1</td></tr>
+<tr><td><code>I</code></td><td>鐵錠</td><td>6</td></tr>
+<tr><td><code>R</code></td><td>紅石粉</td><td>2</td></tr>
+</tbody>
+</table>
+</div>
+<ul>
+<li>導能線纜適合補足節點之間的短距離接線。</li>
+<li>用鐵、銅、紅石就能先把基礎主幹搭起來。</li>
+</ul>
+<h3 id="岩漿發電機"><a class="header" href="#岩漿發電機">岩漿發電機</a></h3>
+<pre><code>IBI
+CMC
+IRI
+</code></pre>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>代號</th><th>材料</th><th>需要</th></tr>
+</thead>
+<tbody>
+<tr><td><code>B</code></td><td>鐵桶</td><td>1</td></tr>
+<tr><td><code>C</code></td><td>鵝卵石</td><td>2</td></tr>
+<tr><td><code>I</code></td><td>鐵錠</td><td>4</td></tr>
+<tr><td><code>M</code></td><td>岩漿塊</td><td>1</td></tr>
+<tr><td><code>R</code></td><td>紅石粉</td><td>1</td></tr>
+</tbody>
+</table>
+</div>
+<ul>
+<li>先做好煤炭發電機後再來做岩漿發電機。</li>
+<li>放好後吃岩漿桶發電，效率比燃煤高。</li>
+</ul>
+<h3 id="巔峰鍛成儀"><a class="header" href="#巔峰鍛成儀">巔峰鍛成儀</a></h3>
+<pre><code>QFQ
+RER
+QFQ
+</code></pre>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>代號</th><th>材料</th><th>需要</th></tr>
+</thead>
+<tbody>
+<tr><td><code>E</code></td><td>附魔台</td><td>1</td></tr>
+<tr><td><code>F</code></td><td>力場板</td><td>2</td></tr>
+<tr><td><code>Q</code></td><td>量子晶片</td><td>4</td></tr>
+<tr><td><code>R</code></td><td>反應爐核心</td><td>2</td></tr>
+</tbody>
+</table>
+</div>
+<ul>
+<li>巔峰鍛成儀不是單一機器，而是整條文明級科技線的總結點。</li>
+<li>在做它前，請先確認終局鏈、觀測資料線、巨構材料線都已成熟。</li>
+<li>終極矩陣、巔峰核心與終極檔案庫就是這套科技進程的最後展示物。</li>
+</ul>
+<h3 id="工業窯爐"><a class="header" href="#工業窯爐">工業窯爐</a></h3>
+<pre><code>BCB
+IKI
+IRI
+</code></pre>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>代號</th><th>材料</th><th>需要</th></tr>
+</thead>
+<tbody>
+<tr><td><code>B</code></td><td>紅磚頭</td><td>2</td></tr>
+<tr><td><code>C</code></td><td>黏土球</td><td>1</td></tr>
+<tr><td><code>I</code></td><td>鐵錠</td><td>4</td></tr>
+<tr><td><code>K</code></td><td>紅磚</td><td>1</td></tr>
+<tr><td><code>R</code></td><td>紅石粉</td><td>1</td></tr>
+</tbody>
+</table>
+</div>
+<ul>
+<li>這台是擴充加工線的第一個門檻，先把熔爐、拉線與鋼板穩定下來。</li>
+<li>先燒出陶瓷板，再進一步推成熱穩陶瓷，後面低溫與高熱設備都會反覆用到。</li>
+<li>若你還在缺熱線圈，表示前面金屬與線材節奏還沒站穩。</li>
+</ul>
+<h3 id="工業總線"><a class="header" href="#工業總線">工業總線</a></h3>
+<ul>
+<li>當你工廠跨了好幾區，就該升級成工業總線。</li>
+<li>這是高吞吐主幹，不是一般相鄰輸送帶。</li>
+</ul>
+<h3 id="工業離心機"><a class="header" href="#工業離心機">工業離心機</a></h3>
+<pre><code>APA
+SMS
+APA
+</code></pre>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>代號</th><th>材料</th><th>需要</th></tr>
+</thead>
+<tbody>
+<tr><td><code>A</code></td><td>高級電路</td><td>4</td></tr>
+<tr><td><code>M</code></td><td>鐵方塊</td><td>1</td></tr>
+<tr><td><code>P</code></td><td>鐵板</td><td>2</td></tr>
+<tr><td><code>S</code></td><td>機械零件</td><td>2</td></tr>
+</tbody>
+</table>
+</div>
+<ul>
+<li>工業離心機透過高速旋轉分離礦物成分。</li>
+<li>需要先解鎖工業水洗機，才能使用離心機。</li>
+<li>主要用於從純化鐵粉和鈾礦粉中提取稀有元素。</li>
+<li>可產出鉻粉、鈷粉、濃縮鈾等高階材料。</li>
+</ul>
+<h3 id="拉線機"><a class="header" href="#拉線機">拉線機</a></h3>
+<pre><code>ISI
+CPC
+IRI
+</code></pre>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>代號</th><th>材料</th><th>需要</th></tr>
+</thead>
+<tbody>
+<tr><td><code>C</code></td><td>銅錠</td><td>2</td></tr>
+<tr><td><code>I</code></td><td>鐵錠</td><td>4</td></tr>
+<tr><td><code>P</code></td><td>活塞</td><td>1</td></tr>
+<tr><td><code>R</code></td><td>紅石粉</td><td>1</td></tr>
+<tr><td><code>S</code></td><td>鋼板</td><td>1</td></tr>
+</tbody>
+</table>
+</div>
+<ul>
+<li>先用壓縮機做出鋼板。</li>
+<li>拉線機可以把銅錠拉成銅線、鋼板拉成鋼線。</li>
+<li>銅線與鋼線是中期科技的關鍵材料。</li>
+</ul>
+<h3 id="採礦鑽機"><a class="header" href="#採礦鑽機">採礦鑽機</a></h3>
+<ul>
+<li>先把鋼板、鈦合金、機械零件產線補齊。</li>
+<li>做出鑽頭與機架後，再合成採礦鑽機本體。</li>
+<li>鑽頭組與採礦機架只是合成材料，不是運轉時要塞進去的耗材。</li>
+<li>採礦鑽機改成高爐核心結構，現場搭好後再用右鍵啟動。</li>
+</ul>
+<h3 id="採礦鑽機三型"><a class="header" href="#採礦鑽機三型">採礦鑽機三型</a></h3>
+<ul>
+<li>三型是終局礦機，請先完成聚變與量子框架線。</li>
+<li>這台會直接掃完整個所在區塊到最底層，效率最高，也最吃電與倉儲。</li>
+</ul>
+<h3 id="採礦鑽機二型"><a class="header" href="#採礦鑽機二型">採礦鑽機二型</a></h3>
+<ul>
+<li>先把採礦鑽機跑穩，再補電容組與控制單元。</li>
+<li>二型結構跟一型一樣，但每輪耗電更高、抽礦次數更多。</li>
+</ul>
+<h3 id="星鋼鑄造廠"><a class="header" href="#星鋼鑄造廠">星鋼鑄造廠</a></h3>
+<pre><code>FRF
+QSQ
+FNF
+</code></pre>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>代號</th><th>材料</th><th>需要</th></tr>
+</thead>
+<tbody>
+<tr><td><code>F</code></td><td>力場板</td><td>4</td></tr>
+<tr><td><code>N</code></td><td>奈米塗層</td><td>1</td></tr>
+<tr><td><code>Q</code></td><td>量子晶片</td><td>2</td></tr>
+<tr><td><code>R</code></td><td>反應爐核心</td><td>1</td></tr>
+<tr><td><code>S</code></td><td>鍛造台</td><td>1</td></tr>
+</tbody>
+</table>
+</div>
+<ul>
+<li>星鋼鑄造廠是巨構階段的第一道正式入口。</li>
+<li>若星核、軌道、中子合金三線還不穩，先不要急著硬推巨構。</li>
+<li>星鋼材料會一路推向曲率、事件視界、錨定與巔峰核心。</li>
+</ul>
+<h3 id="時序引擎"><a class="header" href="#時序引擎">時序引擎</a></h3>
+<pre><code>QRQ
+FCF
+QNQ
+</code></pre>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>代號</th><th>材料</th><th>需要</th></tr>
+</thead>
+<tbody>
+<tr><td><code>C</code></td><td>時鐘</td><td>1</td></tr>
+<tr><td><code>F</code></td><td>力場板</td><td>2</td></tr>
+<tr><td><code>N</code></td><td>奈米塗層</td><td>1</td></tr>
+<tr><td><code>Q</code></td><td>量子晶片</td><td>4</td></tr>
+<tr><td><code>R</code></td><td>反應爐核心</td><td>1</td></tr>
+</tbody>
+</table>
+</div>
+<ul>
+<li>時序引擎是終局多分支中最常被低估的一台，因為它本身就會卡住很多後續線。</li>
+<li>先完成軌道列印與虛空穩定化，再把時序線束與時序核心推起來。</li>
+<li>時序線成熟後，熵穩定艙、連續體車床與曲率支線才會順。</li>
+</ul>
+<h3 id="晶體培育艙"><a class="header" href="#晶體培育艙">晶體培育艙</a></h3>
+<pre><code>GCG
+SAS
+GRG
+</code></pre>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>代號</th><th>材料</th><th>需要</th></tr>
+</thead>
+<tbody>
+<tr><td><code>A</code></td><td>紫水晶方塊</td><td>1</td></tr>
+<tr><td><code>C</code></td><td>冷卻電池</td><td>1</td></tr>
+<tr><td><code>G</code></td><td>強化玻璃</td><td>4</td></tr>
+<tr><td><code>R</code></td><td>電路板</td><td>1</td></tr>
+<tr><td><code>S</code></td><td>鋼板</td><td>2</td></tr>
+</tbody>
+</table>
+</div>
+<ul>
+<li>先做好冷卻混合器確保有冷卻混合液。</li>
+<li>中央放原版紫水晶方塊。</li>
+<li>晶體培育艙可以從晶種培育出培育晶體。</li>
+</ul>
+<h3 id="洗礦機"><a class="header" href="#洗礦機">洗礦機</a></h3>
+<pre><code>CIC
+BHB
+CRC
+</code></pre>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>代號</th><th>材料</th><th>需要</th></tr>
+</thead>
+<tbody>
+<tr><td><code>B</code></td><td>鐵桶</td><td>2</td></tr>
+<tr><td><code>C</code></td><td>鵝卵石</td><td>4</td></tr>
+<tr><td><code>H</code></td><td>漏斗</td><td>1</td></tr>
+<tr><td><code>I</code></td><td>鐵錠</td><td>1</td></tr>
+<tr><td><code>R</code></td><td>紅石粉</td><td>1</td></tr>
+</tbody>
+</table>
+</div>
+<ul>
+<li>先做好粉碎機後再來做洗礦機。</li>
+<li>洗礦機把鐵粉洗成礦漿，是進入中階加工的關鍵。</li>
+</ul>
+<h3 id="淘金盤"><a class="header" href="#淘金盤">淘金盤</a></h3>
+<pre><code>___
+IBI
+_I_
+</code></pre>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>代號</th><th>材料</th><th>需要</th></tr>
+</thead>
+<tbody>
+<tr><td><code>B</code></td><td>碗</td><td>1</td></tr>
+<tr><td><code>I</code></td><td>鐵錠</td><td>3</td></tr>
+</tbody>
+</table>
+</div>
+<ul>
+<li>準備 4 個鐵錠與 1 個碗。</li>
+<li>先在地上放鐵方塊，再把工作台放在上方形成進階工作台。</li>
+<li>用進階工作台照配方擺出淘金盤。</li>
+<li>手持淘金盤對準礫石或靈魂沙右鍵即可篩礦。</li>
+<li>礫石可篩出鐵粉、銅粉、錫粉、鋅粉。</li>
+<li>靈魂沙可篩出鉛粉、金粒、石英。</li>
+<li>前期收集合金材料的最重要工具。</li>
+</ul>
+<h3 id="淨化器"><a class="header" href="#淨化器">淨化器</a></h3>
+<pre><code>GBG
+CKC
+IRI
+</code></pre>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>代號</th><th>材料</th><th>需要</th></tr>
+</thead>
+<tbody>
+<tr><td><code>B</code></td><td>鐵桶</td><td>1</td></tr>
+<tr><td><code>C</code></td><td>銅錠</td><td>2</td></tr>
+<tr><td><code>G</code></td><td>玻璃</td><td>2</td></tr>
+<tr><td><code>I</code></td><td>鐵錠</td><td>2</td></tr>
+<tr><td><code>K</code></td><td>鍋釜</td><td>1</td></tr>
+<tr><td><code>R</code></td><td>紅石粉</td><td>1</td></tr>
+</tbody>
+</table>
+</div>
+<ul>
+<li>先準備水桶、玻璃、鍋釜、銅錠、鐵錠與紅石。</li>
+<li>先在地上放鐵方塊，再把工作台放在上方形成進階工作台。</li>
+<li>用進階工作台照配方擺出淨化器。</li>
+<li>放下後右鍵開啟介面，將礦漿淨化為高純度碎片與副產物。</li>
+</ul>
+<h3 id="溫室培育艙"><a class="header" href="#溫室培育艙">溫室培育艙</a></h3>
+<pre><code>GGG
+LSL
+III
+</code></pre>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>代號</th><th>材料</th><th>需要</th></tr>
+</thead>
+<tbody>
+<tr><td><code>G</code></td><td>玻璃</td><td>3</td></tr>
+<tr><td><code>I</code></td><td>鐵錠</td><td>3</td></tr>
+<tr><td><code>L</code></td><td>紅樹林木樹葉</td><td>2</td></tr>
+<tr><td><code>S</code></td><td>小麥種子</td><td>1</td></tr>
+</tbody>
+</table>
+</div>
+<ul>
+<li>先完成自動農場，確保你有種子與基礎糧線。</li>
+<li>用玻璃、樹葉、鐵錠做出溫室培育艙。</li>
+<li>放好後就能把農業材料往生長燈、水凝膠推進。</li>
+<li>之後可再做香辛莓種子、茶葉苗種與水培鏟。</li>
+</ul>
+<h3 id="無人機艙"><a class="header" href="#無人機艙">無人機艙</a></h3>
+<pre><code>ACA
+NSN
+AMA
+</code></pre>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>代號</th><th>材料</th><th>需要</th></tr>
+</thead>
+<tbody>
+<tr><td><code>A</code></td><td>高級電路</td><td>4</td></tr>
+<tr><td><code>C</code></td><td>電路板</td><td>1</td></tr>
+<tr><td><code>M</code></td><td>伺服馬達</td><td>1</td></tr>
+<tr><td><code>N</code></td><td>奈米塗層</td><td>2</td></tr>
+<tr><td><code>S</code></td><td>界伏盒</td><td>1</td></tr>
+</tbody>
+</table>
+</div>
+<ul>
+<li>先用進階製造機做好奈米塗層。</li>
+<li>中央放原版界伏盒。</li>
+<li>無人機艙可以做出無人機外殼與框架。</li>
+</ul>
+<h3 id="煤炭發電機"><a class="header" href="#煤炭發電機">煤炭發電機</a></h3>
+<pre><code>III
+CFC
+IRI
+</code></pre>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>代號</th><th>材料</th><th>需要</th></tr>
+</thead>
+<tbody>
+<tr><td><code>C</code></td><td>煤炭</td><td>2</td></tr>
+<tr><td><code>F</code></td><td>熔爐</td><td>1</td></tr>
+<tr><td><code>I</code></td><td>鐵錠</td><td>5</td></tr>
+<tr><td><code>R</code></td><td>紅石粉</td><td>1</td></tr>
+</tbody>
+</table>
+</div>
+<ul>
+<li>先用圓石合成原版熔爐。</li>
+<li>挖煤、鐵礦，鐵礦熔成鐵錠。</li>
+<li>先在地上放鐵方塊，再把工作台放在上方形成進階工作台。</li>
+<li>用進階工作台照配方擺出燃煤發電機。</li>
+<li>放入煤或煤粉後就能供電。</li>
+</ul>
+<h3 id="熔爐"><a class="header" href="#熔爐">熔爐</a></h3>
+<pre><code>III
+RGR
+CCC
+</code></pre>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>代號</th><th>材料</th><th>需要</th></tr>
+</thead>
+<tbody>
+<tr><td><code>C</code></td><td>鵝卵石</td><td>3</td></tr>
+<tr><td><code>G</code></td><td>玻璃</td><td>1</td></tr>
+<tr><td><code>I</code></td><td>鐵錠</td><td>3</td></tr>
+<tr><td><code>R</code></td><td>紅石粉</td><td>2</td></tr>
+</tbody>
+</table>
+</div>
+<ul>
+<li>這裡做的是科技用熔爐，不是原版熔爐本體。</li>
+<li>先用原版熔爐把沙子燒成玻璃，並準備鐵錠與紅石。</li>
+<li>先在地上放鐵方塊，再把工作台放在上方形成進階工作台。</li>
+<li>用進階工作台照配方擺出科技熔爐。</li>
+<li>做好後就能把鐵粉、銅粉加工回金屬錠。</li>
+</ul>
+<h3 id="物流導管"><a class="header" href="#物流導管">物流導管</a></h3>
+<pre><code>GGG
+IRI
+GGG
+</code></pre>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>代號</th><th>材料</th><th>需要</th></tr>
+</thead>
+<tbody>
+<tr><td><code>G</code></td><td>玻璃片</td><td>6</td></tr>
+<tr><td><code>I</code></td><td>鐵錠</td><td>2</td></tr>
+<tr><td><code>R</code></td><td>紅石粉</td><td>1</td></tr>
+</tbody>
+</table>
+</div>
+<ul>
+<li>當物流不想只靠相鄰六面時，就補物流導管。</li>
+<li>玻璃板、鐵、紅石即可先做出基本物流導管。</li>
+</ul>
+<h3 id="物流節點"><a class="header" href="#物流節點">物流節點</a></h3>
+<pre><code>IRI
+HTH
+IRI
+</code></pre>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>代號</th><th>材料</th><th>需要</th></tr>
+</thead>
+<tbody>
+<tr><td><code>H</code></td><td>漏斗</td><td>2</td></tr>
+<tr><td><code>I</code></td><td>鐵錠</td><td>4</td></tr>
+<tr><td><code>R</code></td><td>紅石粉</td><td>2</td></tr>
+<tr><td><code>T</code></td><td>標靶</td><td>1</td></tr>
+</tbody>
+</table>
+</div>
+<ul>
+<li>有了多條產線後，就該做物流節點。</li>
+<li>這台幫你把遠距物流幹線拉開，不必全部貼在一起。</li>
+</ul>
+<h3 id="物質編譯器"><a class="header" href="#物質編譯器">物質編譯器</a></h3>
+<pre><code>QGQ
+NMN
+QCQ
+</code></pre>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>代號</th><th>材料</th><th>需要</th></tr>
+</thead>
+<tbody>
+<tr><td><code>C</code></td><td>控制單元</td><td>1</td></tr>
+<tr><td><code>G</code></td><td>培育晶體</td><td>1</td></tr>
+<tr><td><code>M</code></td><td>伏聆觸媒</td><td>1</td></tr>
+<tr><td><code>N</code></td><td>奈米塗層</td><td>2</td></tr>
+<tr><td><code>Q</code></td><td>量子晶片</td><td>4</td></tr>
+</tbody>
+</table>
+</div>
+<ul>
+<li>先用晶體培育艙做好培育晶體，量子處理器做好量子晶片。</li>
+<li>中央放原版伏聯催化器。</li>
+<li>物質編譯器可以做出物質團與奇點碎片，是終局科技的最後製造站。</li>
+</ul>
+<h3 id="生物收集器"><a class="header" href="#生物收集器">生物收集器</a></h3>
+<ul>
+<li>先完成控制器與高級裝配線。</li>
+<li>這台適合刷怪塔或自動畜牧場後段回收。</li>
+</ul>
+<h3 id="生質反應爐"><a class="header" href="#生質反應爐">生質反應爐</a></h3>
+<pre><code>SCS
+IPI
+SRS
+</code></pre>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>代號</th><th>材料</th><th>需要</th></tr>
+</thead>
+<tbody>
+<tr><td><code>C</code></td><td>銅錠</td><td>1</td></tr>
+<tr><td><code>I</code></td><td>鐵錠</td><td>2</td></tr>
+<tr><td><code>P</code></td><td>堆肥箱</td><td>1</td></tr>
+<tr><td><code>R</code></td><td>紅石粉</td><td>1</td></tr>
+<tr><td><code>S</code></td><td>鋼板</td><td>4</td></tr>
+</tbody>
+</table>
+</div>
+<ul>
+<li>用壓縮機先做好鋼板，中央放原版堆肥桶。</li>
+<li>生質反應爐可以把作物轉成電力。</li>
+</ul>
+<h3 id="生質合成槽"><a class="header" href="#生質合成槽">生質合成槽</a></h3>
+<pre><code>GBG
+ACA
+GRG
+</code></pre>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>代號</th><th>材料</th><th>需要</th></tr>
+</thead>
+<tbody>
+<tr><td><code>A</code></td><td>高級電路</td><td>2</td></tr>
+<tr><td><code>B</code></td><td>生質纖維</td><td>1</td></tr>
+<tr><td><code>C</code></td><td>鍋釜</td><td>1</td></tr>
+<tr><td><code>G</code></td><td>強化玻璃</td><td>4</td></tr>
+<tr><td><code>R</code></td><td>冷卻電池</td><td>1</td></tr>
+</tbody>
+</table>
+</div>
+<ul>
+<li>先做好基因切片台確保有基因樣板與生質催化劑。</li>
+<li>中央放原版煉藥鍋。</li>
+<li>生質合成槽可以量產合成肉、蛋白質口糧與各種高級料理。</li>
+</ul>
+<h3 id="生質實驗室"><a class="header" href="#生質實驗室">生質實驗室</a></h3>
+<pre><code>GSG
+IBI
+SRS
+</code></pre>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>代號</th><th>材料</th><th>需要</th></tr>
+</thead>
+<tbody>
+<tr><td><code>B</code></td><td>釀造台</td><td>1</td></tr>
+<tr><td><code>G</code></td><td>玻璃</td><td>2</td></tr>
+<tr><td><code>I</code></td><td>鐵錠</td><td>2</td></tr>
+<tr><td><code>R</code></td><td>紅石粉</td><td>1</td></tr>
+<tr><td><code>S</code></td><td>鋼板</td><td>3</td></tr>
+</tbody>
+</table>
+</div>
+<ul>
+<li>先把自動農場跑穩產出作物，再來做生質實驗室。</li>
+<li>中央放原版釀造台。</li>
+<li>可以把作物與木屑轉成生質樹脂與生質纖維。</li>
+</ul>
+<h3 id="異星精煉槽"><a class="header" href="#異星精煉槽">異星精煉槽</a></h3>
+<pre><code>QCQ
+ESE
+QCQ
+</code></pre>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>代號</th><th>材料</th><th>需要</th></tr>
+</thead>
+<tbody>
+<tr><td><code>C</code></td><td>控制單元</td><td>2</td></tr>
+<tr><td><code>E</code></td><td>蝕刻電路</td><td>2</td></tr>
+<tr><td><code>Q</code></td><td>量子晶片</td><td>4</td></tr>
+<tr><td><code>S</code></td><td>鍛造台</td><td>1</td></tr>
+</tbody>
+</table>
+</div>
+<ul>
+<li>異星精煉機把各星球的特殊素材轉成可量產的模組材料，是探索線工業化的關鍵。</li>
+<li>輻射網層、耐寒內襯、耐壓膜層都要先經過這台處理，不能只靠手工拼裝。</li>
+<li>當你開始同時經營多顆星球時，這台會變成穩定供料的瓶頸點。</li>
+</ul>
+<h3 id="真空吸入口"><a class="header" href="#真空吸入口">真空吸入口</a></h3>
+<ul>
+<li>先做好真空核心，再進製造機做本體。</li>
+<li>適合把掉落物集中吸回產線，減少地面卡料。</li>
+</ul>
+<h3 id="研究台"><a class="header" href="#研究台">研究台</a></h3>
+<pre><code>BLB
+CRC
+III
+</code></pre>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>代號</th><th>材料</th><th>需要</th></tr>
+</thead>
+<tbody>
+<tr><td><code>B</code></td><td>書</td><td>2</td></tr>
+<tr><td><code>C</code></td><td>銅錠</td><td>2</td></tr>
+<tr><td><code>I</code></td><td>鐵錠</td><td>3</td></tr>
+<tr><td><code>L</code></td><td>講台</td><td>1</td></tr>
+<tr><td><code>R</code></td><td>紅石粉</td><td>1</td></tr>
+</tbody>
+</table>
+</div>
+<ul>
+<li>先準備講台、書、銅錠、鐵錠與紅石。</li>
+<li>先在地上放鐵方塊，再把工作台放在上方形成進階工作台。</li>
+<li>用進階工作台照配方擺出研究台。</li>
+<li>放下後右鍵即可進入真正的研究台介面。</li>
+<li>前期先研究機器本體，中後期再用它點亮更多科技。</li>
+</ul>
+<h3 id="科技扳手"><a class="header" href="#科技扳手">科技扳手</a></h3>
+<pre><code>_ P
+_CP
+I__
+</code></pre>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>代號</th><th>材料</th><th>需要</th></tr>
+</thead>
+<tbody>
+<tr><td><code>C</code></td><td>銅錠</td><td>1</td></tr>
+<tr><td><code>I</code></td><td>鐵錠</td><td>1</td></tr>
+<tr><td><code>P</code></td><td>鐵板</td><td>2</td></tr>
+</tbody>
+</table>
+</div>
+<ul>
+<li>準備 1 個鐵錠、1 個銅錠與 1 個鐵板。</li>
+<li>先在地上放鐵方塊，再把工作台放在上方形成進階工作台。</li>
+<li>用進階工作台照配方擺出科技扳手。</li>
+<li>左鍵對準機器：開關機省電。</li>
+<li>蹲下+右鍵對準機器：瞬間拆除並保留儲存能源。</li>
+<li>不用的機器記得關機，省電很重要。</li>
+</ul>
+<h3 id="等離子精煉爐"><a class="header" href="#等離子精煉爐">等離子精煉爐</a></h3>
+<pre><code>TRT
+QBQ
+TFT
+</code></pre>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>代號</th><th>材料</th><th>需要</th></tr>
+</thead>
+<tbody>
+<tr><td><code>B</code></td><td>高爐</td><td>1</td></tr>
+<tr><td><code>F</code></td><td>力場板</td><td>1</td></tr>
+<tr><td><code>Q</code></td><td>量子晶片</td><td>2</td></tr>
+<tr><td><code>R</code></td><td>反應爐核心</td><td>1</td></tr>
+<tr><td><code>T</code></td><td>鈦合金</td><td>4</td></tr>
+</tbody>
+</table>
+</div>
+<ul>
+<li>電漿精煉爐不是單獨分支，而是把聚變成果往終局材料再壓一層。</li>
+<li>先確保聚變核心、離心機、精煉塔與合金線都能穩定量產。</li>
+<li>反應爐格架會在時序與巨構支線反覆出現，越早量產越輕鬆。</li>
+</ul>
+<h3 id="粉碎機"><a class="header" href="#粉碎機">粉碎機</a></h3>
+<pre><code>CCC
+IRI
+NPN
+</code></pre>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>代號</th><th>材料</th><th>需要</th></tr>
+</thead>
+<tbody>
+<tr><td><code>C</code></td><td>鵝卵石</td><td>3</td></tr>
+<tr><td><code>I</code></td><td>鐵錠</td><td>2</td></tr>
+<tr><td><code>N</code></td><td>鐵方塊</td><td>2</td></tr>
+<tr><td><code>P</code></td><td>活塞</td><td>1</td></tr>
+<tr><td><code>R</code></td><td>紅石粉</td><td>1</td></tr>
+</tbody>
+</table>
+</div>
+<ul>
+<li>先挖圓石、鐵礦、紅石。</li>
+<li>先用原版方式做出活塞。</li>
+<li>先在地上放鐵方塊，再把工作台放在上方形成進階工作台。</li>
+<li>用進階工作台照配方合成粉碎機。</li>
+<li>第一個要丟進去的通常是鐵礦、銅礦、煤、石英。</li>
+</ul>
+<h3 id="精煉塔"><a class="header" href="#精煉塔">精煉塔</a></h3>
+<pre><code>ICI
+SBS
+IRI
+</code></pre>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>代號</th><th>材料</th><th>需要</th></tr>
+</thead>
+<tbody>
+<tr><td><code>B</code></td><td>煙燻爐</td><td>1</td></tr>
+<tr><td><code>C</code></td><td>銅錠</td><td>1</td></tr>
+<tr><td><code>I</code></td><td>鐵錠</td><td>4</td></tr>
+<tr><td><code>R</code></td><td>紅石粉</td><td>1</td></tr>
+<tr><td><code>S</code></td><td>鋼板</td><td>2</td></tr>
+</tbody>
+</table>
+</div>
+<ul>
+<li>先做好生質實驗室與洗礦機。</li>
+<li>中央放原版燻製爐。</li>
+<li>精煉塔可以把生質樹脂與礦漿精煉成精煉油。</li>
+</ul>
+<h3 id="絕緣壓製台"><a class="header" href="#絕緣壓製台">絕緣壓製台</a></h3>
+<pre><code>SCS
+ILI
+SPS
+</code></pre>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>代號</th><th>材料</th><th>需要</th></tr>
+</thead>
+<tbody>
+<tr><td><code>C</code></td><td>銅錠</td><td>1</td></tr>
+<tr><td><code>I</code></td><td>鐵錠</td><td>2</td></tr>
+<tr><td><code>L</code></td><td>紡織機</td><td>1</td></tr>
+<tr><td><code>P</code></td><td>塑膠</td><td>1</td></tr>
+<tr><td><code>S</code></td><td>鋼板</td><td>4</td></tr>
+</tbody>
+</table>
+</div>
+<ul>
+<li>先做好拉線機確保有銅線與鋼線。</li>
+<li>中央放原版織布機。</li>
+<li>絕緣壓製台可以做出絕緣線材、感測陣列與伺服模組束。</li>
+</ul>
+<h3 id="聚合壓床"><a class="header" href="#聚合壓床">聚合壓床</a></h3>
+<pre><code>SPS
+IHI
+SRS
+</code></pre>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>代號</th><th>材料</th><th>需要</th></tr>
+</thead>
+<tbody>
+<tr><td><code>H</code></td><td>蜂蜜塊</td><td>1</td></tr>
+<tr><td><code>I</code></td><td>鐵錠</td><td>2</td></tr>
+<tr><td><code>P</code></td><td>活塞</td><td>1</td></tr>
+<tr><td><code>R</code></td><td>紅石粉</td><td>1</td></tr>
+<tr><td><code>S</code></td><td>鋼板</td><td>4</td></tr>
+</tbody>
+</table>
+</div>
+<ul>
+<li>先把生質實驗室跑穩，確保有生質樹脂。</li>
+<li>中央放原版蜂蜜方塊。</li>
+<li>聚合壓床可以做出處理塑膠等聚合物。</li>
+</ul>
+<h3 id="聚變反應爐"><a class="header" href="#聚變反應爐">聚變反應爐</a></h3>
+<pre><code>QFQ
+RMR
+QFQ
+</code></pre>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>代號</th><th>材料</th><th>需要</th></tr>
+</thead>
+<tbody>
+<tr><td><code>F</code></td><td>力場板</td><td>2</td></tr>
+<tr><td><code>M</code></td><td>哭泣的黑曜石</td><td>1</td></tr>
+<tr><td><code>Q</code></td><td>量子晶片</td><td>4</td></tr>
+<tr><td><code>R</code></td><td>反應爐核心</td><td>2</td></tr>
+</tbody>
+</table>
+</div>
+<ul>
+<li>先用量子處理器做好量子晶片。</li>
+<li>用場鍛爐做出場板。</li>
+<li>用進階製造機做出反應爐核心。</li>
+<li>先在地上放鐵方塊，再把工作台放在上方形成進階工作台。</li>
+<li>用進階工作台照配方擺出聚變反應爐。</li>
+<li>聚變反應爐是終局科技的核心入口。</li>
+</ul>
+<h3 id="能源節點"><a class="header" href="#能源節點">能源節點</a></h3>
+<pre><code>CRC
+RLR
+CRC
+</code></pre>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>代號</th><th>材料</th><th>需要</th></tr>
+</thead>
+<tbody>
+<tr><td><code>C</code></td><td>銅錠</td><td>4</td></tr>
+<tr><td><code>L</code></td><td>避雷針</td><td>1</td></tr>
+<tr><td><code>R</code></td><td>紅石粉</td><td>4</td></tr>
+</tbody>
+</table>
+</div>
+<ul>
+<li>當發電區與工廠不在一起時，就做能源節點。</li>
+<li>它是遠距離電力骨幹，不是單台發電機。</li>
+<li>建議至少成對設置，方便跨區接線。</li>
+</ul>
+<h3 id="自動農場"><a class="header" href="#自動農場">自動農場</a></h3>
+<pre><code>III
+HWH
+IRI
+</code></pre>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>代號</th><th>材料</th><th>需要</th></tr>
+</thead>
+<tbody>
+<tr><td><code>H</code></td><td>乾草捆</td><td>2</td></tr>
+<tr><td><code>I</code></td><td>鐵錠</td><td>5</td></tr>
+<tr><td><code>R</code></td><td>紅石粉</td><td>1</td></tr>
+<tr><td><code>W</code></td><td>小麥種子</td><td>1</td></tr>
+</tbody>
+</table>
+</div>
+<ul>
+<li>先打草取得小麥種子。</li>
+<li>再用小麥做出乾草捆。</li>
+<li>先在地上放鐵方塊，再把工作台放在上方形成進階工作台。</li>
+<li>用進階工作台照配方合成自動農場。</li>
+<li>放入種子後可穩定產出作物材料，也能進一步做出大豆種子。</li>
+</ul>
+<h3 id="自動釣台"><a class="header" href="#自動釣台">自動釣台</a></h3>
+<ul>
+<li>先從生質實驗室做出誘餌模組，再做水域支線。</li>
+<li>這台能把水域穩定變成被動漁獲來源。</li>
+</ul>
+<h3 id="虛空信標"><a class="header" href="#虛空信標">虛空信標</a></h3>
+<pre><code>FNF
+QBQ
+RCR
+</code></pre>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>代號</th><th>材料</th><th>需要</th></tr>
+</thead>
+<tbody>
+<tr><td><code>B</code></td><td>烽火台</td><td>1</td></tr>
+<tr><td><code>C</code></td><td>控制單元</td><td>1</td></tr>
+<tr><td><code>F</code></td><td>聚變核心</td><td>2</td></tr>
+<tr><td><code>N</code></td><td>奈米塗層</td><td>1</td></tr>
+<tr><td><code>Q</code></td><td>量子晶片</td><td>2</td></tr>
+<tr><td><code>R</code></td><td>反應爐核心</td><td>2</td></tr>
+</tbody>
+</table>
+</div>
+<ul>
+<li>虛空信標是虛空科技線的核心節點，能產出虛空水晶與虛空信標核心。</li>
+<li>在推這台之前，先確保虛空抽取器的碎片產量已穩定。</li>
+<li>虛空信標核心是高階裝備與巨構鏈的關鍵中間材料。</li>
+</ul>
+<h3 id="虛空抽取器"><a class="header" href="#虛空抽取器">虛空抽取器</a></h3>
+<pre><code>NCN
+QMQ
+NFN
+</code></pre>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>代號</th><th>材料</th><th>需要</th></tr>
+</thead>
+<tbody>
+<tr><td><code>C</code></td><td>控制單元</td><td>1</td></tr>
+<tr><td><code>F</code></td><td>力場板</td><td>1</td></tr>
+<tr><td><code>M</code></td><td>哭泣的黑曜石</td><td>1</td></tr>
+<tr><td><code>N</code></td><td>奈米塗層</td><td>4</td></tr>
+<tr><td><code>Q</code></td><td>量子晶片</td><td>2</td></tr>
+</tbody>
+</table>
+</div>
+<ul>
+<li>這是終局物質鏈真正的起點，代表你從量子工業跨進虛空科技。</li>
+<li>先把量子流體、晶體培育、能量骨幹做好，不然虛空線只會不停缺料。</li>
+<li>暗物質粉與虛空碎片會分別流向奇點、反物質與巨構前置。</li>
+</ul>
+<h3 id="行星採集機"><a class="header" href="#行星採集機">行星採集機</a></h3>
+<pre><code>QAQ
+COC
+QAQ
+</code></pre>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>代號</th><th>材料</th><th>需要</th></tr>
+</thead>
+<tbody>
+<tr><td><code>A</code></td><td>高級電路</td><td>2</td></tr>
+<tr><td><code>C</code></td><td>控制單元</td><td>2</td></tr>
+<tr><td><code>O</code></td><td>偵測器</td><td>1</td></tr>
+<tr><td><code>Q</code></td><td>量子晶片</td><td>4</td></tr>
+</tbody>
+</table>
+</div>
+<ul>
+<li>行星採集機專門處理星球表面的特殊樣本，適合把 Aurelia 到 Tempest 的採收轉成半自動外勤據點。</li>
+<li>它不會解析遺跡核心，只會收可重複清理的地表資源，因此仍需要你親自處理遺跡互動機關。</li>
+<li>若採集效率太差，通常不是機器問題，而是星球前哨的供電與物流還沒跟上。</li>
+</ul>
+<h3 id="行星星門"><a class="header" href="#行星星門">行星星門</a></h3>
+<ul>
+<li>行星星門是正式版的星球入口，目標不再只靠指令，而是透過基地中的科技站台啟動。</li>
+<li>站到星門上右鍵即可啟動躍遷動畫，Shift + 右鍵會切換目標星球；平時維持 12 EU/刻吸能，每次躍遷會再吃掉 1200 EU。</li>
+</ul>
+<h3 id="行星測繪信標"><a class="header" href="#行星測繪信標">行星測繪信標</a></h3>
+<pre><code>QEQ
+ABA
+QCQ
+</code></pre>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>代號</th><th>材料</th><th>需要</th></tr>
+</thead>
+<tbody>
+<tr><td><code>A</code></td><td>高級電路</td><td>2</td></tr>
+<tr><td><code>B</code></td><td>烽火台</td><td>1</td></tr>
+<tr><td><code>C</code></td><td>控制單元</td><td>1</td></tr>
+<tr><td><code>E</code></td><td>蝕刻電路</td><td>1</td></tr>
+<tr><td><code>Q</code></td><td>量子晶片</td><td>4</td></tr>
+</tbody>
+</table>
+</div>
+<ul>
+<li>星球線真正起點不是直接跳上去挖，而是先用觀測站做出掃描晶片。</li>
+<li>勘測信標會把星球探索轉成穩定資料流，讓後面的遺跡分析與模組化防護裝有基礎可做。</li>
+<li>若資料產量太慢，通常表示你的觀測站、能源或前段光學線還不夠穩。</li>
+</ul>
+<h3 id="行星鍛造台"><a class="header" href="#行星鍛造台">行星鍛造台</a></h3>
+<pre><code>QFQ
+CNC
+QFQ
+</code></pre>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>代號</th><th>材料</th><th>需要</th></tr>
+</thead>
+<tbody>
+<tr><td><code>C</code></td><td>控制單元</td><td>2</td></tr>
+<tr><td><code>F</code></td><td>力場板</td><td>2</td></tr>
+<tr><td><code>N</code></td><td>獄髓方塊</td><td>1</td></tr>
+<tr><td><code>Q</code></td><td>量子晶片</td><td>4</td></tr>
+</tbody>
+</table>
+</div>
+<ul>
+<li>行星鍛造台負責把通用骨架與專用模組組成真正可用的探索套裝。</li>
+<li>抗輻射、防寒、耐壓三種裝備都共用相同骨架，因此這台會成為整條星球裝備鏈的總裝站。</li>
+<li>當你拿到 Helion 與 Tempest 的遺跡碎片後，也會在這裡組出更高階的前線全域防護套裝。</li>
+<li>建議先推一套抗輻射裝，再依探索目標擴充寒帶、真空與前線版本。</li>
+</ul>
+<h3 id="製造機"><a class="header" href="#製造機">製造機</a></h3>
+<pre><code>SCS
+GBG
+IPI
+</code></pre>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>代號</th><th>材料</th><th>需要</th></tr>
+</thead>
+<tbody>
+<tr><td><code>B</code></td><td>合成器</td><td>1</td></tr>
+<tr><td><code>C</code></td><td>銅錠</td><td>1</td></tr>
+<tr><td><code>G</code></td><td>青銅錠</td><td>2</td></tr>
+<tr><td><code>I</code></td><td>鐵錠</td><td>2</td></tr>
+<tr><td><code>P</code></td><td>活塞</td><td>1</td></tr>
+<tr><td><code>S</code></td><td>鋼板</td><td>2</td></tr>
+</tbody>
+</table>
+</div>
+<ul>
+<li>先用壓縮機把鐵板壓成鋼板。</li>
+<li>準備原版合成器（不是工作台，需要鐵錠+紅石+工作台+投擲器合成）、活塞、銅錠與鐵錠。</li>
+<li>用合金熔煉爐做出青銅錠（銅粉+錘粉）。</li>
+<li>先在地上放鐵方塊，再把工作台放在上方形成進階工作台。</li>
+<li>用進階工作台照配方擺出製造機，中央放合成器。</li>
+<li>製造機能做出電路板、邏輯閘、機械零件等中階材料。</li>
+</ul>
+<h3 id="資料封存庫"><a class="header" href="#資料封存庫">資料封存庫</a></h3>
+<pre><code>QDQ
+NEN
+QGQ
+</code></pre>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>代號</th><th>材料</th><th>需要</th></tr>
+</thead>
+<tbody>
+<tr><td><code>D</code></td><td>資料核心</td><td>1</td></tr>
+<tr><td><code>E</code></td><td>浮雕書櫃</td><td>1</td></tr>
+<tr><td><code>G</code></td><td>重力軸承</td><td>1</td></tr>
+<tr><td><code>N</code></td><td>奈米塗層</td><td>2</td></tr>
+<tr><td><code>Q</code></td><td>量子晶片</td><td>4</td></tr>
+</tbody>
+</table>
+</div>
+<ul>
+<li>資料封存庫承接觀測站的數據核心與重力軸承，將它們壓縮封存為檔案板。</li>
+<li>檔案板是終局科技線（巨構系列）的核心前置材料，早點把產量穩下來。</li>
+<li>若進度卡在資料封存庫，通常表示觀測站的數據核心供應不足，先回頭補強。</li>
+</ul>
+<h3 id="軌道觀測台"><a class="header" href="#軌道觀測台">軌道觀測台</a></h3>
+<pre><code>QEQ
+CLC
+QNQ
+</code></pre>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>代號</th><th>材料</th><th>需要</th></tr>
+</thead>
+<tbody>
+<tr><td><code>C</code></td><td>控制單元</td><td>2</td></tr>
+<tr><td><code>E</code></td><td>蝕刻電路</td><td>1</td></tr>
+<tr><td><code>L</code></td><td>講台</td><td>1</td></tr>
+<tr><td><code>N</code></td><td>奈米塗層</td><td>1</td></tr>
+<tr><td><code>Q</code></td><td>量子晶片</td><td>4</td></tr>
+</tbody>
+</table>
+</div>
+<ul>
+<li>觀測站是資料科技線與終局科技樹的交叉樞紐。</li>
+<li>先把光子編織機、量子處理器、重力材料線做穩，再開始跑星圖與資料核心。</li>
+<li>後續典藏板、遺產資料、封存核心都會從這條線往上長。</li>
+</ul>
+<h3 id="迷宮羅盤"><a class="header" href="#迷宮羅盤">迷宮羅盤</a></h3>
+<ul>
+<li>指向迷宮中心的特殊羅盤，不需要守衛者核心，但仍需要深層遺物。</li>
+<li>在瘴氣中也能保持方向感，是迷途星探索的基礎工具。</li>
+<li>建議第一件做這個，再靠它引導找到更多深層材料。</li>
+</ul>
+<h3 id="迷宮胸甲"><a class="header" href="#迷宮胸甲">迷宮胸甲</a></h3>
+<ul>
+<li>四件套中最貴的一件，碎片需求量最高。</li>
+<li>自帶被動瘴氣過濾，穿上後瘴氣傷害大幅下降。</li>
+<li>建議先做頭盔和靴，最後攢夠材料再做胸甲。</li>
+</ul>
+<h3 id="迷宮護腿"><a class="header" href="#迷宮護腿">迷宮護腿</a></h3>
+<ul>
+<li>嵌入空間穩定器，在牆壁移動時維持行動穩定。</li>
+<li>材料介於頭盔和胸甲之間，是第二貴的部位。</li>
+</ul>
+<h3 id="迷宮靴"><a class="header" href="#迷宮靴">迷宮靴</a></h3>
+<ul>
+<li>底部回聲紋路可偵測附近牆壁結構變化，算是最便宜的入門件。</li>
+<li>和頭盔一起是建議最先做的兩件。</li>
+</ul>
+<h3 id="迷宮頭盔"><a class="header" href="#迷宮頭盔">迷宮頭盔</a></h3>
+<ul>
+<li>內建回聲雷達，穿戴時自帶夜視，在瘴氣中也不會失去視野。</li>
+<li>四件迷宮套合在一起會大幅提升迷途星生存力。</li>
+<li>碎片和蔓藤是主耗材，每趟迷宮優先收集。</li>
+</ul>
+<h3 id="迷途刃"><a class="header" href="#迷途刃">迷途刃</a></h3>
+<ul>
+<li>迷途星最強近戰武器，需要擊敗迷宮魔像兩次才能收集足夠的守衛者核心。</li>
+<li>右鍵回聲震擊會消耗 12 EU，但扇形擊飛加盲視在牆壁會動的環境裡很好用。</li>
+<li>迷宮碎片和遺物需要反覆進入迷宮深層採集，不要指望一趟刷完。</li>
+</ul>
+<h3 id="進階製造機"><a class="header" href="#進階製造機">進階製造機</a></h3>
+<pre><code>ACA
+NMN
+APA
+</code></pre>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>代號</th><th>材料</th><th>需要</th></tr>
+</thead>
+<tbody>
+<tr><td><code>A</code></td><td>高級電路</td><td>4</td></tr>
+<tr><td><code>C</code></td><td>電路板</td><td>1</td></tr>
+<tr><td><code>M</code></td><td>紡織機</td><td>1</td></tr>
+<tr><td><code>N</code></td><td>複合面板</td><td>2</td></tr>
+<tr><td><code>P</code></td><td>精密框架</td><td>1</td></tr>
+</tbody>
+</table>
+</div>
+<ul>
+<li>先用製造機做好高級電路與精密框架。</li>
+<li>用壓縮機做出複合面板（鋼板+塑膠）。</li>
+<li>先在地上放鐵方塊，再把工作台放在上方形成進階工作台。</li>
+<li>用進階工作台照配方擺出進階製造機。</li>
+<li>進階製造機能做出奈米塗層、反應爐核心等高階材料。</li>
+</ul>
+<h3 id="過濾路由器"><a class="header" href="#過濾路由器">過濾路由器</a></h3>
+<ul>
+<li>當你已經有複數中間件混在一起時，就該做過濾路由器。</li>
+<li>它能把單一種類穩定拆去指定支線。</li>
+</ul>
+<h3 id="遺物解析儀"><a class="header" href="#遺物解析儀">遺物解析儀</a></h3>
+<pre><code>QAQ
+EDE
+QAQ
+</code></pre>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>代號</th><th>材料</th><th>需要</th></tr>
+</thead>
+<tbody>
+<tr><td><code>A</code></td><td>高級電路</td><td>2</td></tr>
+<tr><td><code>D</code></td><td>校準伏聆振測器</td><td>1</td></tr>
+<tr><td><code>E</code></td><td>蝕刻電路</td><td>2</td></tr>
+<tr><td><code>Q</code></td><td>量子晶片</td><td>4</td></tr>
+</tbody>
+</table>
+</div>
+<ul>
+<li>遺物解析儀負責把各星球採回來的遺物拆成可用訊號與研究素材。</li>
+<li>Aurelia、Cryon、Nyx 都能提供不同遺物，這台就是把探索成果轉成工業科技進程的核心。</li>
+<li>若想推模組化防護裝，先把這台跑穩，比硬屯礦更重要。</li>
+</ul>
+<h3 id="重力穩定器"><a class="header" href="#重力穩定器">重力穩定器</a></h3>
+<pre><code>CFC
+RBR
+QNQ
+</code></pre>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>代號</th><th>材料</th><th>需要</th></tr>
+</thead>
+<tbody>
+<tr><td><code>B</code></td><td>烽火台</td><td>1</td></tr>
+<tr><td><code>C</code></td><td>晶體矩陣</td><td>2</td></tr>
+<tr><td><code>F</code></td><td>力場板</td><td>1</td></tr>
+<tr><td><code>N</code></td><td>奈米塗層</td><td>1</td></tr>
+<tr><td><code>Q</code></td><td>量子晶片</td><td>2</td></tr>
+<tr><td><code>R</code></td><td>反應爐核心</td><td>2</td></tr>
+</tbody>
+</table>
+</div>
+<ul>
+<li>重力穩定器是重力子科學的基礎，解鎖後才能煉製重力子透鏡與重力子核心。</li>
+<li>先確保場能鍛爐的磁環與培育晶體產線穩住，再推這台。</li>
+<li>重力子透鏡之後會流向軌道列印與巨構分支。</li>
+</ul>
+<h3 id="量子處理器"><a class="header" href="#量子處理器">量子處理器</a></h3>
+<pre><code>NAN
+CMC
+NEN
+</code></pre>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>代號</th><th>材料</th><th>需要</th></tr>
+</thead>
+<tbody>
+<tr><td><code>A</code></td><td>高級電路</td><td>1</td></tr>
+<tr><td><code>C</code></td><td>控制單元</td><td>2</td></tr>
+<tr><td><code>E</code></td><td>蝕刻電路</td><td>1</td></tr>
+<tr><td><code>M</code></td><td>重生錨</td><td>1</td></tr>
+<tr><td><code>N</code></td><td>奈米塗層</td><td>4</td></tr>
+</tbody>
+</table>
+</div>
+<ul>
+<li>先用進階製造機做好奈米塗層。</li>
+<li>用雷射雕刻機做蝕刻電路與控制單元。</li>
+<li>先在地上放鐵方塊，再把工作台放在上方形成進階工作台。</li>
+<li>用進階工作台照配方擺出量子處理器。</li>
+<li>量子處理器能做出量子晶片、場發射器等頂級材料。</li>
+</ul>
+<h3 id="錨定鍛造台"><a class="header" href="#錨定鍛造台">錨定鍛造台</a></h3>
+<pre><code>WGW
+SMS
+WCW
+</code></pre>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>代號</th><th>材料</th><th>需要</th></tr>
+</thead>
+<tbody>
+<tr><td><code>C</code></td><td>虛空信標核心</td><td>1</td></tr>
+<tr><td><code>G</code></td><td>重力子核心</td><td>1</td></tr>
+<tr><td><code>M</code></td><td>重生錨</td><td>1</td></tr>
+<tr><td><code>S</code></td><td>奇點外殼</td><td>2</td></tr>
+<tr><td><code>W</code></td><td>曲率線圈</td><td>4</td></tr>
+</tbody>
+</table>
+</div>
+<ul>
+<li>錨定鍛造台是巨構科技線的核心設備，專門鍛造維度錨與叢集歧管。</li>
+<li>需要先完成虛空信標產線來取得虛空信標核心與曲率線圈。</li>
+<li>確保持續供應奇點外殼與重力子核心，才能維持穩定產出。</li>
+</ul>
+<h3 id="防輻射胸甲"><a class="header" href="#防輻射胸甲">防輻射胸甲</a></h3>
+<pre><code>L_L
+LNL
+LLL
+</code></pre>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>代號</th><th>材料</th><th>需要</th></tr>
+</thead>
+<tbody>
+<tr><td><code>L</code></td><td>鉛錠</td><td>7</td></tr>
+<tr><td><code>N</code></td><td>奈米塗層</td><td>1</td></tr>
+</tbody>
+</table>
+</div>
+<ul>
+<li>防輻射胸甲，覆蓋胸腹要害，單件防禦 25% 輻射。</li>
+<li>四件組合可完全阻斷輻射傷害。</li>
+</ul>
+<h3 id="防輻射護腿"><a class="header" href="#防輻射護腿">防輻射護腿</a></h3>
+<pre><code>LNL
+L_L
+L_L
+</code></pre>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>代號</th><th>材料</th><th>需要</th></tr>
+</thead>
+<tbody>
+<tr><td><code>L</code></td><td>鉛錠</td><td>6</td></tr>
+<tr><td><code>N</code></td><td>奈米塗層</td><td>1</td></tr>
+</tbody>
+</table>
+</div>
+<ul>
+<li>防輻射護腿，附加鉛箔隔離輻射，單件防禦 25%。</li>
+<li>搭配其他三件防輻射裝備可完全免疫。</li>
+</ul>
+<h3 id="防輻射靴"><a class="header" href="#防輻射靴">防輻射靴</a></h3>
+<pre><code>___
+L_L
+LNL
+</code></pre>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>代號</th><th>材料</th><th>需要</th></tr>
+</thead>
+<tbody>
+<tr><td><code>L</code></td><td>鉛錠</td><td>4</td></tr>
+<tr><td><code>N</code></td><td>奈米塗層</td><td>1</td></tr>
+</tbody>
+</table>
+</div>
+<ul>
+<li>防輻射靴，能在輻射區域安全行走，單件防禦 25%。</li>
+<li>四件組合完全免疫核反應堆與鈾礦輻射。</li>
+</ul>
+<h3 id="防輻射頭盔"><a class="header" href="#防輻射頭盔">防輻射頭盔</a></h3>
+<pre><code>LNL
+L_L
+___
+</code></pre>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>代號</th><th>材料</th><th>需要</th></tr>
+</thead>
+<tbody>
+<tr><td><code>L</code></td><td>鉛錠</td><td>4</td></tr>
+<tr><td><code>N</code></td><td>奈米塗層</td><td>1</td></tr>
+</tbody>
+</table>
+</div>
+<ul>
+<li>防輻射頭盔，單件可防禦 25% 輻射傷害。</li>
+<li>集齊四件套（頭盔、胸甲、護腿、靴）可完全免疫輻射。</li>
+<li>在核反應堆或鈾礦脈附近作業時必備。</li>
+</ul>
+<h3 id="離心機"><a class="header" href="#離心機">離心機</a></h3>
+<pre><code>CPC
+SHS
+CRC
+</code></pre>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>代號</th><th>材料</th><th>需要</th></tr>
+</thead>
+<tbody>
+<tr><td><code>C</code></td><td>電路板</td><td>4</td></tr>
+<tr><td><code>H</code></td><td>漏斗</td><td>1</td></tr>
+<tr><td><code>P</code></td><td>壓力導管</td><td>1</td></tr>
+<tr><td><code>R</code></td><td>紅石粉</td><td>1</td></tr>
+<tr><td><code>S</code></td><td>鋼板</td><td>2</td></tr>
+</tbody>
+</table>
+</div>
+<ul>
+<li>先做好淨化器確保有淨化碎晶。</li>
+<li>離心機可以把淨化碎晶拆出離子粉、磁環、離心轉子。</li>
+</ul>
+<h3 id="雷射雕刻機"><a class="header" href="#雷射雕刻機">雷射雕刻機</a></h3>
+<pre><code>OGO
+SES
+APA
+</code></pre>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>代號</th><th>材料</th><th>需要</th></tr>
+</thead>
+<tbody>
+<tr><td><code>A</code></td><td>高級電路</td><td>2</td></tr>
+<tr><td><code>E</code></td><td>終界燭</td><td>1</td></tr>
+<tr><td><code>G</code></td><td>強化玻璃</td><td>1</td></tr>
+<tr><td><code>O</code></td><td>光學鏡片</td><td>2</td></tr>
+<tr><td><code>P</code></td><td>精密框架</td><td>1</td></tr>
+<tr><td><code>S</code></td><td>矽晶</td><td>2</td></tr>
+</tbody>
+</table>
+</div>
+<ul>
+<li>先用熔爐做好光學鏡片（玻璃板 + 矽晶）與強化玻璃（玻璃板 + 碳纖網）。</li>
+<li>確保有進階電路與精密框架（製造機產出）。</li>
+<li>先在地上放鐵方塊，再把工作台放在上方形成進階工作台。</li>
+<li>用進階工作台照配方擺出雷射雕刻機，中央放末地燭。</li>
+<li>雷射雕刻機能做出雷射鏡、蝕刻電路與控制單元。</li>
+</ul>
+<h3 id="電池庫"><a class="header" href="#電池庫">電池庫</a></h3>
+<pre><code>CRC
+RLR
+CIC
+</code></pre>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>代號</th><th>材料</th><th>需要</th></tr>
+</thead>
+<tbody>
+<tr><td><code>C</code></td><td>銅錠</td><td>4</td></tr>
+<tr><td><code>I</code></td><td>鐵錠</td><td>1</td></tr>
+<tr><td><code>L</code></td><td>紅石燈</td><td>1</td></tr>
+<tr><td><code>R</code></td><td>紅石粉</td><td>3</td></tr>
+</tbody>
+</table>
+</div>
+<ul>
+<li>先把太陽能發電機與燃煤發電機跑穩。</li>
+<li>再用原版材料做出電池庫當緩衝電池。</li>
+<li>這台適合放在發電區與加工區之間。</li>
+</ul>
+<h3 id="電解分離機"><a class="header" href="#電解分離機">電解分離機</a></h3>
+<pre><code>AGA
+WMW
+ARA
+</code></pre>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>代號</th><th>材料</th><th>需要</th></tr>
+</thead>
+<tbody>
+<tr><td><code>A</code></td><td>高級電路</td><td>4</td></tr>
+<tr><td><code>G</code></td><td>玻璃</td><td>1</td></tr>
+<tr><td><code>M</code></td><td>鐵方塊</td><td>1</td></tr>
+<tr><td><code>R</code></td><td>紅石方塊</td><td>1</td></tr>
+<tr><td><code>W</code></td><td>銅線</td><td>2</td></tr>
+</tbody>
+</table>
+</div>
+<ul>
+<li>電解分離機利用電流將化合物分解為基本元素。</li>
+<li>需要先解鎖工業離心機，才能建造電解分離機。</li>
+<li>輸入水桶和紅石，可產出氫、氧、硒粉和矽。</li>
+<li>硒粉是太陽能發電機的關鍵材料。</li>
+</ul>
+<h3 id="電鋸"><a class="header" href="#電鋸">電鋸</a></h3>
+<pre><code>ISI
+CRC
+III
+</code></pre>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>代號</th><th>材料</th><th>需要</th></tr>
+</thead>
+<tbody>
+<tr><td><code>C</code></td><td>銅錠</td><td>2</td></tr>
+<tr><td><code>I</code></td><td>鐵錠</td><td>5</td></tr>
+<tr><td><code>R</code></td><td>紅石粉</td><td>1</td></tr>
+<tr><td><code>S</code></td><td>切石機</td><td>1</td></tr>
+</tbody>
+</table>
+</div>
+<ul>
+<li>先用原版方式做出切石機。</li>
+<li>挖銅礦與鐵礦，熔成錠後再合成。</li>
+<li>木頭先做成橡木材板，再放進機器。</li>
+<li>它會把木材轉成木屑。</li>
+</ul>
+<h3 id="風力渦輪機"><a class="header" href="#風力渦輪機">風力渦輪機</a></h3>
+<pre><code>ISI
+GCG
+IBI
+</code></pre>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>代號</th><th>材料</th><th>需要</th></tr>
+</thead>
+<tbody>
+<tr><td><code>B</code></td><td>青銅錠</td><td>1</td></tr>
+<tr><td><code>C</code></td><td>電路板</td><td>1</td></tr>
+<tr><td><code>G</code></td><td>青銅齒輪</td><td>2</td></tr>
+<tr><td><code>I</code></td><td>鐵錠</td><td>4</td></tr>
+<tr><td><code>S</code></td><td>鋼板</td><td>1</td></tr>
+</tbody>
+</table>
+</div>
+<ul>
+<li>先用製造機做好電路板，用合金熔煉爐做青銅齒輪。</li>
+<li>風力渦輪機高度越高效率越好，下雨打雷時更強。</li>
+</ul>
+<h3 id="風暴渦輪機"><a class="header" href="#風暴渦輪機">風暴渦輪機</a></h3>
+<ul>
+<li>先補好拉線機與感測支線，再做風暴發電。</li>
+<li>這台在下雨、打雷時特別強。</li>
+</ul>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../recipes/browser.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
+                            </a>
+
+                            <a rel="next prefetch" href="../recipes/machine-recipes.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../recipes/browser.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
+                    </a>
+
+                    <a rel="next prefetch" href="../recipes/machine-recipes.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
+                    </a>
+            </nav>
+
+        </div>
+
+        <template id=fa-eye><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M288 32c-80.8 0-145.5 36.8-192.6 80.6C48.6 156 17.3 208 2.5 243.7c-3.3 7.9-3.3 16.7 0 24.6C17.3 304 48.6 356 95.4 399.4C142.5 443.2 207.2 480 288 480s145.5-36.8 192.6-80.6c46.8-43.5 78.1-95.4 93-131.1c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C433.5 68.8 368.8 32 288 32zM432 256c0 79.5-64.5 144-144 144s-144-64.5-144-144s64.5-144 144-144s144 64.5 144 144zM288 192c0 35.3-28.7 64-64 64c-11.5 0-22.3-3-31.6-8.4c-.2 2.8-.4 5.5-.4 8.4c0 53 43 96 96 96s96-43 96-96s-43-96-96-96c-2.8 0-5.6 .1-8.4 .4c5.3 9.3 8.4 20.1 8.4 31.6z"/></svg></span></template>
+        <template id=fa-eye-slash><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M38.8 5.1C28.4-3.1 13.3-1.2 5.1 9.2S-1.2 34.7 9.2 42.9l592 464c10.4 8.2 25.5 6.3 33.7-4.1s6.3-25.5-4.1-33.7L525.6 386.7c39.6-40.6 66.4-86.1 79.9-118.4c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C465.5 68.8 400.8 32 320 32c-68.2 0-125 26.3-169.3 60.8L38.8 5.1zM223.1 149.5C248.6 126.2 282.7 112 320 112c79.5 0 144 64.5 144 144c0 24.9-6.3 48.3-17.4 68.7L408 294.5c5.2-11.8 8-24.8 8-38.5c0-53-43-96-96-96c-2.8 0-5.6 .1-8.4 .4c5.3 9.3 8.4 20.1 8.4 31.6c0 10.2-2.4 19.8-6.6 28.3l-90.3-70.8zm223.1 298L373 389.9c-16.4 6.5-34.3 10.1-53 10.1c-79.5 0-144-64.5-144-144c0-6.9 .5-13.6 1.4-20.2L83.1 161.5C60.3 191.2 44 220.8 34.5 243.7c-3.3 7.9-3.3 16.7 0 24.6c14.9 35.7 46.2 87.7 93 131.1C174.5 443.2 239.2 480 320 480c47.8 0 89.9-12.9 126.2-32.5z"/></svg></span></template>
+        <template id=fa-copy><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M502.6 70.63l-61.25-61.25C435.4 3.371 427.2 0 418.7 0H255.1c-35.35 0-64 28.66-64 64l.0195 256C192 355.4 220.7 384 256 384h192c35.2 0 64-28.8 64-64V93.25C512 84.77 508.6 76.63 502.6 70.63zM464 320c0 8.836-7.164 16-16 16H255.1c-8.838 0-16-7.164-16-16L239.1 64.13c0-8.836 7.164-16 16-16h128L384 96c0 17.67 14.33 32 32 32h47.1V320zM272 448c0 8.836-7.164 16-16 16H63.1c-8.838 0-16-7.164-16-16L47.98 192.1c0-8.836 7.164-16 16-16H160V128H63.99c-35.35 0-64 28.65-64 64l.0098 256C.002 483.3 28.66 512 64 512h192c35.2 0 64-28.8 64-64v-32h-47.1L272 448z"/></svg></span></template>
+        <template id=fa-play><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M73 39c-14.8-9.1-33.4-9.4-48.5-.9S0 62.6 0 80V432c0 17.4 9.4 33.4 24.5 41.9s33.7 8.1 48.5-.9L361 297c14.3-8.7 23-24.2 23-41s-8.7-32.2-23-41L73 39z"/></svg></span></template>
+        <template id=fa-clock-rotate-left><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M75 75L41 41C25.9 25.9 0 36.6 0 57.9V168c0 13.3 10.7 24 24 24H134.1c21.4 0 32.1-25.9 17-41l-30.8-30.8C155 85.5 203 64 256 64c106 0 192 86 192 192s-86 192-192 192c-40.8 0-78.6-12.7-109.7-34.4c-14.5-10.1-34.4-6.6-44.6 7.9s-6.6 34.4 7.9 44.6C151.2 495 201.7 512 256 512c141.4 0 256-114.6 256-256S397.4 0 256 0C185.3 0 121.3 28.7 75 75zm181 53c-13.3 0-24 10.7-24 24V256c0 6.4 2.5 12.5 7 17l72 72c9.4 9.4 24.6 9.4 33.9 0s9.4-24.6 0-33.9l-65-65V152c0-13.3-10.7-24-24-24z"/></svg></span></template>
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../elasticlunr-ef4e11c1.min.js"></script>
+        <script src="../mark-09e88c2c.min.js"></script>
+        <script src="../searcher-09f2665d.js"></script>
+
+        <script src="../clipboard-1626706a.min.js"></script>
+        <script src="../highlight-abc7f01d.js"></script>
+        <script src="../book-609e4cb8.js"></script>
+
+        <!-- Custom JS scripts -->
+        <script src="../theme/cjk-search-2989e841.js"></script>
+
+
+
+    </div>
+    </body>
+</html>
